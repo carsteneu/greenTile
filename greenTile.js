@@ -843,6 +843,9 @@ const tile_panel = {
     saved: null,
     sig: [],
     dragging: false,
+    // 'list' (view 1) or 'editor' (view 2); the draft is the editor's working copy
+    view: 'list',
+    draft: null,
 };
 const tile_panel_close = () => {
     if (!tile_panel.actor)
@@ -850,6 +853,8 @@ const tile_panel_close = () => {
     const actor = tile_panel.actor;
     tile_panel.actor = null;
     tile_panel.dragging = false;
+    tile_panel.view = 'list';
+    tile_panel.draft = null;
     tile_panel.sig.splice(0).forEach(({ obj, id }) => {
         try {
             obj.disconnect(id);
@@ -874,19 +879,20 @@ const tile_panel_round_rect = (cr, x, y, w, h, r) => {
     cr.closePath();
     cr.fill();
 };
-// Mockup: 54x34 box, cells separated by a 2px gap (no outer inset), radius 2px.
-const tile_panel_thumb = (stacks) => {
-    const area = new tile_St.DrawingArea({ width: 54, height: 34 });
+// Mockup: list thumbnails 54x34, gap 2px, radius 2px, fill #3d4457;
+// editor rule thumbnails 34x18, gap 2px, 1px between stacked cells, radius 1px.
+const tile_panel_thumb = (stacks, opts = {}) => {
+    const { width = 54, height = 34, gap = 2, vgap = 2, radius = 2, color = [61, 68, 87] } = opts;
+    const area = new tile_St.DrawingArea({ width, height });
     area.connect('repaint', (a) => {
         const cr = a.get_context();
         const [W, H] = a.get_surface_size();
-        const gap = 2;
-        cr.setSourceRGB(61 / 255, 68 / 255, 87 / 255);
+        cr.setSourceRGB(color[0] / 255, color[1] / 255, color[2] / 255);
         const cw = (W - gap * (stacks.length - 1)) / stacks.length;
         for (let c = 0; c < stacks.length; c++) {
-            const ch = (H - gap * (stacks[c] - 1)) / stacks[c];
+            const ch = (H - vgap * (stacks[c] - 1)) / stacks[c];
             for (let r = 0; r < stacks[c]; r++)
-                tile_panel_round_rect(cr, c * (cw + gap), r * (ch + gap), cw, ch, 2);
+                tile_panel_round_rect(cr, c * (cw + gap), r * (ch + vgap), cw, ch, radius);
         }
         cr.$dispose();
     });
@@ -950,7 +956,11 @@ const tile_panel_row = (app, preset, n) => {
 const tile_panel_rebuild = (app) => {
     if (!tile_panel.actor)
         return;
+    const view = tile_panel.view;
+    const draft = tile_panel.draft;
     tile_panel_close();
+    tile_panel.view = view;
+    tile_panel.draft = draft;
     tile_panel_open(app);
 };
 const tile_panel_open = (app) => {
