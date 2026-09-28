@@ -506,7 +506,8 @@ const tile_auto_schedule = (app, ms) => {
         return false;
     });
 };
-// Automatic tiling is switched per workspace (stored in the "general" setting):
+// Automatic tiling is switched per workspace (list setting "autoWorkspaces", General
+// page of the settings dialog):
 // Super+Ctrl+A turns it on for the active workspace and tiles right away (with the
 // preset if one is assigned, otherwise with the auto grid); pressing it again just
 // tiles again. Super+Ctrl+D turns it off; that also pauses a preset, which stays
@@ -514,7 +515,7 @@ const tile_auto_schedule = (app, ms) => {
 const tile_auto_activate = (app) => {
     const wsIndex = global.workspace_manager.get_active_workspace().index();
     if (!tile_ws_active(app, wsIndex)) {
-        tile_general_write(app, tile_general_set_ws(tile_general_read(app), wsIndex, true));
+        tile_auto_set_ws(app, wsIndex, true);
         global.log('greenTile auto tiling on for ws' + wsIndex);
     }
     tile_auto_disarm_timer();
@@ -523,7 +524,7 @@ const tile_auto_activate = (app) => {
 };
 const tile_auto_deactivate = (app) => {
     const wsIndex = global.workspace_manager.get_active_workspace().index();
-    tile_general_write(app, tile_general_set_ws(tile_general_read(app), wsIndex, false));
+    tile_auto_set_ws(app, wsIndex, false);
     tile_auto_disarm_timer();
     tile_auto.pending.clear();
     global.log('greenTile auto tiling off for ws' + wsIndex);
@@ -740,45 +741,40 @@ const tile_preset_retile = (app) => {
     global.log('greenTile preset "' + preset.name + '" applied ws' + wsIndex + ' n=' + n + ' stacks=[' + rule.stacks.join(',') + ']');
 };
 // >>> auto-model (pure functions, no Cinnamon imports; tested by tests/auto-model.test.js)
-// General settings (JSON string in the setting "general"). autoWorkspaces maps a
-// workspace index to true (auto tiling on, Super+Ctrl+A) or false (off, Super+Ctrl+D).
-// Without an entry a workspace is active exactly when it has a preset. Unknown
-// top-level keys are kept, later settings go into the same object.
-const tile_general_parse = (text) => {
-    let g;
-    try {
-        g = JSON.parse(text || '{}');
+// Automatic tiling per workspace is the list setting "autoWorkspaces" (General page of
+// the settings dialog): rows { workspace: <number from 1, as shown in the panel>,
+// auto: true (on, Super+Ctrl+A) | false (off, Super+Ctrl+D) }. A workspace without a
+// row is on exactly when it has a preset. Rows can be edited in the dialog, so
+// anything invalid is ignored; with duplicates the last row wins.
+const tile_auto_row_ok = (row) => row != null && typeof row === 'object'
+    && Number.isInteger(row.workspace) && row.workspace >= 1 && typeof row.auto === 'boolean';
+const tile_auto_list_map = (list) => {
+    const map = {};
+    if (!Array.isArray(list))
+        return map;
+    for (const row of list) {
+        if (tile_auto_row_ok(row))
+            map[row.workspace - 1] = row.auto;
     }
-    catch (e) {
-        g = {};
-    }
-    if (!g || typeof g !== 'object' || Array.isArray(g))
-        g = {};
-    const auto = {};
-    const raw = g.autoWorkspaces;
-    if (raw && typeof raw === 'object' && !Array.isArray(raw)) {
-        for (const key of Object.keys(raw)) {
-            if (typeof raw[key] === 'boolean')
-                auto[key] = raw[key];
-        }
-    }
-    return Object.assign({}, g, { autoWorkspaces: auto });
+    return map;
 };
-const tile_general_ws_active = (general, wsIndex, hasPreset) => {
-    const value = general.autoWorkspaces[String(wsIndex)];
+const tile_auto_ws_active = (map, wsIndex, hasPreset) => {
+    const value = map[wsIndex];
     return typeof value === 'boolean' ? value : hasPreset;
 };
-const tile_general_set_ws = (general, wsIndex, on) => {
-    const auto = Object.assign({}, general.autoWorkspaces);
-    auto[String(wsIndex)] = on;
-    return Object.assign({}, general, { autoWorkspaces: auto });
+const tile_auto_list_set = (list, wsIndex, on) => {
+    const rows = (Array.isArray(list) ? list : [])
+        .filter((row) => tile_auto_row_ok(row) && row.workspace !== wsIndex + 1)
+        .map((row) => ({ workspace: row.workspace, auto: row.auto }));
+    rows.push({ workspace: wsIndex + 1, auto: on });
+    return rows.sort((a, b) => a.workspace - b.workspace);
 };
 // <<< auto-model
-const tile_general_read = (app) => tile_general_parse(app.config.settings.getValue('general'));
-const tile_general_write = (app, general) => {
-    app.config.settings.setValue('general', JSON.stringify(general));
+const tile_auto_list_read = (app) => app.config.settings.getValue('autoWorkspaces');
+const tile_auto_set_ws = (app, wsIndex, on) => {
+    app.config.settings.setValue('autoWorkspaces', tile_auto_list_set(tile_auto_list_read(app), wsIndex, on));
 };
-const tile_ws_active = (app, wsIndex) => tile_general_ws_active(tile_general_read(app), wsIndex, tile_preset_for_ws(app, wsIndex) != null);
+const tile_ws_active = (app, wsIndex) => tile_auto_ws_active(tile_auto_list_map(tile_auto_list_read(app)), wsIndex, tile_preset_for_ws(app, wsIndex) != null);
 // Observer layout source: the observers (window added/removed, minimize, snap after a
 // move, workspace switch) only act on workspaces with automatic tiling on; retile
 // routes to the preset layout when one is assigned, otherwise to the auto grid.
@@ -878,6 +874,7 @@ const tile_editor_commit = (presets, preset) => {
 // design tokens from the approved HTML mockup (docs/superpowers/specs/2026-09-28-preset-ui-design.md).
 const tile_St = imports.gi.St;
 const tile_Clutter = imports.gi.Clutter;
+const tile_Util = imports.misc.util;
 const tile_panel = {
     actor: null,
     positioned: false,
@@ -1003,7 +1000,7 @@ const tile_panel_row = (app, preset, n) => {
         // Choosing a preset means "tile this workspace with it": a workspace whose
         // automatic tiling was switched off (Super+Ctrl+D) is switched on again.
         if (!tile_ws_active(app, wsIndex))
-            tile_general_write(app, tile_general_set_ws(tile_general_read(app), wsIndex, true));
+            tile_auto_set_ws(app, wsIndex, true);
         tile_panel_close();
         tile_preset_retile(app);
     });
@@ -1293,6 +1290,14 @@ const tile_panel_open = (app) => {
         header.add(backBtn);
     }
     else {
+        // ⚙ opens the extension's settings dialog on its first page (General); the same
+        // dialog Cinnamon opens from the Extensions manager.
+        const settingsBtn = new tile_St.Button({ label: '⚙', style_class: 'gk-close gk-settings', track_hover: true });
+        settingsBtn.connect('clicked', () => {
+            tile_panel_close();
+            tile_Util.spawn(['xlet-settings', 'extension', UUID, '-t', '0']);
+        });
+        header.add(settingsBtn);
         const closeBtn = new tile_St.Button({ label: '✕', style_class: 'gk-close', track_hover: true });
         closeBtn.connect('clicked', () => tile_panel_close());
         header.add(closeBtn);

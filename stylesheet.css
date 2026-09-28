@@ -158,6 +158,10 @@
     background-color: rgba(255, 255, 255, 0.08);
 }
 
+.gk-settings {
+    margin-right: 6px;
+}
+
 .gk-row {
     padding: 0;
     border: 1px solid #2a2e39;

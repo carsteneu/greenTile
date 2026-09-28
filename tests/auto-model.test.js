@@ -1,6 +1,8 @@
 'use strict';
 // Tests the pure per-workspace auto model of greenTile.js (marked block
 // "auto-model"), extracted and evaluated without Cinnamon, like editor-model.
+// Storage format: the list setting "autoWorkspaces" shown on the General page of
+// the settings dialog, rows { workspace: <number from 1>, auto: <boolean> }.
 const test = require('node:test');
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
@@ -11,48 +13,56 @@ const match = src.match(/\/\/ >>> auto-model[^\n]*\n([\s\S]*?)\/\/ <<< auto-mode
 if (!match)
     throw new Error('auto-model block not found in greenTile.js');
 const block = match[1];
-const names = ['tile_general_parse', 'tile_general_ws_active', 'tile_general_set_ws'];
+const names = ['tile_auto_list_map', 'tile_auto_ws_active', 'tile_auto_list_set'];
 const m = new Function(block + '\nreturn {' + names.join(',') + '};')();
 
 test('block is self-contained', () => {
     assert.doesNotMatch(block, /imports\.|tile_St|tile_Clutter|global\.|utils_Main/);
 });
 
-test('parse returns a normalised object for any input', () => {
-    assert.deepEqual(m.tile_general_parse('{"autoWorkspaces":{"4":true,"0":false}}'), { autoWorkspaces: { 4: true, 0: false } });
-    assert.deepEqual(m.tile_general_parse(''), { autoWorkspaces: {} });
-    assert.deepEqual(m.tile_general_parse('not json'), { autoWorkspaces: {} });
-    assert.deepEqual(m.tile_general_parse('[1,2]'), { autoWorkspaces: {} });
-    assert.deepEqual(m.tile_general_parse('{"autoWorkspaces":[true]}'), { autoWorkspaces: {} });
-    assert.deepEqual(m.tile_general_parse(null), { autoWorkspaces: {} });
+test('list_map turns rows (workspace numbers from 1) into a map by workspace index', () => {
+    assert.deepEqual(m.tile_auto_list_map([{ workspace: 5, auto: false }, { workspace: 1, auto: true }]), { 4: false, 0: true });
 });
 
-test('parse keeps unknown top-level keys for later settings', () => {
-    const g = m.tile_general_parse('{"autoWorkspaces":{},"future":42}');
-    assert.equal(g.future, 42);
+test('list_map tolerates anything that is not a list of valid rows', () => {
+    assert.deepEqual(m.tile_auto_list_map(undefined), {});
+    assert.deepEqual(m.tile_auto_list_map(null), {});
+    assert.deepEqual(m.tile_auto_list_map('[]'), {});
+    assert.deepEqual(m.tile_auto_list_map({ workspace: 1, auto: true }), {});
+    assert.deepEqual(m.tile_auto_list_map([
+        null,
+        { workspace: 0, auto: true },
+        { workspace: 2.5, auto: true },
+        { workspace: '3', auto: true },
+        { workspace: 4, auto: 'yes' },
+        { workspace: 6, auto: true },
+    ]), { 5: true });
 });
 
-test('parse drops non-boolean workspace entries', () => {
-    assert.deepEqual(m.tile_general_parse('{"autoWorkspaces":{"1":true,"2":"yes","3":1}}'), { autoWorkspaces: { 1: true } });
+test('list_map: with duplicate rows for a workspace the last row wins', () => {
+    assert.deepEqual(m.tile_auto_list_map([{ workspace: 2, auto: true }, { workspace: 2, auto: false }]), { 1: false });
 });
 
-test('without an explicit entry, a workspace is active exactly when it has a preset', () => {
-    const g = m.tile_general_parse('{}');
-    assert.equal(m.tile_general_ws_active(g, 3, true), true);
-    assert.equal(m.tile_general_ws_active(g, 3, false), false);
+test('without a row, a workspace is active exactly when it has a preset', () => {
+    assert.equal(m.tile_auto_ws_active({}, 3, true), true);
+    assert.equal(m.tile_auto_ws_active({}, 3, false), false);
 });
 
-test('an explicit entry wins over the preset default', () => {
-    const g = m.tile_general_parse('{"autoWorkspaces":{"3":false,"5":true}}');
-    assert.equal(m.tile_general_ws_active(g, 3, true), false);
-    assert.equal(m.tile_general_ws_active(g, 5, false), true);
+test('a row wins over the preset default', () => {
+    const map = m.tile_auto_list_map([{ workspace: 4, auto: false }, { workspace: 6, auto: true }]);
+    assert.equal(m.tile_auto_ws_active(map, 3, true), false);
+    assert.equal(m.tile_auto_ws_active(map, 5, false), true);
 });
 
-test('set_ws writes the flag without mutating the input', () => {
-    const g = m.tile_general_parse('{"autoWorkspaces":{"1":true},"future":1}');
-    const next = m.tile_general_set_ws(g, 4, false);
-    assert.deepEqual(next.autoWorkspaces, { 1: true, 4: false });
-    assert.equal(next.future, 1);
-    assert.deepEqual(g.autoWorkspaces, { 1: true });
-    assert.equal(m.tile_general_ws_active(next, 4, true), false);
+test('list_set replaces every row of the workspace by one row, sorted, without mutating', () => {
+    const list = [{ workspace: 3, auto: true }, { workspace: 1, auto: false }, { workspace: 3, auto: false }];
+    const next = m.tile_auto_list_set(list, 2, true);
+    assert.deepEqual(next, [{ workspace: 1, auto: false }, { workspace: 3, auto: true }]);
+    assert.equal(list.length, 3);
+    assert.deepEqual(m.tile_auto_list_set(next, 4, false), [{ workspace: 1, auto: false }, { workspace: 3, auto: true }, { workspace: 5, auto: false }]);
+});
+
+test('list_set drops invalid rows and starts from scratch for a non-list value', () => {
+    assert.deepEqual(m.tile_auto_list_set([null, { workspace: 'x', auto: true }], 0, true), [{ workspace: 1, auto: true }]);
+    assert.deepEqual(m.tile_auto_list_set(undefined, 0, false), [{ workspace: 1, auto: false }]);
 });

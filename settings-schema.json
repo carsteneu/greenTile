@@ -2,10 +2,26 @@
    "layout": {
       "type": "layout",
       "pages": [
+         "general-tab",
          "hotkeys-tab",
          "behaviour-tab",
          "layout-tab"
       ],
+      "general-tab": {
+         "type": "page",
+         "title": "General",
+         "sections": [
+            "auto-workspaces-section"
+         ]
+      },
+      "auto-workspaces-section": {
+         "type": "section",
+         "title": "Automatic tiling per workspace",
+         "keys": [
+            "autoWorkspaces",
+            "auto-workspaces-legend"
+         ]
+      },
       "hotkeys-tab": {
          "type": "page",
          "title": "Hotkeys",
@@ -188,10 +204,19 @@
       "default": "{}",
       "description": "Workspace to preset assignments (JSON)"
    },
-   "general": {
-      "type": "string",
-      "default": "{}",
-      "description": "General settings (JSON), e.g. automatic tiling per workspace"
+   "autoWorkspaces": {
+      "type": "list",
+      "description": "Automatic tiling per workspace",
+      "tooltip": "One row per workspace (number as shown in the preset panel). Super+Ctrl+A and Super+Ctrl+D add or update rows. Workspaces without a row tile automatically only when they have a preset.",
+      "columns": [
+         {"id": "workspace", "title": "Workspace", "type": "integer", "min": 1, "max": 36, "step": 1},
+         {"id": "auto", "title": "Tile automatically", "type": "boolean"}
+      ],
+      "default": []
+   },
+   "auto-workspaces-legend": {
+      "type": "label",
+      "description": "Super+Ctrl+A turns automatic tiling on for the active workspace and tiles right away, Super+Ctrl+D turns it off (a preset stays assigned but is paused). Workspaces without a row: on with a preset, off without. Removing a row returns the workspace to that rule."
    },
    "animation": {
       "type": "checkbox",
