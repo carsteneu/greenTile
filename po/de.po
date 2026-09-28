@@ -9,7 +9,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: greenTile 0.1.0\n"
 "Report-Msgid-Bugs-To: https://github.com/carsteneu\n"
-"POT-Creation-Date: 2026-09-28 17:16+0200\n"
+"POT-Creation-Date: 2026-09-28 18:12+0200\n"
 "PO-Revision-Date: 2026-09-28 17:17+0200\n"
 "Last-Translator: carsten_eu\n"
 "Language-Team: German\n"
@@ -20,41 +20,112 @@ msgstr ""
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 "X-Generator: Poedit 2.3\n"
 
-#: greenTile.js:837
+#: greenTile.js:926
 #, javascript-format
 msgid "assigned — workspace %d"
 msgstr "zugewiesen — Fläche %d"
 
-#: greenTile.js:876
+#: greenTile.js:980
+msgid "Please enter a name."
+msgstr "Bitte einen Namen eingeben."
+
+#: greenTile.js:1000
+#, javascript-format
+msgid "from %d"
+msgstr "ab %d"
+
+#: greenTile.js:1115
+msgid "Rules (by window count)"
+msgstr "Regeln (nach Fensterzahl)"
+
+#: greenTile.js:1119
+msgid "Rule"
+msgstr "Regel"
+
+#: greenTile.js:1120
+msgid "Delete rule"
+msgstr "Regel löschen"
+
+#: greenTile.js:1128
+msgid "Rule applies from"
+msgstr "Regel gilt ab"
+
+#: greenTile.js:1135
+msgid "windows"
+msgstr "Fenstern"
+
+#: greenTile.js:1137
+msgid "Painter"
+msgstr "Malerei"
+
+#: greenTile.js:1152
+msgid ""
+"Click or drag: the row sets how many windows the column holds. Right-click "
+"removes a column."
+msgstr ""
+"Klicken oder ziehen: Die Zeile legt fest, wie viele Fenster die Spalte "
+"aufnimmt. Rechtsklick entfernt eine Spalte."
+
+#: greenTile.js:1157
+msgid "Name"
+msgstr "Name"
+
+#: greenTile.js:1158
+msgid "Preset name"
+msgstr "Name des Presets"
+
+#: greenTile.js:1162
+msgid "Save"
+msgstr "Speichern"
+
+#: greenTile.js:1179
+#, javascript-format
+msgid "Result: %s"
+msgstr "Ergebnis: %s"
+
+#: greenTile.js:1221
 #, javascript-format
 msgid "Presets — workspace %d"
 msgstr "Presets — Arbeitsfläche %d"
 
-#: greenTile.js:940
+#: greenTile.js:1223
+msgid "Create preset"
+msgstr "Neues Preset"
+
+#: greenTile.js:1223
+#, javascript-format
+msgid "Edit %s"
+msgstr "%s bearbeiten"
+
+#: greenTile.js:1227
+msgid "Back"
+msgstr "zurück"
+
+#: greenTile.js:1303
 msgid "No presets yet."
 msgstr "Noch keine Presets vorhanden."
 
-#: greenTile.js:954
+#: greenTile.js:1317
 msgid "New preset"
 msgstr "Neu anlegen"
 
-#: greenTile.js:959
+#: greenTile.js:1320
 msgid "Click a row to apply it to this workspace and tile right away"
 msgstr "Klick auf eine Zeile = sofort auf dieser Fläche anwenden & kacheln"
 
-#: greenTile.js:1099
+#: greenTile.js:1494
 msgid "Auto close"
 msgstr "Automatisch schließen"
 
-#: greenTile.js:1100
+#: greenTile.js:1495
 msgid "Animations"
 msgstr "Animationen"
 
-#: greenTile.js:1101
+#: greenTile.js:1496
 msgid "Auto tile main and list"
 msgstr "Automatisch in einen Hauptbereich und in eine Liste kacheln"
 
-#: greenTile.js:1102
+#: greenTile.js:1497
 msgid "Auto tile two lists"
 msgstr "Automatisch in zwei Listen kacheln"
 
@@ -64,8 +135,8 @@ msgstr "greenTile"
 
 #. metadata.json->description
 msgid ""
-"Column tiling with per-workspace presets, auto mode and snap-on-release. Fork"
-" of gTile by shuairan."
+"Column tiling with per-workspace presets, auto mode and snap-on-release. "
+"Fork of gTile by shuairan."
 msgstr ""
 "Fenster in Spalten kacheln, mit Presets pro Arbeitsfläche, Auto-Modus und "
 "Einrasten nach dem Verschieben. Ein Fork von shuairans gTile."
@@ -207,8 +278,8 @@ msgstr "Seitenverhältnis des Monitors verwenden"
 msgid ""
 "Should the popup's grid reflect the current monitor's aspect ratio or not."
 msgstr ""
-"Legt fest, ob das Raster im Popup dem Seitenverhältnis des aktuellen Monitors"
-" folgt."
+"Legt fest, ob das Raster im Popup dem Seitenverhältnis des aktuellen "
+"Monitors folgt."
 
 #. settings-schema.json->useMonitorCenter->description
 msgid "UI always centered to monitor"

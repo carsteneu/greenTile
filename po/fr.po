@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: greenTile 0.1.0\n"
 "Report-Msgid-Bugs-To: https://github.com/carsteneu\n"
-"POT-Creation-Date: 2026-09-28 17:16+0200\n"
+"POT-Creation-Date: 2026-09-28 18:12+0200\n"
 "PO-Revision-Date: 2025-02-05 18:38+0100\n"
 "Last-Translator: claudiux\n"
 "Language-Team: French\n"
@@ -18,41 +18,110 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "X-Generator: Poedit 3.4.2\n"
 
-#: greenTile.js:837
+#: greenTile.js:926
 #, javascript-format
 msgid "assigned — workspace %d"
 msgstr ""
 
-#: greenTile.js:876
+#: greenTile.js:980
+msgid "Please enter a name."
+msgstr ""
+
+#: greenTile.js:1000
+#, javascript-format
+msgid "from %d"
+msgstr ""
+
+#: greenTile.js:1115
+msgid "Rules (by window count)"
+msgstr ""
+
+#: greenTile.js:1119
+msgid "Rule"
+msgstr ""
+
+#: greenTile.js:1120
+msgid "Delete rule"
+msgstr ""
+
+#: greenTile.js:1128
+msgid "Rule applies from"
+msgstr ""
+
+#: greenTile.js:1135
+msgid "windows"
+msgstr ""
+
+#: greenTile.js:1137
+msgid "Painter"
+msgstr ""
+
+#: greenTile.js:1152
+msgid ""
+"Click or drag: the row sets how many windows the column holds. Right-click "
+"removes a column."
+msgstr ""
+
+#: greenTile.js:1157
+msgid "Name"
+msgstr ""
+
+#: greenTile.js:1158
+msgid "Preset name"
+msgstr ""
+
+#: greenTile.js:1162
+msgid "Save"
+msgstr ""
+
+#: greenTile.js:1179
+#, javascript-format
+msgid "Result: %s"
+msgstr ""
+
+#: greenTile.js:1221
 #, javascript-format
 msgid "Presets — workspace %d"
 msgstr ""
 
-#: greenTile.js:940
+#: greenTile.js:1223
+msgid "Create preset"
+msgstr ""
+
+#: greenTile.js:1223
+#, javascript-format
+msgid "Edit %s"
+msgstr ""
+
+#: greenTile.js:1227
+msgid "Back"
+msgstr ""
+
+#: greenTile.js:1303
 msgid "No presets yet."
 msgstr ""
 
-#: greenTile.js:954
+#: greenTile.js:1317
 msgid "New preset"
 msgstr ""
 
-#: greenTile.js:959
+#: greenTile.js:1320
 msgid "Click a row to apply it to this workspace and tile right away"
 msgstr ""
 
-#: greenTile.js:1099
+#: greenTile.js:1494
 msgid "Auto close"
 msgstr "Fermeture auto"
 
-#: greenTile.js:1100
+#: greenTile.js:1495
 msgid "Animations"
 msgstr "Animations"
 
-#: greenTile.js:1101
+#: greenTile.js:1496
 msgid "Auto tile main and list"
 msgstr "Mosaïque auto principale et liste"
 
-#: greenTile.js:1102
+#: greenTile.js:1497
 msgid "Auto tile two lists"
 msgstr "Mosaïque auto des deux listes"
 
@@ -64,8 +133,8 @@ msgstr "gTile"
 
 #. metadata.json->description
 msgid ""
-"Column tiling with per-workspace presets, auto mode and snap-on-release. Fork"
-" of gTile by shuairan."
+"Column tiling with per-workspace presets, auto mode and snap-on-release. "
+"Fork of gTile by shuairan."
 msgstr ""
 
 #. settings-schema.json->hotkeys-tab->title
