@@ -40,10 +40,20 @@ A preset is a list of rules by window count: each rule defines how many columns 
 In the panel (`Super+Ctrl+P`):
 - **Click a row:** assign the preset to this workspace and tile right away
 - **✕ in a row:** remove the assignment
-- **🔧:** editor (coming later)
+- **🔧:** open the editor for this preset
+- **＋ New preset:** open the editor with an empty preset
 - The panel can be dragged by its title bar and keeps its position when you switch workspaces.
 
 The thumbnail shows the rule that would apply for the current number of windows.
+
+### Editor
+
+- **Rules (left):** one row per rule, "from N" = the rule applies from N windows on (the last rule whose N is not larger than the window count wins). Click a row to edit it. **＋ Rule** adds a rule (N + 1, copy of the highest rule), **🗑 Delete rule** removes the selected one; a preset always keeps one rule.
+- **Rule applies from [−] N [+]:** changes N of the selected rule. N can be smaller than the number of painted cells; the remaining cells then stay empty (e.g. six columns from 2 windows on).
+- **Painter:** 6 columns × 4 rows. Click or drag: the row under the pointer sets how many windows the column holds (top = 1, bottom = 4). Dragging paints every column it passes. Right-click removes a column. With more windows than cells, the rightmost column takes the rest.
+- **Name** and **Save** (or `Enter` in the name field). Saving a preset that is assigned to the active workspace retiles it right away.
+- **← Back** or `Esc` returns to the list without saving.
+- While the editor is open it holds the keyboard and mouse (like a dialog), so the preset hotkey does not work until you go back.
 
 A workspace with a preset is always retiled automatically, even when auto mode is off.
 
@@ -80,6 +90,8 @@ dbus-send --session --print-reply --dest=org.Cinnamon /org/Cinnamon org.Cinnamon
 The first time, enable the extension in the Cinnamon settings. **gTile@shuairan must be disabled**, otherwise both extensions claim the same keys.
 
 Check: `imports.ui.extensionSystem.runningExtensions` (an array) must contain `greenTile@carsten_eu`, and `~/.xsession-errors` must not show any `JS ERROR` mentioning `greenTile.js`.
+
+Tests for the preset editor model: `node --test tests/` (Node 18 or newer). The `tests/` folder is not copied by the deploy steps.
 
 ## Switching from gTile
 
