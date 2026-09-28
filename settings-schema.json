@@ -4,8 +4,7 @@
       "pages": [
          "general-tab",
          "hotkeys-tab",
-         "behaviour-tab",
-         "layout-tab"
+         "behaviour-tab"
       ],
       "general-tab": {
          "type": "page",
@@ -37,16 +36,6 @@
          "title": "Behavior",
          "sections": [
             "behaviour-section"
-         ]
-      },
-      "layout-tab": {
-         "type": "page",
-         "title": "Layout",
-         "sections": [
-            "grid1-section",
-            "grid2-section",
-            "grid3-section",
-            "grid4-section"
          ]
       },
       "help": {
@@ -99,50 +88,6 @@
             "useMonitorCenter",
             "showGridOnAllMonitors",
             "select-using-keyboard"
-         ]
-      },
-      "grid1-section": {
-         "type": "section",
-         "title": "Layout For Button 1",
-         "keys": [
-            "grid1NameOverride",
-            "columns",
-            "grid1x",
-            "rows",
-            "grid1y"
-         ]
-      },
-      "grid2-section": {
-         "type": "section",
-         "title": "Layout For Button 2",
-         "keys": [
-            "grid2NameOverride",
-            "columns",
-            "grid2x",
-            "rows",
-            "grid2y"
-         ]
-      },
-      "grid3-section": {
-         "type": "section",
-         "title": "Layout For Button 3",
-         "keys": [
-            "grid3NameOverride",
-            "columns",
-            "grid3x",
-            "rows",
-            "grid3y"
-         ]
-      },
-      "grid4-section": {
-         "type": "section",
-         "title": "Layout For Button 4",
-         "keys": [
-            "grid4NameOverride",
-            "columns",
-            "grid4x",
-            "rows",
-            "grid4y"
          ]
       },
       "help-section": {
@@ -245,14 +190,6 @@
       "default": "false",
       "description": "Show UI and all monitors at the same time"
    },
-   "columns": {
-		"type": "label",
-		"description": "Columns"
-	},
-   "rows": {
-		"type": "label",
-		"description": "Rows"
-	},
    "grid1NameOverride": {
       "type": "entry",
 		"default": "",
