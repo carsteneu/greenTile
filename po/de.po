@@ -102,16 +102,12 @@ msgid "Back"
 msgstr "zurück"
 
 #: greenTile.js:1297
-#, fuzzy
-#| msgid "Auto close"
 msgid "Auto: on"
-msgstr "Automatisch schließen"
+msgstr "Auto: an"
 
 #: greenTile.js:1297
-#, fuzzy
-#| msgid "Auto close"
 msgid "Auto: off"
-msgstr "Automatisch schließen"
+msgstr "Auto: aus"
 
 #: greenTile.js:1399
 msgid "No presets yet."
@@ -155,7 +151,7 @@ msgstr ""
 
 #. settings-schema.json->settings-tab->title
 msgid "Settings"
-msgstr ""
+msgstr "Einstellungen"
 
 #. settings-schema.json->hotkeys-tab->title
 msgid "Hotkeys"
@@ -183,7 +179,7 @@ msgstr "Tastenbelegung (bei geöffnetem Raster)"
 
 #. settings-schema.json->behaviour-section->title
 msgid "Classic grid (Super+G)"
-msgstr ""
+msgstr "Klassisches Raster (Super+G)"
 
 #. settings-schema.json->help-section->title
 msgid "More Info"
@@ -267,6 +263,8 @@ msgid ""
 "Automatic tiling per workspace (set with Super+Ctrl+A / Super+Ctrl+D or in "
 "the preset panel; not shown in this dialog)"
 msgstr ""
+"Automatisches Kacheln pro Arbeitsfläche (mit Super+Strg+A / Super+Strg+D "
+"oder im Preset-Panel; nicht in diesem Dialog angezeigt)"
 
 #. settings-schema.json->autoWorkspaces->columns->title
 msgid "Workspace"
