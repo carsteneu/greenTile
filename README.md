@@ -44,7 +44,8 @@ In the panel (`Super+Ctrl+P`):
 - **🔧:** open the editor for this preset
 - **＋ New preset:** open the editor with an empty preset
 - **✕ in the title bar** or `Esc` closes the panel. While the list is open, greenTile takes the `Esc` key, so applications do not receive it until the panel is closed.
-- **⚙ in the title bar** closes the panel and opens the extension's settings dialog on its General page.
+- **Auto: on / Auto: off in the title bar** shows whether automatic tiling is on for this workspace (green = on). Clicking it switches it, exactly like `Super+Ctrl+A` / `Super+Ctrl+D`; switching it on tiles right away.
+- **⚙ in the title bar** closes the panel and opens the extension's settings dialog (pages **Settings** and **Hotkeys**).
 - The panel can be dragged by its title bar and keeps its position when you switch workspaces. If that position is no longer on any monitor (external display unplugged), the panel opens centred again.
 - Right after switching between list and editor, clicks are ignored for 400 ms, so the second click of a double-click does not act in the new view.
 
@@ -66,7 +67,7 @@ Automatic tiling is switched **per workspace**:
 - `Super+Ctrl+A` turns it on for the active workspace and tiles right away. Pressing it again on the same workspace just tiles again.
 - `Super+Ctrl+D` turns it off for the active workspace. On a workspace with a preset this pauses the preset: it stays assigned (and visible in the panel) but nothing is tiled until `Super+Ctrl+A`.
 - A workspace that was never switched either way is on when it has a preset and off when it has none.
-- The state is shown and can be edited on the **General** page of the settings dialog ("Automatic tiling per workspace": one row per workspace, numbered as in the preset panel, with a checkbox). It is stored in the list setting `autoWorkspaces` and survives reloads and restarts. Like the preset assignments it is keyed by workspace number, so it shifts when workspaces are removed. Removing a row returns the workspace to the default rule. The General page is where further general settings will go.
+- The state is shown and switched in the title bar of the preset panel (**Auto: on / Auto: off**). It is stored in the list setting `autoWorkspaces` (rows `{workspace: <number from 1>, auto: true|false}`), which is not shown in the settings dialog, and survives reloads and restarts. Like the preset assignments it is keyed by workspace number, so it shifts when workspaces are removed.
 
 While automatic tiling is on for the active workspace:
 - When a window is added to or removed from the active workspace, the layout is retiled after 300 ms (normal windows only, no dialogs). Minimizing and restoring windows also updates the layout.
