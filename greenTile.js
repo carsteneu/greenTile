@@ -1290,8 +1290,24 @@ const tile_panel_open = (app) => {
         header.add(backBtn);
     }
     else {
-        // ⚙ opens the extension's settings dialog on its first page (General); the same
-        // dialog Cinnamon opens from the Extensions manager.
+        // Automatic tiling state of this workspace (Super+Ctrl+A / Super+Ctrl+D), shown
+        // and switchable here; turning it on tiles right away, like Super+Ctrl+A.
+        const autoOn = tile_ws_active(app, wsIndex);
+        const autoBtn = new tile_St.Button({
+            label: autoOn ? _("Auto: on") : _("Auto: off"),
+            style_class: 'gk-auto' + (autoOn ? ' gk-auto-on' : ''),
+            track_hover: true,
+        });
+        autoBtn.connect('clicked', () => {
+            if (tile_ws_active(app, wsIndex))
+                tile_auto_deactivate(app);
+            else
+                tile_auto_activate(app);
+            tile_panel_rebuild(app);
+        });
+        header.add(autoBtn, { y_fill: false, y_align: tile_St.Align.MIDDLE });
+        // ⚙ opens the extension's settings dialog on its first page; the same dialog
+        // Cinnamon opens from the Extensions manager.
         const settingsBtn = new tile_St.Button({ label: '⚙', style_class: 'gk-close gk-settings', track_hover: true });
         settingsBtn.connect('clicked', () => {
             tile_panel_close();

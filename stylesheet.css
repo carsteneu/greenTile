@@ -162,6 +162,33 @@
     margin-right: 6px;
 }
 
+/* Auto tiling state of the workspace in the title bar: grey when off, the
+   "assigned" green when on. */
+.gk-auto {
+    color: #8b91a0;
+    font-size: 12px;
+    padding: 2px 8px;
+    margin-right: 8px;
+    border-radius: 3px;
+    border: 1px solid #3a4050;
+}
+
+.gk-auto:hover {
+    color: #e8eaf0;
+    background-color: rgba(255, 255, 255, 0.08);
+}
+
+.gk-auto-on {
+    color: #9ce072;
+    border-color: rgba(156, 224, 114, 0.5);
+    background-color: rgba(156, 224, 114, 0.08);
+}
+
+.gk-auto-on:hover {
+    color: #9ce072;
+    background-color: rgba(156, 224, 114, 0.16);
+}
+
 .gk-row {
     padding: 0;
     border: 1px solid #2a2e39;
