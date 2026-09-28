@@ -143,14 +143,12 @@ msgstr ""
 
 #. settings-schema.json->general-tab->title
 msgid "General"
-msgstr ""
+msgstr "Allgemein"
 
 #. settings-schema.json->auto-workspaces-section->title
 #. settings-schema.json->autoWorkspaces->description
-#, fuzzy
-#| msgid "Turn automatic tiling off for this workspace"
 msgid "Automatic tiling per workspace"
-msgstr "Automatisches Kacheln für diese Arbeitsfläche ausschalten"
+msgstr "Automatisches Kacheln pro Arbeitsfläche"
 
 #. settings-schema.json->hotkeys-tab->title
 msgid "Hotkeys"
@@ -284,16 +282,17 @@ msgid ""
 "and Super+Ctrl+D add or update rows. Workspaces without a row tile "
 "automatically only when they have a preset."
 msgstr ""
+"Eine Zeile pro Arbeitsfläche (Nummer wie im Preset-Panel). Super+Strg+A und "
+"Super+Strg+D legen Zeilen an oder ändern sie. Arbeitsflächen ohne Zeile "
+"werden nur automatisch gekachelt, wenn sie ein Preset haben."
 
 #. settings-schema.json->autoWorkspaces->columns->title
-#, fuzzy
-#| msgid "Workspace Presets"
 msgid "Workspace"
-msgstr "Presets für Arbeitsflächen"
+msgstr "Arbeitsfläche"
 
 #. settings-schema.json->autoWorkspaces->columns->title
 msgid "Tile automatically"
-msgstr ""
+msgstr "Automatisch kacheln"
 
 #. settings-schema.json->auto-workspaces-legend->description
 msgid ""
@@ -302,6 +301,11 @@ msgid ""
 "paused). Workspaces without a row: on with a preset, off without. Removing a "
 "row returns the workspace to that rule."
 msgstr ""
+"Super+Strg+A schaltet das automatische Kacheln für die aktive Arbeitsfläche "
+"ein und kachelt sofort, Super+Strg+D schaltet es aus (ein Preset bleibt "
+"zugewiesen, ruht aber). Arbeitsflächen ohne Zeile: mit Preset an, ohne "
+"Preset aus. Wird eine Zeile entfernt, gilt für die Arbeitsfläche wieder "
+"diese Regel."
 
 #. settings-schema.json->animation->description
 msgid "Animation"
