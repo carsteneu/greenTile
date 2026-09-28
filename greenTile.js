@@ -1681,10 +1681,11 @@ const tile_panel_rebuild = (app) => {
 };
 const tile_panel_open = (app) => {
     const wsIndex = global.workspace_manager.get_active_workspace().index();
+    const monitorIndex = tile_focus_monitor_index();
     const draft = tile_panel.view === 'editor' ? tile_panel.draft : null;
     const panel = new tile_St.BoxLayout({ vertical: true, style_class: 'gk-panel' + (draft ? ' gk-panel-editor' : ''), reactive: true, can_focus: true });
     const header = new tile_St.BoxLayout({ style_class: 'gk-panel-header', reactive: true });
-    let titleText = _("Presets — workspace %d").format(wsIndex + 1);
+    let titleText = _("Presets — workspace %d · %s").format(wsIndex + 1, tile_monitors.labels[monitorIndex] || '');
     if (draft)
         titleText = draft.isNew ? _("Create preset") : _("Edit %s").format(draft.name);
     const title = new tile_St.Label({ text: titleText, style_class: 'gk-title' });
@@ -1697,7 +1698,6 @@ const tile_panel_open = (app) => {
       else {
           // Automatic tiling state of this monitor and workspace (Super+Ctrl+A / Super+Ctrl+D),
           // shown and switchable here; turning it on tiles right away, like Super+Ctrl+A.
-          const monitorIndex = tile_focus_monitor_index();
           const autoOn = tile_layout_for(app, monitorIndex, wsIndex).auto;
           const autoBtn = new tile_St.Button({
               label: autoOn ? _("Auto: on") : _("Auto: off"),
@@ -1833,7 +1833,7 @@ const tile_panel_open = (app) => {
         const focusWindow = getFocusApp();
         return (focusWindow && monitors[focusWindow.get_monitor()]) || monitors[utils_Main.layoutManager.primaryIndex] || monitors[0];
     };
-    if (tile_panel.saved && !monitorAt(tile_panel.saved.x + 225, tile_panel.saved.y + 20)) {
+    if (tile_panel.saved && !monitorAt(tile_panel.saved.x + 300, tile_panel.saved.y + 20)) {
         global.log('greenTile panel position ' + tile_panel.saved.x + ',' + tile_panel.saved.y + ' is on no monitor, centring again');
         tile_panel.saved = null;
     }
@@ -1841,6 +1841,8 @@ const tile_panel_open = (app) => {
     tile_panel.positioned = tile_panel.saved != null;
     if (tile_panel.saved)
         panel.set_position(tile_panel.saved.x, tile_panel.saved.y);
+    // LIST_MAX measured live: an assigned row is 60 px, a plain row 59 px, so five
+    // rows ≈ 296 px fit without the scrollbar; the sixth row scrolls.
     const LIST_MAX = 320;
     let scrollCapped = false;
     let clamped = false;
@@ -1862,16 +1864,15 @@ const tile_panel_open = (app) => {
             tile_panel.saved = { x: Math.round(cx), y: Math.round(cy) };
         }
         if (!clamped && !tile_panel.dragging) {
-            // Keep the whole panel inside the monitor its title bar is on: the editor is
-            // 600px wide, the list 450px, so a list dragged near the right edge would
-            // stick out after the view switch; a smaller monitor after a display change
-            // has the same effect.
+            // Keep the whole panel inside the monitor its title bar is on: a panel dragged
+            // near the right edge would stick out, and a smaller monitor after a display
+            // change has the same effect. Both views are 600 px wide; probe at the centre.
             clamped = true;
             const box = panel.get_allocation_box();
             const width = box.x2 - box.x1;
             const height = box.y2 - box.y1;
             const [px, py] = panel.get_position();
-            const monitor = monitorAt(px + 225, py + 20) || focusMonitor();
+            const monitor = monitorAt(px + 300, py + 20) || focusMonitor();
             const nx = Math.min(Math.max(px, monitor.x), monitor.x + Math.max(monitor.width - width, 0));
             const ny = Math.min(Math.max(py, monitor.y), monitor.y + Math.max(monitor.height - height, 0));
             if (nx !== px || ny !== py) {
