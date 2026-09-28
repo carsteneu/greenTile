@@ -846,6 +846,91 @@ const tile_auto_list_set = (list, wsIndex, on) => {
     return rows.sort((a, b) => a.workspace - b.workspace);
 };
 // <<< auto-model
+// >>> layouts-model (pure functions, no Cinnamon imports; tested by tests/layouts-model.test.js)
+// Per monitor AND workspace layout assignments, stored in the string setting "layouts":
+// { "<monitor key>": { "<workspace number from 1 | *>": { preset?: id, auto?: boolean } } }.
+// Missing entry/field: no preset, automatic tiling on exactly when a preset is assigned.
+// Nothing is inherited from other monitors or workspaces; invalid data is ignored on read.
+const tile_layouts_parse = (raw) => {
+    if (raw == null || raw === '')
+        return {};
+    let parsed;
+    try {
+        parsed = JSON.parse(raw);
+    }
+    catch (e) {
+        return null;
+    }
+    return (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) ? parsed : null;
+};
+const tile_layouts_entry = (layouts, mkey, wskey, presetIds) => {
+    const monitor = (layouts && typeof layouts === 'object' && !Array.isArray(layouts) ? layouts[mkey] : null) || {};
+    const entry = (entry_ => (entry_ && typeof entry_ === 'object' ? entry_ : null) || {})(monitor[wskey]);
+    let preset = null;
+    if (typeof entry.preset === 'string' && presetIds.indexOf(entry.preset) !== -1)
+        preset = entry.preset;
+    const auto = typeof entry.auto === 'boolean' ? entry.auto : preset != null;
+    return { preset: preset, auto: auto };
+};
+const tile_layouts_set = (layouts, mkey, wskey, patch) => {
+    const next = JSON.parse(JSON.stringify(layouts && typeof layouts === 'object' ? layouts : {}));
+    const monitor = Object.prototype.toString.call(next[mkey]) === '[object Object]' ? next[mkey] : {};
+    const entry = Object.assign({}, monitor[wskey] || {});
+    if (patch && 'preset' in patch) {
+        if (patch.preset == null)
+            delete entry.preset;
+        else if (typeof patch.preset === 'string' && patch.preset)
+            entry.preset = patch.preset;
+    }
+    if (patch && 'auto' in patch) {
+        if (patch.auto == null)
+            delete entry.auto;
+        else if (typeof patch.auto === 'boolean')
+            entry.auto = patch.auto;
+    }
+    if (Object.keys(entry).length === 0)
+        delete monitor[wskey];
+    else
+        monitor[wskey] = entry;
+    if (Object.keys(monitor).length === 0)
+        delete next[mkey];
+    else
+        next[mkey] = monitor;
+    return next;
+};
+const tile_layouts_migrate = (wsPresets, autoList, mkey) => {
+    const autoMap = tile_auto_list_map(autoList);
+    const presets = (wsPresets && typeof wsPresets === 'object' && !Array.isArray(wsPresets)) ? wsPresets : {};
+    const indexes = [];
+    for (const key of Object.keys(presets)) {
+        const idx = Number(key);
+        if (Number.isInteger(idx) && idx >= 0)
+            indexes.push(idx);
+    }
+    for (const key of Object.keys(autoMap)) {
+        const idx = Number(key);
+        if (indexes.indexOf(idx) === -1)
+            indexes.push(idx);
+    }
+    const migrated = {};
+    for (const idx of indexes.sort((a, b) => a - b)) {
+        const preset = typeof presets[String(idx)] === 'string' ? presets[String(idx)] : null;
+        let auto = null;
+        if (typeof autoMap[idx] === 'boolean')
+            auto = autoMap[idx];
+        if (!preset && !auto)
+            continue;
+        const entry = {};
+        if (preset)
+            entry.preset = preset;
+        // Implied auto (preset default) stays implicit; only an explicit row value is stored.
+        if (auto !== null)
+            entry.auto = auto;
+        migrated[String(idx + 1)] = entry;
+    }
+    return Object.keys(migrated).length === 0 ? {} : { [mkey]: migrated };
+};
+// <<< layouts-model
 const tile_auto_list_read = (app) => app.config.settings.getValue('autoWorkspaces');
 const tile_auto_set_ws = (app, wsIndex, on) => {
     app.config.settings.setValue('autoWorkspaces', tile_auto_list_set(tile_auto_list_read(app), wsIndex, on));
