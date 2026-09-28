@@ -142,6 +142,15 @@
       ],
       "default": []
    },
+   "windowGap": {
+      "type": "spinbutton",
+      "description": "Gap between tiled windows (set with − / + in the preset panel; not shown in this dialog)",
+      "min": 0,
+      "max": 48,
+      "step": 2,
+      "units": "px",
+      "default": 0
+   },
    "animation": {
       "type": "checkbox",
       "default": "true",

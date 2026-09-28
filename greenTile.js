@@ -377,6 +377,47 @@ const tile_place = (app, metaWindow, x, y, width, height) => {
         });
     }
 };
+// >>> gap-model (pure functions, no Cinnamon imports; tested by tests/gap-model.test.js)
+// Gap between tiled windows (setting "windowGap", set with − / + in the preset panel).
+// Every side of a cell that borders another cell moves in by half the gap, so two
+// neighbours end up exactly one gap apart; sides on the edge of the usable screen area
+// stay flush. Edges are rounded before the insets, so fractional cell widths
+// (1920/7) do not make the gaps drift.
+const TILE_GAP_MAX = 48;
+const TILE_GAP_STEP = 2;
+const tile_gap_value = (v) => {
+    if (typeof v !== 'number' || !Number.isFinite(v))
+        return 0;
+    const stepped = Math.floor(v / TILE_GAP_STEP) * TILE_GAP_STEP;
+    return Math.min(Math.max(stepped, 0), TILE_GAP_MAX);
+};
+const tile_gap_cell = (cell, area, gap) => {
+    let left = Math.round(cell[0]);
+    let top = Math.round(cell[1]);
+    let right = Math.round(cell[0] + cell[2]);
+    let bottom = Math.round(cell[1] + cell[3]);
+    if (gap > 0) {
+        const lead = Math.floor(gap / 2);
+        const trail = gap - lead;
+        const [ax, ay, aw, ah] = area.map(Math.round);
+        if (Math.abs(left - ax) >= 1)
+            left += lead;
+        if (Math.abs(top - ay) >= 1)
+            top += lead;
+        if (Math.abs(right - (ax + aw)) >= 1)
+            right -= trail;
+        if (Math.abs(bottom - (ay + ah)) >= 1)
+            bottom -= trail;
+    }
+    return [left, top, Math.max(right - left, 1), Math.max(bottom - top, 1)];
+};
+// <<< gap-model
+const tile_gap = (app) => tile_gap_value(app.config.settings.getValue('windowGap'));
+// Places a window into a layout cell of the usable area, minus the window gap.
+const tile_place_cell = (app, metaWindow, x, y, width, height, area) => {
+    const [cx, cy, cw, ch] = tile_gap_cell([x, y, width, height], area, tile_gap(app));
+    tile_place(app, metaWindow, cx, cy, cw, ch);
+};
 const tile_app_columns = (app, cols) => {
     const focusWindow = tile_focus_window();
     if (!focusWindow)
@@ -390,7 +431,7 @@ const tile_app_columns = (app, cols) => {
     let colWidth = screenWidth / cols;
     let ordered = tile_sort_reading_order([focusWindow].concat(windows), false).slice(0, cols);
     for (let index = 0; index < ordered.length; index++) {
-        tile_place(app, ordered[index], screenX + index * colWidth, screenY, colWidth, screenHeight);
+        tile_place_cell(app, ordered[index], screenX + index * colWidth, screenY, colWidth, screenHeight, [screenX, screenY, screenWidth, screenHeight]);
     }
 };
 // Sort direction must match the target layout: column-major for the low-res
@@ -443,7 +484,7 @@ const tile_app_auto = (app) => {
         for (let c = 0; c < 3; c++) {
             let cellHeight = screenHeight / stacks[c];
             for (let r = 0; r < stacks[c]; r++) {
-                tile_place(app, ordered[idx], screenX + c * colWidth, screenY + r * cellHeight, colWidth, cellHeight);
+                tile_place_cell(app, ordered[idx], screenX + c * colWidth, screenY + r * cellHeight, colWidth, cellHeight, [screenX, screenY, screenWidth, screenHeight]);
                 idx++;
             }
         }
@@ -467,7 +508,7 @@ const tile_app_auto = (app) => {
     for (let index = 0; index < ordered.length; index++) {
         let col = index % cols;
         let row = Math.floor(index / cols);
-        tile_place(app, ordered[index], screenX + col * cellWidth, screenY + row * cellHeight, cellWidth, cellHeight);
+        tile_place_cell(app, ordered[index], screenX + col * cellWidth, screenY + row * cellHeight, cellWidth, cellHeight, [screenX, screenY, screenWidth, screenHeight]);
     }
 };
 // Auto-mode observer: re-tiles automatically on workspaces with automatic tiling on
@@ -714,7 +755,7 @@ const tile_place_stacks = (app, ordered, stacks, screenX, screenY, screenWidth, 
     for (let c = 0; c < stacks.length; c++) {
         const cellHeight = screenHeight / last[c];
         for (let r = 0; r < last[c]; r++) {
-            tile_place(app, ordered[idx], screenX + c * colWidth, screenY + r * cellHeight, colWidth, cellHeight);
+            tile_place_cell(app, ordered[idx], screenX + c * colWidth, screenY + r * cellHeight, colWidth, cellHeight, [screenX, screenY, screenWidth, screenHeight]);
             idx++;
         }
     }
