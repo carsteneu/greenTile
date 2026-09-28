@@ -1,13 +1,14 @@
-# Swedish translation for gTile@shuairan.
-# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
-# This file is distributed under the same license as the PACKAGE package.
-# Åke Engelbrektson <eson@svenskasprakfiler.se>, 2017, 2019, 2021
+# Swedish translation for greenTile (greenTile@carsten_eu).
+# Based on the Swedish translation of gTile (gTile@shuairan).
+# Copyright (C) the gTile and greenTile translators
+# This file is distributed under the same license as the greenTile package (GPL-3.0-only).
 #
+# Åke Engelbrektson <eson@svenskasprakfiler.se>, 2017, 2019, 2021
 msgid ""
 msgstr ""
-"Project-Id-Version: gTile@shuairan\n"
-"Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2017-04-30 12:00+0800\n"
+"Project-Id-Version: greenTile 0.1.0\n"
+"Report-Msgid-Bugs-To: https://github.com/carsteneu\n"
+"POT-Creation-Date: 2026-09-28 17:16+0200\n"
 "PO-Revision-Date: 2021-01-12 21:08+0100\n"
 "Last-Translator: Åke Engelbrektson <eson@svenskasprakfiler.se>\n"
 "Language-Team: Svenska Språkfiler <contactform@svenskasprakfiler.se>\n"
@@ -15,76 +16,282 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Generator: Poedit 2.3\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"X-Generator: Poedit 2.3\n"
 
-#. gTile@shuairan->metadata.json->description
-msgid "Tile your windows as you like."
-msgstr "Fördela dina fönster som du vill."
+#: greenTile.js:837
+#, javascript-format
+msgid "assigned — workspace %d"
+msgstr ""
 
-#. gTile@shuairan->metadata.json->name
-msgid "gTile"
-msgstr "gTile"
+#: greenTile.js:876
+#, javascript-format
+msgid "Presets — workspace %d"
+msgstr ""
 
-#. gTile@shuairan->settings-schema.json->gridbutton2x->description
-#. gTile@shuairan->settings-schema.json->gridbutton4x->description
-#. gTile@shuairan->settings-schema.json->gridbutton3x->description
-#. gTile@shuairan->settings-schema.json->gridbutton1x->description
-msgid "Columns"
-msgstr "Kolumner"
+#: greenTile.js:940
+msgid "No presets yet."
+msgstr ""
 
-#. gTile@shuairan->settings-schema.json->gridbutton2x->units
-#. gTile@shuairan->settings-schema.json->gridbutton4x->units
-#. gTile@shuairan->settings-schema.json->gridbutton3x->units
-#. gTile@shuairan->settings-schema.json->gridbutton1x->units
-msgid "x"
-msgstr "x"
+#: greenTile.js:954
+msgid "New preset"
+msgstr ""
 
-#. gTile@shuairan->settings-schema.json->gridbutton2y->description
-#. gTile@shuairan->settings-schema.json->gridbutton4y->description
-#. gTile@shuairan->settings-schema.json->gridbutton3y->description
-#. gTile@shuairan->settings-schema.json->gridbutton1y->description
-msgid "Rows"
-msgstr "Rader"
+#: greenTile.js:959
+msgid "Click a row to apply it to this workspace and tile right away"
+msgstr ""
 
-#. gTile@shuairan->settings-schema.json->gridbutton2y->units
-#. gTile@shuairan->settings-schema.json->gridbutton4y->units
-#. gTile@shuairan->settings-schema.json->gridbutton3y->units
-#. gTile@shuairan->settings-schema.json->gridbutton1y->units
-msgid "y"
-msgstr "y"
-
-#. gTile@shuairan->settings-schema.json->header2->description
-msgid "Layout for Button 2:"
-msgstr "Layout för knapp 2:"
-
-#. gTile@shuairan->settings-schema.json->header3->description
-msgid "Layout for Button 3:"
-msgstr "Layout för knapp 3:"
-
-#. gTile@shuairan->settings-schema.json->header1->description
-msgid "Layout for Button 1:"
-msgstr "Layout för knapp 1:"
-
-#. gTile@shuairan->settings-schema.json->header4->description
-msgid "Layout for Button 4:"
-msgstr "Layout för knapp 4:"
-
-#. gTile@shuairan->settings-schema.json->autoclose->description
-msgid "Auto-Close"
+#: greenTile.js:1099
+#, fuzzy
+#| msgid "Auto-Close"
+msgid "Auto close"
 msgstr "Stäng automatiskt"
 
-#. gTile@shuairan->settings-schema.json->headerKeys->description
-msgid "Hotkeys:"
+#: greenTile.js:1100
+#, fuzzy
+#| msgid "Animation"
+msgid "Animations"
+msgstr "Animering"
+
+#: greenTile.js:1101
+msgid "Auto tile main and list"
+msgstr ""
+
+#: greenTile.js:1102
+msgid "Auto tile two lists"
+msgstr ""
+
+#. metadata.json->name
+#, fuzzy
+#| msgid "gTile"
+msgid "greenTile"
+msgstr "gTile"
+
+#. metadata.json->description
+msgid ""
+"Column tiling with per-workspace presets, auto mode and snap-on-release. Fork"
+" of gTile by shuairan."
+msgstr ""
+
+#. settings-schema.json->hotkeys-tab->title
+#, fuzzy
+#| msgid "Hotkeys:"
+msgid "Hotkeys"
 msgstr "Snabbtangenter:"
 
-#. gTile@shuairan->settings-schema.json->hotkey->description
-msgid "Global Hotkey for gTile"
+#. settings-schema.json->behaviour-tab->title
+#. settings-schema.json->behaviour-section->title
+msgid "Behavior"
+msgstr ""
+
+#. settings-schema.json->layout-tab->title
+msgid "Layout"
+msgstr ""
+
+#. settings-schema.json->help->title
+msgid "Help"
+msgstr ""
+
+#. settings-schema.json->hotkey-section->title
+#, fuzzy
+#| msgid "Global Hotkey for gTile"
+msgid "Global Hotkey"
 msgstr "Snabbtangenter för gTile"
 
-#. gTile@shuairan->settings-schema.json->animation->description
+#. settings-schema.json->autotile-hotkey-section->title
+msgid "Auto-Tile Hotkeys"
+msgstr ""
+
+#. settings-schema.json->preset-section->title
+msgid "Workspace Presets"
+msgstr ""
+
+#. settings-schema.json->keybindings-legend-section->title
+msgid "Keybindings Legend (when open)"
+msgstr ""
+
+#. settings-schema.json->grid1-section->title
+#, fuzzy
+#| msgid "Layout for Button 1:"
+msgid "Layout For Button 1"
+msgstr "Layout för knapp 1:"
+
+#. settings-schema.json->grid2-section->title
+#, fuzzy
+#| msgid "Layout for Button 2:"
+msgid "Layout For Button 2"
+msgstr "Layout för knapp 2:"
+
+#. settings-schema.json->grid3-section->title
+#, fuzzy
+#| msgid "Layout for Button 3:"
+msgid "Layout For Button 3"
+msgstr "Layout för knapp 3:"
+
+#. settings-schema.json->grid4-section->title
+#, fuzzy
+#| msgid "Layout for Button 4:"
+msgid "Layout For Button 4"
+msgstr "Layout för knapp 4:"
+
+#. settings-schema.json->help-section->title
+msgid "More Info"
+msgstr ""
+
+#. settings-schema.json->hotkeys-legend->description
+msgid ""
+"Escape:\t\t\tHide greenTile\n"
+"Enter or Space:\tCommit current selection\n"
+"Left:\t\t\tMove Left inside Grid\n"
+"Right:\t\t\tMove Right inside Grid\n"
+"Up:\t\t\t\tMove Up inside Grid\n"
+"Down:\t\t\tMove Down inside Grid\n"
+"<Shift>Left:\t\tInclude column to the Left in selection\n"
+"<Shift>Right:\t\tInclude column to the Right in selection\n"
+"<Shift>Up:\t\tInclude row Above in selection\n"
+"<Shift>Down:\tInclude row Below in selection\n"
+"<Alt>Left:\t\tMove to the monitor on the Left\n"
+"<Alt>Right:\t\tMove to the monitor on the Right\n"
+"<Alt>Up:\t\t\tMove to the monitor Above\n"
+"<Alt>Down:\t\tMove to the monitor Below\n"
+"1:\t\t\t\tSelect the first grid layout\n"
+"2:\t\t\t\tSelect the second grid layout\n"
+"3:\t\t\t\tSelect the third grid layout\n"
+"4:\t\t\t\tSelect the fourth grid layout"
+msgstr ""
+
+#. settings-schema.json->hotkey->description
+#, fuzzy
+#| msgid "Global Hotkey for gTile"
+msgid "Global Hotkey for greenTile"
+msgstr "Snabbtangenter för gTile"
+
+#. settings-schema.json->autotile6hotkey->description
+msgid "Tile all windows into 6 columns"
+msgstr ""
+
+#. settings-schema.json->autotile3hotkey->description
+msgid "Tile all windows into 3 columns"
+msgstr ""
+
+#. settings-schema.json->autotileautohotkey->description
+msgid "Tile all windows into an automatic grid"
+msgstr ""
+
+#. settings-schema.json->presetHotkey->description
+msgid "Open the preset panel"
+msgstr ""
+
+#. settings-schema.json->presets->description
+msgid "Preset definitions (JSON)"
+msgstr ""
+
+#. settings-schema.json->wsPresets->description
+msgid "Workspace to preset assignments (JSON)"
+msgstr ""
+
+#. settings-schema.json->animation->description
 msgid "Animation"
 msgstr "Animering"
 
-#~ msgid "Tile your windows as you like. It even supports multiscreen ! -EDIT: - See README.md file for configuration -"
-#~ msgstr "Dela upp ditt skrivbord som du vill. Stödjer även flerskärmsanvändning! -Redigera: - Se README.md för konfiguration -"
+#. settings-schema.json->autoclose->description
+msgid "Auto-Close"
+msgstr "Stäng automatiskt"
+
+#. settings-schema.json->aspect-ratio->description
+msgid "Use monitor aspect ratio"
+msgstr ""
+
+#. settings-schema.json->aspect-ratio->tooltip
+msgid ""
+"Should the popup's grid reflect the current monitor's aspect ratio or not."
+msgstr ""
+
+#. settings-schema.json->useMonitorCenter->description
+msgid "UI always centered to monitor"
+msgstr ""
+
+#. settings-schema.json->useMonitorCenter->tooltip
+msgid ""
+"By default the grid UI shows up in the middle of the active window. With "
+"this, it always displays in the middle of the monitor."
+msgstr ""
+
+#. settings-schema.json->showGridOnAllMonitors->description
+msgid "Show UI and all monitors at the same time"
+msgstr ""
+
+#. settings-schema.json->columns->description
+#. settings-schema.json->grid1x->description
+#. settings-schema.json->grid2x->description
+#. settings-schema.json->grid3x->description
+#. settings-schema.json->grid4x->description
+msgid "Columns"
+msgstr "Kolumner"
+
+#. settings-schema.json->rows->description
+#. settings-schema.json->grid1y->description
+#. settings-schema.json->grid2y->description
+#. settings-schema.json->grid3y->description
+#. settings-schema.json->grid4y->description
+msgid "Rows"
+msgstr "Rader"
+
+#. settings-schema.json->grid1NameOverride->description
+msgid "Name Override on the UI"
+msgstr ""
+
+#. settings-schema.json->grid1x->tooltip
+#. settings-schema.json->grid2x->tooltip
+#. settings-schema.json->grid3x->tooltip
+#. settings-schema.json->grid4x->tooltip
+msgid ""
+"Each row represents a column. Span is how much space a column should take up "
+"compared to the other columns. Default is 1."
+msgstr ""
+
+#. settings-schema.json->grid1x->columns->title
+#. settings-schema.json->grid1y->columns->title
+#. settings-schema.json->grid2x->columns->title
+#. settings-schema.json->grid2y->columns->title
+#. settings-schema.json->grid3x->columns->title
+#. settings-schema.json->grid3y->columns->title
+#. settings-schema.json->grid4x->columns->title
+#. settings-schema.json->grid4y->columns->title
+msgid "Span"
+msgstr ""
+
+#. settings-schema.json->grid1y->tooltip
+#. settings-schema.json->grid2y->tooltip
+#. settings-schema.json->grid3y->tooltip
+#. settings-schema.json->grid4y->tooltip
+msgid ""
+"Each row represents a row. Span is how much space a row should take up "
+"compared to the other columns. Default is 1."
+msgstr ""
+
+#. settings-schema.json->grid2NameOverride->description
+#. settings-schema.json->grid3NameOverride->description
+#. settings-schema.json->grid4NameOverride->description
+msgid "Name Override"
+msgstr ""
+
+#. settings-schema.json->select-using-keyboard->description
+msgid "Show tile labels"
+msgstr ""
+
+#~ msgid "Tile your windows as you like."
+#~ msgstr "Fördela dina fönster som du vill."
+
+#~ msgid "x"
+#~ msgstr "x"
+
+#~ msgid "y"
+#~ msgstr "y"
+
+#~ msgid ""
+#~ "Tile your windows as you like. It even supports multiscreen ! -EDIT: - See "
+#~ "README.md file for configuration -"
+#~ msgstr ""
+#~ "Dela upp ditt skrivbord som du vill. Stödjer även flerskärmsanvändning! "
+#~ "-Redigera: - Se README.md för konfiguration -"

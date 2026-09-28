@@ -1,3 +1,16 @@
+/*
+ * greenTile — stylesheet
+ *
+ * Based on 5.4/stylesheet.css from gTile (UUID gTile@shuairan), version 2.2.1,
+ * by vibou, shuairan and the gTile contributors. The gTile rules below are
+ * unchanged; the gk-* rules for the preset panel were added by carsten_eu, 2026.
+ *
+ * Copyright (C) vibou, shuairan and the gTile contributors
+ * Copyright (C) 2026 carsten_eu
+ *
+ * Licensed under the GNU General Public License version 3, see LICENSE.
+ * SPDX-License-Identifier: GPL-3.0-only
+ */
 .grid-title{
 	font-size: 12px;
     font-weight: bold;
@@ -165,9 +178,9 @@
     background-color: #9ce072;
 }
 
-/* Rechts 6px Panelhintergrund neben den Zeilen: Hover und Zuweisungs-Tönung
-   enden vor der Kante. Zusammen mit 4px Innenabstand in .gk-row-box stehen die
-   Schraubenschlüssel senkrecht unter dem ✕ der Kopfzeile (Mitte ≈ 427px). */
+/* 6px of panel background to the right of the rows: hover and assigned tint
+   end before the edge. Together with the 4px right padding in .gk-row-box the
+   wrenches line up vertically under the ✕ of the title bar (centre ≈ 427px). */
 .gk-rows {
     padding-right: 6px;
 }

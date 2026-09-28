@@ -1,3 +1,39 @@
+/*
+ * greenTile — window tiling extension for Cinnamon
+ * UUID: greenTile@carsten_eu
+ *
+ * This file is a modified version of gTile (UUID gTile@shuairan), version 2.2.1.
+ * It is derived from gTile's compiled webpack bundle 5.4/gTile.js:
+ *   - gTile was originally developed by vibou for GNOME Shell
+ *     https://github.com/vibou/vibou.gTile
+ *   - ported to Cinnamon by shuairan
+ *     https://github.com/shuairan/gTile
+ *   - maintained by the community in the Linux Mint Spices repository
+ *     https://github.com/linuxmint/cinnamon-spices-extensions/tree/master/gTile%40shuairan
+ *
+ * Modified by carsten_eu since 2026-09-04: column hotkeys, auto mode with
+ * snap-on-release and animation, own window collector, per-workspace presets
+ * and the preset panel. New code lives mainly in the functions and objects
+ * prefixed tile_*; the original gTile classes were changed where needed
+ * (hotkey registration, settings bindings, UUID, icon path). See README.md.
+ *
+ * Copyright (C) vibou, shuairan and the gTile contributors
+ * Copyright (C) 2026 carsten_eu
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License version 3 as
+ * published by the Free Software Foundation.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see <https://www.gnu.org/licenses/>.
+ *
+ * SPDX-License-Identifier: GPL-3.0-only
+ */
 var gtile;
 /******/ (() => { // webpackBootstrap
 /******/ 	"use strict";
@@ -798,7 +834,7 @@ const tile_panel_row = (app, preset, n) => {
     const textBox = new tile_St.BoxLayout({ vertical: true, style_class: 'gk-row-text' });
     textBox.add(new tile_St.Label({ text: preset.name, style_class: 'gk-name' }));
     if (assignedHere)
-        textBox.add(new tile_St.Label({ text: '✓ zugewiesen — Fläche ' + (wsIndex + 1), style_class: 'gk-sub' }));
+        textBox.add(new tile_St.Label({ text: '✓ ' + _("assigned — workspace %d").format(wsIndex + 1), style_class: 'gk-sub' }));
     box.add(textBox, { expand: true, x_fill: true, y_fill: false, y_align: tile_St.Align.MIDDLE });
     if (assignedHere) {
         const un = new tile_St.Button({ label: '✕', style_class: 'gk-icon-btn', track_hover: true });
@@ -837,17 +873,17 @@ const tile_panel_open = (app) => {
     const wsIndex = global.workspace_manager.get_active_workspace().index();
     const panel = new tile_St.BoxLayout({ vertical: true, style_class: 'gk-panel', reactive: true, can_focus: true });
     const header = new tile_St.BoxLayout({ style_class: 'gk-panel-header', reactive: true });
-    const title = new tile_St.Label({ text: 'Presets — Arbeitsfläche ' + (wsIndex + 1), style_class: 'gk-title' });
+    const title = new tile_St.Label({ text: _("Presets — workspace %d").format(wsIndex + 1), style_class: 'gk-title' });
     header.add(title, { expand: true, x_fill: true, y_fill: false, y_align: tile_St.Align.MIDDLE });
     const closeBtn = new tile_St.Button({ label: '✕', style_class: 'gk-close', track_hover: true });
     closeBtn.connect('clicked', () => tile_panel_close());
     header.add(closeBtn);
     panel.add(header);
-    // Panel von Hand verschieben: die GANZE Kopfzeile greifen (✕ ausgenommen).
-    // Rezept aus Cinnamons dnd.js (_grabEvents/_ungrabEvents) — es braucht BEIDE Teile:
-    //   Main.pushModal(panel)  → X liefert alle Events an Cinnamon, auch über nativen Fenstern
-    //   device.grab(panel)     → Clutter schickt sie an das Panel statt an den Actor unterm Zeiger
-    // Nur eines davon allein verliert Motion/Release, sobald der Zeiger das Panel verlässt.
+    // Drag the panel by hand: the WHOLE title bar is a handle (except the ✕).
+    // Recipe from Cinnamon's dnd.js (_grabEvents/_ungrabEvents); it needs BOTH parts:
+    //   Main.pushModal(panel)  → X delivers all events to Cinnamon, even over native windows
+    //   device.grab(panel)     → Clutter routes them to the panel, not to the actor under the pointer
+    // Either one alone loses motion/release as soon as the pointer leaves the panel.
     let drag = null;
     const endDrag = () => {
         if (!drag)
@@ -901,12 +937,12 @@ const tile_panel_open = (app) => {
     const n = tile_panel_window_count();
     const rowsBox = new tile_St.BoxLayout({ vertical: true, style_class: 'gk-rows' });
     if (presets.length === 0)
-        rowsBox.add(new tile_St.Label({ text: 'Noch keine Presets vorhanden.', style_class: 'gk-muted' }));
+        rowsBox.add(new tile_St.Label({ text: _("No presets yet."), style_class: 'gk-muted' }));
     for (const preset of presets)
         rowsBox.add(tile_panel_row(app, preset, n));
-    // vscrollbar zunächst NEVER: Cinnamons St reserviert bei AUTOMATIC die 21px der
-    // Leiste auch dann, wenn nichts zu scrollen ist (Zeilen rechts zu breit). Die Leiste
-    // wird erst im Allocation-Handler eingeschaltet, wenn die Liste LIST_MAX überschreitet.
+    // vscrollbar starts as NEVER: with AUTOMATIC, Cinnamon's St reserves the bar's 21px
+    // even when there is nothing to scroll (rows end too far from the right edge). The bar
+    // is switched on in the allocation handler once the list exceeds LIST_MAX.
     const scroll = new tile_St.ScrollView({
         style_class: 'gk-scroll',
         reactive: true,
@@ -915,23 +951,23 @@ const tile_panel_open = (app) => {
     });
     scroll.add_actor(rowsBox);
     panel.add(scroll);
-    const plus = new tile_St.Button({ label: '＋ Neu anlegen', style_class: 'gk-plus', x_fill: true, track_hover: true });
+    const plus = new tile_St.Button({ label: '＋ ' + _("New preset"), style_class: 'gk-plus', x_fill: true, track_hover: true });
     plus.connect('clicked', () => {
-        global.log('greenTile preset editor (view 2) follows in M3 — use "Neu anlegen" there');
+        global.log('greenTile preset editor (view 2) follows in M3 — "New preset" will open it');
     });
     panel.add(plus);
-    panel.add(new tile_St.Label({ text: 'Klick auf eine Zeile = sofort auf dieser Fläche anwenden & kacheln', style_class: 'gk-hint' }));
+    panel.add(new tile_St.Label({ text: _("Click a row to apply it to this workspace and tile right away"), style_class: 'gk-hint' }));
     utils_Main.layoutManager.addChrome(panel);
     tile_panel.actor = panel;
-    // Position über Rebuilds (Arbeitsflächenwechsel, Fokuswechsel) hinweg retten
+    // Keep the position across rebuilds (workspace switches, focus changes)
     tile_panel.positioned = tile_panel.saved != null;
     if (tile_panel.saved)
         panel.set_position(tile_panel.saved.x, tile_panel.saved.y);
     const LIST_MAX = 320;
     let scrollCapped = false;
     panel.connect('notify::allocation', () => {
-        // Allocation-Notifications können nach dem Close (destroy) noch nachkommen —
-        // sonst würde die Zentrierung auf einem sterbenden Actor laufen.
+        // Allocation notifications can still arrive after close (destroy);
+        // without this guard the centring would run on a dying actor.
         if (tile_panel.actor !== panel)
             return;
         if (!tile_panel.positioned) {
@@ -955,9 +991,10 @@ const tile_panel_open = (app) => {
             }
         }
     });
-    // PanelFolgt aktiv: Arbeitsflächen- und Fokuswechsel rendern neu (Titel, Zuweisung, Thumbnail-Zählung)
-    // Meta.WorkspaceManager emittiert "workspace-switched" (windowManager.js:435)
-    // Rebuilds während eines aktiven Drags töten den Grab — also aussetzen.
+    // The panel follows the desktop: workspace and focus changes re-render it
+    // (title, assignment, thumbnail window count).
+    // Meta.WorkspaceManager emits "workspace-switched" (windowManager.js:435).
+    // A rebuild during an active drag would kill the grab, so it is skipped then.
     tile_panel.sig.push({ obj: global.workspace_manager, id: global.workspace_manager.connect('workspace-switched', () => {
         if (tile_panel.dragging)
             global.log('greenTile rebuild suppressed (drag)');
