@@ -4,7 +4,7 @@ Window tiling for Cinnamon with column rules, per-workspace presets, an auto mod
 
 greenTile is a fork of **gTile** (version 2.2.1), see [Origin](#origin). Like gTile, greenTile is licensed under the **GNU GPL v3** (see `LICENSE`). The classic gTile grid (`Super+G`) is still included.
 
-- **UUID:** `greenTile@carsten_eu`
+- **UUID:** `greenTile@carsteneu`
 - **Tested with:** Cinnamon 6.6 (Linux Mint)
 
 ## Origin
@@ -82,7 +82,7 @@ In every case only visible windows of the **active** workspace are tiled, never 
 ## Installation and deploy
 
 ```bash
-D=~/.local/share/cinnamon/extensions/greenTile@carsten_eu
+D=~/.local/share/cinnamon/extensions/greenTile@carsteneu
 mkdir -p "$D"
 node --check greenTile.js
 cp extension.js greenTile.js metadata.json settings-schema.json stylesheet.css icon.png LICENSE "$D"/
@@ -90,15 +90,15 @@ cp -r icons "$D"/
 for po in po/*.po; do
   lang=$(basename "$po" .po)
   mkdir -p ~/.local/share/locale/"$lang"/LC_MESSAGES
-  msgfmt --check -o ~/.local/share/locale/"$lang"/LC_MESSAGES/greenTile@carsten_eu.mo "$po"
+  msgfmt --check -o ~/.local/share/locale/"$lang"/LC_MESSAGES/greenTile@carsteneu.mo "$po"
 done
 dbus-send --session --print-reply --dest=org.Cinnamon /org/Cinnamon org.Cinnamon.Eval \
-  string:"imports.ui.extensionSystem.disableExtension('greenTile@carsten_eu'); imports.ui.extensionSystem.enableExtension('greenTile@carsten_eu'); 'reloaded'"
+  string:"imports.ui.extensionSystem.disableExtension('greenTile@carsteneu'); imports.ui.extensionSystem.enableExtension('greenTile@carsteneu'); 'reloaded'"
 ```
 
 The first time, enable the extension in the Cinnamon settings. **gTile@shuairan must be disabled**, otherwise both extensions claim the same keys.
 
-Check: `imports.ui.extensionSystem.runningExtensions` (an array) must contain `greenTile@carsten_eu`, and `~/.xsession-errors` must not show any `JS ERROR` mentioning `greenTile.js`.
+Check: `imports.ui.extensionSystem.runningExtensions` (an array) must contain `greenTile@carsteneu`, and `~/.xsession-errors` must not show any `JS ERROR` mentioning `greenTile.js`.
 
 Tests for the pure models (preset editor, auto mode per workspace): `node --test tests/*.test.js` (Node 18 or newer; passing only the directory `tests/` fails on Node 22 and later). The `tests/` folder is not copied by the deploy steps.
 
@@ -107,27 +107,27 @@ Tests for the pure models (preset editor, auto mode per workspace): `node --test
 Settings and presets are stored per UUID under `~/.config/cinnamon/spices/`. To take them over:
 
 ```bash
-mkdir -p ~/.config/cinnamon/spices/greenTile@carsten_eu
+mkdir -p ~/.config/cinnamon/spices/greenTile@carsteneu
 cp ~/.config/cinnamon/spices/gTile@shuairan/gTile@shuairan.json \
-   ~/.config/cinnamon/spices/greenTile@carsten_eu/greenTile@carsten_eu.json
-gsettings set org.cinnamon enabled-extensions "['greenTile@carsten_eu']"
+   ~/.config/cinnamon/spices/greenTile@carsteneu/greenTile@carsteneu.json
+gsettings set org.cinnamon enabled-extensions "['greenTile@carsteneu']"
 ```
 
 Back to gTile: `gsettings set org.cinnamon enabled-extensions "['gTile@shuairan']"`. gTile's folder and settings are left untouched.
 
 ## Translations
 
-All user-visible strings are English in the source and translated via gettext. The translation domain is the UUID `greenTile@carsten_eu`; compiled catalogs are installed to `~/.local/share/locale/<lang>/LC_MESSAGES/greenTile@carsten_eu.mo` (see the deploy steps above).
+All user-visible strings are English in the source and translated via gettext. The translation domain is the UUID `greenTile@carsteneu`; compiled catalogs are installed to `~/.local/share/locale/<lang>/LC_MESSAGES/greenTile@carsteneu.mo` (see the deploy steps above).
 
-- `po/greenTile@carsten_eu.pot` is the template, `po/<lang>.po` are the translations. They were taken over from gTile, so strings added by greenTile are still untranslated in most languages; German is complete.
+- `po/greenTile@carsteneu.pot` is the template, `po/<lang>.po` are the translations. They were taken over from gTile, so strings added by greenTile are still untranslated in most languages; German is complete.
 - After changing translatable strings in `greenTile.js`, `settings-schema.json` or `metadata.json`, run `./makepot.sh`. It regenerates the template with Cinnamon's `cinnamon-xlet-makepot` and merges it into every `.po` file. That tool needs the Python modules `polib` and `pytz`; see the comment at the top of `makepot.sh`.
-- New language: `msginit -i po/greenTile@carsten_eu.pot -o po/<lang>.po -l <lang>`, then translate and deploy.
+- New language: `msginit -i po/greenTile@carsteneu.pot -o po/<lang>.po -l <lang>`, then translate and deploy.
 - Placeholders such as `%d` must be kept in the translation; the code fills them with `String.prototype.format`.
 
 ## Pitfalls
 
 - Muffin 6.6: use `get_frame_rect()`; `get_outer_rect()` does not exist there.
-- Hotkeys live in two files: the default in the schema and the user value in `~/.config/cinnamon/spices/greenTile@carsten_eu/greenTile@carsten_eu.json`. The user value wins.
+- Hotkeys live in two files: the default in the schema and the user value in `~/.config/cinnamon/spices/greenTile@carsteneu/greenTile@carsteneu.json`. The user value wins.
 - `Super+N` and `Super+Shift+N` belong to the window list applet; do not use them.
 - gTile's `focusMetaWindow` goes stale when switching between windows of the same application. That is why tiling uses its own window collector.
 - `grab-op-begin` and `grab-op-end` pass the display twice: `(display, display, window, op)`.

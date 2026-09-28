@@ -1,4 +1,4 @@
-# Romanian translation for greenTile (greenTile@carsten_eu).
+# Romanian translation for greenTile (greenTile@carsteneu).
 # Based on the Romanian translation of gTile (gTile@shuairan).
 # Copyright (C) the gTile and greenTile translators
 # This file is distributed under the same license as the greenTile package (GPL-3.0-only).

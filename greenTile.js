@@ -1,6 +1,6 @@
 /*
  * greenTile — window tiling extension for Cinnamon
- * UUID: greenTile@carsten_eu
+ * UUID: greenTile@carsteneu
  *
  * This file is a modified version of gTile (UUID gTile@shuairan), version 2.2.1.
  * It is derived from gTile's compiled webpack bundle 5.4/gTile.js:
@@ -174,7 +174,7 @@ class Config {
             tile_panel_close();
         };
         this.app = app;
-        this.settings = new Settings.ExtensionSettings(this, 'greenTile@carsten_eu');
+        this.settings = new Settings.ExtensionSettings(this, 'greenTile@carsteneu');
         this.settings.bindProperty(Settings.BindingDirection.IN, 'hotkey', 'hotkey', this.EnableHotkey, null);
         this.settings.bindProperty(Settings.BindingDirection.IN, 'autotile6hotkey', 'autotile6Hotkey', this.EnableHotkey, null);
         this.settings.bindProperty(Settings.BindingDirection.IN, 'autotile3hotkey', 'autotile3Hotkey', this.EnableHotkey, null);
@@ -231,7 +231,7 @@ const Signals = imports.signals;
 const Meta = imports.gi.Meta;
 const Panel = imports.ui.panel;
 const utils_Main = imports.ui.main;
-const UUID = 'greenTile@carsten_eu';
+const UUID = 'greenTile@carsteneu';
 const isFinalized = function (obj) {
     return obj && utils_Object.prototype.toString.call(obj).indexOf('FINALIZED') > -1;
 };

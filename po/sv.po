@@ -1,4 +1,4 @@
-# Swedish translation for greenTile (greenTile@carsten_eu).
+# Swedish translation for greenTile (greenTile@carsteneu).
 # Based on the Swedish translation of gTile (gTile@shuairan).
 # Copyright (C) the gTile and greenTile translators
 # This file is distributed under the same license as the greenTile package (GPL-3.0-only).

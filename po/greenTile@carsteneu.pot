@@ -1,4 +1,4 @@
-# Translation template for greenTile (greenTile@carsten_eu).
+# Translation template for greenTile (greenTile@carsteneu).
 # Copyright (C) vibou, shuairan and the gTile contributors
 # Copyright (C) 2026 carsten_eu
 # This file is distributed under the same license as the greenTile package (GPL-3.0-only).

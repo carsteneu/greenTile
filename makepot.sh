@@ -1,5 +1,5 @@
 #!/bin/bash
-# Regenerate the translation template po/greenTile@carsten_eu.pot, give it a
+# Regenerate the translation template po/greenTile@carsteneu.pot, give it a
 # proper header and merge it into every po/*.po file.
 #
 # Needs gettext (xgettext, msgmerge) and Cinnamon's cinnamon-xlet-makepot,
@@ -10,7 +10,7 @@
 set -euo pipefail
 cd "$(dirname "$0")"
 
-UUID=greenTile@carsten_eu
+UUID=greenTile@carsteneu
 POT="po/$UUID.pot"
 PYTHON="${MAKEPOT_PYTHON:-python3}"
 VERSION=$(python3 -c "import json; print(json.load(open('metadata.json'))['version'])")
