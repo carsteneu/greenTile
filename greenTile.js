@@ -822,7 +822,10 @@ const tile_auto_disconnect_all = () => {
         tile_Mainloop.source_remove(tile_settle_timer);
         tile_settle_timer = 0;
     }
-    tile_settle_started = 0;
+    // A monitor change destroys the App while the settle wait may be running; keep its
+    // start time then, so the 15 s limit counts from the first change, not the last.
+    if (!tile_settle_pending)
+        tile_settle_started = 0;
 };
 
 // Settle wait after a monitor change: Muffin can take several seconds to move windows
