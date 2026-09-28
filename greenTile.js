@@ -1349,12 +1349,18 @@ const tile_panel_open = (app) => {
             // The list is 450px wide, the editor 600px: a panel dragged near the right
             // monitor edge would stick out after the view switch — clamp it back in.
             editorClamped = true;
-            const focusWindow = getFocusApp();
-            const monitor = utils_Main.layoutManager.monitors[focusWindow ? focusWindow.get_monitor() : utils_Main.layoutManager.primaryIndex];
             const box = panel.get_allocation_box();
             const width = box.x2 - box.x1;
             const height = box.y2 - box.y1;
             const [px, py] = panel.get_position();
+            // Clamp into the monitor the panel is on (by the centre of the list-width
+            // panel), so a panel dragged to another monitor does not jump to the
+            // focused window's monitor; fall back to that monitor otherwise.
+            const mcx = px + 225;
+            const mcy = py + height / 2;
+            const focusWindow = getFocusApp();
+            const monitor = utils_Main.layoutManager.monitors.find((m) => mcx >= m.x && mcx < m.x + m.width && mcy >= m.y && mcy < m.y + m.height)
+                || utils_Main.layoutManager.monitors[focusWindow ? focusWindow.get_monitor() : utils_Main.layoutManager.primaryIndex];
             const nx = Math.min(Math.max(px, monitor.x), monitor.x + Math.max(monitor.width - width, 0));
             const ny = Math.min(Math.max(py, monitor.y), monitor.y + Math.max(monitor.height - height, 0));
             if (nx !== px || ny !== py) {
