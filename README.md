@@ -32,7 +32,7 @@ The starting point was the shipped webpack bundle `5.4/gTile.js` of gTile 2.2.1,
 | `Super+Ctrl+P` | Open/close the preset panel for the active workspace |
 | `Super+G` | Classic gTile grid |
 
-All keys can be changed in the extension settings.
+All keys can be changed in the extension settings (Extensions manager, or ⚙ in the preset panel).
 
 ## Presets
 
@@ -44,6 +44,7 @@ In the panel (`Super+Ctrl+P`):
 - **🔧:** open the editor for this preset
 - **＋ New preset:** open the editor with an empty preset
 - **✕ in the title bar** or `Esc` closes the panel. While the list is open, greenTile takes the `Esc` key, so applications do not receive it until the panel is closed.
+- **⚙ in the title bar** closes the panel and opens the extension's settings dialog on its General page.
 - The panel can be dragged by its title bar and keeps its position when you switch workspaces. If that position is no longer on any monitor (external display unplugged), the panel opens centred again.
 - Right after switching between list and editor, clicks are ignored for 400 ms, so the second click of a double-click does not act in the new view.
 
@@ -65,7 +66,7 @@ Automatic tiling is switched **per workspace**:
 - `Super+Ctrl+A` turns it on for the active workspace and tiles right away. Pressing it again on the same workspace just tiles again.
 - `Super+Ctrl+D` turns it off for the active workspace. On a workspace with a preset this pauses the preset: it stays assigned (and visible in the panel) but nothing is tiled until `Super+Ctrl+A`.
 - A workspace that was never switched either way is on when it has a preset and off when it has none.
-- The state is stored in the setting `general` (JSON, `{"autoWorkspaces": {"<workspace index>": true|false}}`) and survives reloads and restarts. Like the preset assignments it is keyed by workspace index, so it shifts when workspaces are removed. `general` is the place for further general settings later; it is not shown in the settings dialog yet.
+- The state is shown and can be edited on the **General** page of the settings dialog ("Automatic tiling per workspace": one row per workspace, numbered as in the preset panel, with a checkbox). It is stored in the list setting `autoWorkspaces` and survives reloads and restarts. Like the preset assignments it is keyed by workspace number, so it shifts when workspaces are removed. Removing a row returns the workspace to the default rule. The General page is where further general settings will go.
 
 While automatic tiling is on for the active workspace:
 - When a window is added to or removed from the active workspace, the layout is retiled after 300 ms (normal windows only, no dialogs). Minimizing and restoring windows also updates the layout.
@@ -134,6 +135,7 @@ All user-visible strings are English in the source and translated via gettext. T
 - Dragging the panel needs `Main.pushModal(actor)` **and** `device.grab(actor)` together, as in Cinnamon's `dnd.js`. Either one alone loses mouse events as soon as the pointer leaves the panel.
 - Diagnostics: lines `greenTile skipped …` in `~/.xsession-errors` state why a window was not tiled.
 - Reload via DBus Eval as shown above; restarting Cinnamon is not necessary for code changes.
+- The UUID must not contain an underscore: Cinnamon's settings dialog (`KeybindingTable.py`) splits UUIDs at `_` to find instance numbers, does not find the keybindings of such an extension and crashes, so the dialog never opens. That is why the UUID is `greenTile@carsteneu`. If the dialog does not open, run `xlet-settings extension greenTile@carsteneu` in a terminal to see the traceback.
 - gTile 2.2.1 did not disconnect its `monitors-changed` handler on disable, so every reload left a handler behind that rebuilt a complete old instance on each monitor change (duplicate tiling, old hotkeys coming back). Fixed in greenTile; handlers left over from reloads of an older version disappear only with a Cinnamon restart.
 - Exception, translations: gettext (glibc) caches catalogs per process, including the fact that a catalog is *missing*. New or changed `.mo` files therefore only take effect after restarting Cinnamon (`Ctrl+Alt+Esc`, or log out and in). Reloading the extension is not enough.
 
