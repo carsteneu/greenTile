@@ -204,7 +204,10 @@ class Config {
             this.settings.bindProperty(Settings.BindingDirection.IN, nameOverride, nameOverride, this.updateGridSettings, null);
         }
         this.EnableHotkey();
-        tile_auto_connect_all(app);
+        tile_monitors_refresh(app, () => {
+            tile_layouts_migrate_once(app);
+            tile_auto_connect_all(app);
+        });
     }
     get AnimationTime() {
         return this.animation ? 0.3 : 0.1;
@@ -582,16 +585,16 @@ const tile_auto_schedule = (app, ms) => {
         return false;
     });
 };
-// Automatic tiling is switched per workspace (list setting "autoWorkspaces", General
-// page of the settings dialog):
-// Super+Ctrl+A turns it on for the active workspace and tiles right away (with the
-// preset if one is assigned, otherwise with the auto grid); pressing it again just
-// tiles again. Super+Ctrl+D turns it off; that also pauses a preset, which stays
-// assigned and comes back with Super+Ctrl+A.
+// Automatic tiling is switched per monitor and workspace (stored in the "layouts"
+// setting): Super+Ctrl+A turns it on for the focused monitor and the active workspace
+// and tiles right away (with the preset if one is assigned, otherwise with the auto
+// grid); pressing it again just tiles again. Super+Ctrl+D turns it off; that also
+// pauses a preset, which stays assigned and comes back with Super+Ctrl+A.
 const tile_auto_activate = (app) => {
+    const monitorIndex = tile_focus_monitor_index();
     const wsIndex = global.workspace_manager.get_active_workspace().index();
-    if (!tile_ws_active(app, wsIndex)) {
-        tile_auto_set_ws(app, wsIndex, true);
+    if (!tile_layout_for(app, monitorIndex, wsIndex).auto) {
+        tile_layout_set(app, monitorIndex, wsIndex, { auto: true });
         global.log('greenTile auto tiling on for ws' + wsIndex);
     }
     tile_auto_disarm_timer();
@@ -599,8 +602,9 @@ const tile_auto_activate = (app) => {
     tile_retile(app);
 };
 const tile_auto_deactivate = (app) => {
+    const monitorIndex = tile_focus_monitor_index();
     const wsIndex = global.workspace_manager.get_active_workspace().index();
-    tile_auto_set_ws(app, wsIndex, false);
+    tile_layout_set(app, monitorIndex, wsIndex, { auto: false });
     tile_auto_disarm_timer();
     tile_auto.pending.clear();
     global.log('greenTile auto tiling off for ws' + wsIndex);
@@ -721,13 +725,14 @@ const tile_auto_connect_all = (app) => {
     }
     // Switching onto a preset workspace retiles there (Cinnamon's own
     // windowManager.js:358 uses this signal with (wm, from, to, direction)).
-    tile_auto.signals.push([
-        global.window_manager,
-        global.window_manager.connect('switch-workspace', (wm, from, to) => {
-            if (tile_ws_active(app, to))
-                tile_auto_schedule(app, 300);
-        }),
-    ]);
+        tile_auto.signals.push([
+            global.window_manager,
+            global.window_manager.connect('switch-workspace', (wm, from, to) => {
+                const focusWindow = tile_focus_window();
+                if (tile_layout_for(app, focusWindow ? focusWindow.get_monitor() : utils_Main.layoutManager.primaryIndex, to).auto)
+                    tile_auto_schedule(app, 300);
+            }),
+        ]);
 };
 const tile_auto_disconnect_all = () => {
     tile_auto_disarm_timer();
@@ -750,25 +755,133 @@ const tile_presets_read = (app) => {
         return [];
     }
 };
-const tile_presets_ws_map = (app) => {
+// Monitor registry: stable per-monitor keys and display labels, rebuilt at start and
+// after every monitor change (enable() recreates the App then, so this module state is
+// effectively per App). Keys come from the DisplayConfig tuples via the monitor-model
+// block; a monitor that stays unknown (DBus failure) keeps a fallback key, logged once.
+const tile_Gio = imports.gi.Gio;
+const tile_monitors = { keys: [], connectors: [], labels: [], ready: false };
+let tile_monitors_fallback_logged = false;
+let tile_muffin_settings = null;
+const tile_monitors_refresh = (app, onReady) => {
+    tile_monitors.ready = false;
+    tile_monitors.keys = [];
+    tile_monitors.connectors = [];
+    tile_monitors.labels = [];
+    tile_Gio.DBus.session.call('org.cinnamon.Muffin.DisplayConfig', '/org/cinnamon/Muffin/DisplayConfig',
+        'org.cinnamon.Muffin.DisplayConfig', 'GetCurrentState', null, null,
+        tile_Gio.DBusCallFlags.NONE, 3000, null, (source, result) => {
+            let states = [];
+            try {
+                const reply = source.call_finish(result);
+                const unpacked = reply.deep_unpack();
+                states = tile_monitor_states(Array.isArray(unpacked) ? unpacked[1] : null);
+            }
+            catch (e) {
+                global.log('greenTile DisplayConfig.GetCurrentState failed: ' + e);
+            }
+            const monitors = utils_Main.layoutManager.monitors;
+            const keys = monitors.map(() => '');
+            const connectors = monitors.map(() => '');
+            for (const state of states) {
+                const index = Meta.MonitorManager.get().get_monitor_for_connector(state.connector);
+                if (index < 0 || index >= keys.length)
+                    continue;
+                keys[index] = state.key;
+                connectors[index] = state.connector;
+            }
+            const names = monitors.map((m, i) => global.display.get_monitor_name(i));
+            for (let i = 0; i < keys.length; i++) {
+                if (!keys[i] && monitors[i]) {
+                    keys[i] = tile_monitor_fallback_key(names[i], monitors[i].width, monitors[i].height);
+                    if (!tile_monitors_fallback_logged) {
+                        tile_monitors_fallback_logged = true;
+                        global.log('greenTile monitor key fallback for ' + names[i] + ' (' + keys[i] + ')');
+                    }
+                }
+            }
+            tile_monitors.keys = keys;
+            tile_monitors.connectors = connectors;
+            tile_monitors.labels = tile_monitor_labels(names, connectors);
+            tile_monitors.ready = true;
+            global.log('greenTile monitors: ' + keys.map((k, i) => i + '=' + k).join(', '));
+            onReady();
+        });
+};
+const tile_monitor_index_of = (metaWindow) => metaWindow.get_monitor();
+const tile_focus_monitor_index = () => {
+    const focusWindow = tile_focus_window();
+    return focusWindow ? focusWindow.get_monitor() : utils_Main.layoutManager.primaryIndex;
+};
+const tile_layout_only_primary = () => {
+    if (!tile_muffin_settings)
+        tile_muffin_settings = new tile_Gio.Settings({ schema_id: 'org.cinnamon.muffin' });
+    return tile_muffin_settings.get_boolean('workspaces-only-on-primary');
+};
+// Workspace key for a layout lookup: numbered on the primary monitor (and always when
+// workspaces-only-on-primary is off), '*' for every other monitor when the setting is on.
+const tile_layout_ws_key = (monitorIndex, wsIndex) => {
+    return tile_monitor_ws_key(wsIndex, monitorIndex === utils_Main.layoutManager.primaryIndex, tile_layout_only_primary());
+};
+const tile_layout_for = (app, monitorIndex, wsIndex) => {
+    if (!tile_monitors.ready || !tile_monitors.keys[monitorIndex])
+        return { preset: null, auto: false };
+    const presets = tile_presets_read(app);
+    const layouts = tile_layouts_parse(app.config.settings.getValue('layouts') || '');
+    const entry = tile_layouts_entry(layouts, tile_monitors.keys[monitorIndex], tile_layout_ws_key(monitorIndex, wsIndex), presets.map((p) => p.id));
+    return {
+        preset: entry.preset ? presets.find((p) => p.id === entry.preset) || null : null,
+        auto: entry.auto,
+    };
+};
+let tile_layouts_write_guard_logged = false;
+const tile_layout_set = (app, monitorIndex, wsIndex, patch) => {
+    if (!tile_monitors.ready || !tile_monitors.keys[monitorIndex])
+        return;
+    const layouts = tile_layouts_parse(app.config.settings.getValue('layouts') || '');
+    // Corrupt layouts are treated as empty on read; nothing is written (and the
+    // old string is not silently replaced) until the setting itself is fixed.
+    if (layouts === null) {
+        if (!tile_layouts_write_guard_logged) {
+            tile_layouts_write_guard_logged = true;
+            global.log('greenTile layouts setting is corrupt, not writing it');
+        }
+        return;
+    }
+    const next = tile_layouts_set(layouts, tile_monitors.keys[monitorIndex], tile_layout_ws_key(monitorIndex, wsIndex), patch);
+    app.config.settings.setValue('layouts', JSON.stringify(next));
+};
+// Once: convert the old per-workspace keys into layouts entries of the monitor that is
+// primary right now (the 5K monitor). layoutsMigrated keeps deleted layouts from coming
+// back on the next start.
+const tile_layouts_migrate_once = (app) => {
+    if (app.config.settings.getValue('layoutsMigrated'))
+        return;
+    let wsPresets = {};
     try {
-        return JSON.parse(app.config.settings.getValue('wsPresets') || '{}');
+        wsPresets = JSON.parse(app.config.settings.getValue('wsPresets') || '{}');
     }
-    catch (e) {
-        return {};
+    catch (e) { /* old key unreadable — treated as empty */ }
+    if (!wsPresets || typeof wsPresets !== 'object' || Array.isArray(wsPresets))
+        wsPresets = {};
+    const autoList = app.config.settings.getValue('autoWorkspaces');
+    const hasOld = Object.keys(wsPresets).length > 0 || (Array.isArray(autoList) && autoList.length > 0);
+    const layouts = tile_layouts_parse(app.config.settings.getValue('layouts') || '');
+    if (layouts && Object.keys(layouts).length === 0 && hasOld) {
+        const primaryIndex = utils_Main.layoutManager.primaryIndex;
+        const mkey = tile_monitors.keys[primaryIndex] || '';
+        if (mkey) {
+            const migrated = tile_layouts_migrate(wsPresets, autoList, mkey);
+            if (Object.keys(migrated).length > 0) {
+                app.config.settings.setValue('layouts', JSON.stringify(migrated));
+                global.log('greenTile migrated wsPresets/autoWorkspaces to layouts for monitor ' + mkey);
+            }
+        }
     }
+    app.config.settings.setValue('layoutsMigrated', true);
 };
 const tile_presets_write = (app, presets) => {
     app.config.settings.setValue('presets', JSON.stringify(presets));
-};
-const tile_presets_write_ws = (app, map) => {
-    app.config.settings.setValue('wsPresets', JSON.stringify(map));
-};
-const tile_preset_for_ws = (app, wsIndex) => {
-    const id = tile_presets_ws_map(app)[String(wsIndex)];
-    if (!id)
-        return null;
-    return tile_presets_read(app).find((p) => p.id === id) || null;
 };
 const tile_rules_pick = (rules, n) => {
     let match = null;
@@ -800,7 +913,7 @@ const tile_preset_retile = (app) => {
     if (!focusWindow)
         return;
     const wsIndex = global.workspace_manager.get_active_workspace().index();
-    const preset = tile_preset_for_ws(app, wsIndex);
+    const preset = tile_layout_for(app, focusWindow.get_monitor(), wsIndex).preset;
     if (!preset)
         return;
     const monitor = utils_Main.layoutManager.monitors[focusWindow.get_monitor()];
@@ -817,11 +930,11 @@ const tile_preset_retile = (app) => {
     global.log('greenTile preset "' + preset.name + '" applied ws' + wsIndex + ' n=' + n + ' stacks=[' + rule.stacks.join(',') + ']');
 };
 // >>> auto-model (pure functions, no Cinnamon imports; tested by tests/auto-model.test.js)
-// Automatic tiling per workspace is the list setting "autoWorkspaces" (General page of
-// the settings dialog): rows { workspace: <number from 1, as shown in the panel>,
-// auto: true (on, Super+Ctrl+A) | false (off, Super+Ctrl+D) }. A workspace without a
-// row is on exactly when it has a preset. Rows can be edited in the dialog, so
-// anything invalid is ignored; with duplicates the last row wins.
+// Legacy per-workspace automatic tiling list "autoWorkspaces": rows
+// { workspace: <number from 1, as shown in the panel>, auto: true | false }. The
+// runtime reads its automatic tiling state from the "layouts" setting now; this block
+// survives for the one-time migration, which still parses these rows (invalid rows
+// ignored, with duplicates the last row wins).
 const tile_auto_row_ok = (row) => row != null && typeof row === 'object'
     && Number.isInteger(row.workspace) && row.workspace >= 1 && typeof row.auto === 'boolean';
 const tile_auto_list_map = (list) => {
@@ -931,17 +1044,12 @@ const tile_layouts_migrate = (wsPresets, autoList, mkey) => {
     return Object.keys(migrated).length === 0 ? {} : { [mkey]: migrated };
 };
 // <<< layouts-model
-const tile_auto_list_read = (app) => app.config.settings.getValue('autoWorkspaces');
-const tile_auto_set_ws = (app, wsIndex, on) => {
-    app.config.settings.setValue('autoWorkspaces', tile_auto_list_set(tile_auto_list_read(app), wsIndex, on));
-};
-const tile_ws_active = (app, wsIndex) => tile_auto_ws_active(tile_auto_list_map(tile_auto_list_read(app)), wsIndex, tile_preset_for_ws(app, wsIndex) != null);
 // Observer layout source: the observers (window added/removed, minimize, snap after a
-// move, workspace switch) only act on workspaces with automatic tiling on; retile
-// routes to the preset layout when one is assigned, otherwise to the auto grid.
-const tile_auto_engaged = (app) => tile_ws_active(app, global.workspace_manager.get_active_workspace().index());
+// move, workspace switch) only act on monitor/workspace pairs with automatic tiling on
+// (monitor of the focused window until the observer wiring is per monitor).
+const tile_auto_engaged = (app) => tile_layout_for(app, tile_focus_monitor_index(), global.workspace_manager.get_active_workspace().index()).auto;
 const tile_retile = (app) => {
-    if (tile_preset_for_ws(app, global.workspace_manager.get_active_workspace().index())) {
+    if (tile_layout_for(app, tile_focus_monitor_index(), global.workspace_manager.get_active_workspace().index()).preset) {
         tile_preset_retile(app);
         return;
     }
@@ -1122,7 +1230,9 @@ const tile_panel_window_count = () => {
 };
 const tile_panel_row = (app, preset, n) => {
     const wsIndex = global.workspace_manager.get_active_workspace().index();
-    const assignedHere = tile_presets_ws_map(app)[String(wsIndex)] === preset.id;
+    const monitorIndex = tile_focus_monitor_index();
+    const assignedLayout = tile_layout_for(app, monitorIndex, wsIndex).preset;
+    const assignedHere = assignedLayout != null && assignedLayout.id === preset.id;
     // x_fill: St.Button centres its child by default — the row must span the full width
     const row = new tile_St.Button({ style_class: 'gk-row' + (assignedHere ? ' gk-row-assigned' : ''), x_fill: true, y_fill: true, track_hover: true, reactive: true });
     const outer = new tile_St.BoxLayout({ x_expand: true });
@@ -1141,9 +1251,7 @@ const tile_panel_row = (app, preset, n) => {
     if (assignedHere) {
         const un = new tile_St.Button({ label: '✕', style_class: 'gk-icon-btn', track_hover: true });
         un.connect('clicked', () => {
-            const map = tile_presets_ws_map(app);
-            delete map[String(wsIndex)];
-            tile_presets_write_ws(app, map);
+            tile_layout_set(app, monitorIndex, wsIndex, { preset: null });
             global.log('greenTile preset unassigned ws' + wsIndex);
             tile_panel_rebuild(app);
         });
@@ -1154,14 +1262,12 @@ const tile_panel_row = (app, preset, n) => {
     box.add(edit, tile_panel_middle());
     row.set_child(outer);
     row.connect('clicked', () => {
-        const map = tile_presets_ws_map(app);
-        map[String(wsIndex)] = preset.id;
-        tile_presets_write_ws(app, map);
+        tile_layout_set(app, monitorIndex, wsIndex, { preset: preset.id });
         global.log('greenTile preset "' + preset.name + '" assigned ws' + wsIndex);
-        // Choosing a preset means "tile this workspace with it": a workspace whose
-        // automatic tiling was switched off (Super+Ctrl+D) is switched on again.
-        if (!tile_ws_active(app, wsIndex))
-            tile_auto_set_ws(app, wsIndex, true);
+        // Choosing a preset means "tile this workspace with it": a monitor/workspace
+        // whose automatic tiling was switched off (Super+Ctrl+D) is switched on again.
+        if (!tile_layout_for(app, monitorIndex, wsIndex).auto)
+            tile_layout_set(app, monitorIndex, wsIndex, { auto: true });
         tile_panel_close();
         tile_preset_retile(app);
     });
@@ -1206,8 +1312,8 @@ const tile_editor_save = (app, errorLabel) => {
     // Retile only where the preset is in use AND automatic tiling is on; a paused
     // workspace (Super+Ctrl+D) is left alone until Super+Ctrl+A.
     const wsIndex = global.workspace_manager.get_active_workspace().index();
-    const assigned = tile_preset_for_ws(app, wsIndex);
-    if (assigned && assigned.id === preset.id && tile_ws_active(app, wsIndex))
+    const layout = tile_layout_for(app, tile_focus_monitor_index(), wsIndex);
+    if (layout.preset && layout.preset.id === preset.id && layout.auto)
         tile_preset_retile(app);
 };
 const tile_editor_rule_row = (rule, active, last, onSelect) => {
@@ -1480,22 +1586,23 @@ const tile_panel_open = (app) => {
         backBtn.connect('clicked', () => tile_editor_back(app));
         header.add(backBtn);
     }
-    else {
-        // Automatic tiling state of this workspace (Super+Ctrl+A / Super+Ctrl+D), shown
-        // and switchable here; turning it on tiles right away, like Super+Ctrl+A.
-        const autoOn = tile_ws_active(app, wsIndex);
-        const autoBtn = new tile_St.Button({
-            label: autoOn ? _("Auto: on") : _("Auto: off"),
-            style_class: 'gk-auto' + (autoOn ? ' gk-auto-on' : ''),
-            track_hover: true,
-        });
-        autoBtn.connect('clicked', () => {
-            if (tile_ws_active(app, wsIndex))
-                tile_auto_deactivate(app);
-            else
-                tile_auto_activate(app);
-            tile_panel_rebuild(app);
-        });
+      else {
+          // Automatic tiling state of this monitor and workspace (Super+Ctrl+A / Super+Ctrl+D),
+          // shown and switchable here; turning it on tiles right away, like Super+Ctrl+A.
+          const monitorIndex = tile_focus_monitor_index();
+          const autoOn = tile_layout_for(app, monitorIndex, wsIndex).auto;
+          const autoBtn = new tile_St.Button({
+              label: autoOn ? _("Auto: on") : _("Auto: off"),
+              style_class: 'gk-auto' + (autoOn ? ' gk-auto-on' : ''),
+              track_hover: true,
+          });
+          autoBtn.connect('clicked', () => {
+              if (tile_layout_for(app, monitorIndex, wsIndex).auto)
+                  tile_auto_deactivate(app);
+              else
+                  tile_auto_activate(app);
+              tile_panel_rebuild(app);
+          });
         header.add(autoBtn, { y_fill: false, y_align: tile_St.Align.MIDDLE });
         // ⚙ opens the extension's settings dialog on its first page; the same dialog
         // Cinnamon opens from the Extensions manager.
