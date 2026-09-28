@@ -377,6 +377,41 @@ const tile_place = (app, metaWindow, x, y, width, height) => {
         });
     }
 };
+// >>> monitor-model (pure functions, no Cinnamon imports; tested by tests/monitor-model.test.js)
+// Stable monitor identity from the DisplayConfig tuple (connector, vendor, product,
+// serial): the key survives rearrangements and re-plugging, identical models are
+// separated by serial, and panels with a zero serial (typical laptop screens) by
+// the connector. Workspace key '*' covers all workspaces of non-primary monitors
+// when workspaces-only-on-primary is on.
+const tile_monitor_key = (connector, vendor, product, serial) => {
+    const base = vendor + '|' + product + '|' + serial;
+    return (!serial || /^(0x)?0+$/.test(serial)) ? base + '|' + connector : base;
+};
+const tile_monitor_fallback_key = (name, width, height) => 'name:' + name + '|' + width + 'x' + height;
+const tile_monitor_states = (monitors) => {
+    if (!Array.isArray(monitors))
+        return [];
+    const states = [];
+    for (const item of monitors) {
+        if (!Array.isArray(item) || !Array.isArray(item[0]) || !item[0][0])
+            continue;
+        const [connector, vendor, product, serial] = item[0];
+        states.push({ connector: connector, key: tile_monitor_key(connector, vendor, product, serial) });
+    }
+    return states;
+};
+const tile_monitor_ws_key = (wsIndex, isPrimary, onlyPrimary) => {
+    return (onlyPrimary && !isPrimary) ? '*' : String(wsIndex + 1);
+};
+const tile_monitor_labels = (names, connectors) => {
+    const duplicate = (name) => names.indexOf(name) !== names.lastIndexOf(name);
+    return names.map((name, i) => {
+        if (!duplicate(name))
+            return name;
+        return name + ' (' + (connectors[i] || i + 1) + ')';
+    });
+};
+// <<< monitor-model
 // >>> gap-model (pure functions, no Cinnamon imports; tested by tests/gap-model.test.js)
 // Gap between tiled windows (setting "windowGap", set with − / + in the preset panel).
 // Every side of a cell that borders another cell moves in by half the gap, so two
