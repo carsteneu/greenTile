@@ -1321,13 +1321,26 @@ const tile_panel_open = (app) => {
     }
     utils_Main.layoutManager.addChrome(panel);
     tile_panel.actor = panel;
+    // Monitors come and go (external display plugged in or out). A saved position
+    // whose title bar is on no current monitor would open the panel off screen, so it
+    // is dropped and the panel is centred again. Probe point: title bar at list width.
+    const monitors = utils_Main.layoutManager.monitors;
+    const monitorAt = (x, y) => monitors.find((m) => x >= m.x && x < m.x + m.width && y >= m.y && y < m.y + m.height) || null;
+    const focusMonitor = () => {
+        const focusWindow = getFocusApp();
+        return (focusWindow && monitors[focusWindow.get_monitor()]) || monitors[utils_Main.layoutManager.primaryIndex] || monitors[0];
+    };
+    if (tile_panel.saved && !monitorAt(tile_panel.saved.x + 225, tile_panel.saved.y + 20)) {
+        global.log('greenTile panel position ' + tile_panel.saved.x + ',' + tile_panel.saved.y + ' is on no monitor, centring again');
+        tile_panel.saved = null;
+    }
     // Keep the position across rebuilds (workspace switches, focus changes, view changes)
     tile_panel.positioned = tile_panel.saved != null;
     if (tile_panel.saved)
         panel.set_position(tile_panel.saved.x, tile_panel.saved.y);
     const LIST_MAX = 320;
     let scrollCapped = false;
-    let editorClamped = false;
+    let clamped = false;
     panel.connect('notify::allocation', () => {
         // Allocation notifications can still arrive after close (destroy);
         // without this guard the centring would run on a dying actor.
@@ -1335,8 +1348,8 @@ const tile_panel_open = (app) => {
             return;
         if (!tile_panel.positioned) {
             tile_panel.positioned = true;
-            const focusWindow = getFocusApp();
-            const monitor = utils_Main.layoutManager.monitors[focusWindow ? focusWindow.get_monitor() : utils_Main.layoutManager.primaryIndex];
+            clamped = true;
+            const monitor = focusMonitor();
             const box = panel.get_allocation_box();
             const width = box.x2 - box.x1;
             const height = box.y2 - box.y1;
@@ -1345,28 +1358,23 @@ const tile_panel_open = (app) => {
             panel.set_position(Math.round(cx), Math.round(cy));
             tile_panel.saved = { x: Math.round(cx), y: Math.round(cy) };
         }
-        if (draft && !editorClamped && !tile_panel.dragging) {
-            // The list is 450px wide, the editor 600px: a panel dragged near the right
-            // monitor edge would stick out after the view switch — clamp it back in.
-            editorClamped = true;
+        if (!clamped && !tile_panel.dragging) {
+            // Keep the whole panel inside the monitor its title bar is on: the editor is
+            // 600px wide, the list 450px, so a list dragged near the right edge would
+            // stick out after the view switch; a smaller monitor after a display change
+            // has the same effect.
+            clamped = true;
             const box = panel.get_allocation_box();
             const width = box.x2 - box.x1;
             const height = box.y2 - box.y1;
             const [px, py] = panel.get_position();
-            // Clamp into the monitor the panel is on (by the centre of the list-width
-            // panel), so a panel dragged to another monitor does not jump to the
-            // focused window's monitor; fall back to that monitor otherwise.
-            const mcx = px + 225;
-            const mcy = py + height / 2;
-            const focusWindow = getFocusApp();
-            const monitor = utils_Main.layoutManager.monitors.find((m) => mcx >= m.x && mcx < m.x + m.width && mcy >= m.y && mcy < m.y + m.height)
-                || utils_Main.layoutManager.monitors[focusWindow ? focusWindow.get_monitor() : utils_Main.layoutManager.primaryIndex];
+            const monitor = monitorAt(px + 225, py + 20) || focusMonitor();
             const nx = Math.min(Math.max(px, monitor.x), monitor.x + Math.max(monitor.width - width, 0));
             const ny = Math.min(Math.max(py, monitor.y), monitor.y + Math.max(monitor.height - height, 0));
             if (nx !== px || ny !== py) {
                 panel.set_position(Math.round(nx), Math.round(ny));
                 tile_panel.saved = { x: Math.round(nx), y: Math.round(ny) };
-                global.log('greenTile editor panel clamped to ' + Math.round(nx) + ',' + Math.round(ny));
+                global.log('greenTile panel clamped to ' + Math.round(nx) + ',' + Math.round(ny));
             }
         }
         if (scroll && !scrollCapped) {
@@ -1393,6 +1401,14 @@ const tile_panel_open = (app) => {
     };
     tile_panel.sig.push({ obj: global.workspace_manager, id: global.workspace_manager.connect('workspace-switched', onDesktopChange) });
     tile_panel.sig.push({ obj: global.display, id: global.display.connect('notify::focus-window', onDesktopChange) });
+    // A display change while the panel is open: rebuild in either view (the rebuild keeps
+    // view and draft), so the position check above moves the panel back on screen.
+    tile_panel.sig.push({ obj: utils_Main.layoutManager, id: utils_Main.layoutManager.connect('monitors-changed', () => {
+        if (tile_panel.dragging)
+            return;
+        global.log('greenTile panel rebuilt after a monitor change');
+        tile_panel_rebuild(app);
+    }) });
     panel.connect('key-press-event', (a, event) => {
         if (event.get_key_symbol() === tile_Clutter.KEY_Escape) {
             if (tile_panel.view === 'editor')
