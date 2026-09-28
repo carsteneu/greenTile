@@ -91,7 +91,7 @@ The first time, enable the extension in the Cinnamon settings. **gTile@shuairan 
 
 Check: `imports.ui.extensionSystem.runningExtensions` (an array) must contain `greenTile@carsten_eu`, and `~/.xsession-errors` must not show any `JS ERROR` mentioning `greenTile.js`.
 
-Tests for the preset editor model: `node --test tests/` (Node 18 or newer). The `tests/` folder is not copied by the deploy steps.
+Tests for the preset editor model: `node --test tests/*.test.js` (Node 18 or newer; passing only the directory `tests/` fails on Node 22 and later). The `tests/` folder is not copied by the deploy steps.
 
 ## Switching from gTile
 
