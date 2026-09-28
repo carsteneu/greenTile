@@ -1305,6 +1305,36 @@ const tile_editor_body = (app) => {
     refresh();
     return { actor: body, entry };
 };
+// "Gap between windows  − 8 px +" in the list view. Each click stores the value and,
+// when automatic tiling is on for this workspace, retiles it shortly after (debounced,
+// so fast repeated clicks tile once), so the new gap shows live.
+const tile_panel_gap_row = (app) => {
+    const row = new tile_St.BoxLayout({ style_class: 'gk-gap-row' });
+    row.add(new tile_St.Label({ text: _("Gap between windows"), style_class: 'gk-gap-label' }), { expand: true, x_fill: true, y_fill: false, y_align: tile_St.Align.MIDDLE });
+    const minus = new tile_St.Button({ label: '−', style_class: 'gk-gap-btn', track_hover: true });
+    const value = new tile_St.Label({ style_class: 'gk-gap-value' });
+    const plus = new tile_St.Button({ label: '+', style_class: 'gk-gap-btn', track_hover: true });
+    const show = (gap) => {
+        value.text = _("%d px").format(gap);
+        minus.reactive = gap > 0;
+        minus.opacity = gap > 0 ? 255 : 90;
+        plus.reactive = gap < TILE_GAP_MAX;
+        plus.opacity = gap < TILE_GAP_MAX ? 255 : 90;
+    };
+    const change = (delta) => {
+        const gap = tile_gap_value(tile_gap(app) + delta);
+        app.config.settings.setValue('windowGap', gap);
+        show(gap);
+        tile_auto_schedule(app, 150);
+    };
+    minus.connect('clicked', () => change(-TILE_GAP_STEP));
+    plus.connect('clicked', () => change(TILE_GAP_STEP));
+    row.add(minus, { y_fill: false, y_align: tile_St.Align.MIDDLE });
+    row.add(value, { y_fill: false, y_align: tile_St.Align.MIDDLE });
+    row.add(plus, { y_fill: false, y_align: tile_St.Align.MIDDLE });
+    show(tile_gap(app));
+    return row;
+};
 const tile_panel_rebuild = (app) => {
     if (!tile_panel.actor)
         return;
@@ -1451,6 +1481,7 @@ const tile_panel_open = (app) => {
         });
         scroll.add_actor(rowsBox);
         panel.add(scroll);
+        panel.add(tile_panel_gap_row(app));
         const plus = new tile_St.Button({ label: '＋ ' + _("New preset"), style_class: 'gk-plus', x_fill: true, track_hover: true });
         plus.connect('clicked', () => tile_editor_open_new(app));
         panel.add(plus);

@@ -276,6 +276,38 @@
     padding: 8px 14px 12px 14px;
 }
 
+/* "Gap between windows  − 8 px +" between the list and New preset. */
+.gk-gap-row {
+    padding: 8px 14px;
+    spacing: 6px;
+    border-top: 1px solid #2a2e39;
+}
+
+.gk-gap-label {
+    color: #b8bdc9;
+    font-size: 13px;
+}
+
+.gk-gap-value {
+    color: #e8eaf0;
+    font-size: 13px;
+    min-width: 48px;
+    text-align: center;
+}
+
+.gk-gap-btn {
+    color: #e8eaf0;
+    font-size: 15px;
+    width: 26px;
+    height: 24px;
+    border-radius: 3px;
+    border: 1px solid #3a4050;
+}
+
+.gk-gap-btn:hover {
+    background-color: rgba(255, 255, 255, 0.08);
+}
+
 .gk-muted {
     color: #8b91a0;
     font-size: 11px;
