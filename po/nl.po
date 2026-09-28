@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: greenTile 0.1.0\n"
 "Report-Msgid-Bugs-To: https://github.com/carsteneu\n"
-"POT-Creation-Date: 2026-09-28 20:38+0200\n"
+"POT-Creation-Date: 2026-09-28 20:52+0200\n"
 "PO-Revision-Date: 2024-04-17 10:36+0200\n"
 "Last-Translator: qadzek\n"
 "Language-Team: Dutch\n"
@@ -17,122 +17,131 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: greenTile.js:978
+#: greenTile.js:1019
 #, javascript-format
 msgid "assigned — workspace %d"
 msgstr ""
 
-#: greenTile.js:1038
+#: greenTile.js:1079
 msgid "Please enter a name."
 msgstr ""
 
-#: greenTile.js:1061
+#: greenTile.js:1102
 #, javascript-format
 msgid "from %d"
 msgstr ""
 
-#: greenTile.js:1176
+#: greenTile.js:1217
 msgid "Rules (by window count)"
 msgstr ""
 
-#: greenTile.js:1180
+#: greenTile.js:1221
 msgid "Rule"
 msgstr ""
 
-#: greenTile.js:1181
+#: greenTile.js:1222
 msgid "Delete rule"
 msgstr ""
 
-#: greenTile.js:1189
+#: greenTile.js:1230
 msgid "Rule applies from"
 msgstr ""
 
-#: greenTile.js:1196
+#: greenTile.js:1237
 msgid "windows"
 msgstr ""
 
-#: greenTile.js:1198
+#: greenTile.js:1239
 msgid "Painter"
 msgstr ""
 
-#: greenTile.js:1213
+#: greenTile.js:1254
 msgid ""
 "Click or drag: the row sets how many windows the column holds. Right-click "
 "removes a column."
 msgstr ""
 
-#: greenTile.js:1218
+#: greenTile.js:1259
 msgid "Name"
 msgstr ""
 
-#: greenTile.js:1219
+#: greenTile.js:1260
 msgid "Preset name"
 msgstr ""
 
-#: greenTile.js:1223
+#: greenTile.js:1264
 msgid "Save"
 msgstr ""
 
-#: greenTile.js:1240
+#: greenTile.js:1281
 #, javascript-format
 msgid "Result: %s"
 msgstr ""
 
-#: greenTile.js:1282
+#: greenTile.js:1313
+msgid "Gap between windows"
+msgstr ""
+
+#: greenTile.js:1318
+#, javascript-format
+msgid "%d px"
+msgstr ""
+
+#: greenTile.js:1353
 #, javascript-format
 msgid "Presets — workspace %d"
 msgstr ""
 
-#: greenTile.js:1284
+#: greenTile.js:1355
 msgid "Create preset"
 msgstr ""
 
-#: greenTile.js:1284
+#: greenTile.js:1355
 #, javascript-format
 msgid "Edit %s"
 msgstr ""
 
-#: greenTile.js:1288
+#: greenTile.js:1359
 msgid "Back"
 msgstr ""
 
-#: greenTile.js:1297
+#: greenTile.js:1368
 #, fuzzy
 #| msgid "Auto close"
 msgid "Auto: on"
 msgstr "Automatisch sluiten"
 
-#: greenTile.js:1297
+#: greenTile.js:1368
 #, fuzzy
 #| msgid "Auto close"
 msgid "Auto: off"
 msgstr "Automatisch sluiten"
 
-#: greenTile.js:1399
+#: greenTile.js:1470
 msgid "No presets yet."
 msgstr ""
 
-#: greenTile.js:1413
+#: greenTile.js:1485
 msgid "New preset"
 msgstr ""
 
-#: greenTile.js:1416
+#: greenTile.js:1488
 msgid "Click a row to apply it to this workspace and tile right away"
 msgstr ""
 
-#: greenTile.js:1614
+#: greenTile.js:1686
 msgid "Auto close"
 msgstr "Automatisch sluiten"
 
-#: greenTile.js:1615
+#: greenTile.js:1687
 msgid "Animations"
 msgstr "Animaties"
 
-#: greenTile.js:1616
+#: greenTile.js:1688
 msgid "Auto tile main and list"
 msgstr "Automatisch tegelen van hoofd en lijst"
 
-#: greenTile.js:1617
+#: greenTile.js:1689
 msgid "Auto tile two lists"
 msgstr "Automatisch tegelen van twee lijsten"
 
@@ -294,6 +303,18 @@ msgstr ""
 msgid "Tile automatically"
 msgstr ""
 
+#. settings-schema.json->windowGap->description
+msgid ""
+"Gap between tiled windows (set with − / + in the preset panel; not shown in "
+"this dialog)"
+msgstr ""
+
+#. settings-schema.json->windowGap->units
+#, fuzzy
+#| msgid "x"
+msgid "px"
+msgstr "x"
+
 #. settings-schema.json->animation->description
 msgid "Animation"
 msgstr "Animatie"
@@ -419,9 +440,6 @@ msgstr ""
 
 #~ msgid "Layout for Button 1:"
 #~ msgstr "Indeling voor Knop 1:"
-
-#~ msgid "x"
-#~ msgstr "x"
 
 #~ msgid "y"
 #~ msgstr "y"
