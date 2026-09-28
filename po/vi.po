@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: greenTile 0.1.0\n"
 "Report-Msgid-Bugs-To: https://github.com/carsteneu\n"
-"POT-Creation-Date: 2026-09-28 20:17+0200\n"
+"POT-Creation-Date: 2026-09-28 20:31+0200\n"
 "PO-Revision-Date: 2025-10-19 02:39+0700\n"
 "Last-Translator: loccun <huynhloc.contact@gmail.com>\n"
 "Language-Team: Vietnamese\n"
@@ -155,10 +155,6 @@ msgstr "Phím tắt"
 msgid "Behavior"
 msgstr "Hành vi"
 
-#. settings-schema.json->layout-tab->title
-msgid "Layout"
-msgstr "Bố cục"
-
 #. settings-schema.json->help->title
 msgid "Help"
 msgstr "Trợ giúp"
@@ -180,22 +176,6 @@ msgstr ""
 #. settings-schema.json->keybindings-legend-section->title
 msgid "Keybindings Legend (when open)"
 msgstr "Chú giải Phím tắt (khi mở)"
-
-#. settings-schema.json->grid1-section->title
-msgid "Layout For Button 1"
-msgstr "Bố cục Cho Nút 1"
-
-#. settings-schema.json->grid2-section->title
-msgid "Layout For Button 2"
-msgstr "Bố cục Cho Nút 2"
-
-#. settings-schema.json->grid3-section->title
-msgid "Layout For Button 3"
-msgstr "Bố cục Cho Nút 3"
-
-#. settings-schema.json->grid4-section->title
-msgid "Layout For Button 4"
-msgstr "Bố cục Cho Nút 4"
 
 #. settings-schema.json->help-section->title
 msgid "More Info"
@@ -352,25 +332,16 @@ msgstr ""
 msgid "Show UI and all monitors at the same time"
 msgstr "Hiển thị giao diện trên tất cả màn hình cùng lúc"
 
-#. settings-schema.json->columns->description
+#. settings-schema.json->grid1NameOverride->description
+msgid "Name Override on the UI"
+msgstr "Ghi đè Tên trên Giao diện"
+
 #. settings-schema.json->grid1x->description
 #. settings-schema.json->grid2x->description
 #. settings-schema.json->grid3x->description
 #. settings-schema.json->grid4x->description
 msgid "Columns"
 msgstr "Cột"
-
-#. settings-schema.json->rows->description
-#. settings-schema.json->grid1y->description
-#. settings-schema.json->grid2y->description
-#. settings-schema.json->grid3y->description
-#. settings-schema.json->grid4y->description
-msgid "Rows"
-msgstr "Hàng"
-
-#. settings-schema.json->grid1NameOverride->description
-msgid "Name Override on the UI"
-msgstr "Ghi đè Tên trên Giao diện"
 
 #. settings-schema.json->grid1x->tooltip
 #. settings-schema.json->grid2x->tooltip
@@ -394,6 +365,13 @@ msgstr ""
 msgid "Span"
 msgstr "Khoảng"
 
+#. settings-schema.json->grid1y->description
+#. settings-schema.json->grid2y->description
+#. settings-schema.json->grid3y->description
+#. settings-schema.json->grid4y->description
+msgid "Rows"
+msgstr "Hàng"
+
 #. settings-schema.json->grid1y->tooltip
 #. settings-schema.json->grid2y->tooltip
 #. settings-schema.json->grid3y->tooltip
@@ -414,6 +392,21 @@ msgstr "Ghi đè Tên"
 #. settings-schema.json->select-using-keyboard->description
 msgid "Show tile labels"
 msgstr ""
+
+#~ msgid "Layout"
+#~ msgstr "Bố cục"
+
+#~ msgid "Layout For Button 1"
+#~ msgstr "Bố cục Cho Nút 1"
+
+#~ msgid "Layout For Button 2"
+#~ msgstr "Bố cục Cho Nút 2"
+
+#~ msgid "Layout For Button 3"
+#~ msgstr "Bố cục Cho Nút 3"
+
+#~ msgid "Layout For Button 4"
+#~ msgstr "Bố cục Cho Nút 4"
 
 #~ msgid "Tile your windows as you like."
 #~ msgstr "Xếp ô cửa sổ theo ý muốn của bạn."

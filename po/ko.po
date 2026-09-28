@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: greenTile 0.1.0\n"
 "Report-Msgid-Bugs-To: https://github.com/carsteneu\n"
-"POT-Creation-Date: 2026-09-28 20:17+0200\n"
+"POT-Creation-Date: 2026-09-28 20:31+0200\n"
 "PO-Revision-Date: 2024-08-11 23:42+0900\n"
 "Last-Translator: Kevin Kim <chaeya@gmail.com>\n"
 "Language-Team: Korean\n"
@@ -155,10 +155,6 @@ msgstr "단축키"
 msgid "Behavior"
 msgstr "동작"
 
-#. settings-schema.json->layout-tab->title
-msgid "Layout"
-msgstr "레이아웃"
-
 #. settings-schema.json->help->title
 msgid "Help"
 msgstr "도움말"
@@ -180,22 +176,6 @@ msgstr ""
 #. settings-schema.json->keybindings-legend-section->title
 msgid "Keybindings Legend (when open)"
 msgstr "키 바인딩 범례(열려 있는 경우)"
-
-#. settings-schema.json->grid1-section->title
-msgid "Layout For Button 1"
-msgstr "버튼 1의 레이아웃"
-
-#. settings-schema.json->grid2-section->title
-msgid "Layout For Button 2"
-msgstr "버튼 2의 레이아웃"
-
-#. settings-schema.json->grid3-section->title
-msgid "Layout For Button 3"
-msgstr "버튼 3의 레이아웃"
-
-#. settings-schema.json->grid4-section->title
-msgid "Layout For Button 4"
-msgstr "버튼 4의 레이아웃"
 
 #. settings-schema.json->help-section->title
 msgid "More Info"
@@ -351,25 +331,16 @@ msgstr ""
 msgid "Show UI and all monitors at the same time"
 msgstr "UI와 모든 모니터를 동시에 표시하기"
 
-#. settings-schema.json->columns->description
+#. settings-schema.json->grid1NameOverride->description
+msgid "Name Override on the UI"
+msgstr "UI에서 이름 재정의"
+
 #. settings-schema.json->grid1x->description
 #. settings-schema.json->grid2x->description
 #. settings-schema.json->grid3x->description
 #. settings-schema.json->grid4x->description
 msgid "Columns"
 msgstr "열"
-
-#. settings-schema.json->rows->description
-#. settings-schema.json->grid1y->description
-#. settings-schema.json->grid2y->description
-#. settings-schema.json->grid3y->description
-#. settings-schema.json->grid4y->description
-msgid "Rows"
-msgstr "행"
-
-#. settings-schema.json->grid1NameOverride->description
-msgid "Name Override on the UI"
-msgstr "UI에서 이름 재정의"
 
 #. settings-schema.json->grid1x->tooltip
 #. settings-schema.json->grid2x->tooltip
@@ -393,6 +364,13 @@ msgstr ""
 msgid "Span"
 msgstr "Span"
 
+#. settings-schema.json->grid1y->description
+#. settings-schema.json->grid2y->description
+#. settings-schema.json->grid3y->description
+#. settings-schema.json->grid4y->description
+msgid "Rows"
+msgstr "행"
+
 #. settings-schema.json->grid1y->tooltip
 #. settings-schema.json->grid2y->tooltip
 #. settings-schema.json->grid3y->tooltip
@@ -413,6 +391,21 @@ msgstr "이름 재정의"
 #. settings-schema.json->select-using-keyboard->description
 msgid "Show tile labels"
 msgstr ""
+
+#~ msgid "Layout"
+#~ msgstr "레이아웃"
+
+#~ msgid "Layout For Button 1"
+#~ msgstr "버튼 1의 레이아웃"
+
+#~ msgid "Layout For Button 2"
+#~ msgstr "버튼 2의 레이아웃"
+
+#~ msgid "Layout For Button 3"
+#~ msgstr "버튼 3의 레이아웃"
+
+#~ msgid "Layout For Button 4"
+#~ msgstr "버튼 4의 레이아웃"
 
 #~ msgid "Tile your windows as you like."
 #~ msgstr "원하는 대로 창을 타일링하세요."

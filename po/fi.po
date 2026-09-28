@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: greenTile 0.1.0\n"
 "Report-Msgid-Bugs-To: https://github.com/carsteneu\n"
-"POT-Creation-Date: 2026-09-28 20:17+0200\n"
+"POT-Creation-Date: 2026-09-28 20:31+0200\n"
 "PO-Revision-Date: 2024-07-25 20:23+0300\n"
 "Last-Translator: Kimmo Kujansuu <mrkujansuu@gmail.com>\n"
 "Language-Team: Finnish\n"
@@ -156,10 +156,6 @@ msgstr "Pikanäppäimet"
 msgid "Behavior"
 msgstr "Toiminta"
 
-#. settings-schema.json->layout-tab->title
-msgid "Layout"
-msgstr "Asettelu"
-
 #. settings-schema.json->help->title
 msgid "Help"
 msgstr "Ohje"
@@ -181,22 +177,6 @@ msgstr ""
 #. settings-schema.json->keybindings-legend-section->title
 msgid "Keybindings Legend (when open)"
 msgstr "Näppäimistön selite (kun auki)"
-
-#. settings-schema.json->grid1-section->title
-msgid "Layout For Button 1"
-msgstr "Painikkeen 1 asettelu"
-
-#. settings-schema.json->grid2-section->title
-msgid "Layout For Button 2"
-msgstr "Painikkeen 2 asettelu"
-
-#. settings-schema.json->grid3-section->title
-msgid "Layout For Button 3"
-msgstr "Painikkeen 3 asettelu"
-
-#. settings-schema.json->grid4-section->title
-msgid "Layout For Button 4"
-msgstr "Painikkeen 4 asettelu"
 
 #. settings-schema.json->help-section->title
 msgid "More Info"
@@ -352,25 +332,16 @@ msgstr ""
 msgid "Show UI and all monitors at the same time"
 msgstr "Näytä käyttöliittymä ja kaikilla näytöillä samaan aikaan"
 
-#. settings-schema.json->columns->description
+#. settings-schema.json->grid1NameOverride->description
+msgid "Name Override on the UI"
+msgstr "Käyttöliittymän nimen ohitus"
+
 #. settings-schema.json->grid1x->description
 #. settings-schema.json->grid2x->description
 #. settings-schema.json->grid3x->description
 #. settings-schema.json->grid4x->description
 msgid "Columns"
 msgstr "Sarakkeet"
-
-#. settings-schema.json->rows->description
-#. settings-schema.json->grid1y->description
-#. settings-schema.json->grid2y->description
-#. settings-schema.json->grid3y->description
-#. settings-schema.json->grid4y->description
-msgid "Rows"
-msgstr "Rivejä"
-
-#. settings-schema.json->grid1NameOverride->description
-msgid "Name Override on the UI"
-msgstr "Käyttöliittymän nimen ohitus"
 
 #. settings-schema.json->grid1x->tooltip
 #. settings-schema.json->grid2x->tooltip
@@ -394,6 +365,13 @@ msgstr ""
 msgid "Span"
 msgstr "Väli"
 
+#. settings-schema.json->grid1y->description
+#. settings-schema.json->grid2y->description
+#. settings-schema.json->grid3y->description
+#. settings-schema.json->grid4y->description
+msgid "Rows"
+msgstr "Rivejä"
+
 #. settings-schema.json->grid1y->tooltip
 #. settings-schema.json->grid2y->tooltip
 #. settings-schema.json->grid3y->tooltip
@@ -414,6 +392,21 @@ msgstr "Nimen ohitus"
 #. settings-schema.json->select-using-keyboard->description
 msgid "Show tile labels"
 msgstr ""
+
+#~ msgid "Layout"
+#~ msgstr "Asettelu"
+
+#~ msgid "Layout For Button 1"
+#~ msgstr "Painikkeen 1 asettelu"
+
+#~ msgid "Layout For Button 2"
+#~ msgstr "Painikkeen 2 asettelu"
+
+#~ msgid "Layout For Button 3"
+#~ msgstr "Painikkeen 3 asettelu"
+
+#~ msgid "Layout For Button 4"
+#~ msgstr "Painikkeen 4 asettelu"
 
 #~ msgid "Tile your windows as you like."
 #~ msgstr ""

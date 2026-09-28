@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: greenTile 0.1.0\n"
 "Report-Msgid-Bugs-To: https://github.com/carsteneu\n"
-"POT-Creation-Date: 2026-09-28 20:17+0200\n"
+"POT-Creation-Date: 2026-09-28 20:31+0200\n"
 "PO-Revision-Date: 2021-01-12 21:08+0100\n"
 "Last-Translator: Åke Engelbrektson <eson@svenskasprakfiler.se>\n"
 "Language-Team: Svenska Språkfiler <contactform@svenskasprakfiler.se>\n"
@@ -162,10 +162,6 @@ msgstr "Snabbtangenter:"
 msgid "Behavior"
 msgstr ""
 
-#. settings-schema.json->layout-tab->title
-msgid "Layout"
-msgstr ""
-
 #. settings-schema.json->help->title
 msgid "Help"
 msgstr ""
@@ -187,30 +183,6 @@ msgstr ""
 #. settings-schema.json->keybindings-legend-section->title
 msgid "Keybindings Legend (when open)"
 msgstr ""
-
-#. settings-schema.json->grid1-section->title
-#, fuzzy
-#| msgid "Layout for Button 1:"
-msgid "Layout For Button 1"
-msgstr "Layout för knapp 1:"
-
-#. settings-schema.json->grid2-section->title
-#, fuzzy
-#| msgid "Layout for Button 2:"
-msgid "Layout For Button 2"
-msgstr "Layout för knapp 2:"
-
-#. settings-schema.json->grid3-section->title
-#, fuzzy
-#| msgid "Layout for Button 3:"
-msgid "Layout For Button 3"
-msgstr "Layout för knapp 3:"
-
-#. settings-schema.json->grid4-section->title
-#, fuzzy
-#| msgid "Layout for Button 4:"
-msgid "Layout For Button 4"
-msgstr "Layout för knapp 4:"
 
 #. settings-schema.json->help-section->title
 msgid "More Info"
@@ -326,25 +298,16 @@ msgstr ""
 msgid "Show UI and all monitors at the same time"
 msgstr ""
 
-#. settings-schema.json->columns->description
+#. settings-schema.json->grid1NameOverride->description
+msgid "Name Override on the UI"
+msgstr ""
+
 #. settings-schema.json->grid1x->description
 #. settings-schema.json->grid2x->description
 #. settings-schema.json->grid3x->description
 #. settings-schema.json->grid4x->description
 msgid "Columns"
 msgstr "Kolumner"
-
-#. settings-schema.json->rows->description
-#. settings-schema.json->grid1y->description
-#. settings-schema.json->grid2y->description
-#. settings-schema.json->grid3y->description
-#. settings-schema.json->grid4y->description
-msgid "Rows"
-msgstr "Rader"
-
-#. settings-schema.json->grid1NameOverride->description
-msgid "Name Override on the UI"
-msgstr ""
 
 #. settings-schema.json->grid1x->tooltip
 #. settings-schema.json->grid2x->tooltip
@@ -366,6 +329,13 @@ msgstr ""
 msgid "Span"
 msgstr ""
 
+#. settings-schema.json->grid1y->description
+#. settings-schema.json->grid2y->description
+#. settings-schema.json->grid3y->description
+#. settings-schema.json->grid4y->description
+msgid "Rows"
+msgstr "Rader"
+
 #. settings-schema.json->grid1y->tooltip
 #. settings-schema.json->grid2y->tooltip
 #. settings-schema.json->grid3y->tooltip
@@ -384,6 +354,26 @@ msgstr ""
 #. settings-schema.json->select-using-keyboard->description
 msgid "Show tile labels"
 msgstr ""
+
+#, fuzzy
+#~| msgid "Layout for Button 1:"
+#~ msgid "Layout For Button 1"
+#~ msgstr "Layout för knapp 1:"
+
+#, fuzzy
+#~| msgid "Layout for Button 2:"
+#~ msgid "Layout For Button 2"
+#~ msgstr "Layout för knapp 2:"
+
+#, fuzzy
+#~| msgid "Layout for Button 3:"
+#~ msgid "Layout For Button 3"
+#~ msgstr "Layout för knapp 3:"
+
+#, fuzzy
+#~| msgid "Layout for Button 4:"
+#~ msgid "Layout For Button 4"
+#~ msgstr "Layout för knapp 4:"
 
 #~ msgid "Tile your windows as you like."
 #~ msgstr "Fördela dina fönster som du vill."

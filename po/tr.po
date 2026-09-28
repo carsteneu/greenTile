@@ -10,7 +10,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: greenTile 0.1.0\n"
 "Report-Msgid-Bugs-To: https://github.com/carsteneu\n"
-"POT-Creation-Date: 2026-09-28 20:17+0200\n"
+"POT-Creation-Date: 2026-09-28 20:31+0200\n"
 "PO-Revision-Date: 2025-03-05 17:30+0300\n"
 "Last-Translator: Erdem Uygun <uygun.erdem@gmail.com>\n"
 "Language-Team: Turkish <dev@pardus.org.tr>\n"
@@ -158,10 +158,6 @@ msgstr "Kısayol tuşları"
 msgid "Behavior"
 msgstr "Davranış"
 
-#. settings-schema.json->layout-tab->title
-msgid "Layout"
-msgstr "Yerleşim"
-
 #. settings-schema.json->help->title
 msgid "Help"
 msgstr "Yardım"
@@ -183,22 +179,6 @@ msgstr ""
 #. settings-schema.json->keybindings-legend-section->title
 msgid "Keybindings Legend (when open)"
 msgstr "Tuş Atamaları Göstergesi (açıkken)"
-
-#. settings-schema.json->grid1-section->title
-msgid "Layout For Button 1"
-msgstr "Düğme 1 için Yerleşim:"
-
-#. settings-schema.json->grid2-section->title
-msgid "Layout For Button 2"
-msgstr "Düğme 2 için Yerleşim:"
-
-#. settings-schema.json->grid3-section->title
-msgid "Layout For Button 3"
-msgstr "Düğme 3 için Yerleşim:"
-
-#. settings-schema.json->grid4-section->title
-msgid "Layout For Button 4"
-msgstr "Düğme 4 için Yerleşim:"
 
 #. settings-schema.json->help-section->title
 msgid "More Info"
@@ -355,25 +335,16 @@ msgstr ""
 msgid "Show UI and all monitors at the same time"
 msgstr "Arayüzü ve tüm monitörleri aynı anda göster"
 
-#. settings-schema.json->columns->description
+#. settings-schema.json->grid1NameOverride->description
+msgid "Name Override on the UI"
+msgstr "Arayüzde Adı Değiştirme"
+
 #. settings-schema.json->grid1x->description
 #. settings-schema.json->grid2x->description
 #. settings-schema.json->grid3x->description
 #. settings-schema.json->grid4x->description
 msgid "Columns"
 msgstr "Sütunlar"
-
-#. settings-schema.json->rows->description
-#. settings-schema.json->grid1y->description
-#. settings-schema.json->grid2y->description
-#. settings-schema.json->grid3y->description
-#. settings-schema.json->grid4y->description
-msgid "Rows"
-msgstr "Satırlar"
-
-#. settings-schema.json->grid1NameOverride->description
-msgid "Name Override on the UI"
-msgstr "Arayüzde Adı Değiştirme"
 
 #. settings-schema.json->grid1x->tooltip
 #. settings-schema.json->grid2x->tooltip
@@ -398,6 +369,13 @@ msgstr ""
 msgid "Span"
 msgstr "Genişlik"
 
+#. settings-schema.json->grid1y->description
+#. settings-schema.json->grid2y->description
+#. settings-schema.json->grid3y->description
+#. settings-schema.json->grid4y->description
+msgid "Rows"
+msgstr "Satırlar"
+
 #. settings-schema.json->grid1y->tooltip
 #. settings-schema.json->grid2y->tooltip
 #. settings-schema.json->grid3y->tooltip
@@ -419,6 +397,21 @@ msgstr "Adı Değiştir"
 #. settings-schema.json->select-using-keyboard->description
 msgid "Show tile labels"
 msgstr ""
+
+#~ msgid "Layout"
+#~ msgstr "Yerleşim"
+
+#~ msgid "Layout For Button 1"
+#~ msgstr "Düğme 1 için Yerleşim:"
+
+#~ msgid "Layout For Button 2"
+#~ msgstr "Düğme 2 için Yerleşim:"
+
+#~ msgid "Layout For Button 3"
+#~ msgstr "Düğme 3 için Yerleşim:"
+
+#~ msgid "Layout For Button 4"
+#~ msgstr "Düğme 4 için Yerleşim:"
 
 #~ msgid "Tile your windows as you like."
 #~ msgstr "Pencerelerinizi istediğiniz şekilde döşeyin."

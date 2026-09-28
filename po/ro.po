@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: greenTile 0.1.0\n"
 "Report-Msgid-Bugs-To: https://github.com/carsteneu\n"
-"POT-Creation-Date: 2026-09-28 20:17+0200\n"
+"POT-Creation-Date: 2026-09-28 20:31+0200\n"
 "PO-Revision-Date: 2022-08-06 01:55+0200\n"
 "Last-Translator: \n"
 "Language-Team: Romanian\n"
@@ -156,10 +156,6 @@ msgstr "Tastele de acces rapid"
 msgid "Behavior"
 msgstr "Comportament"
 
-#. settings-schema.json->layout-tab->title
-msgid "Layout"
-msgstr "Dispunere"
-
 #. settings-schema.json->help->title
 msgid "Help"
 msgstr "Ajutor"
@@ -181,22 +177,6 @@ msgstr ""
 #. settings-schema.json->keybindings-legend-section->title
 msgid "Keybindings Legend (when open)"
 msgstr "Legenda combinațiilor de taste (când este deschisă)"
-
-#. settings-schema.json->grid1-section->title
-msgid "Layout For Button 1"
-msgstr "Dispunere pentru butonul 1"
-
-#. settings-schema.json->grid2-section->title
-msgid "Layout For Button 2"
-msgstr "Layout pentru butonul 2"
-
-#. settings-schema.json->grid3-section->title
-msgid "Layout For Button 3"
-msgstr "Layout pentru butonul 3"
-
-#. settings-schema.json->grid4-section->title
-msgid "Layout For Button 4"
-msgstr "Dispunere pentru butonul 4"
 
 #. settings-schema.json->help-section->title
 msgid "More Info"
@@ -350,25 +330,16 @@ msgstr ""
 msgid "Show UI and all monitors at the same time"
 msgstr ""
 
-#. settings-schema.json->columns->description
+#. settings-schema.json->grid1NameOverride->description
+msgid "Name Override on the UI"
+msgstr ""
+
 #. settings-schema.json->grid1x->description
 #. settings-schema.json->grid2x->description
 #. settings-schema.json->grid3x->description
 #. settings-schema.json->grid4x->description
 msgid "Columns"
 msgstr "Coloane"
-
-#. settings-schema.json->rows->description
-#. settings-schema.json->grid1y->description
-#. settings-schema.json->grid2y->description
-#. settings-schema.json->grid3y->description
-#. settings-schema.json->grid4y->description
-msgid "Rows"
-msgstr "Rânduri"
-
-#. settings-schema.json->grid1NameOverride->description
-msgid "Name Override on the UI"
-msgstr ""
 
 #. settings-schema.json->grid1x->tooltip
 #. settings-schema.json->grid2x->tooltip
@@ -393,6 +364,13 @@ msgstr ""
 msgid "Span"
 msgstr "Anvergura"
 
+#. settings-schema.json->grid1y->description
+#. settings-schema.json->grid2y->description
+#. settings-schema.json->grid3y->description
+#. settings-schema.json->grid4y->description
+msgid "Rows"
+msgstr "Rânduri"
+
 #. settings-schema.json->grid1y->tooltip
 #. settings-schema.json->grid2y->tooltip
 #. settings-schema.json->grid3y->tooltip
@@ -414,6 +392,21 @@ msgstr ""
 #. settings-schema.json->select-using-keyboard->description
 msgid "Show tile labels"
 msgstr ""
+
+#~ msgid "Layout"
+#~ msgstr "Dispunere"
+
+#~ msgid "Layout For Button 1"
+#~ msgstr "Dispunere pentru butonul 1"
+
+#~ msgid "Layout For Button 2"
+#~ msgstr "Layout pentru butonul 2"
+
+#~ msgid "Layout For Button 3"
+#~ msgstr "Layout pentru butonul 3"
+
+#~ msgid "Layout For Button 4"
+#~ msgstr "Dispunere pentru butonul 4"
 
 #~ msgid "Tile your windows as you like."
 #~ msgstr "Organizează ferestrele într-o grilă după cum dorești."

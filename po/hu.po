@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: greenTile 0.1.0\n"
 "Report-Msgid-Bugs-To: https://github.com/carsteneu\n"
-"POT-Creation-Date: 2026-09-28 20:17+0200\n"
+"POT-Creation-Date: 2026-09-28 20:31+0200\n"
 "PO-Revision-Date: 2023-01-09 21:16+0100\n"
 "Last-Translator: Kálmán „KAMI” Szalai <kami911@gmail.com>\n"
 "Language-Team: Hungarian\n"
@@ -156,10 +156,6 @@ msgstr "Gyorsbillentyűk"
 msgid "Behavior"
 msgstr "Viselkedés"
 
-#. settings-schema.json->layout-tab->title
-msgid "Layout"
-msgstr "Elrendezés"
-
 #. settings-schema.json->help->title
 msgid "Help"
 msgstr "Súgó"
@@ -181,22 +177,6 @@ msgstr ""
 #. settings-schema.json->keybindings-legend-section->title
 msgid "Keybindings Legend (when open)"
 msgstr "Billentyűzetkiosztás megjelenítése (amikor nyitva van)"
-
-#. settings-schema.json->grid1-section->title
-msgid "Layout For Button 1"
-msgstr "Gomb 1"
-
-#. settings-schema.json->grid2-section->title
-msgid "Layout For Button 2"
-msgstr "Gomb 2"
-
-#. settings-schema.json->grid3-section->title
-msgid "Layout For Button 3"
-msgstr "Gomb 3"
-
-#. settings-schema.json->grid4-section->title
-msgid "Layout For Button 4"
-msgstr "Gomb 4"
 
 #. settings-schema.json->help-section->title
 msgid "More Info"
@@ -354,25 +334,16 @@ msgstr ""
 msgid "Show UI and all monitors at the same time"
 msgstr "A felhasználói felület megjelenítése az összes kijelzőn"
 
-#. settings-schema.json->columns->description
+#. settings-schema.json->grid1NameOverride->description
+msgid "Name Override on the UI"
+msgstr "Név felülbírálás a felhasználói felületen"
+
 #. settings-schema.json->grid1x->description
 #. settings-schema.json->grid2x->description
 #. settings-schema.json->grid3x->description
 #. settings-schema.json->grid4x->description
 msgid "Columns"
 msgstr "Oszlopok"
-
-#. settings-schema.json->rows->description
-#. settings-schema.json->grid1y->description
-#. settings-schema.json->grid2y->description
-#. settings-schema.json->grid3y->description
-#. settings-schema.json->grid4y->description
-msgid "Rows"
-msgstr "Sorok"
-
-#. settings-schema.json->grid1NameOverride->description
-msgid "Name Override on the UI"
-msgstr "Név felülbírálás a felhasználói felületen"
 
 #. settings-schema.json->grid1x->tooltip
 #. settings-schema.json->grid2x->tooltip
@@ -396,6 +367,13 @@ msgstr ""
 msgid "Span"
 msgstr "Nyújtás"
 
+#. settings-schema.json->grid1y->description
+#. settings-schema.json->grid2y->description
+#. settings-schema.json->grid3y->description
+#. settings-schema.json->grid4y->description
+msgid "Rows"
+msgstr "Sorok"
+
 #. settings-schema.json->grid1y->tooltip
 #. settings-schema.json->grid2y->tooltip
 #. settings-schema.json->grid3y->tooltip
@@ -416,6 +394,21 @@ msgstr "Név felülbírálás"
 #. settings-schema.json->select-using-keyboard->description
 msgid "Show tile labels"
 msgstr ""
+
+#~ msgid "Layout"
+#~ msgstr "Elrendezés"
+
+#~ msgid "Layout For Button 1"
+#~ msgstr "Gomb 1"
+
+#~ msgid "Layout For Button 2"
+#~ msgstr "Gomb 2"
+
+#~ msgid "Layout For Button 3"
+#~ msgstr "Gomb 3"
+
+#~ msgid "Layout For Button 4"
+#~ msgstr "Gomb 4"
 
 #~ msgid "Tile your windows as you like."
 #~ msgstr "Csempézze az ablakokat ahogy szeretné."

@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: greenTile 0.1.0\n"
 "Report-Msgid-Bugs-To: https://github.com/carsteneu\n"
-"POT-Creation-Date: 2026-09-28 20:17+0200\n"
+"POT-Creation-Date: 2026-09-28 20:31+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -152,10 +152,6 @@ msgstr ""
 msgid "Behavior"
 msgstr ""
 
-#. settings-schema.json->layout-tab->title
-msgid "Layout"
-msgstr ""
-
 #. settings-schema.json->help->title
 msgid "Help"
 msgstr ""
@@ -174,22 +170,6 @@ msgstr ""
 
 #. settings-schema.json->keybindings-legend-section->title
 msgid "Keybindings Legend (when open)"
-msgstr ""
-
-#. settings-schema.json->grid1-section->title
-msgid "Layout For Button 1"
-msgstr ""
-
-#. settings-schema.json->grid2-section->title
-msgid "Layout For Button 2"
-msgstr ""
-
-#. settings-schema.json->grid3-section->title
-msgid "Layout For Button 3"
-msgstr ""
-
-#. settings-schema.json->grid4-section->title
-msgid "Layout For Button 4"
 msgstr ""
 
 #. settings-schema.json->help-section->title
@@ -304,24 +284,15 @@ msgstr ""
 msgid "Show UI and all monitors at the same time"
 msgstr ""
 
-#. settings-schema.json->columns->description
+#. settings-schema.json->grid1NameOverride->description
+msgid "Name Override on the UI"
+msgstr ""
+
 #. settings-schema.json->grid1x->description
 #. settings-schema.json->grid2x->description
 #. settings-schema.json->grid3x->description
 #. settings-schema.json->grid4x->description
 msgid "Columns"
-msgstr ""
-
-#. settings-schema.json->rows->description
-#. settings-schema.json->grid1y->description
-#. settings-schema.json->grid2y->description
-#. settings-schema.json->grid3y->description
-#. settings-schema.json->grid4y->description
-msgid "Rows"
-msgstr ""
-
-#. settings-schema.json->grid1NameOverride->description
-msgid "Name Override on the UI"
 msgstr ""
 
 #. settings-schema.json->grid1x->tooltip
@@ -342,6 +313,13 @@ msgstr ""
 #. settings-schema.json->grid4x->columns->title
 #. settings-schema.json->grid4y->columns->title
 msgid "Span"
+msgstr ""
+
+#. settings-schema.json->grid1y->description
+#. settings-schema.json->grid2y->description
+#. settings-schema.json->grid3y->description
+#. settings-schema.json->grid4y->description
+msgid "Rows"
 msgstr ""
 
 #. settings-schema.json->grid1y->tooltip

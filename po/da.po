@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: greenTile 0.1.0\n"
 "Report-Msgid-Bugs-To: https://github.com/carsteneu\n"
-"POT-Creation-Date: 2026-09-28 20:17+0200\n"
+"POT-Creation-Date: 2026-09-28 20:31+0200\n"
 "PO-Revision-Date: 2023-12-07 15:21+0100\n"
 "Last-Translator: Alan Mortensen <alanmortensen.am@gmail.com>\n"
 "Language-Team: Danish\n"
@@ -156,10 +156,6 @@ msgstr "Genvejstaster"
 msgid "Behavior"
 msgstr "Opførsel"
 
-#. settings-schema.json->layout-tab->title
-msgid "Layout"
-msgstr "Layout"
-
 #. settings-schema.json->help->title
 msgid "Help"
 msgstr "Hjælp"
@@ -181,22 +177,6 @@ msgstr ""
 #. settings-schema.json->keybindings-legend-section->title
 msgid "Keybindings Legend (when open)"
 msgstr "Forklaring til genvejstaster (når åben)"
-
-#. settings-schema.json->grid1-section->title
-msgid "Layout For Button 1"
-msgstr "Layout for knap 1"
-
-#. settings-schema.json->grid2-section->title
-msgid "Layout For Button 2"
-msgstr "Layout for knap 2"
-
-#. settings-schema.json->grid3-section->title
-msgid "Layout For Button 3"
-msgstr "Layout for knap 3"
-
-#. settings-schema.json->grid4-section->title
-msgid "Layout For Button 4"
-msgstr "Layout for knap 4"
 
 #. settings-schema.json->help-section->title
 msgid "More Info"
@@ -353,25 +333,16 @@ msgstr ""
 msgid "Show UI and all monitors at the same time"
 msgstr "Vis brugergrænseflade og alle skærme på samme tid"
 
-#. settings-schema.json->columns->description
+#. settings-schema.json->grid1NameOverride->description
+msgid "Name Override on the UI"
+msgstr "Tilsidesættelse af navn i brugergrænsefladen"
+
 #. settings-schema.json->grid1x->description
 #. settings-schema.json->grid2x->description
 #. settings-schema.json->grid3x->description
 #. settings-schema.json->grid4x->description
 msgid "Columns"
 msgstr "Kolonner"
-
-#. settings-schema.json->rows->description
-#. settings-schema.json->grid1y->description
-#. settings-schema.json->grid2y->description
-#. settings-schema.json->grid3y->description
-#. settings-schema.json->grid4y->description
-msgid "Rows"
-msgstr "Rækker"
-
-#. settings-schema.json->grid1NameOverride->description
-msgid "Name Override on the UI"
-msgstr "Tilsidesættelse af navn i brugergrænsefladen"
 
 #. settings-schema.json->grid1x->tooltip
 #. settings-schema.json->grid2x->tooltip
@@ -395,6 +366,13 @@ msgstr ""
 msgid "Span"
 msgstr "Udstrækning"
 
+#. settings-schema.json->grid1y->description
+#. settings-schema.json->grid2y->description
+#. settings-schema.json->grid3y->description
+#. settings-schema.json->grid4y->description
+msgid "Rows"
+msgstr "Rækker"
+
 #. settings-schema.json->grid1y->tooltip
 #. settings-schema.json->grid2y->tooltip
 #. settings-schema.json->grid3y->tooltip
@@ -415,6 +393,21 @@ msgstr "Tilsidesættelse af navn"
 #. settings-schema.json->select-using-keyboard->description
 msgid "Show tile labels"
 msgstr ""
+
+#~ msgid "Layout"
+#~ msgstr "Layout"
+
+#~ msgid "Layout For Button 1"
+#~ msgstr "Layout for knap 1"
+
+#~ msgid "Layout For Button 2"
+#~ msgstr "Layout for knap 2"
+
+#~ msgid "Layout For Button 3"
+#~ msgstr "Layout for knap 3"
+
+#~ msgid "Layout For Button 4"
+#~ msgstr "Layout for knap 4"
 
 #~ msgid "Tile your windows as you like."
 #~ msgstr "Udlæg dine vinduer, som du synes."
