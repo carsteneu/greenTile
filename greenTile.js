@@ -800,10 +800,10 @@ const tile_auto_connect_all = (app) => {
     }
     // Switching onto a preset workspace retiles there (Cinnamon's own
     // windowManager.js:358 uses this signal with (wm, from, to, direction)).
-        tile_auto.signals.push([
-            global.window_manager,
-            global.window_manager.connect('switch-workspace', (wm, from, to) => tile_auto_schedule_all(app, 300)),
-        ]);
+    tile_auto.signals.push([
+        global.window_manager,
+        global.window_manager.connect('switch-workspace', (wm, from, to) => tile_auto_schedule_all(app, 300)),
+    ]);
 };
 const tile_auto_disconnect_all = () => {
     for (const id of tile_auto.timers.values())
@@ -865,13 +865,12 @@ const tile_presets_read = (app) => {
 // effectively per App). Keys come from the DisplayConfig tuples via the monitor-model
 // block; a monitor that stays unknown (DBus failure) keeps a fallback key, logged once.
 const tile_Gio = imports.gi.Gio;
-const tile_monitors = { keys: [], connectors: [], labels: [], ready: false };
+const tile_monitors = { keys: [], labels: [], ready: false };
 let tile_monitors_fallback_logged = false;
 let tile_muffin_settings = null;
 const tile_monitors_refresh = (app, onReady) => {
     tile_monitors.ready = false;
     tile_monitors.keys = [];
-    tile_monitors.connectors = [];
     tile_monitors.labels = [];
     tile_Gio.DBus.session.call('org.cinnamon.Muffin.DisplayConfig', '/org/cinnamon/Muffin/DisplayConfig',
         'org.cinnamon.Muffin.DisplayConfig', 'GetCurrentState', null, null,
@@ -906,7 +905,6 @@ const tile_monitors_refresh = (app, onReady) => {
                 }
             }
             tile_monitors.keys = keys;
-            tile_monitors.connectors = connectors;
             tile_monitors.labels = tile_monitor_labels(names, connectors);
             tile_monitors.ready = true;
             global.log('greenTile monitors: ' + keys.map((k, i) => i + '=' + k).join(', '));
@@ -1695,22 +1693,22 @@ const tile_panel_open = (app) => {
         backBtn.connect('clicked', () => tile_editor_back(app));
         header.add(backBtn);
     }
-      else {
-          // Automatic tiling state of this monitor and workspace (Super+Ctrl+A / Super+Ctrl+D),
-          // shown and switchable here; turning it on tiles right away, like Super+Ctrl+A.
-          const autoOn = tile_layout_for(app, monitorIndex, wsIndex).auto;
-          const autoBtn = new tile_St.Button({
-              label: autoOn ? _("Auto: on") : _("Auto: off"),
-              style_class: 'gk-auto' + (autoOn ? ' gk-auto-on' : ''),
-              track_hover: true,
-          });
-          autoBtn.connect('clicked', () => {
-              if (tile_layout_for(app, monitorIndex, wsIndex).auto)
-                  tile_auto_deactivate(app);
-              else
-                  tile_auto_activate(app);
-              tile_panel_rebuild(app);
-          });
+    else {
+        // Automatic tiling state of this monitor and workspace (Super+Ctrl+A / Super+Ctrl+D),
+        // shown and switchable here; turning it on tiles right away, like Super+Ctrl+A.
+        const autoOn = tile_layout_for(app, monitorIndex, wsIndex).auto;
+        const autoBtn = new tile_St.Button({
+            label: autoOn ? _("Auto: on") : _("Auto: off"),
+            style_class: 'gk-auto' + (autoOn ? ' gk-auto-on' : ''),
+            track_hover: true,
+        });
+        autoBtn.connect('clicked', () => {
+            if (tile_layout_for(app, monitorIndex, wsIndex).auto)
+                tile_auto_deactivate(app);
+            else
+                tile_auto_activate(app);
+            tile_panel_rebuild(app);
+        });
         header.add(autoBtn, { y_fill: false, y_align: tile_St.Align.MIDDLE });
         // ⚙ opens the extension's settings dialog on its first page; the same dialog
         // Cinnamon opens from the Extensions manager.
