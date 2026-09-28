@@ -1,0 +1,11 @@
+{
+    "uuid": "greenTile@carsten_eu",
+    "name": "greenTile",
+    "description": "Column tiling with per-workspace presets, auto mode and snap-on-release. Fork of gTile by shuairan.",
+    "version": "0.1.0",
+    "cinnamon-version": [
+        "6.6"
+    ],
+    "url": "https://github.com/carsteneu",
+    "author": "carsten_eu"
+}

@@ -1,0 +1,234 @@
+.grid-title{
+	font-size: 12px;
+    font-weight: bold;
+    color: #ffffff;
+    padding: .5em;
+    text-align:center;
+    max-width: 150px;
+}
+
+.grid-panel{
+    background-color: rgba(10,10,10,0.7);
+    border-radius: 10px;
+}
+
+.table{
+    margin-left: 10px;
+    margin-right: 10px;
+}
+
+.table-element{
+    background-color: rgba(240,240,240,0.4);
+    border-radius: 3px;
+}
+
+.table-element:hover, .table-element:activate
+{
+    background-color: rgba(240,240,240,0.8);
+}
+
+.top-box
+{
+    padding:1em;
+}
+
+.settings-button
+{
+    background-color: rgba(0,120,255,0.4);
+    color: rgba(255,255,255,0.4);
+    min-width:40px;
+    border-radius:5px;
+    padding:3px;
+    margin-left: 2px;
+    margin-right: 2px;
+    border:1px rgba(0,200,255,0.4);
+    max-height:30px;
+    min-height:30px;
+}
+
+.settings-button:activate
+{
+   background-color: rgba(0,120,255,0.7);
+    color: rgba(255,255,255,1);
+    border:1px rgba(0,200,255,0.7);
+}
+
+.settings-button:activate:hover
+{
+    background-color: rgba(30,150,255,0.7);
+    color: rgba(255,255,255,1);
+    border:1px rgba(0,200,255,0.7);
+}
+
+.settings-button:hover
+{
+    background-color: rgba(0,120,255,0.7);
+    color: rgba(255,255,255,1);
+    border:1px rgba(0,200,255,0.7);
+}
+
+.grid-preview
+{
+     background-color: rgba(241,122,73,0.0);
+     border: rgba(217,108,59,0.0);
+}
+
+.grid-preview:activate
+{
+    background-color: rgba(241,122,73,0.4);
+    background-color: rgba(73,122,241,0.4);
+    border: 1px solid rgba(217,108,59,0.8);
+    border: 1px solid rgba(59,108,217,0.8);
+}
+
+.bottom-box
+{
+    padding-top:10px;
+    display:block;
+}
+
+.very-bottom-box {
+    padding-bottom:10px;
+}
+
+.tile-label {
+    color: white;
+    font-size: 24px;
+    font-weight: bold;
+    text-align: center;
+}
+
+/* gKachel preset panel — tokens 1:1 from the approved HTML mockup
+   (base font 16px, row padding 12px 14px, gap 14px, thumb 54x34).
+   One-sided borders: full border + zero widths (St has no reliable
+   per-side colours, Mint-X uses the same pattern). */
+.gk-panel {
+    width: 450px;
+    background-color: rgba(28, 31, 40, 0.98);
+    border: 1px solid #3a4050;
+    border-radius: 6px;
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.55);
+    color: #e8eaf0;
+    font-size: 16px;
+}
+
+.gk-panel-header {
+    background-color: #262a35;
+    border: 1px solid #333846;
+    border-top-width: 0;
+    border-left-width: 0;
+    border-right-width: 0;
+    border-radius: 6px 6px 0 0;
+    padding: 10px 14px;
+}
+
+.gk-title {
+    color: #e8eaf0;
+    font-size: 16px;
+    font-weight: bold;
+}
+
+.gk-close {
+    color: #8b91a0;
+    font-size: 16px;
+    padding: 0 4px;
+    border-radius: 3px;
+}
+
+.gk-close:hover {
+    color: #e8eaf0;
+    background-color: rgba(255, 255, 255, 0.08);
+}
+
+.gk-row {
+    padding: 0;
+    border: 1px solid #2a2e39;
+    border-top-width: 0;
+    border-left-width: 0;
+    border-right-width: 0;
+}
+
+.gk-row:hover {
+    background-color: #262a35;
+}
+
+.gk-row-assigned {
+    background-color: rgba(156, 224, 114, 0.06);
+}
+
+.gk-row-assigned:hover {
+    background-color: rgba(156, 224, 114, 0.13);
+}
+
+.gk-row-stripe {
+    width: 3px;
+    background-color: #9ce072;
+}
+
+/* Rechts 6px Panelhintergrund neben den Zeilen: Hover und Zuweisungs-Tönung
+   enden vor der Kante. Zusammen mit 4px Innenabstand in .gk-row-box stehen die
+   Schraubenschlüssel senkrecht unter dem ✕ der Kopfzeile (Mitte ≈ 427px). */
+.gk-rows {
+    padding-right: 6px;
+}
+
+.gk-row-box {
+    padding: 12px 4px 12px 14px;
+    spacing: 14px;
+}
+
+.gk-row-text {
+    spacing: 2px;
+}
+
+.gk-name {
+    color: #e8eaf0;
+    font-size: 16px;
+}
+
+.gk-sub {
+    color: #9ce072;
+    font-size: 11px;
+}
+
+.gk-icon-btn {
+    color: #8b91a0;
+    font-size: 16px;
+    padding: 2px 4px;
+    border-radius: 3px;
+}
+
+.gk-icon-btn:hover {
+    color: #e8eaf0;
+    background-color: rgba(255, 255, 255, 0.08);
+}
+
+.gk-plus {
+    color: #ff9640;
+    font-size: 16px;
+    padding: 12px 14px;
+    background-color: #232733;
+    border: 1px solid #2a2e39;
+    border-top-width: 1px;
+    border-left-width: 0;
+    border-right-width: 0;
+    border-bottom-width: 0;
+}
+
+.gk-plus:hover {
+    color: #ffb070;
+    background-color: #2a2f3d;
+    border-top-color: #333846;
+}
+
+.gk-hint {
+    color: #6b7180;
+    font-size: 11px;
+    padding: 8px 14px 12px 14px;
+}
+
+.gk-muted {
+    color: #8b91a0;
+    font-size: 11px;
+    padding: 8px 14px;
+}
