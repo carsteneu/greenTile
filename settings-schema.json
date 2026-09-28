@@ -51,8 +51,7 @@
          "title": "Workspace Presets",
          "keys": [
             "presetHotkey",
-            "presets",
-            "wsPresets"
+            "presets"
          ]
       },
       "keybindings-legend-section": {
