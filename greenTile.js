@@ -619,14 +619,14 @@ const tile_auto_activate = (app) => {
         tile_layout_set(app, monitorIndex, wsIndex, { auto: true });
         global.log('greenTile auto tiling on for ws' + wsIndex);
     }
-    tile_auto.pending.clear();
+    tile_auto.pending.delete(monitorIndex);
     tile_retile_monitor(app, monitorIndex, focusWindow);
 };
 const tile_auto_deactivate = (app) => {
     const monitorIndex = tile_focus_monitor_index();
     const wsIndex = global.workspace_manager.get_active_workspace().index();
     tile_layout_set(app, monitorIndex, wsIndex, { auto: false });
-    tile_auto.pending.clear();
+    tile_auto.pending.delete(monitorIndex);
     global.log('greenTile auto tiling off for ws' + wsIndex);
 };
 const tile_auto_on_window_added = (app, ws, w) => {
@@ -868,13 +868,19 @@ const tile_Gio = imports.gi.Gio;
 const tile_monitors = { keys: [], labels: [], ready: false };
 let tile_monitors_fallback_logged = false;
 let tile_muffin_settings = null;
+let tile_monitors_epoch = 0;
 const tile_monitors_refresh = (app, onReady) => {
+    // Monitor changes destroy and recreate the App; a late reply for a refresh that
+    // belongs to a destroyed App must not connect observers or write registry state.
+    const epoch = ++tile_monitors_epoch;
     tile_monitors.ready = false;
     tile_monitors.keys = [];
     tile_monitors.labels = [];
     tile_Gio.DBus.session.call('org.cinnamon.Muffin.DisplayConfig', '/org/cinnamon/Muffin/DisplayConfig',
         'org.cinnamon.Muffin.DisplayConfig', 'GetCurrentState', null, null,
         tile_Gio.DBusCallFlags.NONE, 3000, null, (source, result) => {
+            if (epoch !== tile_monitors_epoch)
+                return;
             let states = [];
             try {
                 const reply = source.call_finish(result);
@@ -1681,7 +1687,7 @@ const tile_panel_open = (app) => {
     const wsIndex = global.workspace_manager.get_active_workspace().index();
     const monitorIndex = tile_focus_monitor_index();
     const draft = tile_panel.view === 'editor' ? tile_panel.draft : null;
-    const panel = new tile_St.BoxLayout({ vertical: true, style_class: 'gk-panel' + (draft ? ' gk-panel-editor' : ''), reactive: true, can_focus: true });
+    const panel = new tile_St.BoxLayout({ vertical: true, style_class: 'gk-panel', reactive: true, can_focus: true });
     const header = new tile_St.BoxLayout({ style_class: 'gk-panel-header', reactive: true });
     let titleText = _("Presets — workspace %d · %s").format(wsIndex + 1, tile_monitors.labels[monitorIndex] || '');
     if (draft)
