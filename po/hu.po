@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: greenTile 0.1.0\n"
 "Report-Msgid-Bugs-To: https://github.com/carsteneu\n"
-"POT-Creation-Date: 2026-09-28 20:31+0200\n"
+"POT-Creation-Date: 2026-09-28 20:38+0200\n"
 "PO-Revision-Date: 2023-01-09 21:16+0100\n"
 "Last-Translator: Kálmán „KAMI” Szalai <kami911@gmail.com>\n"
 "Language-Team: Hungarian\n"
@@ -98,31 +98,43 @@ msgstr ""
 msgid "Back"
 msgstr ""
 
-#: greenTile.js:1383
+#: greenTile.js:1297
+#, fuzzy
+#| msgid "Auto close"
+msgid "Auto: on"
+msgstr "Automatikus bezárás"
+
+#: greenTile.js:1297
+#, fuzzy
+#| msgid "Auto close"
+msgid "Auto: off"
+msgstr "Automatikus bezárás"
+
+#: greenTile.js:1399
 msgid "No presets yet."
 msgstr ""
 
-#: greenTile.js:1397
+#: greenTile.js:1413
 msgid "New preset"
 msgstr ""
 
-#: greenTile.js:1400
+#: greenTile.js:1416
 msgid "Click a row to apply it to this workspace and tile right away"
 msgstr ""
 
-#: greenTile.js:1598
+#: greenTile.js:1614
 msgid "Auto close"
 msgstr "Automatikus bezárás"
 
-#: greenTile.js:1599
+#: greenTile.js:1615
 msgid "Animations"
 msgstr "Animációk"
 
-#: greenTile.js:1600
+#: greenTile.js:1616
 msgid "Auto tile main and list"
 msgstr "Automatikus főcsempe és lista"
 
-#: greenTile.js:1601
+#: greenTile.js:1617
 msgid "Auto tile two lists"
 msgstr "Automatikus csempe két listába"
 
@@ -138,23 +150,13 @@ msgid ""
 "Fork of gTile by shuairan."
 msgstr ""
 
-#. settings-schema.json->general-tab->title
-msgid "General"
-msgstr ""
-
-#. settings-schema.json->auto-workspaces-section->title
-#. settings-schema.json->autoWorkspaces->description
-msgid "Automatic tiling per workspace"
+#. settings-schema.json->settings-tab->title
+msgid "Settings"
 msgstr ""
 
 #. settings-schema.json->hotkeys-tab->title
 msgid "Hotkeys"
 msgstr "Gyorsbillentyűk"
-
-#. settings-schema.json->behaviour-tab->title
-#. settings-schema.json->behaviour-section->title
-msgid "Behavior"
-msgstr "Viselkedés"
 
 #. settings-schema.json->help->title
 msgid "Help"
@@ -177,6 +179,10 @@ msgstr ""
 #. settings-schema.json->keybindings-legend-section->title
 msgid "Keybindings Legend (when open)"
 msgstr "Billentyűzetkiosztás megjelenítése (amikor nyitva van)"
+
+#. settings-schema.json->behaviour-section->title
+msgid "Classic grid (Super+G)"
+msgstr ""
 
 #. settings-schema.json->help-section->title
 msgid "More Info"
@@ -276,11 +282,10 @@ msgstr ""
 msgid "Workspace to preset assignments (JSON)"
 msgstr ""
 
-#. settings-schema.json->autoWorkspaces->tooltip
+#. settings-schema.json->autoWorkspaces->description
 msgid ""
-"One row per workspace (number as shown in the preset panel). Super+Ctrl+A "
-"and Super+Ctrl+D add or update rows. Workspaces without a row tile "
-"automatically only when they have a preset."
+"Automatic tiling per workspace (set with Super+Ctrl+A / Super+Ctrl+D or in "
+"the preset panel; not shown in this dialog)"
 msgstr ""
 
 #. settings-schema.json->autoWorkspaces->columns->title
@@ -289,14 +294,6 @@ msgstr ""
 
 #. settings-schema.json->autoWorkspaces->columns->title
 msgid "Tile automatically"
-msgstr ""
-
-#. settings-schema.json->auto-workspaces-legend->description
-msgid ""
-"Super+Ctrl+A turns automatic tiling on for the active workspace and tiles "
-"right away, Super+Ctrl+D turns it off (a preset stays assigned but is "
-"paused). Workspaces without a row: on with a preset, off without. Removing a "
-"row returns the workspace to that rule."
 msgstr ""
 
 #. settings-schema.json->animation->description
@@ -394,6 +391,9 @@ msgstr "Név felülbírálás"
 #. settings-schema.json->select-using-keyboard->description
 msgid "Show tile labels"
 msgstr ""
+
+#~ msgid "Behavior"
+#~ msgstr "Viselkedés"
 
 #~ msgid "Layout"
 #~ msgstr "Elrendezés"

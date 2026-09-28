@@ -9,7 +9,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: greenTile 0.1.0\n"
 "Report-Msgid-Bugs-To: https://github.com/carsteneu\n"
-"POT-Creation-Date: 2026-09-28 20:31+0200\n"
+"POT-Creation-Date: 2026-09-28 20:38+0200\n"
 "PO-Revision-Date: 2026-09-28 17:17+0200\n"
 "Last-Translator: carsten_eu\n"
 "Language-Team: German\n"
@@ -101,31 +101,43 @@ msgstr "%s bearbeiten"
 msgid "Back"
 msgstr "zurück"
 
-#: greenTile.js:1383
+#: greenTile.js:1297
+#, fuzzy
+#| msgid "Auto close"
+msgid "Auto: on"
+msgstr "Automatisch schließen"
+
+#: greenTile.js:1297
+#, fuzzy
+#| msgid "Auto close"
+msgid "Auto: off"
+msgstr "Automatisch schließen"
+
+#: greenTile.js:1399
 msgid "No presets yet."
 msgstr "Noch keine Presets vorhanden."
 
-#: greenTile.js:1397
+#: greenTile.js:1413
 msgid "New preset"
 msgstr "Neu anlegen"
 
-#: greenTile.js:1400
+#: greenTile.js:1416
 msgid "Click a row to apply it to this workspace and tile right away"
 msgstr "Klick auf eine Zeile = sofort auf dieser Fläche anwenden & kacheln"
 
-#: greenTile.js:1598
+#: greenTile.js:1614
 msgid "Auto close"
 msgstr "Automatisch schließen"
 
-#: greenTile.js:1599
+#: greenTile.js:1615
 msgid "Animations"
 msgstr "Animationen"
 
-#: greenTile.js:1600
+#: greenTile.js:1616
 msgid "Auto tile main and list"
 msgstr "Automatisch in einen Hauptbereich und in eine Liste kacheln"
 
-#: greenTile.js:1601
+#: greenTile.js:1617
 msgid "Auto tile two lists"
 msgstr "Automatisch in zwei Listen kacheln"
 
@@ -141,23 +153,13 @@ msgstr ""
 "Fenster in Spalten kacheln, mit Presets pro Arbeitsfläche, Auto-Modus und "
 "Einrasten nach dem Verschieben. Ein Fork von shuairans gTile."
 
-#. settings-schema.json->general-tab->title
-msgid "General"
-msgstr "Allgemein"
-
-#. settings-schema.json->auto-workspaces-section->title
-#. settings-schema.json->autoWorkspaces->description
-msgid "Automatic tiling per workspace"
-msgstr "Automatisches Kacheln pro Arbeitsfläche"
+#. settings-schema.json->settings-tab->title
+msgid "Settings"
+msgstr ""
 
 #. settings-schema.json->hotkeys-tab->title
 msgid "Hotkeys"
 msgstr "Tastenkürzel"
-
-#. settings-schema.json->behaviour-tab->title
-#. settings-schema.json->behaviour-section->title
-msgid "Behavior"
-msgstr "Verhalten"
 
 #. settings-schema.json->help->title
 msgid "Help"
@@ -178,6 +180,10 @@ msgstr "Presets für Arbeitsflächen"
 #. settings-schema.json->keybindings-legend-section->title
 msgid "Keybindings Legend (when open)"
 msgstr "Tastenbelegung (bei geöffnetem Raster)"
+
+#. settings-schema.json->behaviour-section->title
+msgid "Classic grid (Super+G)"
+msgstr ""
 
 #. settings-schema.json->help-section->title
 msgid "More Info"
@@ -256,15 +262,11 @@ msgstr "Preset-Definitionen (JSON)"
 msgid "Workspace to preset assignments (JSON)"
 msgstr "Zuordnung von Arbeitsflächen zu Presets (JSON)"
 
-#. settings-schema.json->autoWorkspaces->tooltip
+#. settings-schema.json->autoWorkspaces->description
 msgid ""
-"One row per workspace (number as shown in the preset panel). Super+Ctrl+A "
-"and Super+Ctrl+D add or update rows. Workspaces without a row tile "
-"automatically only when they have a preset."
+"Automatic tiling per workspace (set with Super+Ctrl+A / Super+Ctrl+D or in "
+"the preset panel; not shown in this dialog)"
 msgstr ""
-"Eine Zeile pro Arbeitsfläche (Nummer wie im Preset-Panel). Super+Strg+A und "
-"Super+Strg+D legen Zeilen an oder ändern sie. Arbeitsflächen ohne Zeile "
-"werden nur automatisch gekachelt, wenn sie ein Preset haben."
 
 #. settings-schema.json->autoWorkspaces->columns->title
 msgid "Workspace"
@@ -273,19 +275,6 @@ msgstr "Arbeitsfläche"
 #. settings-schema.json->autoWorkspaces->columns->title
 msgid "Tile automatically"
 msgstr "Automatisch kacheln"
-
-#. settings-schema.json->auto-workspaces-legend->description
-msgid ""
-"Super+Ctrl+A turns automatic tiling on for the active workspace and tiles "
-"right away, Super+Ctrl+D turns it off (a preset stays assigned but is "
-"paused). Workspaces without a row: on with a preset, off without. Removing a "
-"row returns the workspace to that rule."
-msgstr ""
-"Super+Strg+A schaltet das automatische Kacheln für die aktive Arbeitsfläche "
-"ein und kachelt sofort, Super+Strg+D schaltet es aus (ein Preset bleibt "
-"zugewiesen, ruht aber). Arbeitsflächen ohne Zeile: mit Preset an, ohne "
-"Preset aus. Wird eine Zeile entfernt, gilt für die Arbeitsfläche wieder "
-"diese Regel."
 
 #. settings-schema.json->animation->description
 msgid "Animation"
@@ -382,6 +371,36 @@ msgstr "Eigener Name"
 #. settings-schema.json->select-using-keyboard->description
 msgid "Show tile labels"
 msgstr "Kachel-Beschriftungen anzeigen"
+
+#~ msgid "General"
+#~ msgstr "Allgemein"
+
+#~ msgid "Automatic tiling per workspace"
+#~ msgstr "Automatisches Kacheln pro Arbeitsfläche"
+
+#~ msgid "Behavior"
+#~ msgstr "Verhalten"
+
+#~ msgid ""
+#~ "One row per workspace (number as shown in the preset panel). Super+Ctrl+A "
+#~ "and Super+Ctrl+D add or update rows. Workspaces without a row tile "
+#~ "automatically only when they have a preset."
+#~ msgstr ""
+#~ "Eine Zeile pro Arbeitsfläche (Nummer wie im Preset-Panel). Super+Strg+A "
+#~ "und Super+Strg+D legen Zeilen an oder ändern sie. Arbeitsflächen ohne "
+#~ "Zeile werden nur automatisch gekachelt, wenn sie ein Preset haben."
+
+#~ msgid ""
+#~ "Super+Ctrl+A turns automatic tiling on for the active workspace and tiles "
+#~ "right away, Super+Ctrl+D turns it off (a preset stays assigned but is "
+#~ "paused). Workspaces without a row: on with a preset, off without. "
+#~ "Removing a row returns the workspace to that rule."
+#~ msgstr ""
+#~ "Super+Strg+A schaltet das automatische Kacheln für die aktive "
+#~ "Arbeitsfläche ein und kachelt sofort, Super+Strg+D schaltet es aus (ein "
+#~ "Preset bleibt zugewiesen, ruht aber). Arbeitsflächen ohne Zeile: mit "
+#~ "Preset an, ohne Preset aus. Wird eine Zeile entfernt, gilt für die "
+#~ "Arbeitsfläche wieder diese Regel."
 
 #~ msgid "Layout"
 #~ msgstr "Layout"
