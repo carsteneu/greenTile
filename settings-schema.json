@@ -53,7 +53,8 @@
          "keys": [
             "autotile6hotkey",
             "autotile3hotkey",
-            "autotileautohotkey"
+            "autotileautohotkey",
+            "autotileoffhotkey"
          ]
       },
       "preset-section": {
@@ -165,7 +166,12 @@
    "autotileautohotkey": {
       "type": "keybinding",
       "default": "<Super><Ctrl>a",
-      "description": "Tile all windows into an automatic grid"
+      "description": "Turn automatic tiling on for this workspace and tile now"
+   },
+   "autotileoffhotkey": {
+      "type": "keybinding",
+      "default": "<Super><Ctrl>d",
+      "description": "Turn automatic tiling off for this workspace"
    },
    "presetHotkey": {
       "type": "keybinding",
@@ -181,6 +187,11 @@
       "type": "string",
       "default": "{}",
       "description": "Workspace to preset assignments (JSON)"
+   },
+   "general": {
+      "type": "string",
+      "default": "{}",
+      "description": "General settings (JSON), e.g. automatic tiling per workspace"
    },
    "animation": {
       "type": "checkbox",

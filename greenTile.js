@@ -124,7 +124,8 @@ class Config {
             Main.keybindingManager.addHotKey('greenTile', this.hotkey, this.app.ToggleUI);
             Main.keybindingManager.addHotKey('greenTile-auto6', this.autotile6Hotkey, () => tile_app_columns(this.app, 6));
             Main.keybindingManager.addHotKey('greenTile-auto3', this.autotile3Hotkey, () => tile_app_columns(this.app, 3));
-            Main.keybindingManager.addHotKey('greenTile-autoN', this.autotileAutoHotkey, () => tile_auto_toggle(this.app));
+            Main.keybindingManager.addHotKey('greenTile-autoN', this.autotileAutoHotkey, () => tile_auto_activate(this.app));
+            Main.keybindingManager.addHotKey('greenTile-autoOff', this.autotileOffHotkey, () => tile_auto_deactivate(this.app));
             Main.keybindingManager.addHotKey('greenTile-preset', this.presetHotkey, () => tile_panel_toggle(this.app));
         };
         this.DisableHotkey = () => {
@@ -132,6 +133,7 @@ class Config {
             Main.keybindingManager.removeHotKey('greenTile-auto6');
             Main.keybindingManager.removeHotKey('greenTile-auto3');
             Main.keybindingManager.removeHotKey('greenTile-autoN');
+            Main.keybindingManager.removeHotKey('greenTile-autoOff');
             Main.keybindingManager.removeHotKey('greenTile-preset');
         };
         this.updateSettings = () => {
@@ -177,6 +179,7 @@ class Config {
         this.settings.bindProperty(Settings.BindingDirection.IN, 'autotile6hotkey', 'autotile6Hotkey', this.EnableHotkey, null);
         this.settings.bindProperty(Settings.BindingDirection.IN, 'autotile3hotkey', 'autotile3Hotkey', this.EnableHotkey, null);
         this.settings.bindProperty(Settings.BindingDirection.IN, 'autotileautohotkey', 'autotileAutoHotkey', this.EnableHotkey, null);
+        this.settings.bindProperty(Settings.BindingDirection.IN, 'autotileoffhotkey', 'autotileOffHotkey', this.EnableHotkey, null);
         this.settings.bindProperty(Settings.BindingDirection.IN, 'presetHotkey', 'presetHotkey', this.EnableHotkey, null);
         this.settings.bindProperty(Settings.BindingDirection.OUT, 'lastGridRows', 'nbCols');
         this.settings.bindProperty(Settings.BindingDirection.OUT, 'lastGridCols', 'nbRows');
@@ -420,7 +423,7 @@ const tile_app_auto = (app) => {
     let n = windows.length + 1;
     if (n < 2)
         return;
-    // New windows (opened while auto-mode is armed) append at the end — their spawn
+    // New windows (opened while automatic tiling is on) append at the end — their spawn
     // position is meaningless for the reading order. Cleared after each tiling.
     let fresh = windows.filter((w) => tile_auto.pending.has(w.get_stable_sequence()));
     let settled = windows.filter((w) => !tile_auto.pending.has(w.get_stable_sequence()));
@@ -467,7 +470,8 @@ const tile_app_auto = (app) => {
         tile_place(app, ordered[index], screenX + col * cellWidth, screenY + row * cellHeight, cellWidth, cellHeight);
     }
 };
-// Auto-mode observer: re-tiles automatically while armed (Super+Ctrl+A toggles).
+// Auto-mode observer: re-tiles automatically on workspaces with automatic tiling on
+// (Super+Ctrl+A on, Super+Ctrl+D off, per workspace).
 // Triggers: window added/removed on the active workspace (debounced 300ms) and
 // manual window moves on release (grab-op-end, 250ms) — the moved window snaps
 // into the grid slot nearest its drop position, manual arranging stays possible.
@@ -475,7 +479,6 @@ const tile_app_auto = (app) => {
 // re-validates at run time). State is global across workspaces by design.
 const tile_Mainloop = imports.mainloop;
 const tile_auto = {
-    armed: false,
     timeout: 0,
     pending: new Set(),
     workspaceSignals: [],
@@ -503,24 +506,27 @@ const tile_auto_schedule = (app, ms) => {
         return false;
     });
 };
-const tile_auto_toggle = (app) => {
-    // On preset workspaces Super+Ctrl+A re-applies the preset instead of
-    // toggling the armed ad-hoc mode (one mental model, no dual state).
-    if (tile_preset_for_ws(app, global.workspace_manager.get_active_workspace().index())) {
-        global.log('greenTile preset re-applied via hotkey');
-        tile_preset_retile(app);
-        return;
+// Automatic tiling is switched per workspace (stored in the "general" setting):
+// Super+Ctrl+A turns it on for the active workspace and tiles right away (with the
+// preset if one is assigned, otherwise with the auto grid); pressing it again just
+// tiles again. Super+Ctrl+D turns it off; that also pauses a preset, which stays
+// assigned and comes back with Super+Ctrl+A.
+const tile_auto_activate = (app) => {
+    const wsIndex = global.workspace_manager.get_active_workspace().index();
+    if (!tile_ws_active(app, wsIndex)) {
+        tile_general_write(app, tile_general_set_ws(tile_general_read(app), wsIndex, true));
+        global.log('greenTile auto tiling on for ws' + wsIndex);
     }
-    tile_auto.armed = !tile_auto.armed;
-    if (tile_auto.armed) {
-        global.log('greenTile auto-mode armed');
-        tile_app_auto(app);
-    }
-    else {
-        tile_auto_disarm_timer();
-        tile_auto.pending.clear();
-        global.log('greenTile auto-mode disarmed');
-    }
+    tile_auto_disarm_timer();
+    tile_auto.pending.clear();
+    tile_retile(app);
+};
+const tile_auto_deactivate = (app) => {
+    const wsIndex = global.workspace_manager.get_active_workspace().index();
+    tile_general_write(app, tile_general_set_ws(tile_general_read(app), wsIndex, false));
+    tile_auto_disarm_timer();
+    tile_auto.pending.clear();
+    global.log('greenTile auto tiling off for ws' + wsIndex);
 };
 const tile_auto_on_window_added = (app, ws, w) => {
     if (ws !== global.workspace_manager.get_active_workspace() || !tile_auto_engaged(app))
@@ -641,14 +647,13 @@ const tile_auto_connect_all = (app) => {
     tile_auto.signals.push([
         global.window_manager,
         global.window_manager.connect('switch-workspace', (wm, from, to) => {
-            if (tile_preset_for_ws(app, to) || tile_auto.armed)
+            if (tile_ws_active(app, to))
                 tile_auto_schedule(app, 300);
         }),
     ]);
 };
 const tile_auto_disconnect_all = () => {
     tile_auto_disarm_timer();
-    tile_auto.armed = false;
     tile_auto_disconnect_workspaces();
     for (const [obj, id] of tile_auto.signals)
         obj.disconnect(id);
@@ -734,13 +739,50 @@ const tile_preset_retile = (app) => {
     tile_place_stacks(app, ordered, rule.stacks, screenX, screenY, screenWidth, screenHeight);
     global.log('greenTile preset "' + preset.name + '" applied ws' + wsIndex + ' n=' + n + ' stacks=[' + rule.stacks.join(',') + ']');
 };
-// Observer layout source: preset workspaces are engaged WITHOUT the armed flag;
-// retile routes to the preset layout when assigned, otherwise to the auto grid.
-const tile_auto_engaged = (app) => {
-    if (tile_auto.armed)
-        return true;
-    return tile_preset_for_ws(app, global.workspace_manager.get_active_workspace().index()) != null;
+// >>> auto-model (pure functions, no Cinnamon imports; tested by tests/auto-model.test.js)
+// General settings (JSON string in the setting "general"). autoWorkspaces maps a
+// workspace index to true (auto tiling on, Super+Ctrl+A) or false (off, Super+Ctrl+D).
+// Without an entry a workspace is active exactly when it has a preset. Unknown
+// top-level keys are kept, later settings go into the same object.
+const tile_general_parse = (text) => {
+    let g;
+    try {
+        g = JSON.parse(text || '{}');
+    }
+    catch (e) {
+        g = {};
+    }
+    if (!g || typeof g !== 'object' || Array.isArray(g))
+        g = {};
+    const auto = {};
+    const raw = g.autoWorkspaces;
+    if (raw && typeof raw === 'object' && !Array.isArray(raw)) {
+        for (const key of Object.keys(raw)) {
+            if (typeof raw[key] === 'boolean')
+                auto[key] = raw[key];
+        }
+    }
+    return Object.assign({}, g, { autoWorkspaces: auto });
 };
+const tile_general_ws_active = (general, wsIndex, hasPreset) => {
+    const value = general.autoWorkspaces[String(wsIndex)];
+    return typeof value === 'boolean' ? value : hasPreset;
+};
+const tile_general_set_ws = (general, wsIndex, on) => {
+    const auto = Object.assign({}, general.autoWorkspaces);
+    auto[String(wsIndex)] = on;
+    return Object.assign({}, general, { autoWorkspaces: auto });
+};
+// <<< auto-model
+const tile_general_read = (app) => tile_general_parse(app.config.settings.getValue('general'));
+const tile_general_write = (app, general) => {
+    app.config.settings.setValue('general', JSON.stringify(general));
+};
+const tile_ws_active = (app, wsIndex) => tile_general_ws_active(tile_general_read(app), wsIndex, tile_preset_for_ws(app, wsIndex) != null);
+// Observer layout source: the observers (window added/removed, minimize, snap after a
+// move, workspace switch) only act on workspaces with automatic tiling on; retile
+// routes to the preset layout when one is assigned, otherwise to the auto grid.
+const tile_auto_engaged = (app) => tile_ws_active(app, global.workspace_manager.get_active_workspace().index());
 const tile_retile = (app) => {
     if (tile_preset_for_ws(app, global.workspace_manager.get_active_workspace().index())) {
         tile_preset_retile(app);
@@ -845,8 +887,21 @@ const tile_panel = {
     // 'list' (view 1) or 'editor' (view 2); the draft is the editor's working copy
     view: 'list',
     draft: null,
+    // Monotonic time (µs) until which mouse buttons on the panel are ignored: the
+    // second click of a double-click must not act in the view it just opened.
+    guardUntil: 0,
+    // Escape registered as a hotkey while the list is open (it has no modal).
+    escBound: false,
+};
+const TILE_PANEL_SWITCH_GUARD_US = 400 * 1000;
+const tile_panel_guard = () => {
+    tile_panel.guardUntil = GLib.get_monotonic_time() + TILE_PANEL_SWITCH_GUARD_US;
 };
 const tile_panel_close = () => {
+    if (tile_panel.escBound) {
+        tile_panel.escBound = false;
+        utils_Main.keybindingManager.removeHotKey('greenTile-panel-esc');
+    }
     if (!tile_panel.actor)
         return;
     const actor = tile_panel.actor;
@@ -945,6 +1000,10 @@ const tile_panel_row = (app, preset, n) => {
         map[String(wsIndex)] = preset.id;
         tile_presets_write_ws(app, map);
         global.log('greenTile preset "' + preset.name + '" assigned ws' + wsIndex);
+        // Choosing a preset means "tile this workspace with it": a workspace whose
+        // automatic tiling was switched off (Super+Ctrl+D) is switched on again.
+        if (!tile_ws_active(app, wsIndex))
+            tile_general_write(app, tile_general_set_ws(tile_general_read(app), wsIndex, true));
         tile_panel_close();
         tile_preset_retile(app);
     });
@@ -962,6 +1021,7 @@ const tile_editor_open = (app, preset) => {
     const pick = tile_rules_pick(rules, tile_panel_window_count());
     tile_panel.draft = { id: preset.id, name: preset.name || '', rules, index: Math.max(rules.indexOf(pick), 0), isNew: !!preset.isNew };
     tile_panel.view = 'editor';
+    tile_panel_guard();
     tile_panel_rebuild(app);
 };
 const tile_editor_open_new = (app) => {
@@ -970,6 +1030,7 @@ const tile_editor_open_new = (app) => {
 const tile_editor_back = (app) => {
     tile_panel.view = 'list';
     tile_panel.draft = null;
+    tile_panel_guard();
     tile_panel_rebuild(app);
 };
 const tile_editor_save = (app, errorLabel) => {
@@ -984,8 +1045,11 @@ const tile_editor_save = (app, errorLabel) => {
     tile_presets_write(app, tile_editor_commit(tile_presets_read(app), preset));
     global.log('greenTile preset "' + preset.name + '" saved (' + preset.rules.length + ' rules)');
     tile_editor_back(app);
-    const assigned = tile_preset_for_ws(app, global.workspace_manager.get_active_workspace().index());
-    if (assigned && assigned.id === preset.id)
+    // Retile only where the preset is in use AND automatic tiling is on; a paused
+    // workspace (Super+Ctrl+D) is left alone until Super+Ctrl+A.
+    const wsIndex = global.workspace_manager.get_active_workspace().index();
+    const assigned = tile_preset_for_ws(app, wsIndex);
+    if (assigned && assigned.id === preset.id && tile_ws_active(app, wsIndex))
         tile_preset_retile(app);
 };
 const tile_editor_rule_row = (rule, active, last, onSelect) => {
@@ -1288,6 +1352,17 @@ const tile_panel_open = (app) => {
     panel.connect('motion-event', onDragMotion);
     panel.connect('button-release-event', onDragRelease);
     panel.connect('destroy', () => endDrag());
+    // Double-click guard: right after a switch between list and editor, mouse buttons
+    // on the panel are swallowed in the capture phase, before any button, row or the
+    // painter sees them (a double-click on Save would otherwise assign the list row
+    // under the pointer; one on 🔧 would paint into the editor).
+    panel.connect('captured-event', (a, event) => {
+        const type = event.type();
+        if ((type === tile_Clutter.EventType.BUTTON_PRESS || type === tile_Clutter.EventType.BUTTON_RELEASE)
+            && GLib.get_monotonic_time() < tile_panel.guardUntil)
+            return tile_Clutter.EVENT_STOP;
+        return tile_Clutter.EVENT_PROPAGATE;
+    });
     let rowsBox = null;
     let scroll = null;
     let editor = null;
@@ -1401,14 +1476,8 @@ const tile_panel_open = (app) => {
     };
     tile_panel.sig.push({ obj: global.workspace_manager, id: global.workspace_manager.connect('workspace-switched', onDesktopChange) });
     tile_panel.sig.push({ obj: global.display, id: global.display.connect('notify::focus-window', onDesktopChange) });
-    // A display change while the panel is open: rebuild in either view (the rebuild keeps
-    // view and draft), so the position check above moves the panel back on screen.
-    tile_panel.sig.push({ obj: utils_Main.layoutManager, id: utils_Main.layoutManager.connect('monitors-changed', () => {
-        if (tile_panel.dragging)
-            return;
-        global.log('greenTile panel rebuilt after a monitor change');
-        tile_panel_rebuild(app);
-    }) });
+    // No monitors-changed handler here: on a display change enable() recreates the whole
+    // App, which closes the panel; the saved-position check above covers the next open.
     panel.connect('key-press-event', (a, event) => {
         if (event.get_key_symbol() === tile_Clutter.KEY_Escape) {
             if (tile_panel.view === 'editor')
@@ -1419,6 +1488,14 @@ const tile_panel_open = (app) => {
         }
         return tile_Clutter.EVENT_PROPAGATE;
     });
+    // The list has no modal (it must not block the desktop), so it never gets key
+    // events itself. Escape is therefore grabbed as a hotkey while the list is open
+    // (same way the classic grid binds its Escape); released in tile_panel_close.
+    // Side effect: while the list is open, applications do not receive Escape.
+    if (!draft) {
+        utils_Main.keybindingManager.addHotKey('greenTile-panel-esc', 'Escape', () => tile_panel_close());
+        tile_panel.escBound = true;
+    }
     global.log('greenTile panel open' + (draft ? ' (editor)' : ''));
     if (editor) {
         // The name entry needs the keyboard; a chrome actor only gets key events while
@@ -2699,8 +2776,8 @@ class App {
         app_Main.uiGroup.add_actor(this.area);
         this.config = new Config(this);
         this.InitGrid();
-        this.tracker.connect("notify::focus-app", this.OnFocusedWindowChanged);
-        global.screen.connect('monitors-changed', this.ReInitialize);
+        this.focusAppSignal = this.tracker.connect("notify::focus-app", this.OnFocusedWindowChanged);
+        this.screenMonitorsSignal = global.screen.connect('monitors-changed', this.ReInitialize);
     }
     get CurrentMonitor() {
         return this.currentMonitor;
@@ -2716,6 +2793,16 @@ class App {
         return this.grids;
     }
     destroy() {
+        // greenTile fix: gTile never disconnected these two, so destroyed Apps kept
+        // reacting to focus and monitor changes.
+        if (this.focusAppSignal) {
+            this.tracker.disconnect(this.focusAppSignal);
+            this.focusAppSignal = 0;
+        }
+        if (this.screenMonitorsSignal) {
+            global.screen.disconnect(this.screenMonitorsSignal);
+            this.screenMonitorsSignal = 0;
+        }
         this.config.destroy();
         this.DestroyGrid();
         this.ResetFocusedWindow();
@@ -2830,8 +2917,12 @@ const enable = () => {
         });
 };
 const disable = () => {
+        // greenTile fix: gTile 2.2.1 left this disconnect commented out. Every
+        // disable/enable cycle then kept a handler bound to the OLD module, and each
+        // monitor change resurrected a complete old App (hotkeys and tiling
+        // observers included) per stale handler: duplicate retiles, zombie bindings.
         if (monitorChangedSignal) {
-            // Main.layoutManager.disconnect(monitorChangedSignal);
+            Main.layoutManager.disconnect(monitorChangedSignal);
             monitorChangedSignal = null;
         }
     app.destroy();
