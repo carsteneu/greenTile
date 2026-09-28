@@ -9,7 +9,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: greenTile 0.1.0\n"
 "Report-Msgid-Bugs-To: https://github.com/carsteneu\n"
-"POT-Creation-Date: 2026-09-28 19:46+0200\n"
+"POT-Creation-Date: 2026-09-28 20:17+0200\n"
 "PO-Revision-Date: 2026-09-28 17:17+0200\n"
 "Last-Translator: carsten_eu\n"
 "Language-Team: German\n"
@@ -20,45 +20,45 @@ msgstr ""
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 "X-Generator: Poedit 2.3\n"
 
-#: greenTile.js:981
+#: greenTile.js:978
 #, javascript-format
 msgid "assigned — workspace %d"
 msgstr "zugewiesen — Fläche %d"
 
-#: greenTile.js:1041
+#: greenTile.js:1038
 msgid "Please enter a name."
 msgstr "Bitte einen Namen eingeben."
 
-#: greenTile.js:1064
+#: greenTile.js:1061
 #, javascript-format
 msgid "from %d"
 msgstr "ab %d"
 
-#: greenTile.js:1179
+#: greenTile.js:1176
 msgid "Rules (by window count)"
 msgstr "Regeln (nach Fensterzahl)"
 
-#: greenTile.js:1183
+#: greenTile.js:1180
 msgid "Rule"
 msgstr "Regel"
 
-#: greenTile.js:1184
+#: greenTile.js:1181
 msgid "Delete rule"
 msgstr "Regel löschen"
 
-#: greenTile.js:1192
+#: greenTile.js:1189
 msgid "Rule applies from"
 msgstr "Regel gilt ab"
 
-#: greenTile.js:1199
+#: greenTile.js:1196
 msgid "windows"
 msgstr "Fenstern"
 
-#: greenTile.js:1201
+#: greenTile.js:1198
 msgid "Painter"
 msgstr "Malerei"
 
-#: greenTile.js:1216
+#: greenTile.js:1213
 msgid ""
 "Click or drag: the row sets how many windows the column holds. Right-click "
 "removes a column."
@@ -66,66 +66,66 @@ msgstr ""
 "Klicken oder ziehen: Die Zeile legt fest, wie viele Fenster die Spalte "
 "aufnimmt. Rechtsklick entfernt eine Spalte."
 
-#: greenTile.js:1221
+#: greenTile.js:1218
 msgid "Name"
 msgstr "Name"
 
-#: greenTile.js:1222
+#: greenTile.js:1219
 msgid "Preset name"
 msgstr "Name des Presets"
 
-#: greenTile.js:1226
+#: greenTile.js:1223
 msgid "Save"
 msgstr "Speichern"
 
-#: greenTile.js:1243
+#: greenTile.js:1240
 #, javascript-format
 msgid "Result: %s"
 msgstr "Ergebnis: %s"
 
-#: greenTile.js:1285
+#: greenTile.js:1282
 #, javascript-format
 msgid "Presets — workspace %d"
 msgstr "Presets — Arbeitsfläche %d"
 
-#: greenTile.js:1287
+#: greenTile.js:1284
 msgid "Create preset"
 msgstr "Neues Preset"
 
-#: greenTile.js:1287
+#: greenTile.js:1284
 #, javascript-format
 msgid "Edit %s"
 msgstr "%s bearbeiten"
 
-#: greenTile.js:1291
+#: greenTile.js:1288
 msgid "Back"
 msgstr "zurück"
 
-#: greenTile.js:1378
+#: greenTile.js:1383
 msgid "No presets yet."
 msgstr "Noch keine Presets vorhanden."
 
-#: greenTile.js:1392
+#: greenTile.js:1397
 msgid "New preset"
 msgstr "Neu anlegen"
 
-#: greenTile.js:1395
+#: greenTile.js:1400
 msgid "Click a row to apply it to this workspace and tile right away"
 msgstr "Klick auf eine Zeile = sofort auf dieser Fläche anwenden & kacheln"
 
-#: greenTile.js:1593
+#: greenTile.js:1598
 msgid "Auto close"
 msgstr "Automatisch schließen"
 
-#: greenTile.js:1594
+#: greenTile.js:1599
 msgid "Animations"
 msgstr "Animationen"
 
-#: greenTile.js:1595
+#: greenTile.js:1600
 msgid "Auto tile main and list"
 msgstr "Automatisch in einen Hauptbereich und in eine Liste kacheln"
 
-#: greenTile.js:1596
+#: greenTile.js:1601
 msgid "Auto tile two lists"
 msgstr "Automatisch in zwei Listen kacheln"
 
@@ -140,6 +140,17 @@ msgid ""
 msgstr ""
 "Fenster in Spalten kacheln, mit Presets pro Arbeitsfläche, Auto-Modus und "
 "Einrasten nach dem Verschieben. Ein Fork von shuairans gTile."
+
+#. settings-schema.json->general-tab->title
+msgid "General"
+msgstr ""
+
+#. settings-schema.json->auto-workspaces-section->title
+#. settings-schema.json->autoWorkspaces->description
+#, fuzzy
+#| msgid "Turn automatic tiling off for this workspace"
+msgid "Automatic tiling per workspace"
+msgstr "Automatisches Kacheln für diese Arbeitsfläche ausschalten"
 
 #. settings-schema.json->hotkeys-tab->title
 msgid "Hotkeys"
@@ -248,7 +259,8 @@ msgstr "Alle Fenster in 3 Spalten kacheln"
 
 #. settings-schema.json->autotileautohotkey->description
 msgid "Turn automatic tiling on for this workspace and tile now"
-msgstr "Automatisches Kacheln für diese Arbeitsfläche einschalten und sofort kacheln"
+msgstr ""
+"Automatisches Kacheln für diese Arbeitsfläche einschalten und sofort kacheln"
 
 #. settings-schema.json->autotileoffhotkey->description
 msgid "Turn automatic tiling off for this workspace"
@@ -266,9 +278,30 @@ msgstr "Preset-Definitionen (JSON)"
 msgid "Workspace to preset assignments (JSON)"
 msgstr "Zuordnung von Arbeitsflächen zu Presets (JSON)"
 
-#. settings-schema.json->general->description
-msgid "General settings (JSON), e.g. automatic tiling per workspace"
-msgstr "Allgemeine Einstellungen (JSON), z. B. automatisches Kacheln pro Arbeitsfläche"
+#. settings-schema.json->autoWorkspaces->tooltip
+msgid ""
+"One row per workspace (number as shown in the preset panel). Super+Ctrl+A "
+"and Super+Ctrl+D add or update rows. Workspaces without a row tile "
+"automatically only when they have a preset."
+msgstr ""
+
+#. settings-schema.json->autoWorkspaces->columns->title
+#, fuzzy
+#| msgid "Workspace Presets"
+msgid "Workspace"
+msgstr "Presets für Arbeitsflächen"
+
+#. settings-schema.json->autoWorkspaces->columns->title
+msgid "Tile automatically"
+msgstr ""
+
+#. settings-schema.json->auto-workspaces-legend->description
+msgid ""
+"Super+Ctrl+A turns automatic tiling on for the active workspace and tiles "
+"right away, Super+Ctrl+D turns it off (a preset stays assigned but is "
+"paused). Workspaces without a row: on with a preset, off without. Removing a "
+"row returns the workspace to that rule."
+msgstr ""
 
 #. settings-schema.json->animation->description
 msgid "Animation"
@@ -367,6 +400,11 @@ msgstr "Eigener Name"
 #. settings-schema.json->select-using-keyboard->description
 msgid "Show tile labels"
 msgstr "Kachel-Beschriftungen anzeigen"
+
+#~ msgid "General settings (JSON), e.g. automatic tiling per workspace"
+#~ msgstr ""
+#~ "Allgemeine Einstellungen (JSON), z. B. automatisches Kacheln pro "
+#~ "Arbeitsfläche"
 
 #~ msgid "Tile all windows into an automatic grid"
 #~ msgstr "Alle Fenster in ein automatisches Raster kacheln"

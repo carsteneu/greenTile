@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: greenTile 0.1.0\n"
 "Report-Msgid-Bugs-To: https://github.com/carsteneu\n"
-"POT-Creation-Date: 2026-09-28 19:46+0200\n"
+"POT-Creation-Date: 2026-09-28 20:17+0200\n"
 "PO-Revision-Date: 2025-10-19 02:39+0700\n"
 "Last-Translator: loccun <huynhloc.contact@gmail.com>\n"
 "Language-Team: Vietnamese\n"
@@ -18,110 +18,110 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "X-Generator: Poedit 3.4.2\n"
 
-#: greenTile.js:981
+#: greenTile.js:978
 #, javascript-format
 msgid "assigned — workspace %d"
 msgstr ""
 
-#: greenTile.js:1041
+#: greenTile.js:1038
 msgid "Please enter a name."
 msgstr ""
 
-#: greenTile.js:1064
+#: greenTile.js:1061
 #, javascript-format
 msgid "from %d"
 msgstr ""
 
-#: greenTile.js:1179
+#: greenTile.js:1176
 msgid "Rules (by window count)"
 msgstr ""
 
-#: greenTile.js:1183
+#: greenTile.js:1180
 msgid "Rule"
 msgstr ""
 
-#: greenTile.js:1184
+#: greenTile.js:1181
 msgid "Delete rule"
 msgstr ""
 
-#: greenTile.js:1192
+#: greenTile.js:1189
 msgid "Rule applies from"
 msgstr ""
 
-#: greenTile.js:1199
+#: greenTile.js:1196
 msgid "windows"
 msgstr ""
 
-#: greenTile.js:1201
+#: greenTile.js:1198
 msgid "Painter"
 msgstr ""
 
-#: greenTile.js:1216
+#: greenTile.js:1213
 msgid ""
 "Click or drag: the row sets how many windows the column holds. Right-click "
 "removes a column."
 msgstr ""
 
-#: greenTile.js:1221
+#: greenTile.js:1218
 msgid "Name"
 msgstr ""
 
-#: greenTile.js:1222
+#: greenTile.js:1219
 msgid "Preset name"
 msgstr ""
 
-#: greenTile.js:1226
+#: greenTile.js:1223
 msgid "Save"
 msgstr ""
 
-#: greenTile.js:1243
+#: greenTile.js:1240
 #, javascript-format
 msgid "Result: %s"
 msgstr ""
 
-#: greenTile.js:1285
+#: greenTile.js:1282
 #, javascript-format
 msgid "Presets — workspace %d"
 msgstr ""
 
-#: greenTile.js:1287
+#: greenTile.js:1284
 msgid "Create preset"
 msgstr ""
 
-#: greenTile.js:1287
+#: greenTile.js:1284
 #, javascript-format
 msgid "Edit %s"
 msgstr ""
 
-#: greenTile.js:1291
+#: greenTile.js:1288
 msgid "Back"
 msgstr ""
 
-#: greenTile.js:1378
+#: greenTile.js:1383
 msgid "No presets yet."
 msgstr ""
 
-#: greenTile.js:1392
+#: greenTile.js:1397
 msgid "New preset"
 msgstr ""
 
-#: greenTile.js:1395
+#: greenTile.js:1400
 msgid "Click a row to apply it to this workspace and tile right away"
 msgstr ""
 
-#: greenTile.js:1593
+#: greenTile.js:1598
 msgid "Auto close"
 msgstr "Tự động đóng"
 
-#: greenTile.js:1594
+#: greenTile.js:1599
 msgid "Animations"
 msgstr "Hoạt ảnh"
 
-#: greenTile.js:1595
+#: greenTile.js:1600
 msgid "Auto tile main and list"
 msgstr "Tự động xếp ô chính và danh sách"
 
-#: greenTile.js:1596
+#: greenTile.js:1601
 msgid "Auto tile two lists"
 msgstr "Tự động xếp ô hai danh sách"
 
@@ -135,6 +135,15 @@ msgstr "gTile"
 msgid ""
 "Column tiling with per-workspace presets, auto mode and snap-on-release. "
 "Fork of gTile by shuairan."
+msgstr ""
+
+#. settings-schema.json->general-tab->title
+msgid "General"
+msgstr ""
+
+#. settings-schema.json->auto-workspaces-section->title
+#. settings-schema.json->autoWorkspaces->description
+msgid "Automatic tiling per workspace"
 msgstr ""
 
 #. settings-schema.json->hotkeys-tab->title
@@ -286,8 +295,27 @@ msgstr ""
 msgid "Workspace to preset assignments (JSON)"
 msgstr ""
 
-#. settings-schema.json->general->description
-msgid "General settings (JSON), e.g. automatic tiling per workspace"
+#. settings-schema.json->autoWorkspaces->tooltip
+msgid ""
+"One row per workspace (number as shown in the preset panel). Super+Ctrl+A "
+"and Super+Ctrl+D add or update rows. Workspaces without a row tile "
+"automatically only when they have a preset."
+msgstr ""
+
+#. settings-schema.json->autoWorkspaces->columns->title
+msgid "Workspace"
+msgstr ""
+
+#. settings-schema.json->autoWorkspaces->columns->title
+msgid "Tile automatically"
+msgstr ""
+
+#. settings-schema.json->auto-workspaces-legend->description
+msgid ""
+"Super+Ctrl+A turns automatic tiling on for the active workspace and tiles "
+"right away, Super+Ctrl+D turns it off (a preset stays assigned but is "
+"paused). Workspaces without a row: on with a preset, off without. Removing a "
+"row returns the workspace to that rule."
 msgstr ""
 
 #. settings-schema.json->animation->description
