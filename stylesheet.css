@@ -125,6 +125,11 @@
     font-size: 16px;
 }
 
+/* Editor view only (450px leaves too little room for stepper and save row) */
+.gk-panel-editor {
+    width: 600px;
+}
+
 .gk-panel-header {
     background-color: #262a35;
     border: 1px solid #333846;
@@ -244,4 +249,207 @@
     color: #8b91a0;
     font-size: 11px;
     padding: 8px 14px;
+}
+
+/* Preset editor (view 2) — tokens from the approved prototype: labels 11px
+   #8b91a0 uppercase, rule rows padding 8px 10px, active rule orange stripe
+   2px + tint, painter #14161d with 6px inset, button #ff9640 on #14161d. */
+.gk-back {
+    color: #8b91a0;
+    font-size: 16px;
+    padding: 0 4px;
+    border-radius: 3px;
+}
+
+.gk-back:hover {
+    color: #e8eaf0;
+    background-color: rgba(255, 255, 255, 0.08);
+}
+
+.gk-ed-body {
+    padding: 14px;
+    spacing: 16px;
+}
+
+.gk-ed-left {
+    width: 170px;
+}
+
+.gk-ed-label {
+    color: #8b91a0;
+    font-size: 11px;
+    padding-bottom: 6px;
+}
+
+.gk-ed-rules {
+    border: 1px solid #2a2e39;
+    border-radius: 4px;
+}
+
+.gk-ed-rule {
+    border: 1px solid #2a2e39;
+    border-top-width: 0;
+    border-left-width: 0;
+    border-right-width: 0;
+}
+
+.gk-ed-rule-last {
+    border-bottom-width: 0;
+}
+
+.gk-ed-rule:hover {
+    background-color: #262a35;
+}
+
+.gk-ed-rule-active {
+    background-color: rgba(255, 150, 64, 0.08);
+}
+
+.gk-ed-rule-active:hover {
+    background-color: rgba(255, 150, 64, 0.14);
+}
+
+.gk-ed-rule-stripe {
+    width: 2px;
+    background-color: #ff9640;
+}
+
+.gk-ed-rule-box {
+    padding: 8px 10px;
+    spacing: 8px;
+}
+
+.gk-ed-rule-label {
+    color: #c8ccd8;
+    font-size: 16px;
+}
+
+.gk-ed-rule-active .gk-ed-rule-label {
+    color: #e8eaf0;
+}
+
+.gk-ed-actions {
+    spacing: 12px;
+    padding-top: 8px;
+}
+
+.gk-ed-add {
+    color: #ff9640;
+    font-size: 15px;
+}
+
+.gk-ed-add:hover {
+    color: #ffb070;
+}
+
+.gk-ed-del {
+    color: #8b91a0;
+    font-size: 15px;
+}
+
+.gk-ed-del:hover {
+    color: #e8eaf0;
+}
+
+.gk-ed-del:insensitive {
+    color: #4a4f5c;
+}
+
+.gk-stepper {
+    spacing: 8px;
+    padding-bottom: 10px;
+}
+
+.gk-stepper .gk-ed-label {
+    padding-bottom: 0;
+}
+
+.gk-stepper-btn {
+    color: #e8eaf0;
+    font-size: 15px;
+    background-color: #262a35;
+    border: 1px solid #2a2e39;
+    border-radius: 3px;
+    padding: 0 8px;
+}
+
+.gk-stepper-btn:hover {
+    border-color: #ff9640;
+}
+
+.gk-stepper-value {
+    color: #e8eaf0;
+    font-size: 16px;
+    font-weight: bold;
+    width: 22px;
+    text-align: center;
+}
+
+.gk-painter {
+    background-color: #14161d;
+    border: 1px solid #2a2e39;
+    border-radius: 4px;
+    padding: 6px;
+}
+
+.gk-painter-area {
+    height: 136px;
+}
+
+.gk-ed-faint {
+    color: #6b7180;
+    font-size: 11px;
+    padding-top: 8px;
+}
+
+.gk-ed-name-row {
+    spacing: 10px;
+    padding-top: 14px;
+}
+
+.gk-ed-name-row .gk-ed-label {
+    padding-bottom: 0;
+}
+
+.gk-entry {
+    color: #e8eaf0;
+    font-size: 16px;
+    background-color: #1c1f28;
+    border: 1px solid #2a2e39;
+    border-radius: 3px;
+    padding: 5px 10px;
+    caret-color: #e8eaf0;
+    selection-background-color: #ff9640;
+    selected-color: #14161d;
+}
+
+.gk-entry:focus {
+    border-color: #ff9640;
+}
+
+.gk-entry:indeterminate {
+    color: #6b7180;
+}
+
+.gk-ed-save-row {
+    spacing: 10px;
+    padding-top: 14px;
+}
+
+.gk-save {
+    color: #14161d;
+    font-size: 15px;
+    font-weight: bold;
+    background-color: #ff9640;
+    border-radius: 4px;
+    padding: 7px 16px;
+}
+
+.gk-save:hover {
+    background-color: #ffab66;
+}
+
+.gk-error {
+    color: #ff6b6b;
+    font-size: 11px;
 }

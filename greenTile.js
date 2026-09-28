@@ -832,9 +832,8 @@ const tile_editor_commit = (presets, preset) => {
     return next;
 };
 // <<< editor-model
-// Preset panel — view 1 (selection list), design tokens from the approved
-// HTML mockup (docs/superpowers/specs/2026-09-28-preset-ui-design.md).
-// M2: list / assign / unassign; editor (view 2) follows in M3.
+// Preset panel — view 1 (selection list) and, further below, view 2 (editor);
+// design tokens from the approved HTML mockup (docs/superpowers/specs/2026-09-28-preset-ui-design.md).
 const tile_St = imports.gi.St;
 const tile_Clutter = imports.gi.Clutter;
 const tile_panel = {
@@ -938,9 +937,7 @@ const tile_panel_row = (app, preset, n) => {
         box.add(un, tile_panel_middle());
     }
     const edit = new tile_St.Button({ label: '🔧', style_class: 'gk-icon-btn', track_hover: true });
-    edit.connect('clicked', () => {
-        global.log('greenTile preset editor (view 2) follows in M3 — preset "' + preset.name + '"');
-    });
+    edit.connect('clicked', () => tile_editor_open(app, preset));
     box.add(edit, tile_panel_middle());
     row.set_child(outer);
     row.connect('clicked', () => {
@@ -952,6 +949,259 @@ const tile_panel_row = (app, preset, n) => {
         tile_preset_retile(app);
     });
     return row;
+};
+// Preset panel — view 2 (editor): rule list on the left, stepper + painter + name on
+// the right (layout and tokens from the approved prototype). The draft
+// {id, name, rules (sorted by min), index, isNew} is written to the settings on Save only.
+const tile_editor_accent = [255, 150, 64];
+const tile_editor_open = (app, preset) => {
+    const rules = tile_editor_sort((preset.rules || []).map((r) => ({ min: r.min, stacks: tile_editor_clamp(r.stacks || []) })));
+    if (rules.length === 0)
+        rules.push({ min: tile_editor_min_floor, stacks: [1, 1] });
+    // Start on the rule a click in view 1 would apply right now
+    const pick = tile_rules_pick(rules, tile_panel_window_count());
+    tile_panel.draft = { id: preset.id, name: preset.name || '', rules, index: Math.max(rules.indexOf(pick), 0), isNew: !!preset.isNew };
+    tile_panel.view = 'editor';
+    tile_panel_rebuild(app);
+};
+const tile_editor_open_new = (app) => {
+    tile_editor_open(app, { id: tile_editor_new_id(tile_presets_read(app)), name: '', rules: [{ min: tile_editor_min_floor, stacks: [1, 1] }], isNew: true });
+};
+const tile_editor_back = (app) => {
+    tile_panel.view = 'list';
+    tile_panel.draft = null;
+    tile_panel_rebuild(app);
+};
+const tile_editor_save = (app, errorLabel) => {
+    const d = tile_panel.draft;
+    if (!d)
+        return;
+    if (tile_editor_validate(d) === 'name') {
+        errorLabel.text = _("Please enter a name.");
+        return;
+    }
+    const preset = { id: d.id, name: d.name.trim(), rules: d.rules.map((r) => ({ min: r.min, stacks: r.stacks.slice() })) };
+    tile_presets_write(app, tile_editor_commit(tile_presets_read(app), preset));
+    global.log('greenTile preset "' + preset.name + '" saved (' + preset.rules.length + ' rules)');
+    tile_editor_back(app);
+    const assigned = tile_preset_for_ws(app, global.workspace_manager.get_active_workspace().index());
+    if (assigned && assigned.id === preset.id)
+        tile_preset_retile(app);
+};
+const tile_editor_rule_row = (rule, active, last, onSelect) => {
+    const row = new tile_St.Button({
+        style_class: 'gk-ed-rule' + (active ? ' gk-ed-rule-active' : '') + (last ? ' gk-ed-rule-last' : ''),
+        x_fill: true, y_fill: true, track_hover: true, reactive: true,
+    });
+    const outer = new tile_St.BoxLayout({ x_expand: true });
+    if (active)
+        outer.add(new tile_St.Bin({ style_class: 'gk-ed-rule-stripe' }), { x_fill: false, y_fill: true });
+    const box = new tile_St.BoxLayout({ style_class: 'gk-ed-rule-box', x_expand: true });
+    box.add(new tile_St.Label({ text: _("from %d").format(rule.min), style_class: 'gk-ed-rule-label' }), { expand: true, x_fill: true, y_fill: false, y_align: tile_St.Align.MIDDLE });
+    box.add(tile_panel_thumb(rule.stacks, { width: 34, height: 18, gap: 2, vgap: 1, radius: 1, color: active ? tile_editor_accent : [61, 68, 87] }), tile_panel_middle());
+    outer.add(box, { expand: true, x_fill: true, y_fill: true });
+    row.set_child(outer);
+    row.connect('clicked', () => onSelect());
+    return row;
+};
+// Painter: 6 columns x 4 rows. Button 1 paints (row under the pointer = windows in the
+// column), dragging paints every column passed; button 3 removes the column.
+const tile_editor_painter = (getStacks, onChange) => {
+    const frame = new tile_St.Bin({ style_class: 'gk-painter', x_fill: true, y_fill: true });
+    const area = new tile_St.DrawingArea({ style_class: 'gk-painter-area', reactive: true, x_expand: true });
+    frame.set_child(area);
+    area.connect('repaint', (a) => {
+        const cr = a.get_context();
+        const [W, H] = a.get_surface_size();
+        const stacks = getStacks();
+        const gap = 3;
+        const cw = (W - gap * (tile_editor_cols - 1)) / tile_editor_cols;
+        for (let c = 0; c < tile_editor_cols; c++) {
+            const x = c * (cw + gap);
+            if (c < stacks.length) {
+                cr.setSourceRGBA(tile_editor_accent[0] / 255, tile_editor_accent[1] / 255, tile_editor_accent[2] / 255, 0.85);
+                const ch = (H - gap * (stacks[c] - 1)) / stacks[c];
+                for (let r = 0; r < stacks[c]; r++)
+                    tile_panel_round_rect(cr, x, r * (ch + gap), cw, ch, 2);
+            }
+            else {
+                // empty column: dashed outline in the border colour
+                cr.setSourceRGB(42 / 255, 46 / 255, 57 / 255);
+                cr.setLineWidth(1);
+                cr.setDash([3, 3], 0);
+                cr.rectangle(x + 0.5, 0.5, cw - 1, H - 1);
+                cr.stroke();
+                cr.setDash([], 0);
+            }
+        }
+        cr.$dispose();
+    });
+    const cellAt = (event) => {
+        const [sx, sy] = event.get_coords();
+        const [ok, lx, ly] = area.transform_stage_point(sx, sy);
+        if (!ok)
+            return null;
+        const [w, h] = area.get_size();
+        if (w <= 0 || h <= 0)
+            return null;
+        const col = Math.min(Math.max(Math.floor(lx / (w / tile_editor_cols)), 0), tile_editor_cols - 1);
+        return { col, row: Math.floor(ly / (h / tile_editor_rows)) };
+    };
+    let stroke = null;
+    const endStroke = () => {
+        if (!stroke)
+            return;
+        const device = stroke.device;
+        stroke = null;
+        device.ungrab();
+        try {
+            utils_Main.popModal(area);
+        }
+        catch (e) {
+            // already popped
+        }
+    };
+    area.connect('button-press-event', (a, event) => {
+        const pos = cellAt(event);
+        if (!pos)
+            return tile_Clutter.EVENT_PROPAGATE;
+        const button = event.get_button();
+        if (button === 3) {
+            onChange(tile_editor_remove(getStacks(), pos.col));
+            return tile_Clutter.EVENT_STOP;
+        }
+        if (button !== 1)
+            return tile_Clutter.EVENT_PROPAGATE;
+        endStroke();
+        onChange(tile_editor_paint(getStacks(), pos.col, pos.row));
+        // Same recipe as the title-bar drag (pushModal + device.grab): the stroke keeps
+        // receiving motion and release when the pointer leaves the painter.
+        if (utils_Main.pushModal(area)) {
+            const device = event.get_device();
+            device.grab(area);
+            stroke = { device, col: pos.col };
+        }
+        return tile_Clutter.EVENT_STOP;
+    });
+    area.connect('motion-event', (a, event) => {
+        if (!stroke)
+            return tile_Clutter.EVENT_PROPAGATE;
+        const pos = cellAt(event);
+        if (!pos)
+            return tile_Clutter.EVENT_STOP;
+        if (pos.col === stroke.col)
+            onChange(tile_editor_paint(getStacks(), pos.col, pos.row));
+        else
+            onChange(tile_editor_paint_range(getStacks(), stroke.col + Math.sign(pos.col - stroke.col), pos.col, pos.row));
+        stroke.col = pos.col;
+        return tile_Clutter.EVENT_STOP;
+    });
+    area.connect('button-release-event', () => {
+        if (!stroke)
+            return tile_Clutter.EVENT_PROPAGATE;
+        endStroke();
+        return tile_Clutter.EVENT_STOP;
+    });
+    // Connected before any pushModal(area), so it runs before main.js' own destroy
+    // handler and pops a valid record (popModal on an unknown actor ends ALL modals).
+    area.connect('destroy', () => endStroke());
+    return { actor: frame, area };
+};
+const tile_editor_body = (app) => {
+    const middle = tile_panel_middle();
+    const body = new tile_St.BoxLayout({ style_class: 'gk-ed-body', reactive: true });
+    // left column: rules
+    const left = new tile_St.BoxLayout({ vertical: true, style_class: 'gk-ed-left' });
+    left.add(new tile_St.Label({ text: _("Rules (by window count)").toUpperCase(), style_class: 'gk-ed-label' }));
+    const rulesBox = new tile_St.BoxLayout({ vertical: true, style_class: 'gk-ed-rules' });
+    left.add(rulesBox);
+    const actions = new tile_St.BoxLayout({ style_class: 'gk-ed-actions' });
+    const addBtn = new tile_St.Button({ label: '＋ ' + _("Rule"), style_class: 'gk-ed-add', track_hover: true });
+    const delBtn = new tile_St.Button({ label: '🗑 ' + _("Delete rule"), style_class: 'gk-ed-del', track_hover: true });
+    actions.add(addBtn);
+    actions.add(delBtn);
+    left.add(actions);
+    body.add(left, { x_fill: false, y_fill: false, y_align: tile_St.Align.START });
+    // right column: stepper, painter, name, save
+    const right = new tile_St.BoxLayout({ vertical: true, style_class: 'gk-ed-right', x_expand: true });
+    const stepper = new tile_St.BoxLayout({ style_class: 'gk-stepper' });
+    stepper.add(new tile_St.Label({ text: _("Rule applies from").toUpperCase(), style_class: 'gk-ed-label' }), middle);
+    const minus = new tile_St.Button({ label: '−', style_class: 'gk-stepper-btn', track_hover: true });
+    const value = new tile_St.Label({ style_class: 'gk-stepper-value' });
+    const plus = new tile_St.Button({ label: '+', style_class: 'gk-stepper-btn', track_hover: true });
+    stepper.add(minus, middle);
+    stepper.add(value, middle);
+    stepper.add(plus, middle);
+    stepper.add(new tile_St.Label({ text: _("windows").toUpperCase(), style_class: 'gk-ed-label' }), middle);
+    right.add(stepper);
+    right.add(new tile_St.Label({ text: _("Painter").toUpperCase(), style_class: 'gk-ed-label' }));
+    let refresh = () => {};
+    const painter = tile_editor_painter(
+        () => tile_panel.draft.rules[tile_panel.draft.index].stacks,
+        (stacks) => {
+            const dr = tile_panel.draft;
+            const rule = dr.rules[dr.index];
+            if (stacks.join(',') === rule.stacks.join(','))
+                return;
+            dr.rules[dr.index] = { min: rule.min, stacks };
+            refresh();
+        });
+    right.add(painter.actor);
+    const result = new tile_St.Label({ style_class: 'gk-ed-faint' });
+    right.add(result);
+    const hint = new tile_St.Label({ text: _("Click or drag: the row sets how many windows the column holds. Right-click removes a column."), style_class: 'gk-ed-faint' });
+    hint.clutter_text.line_wrap = true;
+    hint.clutter_text.ellipsize = imports.gi.Pango.EllipsizeMode.NONE;
+    right.add(hint);
+    const nameRow = new tile_St.BoxLayout({ style_class: 'gk-ed-name-row' });
+    nameRow.add(new tile_St.Label({ text: _("Name").toUpperCase(), style_class: 'gk-ed-label' }), middle);
+    const entry = new tile_St.Entry({ style_class: 'gk-entry', text: tile_panel.draft.name, hint_text: _("Preset name"), can_focus: true, x_expand: true });
+    nameRow.add(entry, { expand: true, x_fill: true, y_fill: false, y_align: tile_St.Align.MIDDLE });
+    right.add(nameRow);
+    const saveRow = new tile_St.BoxLayout({ style_class: 'gk-ed-save-row' });
+    const save = new tile_St.Button({ label: _("Save"), style_class: 'gk-save', track_hover: true });
+    const error = new tile_St.Label({ text: '', style_class: 'gk-error' });
+    saveRow.add(save, middle);
+    saveRow.add(error, middle);
+    right.add(saveRow);
+    body.add(right, { expand: true, x_fill: true, y_fill: true });
+    refresh = () => {
+        const dr = tile_panel.draft;
+        rulesBox.destroy_all_children();
+        dr.rules.forEach((rule, i) => {
+            rulesBox.add(tile_editor_rule_row(rule, i === dr.index, i === dr.rules.length - 1, () => {
+                dr.index = i;
+                refresh();
+            }));
+        });
+        const rule = dr.rules[dr.index];
+        value.text = String(rule.min);
+        result.text = _("Result: %s").format('[' + rule.stacks.join(',') + ']');
+        const canDelete = dr.rules.length > 1;
+        delBtn.reactive = canDelete;
+        if (canDelete)
+            delBtn.remove_style_pseudo_class('insensitive');
+        else
+            delBtn.add_style_pseudo_class('insensitive');
+        painter.area.queue_repaint();
+    };
+    const apply = (r) => {
+        tile_panel.draft.rules = r.rules;
+        tile_panel.draft.index = r.index;
+        refresh();
+    };
+    addBtn.connect('clicked', () => apply(tile_editor_add_rule(tile_panel.draft.rules)));
+    delBtn.connect('clicked', () => apply(tile_editor_delete_rule(tile_panel.draft.rules, tile_panel.draft.index)));
+    minus.connect('clicked', () => apply(tile_editor_step_min(tile_panel.draft.rules, tile_panel.draft.index, -1)));
+    plus.connect('clicked', () => apply(tile_editor_step_min(tile_panel.draft.rules, tile_panel.draft.index, 1)));
+    entry.clutter_text.connect('text-changed', () => {
+        tile_panel.draft.name = entry.get_text();
+        error.text = '';
+    });
+    entry.clutter_text.connect('activate', () => tile_editor_save(app, error));
+    save.connect('clicked', () => tile_editor_save(app, error));
+    refresh();
+    return { actor: body, entry };
 };
 const tile_panel_rebuild = (app) => {
     if (!tile_panel.actor)
@@ -965,15 +1215,26 @@ const tile_panel_rebuild = (app) => {
 };
 const tile_panel_open = (app) => {
     const wsIndex = global.workspace_manager.get_active_workspace().index();
-    const panel = new tile_St.BoxLayout({ vertical: true, style_class: 'gk-panel', reactive: true, can_focus: true });
+    const draft = tile_panel.view === 'editor' ? tile_panel.draft : null;
+    const panel = new tile_St.BoxLayout({ vertical: true, style_class: 'gk-panel' + (draft ? ' gk-panel-editor' : ''), reactive: true, can_focus: true });
     const header = new tile_St.BoxLayout({ style_class: 'gk-panel-header', reactive: true });
-    const title = new tile_St.Label({ text: _("Presets — workspace %d").format(wsIndex + 1), style_class: 'gk-title' });
+    let titleText = _("Presets — workspace %d").format(wsIndex + 1);
+    if (draft)
+        titleText = draft.isNew ? _("Create preset") : _("Edit %s").format(draft.name);
+    const title = new tile_St.Label({ text: titleText, style_class: 'gk-title' });
     header.add(title, { expand: true, x_fill: true, y_fill: false, y_align: tile_St.Align.MIDDLE });
-    const closeBtn = new tile_St.Button({ label: '✕', style_class: 'gk-close', track_hover: true });
-    closeBtn.connect('clicked', () => tile_panel_close());
-    header.add(closeBtn);
+    if (draft) {
+        const backBtn = new tile_St.Button({ label: '← ' + _("Back"), style_class: 'gk-back', track_hover: true });
+        backBtn.connect('clicked', () => tile_editor_back(app));
+        header.add(backBtn);
+    }
+    else {
+        const closeBtn = new tile_St.Button({ label: '✕', style_class: 'gk-close', track_hover: true });
+        closeBtn.connect('clicked', () => tile_panel_close());
+        header.add(closeBtn);
+    }
     panel.add(header);
-    // Drag the panel by hand: the WHOLE title bar is a handle (except the ✕).
+    // Drag the panel by hand: the WHOLE title bar is a handle (except the button).
     // Recipe from Cinnamon's dnd.js (_grabEvents/_ungrabEvents); it needs BOTH parts:
     //   Main.pushModal(panel)  → X delivers all events to Cinnamon, even over native windows
     //   device.grab(panel)     → Clutter routes them to the panel, not to the actor under the pointer
@@ -1027,38 +1288,46 @@ const tile_panel_open = (app) => {
     panel.connect('motion-event', onDragMotion);
     panel.connect('button-release-event', onDragRelease);
     panel.connect('destroy', () => endDrag());
-    const presets = tile_presets_read(app);
-    const n = tile_panel_window_count();
-    const rowsBox = new tile_St.BoxLayout({ vertical: true, style_class: 'gk-rows' });
-    if (presets.length === 0)
-        rowsBox.add(new tile_St.Label({ text: _("No presets yet."), style_class: 'gk-muted' }));
-    for (const preset of presets)
-        rowsBox.add(tile_panel_row(app, preset, n));
-    // vscrollbar starts as NEVER: with AUTOMATIC, Cinnamon's St reserves the bar's 21px
-    // even when there is nothing to scroll (rows end too far from the right edge). The bar
-    // is switched on in the allocation handler once the list exceeds LIST_MAX.
-    const scroll = new tile_St.ScrollView({
-        style_class: 'gk-scroll',
-        reactive: true,
-        hscrollbar_policy: tile_St.PolicyType.NEVER,
-        vscrollbar_policy: tile_St.PolicyType.NEVER,
-    });
-    scroll.add_actor(rowsBox);
-    panel.add(scroll);
-    const plus = new tile_St.Button({ label: '＋ ' + _("New preset"), style_class: 'gk-plus', x_fill: true, track_hover: true });
-    plus.connect('clicked', () => {
-        global.log('greenTile preset editor (view 2) follows in M3 — "New preset" will open it');
-    });
-    panel.add(plus);
-    panel.add(new tile_St.Label({ text: _("Click a row to apply it to this workspace and tile right away"), style_class: 'gk-hint' }));
+    let rowsBox = null;
+    let scroll = null;
+    let editor = null;
+    if (draft) {
+        editor = tile_editor_body(app);
+        panel.add(editor.actor);
+    }
+    else {
+        const presets = tile_presets_read(app);
+        const n = tile_panel_window_count();
+        rowsBox = new tile_St.BoxLayout({ vertical: true, style_class: 'gk-rows' });
+        if (presets.length === 0)
+            rowsBox.add(new tile_St.Label({ text: _("No presets yet."), style_class: 'gk-muted' }));
+        for (const preset of presets)
+            rowsBox.add(tile_panel_row(app, preset, n));
+        // vscrollbar starts as NEVER: with AUTOMATIC, Cinnamon's St reserves the bar's 21px
+        // even when there is nothing to scroll (rows end too far from the right edge). The bar
+        // is switched on in the allocation handler once the list exceeds LIST_MAX.
+        scroll = new tile_St.ScrollView({
+            style_class: 'gk-scroll',
+            reactive: true,
+            hscrollbar_policy: tile_St.PolicyType.NEVER,
+            vscrollbar_policy: tile_St.PolicyType.NEVER,
+        });
+        scroll.add_actor(rowsBox);
+        panel.add(scroll);
+        const plus = new tile_St.Button({ label: '＋ ' + _("New preset"), style_class: 'gk-plus', x_fill: true, track_hover: true });
+        plus.connect('clicked', () => tile_editor_open_new(app));
+        panel.add(plus);
+        panel.add(new tile_St.Label({ text: _("Click a row to apply it to this workspace and tile right away"), style_class: 'gk-hint' }));
+    }
     utils_Main.layoutManager.addChrome(panel);
     tile_panel.actor = panel;
-    // Keep the position across rebuilds (workspace switches, focus changes)
+    // Keep the position across rebuilds (workspace switches, focus changes, view changes)
     tile_panel.positioned = tile_panel.saved != null;
     if (tile_panel.saved)
         panel.set_position(tile_panel.saved.x, tile_panel.saved.y);
     const LIST_MAX = 320;
     let scrollCapped = false;
+    let editorClamped = false;
     panel.connect('notify::allocation', () => {
         // Allocation notifications can still arrive after close (destroy);
         // without this guard the centring would run on a dying actor.
@@ -1076,7 +1345,25 @@ const tile_panel_open = (app) => {
             panel.set_position(Math.round(cx), Math.round(cy));
             tile_panel.saved = { x: Math.round(cx), y: Math.round(cy) };
         }
-        if (!scrollCapped) {
+        if (draft && !editorClamped && !tile_panel.dragging) {
+            // The list is 450px wide, the editor 600px: a panel dragged near the right
+            // monitor edge would stick out after the view switch — clamp it back in.
+            editorClamped = true;
+            const focusWindow = getFocusApp();
+            const monitor = utils_Main.layoutManager.monitors[focusWindow ? focusWindow.get_monitor() : utils_Main.layoutManager.primaryIndex];
+            const box = panel.get_allocation_box();
+            const width = box.x2 - box.x1;
+            const height = box.y2 - box.y1;
+            const [px, py] = panel.get_position();
+            const nx = Math.min(Math.max(px, monitor.x), monitor.x + Math.max(monitor.width - width, 0));
+            const ny = Math.min(Math.max(py, monitor.y), monitor.y + Math.max(monitor.height - height, 0));
+            if (nx !== px || ny !== py) {
+                panel.set_position(Math.round(nx), Math.round(ny));
+                tile_panel.saved = { x: Math.round(nx), y: Math.round(ny) };
+                global.log('greenTile editor panel clamped to ' + Math.round(nx) + ',' + Math.round(ny));
+            }
+        }
+        if (scroll && !scrollCapped) {
             const rb = rowsBox.get_allocation_box();
             if (rb.y2 - rb.y1 > LIST_MAX) {
                 scrollCapped = true;
@@ -1085,31 +1372,45 @@ const tile_panel_open = (app) => {
             }
         }
     });
-    // The panel follows the desktop: workspace and focus changes re-render it
-    // (title, assignment, thumbnail window count).
+    // The list follows the desktop: workspace and focus changes re-render it
+    // (title, assignment, thumbnail window count). The editor is never rebuilt by
+    // these signals, it would lose the draft.
     // Meta.WorkspaceManager emits "workspace-switched" (windowManager.js:435).
     // A rebuild during an active drag would kill the grab, so it is skipped then.
-    tile_panel.sig.push({ obj: global.workspace_manager, id: global.workspace_manager.connect('workspace-switched', () => {
+    const onDesktopChange = () => {
+        if (tile_panel.view === 'editor')
+            return;
         if (tile_panel.dragging)
             global.log('greenTile rebuild suppressed (drag)');
         else
             tile_panel_rebuild(app);
-    }) });
-    tile_panel.sig.push({ obj: global.display, id: global.display.connect('notify::focus-window', () => {
-        if (tile_panel.dragging)
-            global.log('greenTile rebuild suppressed (drag)');
-        else
-            tile_panel_rebuild(app);
-    }) });
+    };
+    tile_panel.sig.push({ obj: global.workspace_manager, id: global.workspace_manager.connect('workspace-switched', onDesktopChange) });
+    tile_panel.sig.push({ obj: global.display, id: global.display.connect('notify::focus-window', onDesktopChange) });
     panel.connect('key-press-event', (a, event) => {
         if (event.get_key_symbol() === tile_Clutter.KEY_Escape) {
-            tile_panel_close();
+            if (tile_panel.view === 'editor')
+                tile_editor_back(app);
+            else
+                tile_panel_close();
             return tile_Clutter.EVENT_STOP;
         }
         return tile_Clutter.EVENT_PROPAGATE;
     });
-    global.log('greenTile panel open');
-    panel.grab_key_focus();
+    global.log('greenTile panel open' + (draft ? ' (editor)' : ''));
+    if (editor) {
+        // The name entry needs the keyboard; a chrome actor only gets key events while
+        // Cinnamon holds a modal grab. The modal sits on the editor body, NOT on the panel:
+        // popModal restores the key focus only for the topmost record, so the drag
+        // (pushModal(panel)) and the painter stroke (pushModal(area)) must stay separate
+        // records that hand the focus back to the entry. Destroying the panel pops it.
+        if (utils_Main.pushModal(editor.actor))
+            editor.entry.grab_key_focus();
+        else
+            global.log('greenTile editor: pushModal failed, the name entry gets no keyboard');
+    }
+    else
+        panel.grab_key_focus();
 };
 const tile_panel_toggle = (app) => {
     if (tile_panel.actor)
