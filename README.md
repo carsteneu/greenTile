@@ -27,7 +27,8 @@ The starting point was the shipped webpack bundle `5.4/gTile.js` of gTile 2.2.1,
 |---|---|
 | `Super+Ctrl+3` | 3 columns of equal width |
 | `Super+Ctrl+6` | 6 columns of equal width |
-| `Super+Ctrl+A` | Toggle auto mode (tiles immediately when switched on); on a workspace with a preset: apply the preset again |
+| `Super+Ctrl+A` | Turn automatic tiling on for the active workspace and tile now (with its preset if one is assigned, otherwise with the auto grid); pressing it again tiles again |
+| `Super+Ctrl+D` | Turn automatic tiling off for the active workspace (also pauses its preset) |
 | `Super+Ctrl+P` | Open/close the preset panel for the active workspace |
 | `Super+G` | Classic gTile grid |
 
@@ -38,11 +39,13 @@ All keys can be changed in the extension settings.
 A preset is a list of rules by window count: each rule defines how many columns there are and how many windows are stacked in each column. A preset is assigned to a workspace and applies there.
 
 In the panel (`Super+Ctrl+P`):
-- **Click a row:** assign the preset to this workspace and tile right away
+- **Click a row:** assign the preset to this workspace and tile right away (this also turns automatic tiling on for the workspace if it was off)
 - **✕ in a row:** remove the assignment
 - **🔧:** open the editor for this preset
 - **＋ New preset:** open the editor with an empty preset
-- The panel can be dragged by its title bar and keeps its position when you switch workspaces.
+- **✕ in the title bar** or `Esc` closes the panel. While the list is open, greenTile takes the `Esc` key, so applications do not receive it until the panel is closed.
+- The panel can be dragged by its title bar and keeps its position when you switch workspaces. If that position is no longer on any monitor (external display unplugged), the panel opens centred again.
+- Right after switching between list and editor, clicks are ignored for 400 ms, so the second click of a double-click does not act in the new view.
 
 The thumbnail shows the rule that would apply for the current number of windows.
 
@@ -51,20 +54,26 @@ The thumbnail shows the rule that would apply for the current number of windows.
 - **Rules (left):** one row per rule, "from N" = the rule applies from N windows on (the last rule whose N is not larger than the window count wins). Click a row to edit it. **＋ Rule** adds a rule (N + 1, copy of the highest rule), **🗑 Delete rule** removes the selected one; a preset always keeps one rule.
 - **Rule applies from [−] N [+]:** changes N of the selected rule. N can be smaller than the number of painted cells; the remaining cells then stay empty (e.g. six columns from 2 windows on).
 - **Painter:** 6 columns × 4 rows. Click or drag: the row under the pointer sets how many windows the column holds (top = 1, bottom = 4). Dragging paints every column it passes. Right-click removes a column. With more windows than cells, the rightmost column takes the rest.
-- **Name** and **Save** (or `Enter` in the name field). Saving a preset that is assigned to the active workspace retiles it right away.
+- **Name** and **Save** (or `Enter` in the name field). Saving a preset that is assigned to the active workspace retiles it right away, unless automatic tiling is off there.
 - **← Back** or `Esc` returns to the list without saving.
 - While the editor is open it holds the keyboard and mouse (like a dialog), so the preset hotkey does not work until you go back.
 
-A workspace with a preset is always retiled automatically, even when auto mode is off.
-
 ## Auto mode
 
+Automatic tiling is switched **per workspace**:
+
+- `Super+Ctrl+A` turns it on for the active workspace and tiles right away. Pressing it again on the same workspace just tiles again.
+- `Super+Ctrl+D` turns it off for the active workspace. On a workspace with a preset this pauses the preset: it stays assigned (and visible in the panel) but nothing is tiled until `Super+Ctrl+A`.
+- A workspace that was never switched either way is on when it has a preset and off when it has none.
+- The state is stored in the setting `general` (JSON, `{"autoWorkspaces": {"<workspace index>": true|false}}`) and survives reloads and restarts. Like the preset assignments it is keyed by workspace index, so it shifts when workspaces are removed. `general` is the place for further general settings later; it is not shown in the settings dialog yet.
+
+While automatic tiling is on for the active workspace:
 - When a window is added to or removed from the active workspace, the layout is retiled after 300 ms (normal windows only, no dialogs). Minimizing and restoring windows also updates the layout.
 - A window moved by hand snaps into the grid slot where it is dropped; its neighbours move up.
 - All movements are animated (250 ms). The window gets its final size immediately and only the picture glides, so terminal text does not flicker.
 - New windows are appended at the end.
 
-Without a preset the auto grid applies (only while auto mode is on), depending on the monitor width:
+Without a preset the auto grid applies, depending on the monitor width:
 - **2100 px and wider:** up to 6 windows in one row, beyond that balanced rows (8 = 4×2, 12 = 6×2)
 - **narrower than 2100 px:** up to 3 windows in one row, from 4 windows on 3 columns with stacks (4 = 1·1·2, 5 = 1·2·2, 6 = 2·2·2)
 
@@ -91,7 +100,7 @@ The first time, enable the extension in the Cinnamon settings. **gTile@shuairan 
 
 Check: `imports.ui.extensionSystem.runningExtensions` (an array) must contain `greenTile@carsten_eu`, and `~/.xsession-errors` must not show any `JS ERROR` mentioning `greenTile.js`.
 
-Tests for the preset editor model: `node --test tests/*.test.js` (Node 18 or newer; passing only the directory `tests/` fails on Node 22 and later). The `tests/` folder is not copied by the deploy steps.
+Tests for the pure models (preset editor, auto mode per workspace): `node --test tests/*.test.js` (Node 18 or newer; passing only the directory `tests/` fails on Node 22 and later). The `tests/` folder is not copied by the deploy steps.
 
 ## Switching from gTile
 
@@ -125,6 +134,7 @@ All user-visible strings are English in the source and translated via gettext. T
 - Dragging the panel needs `Main.pushModal(actor)` **and** `device.grab(actor)` together, as in Cinnamon's `dnd.js`. Either one alone loses mouse events as soon as the pointer leaves the panel.
 - Diagnostics: lines `greenTile skipped …` in `~/.xsession-errors` state why a window was not tiled.
 - Reload via DBus Eval as shown above; restarting Cinnamon is not necessary for code changes.
+- gTile 2.2.1 did not disconnect its `monitors-changed` handler on disable, so every reload left a handler behind that rebuilt a complete old instance on each monitor change (duplicate tiling, old hotkeys coming back). Fixed in greenTile; handlers left over from reloads of an older version disappear only with a Cinnamon restart.
 - Exception, translations: gettext (glibc) caches catalogs per process, including the fact that a catalog is *missing*. New or changed `.mo` files therefore only take effect after restarting Cinnamon (`Ctrl+Alt+Esc`, or log out and in). Reloading the extension is not enough.
 
 ## License

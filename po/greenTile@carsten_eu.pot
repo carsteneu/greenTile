@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: greenTile 0.1.0\n"
 "Report-Msgid-Bugs-To: https://github.com/carsteneu\n"
-"POT-Creation-Date: 2026-09-28 18:12+0200\n"
+"POT-Creation-Date: 2026-09-28 19:46+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,110 +17,110 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: greenTile.js:926
+#: greenTile.js:981
 #, javascript-format
 msgid "assigned — workspace %d"
 msgstr ""
 
-#: greenTile.js:980
+#: greenTile.js:1041
 msgid "Please enter a name."
 msgstr ""
 
-#: greenTile.js:1000
+#: greenTile.js:1064
 #, javascript-format
 msgid "from %d"
 msgstr ""
 
-#: greenTile.js:1115
+#: greenTile.js:1179
 msgid "Rules (by window count)"
 msgstr ""
 
-#: greenTile.js:1119
+#: greenTile.js:1183
 msgid "Rule"
 msgstr ""
 
-#: greenTile.js:1120
+#: greenTile.js:1184
 msgid "Delete rule"
 msgstr ""
 
-#: greenTile.js:1128
+#: greenTile.js:1192
 msgid "Rule applies from"
 msgstr ""
 
-#: greenTile.js:1135
+#: greenTile.js:1199
 msgid "windows"
 msgstr ""
 
-#: greenTile.js:1137
+#: greenTile.js:1201
 msgid "Painter"
 msgstr ""
 
-#: greenTile.js:1152
+#: greenTile.js:1216
 msgid ""
 "Click or drag: the row sets how many windows the column holds. Right-click "
 "removes a column."
 msgstr ""
 
-#: greenTile.js:1157
+#: greenTile.js:1221
 msgid "Name"
 msgstr ""
 
-#: greenTile.js:1158
+#: greenTile.js:1222
 msgid "Preset name"
 msgstr ""
 
-#: greenTile.js:1162
+#: greenTile.js:1226
 msgid "Save"
 msgstr ""
 
-#: greenTile.js:1179
+#: greenTile.js:1243
 #, javascript-format
 msgid "Result: %s"
 msgstr ""
 
-#: greenTile.js:1221
+#: greenTile.js:1285
 #, javascript-format
 msgid "Presets — workspace %d"
 msgstr ""
 
-#: greenTile.js:1223
+#: greenTile.js:1287
 msgid "Create preset"
 msgstr ""
 
-#: greenTile.js:1223
+#: greenTile.js:1287
 #, javascript-format
 msgid "Edit %s"
 msgstr ""
 
-#: greenTile.js:1227
+#: greenTile.js:1291
 msgid "Back"
 msgstr ""
 
-#: greenTile.js:1303
+#: greenTile.js:1378
 msgid "No presets yet."
 msgstr ""
 
-#: greenTile.js:1317
+#: greenTile.js:1392
 msgid "New preset"
 msgstr ""
 
-#: greenTile.js:1320
+#: greenTile.js:1395
 msgid "Click a row to apply it to this workspace and tile right away"
 msgstr ""
 
-#: greenTile.js:1494
+#: greenTile.js:1593
 msgid "Auto close"
 msgstr ""
 
-#: greenTile.js:1495
+#: greenTile.js:1594
 msgid "Animations"
 msgstr ""
 
-#: greenTile.js:1496
+#: greenTile.js:1595
 msgid "Auto tile main and list"
 msgstr ""
 
-#: greenTile.js:1497
+#: greenTile.js:1596
 msgid "Auto tile two lists"
 msgstr ""
 
@@ -222,7 +222,11 @@ msgid "Tile all windows into 3 columns"
 msgstr ""
 
 #. settings-schema.json->autotileautohotkey->description
-msgid "Tile all windows into an automatic grid"
+msgid "Turn automatic tiling on for this workspace and tile now"
+msgstr ""
+
+#. settings-schema.json->autotileoffhotkey->description
+msgid "Turn automatic tiling off for this workspace"
 msgstr ""
 
 #. settings-schema.json->presetHotkey->description
@@ -235,6 +239,10 @@ msgstr ""
 
 #. settings-schema.json->wsPresets->description
 msgid "Workspace to preset assignments (JSON)"
+msgstr ""
+
+#. settings-schema.json->general->description
+msgid "General settings (JSON), e.g. automatic tiling per workspace"
 msgstr ""
 
 #. settings-schema.json->animation->description
