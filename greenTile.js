@@ -207,6 +207,10 @@ class Config {
         tile_monitors_refresh(app, () => {
             tile_layouts_migrate_once(app);
             tile_auto_connect_all(app);
+            if (tile_settle_pending) {
+                tile_settle_pending = false;
+                tile_settle_start(app);
+            }
         });
     }
     get AnimationTime() {
@@ -747,6 +751,9 @@ const tile_auto_on_entered_monitor = (app, monitorIndex, w) => {
     if (w == null)
         return;
     tile_auto.lastMonitor.set(w.get_stable_sequence(), monitorIndex);
+    // Muffin moving windows across monitors restarts the settle wait while it runs.
+    if (tile_settle_started)
+        tile_settle_start(app);
 };
 const tile_auto_connect_all = (app) => {
     const n = global.screen.get_n_workspaces();
@@ -811,6 +818,35 @@ const tile_auto_disconnect_all = () => {
     tile_auto.signals = [];
     for (const [w] of tile_auto.tracked.slice())
         tile_auto_untrack(w);
+    if (tile_settle_timer) {
+        tile_Mainloop.source_remove(tile_settle_timer);
+        tile_settle_timer = 0;
+    }
+    tile_settle_started = 0;
+};
+
+// Settle wait after a monitor change: Muffin can take several seconds to move windows
+// to their new monitors. The retile runs once, 2 s after the last monitor change or
+// window-entered-monitor event, at the latest 15 s after the first change. The flag
+// routes the wait through the App recreation (monitors-changed destroys the App).
+let tile_settle_pending = false;
+let tile_settle_timer = 0;
+let tile_settle_started = 0;
+const tile_settle_start = (app) => {
+    const now = Date.now();
+    if (!tile_settle_started)
+        tile_settle_started = now;
+    const delay = Math.max(Math.min(2000, 15000 - (now - tile_settle_started)), 1);
+    if (tile_settle_timer)
+        tile_Mainloop.source_remove(tile_settle_timer);
+    tile_settle_timer = tile_Mainloop.timeout_add(delay, () => {
+        tile_settle_timer = 0;
+        const elapsed = Date.now() - tile_settle_started;
+        tile_settle_started = 0;
+        tile_auto_schedule_all(app, 0);
+        global.log('greenTile monitors settled after ' + elapsed + ' ms');
+        return false;
+    });
 };
 // Per-workspace preset tiling: rules by window count, stored in extension settings
 // (survives spice reinstalls — settings live in ~/.config/cinnamon/spices).
@@ -3304,6 +3340,7 @@ const init = (meta) => {
 const enable = () => {
     app = new App(platform);
         monitorChangedSignal = Main.layoutManager.connect('monitors-changed', () => {
+            tile_settle_pending = true;
             app.destroy();
             app = new App(platform);
         });
