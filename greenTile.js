@@ -491,28 +491,29 @@ const tile_sort_reading_order = (windows, columnMajor) => {
         return ra.x - rb.x;
     });
 };
-const tile_app_auto = (app) => {
-    const focusWindow = tile_focus_window();
-    if (!focusWindow)
+const tile_app_auto = (app, monitorIndex, focusWindow) => {
+    const monitor = utils_Main.layoutManager.monitors[monitorIndex];
+    if (!monitor)
         return;
-    let monitor = utils_Main.layoutManager.monitors[focusWindow.get_monitor()];
     let [screenX, screenY, screenWidth, screenHeight] = getUsableScreenArea(monitor);
     let windows = tile_collect_windows(monitor, focusWindow);
     tile_debug_count(monitor, focusWindow, windows);
-    let n = windows.length + 1;
+    const focused = focusWindow && !focusWindow.minimized && focusWindow.get_monitor() === monitorIndex;
+    let n = windows.length + (focused ? 1 : 0);
     if (n < 2)
         return;
     // New windows (opened while automatic tiling is on) append at the end — their spawn
     // position is meaningless for the reading order. Cleared after each tiling.
-    let fresh = windows.filter((w) => tile_auto.pending.has(w.get_stable_sequence()));
-    let settled = windows.filter((w) => !tile_auto.pending.has(w.get_stable_sequence()));
-    tile_auto.pending.clear();
+    let pending = tile_auto.pending.get(monitorIndex) || new Set();
+    tile_auto.pending.set(monitorIndex, new Set());
+    let fresh = windows.filter((w) => pending.has(w.get_stable_sequence()));
+    let settled = windows.filter((w) => !pending.has(w.get_stable_sequence()));
     // Below 2100px monitor width, 4+ uniform columns get too narrow: 3 fixed columns
     // with balanced stacks instead (4=1·1·2, 5=1·2·2, 6=2·2·2, 8=2·3·3) — full-height
     // singles stay left, extra windows stack on the right columns. Screen always fills.
     let ordered;
     if (monitor.width < 2100 && n > 3) {
-        ordered = tile_sort_reading_order([focusWindow].concat(settled), true)
+        ordered = tile_sort_reading_order((focused ? [focusWindow] : []).concat(settled), true)
             .concat(tile_sort_reading_order(fresh, true));
         let base = Math.floor(n / 3);
         let rem = n % 3;
@@ -539,7 +540,7 @@ const tile_app_auto = (app) => {
         rows = Math.ceil(n / 6);
         cols = Math.ceil(n / rows);
     }
-    ordered = tile_sort_reading_order([focusWindow].concat(settled), false)
+    ordered = tile_sort_reading_order((focused ? [focusWindow] : []).concat(settled), false)
         .concat(tile_sort_reading_order(fresh, false));
     let cellWidth = screenWidth / cols;
     let cellHeight = screenHeight / rows;
@@ -558,8 +559,13 @@ const tile_app_auto = (app) => {
 // re-validates at run time). State is global across workspaces by design.
 const tile_Mainloop = imports.mainloop;
 const tile_auto = {
-    timeout: 0,
-    pending: new Set(),
+    timers: new Map(),
+    // pending: per monitor, the stable sequences of fresh windows (append at the end).
+    // lastMonitor: stable sequence -> monitor the window was last seen on (close path).
+    // grabMonitor: stable sequence -> monitor at grab start (manual move across monitors).
+    pending: new Map(),
+    lastMonitor: new Map(),
+    grabMonitor: new Map(),
     workspaceSignals: [],
     signals: [],
     tracked: [],
@@ -568,22 +574,33 @@ const tile_auto_window_ok = (w) => {
     return w != null && !w.minimized && w.get_wm_class() != null
         && w.get_window_type() === Meta.WindowType.NORMAL;
 };
-const tile_auto_disarm_timer = () => {
-    if (tile_auto.timeout) {
-        tile_Mainloop.source_remove(tile_auto.timeout);
-        tile_auto.timeout = 0;
+// Per-monitor debounce: every monitor has its own pending timer, so a burst on one
+// monitor does not delay or cancel a retile on another. The timer re-checks that the
+// monitor still exists and that automatic tiling is still on for the active workspace.
+const tile_auto_schedule_monitor = (app, monitorIndex, ms) => {
+    const existing = tile_auto.timers.get(monitorIndex);
+    if (existing) {
+        tile_Mainloop.source_remove(existing);
+        tile_auto.timers.delete(monitorIndex);
     }
-};
-const tile_auto_schedule = (app, ms) => {
-    if (!tile_auto_engaged(app))
-        return;
-    tile_auto_disarm_timer();
-    tile_auto.timeout = tile_Mainloop.timeout_add(ms, () => {
-        tile_auto.timeout = 0;
-        if (tile_auto_engaged(app))
-            tile_retile(app);
+    tile_auto.timers.set(monitorIndex, tile_Mainloop.timeout_add(ms, () => {
+        tile_auto.timers.delete(monitorIndex);
+        // The App is recreated when monitors change, so indexes never survive a change;
+        // a timer for a monitor that is gone (or no longer ready) must do nothing.
+        if (!tile_monitors.ready || !utils_Main.layoutManager.monitors[monitorIndex])
+            return false;
+        if (tile_layout_for(app, monitorIndex, global.workspace_manager.get_active_workspace().index()).auto)
+            tile_retile_monitor(app, monitorIndex, null);
         return false;
-    });
+    }));
+};
+const tile_auto_schedule_all = (app, ms) => {
+    const wsIndex = global.workspace_manager.get_active_workspace().index();
+    const count = utils_Main.layoutManager.monitors.length;
+    for (let i = 0; i < count; i++) {
+        if (tile_layout_for(app, i, wsIndex).auto)
+            tile_auto_schedule_monitor(app, i, ms);
+    }
 };
 // Automatic tiling is switched per monitor and workspace (stored in the "layouts"
 // setting): Super+Ctrl+A turns it on for the focused monitor and the active workspace
@@ -591,48 +608,80 @@ const tile_auto_schedule = (app, ms) => {
 // grid); pressing it again just tiles again. Super+Ctrl+D turns it off; that also
 // pauses a preset, which stays assigned and comes back with Super+Ctrl+A.
 const tile_auto_activate = (app) => {
-    const monitorIndex = tile_focus_monitor_index();
+    const focusWindow = tile_focus_window();
+    const monitorIndex = focusWindow ? focusWindow.get_monitor() : utils_Main.layoutManager.primaryIndex;
     const wsIndex = global.workspace_manager.get_active_workspace().index();
     if (!tile_layout_for(app, monitorIndex, wsIndex).auto) {
         tile_layout_set(app, monitorIndex, wsIndex, { auto: true });
         global.log('greenTile auto tiling on for ws' + wsIndex);
     }
-    tile_auto_disarm_timer();
     tile_auto.pending.clear();
-    tile_retile(app);
+    tile_retile_monitor(app, monitorIndex, focusWindow);
 };
 const tile_auto_deactivate = (app) => {
     const monitorIndex = tile_focus_monitor_index();
     const wsIndex = global.workspace_manager.get_active_workspace().index();
     tile_layout_set(app, monitorIndex, wsIndex, { auto: false });
-    tile_auto_disarm_timer();
     tile_auto.pending.clear();
     global.log('greenTile auto tiling off for ws' + wsIndex);
 };
 const tile_auto_on_window_added = (app, ws, w) => {
-    if (ws !== global.workspace_manager.get_active_workspace() || !tile_auto_engaged(app))
+    if (ws !== global.workspace_manager.get_active_workspace())
         return;
     if (w == null || w.get_window_type() !== Meta.WindowType.NORMAL)
         return;
-    tile_auto.pending.add(w.get_stable_sequence());
-    tile_auto_schedule(app, 300);
+    const monitorIndex = w.get_monitor();
+    let pending = tile_auto.pending.get(monitorIndex);
+    if (!pending) {
+        pending = new Set();
+        tile_auto.pending.set(monitorIndex, pending);
+    }
+    pending.add(w.get_stable_sequence());
+    tile_auto.lastMonitor.set(w.get_stable_sequence(), monitorIndex);
+    tile_auto_schedule_monitor(app, monitorIndex, 300);
 };
-const tile_auto_on_window_removed = (app, ws) => {
-    // No access to the removed window here — it may already be destroyed.
-    if (ws !== global.workspace_manager.get_active_workspace() || !tile_auto_engaged(app))
+const tile_auto_on_window_removed = (app, ws, w) => {
+    if (ws !== global.workspace_manager.get_active_workspace())
         return;
-    tile_auto_schedule(app, 300);
+    if (w == null)
+        return;
+    // The wrapper may already be destroyed; its stable sequence still maps to the
+    // monitor the window was last seen on — without a record there is nothing to retile.
+    let seq;
+    try {
+        seq = w.get_stable_sequence();
+    }
+    catch (e) {
+        return;
+    }
+    const monitorIndex = tile_auto.lastMonitor.get(seq);
+    if (monitorIndex === undefined)
+        return;
+    tile_auto_schedule_monitor(app, monitorIndex, 300);
 };
-const tile_auto_on_grab_end = (app, w, op) => {
-    if (!tile_auto_engaged(app))
-        return;
+const tile_auto_on_grab_begin = (app, w, op) => {
     if (op !== Meta.GrabOp.MOVING && op !== Meta.GrabOp.KEYBOARD_MOVING)
         return;
     if (!tile_auto_window_ok(w))
         return;
+    tile_auto.grabMonitor.set(w.get_stable_sequence(), w.get_monitor());
+};
+const tile_auto_on_grab_end = (app, w, op) => {
+    if (!tile_auto_window_ok(w))
+        return;
+    if (op !== Meta.GrabOp.MOVING && op !== Meta.GrabOp.KEYBOARD_MOVING)
+        return;
     if (w.get_workspace() !== global.workspace_manager.get_active_workspace())
         return;
-    tile_auto_schedule(app, 250);
+    const seq = w.get_stable_sequence();
+    const from = tile_auto.grabMonitor.get(seq);
+    tile_auto.grabMonitor.delete(seq);
+    const to = w.get_monitor();
+    // Manual moves can cross monitors: both the monitor at grab start and the one at
+    // release may need a retile (one call when equal, per-monitor timers anyway).
+    if (from !== undefined && from !== to)
+        tile_auto_schedule_monitor(app, from, 250);
+    tile_auto_schedule_monitor(app, to, 250);
 };
 // Minimizing does NOT fire workspace window-removed (the window stays on its
 // workspace), and Meta.Display has no 'window-minimize' signal in muffin 6.6 —
@@ -647,19 +696,17 @@ const tile_auto_any_window = (args) => {
     return null;
 };
 const tile_auto_on_minimized_notify = (app, w) => {
-    if (!tile_auto_engaged(app))
-        return;
-    if (w.get_window_type() !== Meta.WindowType.NORMAL)
+    if (w == null || w.get_window_type() !== Meta.WindowType.NORMAL)
         return;
     if (w.get_workspace() !== global.workspace_manager.get_active_workspace())
         return;
-    tile_auto_schedule(app, 300);
+    tile_auto_schedule_monitor(app, w.get_monitor(), 300);
 };
 const tile_auto_untrack = (w) => {
     const idx = tile_auto.tracked.findIndex(([tw]) => tw === w);
     if (idx === -1)
         return;
-    const [_, mid, uid] = tile_auto.tracked[idx];
+    const [_, mid, uid, seq] = tile_auto.tracked[idx];
     try {
         w.disconnect(mid);
         w.disconnect(uid);
@@ -667,6 +714,8 @@ const tile_auto_untrack = (w) => {
     catch (e) {
         // window already destroyed — wrapper invalid, nothing to clean
     }
+    tile_auto.lastMonitor.delete(seq);
+    tile_auto.grabMonitor.delete(seq);
     tile_auto.tracked.splice(idx, 1);
 };
 const tile_auto_track_window = (app, w) => {
@@ -676,7 +725,11 @@ const tile_auto_track_window = (app, w) => {
         return;
     const mid = w.connect('notify::minimized', () => tile_auto_on_minimized_notify(app, w));
     const uid = w.connect('unmanaged', () => tile_auto_untrack(w));
-    tile_auto.tracked.push([w, mid, uid]);
+    const seq = w.get_stable_sequence();
+    // Spec: a tracked window records its monitor when it is tracked — the close
+    // path needs it because the window is gone when window-removed arrives.
+    tile_auto.lastMonitor.set(seq, w.get_monitor());
+    tile_auto.tracked.push([w, mid, uid, seq]);
 };
 const tile_auto_disconnect_workspaces = () => {
     for (const [ws, a, r] of tile_auto.workspaceSignals) {
@@ -687,8 +740,13 @@ const tile_auto_disconnect_workspaces = () => {
 };
 const tile_auto_connect_workspace = (app, ws) => {
     const a = ws.connect('window-added', (ws_, w) => tile_auto_on_window_added(app, ws_, w));
-    const r = ws.connect('window-removed', (ws_) => tile_auto_on_window_removed(app, ws_));
+    const r = ws.connect('window-removed', (ws_, w) => tile_auto_on_window_removed(app, ws_, w));
     tile_auto.workspaceSignals.push([ws, a, r]);
+};
+const tile_auto_on_entered_monitor = (app, monitorIndex, w) => {
+    if (w == null)
+        return;
+    tile_auto.lastMonitor.set(w.get_stable_sequence(), monitorIndex);
 };
 const tile_auto_connect_all = (app) => {
     const n = global.screen.get_n_workspaces();
@@ -704,11 +762,21 @@ const tile_auto_connect_all = (app) => {
                 tile_auto_connect_workspace(app, global.screen.get_workspace_by_index(j));
         }),
     ]);
-    // Muffin 6.6 emits grab-op-end as (display, display, window, op) — the display
-    // is passed twice (legacy screen slot). Verified via live signal probe.
+    // Muffin 6.6 emits grab-op-begin/end as (display, display, window, op) — the
+    // display is passed twice (legacy screen slot). Verified via live signal probe.
+    tile_auto.signals.push([
+        global.display,
+        global.display.connect('grab-op-begin', (display, display2, w, op) => tile_auto_on_grab_begin(app, w, op)),
+    ]);
     tile_auto.signals.push([
         global.display,
         global.display.connect('grab-op-end', (display, display2, w, op) => tile_auto_on_grab_end(app, w, op)),
+    ]);
+    // Cross-monitor moves: (monitor index, MetaWindow), signature verified live
+    // via GObject.signal_query.
+    tile_auto.signals.push([
+        global.display,
+        global.display.connect('window-entered-monitor', (display, monitorIndex, w) => tile_auto_on_entered_monitor(app, monitorIndex, w)),
     ]);
     // Arg scan by duck typing guards against muffin signature quirks (grab-op
     // passes the display twice). window-created wires minimize tracking for
@@ -727,15 +795,16 @@ const tile_auto_connect_all = (app) => {
     // windowManager.js:358 uses this signal with (wm, from, to, direction)).
         tile_auto.signals.push([
             global.window_manager,
-            global.window_manager.connect('switch-workspace', (wm, from, to) => {
-                const focusWindow = tile_focus_window();
-                if (tile_layout_for(app, focusWindow ? focusWindow.get_monitor() : utils_Main.layoutManager.primaryIndex, to).auto)
-                    tile_auto_schedule(app, 300);
-            }),
+            global.window_manager.connect('switch-workspace', (wm, from, to) => tile_auto_schedule_all(app, 300)),
         ]);
 };
 const tile_auto_disconnect_all = () => {
-    tile_auto_disarm_timer();
+    for (const id of tile_auto.timers.values())
+        tile_Mainloop.source_remove(id);
+    tile_auto.timers.clear();
+    tile_auto.pending.clear();
+    tile_auto.lastMonitor.clear();
+    tile_auto.grabMonitor.clear();
     tile_auto_disconnect_workspaces();
     for (const [obj, id] of tile_auto.signals)
         obj.disconnect(id);
@@ -908,26 +977,26 @@ const tile_place_stacks = (app, ordered, stacks, screenX, screenY, screenWidth, 
         }
     }
 };
-const tile_preset_retile = (app) => {
-    const focusWindow = tile_focus_window();
-    if (!focusWindow)
+const tile_preset_retile = (app, monitorIndex, focusWindow) => {
+    const monitor = utils_Main.layoutManager.monitors[monitorIndex];
+    if (!monitor)
         return;
     const wsIndex = global.workspace_manager.get_active_workspace().index();
-    const preset = tile_layout_for(app, focusWindow.get_monitor(), wsIndex).preset;
+    const preset = tile_layout_for(app, monitorIndex, wsIndex).preset;
     if (!preset)
         return;
-    const monitor = utils_Main.layoutManager.monitors[focusWindow.get_monitor()];
     const [screenX, screenY, screenWidth, screenHeight] = getUsableScreenArea(monitor);
     const windows = tile_collect_windows(monitor, focusWindow);
-    const n = windows.length + 1;
+    const focused = focusWindow && !focusWindow.minimized && focusWindow.get_monitor() === monitorIndex;
+    const n = windows.length + (focused ? 1 : 0);
     if (n < 2)
         return;
     const rule = tile_rules_pick(preset.rules, n);
     if (!rule || !rule.stacks || rule.stacks.length === 0)
         return;
-    const ordered = tile_sort_reading_order([focusWindow].concat(windows), true);
+    const ordered = tile_sort_reading_order((focused ? [focusWindow] : []).concat(windows), true);
     tile_place_stacks(app, ordered, rule.stacks, screenX, screenY, screenWidth, screenHeight);
-    global.log('greenTile preset "' + preset.name + '" applied ws' + wsIndex + ' n=' + n + ' stacks=[' + rule.stacks.join(',') + ']');
+    global.log('greenTile preset "' + preset.name + '" applied ws' + (wsIndex + 1) + ' mon=' + (tile_monitors.keys[monitorIndex] || '?') + ' n=' + n + ' stacks=[' + rule.stacks.join(',') + ']');
 };
 // >>> auto-model (pure functions, no Cinnamon imports; tested by tests/auto-model.test.js)
 // Legacy per-workspace automatic tiling list "autoWorkspaces": rows
@@ -1044,16 +1113,18 @@ const tile_layouts_migrate = (wsPresets, autoList, mkey) => {
     return Object.keys(migrated).length === 0 ? {} : { [mkey]: migrated };
 };
 // <<< layouts-model
-// Observer layout source: the observers (window added/removed, minimize, snap after a
-// move, workspace switch) only act on monitor/workspace pairs with automatic tiling on
-// (monitor of the focused window until the observer wiring is per monitor).
-const tile_auto_engaged = (app) => tile_layout_for(app, tile_focus_monitor_index(), global.workspace_manager.get_active_workspace().index()).auto;
-const tile_retile = (app) => {
-    if (tile_layout_for(app, tile_focus_monitor_index(), global.workspace_manager.get_active_workspace().index()).preset) {
-        tile_preset_retile(app);
+// Retiles exactly one monitor: preset layout when (monitor, workspace) has one, else
+// the auto grid when automatic tiling is on. Monitors whose entry has automatic tiling
+// off are left alone — hotkeys retile directly and do not come through here.
+const tile_retile_monitor = (app, monitorIndex, focusWindow) => {
+    if (!tile_monitors.ready || !utils_Main.layoutManager.monitors[monitorIndex])
         return;
-    }
-    tile_app_auto(app);
+    const wsIndex = global.workspace_manager.get_active_workspace().index();
+    const layout = tile_layout_for(app, monitorIndex, wsIndex);
+    if (layout.preset)
+        tile_preset_retile(app, monitorIndex, focusWindow);
+    else if (layout.auto)
+        tile_app_auto(app, monitorIndex, focusWindow);
 };
 // >>> editor-model (pure functions, no Cinnamon imports; tested by tests/editor-model.test.js)
 // Preset editor model. A rule is {min, stacks}; stacks[i] = windows stacked in column i.
@@ -1268,8 +1339,9 @@ const tile_panel_row = (app, preset, n) => {
         // whose automatic tiling was switched off (Super+Ctrl+D) is switched on again.
         if (!tile_layout_for(app, monitorIndex, wsIndex).auto)
             tile_layout_set(app, monitorIndex, wsIndex, { auto: true });
+        const focusWindow = tile_focus_window();
         tile_panel_close();
-        tile_preset_retile(app);
+        tile_retile_monitor(app, monitorIndex, focusWindow);
     });
     return row;
 };
@@ -1314,7 +1386,7 @@ const tile_editor_save = (app, errorLabel) => {
     const wsIndex = global.workspace_manager.get_active_workspace().index();
     const layout = tile_layout_for(app, tile_focus_monitor_index(), wsIndex);
     if (layout.preset && layout.preset.id === preset.id && layout.auto)
-        tile_preset_retile(app);
+        tile_retile_monitor(app, tile_focus_monitor_index(), tile_focus_window());
 };
 const tile_editor_rule_row = (rule, active, last, onSelect) => {
     const row = new tile_St.Button({
@@ -1551,7 +1623,7 @@ const tile_panel_gap_row = (app) => {
         const gap = tile_gap_value(tile_gap(app) + delta);
         app.config.settings.setValue('windowGap', gap);
         show(gap);
-        tile_auto_schedule(app, 150);
+        tile_auto_schedule_monitor(app, tile_focus_monitor_index(), 150);
     };
     minus.connect('clicked', () => change(-TILE_GAP_STEP));
     plus.connect('clicked', () => change(TILE_GAP_STEP));
