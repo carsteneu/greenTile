@@ -2,23 +2,14 @@
    "layout": {
       "type": "layout",
       "pages": [
-         "general-tab",
-         "hotkeys-tab",
-         "behaviour-tab"
+         "settings-tab",
+         "hotkeys-tab"
       ],
-      "general-tab": {
+      "settings-tab": {
          "type": "page",
-         "title": "General",
+         "title": "Settings",
          "sections": [
-            "auto-workspaces-section"
-         ]
-      },
-      "auto-workspaces-section": {
-         "type": "section",
-         "title": "Automatic tiling per workspace",
-         "keys": [
-            "autoWorkspaces",
-            "auto-workspaces-legend"
+            "behaviour-section"
          ]
       },
       "hotkeys-tab": {
@@ -30,13 +21,6 @@
              "preset-section",
              "keybindings-legend-section"
           ]
-      },
-      "behaviour-tab": {
-         "type": "page",
-         "title": "Behavior",
-         "sections": [
-            "behaviour-section"
-         ]
       },
       "help": {
          "type": "page",
@@ -80,7 +64,7 @@
       },
       "behaviour-section": {
          "type": "section",
-         "title": "Behavior",
+         "title": "Classic grid (Super+G)",
          "keys": [
             "animation",
             "autoclose",
@@ -151,17 +135,12 @@
    },
    "autoWorkspaces": {
       "type": "list",
-      "description": "Automatic tiling per workspace",
-      "tooltip": "One row per workspace (number as shown in the preset panel). Super+Ctrl+A and Super+Ctrl+D add or update rows. Workspaces without a row tile automatically only when they have a preset.",
+      "description": "Automatic tiling per workspace (set with Super+Ctrl+A / Super+Ctrl+D or in the preset panel; not shown in this dialog)",
       "columns": [
          {"id": "workspace", "title": "Workspace", "type": "integer", "min": 1, "max": 36, "step": 1},
          {"id": "auto", "title": "Tile automatically", "type": "boolean"}
       ],
       "default": []
-   },
-   "auto-workspaces-legend": {
-      "type": "label",
-      "description": "Super+Ctrl+A turns automatic tiling on for the active workspace and tiles right away, Super+Ctrl+D turns it off (a preset stays assigned but is paused). Workspaces without a row: on with a preset, off without. Removing a row returns the workspace to that rule."
    },
    "animation": {
       "type": "checkbox",
