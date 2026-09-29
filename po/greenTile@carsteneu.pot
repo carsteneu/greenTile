@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: greenTile 0.1.0\n"
 "Report-Msgid-Bugs-To: https://github.com/carsteneu\n"
-"POT-Creation-Date: 2026-09-29 13:07+0200\n"
+"POT-Creation-Date: 2026-09-29 14:10+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,123 +17,123 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: greenTile.js:1811
+#: greenTile.js:1813
 #, javascript-format
 msgid "assigned — workspace %d"
 msgstr ""
 
-#: greenTile.js:1872
+#: greenTile.js:1874
 msgid "Please enter a name."
 msgstr ""
 
-#: greenTile.js:1895
+#: greenTile.js:1897
 #, javascript-format
 msgid "from %d"
 msgstr ""
 
-#: greenTile.js:2012
+#: greenTile.js:2014
 msgid "Rules (by window count)"
 msgstr ""
 
-#: greenTile.js:2016
+#: greenTile.js:2018
 msgid "Rule"
 msgstr ""
 
-#: greenTile.js:2017
+#: greenTile.js:2019
 msgid "Delete rule"
 msgstr ""
 
-#: greenTile.js:2025
+#: greenTile.js:2027
 msgid "Rule applies from"
 msgstr ""
 
-#: greenTile.js:2032
+#: greenTile.js:2034
 msgid "windows"
 msgstr ""
 
-#: greenTile.js:2034
+#: greenTile.js:2036
 msgid "Painter"
 msgstr ""
 
-#: greenTile.js:2049
+#: greenTile.js:2051
 msgid ""
 "Click or drag: the row sets how many windows the column holds. Right-click "
 "removes a column."
 msgstr ""
 
-#: greenTile.js:2054
+#: greenTile.js:2056
 msgid "Name"
 msgstr ""
 
-#: greenTile.js:2055
+#: greenTile.js:2057
 msgid "Preset name"
 msgstr ""
 
-#: greenTile.js:2059
+#: greenTile.js:2061
 msgid "Save"
 msgstr ""
 
-#: greenTile.js:2076
+#: greenTile.js:2078
 #, javascript-format
 msgid "Result: %s"
 msgstr ""
 
-#: greenTile.js:2456
+#: greenTile.js:2532
 msgid "Gap between windows"
 msgstr ""
 
-#: greenTile.js:2461
+#: greenTile.js:2537
 #, javascript-format
 msgid "%d px"
 msgstr ""
 
-#: greenTile.js:2480
+#: greenTile.js:2556
 msgid "Reset sizes"
 msgstr ""
 
-#: greenTile.js:2511
+#: greenTile.js:2587
 #, javascript-format
 msgid "Presets — workspace %d · %s"
 msgstr ""
 
-#: greenTile.js:2513
+#: greenTile.js:2589
 msgid "Create preset"
 msgstr ""
 
-#: greenTile.js:2513
+#: greenTile.js:2589
 #, javascript-format
 msgid "Edit %s"
 msgstr ""
 
-#: greenTile.js:2517
+#: greenTile.js:2593
 msgid "Back"
 msgstr ""
 
-#: greenTile.js:2526
+#: greenTile.js:2602
 msgid "Auto: on"
 msgstr ""
 
-#: greenTile.js:2526
+#: greenTile.js:2602
 msgid "Auto: off"
 msgstr ""
 
-#: greenTile.js:2547
+#: greenTile.js:2623
 msgid "Dark theme"
 msgstr ""
 
-#: greenTile.js:2547
+#: greenTile.js:2623
 msgid "Light theme"
 msgstr ""
 
-#: greenTile.js:2667
+#: greenTile.js:2743
 msgid "No presets yet."
 msgstr ""
 
-#: greenTile.js:2682
+#: greenTile.js:2758
 msgid "New preset"
 msgstr ""
 
-#: greenTile.js:2685
+#: greenTile.js:2761
 msgid "Click a row to apply it to this workspace and tile right away"
 msgstr ""
 
@@ -284,7 +284,13 @@ msgid ""
 msgstr ""
 
 #. settings-schema.json->accentMode->options
+#. settings-schema.json->stateMode->options
 msgid "Follow theme"
+msgstr ""
+
+#. settings-schema.json->accentMode->options
+#. settings-schema.json->stateMode->options
+msgid "Custom"
 msgstr ""
 
 #. settings-schema.json->accentColor->description
@@ -293,4 +299,27 @@ msgstr ""
 
 #. settings-schema.json->accentColor->tooltip
 msgid "Accent of the preset panel and editor when Accent color is Custom."
+msgstr ""
+
+#. settings-schema.json->stateMode->description
+msgid "State color"
+msgstr ""
+
+#. settings-schema.json->stateMode->tooltip
+msgid ""
+"Color of the \"Auto: on\" marker and the assigned rows. Green keeps today's "
+"look. Follow theme tracks the accent color of the Cinnamon theme live. "
+"Custom uses the color below."
+msgstr ""
+
+#. settings-schema.json->stateMode->options
+msgid "Green"
+msgstr ""
+
+#. settings-schema.json->stateColor->description
+msgid "Custom state color"
+msgstr ""
+
+#. settings-schema.json->stateColor->tooltip
+msgid "State color of the preset panel when State color is Custom."
 msgstr ""
