@@ -1,3 +1,9 @@
 *.bak
 *.orig
 *.mo
+
+# internal working documents, kept local
+docs/todo.md
+docs/research/
+docs/superpowers/
+.worktrees/
