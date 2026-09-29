@@ -33,6 +33,8 @@ The starting point was the shipped webpack bundle `5.4/gTile.js` of gTile 2.2.1,
 | `Super+G` | Never tile the focused window — press again to tile it again (forgotten when the window is closed) |
 | `Super+Alt+Right` / `Super+Alt+Left` | Make the focused tiled window wider / narrower (tap = 1 px, hold to speed up) |
 | `Super+Alt+Down` / `Super+Alt+Up` | Make the focused tiled window taller / shorter |
+| `Super+Ctrl+Left` / `Super+Ctrl+Right` | Swap the focused tiled window with its neighbor to the left / right (see [Swapping windows](#swapping-windows)) |
+| `Super+Ctrl+Up` / `Super+Ctrl+Down` | Swap the focused tiled window with its neighbor above / below |
 
 All keys can be changed in the extension settings (Extensions manager, or ⚙ in the preset panel).
 
@@ -113,6 +115,17 @@ Tiled windows do not have to share the area equally. Where automatic tiling is o
 - **Reset sizes** in the preset panel removes all borders of the monitor and workspace.
 - Not for `Super+Ctrl+3/6`. With automatic tiling off, resizing a window stays a free resize.
 - Known limitation: applications with their own minimum size may refuse to shrink to their cell; windows can then overlap.
+
+## Swapping windows
+
+`Super+Ctrl+Left/Right/Up/Down` swaps the focused tiled window with its neighbour in that direction: only the two windows exchange cells, borders (splits) and every other window keep their place. The neighbour is the cell in the pressed direction that overlaps on the perpendicular axis — from a stacked cell, Right moves to the window at about the same height in the next column.
+
+Where nothing neighbours in the pressed direction, Left/Right continue along the monitor chain, monitors ordered left to right by geometry:
+
+- Right past the rightmost monitor pushes the focused window onto the next workspace, landing in the first slot of its leftmost monitor; Left past the leftmost monitor mirrors that onto the previous workspace (last slot of the rightmost monitor). Nothing happens at the first/last workspace (no wrap).
+- Between monitors the window lands in the edge slot of the neighbour monitor, chosen by the best vertical overlap with the window so it stays at about the same height. Landing is an insert, not a swap: the target retiles with one window more, the source with one less.
+
+Focus stays on the moved window in every case, so repeated presses walk the same window along the chain. Nothing happens when no window is focused, when it is excluded from tiling or on all workspaces, for Up/Down at the top/bottom edge, and for Up/Down when nothing neighbours the window. On a monitor without an active tiling a Left/Right press moves the window there untiled (size kept) and the next press pushes it on. With Muffin's `workspaces-only-on-primary` on, workspace steps only anchor on the primary monitor; from a non-primary monitor the chain ends at the last monitor without changing the workspace.
 
 ## Per-monitor layouts
 

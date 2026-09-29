@@ -9,7 +9,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: greenTile 0.1.0\n"
 "Report-Msgid-Bugs-To: https://github.com/carsteneu\n"
-"POT-Creation-Date: 2026-09-29 14:56+0200\n"
+"POT-Creation-Date: 2026-09-29 16:14+0200\n"
 "PO-Revision-Date: 2026-09-28 17:17+0200\n"
 "Last-Translator: carsten_eu\n"
 "Language-Team: German\n"
@@ -21,57 +21,57 @@ msgstr ""
 "X-Generator: Poedit 2.3\n"
 
 #. settings-schema.json->excludeAppPicker->options
-#: greenTile.js:387
+#: greenTile.js:430
 msgid "Add application …"
 msgstr "Anwendung hinzufügen …"
 
-#: greenTile.js:406
+#: greenTile.js:449
 msgid "Window floats"
 msgstr "Fenster schwebt frei"
 
-#: greenTile.js:406
+#: greenTile.js:449
 msgid "Window tiles again"
 msgstr "Fenster wird wieder gekachelt"
 
-#: greenTile.js:1992
+#: greenTile.js:2248
 #, javascript-format
 msgid "assigned — workspace %d"
 msgstr "zugewiesen — Fläche %d"
 
-#: greenTile.js:2053
+#: greenTile.js:2309
 msgid "Please enter a name."
 msgstr "Bitte einen Namen eingeben."
 
-#: greenTile.js:2076
+#: greenTile.js:2332
 #, javascript-format
 msgid "from %d"
 msgstr "ab %d"
 
-#: greenTile.js:2193
+#: greenTile.js:2449
 msgid "Rules (by window count)"
 msgstr "Regeln (nach Fensterzahl)"
 
-#: greenTile.js:2197
+#: greenTile.js:2453
 msgid "Rule"
 msgstr "Regel"
 
-#: greenTile.js:2198
+#: greenTile.js:2454
 msgid "Delete rule"
 msgstr "Regel löschen"
 
-#: greenTile.js:2206
+#: greenTile.js:2462
 msgid "Rule applies from"
 msgstr "Regel gilt ab"
 
-#: greenTile.js:2213
+#: greenTile.js:2469
 msgid "windows"
 msgstr "Fenstern"
 
-#: greenTile.js:2215
+#: greenTile.js:2471
 msgid "Painter"
 msgstr "Malerei"
 
-#: greenTile.js:2230
+#: greenTile.js:2486
 msgid ""
 "Click or drag: the row sets how many windows the column holds. Right-click "
 "removes a column."
@@ -79,79 +79,79 @@ msgstr ""
 "Klicken oder ziehen: Die Zeile legt fest, wie viele Fenster die Spalte "
 "aufnimmt. Rechtsklick entfernt eine Spalte."
 
-#: greenTile.js:2235
+#: greenTile.js:2491
 msgid "Name"
 msgstr "Name"
 
-#: greenTile.js:2236
+#: greenTile.js:2492
 msgid "Preset name"
 msgstr "Name des Presets"
 
-#: greenTile.js:2240
+#: greenTile.js:2496
 msgid "Save"
 msgstr "Speichern"
 
-#: greenTile.js:2257
+#: greenTile.js:2513
 #, javascript-format
 msgid "Result: %s"
 msgstr "Ergebnis: %s"
 
-#: greenTile.js:2711
+#: greenTile.js:2986
 msgid "Gap between windows"
 msgstr "Abstand zwischen Fenstern"
 
-#: greenTile.js:2716
+#: greenTile.js:2991
 #, javascript-format
 msgid "%d px"
 msgstr "%d px"
 
-#: greenTile.js:2735
+#: greenTile.js:3010
 msgid "Reset sizes"
 msgstr "Größen zurücksetzen"
 
-#: greenTile.js:2766
+#: greenTile.js:3041
 #, javascript-format
 msgid "Presets — workspace %d · %s"
 msgstr "Presets — Arbeitsfläche %d · %s"
 
-#: greenTile.js:2768
+#: greenTile.js:3043
 msgid "Create preset"
 msgstr "Neues Preset"
 
-#: greenTile.js:2768
+#: greenTile.js:3043
 #, javascript-format
 msgid "Edit %s"
 msgstr "%s bearbeiten"
 
-#: greenTile.js:2772
+#: greenTile.js:3047
 msgid "Back"
 msgstr "zurück"
 
-#: greenTile.js:2781
+#: greenTile.js:3056
 msgid "Auto: on"
 msgstr "Auto: an"
 
-#: greenTile.js:2781
+#: greenTile.js:3056
 msgid "Auto: off"
 msgstr "Auto: aus"
 
-#: greenTile.js:2802
+#: greenTile.js:3077
 msgid "Dark theme"
 msgstr "Dunkles Design"
 
-#: greenTile.js:2802
+#: greenTile.js:3077
 msgid "Light theme"
 msgstr "Helles Design"
 
-#: greenTile.js:2922
+#: greenTile.js:3197
 msgid "No presets yet."
 msgstr "Noch keine Presets vorhanden."
 
-#: greenTile.js:2937
+#: greenTile.js:3212
 msgid "New preset"
 msgstr "Neu anlegen"
 
-#: greenTile.js:2940
+#: greenTile.js:3215
 msgid "Click a row to apply it to this workspace and tile right away"
 msgstr "Klick auf eine Zeile = sofort auf dieser Fläche anwenden & kacheln"
 
@@ -186,6 +186,11 @@ msgstr "Presets für Arbeitsflächen"
 #. settings-schema.json->resize-section->title
 msgid "Resize tiled windows"
 msgstr "Größe gekachelter Fenster ändern"
+
+#. settings-schema.json->swap-section->title
+#| msgid "windows"
+msgid "Swap windows"
+msgstr "Fenster tauschen"
 
 #. settings-schema.json->tiling-section->title
 msgid "Tiling"
@@ -238,6 +243,26 @@ msgstr "Fokussiertes gekacheltes Fenster höher machen"
 #. settings-schema.json->resizeShorterHotkey->description
 msgid "Make the focused tiled window shorter"
 msgstr "Fokussiertes gekacheltes Fenster niedriger machen"
+
+#. settings-schema.json->swapLeftHotkey->description
+#| msgid "Make the focused tiled window shorter"
+msgid "Swap the focused tiled window with its neighbor to the left"
+msgstr "Das fokussierte gekachelte Fenster mit dem Nachbarn links tauschen"
+
+#. settings-schema.json->swapRightHotkey->description
+#| msgid "Make the focused tiled window shorter"
+msgid "Swap the focused tiled window with its neighbor to the right"
+msgstr "Das fokussierte gekachelte Fenster mit dem Nachbarn rechts tauschen"
+
+#. settings-schema.json->swapUpHotkey->description
+#| msgid "Make the focused tiled window shorter"
+msgid "Swap the focused tiled window with its neighbor above"
+msgstr "Das fokussierte gekachelte Fenster mit dem Nachbarn darüber tauschen"
+
+#. settings-schema.json->swapDownHotkey->description
+#| msgid "Make the focused tiled window shorter"
+msgid "Swap the focused tiled window with its neighbor below"
+msgstr "Das fokussierte gekachelte Fenster mit dem Nachbarn darunter tauschen"
 
 #. settings-schema.json->presets->description
 msgid "Preset definitions (JSON)"

@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: greenTile 0.1.0\n"
 "Report-Msgid-Bugs-To: https://github.com/carsteneu\n"
-"POT-Creation-Date: 2026-09-29 14:56+0200\n"
+"POT-Creation-Date: 2026-09-29 16:14+0200\n"
 "PO-Revision-Date: 2022-12-15 23:42+0900\n"
 "Last-Translator: \n"
 "Language-Team: Japanese\n"
@@ -19,139 +19,139 @@ msgstr ""
 "X-Generator: Poedit 3.2.2\n"
 
 #. settings-schema.json->excludeAppPicker->options
-#: greenTile.js:387
+#: greenTile.js:430
 msgid "Add application …"
 msgstr ""
 
-#: greenTile.js:406
+#: greenTile.js:449
 msgid "Window floats"
 msgstr ""
 
-#: greenTile.js:406
+#: greenTile.js:449
 msgid "Window tiles again"
 msgstr ""
 
-#: greenTile.js:1992
+#: greenTile.js:2248
 #, javascript-format
 msgid "assigned — workspace %d"
 msgstr ""
 
-#: greenTile.js:2053
+#: greenTile.js:2309
 msgid "Please enter a name."
 msgstr ""
 
-#: greenTile.js:2076
+#: greenTile.js:2332
 #, javascript-format
 msgid "from %d"
 msgstr ""
 
-#: greenTile.js:2193
+#: greenTile.js:2449
 msgid "Rules (by window count)"
 msgstr ""
 
-#: greenTile.js:2197
+#: greenTile.js:2453
 msgid "Rule"
 msgstr ""
 
-#: greenTile.js:2198
+#: greenTile.js:2454
 msgid "Delete rule"
 msgstr ""
 
-#: greenTile.js:2206
+#: greenTile.js:2462
 msgid "Rule applies from"
 msgstr ""
 
-#: greenTile.js:2213
+#: greenTile.js:2469
 msgid "windows"
 msgstr ""
 
-#: greenTile.js:2215
+#: greenTile.js:2471
 msgid "Painter"
 msgstr ""
 
-#: greenTile.js:2230
+#: greenTile.js:2486
 msgid ""
 "Click or drag: the row sets how many windows the column holds. Right-click "
 "removes a column."
 msgstr ""
 
-#: greenTile.js:2235
+#: greenTile.js:2491
 msgid "Name"
 msgstr ""
 
-#: greenTile.js:2236
+#: greenTile.js:2492
 msgid "Preset name"
 msgstr ""
 
-#: greenTile.js:2240
+#: greenTile.js:2496
 msgid "Save"
 msgstr ""
 
-#: greenTile.js:2257
+#: greenTile.js:2513
 #, javascript-format
 msgid "Result: %s"
 msgstr ""
 
-#: greenTile.js:2711
+#: greenTile.js:2986
 msgid "Gap between windows"
 msgstr ""
 
-#: greenTile.js:2716
+#: greenTile.js:2991
 #, javascript-format
 msgid "%d px"
 msgstr ""
 
-#: greenTile.js:2735
+#: greenTile.js:3010
 msgid "Reset sizes"
 msgstr ""
 
-#: greenTile.js:2766
+#: greenTile.js:3041
 #, javascript-format
 msgid "Presets — workspace %d · %s"
 msgstr ""
 
-#: greenTile.js:2768
+#: greenTile.js:3043
 msgid "Create preset"
 msgstr ""
 
-#: greenTile.js:2768
+#: greenTile.js:3043
 #, javascript-format
 msgid "Edit %s"
 msgstr ""
 
-#: greenTile.js:2772
+#: greenTile.js:3047
 msgid "Back"
 msgstr ""
 
-#: greenTile.js:2781
+#: greenTile.js:3056
 #, fuzzy
 #| msgid "Auto close"
 msgid "Auto: on"
 msgstr "自動で閉じる"
 
-#: greenTile.js:2781
+#: greenTile.js:3056
 #, fuzzy
 #| msgid "Auto close"
 msgid "Auto: off"
 msgstr "自動で閉じる"
 
-#: greenTile.js:2802
+#: greenTile.js:3077
 msgid "Dark theme"
 msgstr ""
 
-#: greenTile.js:2802
+#: greenTile.js:3077
 msgid "Light theme"
 msgstr ""
 
-#: greenTile.js:2922
+#: greenTile.js:3197
 msgid "No presets yet."
 msgstr ""
 
-#: greenTile.js:2937
+#: greenTile.js:3212
 msgid "New preset"
 msgstr ""
 
-#: greenTile.js:2940
+#: greenTile.js:3215
 msgid "Click a row to apply it to this workspace and tile right away"
 msgstr ""
 
@@ -187,6 +187,10 @@ msgstr ""
 
 #. settings-schema.json->resize-section->title
 msgid "Resize tiled windows"
+msgstr ""
+
+#. settings-schema.json->swap-section->title
+msgid "Swap windows"
 msgstr ""
 
 #. settings-schema.json->tiling-section->title
@@ -236,6 +240,22 @@ msgstr ""
 
 #. settings-schema.json->resizeShorterHotkey->description
 msgid "Make the focused tiled window shorter"
+msgstr ""
+
+#. settings-schema.json->swapLeftHotkey->description
+msgid "Swap the focused tiled window with its neighbor to the left"
+msgstr ""
+
+#. settings-schema.json->swapRightHotkey->description
+msgid "Swap the focused tiled window with its neighbor to the right"
+msgstr ""
+
+#. settings-schema.json->swapUpHotkey->description
+msgid "Swap the focused tiled window with its neighbor above"
+msgstr ""
+
+#. settings-schema.json->swapDownHotkey->description
+msgid "Swap the focused tiled window with its neighbor below"
 msgstr ""
 
 #. settings-schema.json->presets->description
