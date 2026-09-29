@@ -2022,7 +2022,9 @@ const tile_swap_hotkey = (app, dir) => {
     // though it is no longer active.
     const targetWsIndex = wsIndex + step.delta;
     const nTarget = tile_collect_windows(targetMonitor, null, targetWsIndex).length + 1;
-    focusWindow.change_workspace_by_index(targetWsIndex, false, global.get_current_time());
+    // Muffin's signature is (index, append); Cinnamon's main.js passes a third time
+    // argument that GJS drops with a "Too many arguments" warning.
+    focusWindow.change_workspace_by_index(targetWsIndex, false);
     focusWindow.move_to_monitor(step.monitor);
     global.workspace_manager.get_workspace_by_index(targetWsIndex).activate_with_focus(focusWindow, global.get_current_time());
     const targetLayout = tile_layout_shape(app, step.monitor, nTarget);
