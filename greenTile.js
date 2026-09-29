@@ -264,12 +264,13 @@ const tile_collect_windows = (monitor, focusWindow) => {
 const TILE_ANIMATE_MS = 250;
 const Tweener = imports.ui.tweener;
 // animate = false: the window jumps (resize hotkeys held down retile ~33 times per second;
-// overlapping tweens would make the windows swim).
+// overlapping tweens would make the windows swim). With the setting tileAnimation off
+// every placement jumps; read at each placement, so a change applies from the next tiling.
 const tile_place = (app, metaWindow, x, y, width, height, animate = true) => {
     app.platform.reset_window(metaWindow);
     const oldRect = metaWindow.get_frame_rect();
     const actor = metaWindow.get_compositor_private();
-    if (actor && !animate) {
+    if (actor && (!animate || app.config.settings.getValue('tileAnimation') === false)) {
         Tweener.removeTweens(actor);
         actor.translation_x = 0;
         actor.translation_y = 0;

@@ -9,6 +9,7 @@
          "type": "page",
          "title": "Settings",
          "sections": [
+            "tiling-section",
             "panel-section"
          ]
       },
@@ -47,6 +48,13 @@
             "resizeNarrowerHotkey",
             "resizeTallerHotkey",
             "resizeShorterHotkey"
+         ]
+      },
+      "tiling-section": {
+         "type": "section",
+         "title": "Tiling",
+         "keys": [
+            "tileAnimation"
          ]
       },
       "panel-section": {
@@ -141,6 +149,12 @@
       "step": 2,
       "units": "px",
       "default": 0
+   },
+   "tileAnimation": {
+      "type": "checkbox",
+      "default": true,
+      "description": "Animate tiling",
+      "tooltip": "Windows glide into their new place. Off: they jump there at once."
    },
    "panelTheme": {
       "type": "combobox",

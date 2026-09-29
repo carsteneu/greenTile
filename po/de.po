@@ -9,7 +9,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: greenTile 0.1.0\n"
 "Report-Msgid-Bugs-To: https://github.com/carsteneu\n"
-"POT-Creation-Date: 2026-09-29 12:37+0200\n"
+"POT-Creation-Date: 2026-09-29 12:52+0200\n"
 "PO-Revision-Date: 2026-09-28 17:17+0200\n"
 "Last-Translator: carsten_eu\n"
 "Language-Team: German\n"
@@ -20,45 +20,45 @@ msgstr ""
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 "X-Generator: Poedit 2.3\n"
 
-#: greenTile.js:1808
+#: greenTile.js:1809
 #, javascript-format
 msgid "assigned — workspace %d"
 msgstr "zugewiesen — Fläche %d"
 
-#: greenTile.js:1867
+#: greenTile.js:1868
 msgid "Please enter a name."
 msgstr "Bitte einen Namen eingeben."
 
-#: greenTile.js:1890
+#: greenTile.js:1891
 #, javascript-format
 msgid "from %d"
 msgstr "ab %d"
 
-#: greenTile.js:2006
+#: greenTile.js:2007
 msgid "Rules (by window count)"
 msgstr "Regeln (nach Fensterzahl)"
 
-#: greenTile.js:2010
+#: greenTile.js:2011
 msgid "Rule"
 msgstr "Regel"
 
-#: greenTile.js:2011
+#: greenTile.js:2012
 msgid "Delete rule"
 msgstr "Regel löschen"
 
-#: greenTile.js:2019
+#: greenTile.js:2020
 msgid "Rule applies from"
 msgstr "Regel gilt ab"
 
-#: greenTile.js:2026
+#: greenTile.js:2027
 msgid "windows"
 msgstr "Fenstern"
 
-#: greenTile.js:2028
+#: greenTile.js:2029
 msgid "Painter"
 msgstr "Malerei"
 
-#: greenTile.js:2043
+#: greenTile.js:2044
 msgid ""
 "Click or drag: the row sets how many windows the column holds. Right-click "
 "removes a column."
@@ -66,79 +66,79 @@ msgstr ""
 "Klicken oder ziehen: Die Zeile legt fest, wie viele Fenster die Spalte "
 "aufnimmt. Rechtsklick entfernt eine Spalte."
 
-#: greenTile.js:2048
+#: greenTile.js:2049
 msgid "Name"
 msgstr "Name"
 
-#: greenTile.js:2049
+#: greenTile.js:2050
 msgid "Preset name"
 msgstr "Name des Presets"
 
-#: greenTile.js:2053
+#: greenTile.js:2054
 msgid "Save"
 msgstr "Speichern"
 
-#: greenTile.js:2070
+#: greenTile.js:2071
 #, javascript-format
 msgid "Result: %s"
 msgstr "Ergebnis: %s"
 
-#: greenTile.js:2230
+#: greenTile.js:2231
 msgid "Gap between windows"
 msgstr "Abstand zwischen Fenstern"
 
-#: greenTile.js:2235
+#: greenTile.js:2236
 #, javascript-format
 msgid "%d px"
 msgstr "%d px"
 
-#: greenTile.js:2254
+#: greenTile.js:2255
 msgid "Reset sizes"
 msgstr "Größen zurücksetzen"
 
-#: greenTile.js:2285
+#: greenTile.js:2286
 #, javascript-format
 msgid "Presets — workspace %d · %s"
 msgstr "Presets — Arbeitsfläche %d · %s"
 
-#: greenTile.js:2287
+#: greenTile.js:2288
 msgid "Create preset"
 msgstr "Neues Preset"
 
-#: greenTile.js:2287
+#: greenTile.js:2288
 #, javascript-format
 msgid "Edit %s"
 msgstr "%s bearbeiten"
 
-#: greenTile.js:2291
+#: greenTile.js:2292
 msgid "Back"
 msgstr "zurück"
 
-#: greenTile.js:2300
+#: greenTile.js:2301
 msgid "Auto: on"
 msgstr "Auto: an"
 
-#: greenTile.js:2300
+#: greenTile.js:2301
 msgid "Auto: off"
 msgstr "Auto: aus"
 
-#: greenTile.js:2321
+#: greenTile.js:2322
 msgid "Dark theme"
 msgstr "Dunkles Design"
 
-#: greenTile.js:2321
+#: greenTile.js:2322
 msgid "Light theme"
 msgstr "Helles Design"
 
-#: greenTile.js:2441
+#: greenTile.js:2442
 msgid "No presets yet."
 msgstr "Noch keine Presets vorhanden."
 
-#: greenTile.js:2456
+#: greenTile.js:2457
 msgid "New preset"
 msgstr "Neu anlegen"
 
-#: greenTile.js:2459
+#: greenTile.js:2460
 msgid "Click a row to apply it to this workspace and tile right away"
 msgstr "Klick auf eine Zeile = sofort auf dieser Fläche anwenden & kacheln"
 
@@ -173,6 +173,10 @@ msgstr "Presets für Arbeitsflächen"
 #. settings-schema.json->resize-section->title
 msgid "Resize tiled windows"
 msgstr "Größe gekachelter Fenster ändern"
+
+#. settings-schema.json->tiling-section->title
+msgid "Tiling"
+msgstr "Kacheln"
 
 #. settings-schema.json->panel-section->title
 msgid "Preset panel"
@@ -252,6 +256,14 @@ msgstr ""
 #. settings-schema.json->windowGap->units
 msgid "px"
 msgstr "px"
+
+#. settings-schema.json->tileAnimation->description
+msgid "Animate tiling"
+msgstr "Kacheln animieren"
+
+#. settings-schema.json->tileAnimation->tooltip
+msgid "Windows glide into their new place. Off: they jump there at once."
+msgstr "Fenster gleiten an ihren neuen Platz. Aus: Sie springen sofort dorthin."
 
 #. settings-schema.json->panelTheme->description
 msgid "Theme of the preset panel"

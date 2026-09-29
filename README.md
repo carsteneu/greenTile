@@ -35,6 +35,8 @@ The starting point was the shipped webpack bundle `5.4/gTile.js` of gTile 2.2.1,
 
 All keys can be changed in the extension settings (Extensions manager, or ⚙ in the preset panel).
 
+Tiled windows glide into their new place (250 ms). **Animate tiling** on the **Settings** page (setting `tileAnimation`, default on) turns that off: the windows then jump there at once. It applies to every greenTile layout from the next tiling on; while a resize key is held down, windows always jump.
+
 ## Presets
 
 A preset is a list of rules by window count: each rule defines how many columns there are and how many windows are stacked in each column. A preset is assigned to a monitor and workspace and applies there.
