@@ -9,7 +9,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: greenTile 0.1.0\n"
 "Report-Msgid-Bugs-To: https://github.com/carsteneu\n"
-"POT-Creation-Date: 2026-09-29 10:58+0200\n"
+"POT-Creation-Date: 2026-09-29 11:48+0200\n"
 "PO-Revision-Date: 2026-09-28 17:17+0200\n"
 "Last-Translator: carsten_eu\n"
 "Language-Team: German\n"
@@ -20,45 +20,45 @@ msgstr ""
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 "X-Generator: Poedit 2.3\n"
 
-#: greenTile.js:1861
+#: greenTile.js:1922
 #, javascript-format
 msgid "assigned — workspace %d"
 msgstr "zugewiesen — Fläche %d"
 
-#: greenTile.js:1920
+#: greenTile.js:1981
 msgid "Please enter a name."
 msgstr "Bitte einen Namen eingeben."
 
-#: greenTile.js:1943
+#: greenTile.js:2004
 #, javascript-format
 msgid "from %d"
 msgstr "ab %d"
 
-#: greenTile.js:2058
+#: greenTile.js:2120
 msgid "Rules (by window count)"
 msgstr "Regeln (nach Fensterzahl)"
 
-#: greenTile.js:2062
+#: greenTile.js:2124
 msgid "Rule"
 msgstr "Regel"
 
-#: greenTile.js:2063
+#: greenTile.js:2125
 msgid "Delete rule"
 msgstr "Regel löschen"
 
-#: greenTile.js:2071
+#: greenTile.js:2133
 msgid "Rule applies from"
 msgstr "Regel gilt ab"
 
-#: greenTile.js:2078
+#: greenTile.js:2140
 msgid "windows"
 msgstr "Fenstern"
 
-#: greenTile.js:2080
+#: greenTile.js:2142
 msgid "Painter"
 msgstr "Malerei"
 
-#: greenTile.js:2095
+#: greenTile.js:2157
 msgid ""
 "Click or drag: the row sets how many windows the column holds. Right-click "
 "removes a column."
@@ -66,87 +66,87 @@ msgstr ""
 "Klicken oder ziehen: Die Zeile legt fest, wie viele Fenster die Spalte "
 "aufnimmt. Rechtsklick entfernt eine Spalte."
 
-#: greenTile.js:2100
+#: greenTile.js:2162
 msgid "Name"
 msgstr "Name"
 
-#: greenTile.js:2101
+#: greenTile.js:2163
 msgid "Preset name"
 msgstr "Name des Presets"
 
-#: greenTile.js:2105
+#: greenTile.js:2167
 msgid "Save"
 msgstr "Speichern"
 
-#: greenTile.js:2122
+#: greenTile.js:2184
 #, javascript-format
 msgid "Result: %s"
 msgstr "Ergebnis: %s"
 
-#: greenTile.js:2195
+#: greenTile.js:2334
 msgid "Gap between windows"
 msgstr "Abstand zwischen Fenstern"
 
-#: greenTile.js:2200
+#: greenTile.js:2339
 #, javascript-format
 msgid "%d px"
 msgstr "%d px"
 
-#: greenTile.js:2219
+#: greenTile.js:2358
 msgid "Reset sizes"
 msgstr "Größen zurücksetzen"
 
-#: greenTile.js:2250
+#: greenTile.js:2389
 #, javascript-format
 msgid "Presets — workspace %d · %s"
 msgstr "Presets — Arbeitsfläche %d · %s"
 
-#: greenTile.js:2252
+#: greenTile.js:2391
 msgid "Create preset"
 msgstr "Neues Preset"
 
-#: greenTile.js:2252
+#: greenTile.js:2391
 #, javascript-format
 msgid "Edit %s"
 msgstr "%s bearbeiten"
 
-#: greenTile.js:2256
+#: greenTile.js:2395
 msgid "Back"
 msgstr "zurück"
 
-#: greenTile.js:2265
+#: greenTile.js:2404
 msgid "Auto: on"
 msgstr "Auto: an"
 
-#: greenTile.js:2265
+#: greenTile.js:2404
 msgid "Auto: off"
 msgstr "Auto: aus"
 
-#: greenTile.js:2386
+#: greenTile.js:2525
 msgid "No presets yet."
 msgstr "Noch keine Presets vorhanden."
 
-#: greenTile.js:2401
+#: greenTile.js:2540
 msgid "New preset"
 msgstr "Neu anlegen"
 
-#: greenTile.js:2404
+#: greenTile.js:2543
 msgid "Click a row to apply it to this workspace and tile right away"
 msgstr "Klick auf eine Zeile = sofort auf dieser Fläche anwenden & kacheln"
 
-#: greenTile.js:2705
+#: greenTile.js:2844
 msgid "Auto close"
 msgstr "Automatisch schließen"
 
-#: greenTile.js:2706
+#: greenTile.js:2845
 msgid "Animations"
 msgstr "Animationen"
 
-#: greenTile.js:2707
+#: greenTile.js:2846
 msgid "Auto tile main and list"
 msgstr "Automatisch in einen Hauptbereich und in eine Liste kacheln"
 
-#: greenTile.js:2708
+#: greenTile.js:2847
 msgid "Auto tile two lists"
 msgstr "Automatisch in zwei Listen kacheln"
 
@@ -197,6 +197,10 @@ msgstr "Tastenbelegung (bei geöffnetem Raster)"
 #. settings-schema.json->behaviour-section->title
 msgid "Classic grid (Super+G)"
 msgstr "Klassisches Raster (Super+G)"
+
+#. settings-schema.json->panel-section->title
+msgid "Preset panel"
+msgstr "Preset-Panel"
 
 #. settings-schema.json->help-section->title
 msgid "More Info"
@@ -269,7 +273,9 @@ msgstr "Preset-Panel öffnen"
 
 #. settings-schema.json->resizeWiderHotkey->description
 msgid "Make the focused tiled window wider (tap = 1 px, hold to speed up)"
-msgstr "Fokussiertes gekacheltes Fenster breiter machen (Tippen = 1 px, Halten beschleunigt)"
+msgstr ""
+"Fokussiertes gekacheltes Fenster breiter machen (Tippen = 1 px, Halten "
+"beschleunigt)"
 
 #. settings-schema.json->resizeNarrowerHotkey->description
 msgid "Make the focused tiled window narrower"
@@ -318,6 +324,30 @@ msgstr ""
 #. settings-schema.json->windowGap->units
 msgid "px"
 msgstr "px"
+
+#. settings-schema.json->panelTheme->description
+msgid "Theme of the preset panel"
+msgstr "Design des Preset-Panels"
+
+#. settings-schema.json->panelTheme->tooltip
+msgid ""
+"Follow system tracks the desktop color scheme live; Light and Dark override "
+"it."
+msgstr ""
+"Systemvorgabe folgt live dem Desktop-Farbschema; Hell und Dunkel "
+"überschreiben sie."
+
+#. settings-schema.json->panelTheme->options
+msgid "Follow system"
+msgstr "Systemvorgabe folgen"
+
+#. settings-schema.json->panelTheme->options
+msgid "Light"
+msgstr "Hell"
+
+#. settings-schema.json->panelTheme->options
+msgid "Dark"
+msgstr "Dunkel"
 
 #. settings-schema.json->animation->description
 msgid "Animation"

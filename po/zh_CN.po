@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: greenTile 0.1.0\n"
 "Report-Msgid-Bugs-To: https://github.com/carsteneu\n"
-"POT-Creation-Date: 2026-09-29 10:58+0200\n"
+"POT-Creation-Date: 2026-09-29 11:48+0200\n"
 "PO-Revision-Date: \n"
 "Last-Translator: \n"
 "Language-Team: Simplified Chinese\n"
@@ -18,135 +18,135 @@ msgstr ""
 "Plural-Forms: nplurals=1; plural=0;\n"
 "X-Generator: Poedit 3.4.4\n"
 
-#: greenTile.js:1861
+#: greenTile.js:1922
 #, javascript-format
 msgid "assigned — workspace %d"
 msgstr ""
 
-#: greenTile.js:1920
+#: greenTile.js:1981
 msgid "Please enter a name."
 msgstr ""
 
-#: greenTile.js:1943
+#: greenTile.js:2004
 #, javascript-format
 msgid "from %d"
 msgstr ""
 
-#: greenTile.js:2058
+#: greenTile.js:2120
 msgid "Rules (by window count)"
 msgstr ""
 
-#: greenTile.js:2062
+#: greenTile.js:2124
 msgid "Rule"
 msgstr ""
 
-#: greenTile.js:2063
+#: greenTile.js:2125
 msgid "Delete rule"
 msgstr ""
 
-#: greenTile.js:2071
+#: greenTile.js:2133
 msgid "Rule applies from"
 msgstr ""
 
-#: greenTile.js:2078
+#: greenTile.js:2140
 msgid "windows"
 msgstr ""
 
-#: greenTile.js:2080
+#: greenTile.js:2142
 msgid "Painter"
 msgstr ""
 
-#: greenTile.js:2095
+#: greenTile.js:2157
 msgid ""
 "Click or drag: the row sets how many windows the column holds. Right-click "
 "removes a column."
 msgstr ""
 
-#: greenTile.js:2100
+#: greenTile.js:2162
 msgid "Name"
 msgstr ""
 
-#: greenTile.js:2101
+#: greenTile.js:2163
 msgid "Preset name"
 msgstr ""
 
-#: greenTile.js:2105
+#: greenTile.js:2167
 msgid "Save"
 msgstr ""
 
-#: greenTile.js:2122
+#: greenTile.js:2184
 #, javascript-format
 msgid "Result: %s"
 msgstr ""
 
-#: greenTile.js:2195
+#: greenTile.js:2334
 msgid "Gap between windows"
 msgstr ""
 
-#: greenTile.js:2200
+#: greenTile.js:2339
 #, javascript-format
 msgid "%d px"
 msgstr ""
 
-#: greenTile.js:2219
+#: greenTile.js:2358
 msgid "Reset sizes"
 msgstr ""
 
-#: greenTile.js:2250
+#: greenTile.js:2389
 #, javascript-format
 msgid "Presets — workspace %d · %s"
 msgstr ""
 
-#: greenTile.js:2252
+#: greenTile.js:2391
 msgid "Create preset"
 msgstr ""
 
-#: greenTile.js:2252
+#: greenTile.js:2391
 #, javascript-format
 msgid "Edit %s"
 msgstr ""
 
-#: greenTile.js:2256
+#: greenTile.js:2395
 msgid "Back"
 msgstr ""
 
-#: greenTile.js:2265
+#: greenTile.js:2404
 #, fuzzy
 #| msgid "Auto close"
 msgid "Auto: on"
 msgstr "自动关闭"
 
-#: greenTile.js:2265
+#: greenTile.js:2404
 #, fuzzy
 #| msgid "Auto close"
 msgid "Auto: off"
 msgstr "自动关闭"
 
-#: greenTile.js:2386
+#: greenTile.js:2525
 msgid "No presets yet."
 msgstr ""
 
-#: greenTile.js:2401
+#: greenTile.js:2540
 msgid "New preset"
 msgstr ""
 
-#: greenTile.js:2404
+#: greenTile.js:2543
 msgid "Click a row to apply it to this workspace and tile right away"
 msgstr ""
 
-#: greenTile.js:2705
+#: greenTile.js:2844
 msgid "Auto close"
 msgstr "自动关闭"
 
-#: greenTile.js:2706
+#: greenTile.js:2845
 msgid "Animations"
 msgstr "动画"
 
-#: greenTile.js:2707
+#: greenTile.js:2846
 msgid "Auto tile main and list"
 msgstr "自动平铺主栏和列表"
 
-#: greenTile.js:2708
+#: greenTile.js:2847
 msgid "Auto tile two lists"
 msgstr "自动平铺两个列表"
 
@@ -198,6 +198,10 @@ msgstr "键绑定图例（打开时）"
 
 #. settings-schema.json->behaviour-section->title
 msgid "Classic grid (Super+G)"
+msgstr ""
+
+#. settings-schema.json->panel-section->title
+msgid "Preset panel"
 msgstr ""
 
 #. settings-schema.json->help-section->title
@@ -339,6 +343,28 @@ msgstr ""
 #| msgid "x"
 msgid "px"
 msgstr "x"
+
+#. settings-schema.json->panelTheme->description
+msgid "Theme of the preset panel"
+msgstr ""
+
+#. settings-schema.json->panelTheme->tooltip
+msgid ""
+"Follow system tracks the desktop color scheme live; Light and Dark override "
+"it."
+msgstr ""
+
+#. settings-schema.json->panelTheme->options
+msgid "Follow system"
+msgstr ""
+
+#. settings-schema.json->panelTheme->options
+msgid "Light"
+msgstr ""
+
+#. settings-schema.json->panelTheme->options
+msgid "Dark"
+msgstr ""
 
 #. settings-schema.json->animation->description
 msgid "Animation"

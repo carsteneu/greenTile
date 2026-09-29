@@ -541,3 +541,244 @@
     color: #ff6b6b;
     font-size: 11px;
 }
+
+/* Light theme ("panelTheme": "light", or "system" with a light desktop): every
+   rule lives under the gk-light class that greenTile.js puts on the panel root,
+   so the dark look above stays untouched. Same tones, inverted: panels and
+   fields go white-grey, text goes dark, greens and oranges are darkened for
+   contrast on the light background. */
+.gk-light.gk-panel {
+    background-color: rgba(246, 247, 250, 0.98);
+    border-color: #d5d9e2;
+    color: #2b2f3a;
+}
+
+.gk-light .gk-panel-header {
+    background-color: #e9ecf2;
+    border-color: #d5d9e2;
+}
+
+.gk-light .gk-title {
+    color: #2b2f3a;
+}
+
+.gk-light .gk-close {
+    color: #5f6672;
+}
+
+.gk-light .gk-close:hover {
+    color: #2b2f3a;
+    background-color: rgba(0, 0, 0, 0.06);
+}
+
+.gk-light .gk-auto {
+    color: #5f6672;
+    border-color: #c3c9d6;
+}
+
+.gk-light .gk-auto:hover {
+    color: #2b2f3a;
+    background-color: rgba(0, 0, 0, 0.06);
+}
+
+.gk-light .gk-auto-on {
+    color: #3f8f22;
+    border-color: rgba(78, 165, 48, 0.5);
+    background-color: rgba(78, 165, 48, 0.1);
+}
+
+.gk-light .gk-auto-on:hover {
+    color: #3f8f22;
+    background-color: rgba(78, 165, 48, 0.18);
+}
+
+.gk-light .gk-row {
+    border-color: #d5d9e2;
+}
+
+.gk-light .gk-row:hover {
+    background-color: #eceef5;
+}
+
+.gk-light .gk-row-assigned {
+    background-color: rgba(78, 165, 48, 0.08);
+}
+
+.gk-light .gk-row-assigned:hover {
+    background-color: rgba(78, 165, 48, 0.16);
+}
+
+.gk-light .gk-row-stripe {
+    background-color: #4ea530;
+}
+
+.gk-light .gk-name {
+    color: #2b2f3a;
+}
+
+.gk-light .gk-sub {
+    color: #3f8f22;
+}
+
+.gk-light .gk-icon-btn {
+    color: #5f6672;
+}
+
+.gk-light .gk-icon-btn:hover {
+    color: #2b2f3a;
+    background-color: rgba(0, 0, 0, 0.06);
+}
+
+.gk-light .gk-plus {
+    color: #d97a24;
+    background-color: #eef0f5;
+    border-color: #d5d9e2;
+}
+
+.gk-light .gk-plus:hover {
+    color: #e89a3f;
+    background-color: #e4e8f0;
+    border-top-color: #c3c9d6;
+}
+
+.gk-light .gk-grip {
+    color: #8a90a0;
+}
+
+.gk-light .gk-grip:hover {
+    color: #d97a24;
+}
+
+.gk-light .gk-gap-row {
+    border-top-color: #d5d9e2;
+}
+
+.gk-light .gk-gap-label {
+    color: #3a4050;
+}
+
+.gk-light .gk-gap-value {
+    color: #2b2f3a;
+}
+
+.gk-light .gk-gap-btn {
+    color: #2b2f3a;
+    border-color: #c3c9d6;
+}
+
+.gk-light .gk-gap-btn:hover {
+    background-color: rgba(0, 0, 0, 0.06);
+}
+
+.gk-light .gk-reset-btn {
+    color: #2b2f3a;
+    border-color: #c3c9d6;
+}
+
+.gk-light .gk-reset-btn:hover {
+    background-color: rgba(255, 150, 64, 0.22);
+    border-color: #d97a24;
+}
+
+.gk-light .gk-muted {
+    color: #5f6672;
+}
+
+.gk-light .gk-back {
+    color: #5f6672;
+}
+
+.gk-light .gk-back:hover {
+    color: #2b2f3a;
+    background-color: rgba(0, 0, 0, 0.06);
+}
+
+.gk-light .gk-ed-label {
+    color: #5f6672;
+}
+
+.gk-light .gk-ed-rules {
+    border-color: #d5d9e2;
+}
+
+.gk-light .gk-ed-rule {
+    border-color: #d5d9e2;
+}
+
+.gk-light .gk-ed-rule:hover {
+    background-color: #eceef5;
+}
+
+.gk-light .gk-ed-rule-active {
+    background-color: rgba(255, 150, 64, 0.14);
+}
+
+.gk-light .gk-ed-rule-active:hover {
+    background-color: rgba(255, 150, 64, 0.2);
+}
+
+.gk-light .gk-ed-rule-stripe {
+    background-color: #d97a24;
+}
+
+.gk-light .gk-ed-rule-label {
+    color: #3a4050;
+}
+
+.gk-light .gk-ed-rule-active .gk-ed-rule-label {
+    color: #2b2f3a;
+}
+
+.gk-light .gk-ed-add {
+    color: #d97a24;
+}
+
+.gk-light .gk-ed-add:hover {
+    color: #e89a3f;
+}
+
+.gk-light .gk-ed-del {
+    color: #5f6672;
+}
+
+.gk-light .gk-ed-del:hover {
+    color: #2b2f3a;
+}
+
+.gk-light .gk-ed-del:insensitive {
+    color: #b8bdc9;
+}
+
+.gk-light .gk-stepper-btn {
+    color: #2b2f3a;
+    background-color: #e9ecf2;
+    border-color: #c3c9d6;
+}
+
+.gk-light .gk-stepper-btn:hover {
+    border-color: #d97a24;
+}
+
+.gk-light .gk-stepper-value {
+    color: #2b2f3a;
+}
+
+.gk-light .gk-painter {
+    background-color: #e8ebf1;
+    border-color: #c3c9d6;
+}
+
+.gk-light .gk-entry {
+    color: #2b2f3a;
+    background-color: #ffffff;
+    border-color: #c3c9d6;
+    caret-color: #2b2f3a;
+}
+
+.gk-light .gk-entry:focus {
+    border-color: #d97a24;
+}
+
+.gk-light .gk-error {
+    color: #c94b4b;
+}
