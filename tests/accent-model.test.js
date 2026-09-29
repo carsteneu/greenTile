@@ -18,7 +18,7 @@ const stateMatch = src.match(/\/\/ >>> state-model[^\n]*\n([\s\S]*?)\/\/ <<< sta
 if (!stateMatch)
     throw new Error('state-model block not found in greenTile.js');
 const stateBlock = stateMatch[1];
-const names = ['tile_accent_default', 'tile_accent_parse', 'tile_accent_from_probed', 'tile_accent_tones', 'tile_accent_css', 'tile_accent_is_own'];
+const names = ['tile_accent_default', 'tile_accent_parse', 'tile_accent_from_probed', 'tile_accent_tones', 'tile_accent_css', 'tile_accent_is_own', 'tile_accent_probes', 'tile_accent_probe_first'];
 const stateNames = ['tile_state_default', 'tile_state_mode', 'tile_state_tones', 'tile_state_css'];
 // the state block builds on the accent block's HSL helpers, so both evaluate together
 const m = new Function(block + '\n' + stateBlock + '\nreturn {' + names.concat(stateNames).join(',') + '};')();
@@ -70,6 +70,39 @@ test('probed accent is rejected when transparent, grey or extreme', () => {
     assert.equal(m.tile_accent_from_probed(250, 250, 250, 255), null);
     assert.equal(m.tile_accent_from_probed(null, 171, 205, 255), null);
     assert.equal(m.tile_accent_from_probed(108, undefined, 205, 255), null);
+});
+
+test('probe chain tries menu entries first, then the calendar day hover', () => {
+    assert.deepEqual(m.tile_accent_probes, [
+        ['popup-menu-item', 'active'],
+        ['popup-menu-item', 'hover'],
+        ['calendar-day-base', 'hover'],
+    ]);
+});
+
+test('probe chain returns the first color the model accepts', () => {
+    // Mint-Y paints its menu entries grey; the calendar day hover carries the accent
+    const mintY = (className, pseudoClass) =>
+        className === 'calendar-day-base' && pseudoClass === 'hover' ? [232, 33, 39] : null;
+    assert.deepEqual(m.tile_accent_probe_first(mintY), [232, 33, 39]);
+    // Mint-L matches the first stage — later stages stay untouched
+    let reached = false;
+    const mintL = (className, pseudoClass) => {
+        if (className === 'popup-menu-item' && pseudoClass === 'active')
+            return [108, 171, 205];
+        reached = true;
+        return null;
+    };
+    assert.deepEqual(m.tile_accent_probe_first(mintL), [108, 171, 205]);
+    assert.equal(reached, false);
+});
+
+test('probe chain keeps the default when no stage qualifies', () => {
+    assert.equal(m.tile_accent_probe_first(() => null), null);
+    // grey calendar day (Mint-Y-Dark-Grey) is rejected by the model at the caller
+    const greyTheme = (className, pseudoClass) =>
+        className === 'popup-menu-item' ? null : [112, 115, 122];
+    assert.deepEqual(m.tile_accent_probe_first(greyTheme), [112, 115, 122]);
 });
 
 test('tones for the default orange are the historical values, exactly', () => {

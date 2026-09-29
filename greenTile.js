@@ -2364,6 +2364,23 @@ const tile_accent_from_probed = (r, g, b, a) => {
         return null;
     return rgb;
 };
+// The theme probe chain, in fallback order: the menu entries carry the theme
+// accent in Mint-L, but Mint-Y paints them grey — there the calendar day
+// hover state holds it. tile_accent_probe_first walks the chain and returns
+// the first color the model accepts, so grey themes keep the default.
+const tile_accent_probes = [
+    ['popup-menu-item', 'active'],
+    ['popup-menu-item', 'hover'],
+    ['calendar-day-base', 'hover'],
+];
+const tile_accent_probe_first = (probe) => {
+    for (const [className, pseudoClass] of tile_accent_probes) {
+        const rgb = probe(className, pseudoClass);
+        if (rgb)
+            return rgb;
+    }
+    return null;
+};
 const tile_accent_hsl = (rgb) => {
     const [r, g, b] = rgb.map((v) => v / 255);
     const max = Math.max(r, g, b);
@@ -2559,10 +2576,10 @@ const tile_theme_panel_class = () => (tile_theme_state.theme === 'light' ? 'gk-p
 // get new node keys and are matched against the current sheets. Seeded with the
 // clock so it never meets nodes left over from an earlier enable.
 const tile_accent_state = { rgb: tile_accent_default, css: '', path: null, themeObj: null, themeSig: 0, gen: '', genSeq: Date.now() };
-const tile_accent_probe = (pseudoClass) => {
+const tile_accent_probe = (className, pseudoClass) => {
     let probe = null;
     try {
-        probe = new tile_St.BoxLayout({ style_class: 'popup-menu-item', opacity: 0 });
+        probe = new tile_St.BoxLayout({ style_class: className, opacity: 0 });
         probe.add_style_pseudo_class(pseudoClass);
         Main.uiGroup.add_child(probe);
         const c = probe.get_theme_node().get_background_color();
@@ -2601,9 +2618,9 @@ const tile_accent_path = () => {
 const tile_accent_apply = (config) => {
     const own = tile_accent_is_own(config.settings.getValue('accentMode'));
     const stateMode = tile_state_mode(config.settings.getValue('stateMode'));
-    // one probe serves both "Follow theme" modes — accent, state color or both
-    // (:active is the accent state of menu entries in most themes, :hover in the rest)
-    const probe = (!own || stateMode === 'theme') ? (tile_accent_probe('active') || tile_accent_probe('hover')) : null;
+    // the probe chain serves both "Follow theme" modes — accent, state color
+    // or both (first theme node with a usable accent wins, see accent-model)
+    const probe = (!own || stateMode === 'theme') ? tile_accent_probe_first(tile_accent_probe) : null;
     const rgb = own ? tile_accent_parse(config.settings.getValue('accentColor')) : probe;
     const stateRgb = stateMode === 'own'
         ? tile_accent_parse(config.settings.getValue('stateColor'))
