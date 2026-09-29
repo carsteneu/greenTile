@@ -1819,8 +1819,102 @@ const tile_retile_monitor = (app, monitorIndex, focusWindow, animate = true) => 
     if (layout.preset)
         tile_preset_retile(app, monitorIndex, focusWindow, animate);
     else if (layout.auto)
-        tile_app_auto(app, monitorIndex, focusWindow, animate);
+        tile_app_auto(app, monitorIndex, focusWindow, animate)
 };
+// >>> swap-model (pure functions, no Cinnamon imports; tested by tests/swap-model.test.js)
+// Keyboard window swapping (Super+Ctrl+Arrow). Cells are rects [x, y, width, height] in
+// placement order, dir one of 'left'|'right'|'up'|'down'. The neighbor search prefers
+// cells overlapping on the perpendicular axis (the swap lands at "the same height"),
+// then takes the nearest cell in the direction.
+const tile_swap_dir_ok = (dir) => dir === 'left' || dir === 'right' || dir === 'up' || dir === 'down';
+const tile_swap_axis = (dir) => (dir === 'left' || dir === 'right') ? 0 : 1;
+const tile_swap_sign = (dir) => (dir === 'right' || dir === 'down') ? 1 : -1;
+const tile_swap_overlap = (a, b, axis) => Math.min(a[axis] + a[axis + 2], b[axis] + b[axis + 2]) - Math.max(a[axis], b[axis]);
+const tile_swap_center = (r, axis) => r[axis] + r[axis + 2] / 2;
+const tile_swap_neighbor = (cells, self, dir) => {
+    if (!tile_swap_dir_ok(dir) || self == null || self < 0 || self >= cells.length)
+        return null;
+    const d = tile_swap_axis(dir);
+    const p = 1 - d;
+    const sign = tile_swap_sign(dir);
+    const own = cells[self];
+    const ownCenter = tile_swap_center(own, d);
+    let pool = [];
+    for (let i = 0; i < cells.length; i++) {
+        if (i === self)
+            continue;
+        const c = tile_swap_center(cells[i], d);
+        if (sign > 0 ? c > ownCenter : c < ownCenter)
+            pool.push(i);
+    }
+    if (pool.length === 0)
+        return null;
+    const overlapping = pool.filter((i) => tile_swap_overlap(own, cells[i], p) > 0);
+    if (overlapping.length)
+        pool = overlapping;
+    pool.sort((a, b) => {
+        const da = (cells[a][d] - own[d]) * sign;
+        const db = (cells[b][d] - own[d]) * sign;
+        const oa = tile_swap_overlap(own, cells[a], p);
+        const ob = tile_swap_overlap(own, cells[b], p);
+        return (da - db) || (ob - oa) || (cells[a][p] - cells[b][p]) || (a - b);
+    });
+    return pool[0];
+};
+// Landing slot when a window is pushed into a monitor edge slot (Super+Ctrl+Left/Right
+// across monitors or onto another workspace): the first (right)/last (left) cell of the
+// target layout, with several candidates on the edge column chosen by the best vertical
+// overlap with the moved window's frame, else the top one.
+const tile_swap_landing_cell = (cells, frame, dir) => {
+    if (cells.length === 0 || (dir !== 'left' && dir !== 'right'))
+        return null;
+    const right = dir === 'right';
+    let edgeX = right ? cells[0][0] : cells[0][0];
+    for (const r of cells)
+        edgeX = right ? Math.min(edgeX, r[0]) : Math.max(edgeX, r[0]);
+    let pool = [];
+    for (let i = 0; i < cells.length; i++) {
+        if (cells[i][0] === edgeX)
+            pool.push(i);
+    }
+    pool = pool.map((i) => ({ i: i, ov: tile_swap_overlap(cells[i], frame, 1) }));
+    const overlapping = pool.filter((c) => c.ov > 0);
+    if (overlapping.length)
+        pool = overlapping;
+    else
+        pool.forEach((c) => (c.ov = 0)); // none overlaps: fall back to the top one
+    pool.sort((a, b) => (b.ov - a.ov) || (cells[a.i][1] - cells[b.i][1]) || (a.i - b.i));
+    return pool[0].i;
+};
+// One chain step for Super+Ctrl+Left/Right. Monitors ordered by geometry x; Left/Right
+// first stay within the same workspace (the neighbor search handles the in-layout swap,
+// this decides the cross-monitor landing), then continue onto the previous/next
+// workspace, landing in the edge slot of the rightmost/leftmost monitor. workspaces-
+// only-on-primary: workspace steps only anchor on the primary monitor. No wrap.
+const tile_swap_chain_step = (input) => {
+    const { dir, monitorIndex, primaryIndex, onlyPrimary, monitors, workspaces, wsIndex } = input;
+    if (dir !== 'left' && dir !== 'right')
+        return null;
+    const cur = monitors.find((mo) => mo.index === monitorIndex);
+    if (!cur)
+        return null;
+    const right = dir === 'right';
+    const cand = monitors.filter((mo) => (right ? mo.x > cur.x : mo.x < cur.x));
+    if (cand.length) {
+        cand.sort((a, b) => (right ? a.x - b.x : b.x - a.x) || (a.index - b.index));
+        return { kind: 'monitor', to: cand[0].index, slot: right ? 'first' : 'last' };
+    }
+    if (onlyPrimary && monitorIndex !== primaryIndex)
+        return null;
+    const delta = right ? 1 : -1;
+    const nextWs = wsIndex + delta;
+    if (nextWs < 0 || nextWs >= workspaces)
+        return null;
+    const sorted = monitors.slice().sort((a, b) => (a.x - b.x) || (a.index - b.index));
+    const edge = right ? sorted[0] : sorted[sorted.length - 1];
+    return { kind: 'workspace', delta: delta, monitor: edge.index, slot: right ? 'first' : 'last' };
+};
+// <<< swap-model
 // >>> editor-model (pure functions, no Cinnamon imports; tested by tests/editor-model.test.js)
 // Preset editor model. A rule is {min, stacks}; stacks[i] = windows stacked in column i.
 // The painter grid of the approved prototype has 6 columns and 4 rows.
