@@ -1,0 +1,279 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>greenTile · tiling for Cinnamon</title>
+<style>
+@font-face{font-family:"Bricolage";src:url(fonts/bricolage-normal-200_800.woff2) format("woff2");font-weight:200 800;font-stretch:75% 100%}
+@font-face{font-family:"Instrument";src:url(fonts/instrument-normal-400_700.woff2) format("woff2");font-weight:400 700}
+@font-face{font-family:"Instrument";src:url(fonts/instrument-italic-400_700.woff2) format("woff2");font-weight:400 700;font-style:italic}
+@font-face{font-family:"JBMono";src:url(fonts/jbmono-normal-400_700.woff2) format("woff2");font-weight:400 700}
+
+:root{
+  --sage:#E6ECE2;      /* page */
+  --sheet:#F7F9F5;     /* tiles, cards */
+  --ink:#13201A;       /* text */
+  --moss:#2F6A1E;      /* deep brand */
+  --leaf:#4EA530;      /* greenTile green */
+  --amber:#F0A23B;     /* panel accent */
+  --rule:#C5D0BF;
+  --mute:#5B6B60;
+  --r:10px;
+}
+*{box-sizing:border-box}
+html{background:var(--sage);color:var(--ink)}
+body{margin:0;font:400 17px/1.55 "Instrument",system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+a{color:inherit}
+:focus-visible{outline:3px solid var(--amber);outline-offset:3px;border-radius:4px}
+.wrap{max-width:1180px;margin:0 auto;padding:0 clamp(20px,4vw,48px)}
+
+/* nav */
+nav{display:flex;align-items:center;justify-content:space-between;padding:22px 0}
+.mark{display:flex;align-items:center;gap:10px;font:700 21px/1 "Bricolage";letter-spacing:-.02em;text-decoration:none}
+.mark i{display:grid;grid-template-columns:1fr 1fr;gap:2px;width:22px;height:22px}
+.mark i b{background:var(--leaf);border-radius:2px}
+.mark i b:nth-child(2){background:var(--moss)}
+.mark i b:first-child{grid-row:span 2}
+nav ul{display:flex;gap:26px;list-style:none;margin:0;padding:0;font-size:15px}
+nav ul a{text-decoration:none;color:var(--mute)}
+nav ul a:hover{color:var(--ink)}
+.gh{font:600 14px/1 "Instrument";padding:10px 14px;border:1.5px solid var(--ink);border-radius:999px;text-decoration:none}
+.gh:hover{background:var(--ink);color:var(--sage)}
+
+/* hero */
+.hero{padding:clamp(28px,6vh,72px) 0 40px}
+.eyebrow{font:500 13px/1 "JBMono";letter-spacing:.06em;text-transform:uppercase;color:var(--moss);display:flex;gap:10px;align-items:center}
+.eyebrow::before{content:"";width:28px;height:2px;background:var(--leaf)}
+h1{font:800 clamp(46px,7.4vw,104px)/.92 "Bricolage";font-variation-settings:"opsz" 96;letter-spacing:-.045em;margin:20px 0 22px;max-width:11ch}
+h1 em{font-style:normal;color:var(--leaf);position:relative;white-space:nowrap}
+.lede{font-size:clamp(18px,1.6vw,21px);max-width:40ch;color:#2A3A30;margin:0 0 28px}
+.cta{display:flex;flex-wrap:wrap;gap:14px;align-items:center}
+.btn{font:600 16px/1 "Instrument";padding:15px 22px;border-radius:999px;background:var(--ink);color:var(--sage);text-decoration:none}
+.btn:hover{background:var(--moss)}
+.keys{display:inline-flex;gap:6px;align-items:center;font-size:14px;color:var(--mute)}
+kbd{font:600 13px/1 "JBMono";padding:7px 9px 8px;border-radius:7px;background:var(--sheet);border:1px solid var(--rule);box-shadow:0 2px 0 var(--rule);color:var(--ink)}
+
+/* the stage: a tiny 32:9 monitor that retiles itself */
+.stage{margin-top:clamp(34px,6vh,60px)}
+.monitor{position:relative;aspect-ratio:32/9;background:#1B2A21;border-radius:14px;padding:10px;box-shadow:0 30px 60px -30px rgba(19,32,26,.55),inset 0 0 0 1px rgba(255,255,255,.06)}
+.screen{position:relative;width:100%;height:100%;border-radius:6px;overflow:hidden;background:
+  radial-gradient(120% 140% at 85% 0%,#2E5A33 0%,#1E3A25 45%,#15271B 100%)}
+.tile{position:absolute;border-radius:5px;background:var(--sheet);transition:left .25s cubic-bezier(.3,.7,.2,1),top .25s cubic-bezier(.3,.7,.2,1),width .25s cubic-bezier(.3,.7,.2,1),height .25s cubic-bezier(.3,.7,.2,1),opacity .25s;overflow:hidden;box-shadow:0 1px 0 rgba(0,0,0,.25)}
+.tile .bar{height:12%;min-height:9px;max-height:16px;display:flex;align-items:center;gap:3px;padding:0 6px;background:var(--c)}
+.tile .bar i{width:5px;height:5px;border-radius:50%;background:rgba(255,255,255,.55)}
+.tile .body{position:absolute;inset:18% 10% 10% 10%;display:grid;gap:5px;align-content:start}
+.tile .body s{display:block;height:5px;border-radius:3px;background:#DCE3D7;text-decoration:none}
+.tile .body s:nth-child(2){width:70%}.tile .body s:nth-child(3){width:85%}.tile .body s:nth-child(4){width:45%}
+.tile.new{opacity:0}
+.caption{display:flex;justify-content:space-between;align-items:center;margin-top:14px;font:500 13px/1 "JBMono";color:var(--mute)}
+.caption b{color:var(--ink);font-weight:600}
+.dots{display:flex;gap:6px}
+.dots span{width:18px;height:4px;border-radius:2px;background:var(--rule);transition:background .25s}
+.dots span.on{background:var(--leaf)}
+
+/* features laid out as a tiling itself */
+section{padding:clamp(56px,9vh,96px) 0}
+h2{font:750 clamp(34px,4.4vw,56px)/1 "Bricolage";letter-spacing:-.035em;margin:0 0 12px;max-width:16ch}
+.sub{color:var(--mute);max-width:52ch;margin:0 0 36px}
+.grid{display:grid;grid-template-columns:repeat(6,1fr);gap:10px}
+.card{background:var(--sheet);border-radius:var(--r);padding:24px 24px 26px;border:1px solid #D6DED1;display:flex;flex-direction:column;gap:10px;min-height:210px}
+.card h3{font:700 22px/1.1 "Bricolage";letter-spacing:-.02em;margin:0}
+.card p{margin:0;color:#34443A;font-size:15.5px}
+.card .k{margin-top:auto;display:flex;gap:5px;flex-wrap:wrap}
+.card.a{grid-column:span 4;background:var(--ink);color:var(--sage);border-color:var(--ink)}
+.card.a p{color:#C9D5C3}.card.a kbd{background:#223329;border-color:#3A4D40;box-shadow:0 2px 0 #3A4D40;color:var(--sage)}
+.card.b{grid-column:span 2;grid-row:span 2}
+.card.c{grid-column:span 2}.card.d{grid-column:span 2}
+.card.e{grid-column:span 3}.card.f{grid-column:span 3}
+.card.g{grid-column:span 6;flex-direction:row;align-items:center;gap:28px;min-height:0}
+.swatch{display:flex;gap:6px}.swatch i{width:30px;height:30px;border-radius:8px;display:block}
+.mini{display:grid;grid-template-columns:repeat(6,1fr);grid-template-rows:repeat(4,1fr);gap:3px;aspect-ratio:6/4;margin:6px 0 4px}
+.mini i{background:#E1E8DC;border-radius:3px}
+.mini i.p{background:var(--amber)}
+.split{position:relative;height:92px;border-radius:8px;background:#E1E8DC;overflow:hidden;margin:4px 0}
+.split::before{content:"";position:absolute;left:4px;top:4px;bottom:4px;width:calc(50% - 6px);border-radius:5px;background:#fff}
+.split::after{content:"";position:absolute;right:4px;top:4px;height:calc(50% - 6px);width:calc(50% - 6px);border-radius:5px;background:rgba(240,162,59,.35);outline:2px solid var(--amber);outline-offset:-2px}
+
+/* hotkeys */
+.hk{display:grid;grid-template-columns:1fr 1fr;gap:0 48px;border-top:1.5px solid var(--ink)}
+.hk div{display:flex;justify-content:space-between;align-items:center;gap:16px;padding:14px 0;border-bottom:1px solid var(--rule)}
+.hk span{color:#2A3A30}
+.hk .k{display:flex;gap:4px;flex-shrink:0}
+
+/* install */
+.install{display:grid;grid-template-columns:1fr 1.3fr;gap:40px;align-items:start}
+pre{margin:0;background:var(--ink);color:#DDE7D8;border-radius:var(--r);padding:22px 24px;font:500 14px/1.7 "JBMono";overflow:auto}
+pre .c{color:#7E9483}pre .g{color:#8FD16F}
+footer{padding:36px 0 56px;border-top:1px solid var(--rule);display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px;color:var(--mute);font-size:14px}
+
+@media (max-width:980px){
+  .grid{grid-template-columns:repeat(2,1fr)}
+  .card.a,.card.g{grid-column:span 2}
+  .card.b{grid-row:auto}
+  .card.b,.card.c,.card.d,.card.e,.card.f{grid-column:span 1}
+  .hk{grid-template-columns:1fr}
+  .install{grid-template-columns:1fr}
+  nav ul{display:none}
+}
+@media (max-width:560px){.grid{grid-template-columns:1fr}.card.a,.card.b,.card.c,.card.d,.card.e,.card.f,.card.g{grid-column:auto}.card.g{flex-direction:column;align-items:flex-start}}
+@media (prefers-reduced-motion:reduce){.tile{transition:none}}
+.static .tile,.static .dots span{transition:none}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <nav>
+    <a class="mark" href="#"><i><b></b><b></b><b></b></i>greenTile</a>
+    <ul><li><a href="#features">Features</a></li><li><a href="#keys">Hotkeys</a></li><li><a href="#install">Install</a></li></ul>
+    <a class="gh" href="#install">github.com/carsteneu/greenTile</a>
+  </nav>
+
+  <header class="hero">
+    <div class="eyebrow">Extension for Cinnamon 6.6</div>
+    <h1>Every window in <em>its place.</em></h1>
+    <p class="lede">greenTile tiles your Cinnamon desktop the moment a window opens. Presets per monitor and workspace, a grid that grows with you, and windows that snap where you drop them.</p>
+    <div class="cta">
+      <a class="btn" href="#install">Install greenTile</a>
+      <span class="keys">or just press <kbd>Super</kbd><kbd>Ctrl</kbd><kbd>A</kbd></span>
+    </div>
+
+    <div class="stage" aria-label="Animated example: windows retile as they open">
+      <div class="monitor"><div class="screen" id="screen"></div></div>
+      <div class="caption"><span id="label"><b>1 window</b> · auto grid</span><span class="dots" id="dots"></span></div>
+    </div>
+  </header>
+</div>
+
+<section id="features">
+  <div class="wrap">
+    <h2>Tiling that stays out of your way.</h2>
+    <p class="sub">Turn it on per monitor and workspace. Everything else happens on its own, or with one shortcut.</p>
+    <div class="grid">
+      <article class="card a">
+        <h3>Auto mode</h3>
+        <p>Open a window and the grid makes room. Up to six windows share one row on a wide screen, beyond that they spread over full rows. Close one and the rest close the gap.</p>
+        <div class="k"><kbd>Super</kbd><kbd>Ctrl</kbd><kbd>A</kbd></div>
+      </article>
+      <article class="card b">
+        <h3>Presets you paint</h3>
+        <p>Paint columns in a 6 × 4 grid and set from how many windows each rule applies. Assign a preset to any monitor and workspace.</p>
+        <div class="mini" aria-hidden="true">
+          <i class="p"></i><i class="p"></i><i class="p"></i><i></i><i></i><i></i>
+          <i></i><i class="p"></i><i class="p"></i><i></i><i></i><i></i>
+          <i></i><i></i><i class="p"></i><i></i><i></i><i></i>
+          <i></i><i></i><i></i><i></i><i></i><i></i>
+        </div>
+        <div class="k"><kbd>Super</kbd><kbd>Ctrl</kbd><kbd>P</kbd></div>
+      </article>
+      <article class="card c">
+        <h3>Drag to split</h3>
+        <p>Hold a window over the edge of another. A preview shows the new column, stack or row before you let go.</p>
+        <div class="split" aria-hidden="true"></div>
+      </article>
+      <article class="card d">
+        <h3>Move borders</h3>
+        <p>Drag an edge, or nudge it from the keyboard. Hold the key and it speeds up.</p>
+        <div class="k"><kbd>Super</kbd><kbd>Alt</kbd><kbd>←</kbd><kbd>→</kbd></div>
+      </article>
+      <article class="card e">
+        <h3>Swap windows</h3>
+        <p>Trade places with the neighbour, walk on to the next monitor and further onto the next workspace.</p>
+        <div class="k"><kbd>Super</kbd><kbd>Ctrl</kbd><kbd>←</kbd><kbd>→</kbd><kbd>↑</kbd><kbd>↓</kbd></div>
+      </article>
+      <article class="card f">
+        <h3>Never tile</h3>
+        <p>Let a window float with one key, or keep whole apps out of the grid with a list you fill from your installed applications.</p>
+        <div class="k"><kbd>Super</kbd><kbd>G</kbd></div>
+      </article>
+      <article class="card g">
+        <div class="swatch" aria-hidden="true"><i style="background:#6CABCD"></i><i style="background:#E82127"></i><i style="background:#0C75DE"></i><i style="background:#F0A23B"></i></div>
+        <div><h3>Wears your theme</h3><p>The preset panel picks up the accent color of your Cinnamon theme, live, even when you switch themes. Or pick your own.</p></div>
+      </article>
+    </div>
+  </div>
+</section>
+
+<section id="keys">
+  <div class="wrap">
+    <h2>Ten keys. That's it.</h2>
+    <p class="sub">All of them can be changed in the extension settings.</p>
+    <div class="hk">
+      <div><span>Auto mode on, tile now</span><span class="k"><kbd>Super</kbd><kbd>Ctrl</kbd><kbd>A</kbd></span></div>
+      <div><span>Auto mode off</span><span class="k"><kbd>Super</kbd><kbd>Ctrl</kbd><kbd>D</kbd></span></div>
+      <div><span>Preset panel</span><span class="k"><kbd>Super</kbd><kbd>Ctrl</kbd><kbd>P</kbd></span></div>
+      <div><span>Float this window</span><span class="k"><kbd>Super</kbd><kbd>G</kbd></span></div>
+      <div><span>Three equal columns</span><span class="k"><kbd>Super</kbd><kbd>Ctrl</kbd><kbd>3</kbd></span></div>
+      <div><span>Six equal columns</span><span class="k"><kbd>Super</kbd><kbd>Ctrl</kbd><kbd>6</kbd></span></div>
+      <div><span>Wider, narrower</span><span class="k"><kbd>Super</kbd><kbd>Alt</kbd><kbd>→</kbd><kbd>←</kbd></span></div>
+      <div><span>Taller, shorter</span><span class="k"><kbd>Super</kbd><kbd>Alt</kbd><kbd>↓</kbd><kbd>↑</kbd></span></div>
+      <div><span>Swap left, right</span><span class="k"><kbd>Super</kbd><kbd>Ctrl</kbd><kbd>←</kbd><kbd>→</kbd></span></div>
+      <div><span>Swap up, down</span><span class="k"><kbd>Super</kbd><kbd>Ctrl</kbd><kbd>↑</kbd><kbd>↓</kbd></span></div>
+    </div>
+  </div>
+</section>
+
+<section id="install">
+  <div class="wrap install">
+    <div>
+      <h2>Up and running in a minute.</h2>
+      <p class="sub">Copy the extension into your Cinnamon folder, enable it in the Extensions manager and press <kbd>Super</kbd><kbd>Ctrl</kbd><kbd>A</kbd>. Free software under the GPL v3, a fork of gTile.</p>
+    </div>
+<pre><span class="c"># get it</span>
+git clone https://github.com/carsteneu/greenTile
+cd greenTile
+
+<span class="c"># install for your user</span>
+D=~/.local/share/cinnamon/extensions/<span class="g">greenTile@carsteneu</span>
+mkdir -p "$D" && cp *.js *.json *.css icon.png "$D"/
+
+<span class="c"># then: Extensions → greenTile → enable</span></pre>
+  </div>
+</section>
+
+<div class="wrap"><footer><span>greenTile · GPL v3 · based on gTile by vibou and shuairan</span><span>Made for Linux Mint</span></footer></div>
+
+<script>
+// Layouts in percent of the screen, the same shapes greenTile's wide auto grid produces.
+const G = 0.6; // gap in %
+function row(n){ const w=(100-G*(n-1))/n; return Array.from({length:n},(_,i)=>[i*(w+G),0,w,100]); }
+function rows(a,b){ const h=(100-G)/2, out=[];
+  [[a,0],[b,h+G]].forEach(([n,y])=>{const w=(100-G*(n-1))/n; for(let i=0;i<n;i++) out.push([i*(w+G),y,w,h]);}); return out; }
+function preset(){ // a painted preset: wide left column, stacked middle, stacked right
+  const c=[38,31,31-2*G], x2=c[0]+G, x3=x2+c[1]+G, h=(100-G)/2;
+  return [[0,0,c[0],100],[x2,0,c[1],h],[x2,h+G,c[1],h],[x3,0,c[2],h],[x3,h+G,c[2],h]]; }
+const steps = [
+  {r:row(1), t:"<b>1 window</b> · auto grid"},
+  {r:row(2), t:"<b>2 windows</b> · auto grid"},
+  {r:row(3), t:"<b>3 windows</b> · auto grid"},
+  {r:row(4), t:"<b>4 windows</b> · auto grid"},
+  {r:row(6), t:"<b>6 windows</b> · one row"},
+  {r:rows(4,3), t:"<b>7 windows</b> · two full rows"},
+  {r:rows(4,4), t:"<b>8 windows</b> · two full rows"},
+  {r:preset(), t:"<b>5 windows</b> · your preset"},
+];
+const colors=["#4EA530","#2F6A1E","#F0A23B","#3E7CB1","#8E6CC4","#D9534F","#2A9D8F","#5B6B60"];
+const screen=document.getElementById("screen"), label=document.getElementById("label"), dots=document.getElementById("dots");
+steps.forEach(()=>dots.appendChild(document.createElement("span")));
+const tiles=colors.map(c=>{const t=document.createElement("div");t.className="tile new";t.style.setProperty("--c",c);
+  t.innerHTML='<div class="bar"><i></i><i></i><i></i></div><div class="body"><s></s><s></s><s></s><s></s></div>';
+  Object.assign(t.style,{left:"100%",top:"0",width:"0",height:"100%"});screen.appendChild(t);return t;});
+let k=0;
+function show(){ const s=steps[k];
+  tiles.forEach((t,i)=>{ const r=s.r[i];
+    if(r){t.classList.remove("new");Object.assign(t.style,{left:r[0]+"%",top:r[1]+"%",width:r[2]+"%",height:r[3]+"%"});}
+    else{t.classList.add("new");Object.assign(t.style,{left:"100%",width:"0"});} });
+  label.innerHTML=s.t; [...dots.children].forEach((d,i)=>d.classList.toggle("on",i===k));
+  k=(k+1)%steps.length; }
+// ?static freezes the example on one layout (for screen recordings); ?static=N picks step N (0-based).
+// Without the parameter the page animates as usual.
+const q = new URLSearchParams(location.search);
+if (q.has("static")) {
+  const n = parseInt(q.get("static"), 10);
+  k = Number.isInteger(n) && n >= 0 && n < steps.length ? n : steps.length - 1;
+  document.documentElement.classList.add("static");
+  show();
+} else { show(); setInterval(show, 1600); }
+</script>
+</body>
+</html>
