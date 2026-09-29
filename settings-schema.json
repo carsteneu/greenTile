@@ -19,6 +19,7 @@
              "hotkey-section",
              "autotile-hotkey-section",
              "preset-section",
+             "resize-section",
              "keybindings-legend-section"
           ]
       },
@@ -52,6 +53,16 @@
          "keys": [
             "presetHotkey",
             "presets"
+         ]
+      },
+      "resize-section": {
+         "type": "section",
+         "title": "Resize tiled windows",
+         "keys": [
+            "resizeWiderHotkey",
+            "resizeNarrowerHotkey",
+            "resizeTallerHotkey",
+            "resizeShorterHotkey"
          ]
       },
       "keybindings-legend-section": {
@@ -121,6 +132,26 @@
       "type": "keybinding",
       "default": "<Super><Ctrl>p",
       "description": "Open the preset panel"
+   },
+   "resizeWiderHotkey": {
+      "type": "keybinding",
+      "default": "<Super><Alt>Right",
+      "description": "Make the focused tiled window wider (tap = 1 px, hold to speed up)"
+   },
+   "resizeNarrowerHotkey": {
+      "type": "keybinding",
+      "default": "<Super><Alt>Left",
+      "description": "Make the focused tiled window narrower"
+   },
+   "resizeTallerHotkey": {
+      "type": "keybinding",
+      "default": "<Super><Alt>Down",
+      "description": "Make the focused tiled window taller"
+   },
+   "resizeShorterHotkey": {
+      "type": "keybinding",
+      "default": "<Super><Alt>Up",
+      "description": "Make the focused tiled window shorter"
    },
    "presets": {
       "type": "string",

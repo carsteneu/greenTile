@@ -30,6 +30,8 @@ The starting point was the shipped webpack bundle `5.4/gTile.js` of gTile 2.2.1,
 | `Super+Ctrl+A` | Turn automatic tiling on for the focused monitor and the active workspace and tile now (with its preset if one is assigned, otherwise with the auto grid); pressing it again tiles again |
 | `Super+Ctrl+D` | Turn automatic tiling off for the focused monitor and the active workspace (also pauses its preset) |
 | `Super+Ctrl+P` | Open/close the preset panel for the monitor of the focused window |
+| `Super+Alt+Right` / `Super+Alt+Left` | Make the focused tiled window wider / narrower (tap = 1 px, hold to speed up) |
+| `Super+Alt+Down` / `Super+Alt+Up` | Make the focused tiled window taller / shorter |
 | `Super+G` | Classic gTile grid |
 
 All keys can be changed in the extension settings (Extensions manager, or ⚙ in the preset panel).
@@ -46,6 +48,7 @@ In the panel (`Super+Ctrl+P`):
 - **✕ in the title bar** or `Esc` closes the panel. While the list is open, greenTile takes the `Esc` key, so applications do not receive it until the panel is closed.
 - **Auto: on / Auto: off in the title bar** shows whether automatic tiling is on for this monitor and workspace (green = on). Clicking it switches it, exactly like `Super+Ctrl+A` / `Super+Ctrl+D`; switching it on tiles right away.
 - **Gap between windows − N px +** below the list sets the gap between tiled windows (0 to 48 px in steps of 2, default 0). Only the sides where two windows meet move in; windows stay flush with the screen edges. The value applies to all greenTile layouts (auto grid, presets, `Super+Ctrl+3/6`), not to the classic `Super+G` grid. On a workspace with automatic tiling on, every click retiles right away, so the new gap shows live; elsewhere it applies from the next tiling. Stored in the setting `windowGap`.
+- **Reset sizes** appears next to it when borders were moved on this monitor and workspace (see [Moving borders](#moving-borders)); it returns every window count there to equal sizes and retiles.
 - **⚙ in the title bar** closes the panel and opens the extension's settings dialog (pages **Settings** and **Hotkeys**).
 - The panel can be dragged by its title bar and keeps its position when you switch workspaces. If that position is no longer on any monitor (external display unplugged), the panel opens centred again.
 - **◢ in the bottom right corner** resizes the panel: width (at least 600 px) and height of the part that stretches, in the list the preset rows (at least three), in the editor the painter. List and editor keep their own size, stored in the setting `panelSize`, limited to the room on the panel's monitor (a size set on a big monitor shrinks on a small one).
@@ -84,6 +87,18 @@ Without a preset the auto grid applies, depending on the monitor width:
 - **narrower than 2100 px:** up to 3 windows in one row, from 4 windows on 3 columns with stacks (4 = 1·1·2, 5 = 1·2·2, 6 = 2·2·2)
 
 In every case only visible windows of the **active** workspace are tiled, never windows from other workspaces. Minimized windows are left out. The order follows the current position on screen, so windows you rearranged by hand keep their place.
+
+## Moving borders
+
+Tiled windows do not have to share the area equally. Where automatic tiling is on:
+
+- **Mouse:** drag the edge of a tiled window as usual. On release the border between it and its neighbour moves there, and the neighbours follow. A vertical edge moves the column border (in the wide auto grid: the border between two windows of a row); a horizontal edge moves the border inside the column (wide auto grid: the row border). Corners move both. An edge on the screen border has no neighbour, the window snaps back. A click on the edge without dragging changes nothing.
+- **Keyboard:** `Super+Alt+Right` / `Left` make the focused window wider / narrower, `Super+Alt+Down` / `Up` taller / shorter. The window grows at its right/bottom border; the last column/cell uses its left/top border instead. One tap moves the border by 1 px, holding the key speeds up to 64 px per step. While a key is held, windows jump without animation. The keys can be changed on the Hotkeys page of the settings.
+- No window gets narrower or lower than 120 px.
+- The borders are stored per monitor, workspace **and window count** in the `layouts` setting (field `splits`, fractions of the screen, so they survive resolution changes and the gap setting). With 3 windows you get the borders you set for 3 windows; when a fourth window opens, the layout for 4 applies, and closing it brings the 3-window borders back. Borders are ignored (equal sizes) when the layout they were made for no longer applies, e.g. after the preset or its rule changed.
+- **Reset sizes** in the preset panel removes all borders of the monitor and workspace.
+- Not for `Super+Ctrl+3/6` and not for the classic `Super+G` grid. With automatic tiling off, resizing a window stays a free resize.
+- Known limitation: applications with their own minimum size may refuse to shrink to their cell; windows can then overlap.
 
 ## Per-monitor layouts
 

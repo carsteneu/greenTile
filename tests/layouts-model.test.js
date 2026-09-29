@@ -18,7 +18,7 @@ const extract = (name) => {
 };
 const layoutsBlock = extract('layouts-model');
 const code = extract('auto-model') + '\n' + layoutsBlock;
-const names = ['tile_auto_list_map', 'tile_layouts_parse', 'tile_layouts_entry', 'tile_layouts_set', 'tile_layouts_migrate'];
+const names = ['tile_auto_list_map', 'tile_layouts_parse', 'tile_layouts_entry', 'tile_layouts_set', 'tile_layouts_migrate', 'tile_layouts_splits'];
 const m = new Function(code + '\nreturn {' + names.join(',') + '};')();
 
 test('block is self-contained', () => {
@@ -108,4 +108,57 @@ test('migrate ignores invalid rows, as tile_auto_list_map does', () => {
         m.tile_layouts_migrate({ '0': 'p1' }, [{ workspace: 2, auto: true }, { workspace: 'x', auto: true }, null, { workspace: 2.5, auto: true }], 'M'),
         { M: { '1': { preset: 'p1' }, '2': { auto: true } } },
     );
+});
+
+const sp3 = { kind: 'cols', shape: [1, 2], major: [0.6, 0.4], minor: [[1], [0.3, 0.7]] };
+const sp4 = { kind: 'cols', shape: [2, 2], major: [0.5, 0.5], minor: [[0.5, 0.5], [0.2, 0.8]] };
+
+test('splits patch sets one window count next to preset and auto', () => {
+    const start = { M: { '5': { preset: 'p2', auto: true } } };
+    const next = m.tile_layouts_set(start, 'M', '5', { splits: { '3': sp3 } });
+    assert.deepEqual(next, { M: { '5': { preset: 'p2', auto: true, splits: { '3': sp3 } } } });
+    assert.deepEqual(start, { M: { '5': { preset: 'p2', auto: true } } });
+});
+
+test('splits patch adds, replaces and removes single counts', () => {
+    let l = m.tile_layouts_set({}, 'M', '1', { splits: { '3': sp3 } });
+    l = m.tile_layouts_set(l, 'M', '1', { splits: { '4': sp4 } });
+    assert.deepEqual(l.M['1'].splits, { '3': sp3, '4': sp4 });
+    l = m.tile_layouts_set(l, 'M', '1', { splits: { '3': null } });
+    assert.deepEqual(l.M['1'].splits, { '4': sp4 });
+    l = m.tile_layouts_set(l, 'M', '1', { splits: { '4': null } });
+    assert.deepEqual(l, {});
+});
+
+test('splits: null removes all splits, keeps preset and auto', () => {
+    const l = m.tile_layouts_set({ M: { '2': { preset: 'p1', splits: { '3': sp3, '4': sp4 } } } }, 'M', '2', { splits: null });
+    assert.deepEqual(l, { M: { '2': { preset: 'p1' } } });
+});
+
+test('splits never change the implied automatic tiling', () => {
+    const l = m.tile_layouts_set({}, 'M', '7', { splits: { '3': sp3 } });
+    assert.deepEqual(m.tile_layouts_entry(l, 'M', '7', ['p1']), { preset: null, auto: false });
+    const withPreset = m.tile_layouts_set({ M: { '7': { preset: 'p1' } } }, 'M', '7', { splits: { '3': sp3 } });
+    assert.deepEqual(m.tile_layouts_entry(withPreset, 'M', '7', ['p1']), { preset: 'p1', auto: true });
+});
+
+test('removing the preset keeps the splits entry', () => {
+    const l = m.tile_layouts_set({ M: { '2': { preset: 'p1', splits: { '3': sp3 } } } }, 'M', '2', { preset: null });
+    assert.deepEqual(l, { M: { '2': { splits: { '3': sp3 } } } });
+});
+
+test('tile_layouts_splits reads the raw splits object, {} when missing or invalid', () => {
+    assert.deepEqual(m.tile_layouts_splits({ M: { '2': { splits: { '3': sp3 } } } }, 'M', '2'), { '3': sp3 });
+    assert.deepEqual(m.tile_layouts_splits({ M: { '2': { preset: 'p1' } } }, 'M', '2'), {});
+    assert.deepEqual(m.tile_layouts_splits({ M: { '2': { splits: [1] } } }, 'M', '2'), {});
+    assert.deepEqual(m.tile_layouts_splits({ M: { '2': { splits: 'x' } } }, 'M', '2'), {});
+    assert.deepEqual(m.tile_layouts_splits(null, 'M', '2'), {});
+    assert.deepEqual(m.tile_layouts_splits({}, 'X', '1'), {});
+});
+
+test('invalid splits patch values are ignored', () => {
+    const l = m.tile_layouts_set({ M: { '1': { preset: 'p1' } } }, 'M', '1', { splits: 'bogus' });
+    assert.deepEqual(l, { M: { '1': { preset: 'p1' } } });
+    const l2 = m.tile_layouts_set({ M: { '1': { preset: 'p1' } } }, 'M', '1', { splits: { '3': 'x' } });
+    assert.deepEqual(l2, { M: { '1': { preset: 'p1' } } });
 });

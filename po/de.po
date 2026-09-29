@@ -9,7 +9,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: greenTile 0.1.0\n"
 "Report-Msgid-Bugs-To: https://github.com/carsteneu\n"
-"POT-Creation-Date: 2026-09-28 21:25+0200\n"
+"POT-Creation-Date: 2026-09-29 10:58+0200\n"
 "PO-Revision-Date: 2026-09-28 17:17+0200\n"
 "Last-Translator: carsten_eu\n"
 "Language-Team: German\n"
@@ -20,45 +20,45 @@ msgstr ""
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 "X-Generator: Poedit 2.3\n"
 
-#: greenTile.js:1356
+#: greenTile.js:1861
 #, javascript-format
 msgid "assigned — workspace %d"
 msgstr "zugewiesen — Fläche %d"
 
-#: greenTile.js:1413
+#: greenTile.js:1920
 msgid "Please enter a name."
 msgstr "Bitte einen Namen eingeben."
 
-#: greenTile.js:1436
+#: greenTile.js:1943
 #, javascript-format
 msgid "from %d"
 msgstr "ab %d"
 
-#: greenTile.js:1551
+#: greenTile.js:2058
 msgid "Rules (by window count)"
 msgstr "Regeln (nach Fensterzahl)"
 
-#: greenTile.js:1555
+#: greenTile.js:2062
 msgid "Rule"
 msgstr "Regel"
 
-#: greenTile.js:1556
+#: greenTile.js:2063
 msgid "Delete rule"
 msgstr "Regel löschen"
 
-#: greenTile.js:1564
+#: greenTile.js:2071
 msgid "Rule applies from"
 msgstr "Regel gilt ab"
 
-#: greenTile.js:1571
+#: greenTile.js:2078
 msgid "windows"
 msgstr "Fenstern"
 
-#: greenTile.js:1573
+#: greenTile.js:2080
 msgid "Painter"
 msgstr "Malerei"
 
-#: greenTile.js:1588
+#: greenTile.js:2095
 msgid ""
 "Click or drag: the row sets how many windows the column holds. Right-click "
 "removes a column."
@@ -66,84 +66,87 @@ msgstr ""
 "Klicken oder ziehen: Die Zeile legt fest, wie viele Fenster die Spalte "
 "aufnimmt. Rechtsklick entfernt eine Spalte."
 
-#: greenTile.js:1593
+#: greenTile.js:2100
 msgid "Name"
 msgstr "Name"
 
-#: greenTile.js:1594
+#: greenTile.js:2101
 msgid "Preset name"
 msgstr "Name des Presets"
 
-#: greenTile.js:1598
+#: greenTile.js:2105
 msgid "Save"
 msgstr "Speichern"
 
-#: greenTile.js:1615
+#: greenTile.js:2122
 #, javascript-format
 msgid "Result: %s"
 msgstr "Ergebnis: %s"
 
-#: greenTile.js:1647
+#: greenTile.js:2195
 msgid "Gap between windows"
 msgstr "Abstand zwischen Fenstern"
 
-#: greenTile.js:1652
+#: greenTile.js:2200
 #, javascript-format
 msgid "%d px"
 msgstr "%d px"
 
-#: greenTile.js:1688
+#: greenTile.js:2219
+msgid "Reset sizes"
+msgstr "Größen zurücksetzen"
+
+#: greenTile.js:2250
 #, javascript-format
-#| msgid "Presets — workspace %d"
 msgid "Presets — workspace %d · %s"
 msgstr "Presets — Arbeitsfläche %d · %s"
 
-#: greenTile.js:1690
+#: greenTile.js:2252
 msgid "Create preset"
 msgstr "Neues Preset"
 
-#: greenTile.js:1690
+#: greenTile.js:2252
 #, javascript-format
 msgid "Edit %s"
 msgstr "%s bearbeiten"
 
-#: greenTile.js:1694
+#: greenTile.js:2256
 msgid "Back"
 msgstr "zurück"
 
-#: greenTile.js:1703
+#: greenTile.js:2265
 msgid "Auto: on"
 msgstr "Auto: an"
 
-#: greenTile.js:1703
+#: greenTile.js:2265
 msgid "Auto: off"
 msgstr "Auto: aus"
 
-#: greenTile.js:1805
+#: greenTile.js:2386
 msgid "No presets yet."
 msgstr "Noch keine Presets vorhanden."
 
-#: greenTile.js:1820
+#: greenTile.js:2401
 msgid "New preset"
 msgstr "Neu anlegen"
 
-#: greenTile.js:1823
+#: greenTile.js:2404
 msgid "Click a row to apply it to this workspace and tile right away"
 msgstr "Klick auf eine Zeile = sofort auf dieser Fläche anwenden & kacheln"
 
-#: greenTile.js:2022
+#: greenTile.js:2705
 msgid "Auto close"
 msgstr "Automatisch schließen"
 
-#: greenTile.js:2023
+#: greenTile.js:2706
 msgid "Animations"
 msgstr "Animationen"
 
-#: greenTile.js:2024
+#: greenTile.js:2707
 msgid "Auto tile main and list"
 msgstr "Automatisch in einen Hauptbereich und in eine Liste kacheln"
 
-#: greenTile.js:2025
+#: greenTile.js:2708
 msgid "Auto tile two lists"
 msgstr "Automatisch in zwei Listen kacheln"
 
@@ -182,6 +185,10 @@ msgstr "Tastenkürzel für automatisches Kacheln"
 #. settings-schema.json->preset-section->title
 msgid "Workspace Presets"
 msgstr "Presets für Arbeitsflächen"
+
+#. settings-schema.json->resize-section->title
+msgid "Resize tiled windows"
+msgstr "Größe gekachelter Fenster ändern"
 
 #. settings-schema.json->keybindings-legend-section->title
 msgid "Keybindings Legend (when open)"
@@ -259,6 +266,22 @@ msgstr "Automatisches Kacheln für diese Arbeitsfläche ausschalten"
 #. settings-schema.json->presetHotkey->description
 msgid "Open the preset panel"
 msgstr "Preset-Panel öffnen"
+
+#. settings-schema.json->resizeWiderHotkey->description
+msgid "Make the focused tiled window wider (tap = 1 px, hold to speed up)"
+msgstr "Fokussiertes gekacheltes Fenster breiter machen (Tippen = 1 px, Halten beschleunigt)"
+
+#. settings-schema.json->resizeNarrowerHotkey->description
+msgid "Make the focused tiled window narrower"
+msgstr "Fokussiertes gekacheltes Fenster schmaler machen"
+
+#. settings-schema.json->resizeTallerHotkey->description
+msgid "Make the focused tiled window taller"
+msgstr "Fokussiertes gekacheltes Fenster höher machen"
+
+#. settings-schema.json->resizeShorterHotkey->description
+msgid "Make the focused tiled window shorter"
+msgstr "Fokussiertes gekacheltes Fenster niedriger machen"
 
 #. settings-schema.json->presets->description
 msgid "Preset definitions (JSON)"

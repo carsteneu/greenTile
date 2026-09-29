@@ -127,6 +127,10 @@ class Config {
             Main.keybindingManager.addHotKey('greenTile-autoN', this.autotileAutoHotkey, () => tile_auto_activate(this.app));
             Main.keybindingManager.addHotKey('greenTile-autoOff', this.autotileOffHotkey, () => tile_auto_deactivate(this.app));
             Main.keybindingManager.addHotKey('greenTile-preset', this.presetHotkey, () => tile_panel_toggle(this.app));
+            Main.keybindingManager.addHotKey('greenTile-resize-wider', this.resizeWiderHotkey, () => tile_split_hotkey(this.app, 'wider'));
+            Main.keybindingManager.addHotKey('greenTile-resize-narrower', this.resizeNarrowerHotkey, () => tile_split_hotkey(this.app, 'narrower'));
+            Main.keybindingManager.addHotKey('greenTile-resize-taller', this.resizeTallerHotkey, () => tile_split_hotkey(this.app, 'taller'));
+            Main.keybindingManager.addHotKey('greenTile-resize-shorter', this.resizeShorterHotkey, () => tile_split_hotkey(this.app, 'shorter'));
         };
         this.DisableHotkey = () => {
             Main.keybindingManager.removeHotKey('greenTile');
@@ -135,6 +139,10 @@ class Config {
             Main.keybindingManager.removeHotKey('greenTile-autoN');
             Main.keybindingManager.removeHotKey('greenTile-autoOff');
             Main.keybindingManager.removeHotKey('greenTile-preset');
+            Main.keybindingManager.removeHotKey('greenTile-resize-wider');
+            Main.keybindingManager.removeHotKey('greenTile-resize-narrower');
+            Main.keybindingManager.removeHotKey('greenTile-resize-taller');
+            Main.keybindingManager.removeHotKey('greenTile-resize-shorter');
         };
         this.updateSettings = () => {
             for (const grid of this.app.Grids) {
@@ -170,6 +178,8 @@ class Config {
         };
         this.destroy = () => {
             this.DisableHotkey();
+            // resize hotkey steps not yet written (500 ms debounce) must not get lost
+            tile_split_flush(this.app);
             tile_auto_disconnect_all();
             tile_panel_close();
         };
@@ -181,6 +191,10 @@ class Config {
         this.settings.bindProperty(Settings.BindingDirection.IN, 'autotileautohotkey', 'autotileAutoHotkey', this.EnableHotkey, null);
         this.settings.bindProperty(Settings.BindingDirection.IN, 'autotileoffhotkey', 'autotileOffHotkey', this.EnableHotkey, null);
         this.settings.bindProperty(Settings.BindingDirection.IN, 'presetHotkey', 'presetHotkey', this.EnableHotkey, null);
+        this.settings.bindProperty(Settings.BindingDirection.IN, 'resizeWiderHotkey', 'resizeWiderHotkey', this.EnableHotkey, null);
+        this.settings.bindProperty(Settings.BindingDirection.IN, 'resizeNarrowerHotkey', 'resizeNarrowerHotkey', this.EnableHotkey, null);
+        this.settings.bindProperty(Settings.BindingDirection.IN, 'resizeTallerHotkey', 'resizeTallerHotkey', this.EnableHotkey, null);
+        this.settings.bindProperty(Settings.BindingDirection.IN, 'resizeShorterHotkey', 'resizeShorterHotkey', this.EnableHotkey, null);
         this.settings.bindProperty(Settings.BindingDirection.OUT, 'lastGridRows', 'nbCols');
         this.settings.bindProperty(Settings.BindingDirection.OUT, 'lastGridCols', 'nbRows');
         if (this.nbCols == null || !Array.isArray(this.nbCols))
@@ -361,10 +375,21 @@ const tile_collect_windows = (monitor, focusWindow) => {
 // is parked at the old rect via translation/scale and eased back to identity.
 // Offsets are set BEFORE the move so no intermediate frame shows the final position.
 const TILE_ANIMATE_MS = 250;
-const tile_place = (app, metaWindow, x, y, width, height) => {
+// animate = false: the window jumps (resize hotkeys held down retile ~33 times per second;
+// overlapping tweens would make the windows swim).
+const tile_place = (app, metaWindow, x, y, width, height, animate = true) => {
     app.platform.reset_window(metaWindow);
     const oldRect = metaWindow.get_frame_rect();
     const actor = metaWindow.get_compositor_private();
+    if (actor && !animate) {
+        Tweener.removeTweens(actor);
+        actor.translation_x = 0;
+        actor.translation_y = 0;
+        actor.scale_x = 1;
+        actor.scale_y = 1;
+        app.platform.move_resize_window(metaWindow, x, y, width, height);
+        return;
+    }
     if (actor) {
         Tweener.removeTweens(actor);
         actor.translation_x = oldRect.x - x;
@@ -456,9 +481,9 @@ const tile_gap_cell = (cell, area, gap) => {
 // <<< gap-model
 const tile_gap = (app) => tile_gap_value(app.config.settings.getValue('windowGap'));
 // Places a window into a layout cell of the usable area, minus the window gap.
-const tile_place_cell = (app, metaWindow, x, y, width, height, area) => {
+const tile_place_cell = (app, metaWindow, x, y, width, height, area, animate = true) => {
     const [cx, cy, cw, ch] = tile_gap_cell([x, y, width, height], area, tile_gap(app));
-    tile_place(app, metaWindow, cx, cy, cw, ch);
+    tile_place(app, metaWindow, cx, cy, cw, ch, animate);
 };
 const tile_app_columns = (app, cols) => {
     const focusWindow = tile_focus_window();
@@ -477,29 +502,135 @@ const tile_app_columns = (app, cols) => {
     }
 };
 // Sort direction must match the target layout: column-major for the low-res
-// column-stack, row-quantized for uniform grids — otherwise re-tiles shuffle
-// windows between cells and manual arrangements do not survive.
+// column-stack, row-major for uniform grids — otherwise re-tiles shuffle
+// windows between cells and manual arrangements do not survive. Grouping by overlap
+// (tile_sort_order) keeps windows in their column/row with unequal borders too.
+// tile_sort_rect_override: stable sequence -> frame to sort by instead of the current one
+// (set after an edge resize: the dragged window keeps the cell it was tiled into; used up
+// by the next retile, ignored after TILE_SORT_OVERRIDE_MS when no retile came).
+const tile_sort_rect_override = new Map();
+const TILE_SORT_OVERRIDE_MS = 2000;
 const tile_sort_reading_order = (windows, columnMajor) => {
-    return windows.slice().sort((a, b) => {
-        const ra = a.get_frame_rect();
-        const rb = b.get_frame_rect();
-        if (columnMajor) {
-            if (ra.x !== rb.x)
-                return ra.x - rb.x;
-            return ra.y - rb.y;
+    const now = GLib.get_monotonic_time() / 1000;
+    const rects = windows.map((w) => {
+        const seq = w.get_stable_sequence();
+        const o = tile_sort_rect_override.get(seq);
+        if (o) {
+            tile_sort_rect_override.delete(seq);
+            if (now - o.at <= TILE_SORT_OVERRIDE_MS)
+                return o.rect;
         }
-        const rowA = Math.round(ra.y / (ra.height || 1));
-        const rowB = Math.round(rb.y / (rb.height || 1));
-        if (rowA !== rowB)
-            return rowA - rowB;
-        return ra.x - rb.x;
+        const f = w.get_frame_rect();
+        return [f.x, f.y, f.width, f.height];
+    });
+    return tile_sort_order(rects, columnMajor).map((i) => windows[i]);
+};
+// Layout of the automatic grid for n windows. Below 2100 px monitor width, 4+ uniform
+// columns get too narrow: 3 fixed columns with balanced stacks instead (kind "cols",
+// tile_auto_narrow_stacks). Otherwise one row with one column per window up to 6, then
+// the windows are spread evenly over full-width rows (kind "rows", tile_auto_rows).
+const tile_auto_shape = (monitor, n) => (monitor.width < 2100 && n > 3)
+    ? { kind: 'cols', shape: tile_auto_narrow_stacks(n) }
+    : { kind: 'rows', shape: tile_auto_rows(n) };
+// Movable borders (split-model): a split the resize hotkeys have not written yet wins
+// over the stored one; a stored split counts only when it fits the layout.
+// tile_split_pending: key "mkey\nwskey\nn" -> { mkey, wskey, n, split }, written to the
+// settings by tile_split_flush (500 ms after the last hotkey step, at once for the mouse).
+const tile_split_pending = new Map();
+const tile_split_flush_timer = { id: 0 };
+const TILE_SPLIT_FLUSH_MS = 500;
+const tile_split_ref = (monitorIndex, wsIndex, n) => {
+    const mkey = tile_monitors.keys[monitorIndex];
+    if (!mkey)
+        return null;
+    const wskey = tile_layout_ws_key(monitorIndex, wsIndex);
+    return { key: mkey + '\n' + wskey + '\n' + n, mkey: mkey, wskey: wskey, n: String(n) };
+};
+const tile_split_for = (app, monitorIndex, wsIndex, n, layout) => {
+    const ref = tile_split_ref(monitorIndex, wsIndex, n);
+    if (!ref)
+        return null;
+    const pending = tile_split_pending.get(ref.key);
+    if (pending)
+        return tile_split_valid(layout.kind, layout.shape, pending.split);
+    const layouts = tile_layouts_parse(app.config.settings.getValue('layouts') || '');
+    return tile_split_valid(layout.kind, layout.shape, tile_layouts_splits(layouts, ref.mkey, ref.wskey)[ref.n]);
+};
+const tile_split_flush = (app) => {
+    if (tile_split_flush_timer.id) {
+        tile_Mainloop.source_remove(tile_split_flush_timer.id);
+        tile_split_flush_timer.id = 0;
+    }
+    if (tile_split_pending.size === 0)
+        return;
+    let layouts = tile_layouts_parse(app.config.settings.getValue('layouts') || '');
+    if (layouts === null) {
+        // corrupt setting: same rule as tile_layout_set, never overwrite it
+        tile_split_pending.clear();
+        if (!tile_split_flush_timer.corruptLogged) {
+            tile_split_flush_timer.corruptLogged = true;
+            global.log('greenTile layouts setting is corrupt, splits not written');
+        }
+        return;
+    }
+    tile_split_flush_timer.corruptLogged = false;
+    for (const entry of tile_split_pending.values())
+        layouts = tile_layouts_set(layouts, entry.mkey, entry.wskey, { splits: { [entry.n]: entry.split } });
+    tile_split_pending.clear();
+    app.config.settings.setValue('layouts', JSON.stringify(layouts));
+};
+const tile_split_remember = (app, ref, split, flushNow) => {
+    tile_split_pending.set(ref.key, { mkey: ref.mkey, wskey: ref.wskey, n: ref.n, split: split });
+    if (flushNow) {
+        tile_split_flush(app);
+        return;
+    }
+    if (tile_split_flush_timer.id)
+        tile_Mainloop.source_remove(tile_split_flush_timer.id);
+    tile_split_flush_timer.id = tile_Mainloop.timeout_add(TILE_SPLIT_FLUSH_MS, () => {
+        tile_split_flush_timer.id = 0;
+        tile_split_flush(app);
+        return false;
     });
 };
-const tile_app_auto = (app, monitorIndex, focusWindow) => {
+// true when the monitor + workspace has stored (or pending) splits — shows the reset button
+const tile_split_any = (app, monitorIndex, wsIndex) => {
+    const ref = tile_split_ref(monitorIndex, wsIndex, 0);
+    if (!ref)
+        return false;
+    const prefix = ref.mkey + '\n' + ref.wskey + '\n';
+    for (const key of tile_split_pending.keys()) {
+        if (key.indexOf(prefix) === 0)
+            return true;
+    }
+    const layouts = tile_layouts_parse(app.config.settings.getValue('layouts') || '');
+    return Object.keys(tile_layouts_splits(layouts, ref.mkey, ref.wskey)).length > 0;
+};
+const tile_split_reset = (app, monitorIndex, wsIndex) => {
+    const ref = tile_split_ref(monitorIndex, wsIndex, 0);
+    if (!ref)
+        return;
+    const prefix = ref.mkey + '\n' + ref.wskey + '\n';
+    for (const key of Array.from(tile_split_pending.keys())) {
+        if (key.indexOf(prefix) === 0)
+            tile_split_pending.delete(key);
+    }
+    tile_layout_set(app, monitorIndex, wsIndex, { splits: null });
+    global.log('greenTile sizes reset ws' + (wsIndex + 1) + ' mon=' + ref.mkey);
+};
+// Places the ordered windows into the cells of the layout (split or equal division).
+const tile_place_rects = (app, ordered, layout, split, area, animate) => {
+    const rects = tile_split_rects(layout.kind, layout.shape, split, area);
+    for (let i = 0; i < rects.length && i < ordered.length; i++) {
+        const [x, y, w, h] = rects[i];
+        tile_place_cell(app, ordered[i], x, y, w, h, area, animate);
+    }
+};
+const tile_app_auto = (app, monitorIndex, focusWindow, animate = true) => {
     const monitor = utils_Main.layoutManager.monitors[monitorIndex];
     if (!monitor)
         return;
-    let [screenX, screenY, screenWidth, screenHeight] = getUsableScreenArea(monitor);
+    const area = getUsableScreenArea(monitor);
     let windows = tile_collect_windows(monitor, focusWindow);
     tile_debug_count(monitor, focusWindow, windows);
     const focused = focusWindow && !focusWindow.minimized && focusWindow.get_monitor() === monitorIndex;
@@ -512,42 +643,13 @@ const tile_app_auto = (app, monitorIndex, focusWindow) => {
     tile_auto.pending.set(monitorIndex, new Set());
     let fresh = windows.filter((w) => pending.has(w.get_stable_sequence()));
     let settled = windows.filter((w) => !pending.has(w.get_stable_sequence()));
-    // Below 2100px monitor width, 4+ uniform columns get too narrow: 3 fixed columns
-    // with balanced stacks instead (4=1·1·2, 5=1·2·2, 6=2·2·2, 8=2·3·3) — full-height
-    // singles stay left, extra windows stack on the right columns. Screen always fills.
-    let ordered;
-    if (monitor.width < 2100 && n > 3) {
-        ordered = tile_sort_reading_order((focused ? [focusWindow] : []).concat(settled), true)
-            .concat(tile_sort_reading_order(fresh, true));
-        let base = Math.floor(n / 3);
-        let rem = n % 3;
-        let stacks = [base, base + (rem > 1 ? 1 : 0), base + (rem > 0 ? 1 : 0)];
-        let colWidth = screenWidth / 3;
-        let idx = 0;
-        for (let c = 0; c < 3; c++) {
-            let cellHeight = screenHeight / stacks[c];
-            for (let r = 0; r < stacks[c]; r++) {
-                tile_place_cell(app, ordered[idx], screenX + c * colWidth, screenY + r * cellHeight, colWidth, cellHeight, [screenX, screenY, screenWidth, screenHeight]);
-                idx++;
-            }
-        }
-        return;
-    }
-    // High-res: single row with one column per window up to 6, then the windows are
-    // spread evenly over rows (7=4+3, 8=4+4, 12=6+6), every row spans the full width
-    // (tile_auto_rows). Single window => no-op (n < 2 guard above).
-    const rows = tile_auto_rows(n);
-    ordered = tile_sort_reading_order((focused ? [focusWindow] : []).concat(settled), false)
-        .concat(tile_sort_reading_order(fresh, false));
-    let cellHeight = screenHeight / rows.length;
-    let index = 0;
-    for (let row = 0; row < rows.length; row++) {
-        let cellWidth = screenWidth / rows[row];
-        for (let col = 0; col < rows[row]; col++) {
-            tile_place_cell(app, ordered[index], screenX + col * cellWidth, screenY + row * cellHeight, cellWidth, cellHeight, [screenX, screenY, screenWidth, screenHeight]);
-            index++;
-        }
-    }
+    // Sort direction follows the layout: column-major for columns, rows for rows.
+    const layout = tile_auto_shape(monitor, n);
+    const columnMajor = layout.kind === 'cols';
+    const ordered = tile_sort_reading_order((focused ? [focusWindow] : []).concat(settled), columnMajor)
+        .concat(tile_sort_reading_order(fresh, columnMajor));
+    const wsIndex = global.workspace_manager.get_active_workspace().index();
+    tile_place_rects(app, ordered, layout, tile_split_for(app, monitorIndex, wsIndex, n, layout), area, animate);
 };
 // Auto-mode observer: re-tiles automatically on workspaces with automatic tiling on
 // (Super+Ctrl+A on, Super+Ctrl+D off, per workspace).
@@ -565,6 +667,8 @@ const tile_auto = {
     pending: new Map(),
     lastMonitor: new Map(),
     grabMonitor: new Map(),
+    // resizeStart: stable sequence -> { rect, monitor } at the start of an edge resize.
+    resizeStart: new Map(),
     workspaceSignals: [],
     signals: [],
     tracked: [],
@@ -658,16 +762,142 @@ const tile_auto_on_window_removed = (app, ws, w) => {
         return;
     tile_auto_schedule_monitor(app, monitorIndex, 300);
 };
+// Muffin grab op number -> name (RESIZING_E, KEYBOARD_RESIZING_UNKNOWN, ...).
+const tile_grab_op_name = (op) => Object.keys(Meta.GrabOp).find((k) => Meta.GrabOp[k] === op) || '';
+const tile_grab_is_resize = (op) => /RESIZING/.test(tile_grab_op_name(op));
 const tile_auto_on_grab_begin = (app, w, op) => {
-    if (op !== Meta.GrabOp.MOVING && op !== Meta.GrabOp.KEYBOARD_MOVING)
-        return;
     if (!tile_auto_window_ok(w))
         return;
+    if (tile_grab_is_resize(op)) {
+        // Frame at grab start identifies the cell the window was tiled into.
+        const f = w.get_frame_rect();
+        tile_auto.resizeStart.set(w.get_stable_sequence(), { rect: [f.x, f.y, f.width, f.height], monitor: w.get_monitor() });
+        return;
+    }
+    if (op !== Meta.GrabOp.MOVING && op !== Meta.GrabOp.KEYBOARD_MOVING)
+        return;
     tile_auto.grabMonitor.set(w.get_stable_sequence(), w.get_monitor());
+};
+// Edge resize of a tiled window (mouse or window menu): the moved edges become the new
+// borders of the layout (split-model), stored for this monitor, workspace and window
+// count; the neighbours follow in the retile. Edges on the monitor border have no
+// neighbour: the window snaps back. With automatic tiling off it stays a free resize.
+const tile_split_on_resize_end = (app, w, op) => {
+    const seq = w.get_stable_sequence();
+    const start = tile_auto.resizeStart.get(seq);
+    tile_auto.resizeStart.delete(seq);
+    const active = global.workspace_manager.get_active_workspace();
+    if (!start || w.get_workspace() !== active)
+        return;
+    const monitorIndex = w.get_monitor();
+    const wsIndex = active.index();
+    if (!tile_layout_for(app, monitorIndex, wsIndex).auto)
+        return;
+    const monitor = utils_Main.layoutManager.monitors[monitorIndex];
+    if (!monitor || start.monitor !== monitorIndex) {
+        tile_auto_schedule_monitor(app, monitorIndex, 250);
+        return;
+    }
+    const windows = tile_collect_windows(monitor, null);
+    if (windows.indexOf(w) === -1)
+        return;
+    const n = windows.length;
+    const layout = tile_layout_shape(app, monitorIndex, n);
+    const ref = tile_split_ref(monitorIndex, wsIndex, n);
+    if (!layout || !ref)
+        return;
+    // The retile sorts the dragged window by its frame at grab start, so a moved left or
+    // top edge never pushes it into another cell (tile_sort_reading_order).
+    tile_sort_rect_override.set(seq, { rect: start.rect, at: GLib.get_monotonic_time() / 1000 });
+    const area = getUsableScreenArea(monitor);
+    let split = tile_split_for(app, monitorIndex, wsIndex, n, layout);
+    const idx = tile_split_cell_at(tile_split_rects(layout.kind, layout.shape, split, area), start.rect);
+    const f = w.get_frame_rect();
+    const end = [f.x, f.y, f.width, f.height];
+    // Only edges that really moved count: a click on the edge without dragging must not
+    // store anything (the frame edge never sits exactly on the computed border — rounding,
+    // terminals snap their size to character cells).
+    const moved = tile_split_frame_edges(start.rect, end);
+    const named = tile_split_op_edges(tile_grab_op_name(op));
+    const edges = named.length ? named.filter((e) => moved.indexOf(e) !== -1) : moved;
+    // The gap sits half on each side of a border (tile_gap_cell): border = frame edge + half gap outward.
+    const gap = tile_gap(app);
+    const lead = Math.floor(gap / 2);
+    const trail = gap - lead;
+    const pos = { left: f.x - lead, right: f.x + f.width + trail, top: f.y - lead, bottom: f.y + f.height + trail };
+    let changed = false;
+    for (const edge of edges) {
+        const next = idx < 0 ? null : tile_split_move(layout.kind, layout.shape, split, idx, edge, pos[edge], area, TILE_SPLIT_MIN_PX);
+        if (next) {
+            split = next;
+            changed = true;
+        }
+    }
+    if (changed) {
+        tile_split_remember(app, ref, split, true);
+        global.log('greenTile split stored ws' + (wsIndex + 1) + ' mon=' + ref.mkey + ' n=' + n + ' edges=' + edges.join('+'));
+    }
+    tile_auto_schedule_monitor(app, monitorIndex, 250);
+};
+// Resize hotkeys (Super+Alt+arrows): move a border of the focused window's cell. A tap
+// moves 1 px, holding the key accelerates (tile_split_accel). Retiles without animation
+// at every step; the split is written 500 ms after the last step.
+const tile_split_keys = { state: null };
+let tile_keyboard_settings = null;
+const tile_split_repeat_threshold = () => {
+    try {
+        if (!tile_keyboard_settings)
+            tile_keyboard_settings = new tile_Gio.Settings({ schema_id: 'org.cinnamon.desktop.peripherals.keyboard' });
+        return tile_keyboard_settings.get_uint('delay') + 100;
+    }
+    catch (e) {
+        return 600;
+    }
+};
+const tile_split_hotkey = (app, action) => {
+    const w = tile_focus_window();
+    if (!w)
+        return;
+    const monitorIndex = w.get_monitor();
+    const wsIndex = global.workspace_manager.get_active_workspace().index();
+    if (!tile_layout_for(app, monitorIndex, wsIndex).auto)
+        return;
+    const monitor = utils_Main.layoutManager.monitors[monitorIndex];
+    if (!monitor)
+        return;
+    const windows = tile_collect_windows(monitor, null);
+    // only windows of the layout (tile_focus_window may fall back to another window)
+    if (windows.indexOf(w) === -1)
+        return;
+    const n = windows.length;
+    const layout = tile_layout_shape(app, monitorIndex, n);
+    const ref = tile_split_ref(monitorIndex, wsIndex, n);
+    if (!layout || !ref)
+        return;
+    const area = getUsableScreenArea(monitor);
+    const split = tile_split_for(app, monitorIndex, wsIndex, n, layout);
+    const f = w.get_frame_rect();
+    const idx = tile_split_cell_at(tile_split_rects(layout.kind, layout.shape, split, area), [f.x, f.y, f.width, f.height]);
+    const target = idx < 0 ? null : tile_split_key_target(layout.kind, layout.shape, idx, action);
+    if (!target)
+        return;
+    const accel = tile_split_accel(tile_split_keys.state, action, GLib.get_monotonic_time() / 1000, tile_split_repeat_threshold());
+    tile_split_keys.state = accel.state;
+    const from = tile_split_border_pos(layout.kind, layout.shape, split, idx, target.edge, area);
+    const next = tile_split_move(layout.kind, layout.shape, split, idx, target.edge, from + target.sign * accel.step, area, TILE_SPLIT_MIN_PX);
+    // at the minimum size the border stays: no retile and no new flush timer per repeat
+    if (!next || (split && JSON.stringify(next) === JSON.stringify(split)))
+        return;
+    tile_split_remember(app, ref, next, false);
+    tile_retile_monitor(app, monitorIndex, null, false);
 };
 const tile_auto_on_grab_end = (app, w, op) => {
     if (!tile_auto_window_ok(w))
         return;
+    if (tile_grab_is_resize(op)) {
+        tile_split_on_resize_end(app, w, op);
+        return;
+    }
     if (op !== Meta.GrabOp.MOVING && op !== Meta.GrabOp.KEYBOARD_MOVING)
         return;
     if (w.get_workspace() !== global.workspace_manager.get_active_workspace())
@@ -715,6 +945,7 @@ const tile_auto_untrack = (w) => {
     }
     tile_auto.lastMonitor.delete(seq);
     tile_auto.grabMonitor.delete(seq);
+    tile_auto.resizeStart.delete(seq);
     tile_auto.tracked.splice(idx, 1);
 };
 const tile_auto_track_window = (app, w) => {
@@ -807,6 +1038,8 @@ const tile_auto_disconnect_all = () => {
     tile_auto.pending.clear();
     tile_auto.lastMonitor.clear();
     tile_auto.grabMonitor.clear();
+    tile_auto.resizeStart.clear();
+    tile_sort_rect_override.clear();
     tile_auto_disconnect_workspaces();
     for (const [obj, id] of tile_auto.signals)
         obj.disconnect(id);
@@ -1039,22 +1272,275 @@ const tile_auto_rows = (n) => {
         rows.push(base + (r < rem ? 1 : 0));
     return rows;
 };
-// <<< fill-model
-// k columns of equal width, column i gets stacks[i] equal-height cells, after the
-// rule was filled to the window count (tile_fill_stacks): no cell stays empty.
-const tile_place_stacks = (app, ordered, stacks, screenX, screenY, screenWidth, screenHeight) => {
-    const last = tile_fill_stacks(stacks, ordered.length);
-    const colWidth = screenWidth / last.length;
-    let idx = 0;
-    for (let c = 0; c < last.length; c++) {
-        const cellHeight = screenHeight / last[c];
-        for (let r = 0; r < last[c]; r++) {
-            tile_place_cell(app, ordered[idx], screenX + c * colWidth, screenY + r * cellHeight, colWidth, cellHeight, [screenX, screenY, screenWidth, screenHeight]);
-            idx++;
-        }
-    }
+// Narrow automatic grid (below 2100 px, from 4 windows): 3 columns with balanced stacks,
+// full-height singles stay left (4 = 1·1·2, 5 = 1·2·2, 6 = 2·2·2, 8 = 2·3·3).
+const tile_auto_narrow_stacks = (n) => {
+    const base = Math.floor(n / 3);
+    const rem = n % 3;
+    return [base, base + (rem > 1 ? 1 : 0), base + (rem > 0 ? 1 : 0)];
 };
-const tile_preset_retile = (app, monitorIndex, focusWindow) => {
+// <<< fill-model
+// >>> split-model (pure functions, no Cinnamon imports; tested by tests/split-model.test.js)
+// Movable borders of a filled layout, stored as fractions (setting "layouts", field
+// "splits", keyed by window count). kind "cols": columns (major, along x) with stacked
+// cells (minor, along y) — presets and the narrow auto grid; kind "rows": rows (major,
+// along y) with cells side by side (minor, along x) — the wide auto grid. A split is
+// { kind, shape, major: [fractions], minor: [[fractions] per column/row] }.
+const TILE_SPLIT_MIN_PX = 120;
+const TILE_SPLIT_STEP_MAX = 64;
+const tile_split_equal = (kind, shape) => ({
+    kind: kind,
+    shape: shape.slice(),
+    major: shape.map(() => 1 / shape.length),
+    minor: shape.map((k) => {
+        const parts = [];
+        for (let i = 0; i < k; i++)
+            parts.push(1 / k);
+        return parts;
+    }),
+});
+const tile_split_norm = (parts, len) => {
+    if (!Array.isArray(parts) || parts.length !== len)
+        return null;
+    if (!parts.every((v) => typeof v === 'number' && Number.isFinite(v) && v > 0))
+        return null;
+    const sum = parts.reduce((a, b) => a + b, 0);
+    if (Math.abs(sum - 1) > 0.02)
+        return null;
+    return parts.map((v) => v / sum);
+};
+// Normalised copy of a stored split when it fits (kind, shape), otherwise null.
+const tile_split_valid = (kind, shape, split) => {
+    if (split == null || typeof split !== 'object' || split.kind !== kind)
+        return null;
+    if (!Array.isArray(split.shape) || split.shape.length !== shape.length || split.shape.some((v, i) => v !== shape[i]))
+        return null;
+    const major = tile_split_norm(split.major, shape.length);
+    if (!major || !Array.isArray(split.minor) || split.minor.length !== shape.length)
+        return null;
+    const minor = [];
+    for (let i = 0; i < shape.length; i++) {
+        const parts = tile_split_norm(split.minor[i], shape[i]);
+        if (!parts)
+            return null;
+        minor.push(parts);
+    }
+    return { kind: kind, shape: shape.slice(), major: major, minor: minor };
+};
+// Positions and sizes of n parts along one axis. Without fractions this is exactly the
+// equal division of the old code (start + i * len / n), so layouts without a split do
+// not move by a pixel.
+const tile_split_parts = (fractions, n, start, len) => {
+    const out = [];
+    if (!fractions) {
+        const size = len / n;
+        for (let i = 0; i < n; i++)
+            out.push([start + i * size, size]);
+        return out;
+    }
+    let acc = 0;
+    for (let i = 0; i < n; i++) {
+        const from = start + len * acc;
+        acc += fractions[i];
+        const to = i === n - 1 ? start + len : start + len * acc;
+        out.push([from, to - from]);
+    }
+    return out;
+};
+// Cell rectangles in placement order: cols column by column, top to bottom; rows row by
+// row, left to right.
+const tile_split_rects = (kind, shape, split, area) => {
+    const [ax, ay, aw, ah] = area;
+    const rects = [];
+    const cols = kind === 'cols';
+    const major = tile_split_parts(split ? split.major : null, shape.length, cols ? ax : ay, cols ? aw : ah);
+    for (let i = 0; i < shape.length; i++) {
+        const minor = tile_split_parts(split ? split.minor[i] : null, shape[i], cols ? ay : ax, cols ? ah : aw);
+        for (const [pos, size] of minor)
+            rects.push(cols ? [major[i][0], pos, major[i][1], size] : [pos, major[i][0], size, major[i][1]]);
+    }
+    return rects;
+};
+const tile_split_cell_at = (rects, frame) => {
+    const cx = frame[0] + frame[2] / 2;
+    const cy = frame[1] + frame[3] / 2;
+    let best = -1;
+    let bestDist = Infinity;
+    rects.forEach((r, i) => {
+        const dx = r[0] + r[2] / 2 - cx;
+        const dy = r[1] + r[3] / 2 - cy;
+        const dist = dx * dx + dy * dy;
+        if (dist < bestDist) {
+            bestDist = dist;
+            best = i;
+        }
+    });
+    return best;
+};
+// Which stored border an edge of cell idx is: { list: 'major' | 'minor', i, b } — the
+// border between part b and b + 1 of split.major or split.minor[i] — or null when the
+// edge lies on the monitor border.
+const tile_split_edge_ref = (kind, shape, idx, edge) => {
+    let i = 0;
+    let j = idx;
+    while (i < shape.length && j >= shape[i]) {
+        j -= shape[i];
+        i++;
+    }
+    if (idx < 0 || i >= shape.length)
+        return null;
+    const vertical = edge === 'left' || edge === 'right';
+    const after = edge === 'right' || edge === 'bottom';
+    if (!vertical && edge !== 'top' && edge !== 'bottom')
+        return null;
+    const onMajor = (kind === 'cols') === vertical;
+    const index = onMajor ? i : j;
+    const count = onMajor ? shape.length : shape[i];
+    const b = after ? index : index - 1;
+    if (b < 0 || b >= count - 1)
+        return null;
+    return { list: onMajor ? 'major' : 'minor', i: i, b: b };
+};
+const tile_split_has_edge = (kind, shape, idx, edge) => tile_split_edge_ref(kind, shape, idx, edge) !== null;
+const tile_split_axis = (kind, list, area) => {
+    const alongX = (kind === 'cols') === (list === 'major');
+    return alongX ? [area[0], area[2]] : [area[1], area[3]];
+};
+const tile_split_border_pos = (kind, shape, split, idx, edge, area) => {
+    const ref = tile_split_edge_ref(kind, shape, idx, edge);
+    if (!ref)
+        return null;
+    const s = split || tile_split_equal(kind, shape);
+    const parts = ref.list === 'major' ? s.major : s.minor[ref.i];
+    const [start, len] = tile_split_axis(kind, ref.list, area);
+    const cells = tile_split_parts(split ? parts : null, parts.length, start, len);
+    return cells[ref.b][0] + cells[ref.b][1];
+};
+// New split with the given edge of cell idx moved to pos (screen coordinate). Only the
+// two parts next to the border change; both keep at least minPx. null when the edge has
+// no neighbour or the two parts have no room for two minimum sizes.
+const tile_split_move = (kind, shape, split, idx, edge, pos, area, minPx) => {
+    const ref = tile_split_edge_ref(kind, shape, idx, edge);
+    if (!ref)
+        return null;
+    const next = split ? JSON.parse(JSON.stringify(split)) : tile_split_equal(kind, shape);
+    const parts = ref.list === 'major' ? next.major : next.minor[ref.i];
+    const [start, len] = tile_split_axis(kind, ref.list, area);
+    let before = 0;
+    for (let k = 0; k < ref.b; k++)
+        before += parts[k];
+    const p0 = start + len * before;
+    const p2 = start + len * (before + parts[ref.b] + parts[ref.b + 1]);
+    if (p2 - p0 < 2 * minPx)
+        return null;
+    const at = Math.min(Math.max(pos, p0 + minPx), p2 - minPx);
+    parts[ref.b] = (at - p0) / len;
+    parts[ref.b + 1] = (p2 - at) / len;
+    return next;
+};
+// Hotkey action -> the edge to move and the direction (+1 = towards right/bottom).
+// The cell grows or shrinks at its right/bottom border; the last cell in that direction
+// uses its left/top border instead.
+const tile_split_key_target = (kind, shape, idx, action) => {
+    const options = {
+        wider: [['right', 1], ['left', -1]],
+        narrower: [['right', -1], ['left', 1]],
+        taller: [['bottom', 1], ['top', -1]],
+        shorter: [['bottom', -1], ['top', 1]],
+    }[action];
+    if (!options)
+        return null;
+    for (const [edge, sign] of options) {
+        if (tile_split_has_edge(kind, shape, idx, edge))
+            return { edge: edge, sign: sign };
+    }
+    return null;
+};
+// Step size for a resize hotkey. Cinnamon calls the hotkey again on key auto-repeat but
+// reports no release: a call of the same action within `threshold` ms (keyboard repeat
+// delay + margin) is a repeat and grows the step by 1 px up to TILE_SPLIT_STEP_MAX.
+const tile_split_accel = (state, action, now, threshold) => {
+    const repeat = state != null && state.action === action && now - state.last <= threshold;
+    const step = repeat ? Math.min(TILE_SPLIT_STEP_MAX, state.step + 1) : 1;
+    return { step: step, state: { action: action, last: now, step: step } };
+};
+// Muffin grab op name (e.g. RESIZING_NE) -> window edges that move (corners move two).
+const tile_split_op_edges = (name) => {
+    const found = /RESIZING_([NS]?)([EW]?)$/.exec(String(name || ''));
+    if (!found)
+        return [];
+    const edges = [];
+    if (found[1])
+        edges.push(found[1] === 'N' ? 'top' : 'bottom');
+    if (found[2])
+        edges.push(found[2] === 'W' ? 'left' : 'right');
+    return edges;
+};
+// Edges that moved between the frame at grab start and at release (fallback when the
+// grab op does not name a direction, e.g. KEYBOARD_RESIZING_UNKNOWN). 1 px is noise.
+const tile_split_frame_edges = (from, to) => {
+    const edges = [];
+    const moved = (a, b) => Math.abs(a - b) >= 2;
+    if (moved(from[1], to[1]))
+        edges.push('top');
+    if (moved(from[1] + from[3], to[1] + to[3]))
+        edges.push('bottom');
+    if (moved(from[0], to[0]))
+        edges.push('left');
+    if (moved(from[0] + from[2], to[0] + to[2]))
+        edges.push('right');
+    return edges;
+};
+// Reading order for a retile. rects[i] = [x, y, w, h] of window i; returns the indices in
+// placement order. Windows are grouped along the major axis (x for columns, y for rows)
+// by overlap: a window joins the current group when it overlaps the group's first window
+// by at least half the smaller extent. Groups follow each other by centre, inside a group
+// by the other axis. Tiled windows of one column (row) always share a group, whatever the
+// borders, so unequal splits and a dragged edge never move a window to another cell.
+const tile_sort_order = (rects, columnMajor) => {
+    const p = columnMajor ? 0 : 1;
+    const s = 1 - p;
+    const items = rects.map((r, i) => ({ i: i, r: r, c: r[p] + r[p + 2] / 2 }));
+    items.sort((a, b) => (a.c - b.c) || (a.r[s] - b.r[s]) || (a.i - b.i));
+    const groups = [];
+    for (const it of items) {
+        const g = groups[groups.length - 1];
+        if (g) {
+            const a = g.anchor;
+            const overlap = Math.min(a[p] + a[p + 2], it.r[p] + it.r[p + 2]) - Math.max(a[p], it.r[p]);
+            if (overlap > 0 && overlap >= 0.5 * Math.min(a[p + 2], it.r[p + 2])) {
+                g.items.push(it);
+                continue;
+            }
+        }
+        groups.push({ anchor: it.r, items: [it] });
+    }
+    const order = [];
+    for (const g of groups) {
+        g.items.sort((a, b) => (a.r[s] - b.r[s]) || (a.r[p] - b.r[p]) || (a.i - b.i));
+        for (const it of g.items)
+            order.push(it.i);
+    }
+    return order;
+};
+// <<< split-model
+// Layout greenTile tiles for n windows on this monitor and the active workspace: the
+// preset rule filled to n (tile_fill_stacks), or the automatic grid. null when nothing
+// is tiled (no rule matches, or no preset and automatic tiling off).
+const tile_layout_shape = (app, monitorIndex, n) => {
+    const monitor = utils_Main.layoutManager.monitors[monitorIndex];
+    if (!monitor || n < 2)
+        return null;
+    const layoutState = tile_layout_for(app, monitorIndex, global.workspace_manager.get_active_workspace().index());
+    if (layoutState.preset) {
+        const rule = tile_rules_pick(layoutState.preset.rules, n);
+        if (!rule || !rule.stacks || rule.stacks.length === 0)
+            return null;
+        return { kind: 'cols', shape: tile_fill_stacks(rule.stacks, n), rule: rule, preset: layoutState.preset };
+    }
+    return layoutState.auto ? tile_auto_shape(monitor, n) : null;
+};
+const tile_preset_retile = (app, monitorIndex, focusWindow, animate = true) => {
     const monitor = utils_Main.layoutManager.monitors[monitorIndex];
     if (!monitor)
         return;
@@ -1062,18 +1548,18 @@ const tile_preset_retile = (app, monitorIndex, focusWindow) => {
     const preset = tile_layout_for(app, monitorIndex, wsIndex).preset;
     if (!preset)
         return;
-    const [screenX, screenY, screenWidth, screenHeight] = getUsableScreenArea(monitor);
+    const area = getUsableScreenArea(monitor);
     const windows = tile_collect_windows(monitor, focusWindow);
     const focused = focusWindow && !focusWindow.minimized && focusWindow.get_monitor() === monitorIndex;
     const n = windows.length + (focused ? 1 : 0);
-    if (n < 2)
-        return;
-    const rule = tile_rules_pick(preset.rules, n);
-    if (!rule || !rule.stacks || rule.stacks.length === 0)
+    const layout = tile_layout_shape(app, monitorIndex, n);
+    if (!layout || !layout.rule)
         return;
     const ordered = tile_sort_reading_order((focused ? [focusWindow] : []).concat(windows), true);
-    tile_place_stacks(app, ordered, rule.stacks, screenX, screenY, screenWidth, screenHeight);
-    global.log('greenTile preset "' + preset.name + '" applied ws' + (wsIndex + 1) + ' mon=' + (tile_monitors.keys[monitorIndex] || '?') + ' n=' + n + ' stacks=[' + rule.stacks.join(',') + ']');
+    const split = tile_split_for(app, monitorIndex, wsIndex, n, layout);
+    tile_place_rects(app, ordered, layout, split, area, animate);
+    if (animate)
+        global.log('greenTile preset "' + preset.name + '" applied ws' + (wsIndex + 1) + ' mon=' + (tile_monitors.keys[monitorIndex] || '?') + ' n=' + n + ' stacks=[' + layout.rule.stacks.join(',') + ']' + (split ? ' split' : ''));
 };
 // >>> auto-model (pure functions, no Cinnamon imports; tested by tests/auto-model.test.js)
 // Legacy per-workspace automatic tiling list "autoWorkspaces": rows
@@ -1107,7 +1593,8 @@ const tile_auto_list_set = (list, wsIndex, on) => {
 // <<< auto-model
 // >>> layouts-model (pure functions, no Cinnamon imports; tested by tests/layouts-model.test.js)
 // Per monitor AND workspace layout assignments, stored in the string setting "layouts":
-// { "<monitor key>": { "<workspace number from 1 | *>": { preset?: id, auto?: boolean } } }.
+// { "<monitor key>": { "<workspace number from 1 | *>": { preset?: id, auto?: boolean, splits?: { "<window count>": split } } } }
+// (splits: movable borders, see split-model).
 // Missing entry/field: no preset, automatic tiling on exactly when a preset is assigned.
 // Nothing is inherited from other monitors or workspaces; invalid data is ignored on read.
 const tile_layouts_parse = (raw) => {
@@ -1131,6 +1618,13 @@ const tile_layouts_entry = (layouts, mkey, wskey, presetIds) => {
     const auto = typeof entry.auto === 'boolean' ? entry.auto : preset != null;
     return { preset: preset, auto: auto };
 };
+// Raw "splits" object of an entry ({ "<window count>": split }), {} when missing.
+const tile_layouts_splits = (layouts, mkey, wskey) => {
+    const isObject = (v) => Object.prototype.toString.call(v) === '[object Object]';
+    const monitor = isObject(layouts) && isObject(layouts[mkey]) ? layouts[mkey] : {};
+    const entry = isObject(monitor[wskey]) ? monitor[wskey] : {};
+    return isObject(entry.splits) ? entry.splits : {};
+};
 const tile_layouts_set = (layouts, mkey, wskey, patch) => {
     const next = JSON.parse(JSON.stringify(layouts && typeof layouts === 'object' ? layouts : {}));
     const monitor = Object.prototype.toString.call(next[mkey]) === '[object Object]' ? next[mkey] : {};
@@ -1146,6 +1640,27 @@ const tile_layouts_set = (layouts, mkey, wskey, patch) => {
             delete entry.auto;
         else if (typeof patch.auto === 'boolean')
             entry.auto = patch.auto;
+    }
+    // splits: null removes all; { "<window count>": split | null } sets/removes single
+    // counts. The split objects are checked on read (tile_split_valid), not here.
+    if (patch && 'splits' in patch) {
+        const isObject = (v) => Object.prototype.toString.call(v) === '[object Object]';
+        if (patch.splits === null)
+            delete entry.splits;
+        else if (isObject(patch.splits)) {
+            const splits = isObject(entry.splits) ? Object.assign({}, entry.splits) : {};
+            for (const count of Object.keys(patch.splits)) {
+                const value = patch.splits[count];
+                if (value === null)
+                    delete splits[count];
+                else if (isObject(value))
+                    splits[count] = JSON.parse(JSON.stringify(value));
+            }
+            if (Object.keys(splits).length === 0)
+                delete entry.splits;
+            else
+                entry.splits = splits;
+        }
     }
     if (Object.keys(entry).length === 0)
         delete monitor[wskey];
@@ -1193,15 +1708,15 @@ const tile_layouts_migrate = (wsPresets, autoList, mkey) => {
 // Retiles exactly one monitor: preset layout when (monitor, workspace) has one, else
 // the auto grid when automatic tiling is on. Monitors whose entry has automatic tiling
 // off are left alone — hotkeys retile directly and do not come through here.
-const tile_retile_monitor = (app, monitorIndex, focusWindow) => {
+const tile_retile_monitor = (app, monitorIndex, focusWindow, animate = true) => {
     if (!tile_monitors.ready || !utils_Main.layoutManager.monitors[monitorIndex])
         return;
     const wsIndex = global.workspace_manager.get_active_workspace().index();
     const layout = tile_layout_for(app, monitorIndex, wsIndex);
     if (layout.preset)
-        tile_preset_retile(app, monitorIndex, focusWindow);
+        tile_preset_retile(app, monitorIndex, focusWindow, animate);
     else if (layout.auto)
-        tile_app_auto(app, monitorIndex, focusWindow);
+        tile_app_auto(app, monitorIndex, focusWindow, animate);
 };
 // >>> editor-model (pure functions, no Cinnamon imports; tested by tests/editor-model.test.js)
 // Preset editor model. A rule is {min, stacks}; stacks[i] = windows stacked in column i.
@@ -1753,6 +2268,20 @@ const tile_panel_gap_row = (app) => {
     };
     minus.connect('clicked', () => change(-TILE_GAP_STEP));
     plus.connect('clicked', () => change(TILE_GAP_STEP));
+    // "Reset sizes": only when borders were moved on this monitor + workspace (split-model);
+    // clears them for every window count and retiles; the rebuild hides the button again.
+    const monitorIndex = tile_focus_monitor_index();
+    const wsIndex = global.workspace_manager.get_active_workspace().index();
+    if (tile_split_any(app, monitorIndex, wsIndex)) {
+        const reset = new tile_St.Button({ label: _("Reset sizes"), style_class: 'gk-reset-btn', track_hover: true });
+        reset.connect('clicked', () => {
+            tile_split_reset(app, monitorIndex, wsIndex);
+            if (tile_layout_for(app, monitorIndex, wsIndex).auto)
+                tile_retile_monitor(app, monitorIndex, null);
+            tile_panel_rebuild(app);
+        });
+        row.add(reset, { y_fill: false, y_align: tile_St.Align.MIDDLE });
+    }
     row.add(minus, { y_fill: false, y_align: tile_St.Align.MIDDLE });
     row.add(value, { y_fill: false, y_align: tile_St.Align.MIDDLE });
     row.add(plus, { y_fill: false, y_align: tile_St.Align.MIDDLE });

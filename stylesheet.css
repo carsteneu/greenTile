@@ -318,6 +318,21 @@
     background-color: rgba(255, 255, 255, 0.08);
 }
 
+.gk-reset-btn {
+    color: #e8eaf0;
+    font-size: 12px;
+    height: 24px;
+    padding: 0 10px;
+    margin-right: 10px;
+    border-radius: 3px;
+    border: 1px solid #3a4050;
+}
+
+.gk-reset-btn:hover {
+    background-color: rgba(255, 150, 64, 0.18);
+    border-color: #ff9640;
+}
+
 .gk-muted {
     color: #8b91a0;
     font-size: 11px;

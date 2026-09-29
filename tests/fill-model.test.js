@@ -14,7 +14,7 @@ const match = src.match(/\/\/ >>> fill-model[^\n]*\n([\s\S]*?)\/\/ <<< fill-mode
 if (!match)
     throw new Error('fill-model block not found in greenTile.js');
 const block = match[1];
-const names = ['tile_fill_stacks', 'tile_auto_rows', 'TILE_AUTO_ROW_MAX'];
+const names = ['tile_fill_stacks', 'tile_auto_rows', 'tile_auto_narrow_stacks', 'TILE_AUTO_ROW_MAX'];
 const m = new Function(block + '\nreturn {' + names.join(',') + '};')();
 
 const sum = (a) => a.reduce((x, y) => x + y, 0);
@@ -73,6 +73,14 @@ test('the painted rule is not mutated', () => {
 
 test('no windows: the painted rule is returned as it is', () => {
     assert.deepEqual(m.tile_fill_stacks([2, 2], 0), [2, 2]);
+});
+
+test('narrow auto grid: 3 columns with balanced stacks, singles left', () => {
+    assert.deepEqual(m.tile_auto_narrow_stacks(4), [1, 1, 2]);
+    assert.deepEqual(m.tile_auto_narrow_stacks(5), [1, 2, 2]);
+    assert.deepEqual(m.tile_auto_narrow_stacks(6), [2, 2, 2]);
+    assert.deepEqual(m.tile_auto_narrow_stacks(8), [2, 3, 3]);
+    assert.deepEqual(m.tile_auto_narrow_stacks(9), [3, 3, 3]);
 });
 
 test('auto rows: up to six windows side by side in one row', () => {

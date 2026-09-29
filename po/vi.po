@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: greenTile 0.1.0\n"
 "Report-Msgid-Bugs-To: https://github.com/carsteneu\n"
-"POT-Creation-Date: 2026-09-28 21:25+0200\n"
+"POT-Creation-Date: 2026-09-29 10:58+0200\n"
 "PO-Revision-Date: 2025-10-19 02:39+0700\n"
 "Last-Translator: loccun <huynhloc.contact@gmail.com>\n"
 "Language-Team: Vietnamese\n"
@@ -18,131 +18,135 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "X-Generator: Poedit 3.4.2\n"
 
-#: greenTile.js:1356
+#: greenTile.js:1861
 #, javascript-format
 msgid "assigned — workspace %d"
 msgstr ""
 
-#: greenTile.js:1413
+#: greenTile.js:1920
 msgid "Please enter a name."
 msgstr ""
 
-#: greenTile.js:1436
+#: greenTile.js:1943
 #, javascript-format
 msgid "from %d"
 msgstr ""
 
-#: greenTile.js:1551
+#: greenTile.js:2058
 msgid "Rules (by window count)"
 msgstr ""
 
-#: greenTile.js:1555
+#: greenTile.js:2062
 msgid "Rule"
 msgstr ""
 
-#: greenTile.js:1556
+#: greenTile.js:2063
 msgid "Delete rule"
 msgstr ""
 
-#: greenTile.js:1564
+#: greenTile.js:2071
 msgid "Rule applies from"
 msgstr ""
 
-#: greenTile.js:1571
+#: greenTile.js:2078
 msgid "windows"
 msgstr ""
 
-#: greenTile.js:1573
+#: greenTile.js:2080
 msgid "Painter"
 msgstr ""
 
-#: greenTile.js:1588
+#: greenTile.js:2095
 msgid ""
 "Click or drag: the row sets how many windows the column holds. Right-click "
 "removes a column."
 msgstr ""
 
-#: greenTile.js:1593
+#: greenTile.js:2100
 msgid "Name"
 msgstr ""
 
-#: greenTile.js:1594
+#: greenTile.js:2101
 msgid "Preset name"
 msgstr ""
 
-#: greenTile.js:1598
+#: greenTile.js:2105
 msgid "Save"
 msgstr ""
 
-#: greenTile.js:1615
+#: greenTile.js:2122
 #, javascript-format
 msgid "Result: %s"
 msgstr ""
 
-#: greenTile.js:1647
+#: greenTile.js:2195
 msgid "Gap between windows"
 msgstr ""
 
-#: greenTile.js:1652
+#: greenTile.js:2200
 #, javascript-format
 msgid "%d px"
 msgstr ""
 
-#: greenTile.js:1688
+#: greenTile.js:2219
+msgid "Reset sizes"
+msgstr ""
+
+#: greenTile.js:2250
 #, javascript-format
 msgid "Presets — workspace %d · %s"
 msgstr ""
 
-#: greenTile.js:1690
+#: greenTile.js:2252
 msgid "Create preset"
 msgstr ""
 
-#: greenTile.js:1690
+#: greenTile.js:2252
 #, javascript-format
 msgid "Edit %s"
 msgstr ""
 
-#: greenTile.js:1694
+#: greenTile.js:2256
 msgid "Back"
 msgstr ""
 
-#: greenTile.js:1703
+#: greenTile.js:2265
 #, fuzzy
 #| msgid "Auto close"
 msgid "Auto: on"
 msgstr "Tự động đóng"
 
-#: greenTile.js:1703
+#: greenTile.js:2265
 #, fuzzy
 #| msgid "Auto close"
 msgid "Auto: off"
 msgstr "Tự động đóng"
 
-#: greenTile.js:1805
+#: greenTile.js:2386
 msgid "No presets yet."
 msgstr ""
 
-#: greenTile.js:1820
+#: greenTile.js:2401
 msgid "New preset"
 msgstr ""
 
-#: greenTile.js:1823
+#: greenTile.js:2404
 msgid "Click a row to apply it to this workspace and tile right away"
 msgstr ""
 
-#: greenTile.js:2022
+#: greenTile.js:2705
 msgid "Auto close"
 msgstr "Tự động đóng"
 
-#: greenTile.js:2023
+#: greenTile.js:2706
 msgid "Animations"
 msgstr "Hoạt ảnh"
 
-#: greenTile.js:2024
+#: greenTile.js:2707
 msgid "Auto tile main and list"
 msgstr "Tự động xếp ô chính và danh sách"
 
-#: greenTile.js:2025
+#: greenTile.js:2708
 msgid "Auto tile two lists"
 msgstr "Tự động xếp ô hai danh sách"
 
@@ -182,6 +186,10 @@ msgstr "Tự động xếp ô hai danh sách"
 
 #. settings-schema.json->preset-section->title
 msgid "Workspace Presets"
+msgstr ""
+
+#. settings-schema.json->resize-section->title
+msgid "Resize tiled windows"
 msgstr ""
 
 #. settings-schema.json->keybindings-legend-section->title
@@ -280,6 +288,22 @@ msgstr ""
 
 #. settings-schema.json->presetHotkey->description
 msgid "Open the preset panel"
+msgstr ""
+
+#. settings-schema.json->resizeWiderHotkey->description
+msgid "Make the focused tiled window wider (tap = 1 px, hold to speed up)"
+msgstr ""
+
+#. settings-schema.json->resizeNarrowerHotkey->description
+msgid "Make the focused tiled window narrower"
+msgstr ""
+
+#. settings-schema.json->resizeTallerHotkey->description
+msgid "Make the focused tiled window taller"
+msgstr ""
+
+#. settings-schema.json->resizeShorterHotkey->description
+msgid "Make the focused tiled window shorter"
 msgstr ""
 
 #. settings-schema.json->presets->description
