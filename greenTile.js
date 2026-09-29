@@ -235,6 +235,88 @@ const tile_focus_window = () => {
     let tabList = utils_Main.getTabList();
     return tabList.length > 0 ? tabList[0] : null;
 };
+// >>> exclude-model (pure functions, no Cinnamon imports; tested by tests/exclude-model.test.js)
+// Windows that are never tiled: rows of the "exclusions" list setting
+// ({ match: "class" | "title", text }) match by WM_CLASS (equals, the instance variant
+// counts too) or window title (contains), case-insensitive; rows with empty text or an
+// unknown match are ignored. On top, Super+G toggles the focused window ad hoc —
+// in-memory only, per window, forgotten when the window is unmanaged.
+const tile_excl_rows_normalize = (rows) => {
+    if (!Array.isArray(rows))
+        return [];
+    const result = [];
+    for (let i = 0; i < rows.length; i++) {
+        const row = rows[i];
+        if (row == null || typeof row !== 'object')
+            continue;
+        const text = typeof row.text === 'string' ? row.text.trim() : '';
+        if ((row.match !== 'class' && row.match !== 'title') || !text)
+            continue;
+        result.push({ match: row.match, text: text });
+    }
+    return result;
+};
+const tile_excl_match = (wmClass, wmInstance, title, rows) => {
+    const t = typeof title === 'string' ? title.toLowerCase() : '';
+    for (let i = 0; i < rows.length; i++) {
+        const row = rows[i];
+        if (row.match === 'class') {
+            if ((typeof wmClass === 'string' && wmClass.toLowerCase() === row.text.toLowerCase())
+                || (typeof wmInstance === 'string' && wmInstance.toLowerCase() === row.text.toLowerCase()))
+                return true;
+        }
+        else if (row.match === 'title' && t && t.indexOf(row.text.toLowerCase()) !== -1)
+            return true;
+    }
+    return false;
+};
+const tile_excl_toggle_set = (map, seq, on) => {
+    if (on)
+        map.set(seq, true);
+    else
+        map.delete(seq);
+};
+// <<< exclude-model
+const tile_excl = { toggled: new Map(), rows: [] };
+const tile_excl_is_excluded = (w) => {
+    if (w == null)
+        return false;
+    if (tile_excl.toggled.get(w.get_stable_sequence()))
+        return true;
+    return tile_excl.rows.length > 0
+        && tile_excl_match(w.get_wm_class(), w.get_wm_class_instance(), w.get_title(), tile_excl.rows);
+};
+const tile_excl_apply = (app) => {
+    tile_excl.rows = tile_excl_rows_normalize(app.config.settings.getValue('exclusions'));
+};
+// Retile every monitor whose layout can place windows: preset layouts directly, auto
+// grids debounced (consistent with other debounced retiles).
+const tile_excl_retile = (app) => {
+    const wsIndex = global.workspace_manager.get_active_workspace().index();
+    for (let i = 0; i < utils_Main.layoutManager.monitors.length; i++) {
+        const layout = tile_layout_for(app, i, wsIndex);
+        if (layout.preset)
+            tile_retile_monitor(app, i, null);
+        else if (layout.auto)
+            tile_auto_schedule_monitor(app, i, 150);
+    }
+};
+const tile_excl_toggle_focused = (app) => {
+    const w = tile_focus_window();
+    if (!w)
+        return;
+    const excluded = !tile_excl_is_excluded(w);
+    tile_excl_toggle_set(tile_excl.toggled, w.get_stable_sequence(), excluded);
+    global.log('greenTile ' + (excluded ? 'never tile on: ' : 'tiling again: ') + String(w.get_wm_class()) + ' seq=' + w.get_stable_sequence());
+    try {
+        Main.osdWindowManager.show(w.get_monitor(), tile_Gio.ThemedIcon.new('window-restore-symbolic'),
+            excluded ? _("Window floats") : _("Window tiles again"), null);
+    }
+    catch (e) {
+        // OSD is feedback only — a failing show must not block the retile
+    }
+    tile_retile_monitor(app, w.get_monitor(), null);
+};
 // Own collector instead of gTile's GetNotFocusedWindowsOfMonitor: that one excludes
 // app.focusMetaWindow, which goes stale because gTile tracks focus via the app-level
 // 'notify::focus-app' signal (silent on same-app window switches) — visible windows
