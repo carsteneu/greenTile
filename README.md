@@ -52,7 +52,7 @@ In the panel (`Super+Ctrl+P`):
 - **✕ in the title bar** or `Esc` closes the panel. While the list is open, greenTile takes the `Esc` key, so applications do not receive it until the panel is closed.
 - **Auto: on / Auto: off in the title bar** shows whether automatic tiling is on for this monitor and workspace (green = on). Clicking it switches it, exactly like `Super+Ctrl+A` / `Super+Ctrl+D`; switching it on tiles right away.
 - **Gap between windows − N px +** below the list sets the gap between tiled windows (0 to 48 px in steps of 2, default 0). Only the sides where two windows meet move in; windows stay flush with the screen edges. The value applies to all greenTile layouts (auto grid, presets, `Super+Ctrl+3/6`). On a workspace with automatic tiling on, every click retiles right away, so the new gap shows live; elsewhere it applies from the next tiling. Stored in the setting `windowGap`.
-- **Reset sizes** appears next to it when borders were moved on this monitor and workspace (see [Moving borders](#moving-borders)); it returns every window count there to equal sizes and retiles.
+- **Reset sizes** appears next to it when borders were moved or layouts dragged on this monitor and workspace (see [Moving borders](#moving-borders), [Splitting the layout by drag](#splitting-the-layout-by-drag)); it returns every window count there to equal sizes and retiles.
 - **⚙ in the title bar** closes the panel and opens the extension's settings dialog (pages **Settings** and **Hotkeys**).
 - The panel can be dragged by its title bar and keeps its position when you switch workspaces. If that position is no longer on any monitor (external display unplugged), the panel opens centred again.
 - **◢ in the bottom right corner** resizes the panel: width (at least 600 px) and height of the part that stretches, in the list the preset rows (at least three), in the editor the painter. List and editor keep their own size, stored in the setting `panelSize`, limited to the room on the panel's monitor (a size set on a big monitor shrinks on a small one).
@@ -112,9 +112,24 @@ Tiled windows do not have to share the area equally. Where automatic tiling is o
 - **Keyboard:** `Super+Alt+Right` / `Left` make the focused window wider / narrower, `Super+Alt+Down` / `Up` taller / shorter. The window grows at its right/bottom border; the last column/cell uses its left/top border instead. One tap moves the border by 1 px, holding the key speeds up to 64 px per step. While a key is held, windows jump without animation. The keys can be changed on the Hotkeys page of the settings.
 - No window gets narrower or lower than 120 px.
 - The borders are stored per monitor, workspace **and window count** in the `layouts` setting (field `splits`, fractions of the screen, so they survive resolution changes and the gap setting). With 3 windows you get the borders you set for 3 windows; when a fourth window opens, the layout for 4 applies, and closing it brings the 3-window borders back. Borders are ignored (equal sizes) when the layout they were made for no longer applies, e.g. after the preset or its rule changed.
-- **Reset sizes** in the preset panel removes all borders of the monitor and workspace.
+- **Reset sizes** in the preset panel removes all borders and dragged layouts of the monitor and workspace.
 - Not for `Super+Ctrl+3/6`. With automatic tiling off, resizing a window stays a free resize.
 - Known limitation: applications with their own minimum size may refuse to shrink to their cell; windows can then overlap.
+
+## Splitting the layout by drag
+
+While you move a tiled window with the mouse, greenTile shows a translucent preview of the cell the window would take when you release it over a **zone** of another tiled window (on any monitor with active tiling). Each cell of the drop target has edge zones of 25 % of its width/height (corners go to the nearer axis); the centre keeps the usual snap-on-release behaviour.
+
+| Zone on the drop target | Columns layout (presets, narrow auto grid) | Rows layout (wide auto grid) |
+|---|---|---|
+| top / bottom | the window is stacked above / below it in its column | a new row with only this window is inserted above / below its row |
+| left / right | a new column with only this window is opened left / right of it | the window is inserted directly left / right of it in its row |
+
+- The result is stored per monitor, workspace **and window count** in the `layouts` setting (field `shapes`), so it survives reloads and restarts and wins over the preset or auto layout: with 2 windows the base layout applies, and with 3 windows again the dragged one. A dragged layout replaces the moved borders of the same window count.
+- Side splits open whole columns/rows only; splitting a single cell of a stacked column is not supported.
+- Cross-monitor drops work too: the target monitor keeps one window more, the source monitor retiles with one less, and only the target stores a layout.
+- Nothing is written when you press Esc during the drag, release outside any tiled window, drop onto the dragged window's own descending zone where nothing would change, or when a cell of the new layout would fall below the 120 px minimum — the window then snaps as usual.
+- Works with presets and the automatic grid. Keyboard moves get no zones. Not for `Super+Ctrl+3/6`.
 
 ## Swapping windows
 
