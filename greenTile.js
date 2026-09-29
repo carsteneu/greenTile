@@ -2367,15 +2367,17 @@ const tile_accent_from_probed = (r, g, b, a) => {
 // The theme probe chain, in fallback order: the menu entries carry the theme
 // accent in Mint-L, but Mint-Y paints them grey — there the calendar day
 // hover state holds it. tile_accent_probe_first walks the chain and returns
-// the first color the model accepts, so grey themes keep the default.
+// the first color the model accepts, so grey themes keep the default. The
+// probes resolve class-selector rules only — themes painting their accent on
+// type-qualified selectors or in border-color keep the default too.
 const tile_accent_probes = [
     ['popup-menu-item', 'active'],
     ['popup-menu-item', 'hover'],
     ['calendar-day-base', 'hover'],
 ];
-const tile_accent_probe_first = (probe) => {
+const tile_accent_probe_first = (probeFn) => {
     for (const [className, pseudoClass] of tile_accent_probes) {
-        const rgb = probe(className, pseudoClass);
+        const rgb = probeFn(className, pseudoClass);
         if (rgb)
             return rgb;
     }

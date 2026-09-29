@@ -99,7 +99,8 @@ test('probe chain returns the first color the model accepts', () => {
 
 test('probe chain keeps the default when no stage qualifies', () => {
     assert.equal(m.tile_accent_probe_first(() => null), null);
-    // grey calendar day (Mint-Y-Dark-Grey) is rejected by the model at the caller
+    // a grey calendar day (Mint-Y-Dark-Grey) is rejected inside tile_accent_probe
+    // by the model — the chain itself only walks stage by stage
     const greyTheme = (className, pseudoClass) =>
         className === 'popup-menu-item' ? null : [112, 115, 122];
     assert.deepEqual(m.tile_accent_probe_first(greyTheme), [112, 115, 122]);
