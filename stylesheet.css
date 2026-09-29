@@ -1,9 +1,10 @@
 /*
  * greenTile — stylesheet
  *
- * Based on 5.4/stylesheet.css from gTile (UUID gTile@shuairan), version 2.2.1,
- * by vibou, shuairan and the gTile contributors. The gTile rules below are
- * unchanged; the gk-* rules for the preset panel were added by carsten_eu, 2026.
+ * Original file based on 5.4/stylesheet.css from gTile (UUID gTile@shuairan),
+ * version 2.2.1, by vibou, shuairan and the gTile contributors. The gTile
+ * rules were removed together with the classic grid; the gk-* rules for the
+ * preset panel were added by carsten_eu, 2026.
  *
  * Copyright (C) vibou, shuairan and the gTile contributors
  * Copyright (C) 2026 carsten_eu
@@ -11,105 +12,6 @@
  * Licensed under the GNU General Public License version 3, see LICENSE.
  * SPDX-License-Identifier: GPL-3.0-only
  */
-.grid-title{
-	font-size: 12px;
-    font-weight: bold;
-    color: #ffffff;
-    padding: .5em;
-    text-align:center;
-    max-width: 150px;
-}
-
-.grid-panel{
-    background-color: rgba(10,10,10,0.7);
-    border-radius: 10px;
-}
-
-.table{
-    margin-left: 10px;
-    margin-right: 10px;
-}
-
-.table-element{
-    background-color: rgba(240,240,240,0.4);
-    border-radius: 3px;
-}
-
-.table-element:hover, .table-element:activate
-{
-    background-color: rgba(240,240,240,0.8);
-}
-
-.top-box
-{
-    padding:1em;
-}
-
-.settings-button
-{
-    background-color: rgba(0,120,255,0.4);
-    color: rgba(255,255,255,0.4);
-    min-width:40px;
-    border-radius:5px;
-    padding:3px;
-    margin-left: 2px;
-    margin-right: 2px;
-    border:1px rgba(0,200,255,0.4);
-    max-height:30px;
-    min-height:30px;
-}
-
-.settings-button:activate
-{
-   background-color: rgba(0,120,255,0.7);
-    color: rgba(255,255,255,1);
-    border:1px rgba(0,200,255,0.7);
-}
-
-.settings-button:activate:hover
-{
-    background-color: rgba(30,150,255,0.7);
-    color: rgba(255,255,255,1);
-    border:1px rgba(0,200,255,0.7);
-}
-
-.settings-button:hover
-{
-    background-color: rgba(0,120,255,0.7);
-    color: rgba(255,255,255,1);
-    border:1px rgba(0,200,255,0.7);
-}
-
-.grid-preview
-{
-     background-color: rgba(241,122,73,0.0);
-     border: rgba(217,108,59,0.0);
-}
-
-.grid-preview:activate
-{
-    background-color: rgba(241,122,73,0.4);
-    background-color: rgba(73,122,241,0.4);
-    border: 1px solid rgba(217,108,59,0.8);
-    border: 1px solid rgba(59,108,217,0.8);
-}
-
-.bottom-box
-{
-    padding-top:10px;
-    display:block;
-}
-
-.very-bottom-box {
-    padding-bottom:10px;
-}
-
-.tile-label {
-    color: white;
-    font-size: 24px;
-    font-weight: bold;
-    text-align: center;
-}
 
 /* gKachel preset panel — tokens 1:1 from the approved HTML mockup
    (base font 16px, row padding 12px 14px, gap 14px, thumb 54x34).
