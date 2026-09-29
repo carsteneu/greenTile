@@ -2715,15 +2715,12 @@ const move_resize_window = (metaWindow, x, y, width, height) => {
 ;// CONCATENATED MODULE: ./extension.ts
 
     let monitorChangedSignal = null;
-let extension_metadata;
 let app;
 const platform = {
     move_resize_window: move_resize_window,
     reset_window: reset_window,
 };
-const init = (meta) => {
-    extension_metadata = meta;
-};
+const init = () => {};
 const enable = () => {
     app = new App(platform);
         monitorChangedSignal = Main.layoutManager.connect('monitors-changed', () => {
