@@ -48,6 +48,7 @@ In the panel (`Super+Ctrl+P`):
 - **Gap between windows − N px +** below the list sets the gap between tiled windows (0 to 48 px in steps of 2, default 0). Only the sides where two windows meet move in; windows stay flush with the screen edges. The value applies to all greenTile layouts (auto grid, presets, `Super+Ctrl+3/6`), not to the classic `Super+G` grid. On a workspace with automatic tiling on, every click retiles right away, so the new gap shows live; elsewhere it applies from the next tiling. Stored in the setting `windowGap`.
 - **⚙ in the title bar** closes the panel and opens the extension's settings dialog (pages **Settings** and **Hotkeys**).
 - The panel can be dragged by its title bar and keeps its position when you switch workspaces. If that position is no longer on any monitor (external display unplugged), the panel opens centred again.
+- **◢ in the bottom right corner** resizes the panel: width (at least 600 px) and height of the part that stretches, in the list the preset rows (at least three), in the editor the painter. List and editor keep their own size, stored in the setting `panelSize`, limited to the room on the panel's monitor (a size set on a big monitor shrinks on a small one).
 - Right after switching between list and editor, clicks are ignored for 400 ms, so the second click of a double-click does not act in the new view.
 
 The thumbnail shows the rule that would apply for the current number of windows.

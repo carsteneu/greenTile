@@ -1890,7 +1890,8 @@ const tile_panel_open = (app) => {
         const hint = new tile_St.Label({ text: _("Click a row to apply it to this workspace and tile right away"), style_class: 'gk-hint' });
         footer.add(hint, { expand: true, x_fill: true, y_fill: false, y_align: tile_St.Align.MIDDLE });
     }
-    footer.add(grip, { x_fill: false, y_fill: false, x_align: tile_St.Align.END, y_align: tile_St.Align.END });
+    // expand: in the editor there is no hint before the grip, it must still sit right.
+    footer.add(grip, { expand: true, x_fill: false, y_fill: false, x_align: tile_St.Align.END, y_align: tile_St.Align.END });
     panel.add(footer);
     utils_Main.layoutManager.addChrome(panel);
     tile_panel.actor = panel;
@@ -1957,6 +1958,9 @@ const tile_panel_open = (app) => {
         const device = event.get_device();
         device.grab(panel);
         tile_panel.dragging = true;
+        // From now on the user sets the list height: LIST_MAX must not cap it (it
+        // measures the rows box, which the scroll view stretches to its own height).
+        scrollCapped = true;
         const [pw, ph] = panel.get_size();
         const sh = stretch.get_height();
         const m = panelMonitor();
