@@ -1747,6 +1747,14 @@ const tile_layouts_splits = (layouts, mkey, wskey) => {
     const entry = isObject(monitor[wskey]) ? monitor[wskey] : {};
     return isObject(entry.splits) ? entry.splits : {};
 };
+// Raw "shapes" object of an entry ({ "<window count>": { kind, shape } }), {} when
+// missing. Dragged layouts, see drop-model.
+const tile_layouts_shapes = (layouts, mkey, wskey) => {
+    const isObject = (v) => Object.prototype.toString.call(v) === '[object Object]';
+    const monitor = isObject(layouts) && isObject(layouts[mkey]) ? layouts[mkey] : {};
+    const entry = isObject(monitor[wskey]) ? monitor[wskey] : {};
+    return isObject(entry.shapes) ? entry.shapes : {};
+};
 const tile_layouts_set = (layouts, mkey, wskey, patch) => {
     const next = JSON.parse(JSON.stringify(layouts && typeof layouts === 'object' ? layouts : {}));
     const monitor = Object.prototype.toString.call(next[mkey]) === '[object Object]' ? next[mkey] : {};
@@ -1782,6 +1790,27 @@ const tile_layouts_set = (layouts, mkey, wskey, patch) => {
                 delete entry.splits;
             else
                 entry.splits = splits;
+        }
+    }
+    // shapes: same patch semantics as splits (null removes all, single counts set/remove).
+    // The shape objects are checked on read (tile_shape_valid), not here.
+    if (patch && 'shapes' in patch) {
+        const isObject = (v) => Object.prototype.toString.call(v) === '[object Object]';
+        if (patch.shapes === null)
+            delete entry.shapes;
+        else if (isObject(patch.shapes)) {
+            const shapes = isObject(entry.shapes) ? Object.assign({}, entry.shapes) : {};
+            for (const count of Object.keys(patch.shapes)) {
+                const value = patch.shapes[count];
+                if (value === null)
+                    delete shapes[count];
+                else if (isObject(value))
+                    shapes[count] = JSON.parse(JSON.stringify(value));
+            }
+            if (Object.keys(shapes).length === 0)
+                delete entry.shapes;
+            else
+                entry.shapes = shapes;
         }
     }
     if (Object.keys(entry).length === 0)
@@ -1825,6 +1854,28 @@ const tile_layouts_migrate = (wsPresets, autoList, mkey) => {
         migrated[String(idx + 1)] = entry;
     }
     return Object.keys(migrated).length === 0 ? {} : { [mkey]: migrated };
+};
+// A dragged layout { kind, shape } is valid for n windows when every part is an
+// integer >= 1 and the parts sum to n. Normalised copy, null otherwise.
+const tile_shape_valid = (value, n) => {
+    if (value == null || typeof value !== 'object')
+        return null;
+    if (value.kind !== 'cols' && value.kind !== 'rows')
+        return null;
+    const shape = Array.isArray(value.shape) ? value.shape : [];
+    if (shape.length === 0 || !shape.every((k) => Number.isInteger(k) && k >= 1))
+        return null;
+    if (shape.reduce((a, b) => a + b, 0) !== n)
+        return null;
+    return { kind: value.kind, shape: shape.slice() };
+};
+// A valid stored shape wins over the base layout (same rule/preset metadata, other
+// kind + shape); without a base or with an invalid/missing shape the base stands.
+const tile_layout_resolve = (base, stored, n) => {
+    const shape = tile_shape_valid(stored, n);
+    if (!base || !shape)
+        return base;
+    return Object.assign({}, base, shape);
 };
 // <<< layouts-model
 // Retiles exactly one monitor: preset layout when (monitor, workspace) has one, else

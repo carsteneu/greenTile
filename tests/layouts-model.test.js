@@ -18,7 +18,7 @@ const extract = (name) => {
 };
 const layoutsBlock = extract('layouts-model');
 const code = extract('auto-model') + '\n' + layoutsBlock;
-const names = ['tile_auto_list_map', 'tile_layouts_parse', 'tile_layouts_entry', 'tile_layouts_set', 'tile_layouts_migrate', 'tile_layouts_splits'];
+const names = ['tile_auto_list_map', 'tile_layouts_parse', 'tile_layouts_entry', 'tile_layouts_set', 'tile_layouts_migrate', 'tile_layouts_splits', 'tile_shape_valid', 'tile_layouts_shapes', 'tile_layout_resolve'];
 const m = new Function(code + '\nreturn {' + names.join(',') + '};')();
 
 test('block is self-contained', () => {
@@ -161,4 +161,46 @@ test('invalid splits patch values are ignored', () => {
     assert.deepEqual(l, { M: { '1': { preset: 'p1' } } });
     const l2 = m.tile_layouts_set({ M: { '1': { preset: 'p1' } } }, 'M', '1', { splits: { '3': 'x' } });
     assert.deepEqual(l2, { M: { '1': { preset: 'p1' } } });
+});
+
+test('shape_valid accepts cols/rows with integer parts summing to n', () => {
+    assert.deepEqual(m.tile_shape_valid({ kind: 'cols', shape: [2, 1] }, 3), { kind: 'cols', shape: [2, 1] });
+    assert.deepEqual(m.tile_shape_valid({ kind: 'rows', shape: [3] }, 3), { kind: 'rows', shape: [3] });
+    assert.equal(m.tile_shape_valid({ kind: 'cols', shape: [2, 1] }, 4), null);
+    assert.equal(m.tile_shape_valid({ kind: 'cols', shape: [0, 3] }, 3), null);
+    assert.equal(m.tile_shape_valid({ kind: 'cols', shape: [1.5, 1.5] }, 3), null);
+    assert.equal(m.tile_shape_valid({ kind: 'grid', shape: [3] }, 3), null);
+    assert.equal(m.tile_shape_valid(null, 3), null);
+});
+
+test('layouts_set shapes: set, remove single, remove all, empty entry dropped', () => {
+    let l = m.tile_layouts_set({}, 'M', '1', { shapes: { 3: { kind: 'cols', shape: [2, 1] } } });
+    assert.deepEqual(m.tile_layouts_shapes(l, 'M', '1'), { 3: { kind: 'cols', shape: [2, 1] } });
+    l = m.tile_layouts_set(l, 'M', '1', { shapes: { 3: null } });
+    assert.deepEqual(l, {});
+    l = m.tile_layouts_set({ M: { 1: { preset: 'p', shapes: { 2: { kind: 'rows', shape: [2] } } } } }, 'M', '1', { shapes: null });
+    assert.deepEqual(l, { M: { 1: { preset: 'p' } } });
+});
+
+test('layouts_set shape + split removal for the same n in one patch', () => {
+    const before = { M: { 1: { splits: { 3: { cols: [0.5] }, 4: { cols: [0.3] } } } } };
+    const l = m.tile_layouts_set(before, 'M', '1', { shapes: { 3: { kind: 'cols', shape: [2, 1] } }, splits: { 3: null } });
+    assert.deepEqual(l, { M: { 1: { splits: { 4: { cols: [0.3] } }, shapes: { 3: { kind: 'cols', shape: [2, 1] } } } } });
+});
+
+test('layout_resolve: stored shape wins only over a non-null base, keeps rule/preset', () => {
+    const base = { kind: 'cols', shape: [1, 1, 1], rule: { min: 1 }, preset: { id: 'p' } };
+    assert.deepEqual(m.tile_layout_resolve(base, { kind: 'cols', shape: [2, 1] }, 3),
+        { kind: 'cols', shape: [2, 1], rule: { min: 1 }, preset: { id: 'p' } });
+    assert.equal(m.tile_layout_resolve(null, { kind: 'cols', shape: [2, 1] }, 3), null);
+    assert.equal(m.tile_layout_resolve(base, { kind: 'cols', shape: [9] }, 3), base);
+    assert.equal(m.tile_layout_resolve(base, undefined, 3), base);
+});
+
+test('tile_layouts_shapes reads the raw shapes object, {} when missing or invalid', () => {
+    assert.deepEqual(m.tile_layouts_shapes({ M: { '2': { shapes: { '3': { kind: 'cols', shape: [2, 1] } } } } }, 'M', '2'), { '3': { kind: 'cols', shape: [2, 1] } });
+    assert.deepEqual(m.tile_layouts_shapes({ M: { '2': { preset: 'p1' } } }, 'M', '2'), {});
+    assert.deepEqual(m.tile_layouts_shapes({ M: { '2': { shapes: [1] } } }, 'M', '2'), {});
+    assert.deepEqual(m.tile_layouts_shapes(null, 'M', '2'), {});
+    assert.deepEqual(m.tile_layouts_shapes({}, 'X', '1'), {});
 });
