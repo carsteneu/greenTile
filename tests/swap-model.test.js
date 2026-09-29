@@ -128,9 +128,10 @@ test('chain: no wrap at the first and last workspace', () => {
 });
 
 test('chain: workspaces-only-on-primary anchors workspace steps on the primary monitor', () => {
-    // monitor 1 is the primary monitor in this scenario
+    // monitor 1 is the primary monitor in this scenario; the landing monitor is the
+    // primary (the only one with a workspace dimension), not the geometric edge
     assert.deepEqual(chain('right', 1, { onlyPrimary: true, monitorIndex: 1, primaryIndex: 1 }),
-        { kind: 'workspace', delta: 1, monitor: 0, slot: 'first' });
+        { kind: 'workspace', delta: 1, monitor: 1, slot: 'first' });
     // from a non-primary monitor at the chain end there is no workspace step
     assert.deepEqual(chain('right', 1, { onlyPrimary: true }), null);
     assert.deepEqual(chain('left', 0, { onlyPrimary: true, primaryIndex: 2 }), null);

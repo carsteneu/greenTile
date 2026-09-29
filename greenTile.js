@@ -1672,7 +1672,7 @@ const tile_preset_retile = (app, monitorIndex, focusWindow, animate = true, wsIn
     if (!layout || !layout.rule)
         return;
     const ordered = tile_sort_reading_order((focused ? [focusWindow] : []).concat(windows), true);
-    const split = tile_split_for(app, monitorIndex, wsIndex, n, layout);
+    const split = tile_split_for(app, monitorIndex, ws, n, layout);
     tile_place_rects(app, ordered, layout, split, area, animate);
     if (animate)
         global.log('greenTile preset "' + preset.name + '" applied ws' + (ws + 1) + ' mon=' + (tile_monitors.keys[monitorIndex] || '?') + ' n=' + n + ' stacks=[' + layout.rule.stacks.join(',') + ']' + (split ? ' split' : ''));
@@ -1882,7 +1882,7 @@ const tile_swap_landing_cell = (cells, frame, dir) => {
     if (cells.length === 0 || (dir !== 'left' && dir !== 'right'))
         return null;
     const right = dir === 'right';
-    let edgeX = right ? cells[0][0] : cells[0][0];
+    let edgeX = cells[0][0];
     for (const r of cells)
         edgeX = right ? Math.min(edgeX, r[0]) : Math.max(edgeX, r[0]);
     let pool = [];
@@ -1903,7 +1903,8 @@ const tile_swap_landing_cell = (cells, frame, dir) => {
 // first stay within the same workspace (the neighbor search handles the in-layout swap,
 // this decides the cross-monitor landing), then continue onto the previous/next
 // workspace, landing in the edge slot of the rightmost/leftmost monitor. workspaces-
-// only-on-primary: workspace steps only anchor on the primary monitor. No wrap.
+// only-on-primary: the workspace step only anchors on the primary monitor (the only one
+// with a workspace dimension), so the landing monitor is the primary. No wrap.
 const tile_swap_chain_step = (input) => {
     const { dir, monitorIndex, primaryIndex, onlyPrimary, monitors, workspaces, wsIndex } = input;
     if (dir !== 'left' && dir !== 'right')
@@ -1924,7 +1925,11 @@ const tile_swap_chain_step = (input) => {
     if (nextWs < 0 || nextWs >= workspaces)
         return null;
     const sorted = monitors.slice().sort((a, b) => (a.x - b.x) || (a.index - b.index));
-    const edge = right ? sorted[0] : sorted[sorted.length - 1];
+    const edge = onlyPrimary
+        ? monitors.find((mo) => mo.index === primaryIndex)
+        : (right ? sorted[0] : sorted[sorted.length - 1]);
+    if (!edge)
+        return null;
     return { kind: 'workspace', delta: delta, monitor: edge.index, slot: right ? 'first' : 'last' };
 };
 // <<< swap-model
@@ -1935,27 +1940,6 @@ const tile_swap_chain_step = (input) => {
 // stays on the moved window so repeated presses keep moving the same window.
 const tile_swap_override = (metaWindow, rect) => {
     tile_sort_rect_override.set(metaWindow.get_stable_sequence(), { rect: rect, at: GLib.get_monotonic_time() / 1000 });
-};
-const tile_swap_windows_on = (monitor, wsIndex) => {
-    const tracker = imports.gi.Cinnamon.WindowTracker.get_default();
-    const ws = global.workspace_manager.get_workspace_by_index(wsIndex);
-    const result = [];
-    const list = ws.list_windows();
-    for (let i = 0; i < list.length; i++) {
-        const w = list[i];
-        if (w.minimized || w.get_wm_class() == null)
-            continue;
-        if (w.get_window_type() !== Meta.WindowType.NORMAL)
-            continue;
-        if (tile_excl_is_excluded(w))
-            continue;
-        if (utils_Main.layoutManager.monitors[w.get_monitor()] !== monitor)
-            continue;
-        if (tracker.get_window_app(w) == null)
-            continue;
-        result.push(w);
-    }
-    return result;
 };
 const tile_swap_hotkey = (app, dir) => {
     const focusWindow = tile_focus_window();
@@ -2025,14 +2009,15 @@ const tile_swap_hotkey = (app, dir) => {
         global.log('greenTile swap pushed mon=' + (tile_monitors.keys[monitorIndex] || '?') + ' -> mon=' + (tile_monitors.keys[step.monitor] || '?') + ' ws' + (wsIndex + 1));
         return;
     }
-    // Workspace landing: the slot is computed AFTER the switch (tile_layout_shape reads
-    // the active workspace), the count of the other windows before it. The source
-    // workspace retiles with one window less even though it is no longer active.
+    // Workspace landing: the count of the other windows is read before the switch, the
+    // slot is computed AFTER it (tile_layout_shape reads the active workspace). The
+    // window is moved to the landing monitor too — a workspace switch alone would leave
+    // it on the source monitor. The source workspace retiles with one window less even
+    // though it is no longer active.
     const targetWsIndex = wsIndex + step.delta;
-    if (targetWsIndex < 0 || targetWsIndex >= global.screen.get_n_workspaces())
-        return;
-    const nTarget = tile_swap_windows_on(targetMonitor, targetWsIndex).length + 1;
+    const nTarget = tile_collect_windows(targetMonitor, null, targetWsIndex).length + 1;
     focusWindow.change_workspace_by_index(targetWsIndex, false, global.get_current_time());
+    focusWindow.move_to_monitor(step.monitor);
     global.workspace_manager.get_workspace_by_index(targetWsIndex).activate_with_focus(focusWindow, global.get_current_time());
     const targetLayout = tile_layout_shape(app, step.monitor, nTarget);
     if (targetLayout) {
