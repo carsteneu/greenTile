@@ -61,7 +61,9 @@
          "type": "section",
          "title": "Preset panel",
          "keys": [
-            "panelTheme"
+            "panelTheme",
+            "accentMode",
+            "accentColor"
          ]
       }
    },
@@ -166,5 +168,22 @@
          "Light": "light",
          "Dark": "dark"
       }
+   },
+   "accentMode": {
+      "type": "combobox",
+      "default": "theme",
+      "description": "Accent color",
+      "tooltip": "Follow theme tracks the accent color of the Cinnamon theme live. Custom uses the color below.",
+      "options": {
+         "Follow theme": "theme",
+         "Custom": "custom"
+      }
+   },
+   "accentColor": {
+      "type": "colorchooser",
+      "default": "rgb(255,150,64)",
+      "description": "Custom accent color",
+      "tooltip": "Accent of the preset panel and editor when Accent color is Custom.",
+      "dependency": "accentMode=custom"
    }
 }

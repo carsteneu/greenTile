@@ -131,6 +131,8 @@ class Config {
         this.settings.bindProperty(Settings.BindingDirection.IN, 'resizeTallerHotkey', 'resizeTallerHotkey', this.EnableHotkey, null);
         this.settings.bindProperty(Settings.BindingDirection.IN, 'resizeShorterHotkey', 'resizeShorterHotkey', this.EnableHotkey, null);
         this.settings.bindProperty(Settings.BindingDirection.IN, 'panelTheme', 'panelTheme', () => tile_theme_changed(), null);
+        this.settings.bindProperty(Settings.BindingDirection.IN, 'accentMode', 'accentMode', () => tile_theme_changed(), null);
+        this.settings.bindProperty(Settings.BindingDirection.IN, 'accentColor', 'accentColor', () => tile_theme_changed(), null);
         this.EnableHotkey();
         tile_theme_init(this);
         tile_monitors_refresh(app, () => {
@@ -1839,7 +1841,9 @@ const tile_panel_row = (app, preset, n) => {
 // Preset panel — view 2 (editor): rule list on the left, stepper + painter + name on
 // the right (layout and tokens from the approved prototype). The draft
 // {id, name, rules (sorted by min), index, isNew} is written to the settings on Save only.
-const tile_editor_accent = [255, 150, 64];
+// Cairo can't read the stylesheet: tile_accent_state (updated by
+// tile_theme_changed before any panel exists) supplies the accent here.
+const tile_editor_accent = () => tile_accent_state.rgb;
 const tile_editor_open = (app, preset) => {
     const rules = tile_editor_sort((preset.rules || []).map((r) => ({ min: r.min, stacks: tile_editor_clamp(r.stacks || []) })));
     if (rules.length === 0)
@@ -1889,7 +1893,7 @@ const tile_editor_rule_row = (rule, active, last, onSelect) => {
         outer.add(new tile_St.Bin({ style_class: 'gk-ed-rule-stripe' }), { x_fill: false, y_fill: true });
     const box = new tile_St.BoxLayout({ style_class: 'gk-ed-rule-box', x_expand: true });
     box.add(new tile_St.Label({ text: _("from %d").format(rule.min), style_class: 'gk-ed-rule-label' }), { expand: true, x_fill: true, y_fill: false, y_align: tile_St.Align.MIDDLE });
-    box.add(tile_panel_thumb(rule.stacks, { width: 34, height: 18, gap: 2, vgap: 1, radius: 1, color: active ? tile_editor_accent : tile_theme_cairo_get('thumb') }), tile_panel_middle());
+    box.add(tile_panel_thumb(rule.stacks, { width: 34, height: 18, gap: 2, vgap: 1, radius: 1, color: active ? tile_editor_accent() : tile_theme_cairo_get('thumb') }), tile_panel_middle());
     outer.add(box, { expand: true, x_fill: true, y_fill: true });
     row.set_child(outer);
     row.connect('clicked', () => onSelect());
@@ -1905,12 +1909,13 @@ const tile_editor_painter = (getStacks, onChange) => {
         const cr = a.get_context();
         const [W, H] = a.get_surface_size();
         const stacks = getStacks();
+        const accent = tile_editor_accent();
         const gap = 3;
         const cw = (W - gap * (tile_editor_cols - 1)) / tile_editor_cols;
         for (let c = 0; c < tile_editor_cols; c++) {
             const x = c * (cw + gap);
             if (c < stacks.length) {
-                cr.setSourceRGBA(tile_editor_accent[0] / 255, tile_editor_accent[1] / 255, tile_editor_accent[2] / 255, 0.85);
+                cr.setSourceRGBA(accent[0] / 255, accent[1] / 255, accent[2] / 255, 0.85);
                 const ch = (H - gap * (stacks[c] - 1)) / stacks[c];
                 for (let r = 0; r < stacks[c]; r++)
                     tile_panel_round_rect(cr, x, r * (ch + gap), cw, ch, 2);
@@ -2303,6 +2308,73 @@ const tile_theme_cairo = {
 };
 const tile_theme_cairo_get = (key) => tile_theme_cairo[tile_theme_state.theme][key];
 const tile_theme_panel_class = () => tile_theme_state.theme === 'light' ? 'gk-panel gk-light' : 'gk-panel';
+// Accent runtime: resolves theme-probed vs. custom color, writes the generated
+// accent stylesheet into the user cache dir and loads/unloads it on the current
+// St.Theme — the same mechanism Cinnamon uses for extension stylesheets, so
+// hover/focus pseudo-classes keep working and an open panel restyles at once.
+// Re-load hooks into 'theme-set' because every Cinnamon theme switch replaces
+// the whole St.Theme object.
+const tile_accent_state = { rgb: tile_accent_default, css: '', path: null, themeObj: null, themeSig: 0 };
+const tile_accent_probe = () => {
+    let probe = null;
+    try {
+        probe = new tile_St.BoxLayout({ style_class: 'popup-menu-item', opacity: 0 });
+        probe.add_style_pseudo_class('active');
+        Main.uiGroup.add_child(probe);
+        const c = probe.get_theme_node().get_background_color();
+        return tile_accent_from_probed(c.red, c.green, c.blue, c.alpha);
+    } catch (e) {
+        return null;
+    } finally {
+        if (probe)
+            probe.destroy();
+    }
+};
+const tile_accent_load = (theme, path) => {
+    try {
+        theme.load_stylesheet(path);
+        tile_accent_state.themeObj = theme;
+    } catch (e) {
+        global.logError('greenTile: accent stylesheet: ' + e);
+    }
+};
+const tile_accent_unload = () => {
+    if (!tile_accent_state.themeObj)
+        return;
+    try {
+        tile_accent_state.themeObj.unload_stylesheet(tile_accent_state.path);
+    } catch (e) {
+        // the old theme object is already gone after a Cinnamon theme switch
+    }
+    tile_accent_state.themeObj = null;
+};
+const tile_accent_path = () => {
+    if (!tile_accent_state.path)
+        tile_accent_state.path = GLib.build_filenamev([GLib.get_user_cache_dir(), 'greenTile@carsteneu', 'panel-accent.css']);
+    return tile_accent_state.path;
+};
+const tile_accent_apply = (config) => {
+    let rgb = null;
+    if ((config.settings.getValue('accentMode') || 'theme') === 'custom')
+        rgb = tile_accent_parse(config.settings.getValue('accentColor'));
+    else
+        rgb = tile_accent_probe();
+    const base = rgb || tile_accent_default;
+    tile_accent_state.rgb = base;
+    const css = tile_accent_css(tile_accent_tones(base));
+    const path = tile_accent_path();
+    if (css !== tile_accent_state.css) {
+        GLib.mkdir_with_parents(GLib.path_get_dirname(path), 0o700);
+        GLib.file_set_contents(path, css);
+        tile_accent_state.css = css;
+        tile_accent_unload();
+    }
+    const theme = tile_St.ThemeContext.get_for_stage(global.stage).get_theme();
+    if (tile_accent_state.themeObj && tile_accent_state.themeObj !== theme)
+        tile_accent_unload();
+    if (!tile_accent_state.themeObj)
+        tile_accent_load(theme, path);
+};
 const tile_theme_changed = () => {
     const config = tile_theme_state.config;
     if (!config)
@@ -2312,6 +2384,12 @@ const tile_theme_changed = () => {
         tile_theme_state.portal ? tile_theme_state.portal.get_string('color-scheme') : null,
         tile_theme_state.cinnamon ? tile_theme_state.cinnamon.get_string('name') : null
     );
+    try {
+        tile_accent_apply(config);
+    } catch (e) {
+        // a failing accent (unusable probe, unwritable file) keeps the old look
+        global.logError('greenTile: accent color: ' + e);
+    }
     // An open panel or editor rebuilds itself: restyling in place would leave the
     // Cairo thumbnails and the painter in the old colors.
     if (tile_panel.actor)
@@ -2329,6 +2407,12 @@ const tile_theme_init = (config) => {
             tile_theme_state.cinnamon = new tile_Gio.Settings({ schema_id: 'org.cinnamon.theme' });
             tile_theme_state.cinnamonSig = tile_theme_state.cinnamon.connect('changed::name', tile_theme_changed);
         }
+    }
+    if (tile_accent_state.themeSig === 0) {
+        // Cinnamon theme switch: loadTheme replaced the St.Theme object, the accent
+        // sheet and the (re-probed, awaited in tile_theme_changed) accent color
+        // are re-applied on top of the new theme.
+        tile_accent_state.themeSig = Main.themeManager.connect('theme-set', tile_theme_changed);
     }
     tile_theme_state.config = config;
     tile_theme_changed();
@@ -2352,6 +2436,16 @@ const tile_theme_shutdown = () => {
         tile_theme_state.cinnamon = null;
         tile_theme_state.cinnamonSig = 0;
     }
+    if (tile_accent_state.themeSig) {
+        try {
+            Main.themeManager.disconnect(tile_accent_state.themeSig);
+        } catch (e) {
+            // signal was already gone
+        }
+        tile_accent_state.themeSig = 0;
+    }
+    // the panel is closed here; the accent sheet comes off the theme with it
+    tile_accent_unload();
     tile_theme_state.config = null;
 };
 // "Gap between windows  − 8 px +" in the list view. Each click stores the value and,
