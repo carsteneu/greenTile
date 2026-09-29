@@ -53,6 +53,11 @@ h1 em{font-style:normal;color:var(--leaf);position:relative;white-space:nowrap}
 .btn:hover{background:var(--moss)}
 .keys{display:inline-flex;gap:6px;align-items:center;font-size:14px;color:var(--mute)}
 kbd{font:600 13px/1 "JBMono";padding:7px 9px 8px;border-radius:7px;background:var(--sheet);border:1px solid var(--rule);box-shadow:0 2px 0 var(--rule);color:var(--ink)}
+.hero-top{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,440px);gap:48px;align-items:end}
+.shot{margin:0}
+.shot img{display:block;width:100%;height:auto;border-radius:12px;box-shadow:0 30px 60px -30px rgba(19,32,26,.55),0 0 0 1px rgba(19,32,26,.12)}
+.shot figcaption{display:flex;gap:5px;align-items:center;justify-content:flex-end;margin-top:14px;font:500 13px/1 "JBMono";color:var(--mute)}
+.shot figcaption kbd{font-size:12px;padding:5px 7px 6px}
 
 /* the stage: a tiny 32:9 monitor that retiles itself */
 .stage{margin-top:clamp(34px,6vh,60px)}
@@ -108,6 +113,9 @@ pre .c{color:#7E9483}pre .g{color:#8FD16F}
 footer{padding:36px 0 56px;border-top:1px solid var(--rule);display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px;color:var(--mute);font-size:14px}
 
 @media (max-width:980px){
+  .hero-top{grid-template-columns:1fr;gap:36px}
+  .shot{max-width:560px}
+  .shot figcaption{justify-content:flex-start}
   .grid{grid-template-columns:repeat(2,1fr)}
   .card.a,.card.g{grid-column:span 2}
   .card.b{grid-row:auto}
@@ -130,12 +138,20 @@ footer{padding:36px 0 56px;border-top:1px solid var(--rule);display:flex;justify
   </nav>
 
   <header class="hero">
-    <div class="eyebrow">Extension for Cinnamon 6.6</div>
-    <h1>Every window in <em>its place.</em></h1>
-    <p class="lede">greenTile tiles your Cinnamon desktop the moment a window opens. Presets per monitor and workspace, a grid that grows with you, and windows that snap where you drop them.</p>
-    <div class="cta">
-      <a class="btn" href="#install">Install greenTile</a>
-      <span class="keys">or just press <kbd>Super</kbd><kbd>Ctrl</kbd><kbd>A</kbd></span>
+    <div class="hero-top">
+      <div>
+        <div class="eyebrow">Extension for Cinnamon 6.6</div>
+        <h1>Every window in <em>its place.</em></h1>
+        <p class="lede">greenTile tiles your Cinnamon desktop the moment a window opens. Presets per monitor and workspace, a grid that grows with you, and windows that snap where you drop them.</p>
+        <div class="cta">
+          <a class="btn" href="#install">Install greenTile</a>
+          <span class="keys">or just press <kbd>Super</kbd><kbd>Ctrl</kbd><kbd>A</kbd></span>
+        </div>
+      </div>
+      <figure class="shot">
+        <img src="screenshots/preset-panel.png" width="685" height="412" alt="The greenTile preset panel: a list of presets with thumbnails, Auto on, gap between windows and New preset">
+        <figcaption>The preset panel · <kbd>Super</kbd><kbd>Ctrl</kbd><kbd>P</kbd></figcaption>
+      </figure>
     </div>
 
     <div class="stage" aria-label="Animated example: windows retile as they open">
