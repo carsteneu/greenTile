@@ -119,6 +119,7 @@ D=~/.local/share/cinnamon/extensions/greenTile@carsteneu
 mkdir -p "$D"
 node --check greenTile.js
 cp extension.js greenTile.js metadata.json settings-schema.json stylesheet.css icon.png LICENSE "$D"/
+rm -rf "$D"/icons
 for po in po/*.po; do
   lang=$(basename "$po" .po)
   mkdir -p ~/.local/share/locale/"$lang"/LC_MESSAGES
