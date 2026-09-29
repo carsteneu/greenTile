@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: greenTile 0.1.0\n"
 "Report-Msgid-Bugs-To: https://github.com/carsteneu\n"
-"POT-Creation-Date: 2026-09-29 12:09+0200\n"
+"POT-Creation-Date: 2026-09-29 12:37+0200\n"
 "PO-Revision-Date: 2024-04-17 10:36+0200\n"
 "Last-Translator: qadzek\n"
 "Language-Team: Dutch\n"
@@ -17,145 +17,129 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: greenTile.js:1923
+#: greenTile.js:1808
 #, javascript-format
 msgid "assigned — workspace %d"
 msgstr ""
 
-#: greenTile.js:1982
+#: greenTile.js:1867
 msgid "Please enter a name."
 msgstr ""
 
-#: greenTile.js:2005
+#: greenTile.js:1890
 #, javascript-format
 msgid "from %d"
 msgstr ""
 
-#: greenTile.js:2121
+#: greenTile.js:2006
 msgid "Rules (by window count)"
 msgstr ""
 
-#: greenTile.js:2125
+#: greenTile.js:2010
 msgid "Rule"
 msgstr ""
 
-#: greenTile.js:2126
+#: greenTile.js:2011
 msgid "Delete rule"
 msgstr ""
 
-#: greenTile.js:2134
+#: greenTile.js:2019
 msgid "Rule applies from"
 msgstr ""
 
-#: greenTile.js:2141
+#: greenTile.js:2026
 msgid "windows"
 msgstr ""
 
-#: greenTile.js:2143
+#: greenTile.js:2028
 msgid "Painter"
 msgstr ""
 
-#: greenTile.js:2158
+#: greenTile.js:2043
 msgid ""
 "Click or drag: the row sets how many windows the column holds. Right-click "
 "removes a column."
 msgstr ""
 
-#: greenTile.js:2163
+#: greenTile.js:2048
 msgid "Name"
 msgstr ""
 
-#: greenTile.js:2164
+#: greenTile.js:2049
 msgid "Preset name"
 msgstr ""
 
-#: greenTile.js:2168
+#: greenTile.js:2053
 msgid "Save"
 msgstr ""
 
-#: greenTile.js:2185
+#: greenTile.js:2070
 #, javascript-format
 msgid "Result: %s"
 msgstr ""
 
-#: greenTile.js:2345
+#: greenTile.js:2230
 msgid "Gap between windows"
 msgstr ""
 
-#: greenTile.js:2350
+#: greenTile.js:2235
 #, javascript-format
 msgid "%d px"
 msgstr ""
 
-#: greenTile.js:2369
+#: greenTile.js:2254
 msgid "Reset sizes"
 msgstr ""
 
-#: greenTile.js:2400
+#: greenTile.js:2285
 #, javascript-format
 msgid "Presets — workspace %d · %s"
 msgstr ""
 
-#: greenTile.js:2402
+#: greenTile.js:2287
 msgid "Create preset"
 msgstr ""
 
-#: greenTile.js:2402
+#: greenTile.js:2287
 #, javascript-format
 msgid "Edit %s"
 msgstr ""
 
-#: greenTile.js:2406
+#: greenTile.js:2291
 msgid "Back"
 msgstr ""
 
-#: greenTile.js:2415
+#: greenTile.js:2300
 #, fuzzy
 #| msgid "Auto close"
 msgid "Auto: on"
 msgstr "Automatisch sluiten"
 
-#: greenTile.js:2415
+#: greenTile.js:2300
 #, fuzzy
 #| msgid "Auto close"
 msgid "Auto: off"
 msgstr "Automatisch sluiten"
 
-#: greenTile.js:2436
+#: greenTile.js:2321
 msgid "Dark theme"
 msgstr ""
 
-#: greenTile.js:2436
+#: greenTile.js:2321
 msgid "Light theme"
 msgstr ""
 
-#: greenTile.js:2556
+#: greenTile.js:2441
 msgid "No presets yet."
 msgstr ""
 
-#: greenTile.js:2571
+#: greenTile.js:2456
 msgid "New preset"
 msgstr ""
 
-#: greenTile.js:2574
+#: greenTile.js:2459
 msgid "Click a row to apply it to this workspace and tile right away"
 msgstr ""
-
-#: greenTile.js:2875
-msgid "Auto close"
-msgstr "Automatisch sluiten"
-
-#: greenTile.js:2876
-msgid "Animations"
-msgstr "Animaties"
-
-#: greenTile.js:2877
-msgid "Auto tile main and list"
-msgstr "Automatisch tegelen van hoofd en lijst"
-
-#: greenTile.js:2878
-msgid "Auto tile two lists"
-msgstr "Automatisch tegelen van twee lijsten"
 
 #. metadata.json->name
 #, fuzzy
@@ -177,14 +161,6 @@ msgstr ""
 msgid "Hotkeys"
 msgstr "Sneltoetsen"
 
-#. settings-schema.json->help->title
-msgid "Help"
-msgstr "Help"
-
-#. settings-schema.json->hotkey-section->title
-msgid "Global Hotkey"
-msgstr "Globale Sneltoets"
-
 #. settings-schema.json->autotile-hotkey-section->title
 #, fuzzy
 #| msgid "Auto tile two lists"
@@ -199,87 +175,9 @@ msgstr ""
 msgid "Resize tiled windows"
 msgstr ""
 
-#. settings-schema.json->keybindings-legend-section->title
-msgid "Keybindings Legend (when open)"
-msgstr "Legenda toetsenbordcombinaties (wanneer geopend)"
-
-#. settings-schema.json->behaviour-section->title
-msgid "Classic grid (Super+G)"
-msgstr ""
-
 #. settings-schema.json->panel-section->title
 msgid "Preset panel"
 msgstr ""
-
-#. settings-schema.json->help-section->title
-msgid "More Info"
-msgstr "Meer Info"
-
-#. settings-schema.json->hotkeys-legend->description
-#, fuzzy
-#| msgid ""
-#| "Escape:\t\t\tHide gTile\n"
-#| "Enter or Space:\tCommit current selection\n"
-#| "Left:\t\t\tMove Left inside Grid\n"
-#| "Right:\t\t\tMove Right inside Grid\n"
-#| "Up:\t\t\t\tMove Up inside Grid\n"
-#| "Down:\t\t\tMove Down inside Grid\n"
-#| "<Shift>Left:\t\tInclude column to the Left in selection\n"
-#| "<Shift>Right:\t\tInclude column to the Right in selection\n"
-#| "<Shift>Up:\t\tInclude row Above in selection\n"
-#| "<Shift>Down:\tInclude row Below in selection\n"
-#| "<Alt>Left:\t\tMove to the monitor on the Left\n"
-#| "<Alt>Right:\t\tMove to the monitor on the Right\n"
-#| "<Alt>Up:\t\t\tMove to the monitor Above\n"
-#| "<Alt>Down:\t\tMove to the monitor Below\n"
-#| "1:\t\t\t\tSelect the first grid layout\n"
-#| "2:\t\t\t\tSelect the second grid layout\n"
-#| "3:\t\t\t\tSelect the third grid layout\n"
-#| "4:\t\t\t\tSelect the fourth grid layout"
-msgid ""
-"Escape:\t\t\tHide greenTile\n"
-"Enter or Space:\tCommit current selection\n"
-"Left:\t\t\tMove Left inside Grid\n"
-"Right:\t\t\tMove Right inside Grid\n"
-"Up:\t\t\t\tMove Up inside Grid\n"
-"Down:\t\t\tMove Down inside Grid\n"
-"<Shift>Left:\t\tInclude column to the Left in selection\n"
-"<Shift>Right:\t\tInclude column to the Right in selection\n"
-"<Shift>Up:\t\tInclude row Above in selection\n"
-"<Shift>Down:\tInclude row Below in selection\n"
-"<Alt>Left:\t\tMove to the monitor on the Left\n"
-"<Alt>Right:\t\tMove to the monitor on the Right\n"
-"<Alt>Up:\t\t\tMove to the monitor Above\n"
-"<Alt>Down:\t\tMove to the monitor Below\n"
-"1:\t\t\t\tSelect the first grid layout\n"
-"2:\t\t\t\tSelect the second grid layout\n"
-"3:\t\t\t\tSelect the third grid layout\n"
-"4:\t\t\t\tSelect the fourth grid layout"
-msgstr ""
-"Escape:\t\t\tVerberg gTile\n"
-"Enter of Spatie:\tBevestig huidige selectie\n"
-"Links:\t\t\tNaar links bewegen binnen het raster\n"
-"Rechts:\t\t\tNaar rechts bewegen binnen het raster\n"
-"Omhoog:\t\t\tNaar boven bewegen binnen het raster\n"
-"Omlaag:\t\t\tNaar beneden bewegen binnen het raster\n"
-"<Shift>Links:\t\tKolom aan de linkerkant opnemen in de selectie\n"
-"<Shift>Rechts:\t\tKolom aan de rechterkant opnemen in de selectie\n"
-"<Shift>Omhoog:\tRij erboven opnemen in de selectie\n"
-"<Shift>Omlaag:\tRij eronder opnemen in de selectie\n"
-"<Alt>Links:\t\tNaar het scherm aan de linkerkant bewegen\n"
-"<Alt>Rechts:\t\tNaar het scherm aan de rechterkant bewegen\n"
-"<Alt>Omhoog:\t\tNaar het scherm erboven bewegen\n"
-"<Alt>Omlaag:\t\tNaar het scherm eronder bewegen\n"
-"1:\t\t\t\tDe eerste rasterindeling selecteren\n"
-"2:\t\t\t\tDe tweede rasterindeling selecteren\n"
-"3:\t\t\t\tDe derde rasterindeling selecteren\n"
-"4:\t\t\t\tDe vierde rasterindeling selecteren"
-
-#. settings-schema.json->hotkey->description
-#, fuzzy
-#| msgid "Global Hotkey for gTile"
-msgid "Global Hotkey for greenTile"
-msgstr "Globale sneltoets voor gTile"
 
 #. settings-schema.json->autotile6hotkey->description
 msgid "Tile all windows into 6 columns"
@@ -372,141 +270,3 @@ msgstr ""
 #. settings-schema.json->panelTheme->options
 msgid "Dark"
 msgstr ""
-
-#. settings-schema.json->animation->description
-msgid "Animation"
-msgstr "Animatie"
-
-#. settings-schema.json->autoclose->description
-msgid "Auto-Close"
-msgstr "Automatisch sluiten"
-
-#. settings-schema.json->aspect-ratio->description
-msgid "Use monitor aspect ratio"
-msgstr "Gebruik de beeldverhouding van de monitor"
-
-#. settings-schema.json->aspect-ratio->tooltip
-msgid ""
-"Should the popup's grid reflect the current monitor's aspect ratio or not."
-msgstr ""
-"Moet het raster van het pop-upvenster de huidige beeldverhouding van de "
-"monitor weerspiegelen of niet."
-
-#. settings-schema.json->useMonitorCenter->description
-msgid "UI always centered to monitor"
-msgstr "UI altijd gecentreerd op monitor"
-
-#. settings-schema.json->useMonitorCenter->tooltip
-msgid ""
-"By default the grid UI shows up in the middle of the active window. With "
-"this, it always displays in the middle of the monitor."
-msgstr ""
-"Standaard verschijnt de raster-UI in het midden van het actieve venster. Met "
-"deze optie wordt het altijd weergegeven in het midden van de monitor."
-
-#. settings-schema.json->showGridOnAllMonitors->description
-msgid "Show UI and all monitors at the same time"
-msgstr "Toon UI en alle schermen tegelijk"
-
-#. settings-schema.json->grid1NameOverride->description
-msgid "Name Override on the UI"
-msgstr "Naam overschrijven op de UI"
-
-#. settings-schema.json->grid1x->description
-#. settings-schema.json->grid2x->description
-#. settings-schema.json->grid3x->description
-#. settings-schema.json->grid4x->description
-msgid "Columns"
-msgstr "Kolommen"
-
-#. settings-schema.json->grid1x->tooltip
-#. settings-schema.json->grid2x->tooltip
-#. settings-schema.json->grid3x->tooltip
-#. settings-schema.json->grid4x->tooltip
-msgid ""
-"Each row represents a column. Span is how much space a column should take up "
-"compared to the other columns. Default is 1."
-msgstr ""
-"Elke rij vertegenwoordigt een kolom. Span is hoeveel ruimte een kolom in "
-"beslag moet nemen ten opzichte van de andere kolommen. Standaard is 1."
-
-#. settings-schema.json->grid1x->columns->title
-#. settings-schema.json->grid1y->columns->title
-#. settings-schema.json->grid2x->columns->title
-#. settings-schema.json->grid2y->columns->title
-#. settings-schema.json->grid3x->columns->title
-#. settings-schema.json->grid3y->columns->title
-#. settings-schema.json->grid4x->columns->title
-#. settings-schema.json->grid4y->columns->title
-msgid "Span"
-msgstr "Span"
-
-#. settings-schema.json->grid1y->description
-#. settings-schema.json->grid2y->description
-#. settings-schema.json->grid3y->description
-#. settings-schema.json->grid4y->description
-msgid "Rows"
-msgstr "Rijen"
-
-#. settings-schema.json->grid1y->tooltip
-#. settings-schema.json->grid2y->tooltip
-#. settings-schema.json->grid3y->tooltip
-#. settings-schema.json->grid4y->tooltip
-msgid ""
-"Each row represents a row. Span is how much space a row should take up "
-"compared to the other columns. Default is 1."
-msgstr ""
-"Elke rij vertegenwoordigt een rij. Span is hoeveel ruimte een rij in beslag "
-"moet nemen ten opzichte van de andere kolommen. Standaard is 1."
-
-#. settings-schema.json->grid2NameOverride->description
-#. settings-schema.json->grid3NameOverride->description
-#. settings-schema.json->grid4NameOverride->description
-msgid "Name Override"
-msgstr "Naam overschrijven"
-
-#. settings-schema.json->select-using-keyboard->description
-msgid "Show tile labels"
-msgstr ""
-
-#~ msgid "Behavior"
-#~ msgstr "Gedrag"
-
-#~ msgid "Layout"
-#~ msgstr "Indeling"
-
-#~ msgid "Layout For Button 1"
-#~ msgstr "Indeling voor Knop 1"
-
-#~ msgid "Layout For Button 2"
-#~ msgstr "Indeling voor Knop 2"
-
-#~ msgid "Layout For Button 3"
-#~ msgstr "Indeling voor Knop 3"
-
-#~ msgid "Layout For Button 4"
-#~ msgstr "Indeling voor Knop 4"
-
-#~ msgid "Tile your windows as you like."
-#~ msgstr "Orden je vensters zoals je wilt."
-
-#~ msgid "Hotkeys:"
-#~ msgstr "Sneltoetsen:"
-
-#~ msgid "Behavior:"
-#~ msgstr "Gedrag:"
-
-#~ msgid "Layout for Button 1:"
-#~ msgstr "Indeling voor Knop 1:"
-
-#~ msgid "y"
-#~ msgstr "y"
-
-#~ msgid "Layout for Button 2:"
-#~ msgstr "Indeling voor Knop 2:"
-
-#~ msgid "Layout for Button 3:"
-#~ msgstr "Indeling voor Knop 3:"
-
-#~ msgid "Layout for Button 4:"
-#~ msgstr "Indeling voor Knop 4:"

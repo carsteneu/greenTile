@@ -9,7 +9,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: greenTile 0.1.0\n"
 "Report-Msgid-Bugs-To: https://github.com/carsteneu\n"
-"POT-Creation-Date: 2026-09-29 12:09+0200\n"
+"POT-Creation-Date: 2026-09-29 12:37+0200\n"
 "PO-Revision-Date: 2026-09-28 17:17+0200\n"
 "Last-Translator: carsten_eu\n"
 "Language-Team: German\n"
@@ -20,45 +20,45 @@ msgstr ""
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 "X-Generator: Poedit 2.3\n"
 
-#: greenTile.js:1923
+#: greenTile.js:1808
 #, javascript-format
 msgid "assigned — workspace %d"
 msgstr "zugewiesen — Fläche %d"
 
-#: greenTile.js:1982
+#: greenTile.js:1867
 msgid "Please enter a name."
 msgstr "Bitte einen Namen eingeben."
 
-#: greenTile.js:2005
+#: greenTile.js:1890
 #, javascript-format
 msgid "from %d"
 msgstr "ab %d"
 
-#: greenTile.js:2121
+#: greenTile.js:2006
 msgid "Rules (by window count)"
 msgstr "Regeln (nach Fensterzahl)"
 
-#: greenTile.js:2125
+#: greenTile.js:2010
 msgid "Rule"
 msgstr "Regel"
 
-#: greenTile.js:2126
+#: greenTile.js:2011
 msgid "Delete rule"
 msgstr "Regel löschen"
 
-#: greenTile.js:2134
+#: greenTile.js:2019
 msgid "Rule applies from"
 msgstr "Regel gilt ab"
 
-#: greenTile.js:2141
+#: greenTile.js:2026
 msgid "windows"
 msgstr "Fenstern"
 
-#: greenTile.js:2143
+#: greenTile.js:2028
 msgid "Painter"
 msgstr "Malerei"
 
-#: greenTile.js:2158
+#: greenTile.js:2043
 msgid ""
 "Click or drag: the row sets how many windows the column holds. Right-click "
 "removes a column."
@@ -66,97 +66,81 @@ msgstr ""
 "Klicken oder ziehen: Die Zeile legt fest, wie viele Fenster die Spalte "
 "aufnimmt. Rechtsklick entfernt eine Spalte."
 
-#: greenTile.js:2163
+#: greenTile.js:2048
 msgid "Name"
 msgstr "Name"
 
-#: greenTile.js:2164
+#: greenTile.js:2049
 msgid "Preset name"
 msgstr "Name des Presets"
 
-#: greenTile.js:2168
+#: greenTile.js:2053
 msgid "Save"
 msgstr "Speichern"
 
-#: greenTile.js:2185
+#: greenTile.js:2070
 #, javascript-format
 msgid "Result: %s"
 msgstr "Ergebnis: %s"
 
-#: greenTile.js:2345
+#: greenTile.js:2230
 msgid "Gap between windows"
 msgstr "Abstand zwischen Fenstern"
 
-#: greenTile.js:2350
+#: greenTile.js:2235
 #, javascript-format
 msgid "%d px"
 msgstr "%d px"
 
-#: greenTile.js:2369
+#: greenTile.js:2254
 msgid "Reset sizes"
 msgstr "Größen zurücksetzen"
 
-#: greenTile.js:2400
+#: greenTile.js:2285
 #, javascript-format
 msgid "Presets — workspace %d · %s"
 msgstr "Presets — Arbeitsfläche %d · %s"
 
-#: greenTile.js:2402
+#: greenTile.js:2287
 msgid "Create preset"
 msgstr "Neues Preset"
 
-#: greenTile.js:2402
+#: greenTile.js:2287
 #, javascript-format
 msgid "Edit %s"
 msgstr "%s bearbeiten"
 
-#: greenTile.js:2406
+#: greenTile.js:2291
 msgid "Back"
 msgstr "zurück"
 
-#: greenTile.js:2415
+#: greenTile.js:2300
 msgid "Auto: on"
 msgstr "Auto: an"
 
-#: greenTile.js:2415
+#: greenTile.js:2300
 msgid "Auto: off"
 msgstr "Auto: aus"
 
-#: greenTile.js:2436
+#: greenTile.js:2321
 msgid "Dark theme"
 msgstr "Dunkles Design"
 
-#: greenTile.js:2436
+#: greenTile.js:2321
 msgid "Light theme"
 msgstr "Helles Design"
 
-#: greenTile.js:2556
+#: greenTile.js:2441
 msgid "No presets yet."
 msgstr "Noch keine Presets vorhanden."
 
-#: greenTile.js:2571
+#: greenTile.js:2456
 msgid "New preset"
 msgstr "Neu anlegen"
 
-#: greenTile.js:2574
+#: greenTile.js:2459
 msgid "Click a row to apply it to this workspace and tile right away"
 msgstr "Klick auf eine Zeile = sofort auf dieser Fläche anwenden & kacheln"
-
-#: greenTile.js:2875
-msgid "Auto close"
-msgstr "Automatisch schließen"
-
-#: greenTile.js:2876
-msgid "Animations"
-msgstr "Animationen"
-
-#: greenTile.js:2877
-msgid "Auto tile main and list"
-msgstr "Automatisch in einen Hauptbereich und in eine Liste kacheln"
-
-#: greenTile.js:2878
-msgid "Auto tile two lists"
-msgstr "Automatisch in zwei Listen kacheln"
 
 #. metadata.json->name
 msgid "greenTile"
@@ -178,14 +162,6 @@ msgstr "Einstellungen"
 msgid "Hotkeys"
 msgstr "Tastenkürzel"
 
-#. settings-schema.json->help->title
-msgid "Help"
-msgstr "Hilfe"
-
-#. settings-schema.json->hotkey-section->title
-msgid "Global Hotkey"
-msgstr "Globales Tastenkürzel"
-
 #. settings-schema.json->autotile-hotkey-section->title
 msgid "Auto-Tile Hotkeys"
 msgstr "Tastenkürzel für automatisches Kacheln"
@@ -198,65 +174,9 @@ msgstr "Presets für Arbeitsflächen"
 msgid "Resize tiled windows"
 msgstr "Größe gekachelter Fenster ändern"
 
-#. settings-schema.json->keybindings-legend-section->title
-msgid "Keybindings Legend (when open)"
-msgstr "Tastenbelegung (bei geöffnetem Raster)"
-
-#. settings-schema.json->behaviour-section->title
-msgid "Classic grid (Super+G)"
-msgstr "Klassisches Raster (Super+G)"
-
 #. settings-schema.json->panel-section->title
 msgid "Preset panel"
 msgstr "Preset-Panel"
-
-#. settings-schema.json->help-section->title
-msgid "More Info"
-msgstr "Weitere Informationen"
-
-#. settings-schema.json->hotkeys-legend->description
-msgid ""
-"Escape:\t\t\tHide greenTile\n"
-"Enter or Space:\tCommit current selection\n"
-"Left:\t\t\tMove Left inside Grid\n"
-"Right:\t\t\tMove Right inside Grid\n"
-"Up:\t\t\t\tMove Up inside Grid\n"
-"Down:\t\t\tMove Down inside Grid\n"
-"<Shift>Left:\t\tInclude column to the Left in selection\n"
-"<Shift>Right:\t\tInclude column to the Right in selection\n"
-"<Shift>Up:\t\tInclude row Above in selection\n"
-"<Shift>Down:\tInclude row Below in selection\n"
-"<Alt>Left:\t\tMove to the monitor on the Left\n"
-"<Alt>Right:\t\tMove to the monitor on the Right\n"
-"<Alt>Up:\t\t\tMove to the monitor Above\n"
-"<Alt>Down:\t\tMove to the monitor Below\n"
-"1:\t\t\t\tSelect the first grid layout\n"
-"2:\t\t\t\tSelect the second grid layout\n"
-"3:\t\t\t\tSelect the third grid layout\n"
-"4:\t\t\t\tSelect the fourth grid layout"
-msgstr ""
-"Escape:\t\t\tgreenTile ausblenden\n"
-"Enter/Leertaste:\tAuswahl übernehmen\n"
-"Left:\t\t\tIm Raster nach links\n"
-"Right:\t\t\tIm Raster nach rechts\n"
-"Up:\t\t\t\tIm Raster nach oben\n"
-"Down:\t\t\tIm Raster nach unten\n"
-"<Shift>Left:\t\tSpalte links zur Auswahl hinzufügen\n"
-"<Shift>Right:\t\tSpalte rechts zur Auswahl hinzufügen\n"
-"<Shift>Up:\t\tZeile darüber zur Auswahl hinzufügen\n"
-"<Shift>Down:\tZeile darunter zur Auswahl hinzufügen\n"
-"<Alt>Left:\t\tZum Monitor links wechseln\n"
-"<Alt>Right:\t\tZum Monitor rechts wechseln\n"
-"<Alt>Up:\t\t\tZum Monitor darüber wechseln\n"
-"<Alt>Down:\t\tZum Monitor darunter wechseln\n"
-"1:\t\t\t\tErstes Raster-Layout wählen\n"
-"2:\t\t\t\tZweites Raster-Layout wählen\n"
-"3:\t\t\t\tDrittes Raster-Layout wählen\n"
-"4:\t\t\t\tViertes Raster-Layout wählen"
-
-#. settings-schema.json->hotkey->description
-msgid "Global Hotkey for greenTile"
-msgstr "Globales Tastenkürzel für greenTile"
 
 #. settings-schema.json->autotile6hotkey->description
 msgid "Tile all windows into 6 columns"
@@ -356,158 +276,3 @@ msgstr "Hell"
 #. settings-schema.json->panelTheme->options
 msgid "Dark"
 msgstr "Dunkel"
-
-#. settings-schema.json->animation->description
-msgid "Animation"
-msgstr "Animation"
-
-#. settings-schema.json->autoclose->description
-msgid "Auto-Close"
-msgstr "Automatisch schließen"
-
-#. settings-schema.json->aspect-ratio->description
-msgid "Use monitor aspect ratio"
-msgstr "Seitenverhältnis des Monitors verwenden"
-
-#. settings-schema.json->aspect-ratio->tooltip
-msgid ""
-"Should the popup's grid reflect the current monitor's aspect ratio or not."
-msgstr ""
-"Legt fest, ob das Raster im Popup dem Seitenverhältnis des aktuellen "
-"Monitors folgt."
-
-#. settings-schema.json->useMonitorCenter->description
-msgid "UI always centered to monitor"
-msgstr "Oberfläche immer mittig auf dem Monitor"
-
-#. settings-schema.json->useMonitorCenter->tooltip
-msgid ""
-"By default the grid UI shows up in the middle of the active window. With "
-"this, it always displays in the middle of the monitor."
-msgstr ""
-"Standardmäßig erscheint das Raster in der Mitte des aktiven Fensters. Mit "
-"dieser Option erscheint es immer in der Mitte des Monitors."
-
-#. settings-schema.json->showGridOnAllMonitors->description
-msgid "Show UI and all monitors at the same time"
-msgstr "Oberfläche auf allen Monitoren gleichzeitig anzeigen"
-
-#. settings-schema.json->grid1NameOverride->description
-msgid "Name Override on the UI"
-msgstr "Eigener Name in der Oberfläche"
-
-#. settings-schema.json->grid1x->description
-#. settings-schema.json->grid2x->description
-#. settings-schema.json->grid3x->description
-#. settings-schema.json->grid4x->description
-msgid "Columns"
-msgstr "Spalten"
-
-#. settings-schema.json->grid1x->tooltip
-#. settings-schema.json->grid2x->tooltip
-#. settings-schema.json->grid3x->tooltip
-#. settings-schema.json->grid4x->tooltip
-msgid ""
-"Each row represents a column. Span is how much space a column should take up "
-"compared to the other columns. Default is 1."
-msgstr ""
-"Jeder Eintrag steht für eine Spalte. „Anteil“ gibt an, wie viel Platz die "
-"Spalte im Verhältnis zu den anderen einnimmt. Standard ist 1."
-
-#. settings-schema.json->grid1x->columns->title
-#. settings-schema.json->grid1y->columns->title
-#. settings-schema.json->grid2x->columns->title
-#. settings-schema.json->grid2y->columns->title
-#. settings-schema.json->grid3x->columns->title
-#. settings-schema.json->grid3y->columns->title
-#. settings-schema.json->grid4x->columns->title
-#. settings-schema.json->grid4y->columns->title
-msgid "Span"
-msgstr "Anteil"
-
-#. settings-schema.json->grid1y->description
-#. settings-schema.json->grid2y->description
-#. settings-schema.json->grid3y->description
-#. settings-schema.json->grid4y->description
-msgid "Rows"
-msgstr "Zeilen"
-
-#. settings-schema.json->grid1y->tooltip
-#. settings-schema.json->grid2y->tooltip
-#. settings-schema.json->grid3y->tooltip
-#. settings-schema.json->grid4y->tooltip
-msgid ""
-"Each row represents a row. Span is how much space a row should take up "
-"compared to the other columns. Default is 1."
-msgstr ""
-"Jeder Eintrag steht für eine Rasterzeile. „Anteil“ gibt an, wie viel Platz "
-"die Zeile im Verhältnis zu den anderen einnimmt. Standard ist 1."
-
-#. settings-schema.json->grid2NameOverride->description
-#. settings-schema.json->grid3NameOverride->description
-#. settings-schema.json->grid4NameOverride->description
-msgid "Name Override"
-msgstr "Eigener Name"
-
-#. settings-schema.json->select-using-keyboard->description
-msgid "Show tile labels"
-msgstr "Kachel-Beschriftungen anzeigen"
-
-#~ msgid "General"
-#~ msgstr "Allgemein"
-
-#~ msgid "Automatic tiling per workspace"
-#~ msgstr "Automatisches Kacheln pro Arbeitsfläche"
-
-#~ msgid "Behavior"
-#~ msgstr "Verhalten"
-
-#~ msgid ""
-#~ "One row per workspace (number as shown in the preset panel). Super+Ctrl+A "
-#~ "and Super+Ctrl+D add or update rows. Workspaces without a row tile "
-#~ "automatically only when they have a preset."
-#~ msgstr ""
-#~ "Eine Zeile pro Arbeitsfläche (Nummer wie im Preset-Panel). Super+Strg+A "
-#~ "und Super+Strg+D legen Zeilen an oder ändern sie. Arbeitsflächen ohne "
-#~ "Zeile werden nur automatisch gekachelt, wenn sie ein Preset haben."
-
-#~ msgid ""
-#~ "Super+Ctrl+A turns automatic tiling on for the active workspace and tiles "
-#~ "right away, Super+Ctrl+D turns it off (a preset stays assigned but is "
-#~ "paused). Workspaces without a row: on with a preset, off without. "
-#~ "Removing a row returns the workspace to that rule."
-#~ msgstr ""
-#~ "Super+Strg+A schaltet das automatische Kacheln für die aktive "
-#~ "Arbeitsfläche ein und kachelt sofort, Super+Strg+D schaltet es aus (ein "
-#~ "Preset bleibt zugewiesen, ruht aber). Arbeitsflächen ohne Zeile: mit "
-#~ "Preset an, ohne Preset aus. Wird eine Zeile entfernt, gilt für die "
-#~ "Arbeitsfläche wieder diese Regel."
-
-#~ msgid "Layout"
-#~ msgstr "Layout"
-
-#~ msgid "Layout For Button 1"
-#~ msgstr "Layout für Schaltfläche 1"
-
-#~ msgid "Layout For Button 2"
-#~ msgstr "Layout für Schaltfläche 2"
-
-#~ msgid "Layout For Button 3"
-#~ msgstr "Layout für Schaltfläche 3"
-
-#~ msgid "Layout For Button 4"
-#~ msgstr "Layout für Schaltfläche 4"
-
-#~ msgid "General settings (JSON), e.g. automatic tiling per workspace"
-#~ msgstr ""
-#~ "Allgemeine Einstellungen (JSON), z. B. automatisches Kacheln pro "
-#~ "Arbeitsfläche"
-
-#~ msgid "Tile all windows into an automatic grid"
-#~ msgstr "Alle Fenster in ein automatisches Raster kacheln"
-
-#~ msgid "Tile your windows as you like."
-#~ msgstr "Fenster nach Belieben kacheln"
-
-#~ msgid "y"
-#~ msgstr "y"
