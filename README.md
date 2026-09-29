@@ -44,6 +44,8 @@ Tiled windows glide into their new place (250 ms). **Animate tiling** on the **S
 
 A preset is a list of rules by window count: each rule defines how many columns there are and how many windows are stacked in each column. A preset is assigned to a monitor and workspace and applies there. The presets themselves are stored in the setting `presets`, their assignments in `layouts` (see [Per-monitor layouts](#per-monitor-layouts)).
 
+![Preset panel](docs/screenshots/preset-panel.png)
+
 In the panel (`Super+Ctrl+P`):
 - **Click a row:** assign the preset to this monitor and workspace and tile right away (this also turns automatic tiling on for it if it was off). The panel stays open, so you can try several presets in a row; close it with ✕, `Esc`, `Super+Ctrl+P` or a click outside.
 - **✕ in a row:** remove the assignment
@@ -67,6 +69,8 @@ The thumbnail shows the layout a click would tile right now: the matching rule, 
 Tiled windows always cover the whole screen, no cell stays empty. When a rule has more cells than there are windows, the highest column loses a cell (on a tie the right one) until the count fits; with fewer windows than columns, columns drop from the right. Example: a rule `2·2` with 3 windows tiles as `2·1`, with 2 windows as `1·1`. With more windows than cells, the rightmost column takes the rest.
 
 ### Editor
+
+![Preset editor](docs/screenshots/preset-editor.png)
 
 - **Rules (left):** one row per rule, "from N" = the rule applies from N windows on (the last rule whose N is not larger than the window count wins). Click a row to edit it. **＋ Rule** adds a rule (N + 1, copy of the highest rule), **🗑 Delete rule** removes the selected one; a preset always keeps one rule.
 - **Rule applies from [−] N [+]:** changes N of the selected rule. N can be smaller than the number of painted cells; with fewer windows the layout is filled as described above, so no cell stays empty.
