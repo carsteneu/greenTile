@@ -17,9 +17,9 @@ greenTile is based on **gTile** (UUID `gTile@shuairan`), version 2.2.1:
 
 The starting point was the shipped webpack bundle `5.4/gTile.js` of gTile 2.2.1, i.e. the code base for Cinnamon 5.4 and later that was introduced in gTile 2.2.0. greenTile modifies this bundle directly; gTile's TypeScript sources (`src/` in the Spices repository) are not used.
 
-**Taken over from gTile:** the extension skeleton, `icon.png` and the translation sources (`po/`; they are not compiled or installed by the deploy steps below). The classic grid (`Super+G`) with its settings and the grid icons were removed.
+**Taken over from gTile:** the extension skeleton, `icon.png` and the translation sources (`po/`, since extended with greenTile's own strings). The classic grid (`Super+G`) with its settings and the grid icons were removed.
 
-**Changed or added in greenTile:** column hotkeys, auto mode with snap-on-release and animation, own window collector, presets per monitor and workspace plus the preset panel, new UUID and a flat directory layout without version subfolders. Modified by carsten_eu since 2026-09-04.
+**Changed or added in greenTile:** column hotkeys, auto mode with snap-on-release and animation, own window collector, presets per monitor and workspace plus the preset panel and editor, moving borders by mouse and keyboard, splitting the layout by drag, swapping windows by keyboard, the never-tile list, the window gap, panel theme plus accent and state colors, new UUID and a flat directory layout without version subfolders. Modified by carsten_eu since 2026-09-04.
 
 ## Hotkeys
 
@@ -42,7 +42,7 @@ Tiled windows glide into their new place (250 ms). **Animate tiling** on the **S
 
 ## Presets
 
-A preset is a list of rules by window count: each rule defines how many columns there are and how many windows are stacked in each column. A preset is assigned to a monitor and workspace and applies there.
+A preset is a list of rules by window count: each rule defines how many columns there are and how many windows are stacked in each column. A preset is assigned to a monitor and workspace and applies there. The presets themselves are stored in the setting `presets`, their assignments in `layouts` (see [Per-monitor layouts](#per-monitor-layouts)).
 
 In the panel (`Super+Ctrl+P`):
 - **Click a row:** assign the preset to this monitor and workspace and tile right away (this also turns automatic tiling on for it if it was off). The panel stays open, so you can try several presets in a row; close it with ✕, `Esc` or `Super+Ctrl+P`.
@@ -128,7 +128,7 @@ While you move a tiled window with the mouse, greenTile shows a translucent prev
 - The result is stored per monitor, workspace **and window count** in the `layouts` setting (field `shapes`), so it survives reloads and restarts and wins over the preset or auto layout: with 2 windows the base layout applies, and with 3 windows again the dragged one. A dragged layout replaces the moved borders of the same window count.
 - Side splits open whole columns/rows only; splitting a single cell of a stacked column is not supported.
 - Cross-monitor drops work too: the target monitor keeps one window more, the source monitor retiles with one less, and only the target stores a layout.
-- Nothing is written when you press Esc during the drag, release outside any tiled window, drop onto the dragged window's own descending zone where nothing would change, or when a cell of the new layout would fall below the 120 px minimum — the window then snaps as usual.
+- Nothing is written when you press Esc during the drag, release outside any tiled window, drop onto the dragged window's own cell or onto a zone where the layout would not change, or when a cell of the new layout would fall below the 120 px minimum — the window then snaps as usual.
 - Works with presets and the automatic grid. Keyboard moves get no zones. Not for `Super+Ctrl+3/6`.
 
 ## Swapping windows
@@ -174,7 +174,7 @@ The first time, enable the extension in the Cinnamon settings. **gTile@shuairan 
 
 Check: `imports.ui.extensionSystem.runningExtensions` (an array) must contain `greenTile@carsteneu`, and `~/.xsession-errors` must not show any `JS ERROR` mentioning `greenTile.js`.
 
-Tests for the pure models (monitor keys, layouts with migration, auto mode, preset editor): `node --test tests/*.test.js` (Node 18 or newer; passing only the directory `tests/` fails on Node 22 and later). The `tests/` folder is not copied by the deploy steps.
+Tests for the pure models (monitor keys, layouts with migration, auto mode, preset fill rule, preset editor, borders, drag split, swapping, window gap, exclusions, panel size, theme and accent colors): `node --test tests/*.test.js` (Node 18 or newer; passing only the directory `tests/` fails on Node 22 and later). The `tests/` folder is not copied by the deploy steps.
 
 ## Switching from gTile
 
@@ -204,7 +204,10 @@ All user-visible strings are English in the source and translated via gettext. T
 - Hotkeys live in two files: the default in the schema and the user value in `~/.config/cinnamon/spices/greenTile@carsteneu/greenTile@carsteneu.json`. The user value wins.
 - `Super+N` and `Super+Shift+N` belong to the window list applet; do not use them.
 - gTile's `focusMetaWindow` goes stale when switching between windows of the same application. That is why tiling uses its own window collector.
-- `grab-op-begin` and `grab-op-end` pass the display twice: `(display, display, window, op)`.
+- `grab-op-begin` and `grab-op-end` pass the display twice: `(display, display, window, op)`. When a mouse move is cancelled with `Esc`, `grab-op-end` still reports `MOVING`, but the frame is already back at its start rectangle; that is how the drag split tells a cancel from a drop.
+- `Meta.Window.change_workspace_by_index` takes two arguments `(index, append)` in Muffin 6.6. Cinnamon's own `main.js` passes a third one, which GJS drops with a "Too many arguments" warning. Trust such GJS warnings over Cinnamon's JS as a signature reference.
+- Cinnamon's settings dialog silently drops every combobox option whose value is exactly `"custom"`. That is why the "Custom" options of `accentMode` and `stateMode` use the value `own`; a stored `custom` is read as `own`.
+- St does not flush its theme-node cache when a stylesheet is loaded or unloaded at runtime: actors keep the old colors even when rebuilt. The generated accent stylesheet therefore adds a new generation class to the panel root on each change, so every node gets a fresh cache key.
 - Dragging the panel needs `Main.pushModal(actor)` **and** `device.grab(actor)` together, as in Cinnamon's `dnd.js`. Either one alone loses mouse events as soon as the pointer leaves the panel.
 - Diagnostics: lines `greenTile skipped …` in `~/.xsession-errors` state why a window was not tiled.
 - Reload via DBus Eval as shown above; restarting Cinnamon is not necessary for code changes.
