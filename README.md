@@ -53,6 +53,7 @@ In the panel (`Super+Ctrl+P`):
 - The panel can be dragged by its title bar and keeps its position when you switch workspaces. If that position is no longer on any monitor (external display unplugged), the panel opens centred again.
 - **◢ in the bottom right corner** resizes the panel: width (at least 600 px) and height of the part that stretches, in the list the preset rows (at least three), in the editor the painter. List and editor keep their own size, stored in the setting `panelSize`, limited to the room on the panel's monitor (a size set on a big monitor shrinks on a small one).
 - **Theme:** the setting `panelTheme` (Extensions → greenTile → configure → **Settings** → **Preset panel**) decides whether the panel and the editor follow the desktop color scheme (**Follow system**, the default, applied live: switching the desktop's theme restyles an open panel right away) or always stay **Light** or **Dark**, whatever the desktop does.
+- **Theme toggle in the title bar:** the sun/moon button switches the panel between Light and Dark with one click and shows the theme a click switches to (moon in light mode); it overrides `panelTheme`, and **Follow system** stays selectable in the settings dialog.
 - Right after switching between list and editor, clicks are ignored for 400 ms, so the second click of a double-click does not act in the new view.
 
 The thumbnail shows the layout a click would tile right now: the matching rule, filled to the current number of windows (see below).

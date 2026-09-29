@@ -157,6 +157,10 @@
     margin-right: 6px;
 }
 
+.gk-theme {
+    margin-right: 6px;
+}
+
 /* Auto tiling state of the workspace in the title bar: grey when off, the
    "assigned" green when on. */
 .gk-auto {

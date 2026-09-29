@@ -13,7 +13,7 @@ const match = src.match(/\/\/ >>> theme-model[^\n]*\n([\s\S]*?)\/\/ <<< theme-mo
 if (!match)
     throw new Error('theme-model block not found in greenTile.js');
 const block = match[1];
-const names = ['tile_theme_resolve'];
+const names = ['tile_theme_resolve', 'tile_theme_toggle_target'];
 const m = new Function(block + '\nreturn {' + names.join(',') + '};')();
 
 test('block is self-contained', () => {
@@ -45,6 +45,13 @@ test('system with a missing scheme falls back to the theme name, then to light',
     assert.equal(m.tile_theme_resolve('system', null, ''), 'light');
     assert.equal(m.tile_theme_resolve('system', null, null), 'light');
     assert.equal(m.tile_theme_resolve('system', undefined, 'Mint-Y'), 'light');
+});
+
+test('toggle_target always resolves "system" too: shown theme decides the opposite setting', () => {
+    // The header button shows the theme a click switches TO; the target is derived
+    // from tile_theme_state.theme, which is always 'light' or 'dark', never 'system'.
+    assert.equal(m.tile_theme_toggle_target('light'), 'dark');
+    assert.equal(m.tile_theme_toggle_target('dark'), 'light');
 });
 
 test('an unset or invalid setting behaves like system', () => {

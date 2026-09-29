@@ -2263,6 +2263,10 @@ const tile_theme_resolve = (setting, colorScheme, themeName) => {
         return 'light';
     return /dark/i.test(String(themeName || '')) ? 'dark' : 'light';
 };
+// The header toggle switches between light and dark only; the panelTheme setting
+// written is the opposite of the theme currently SHOWN, so "system" is overridden
+// by a click. "Follow system" is selectable again in the settings dialog.
+const tile_theme_toggle_target = (theme) => (theme === 'light' ? 'dark' : 'light');
 // <<< theme-model
 // Live theme state, set up per App (Config). Reads the panelTheme setting, the x-apps
 // portal color scheme and the Cinnamon theme name; under "system" a change of the
@@ -2416,6 +2420,26 @@ const tile_panel_open = (app) => {
             tile_panel_rebuild(app);
         });
         header.add(autoBtn, { y_fill: false, y_align: tile_St.Align.MIDDLE });
+        // Theme toggle: one click switches between light and dark; "Follow system" is
+        // selectable again in the settings dialog. The glyph shows the theme a click
+        // switches TO (moon in light mode, like most desktop apps do).
+        const themeShown = tile_theme_state.theme;
+        const themeBtn = new tile_St.Button({
+            label: themeShown === 'light' ? '☾' : '☀',
+            style_class: 'gk-close gk-theme',
+            track_hover: true,
+        });
+        new Tooltips.Tooltip(themeBtn, themeShown === 'light' ? _("Dark theme") : _("Light theme"));
+        themeBtn.connect('clicked', () => {
+            app.config.settings.setValue('panelTheme', tile_theme_toggle_target(tile_theme_state.theme));
+            // Cinnamon's XletSettings.setValue only saves the settings file — the
+            // IN bind callback does not fire on programmatic changes, so the panel
+            // re-theme and rebuild happen here. The guard swallows stray clicks
+            // that follow the rebuild, like the Back button does.
+            tile_panel_guard();
+            tile_theme_changed();
+        });
+        header.add(themeBtn);
         // ⚙ opens the extension's settings dialog on its first page; the same dialog
         // Cinnamon opens from the Extensions manager.
         const settingsBtn = new tile_St.Button({ label: '⚙', style_class: 'gk-close gk-settings', track_hover: true });
