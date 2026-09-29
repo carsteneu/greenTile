@@ -1865,7 +1865,8 @@ const tile_panel_round_rect = (cr, x, y, w, h, r) => {
     cr.closePath();
     cr.fill();
 };
-// Mockup: list thumbnails 54x34, gap 2px, radius 2px, fill #3d4457;
+// Mockup: list thumbnails 54x34, gap 2px, radius 2px, fill per tile_theme_cairo.thumb
+// (#485064 dark / #b7bdcc light);
 // editor rule thumbnails 34x18, gap 2px, 1px between stacked cells, radius 1px.
 const tile_panel_thumb = (stacks, opts = {}) => {
     const { width = 54, height = 34, gap = 2, vgap = 2, radius = 2, color = null } = opts;
@@ -2275,10 +2276,13 @@ const tile_theme_toggle_target = (theme) => (theme === 'light' ? 'dark' : 'light
 // constructor, where app.config is not assigned yet.
 const tile_theme_state = { theme: 'dark', config: null, portal: null, portalSig: 0, cinnamon: null, cinnamonSig: 0 };
 // Cairo colors for the thumbnails and the painter's dashed outline, per theme; the CSS
-// classes cover the rest. Dark is today's look, one to one.
+// classes cover the rest. Thumbs stand somewhat (not dramatically) apart from the panel
+// background: #1c1f28 in dark, #f6f7fa in light — thumb contrast 1.70→2.04 (dark,
+// lighter) and 1.49→1.76 (light, darker) against the panel. The outline pairs with the
+// CSS border tokens (#2a2e39 / #c3c9d6) and stays.
 const tile_theme_cairo = {
-    dark: { thumb: [61, 68, 87], outline: [42, 46, 57] },
-    light: { thumb: [200, 205, 217], outline: [195, 201, 214] },
+    dark: { thumb: [72, 80, 100], outline: [42, 46, 57] },
+    light: { thumb: [183, 189, 204], outline: [195, 201, 214] },
 };
 const tile_theme_cairo_get = (key) => tile_theme_cairo[tile_theme_state.theme][key];
 const tile_theme_panel_class = () => tile_theme_state.theme === 'light' ? 'gk-panel gk-light' : 'gk-panel';
