@@ -317,7 +317,7 @@ const tile_excl_toggle_focused = (app) => {
         return;
     const excluded = !tile_excl_is_excluded(w);
     tile_excl_toggle_set(tile_excl.toggled, w.get_stable_sequence(), excluded);
-    global.log('greenTile ' + (excluded ? 'never tile on: ' : 'tiling again: ') + String(w.get_wm_class()) + ' seq=' + w.get_stable_sequence());
+    global.log('greenTile ' + (excluded ? 'never tile on: ' : 'tiling again: ') + String(w.get_wm_class()).replace(/\s+/g, ' ') + ' seq=' + w.get_stable_sequence());
     try {
         Main.osdWindowManager.show(w.get_monitor(), tile_Gio.ThemedIcon.new('window-restore-symbolic'),
             excluded ? _("Window floats") : _("Window tiles again"), null);
