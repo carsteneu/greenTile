@@ -2364,7 +2364,6 @@ const tile_accent_apply = (config) => {
         // :active is the accent state of menu entries in most themes, :hover in the rest
         rgb = tile_accent_probe('active') || tile_accent_probe('hover');
     const base = rgb || tile_accent_default;
-    tile_accent_state.rgb = base;
     const css = tile_accent_css(tile_accent_tones(base));
     const path = tile_accent_path();
     if (css !== tile_accent_state.css) {
@@ -2373,6 +2372,9 @@ const tile_accent_apply = (config) => {
         tile_accent_state.css = css;
         tile_accent_unload();
     }
+    // set only after a successful persist: a failed write keeps painter and CSS
+    // in the SAME (old) color instead of two different ones
+    tile_accent_state.rgb = base;
     const theme = tile_St.ThemeContext.get_for_stage(global.stage).get_theme();
     if (tile_accent_state.themeObj && tile_accent_state.themeObj !== theme)
         tile_accent_unload();
