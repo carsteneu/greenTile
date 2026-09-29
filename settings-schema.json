@@ -78,7 +78,11 @@
          "type": "section",
          "title": "Preset panel",
          "keys": [
-            "panelTheme"
+            "panelTheme",
+            "accentMode",
+            "accentColor",
+            "stateMode",
+            "stateColor"
          ]
       }
    },
@@ -206,5 +210,40 @@
          "Light": "light",
          "Dark": "dark"
       }
+   },
+   "accentMode": {
+      "type": "combobox",
+      "default": "theme",
+      "description": "Accent color",
+      "tooltip": "Follow theme tracks the accent color of the Cinnamon theme live. Custom uses the color below.",
+      "options": {
+         "Follow theme": "theme",
+         "Custom": "own"
+      }
+   },
+   "accentColor": {
+      "type": "colorchooser",
+      "default": "rgb(255,150,64)",
+      "description": "Custom accent color",
+      "tooltip": "Accent of the preset panel and editor when Accent color is Custom.",
+      "dependency": "accentMode=own"
+   },
+   "stateMode": {
+      "type": "combobox",
+      "default": "green",
+      "description": "State color",
+      "tooltip": "Color of the \"Auto: on\" marker and the assigned rows. Green keeps today's look. Follow theme tracks the accent color of the Cinnamon theme live. Custom uses the color below.",
+      "options": {
+         "Green": "green",
+         "Follow theme": "theme",
+         "Custom": "own"
+      }
+   },
+   "stateColor": {
+      "type": "colorchooser",
+      "default": "rgb(156,224,114)",
+      "description": "Custom state color",
+      "tooltip": "State color of the preset panel when State color is Custom.",
+      "dependency": "stateMode=own"
    }
 }

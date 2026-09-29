@@ -145,6 +145,10 @@ class Config {
         this.settings.bindProperty(Settings.BindingDirection.IN, 'resizeTallerHotkey', 'resizeTallerHotkey', this.EnableHotkey, null);
         this.settings.bindProperty(Settings.BindingDirection.IN, 'resizeShorterHotkey', 'resizeShorterHotkey', this.EnableHotkey, null);
         this.settings.bindProperty(Settings.BindingDirection.IN, 'panelTheme', 'panelTheme', () => tile_theme_changed(), null);
+        this.settings.bindProperty(Settings.BindingDirection.IN, 'accentMode', 'accentMode', () => tile_theme_changed(), null);
+        this.settings.bindProperty(Settings.BindingDirection.IN, 'accentColor', 'accentColor', () => tile_theme_changed(), null);
+        this.settings.bindProperty(Settings.BindingDirection.IN, 'stateMode', 'stateMode', () => tile_theme_changed(), null);
+        this.settings.bindProperty(Settings.BindingDirection.IN, 'stateColor', 'stateColor', () => tile_theme_changed(), null);
         tile_excl_apply(this.settings);
         tile_excl_app_populate(this.settings);
         this.excludeAppSignal = imports.gi.Cinnamon.AppSystem.get_default().connect('installed-changed', () => {
@@ -2018,7 +2022,9 @@ const tile_panel_row = (app, preset, n) => {
 // Preset panel — view 2 (editor): rule list on the left, stepper + painter + name on
 // the right (layout and tokens from the approved prototype). The draft
 // {id, name, rules (sorted by min), index, isNew} is written to the settings on Save only.
-const tile_editor_accent = [255, 150, 64];
+// Cairo can't read the stylesheet: tile_accent_state (updated by
+// tile_theme_changed before any panel exists) supplies the accent here.
+const tile_editor_accent = () => tile_accent_state.rgb;
 const tile_editor_open = (app, preset) => {
     const rules = tile_editor_sort((preset.rules || []).map((r) => ({ min: r.min, stacks: tile_editor_clamp(r.stacks || []) })));
     if (rules.length === 0)
@@ -2068,7 +2074,7 @@ const tile_editor_rule_row = (rule, active, last, onSelect) => {
         outer.add(new tile_St.Bin({ style_class: 'gk-ed-rule-stripe' }), { x_fill: false, y_fill: true });
     const box = new tile_St.BoxLayout({ style_class: 'gk-ed-rule-box', x_expand: true });
     box.add(new tile_St.Label({ text: _("from %d").format(rule.min), style_class: 'gk-ed-rule-label' }), { expand: true, x_fill: true, y_fill: false, y_align: tile_St.Align.MIDDLE });
-    box.add(tile_panel_thumb(rule.stacks, { width: 34, height: 18, gap: 2, vgap: 1, radius: 1, color: active ? tile_editor_accent : tile_theme_cairo_get('thumb') }), tile_panel_middle());
+    box.add(tile_panel_thumb(rule.stacks, { width: 34, height: 18, gap: 2, vgap: 1, radius: 1, color: active ? tile_editor_accent() : tile_theme_cairo_get('thumb') }), tile_panel_middle());
     outer.add(box, { expand: true, x_fill: true, y_fill: true });
     row.set_child(outer);
     row.connect('clicked', () => onSelect());
@@ -2084,12 +2090,13 @@ const tile_editor_painter = (getStacks, onChange) => {
         const cr = a.get_context();
         const [W, H] = a.get_surface_size();
         const stacks = getStacks();
+        const accent = tile_editor_accent();
         const gap = 3;
         const cw = (W - gap * (tile_editor_cols - 1)) / tile_editor_cols;
         for (let c = 0; c < tile_editor_cols; c++) {
             const x = c * (cw + gap);
             if (c < stacks.length) {
-                cr.setSourceRGBA(tile_editor_accent[0] / 255, tile_editor_accent[1] / 255, tile_editor_accent[2] / 255, 0.85);
+                cr.setSourceRGBA(accent[0] / 255, accent[1] / 255, accent[2] / 255, 0.85);
                 const ch = (H - gap * (stacks[c] - 1)) / stacks[c];
                 for (let r = 0; r < stacks[c]; r++)
                     tile_panel_round_rect(cr, x, r * (ch + gap), cw, ch, 2);
@@ -2316,6 +2323,192 @@ const tile_panel_size_clamp = (size, min, max) => ({
 });
 // <<< panel-size-model
 // >>> theme-model (pure functions, no Cinnamon imports; tested by tests/theme-model.test.js)
+// >>> accent-model
+// All accent colors derive from one base: today's orange, the accent of the
+// Cinnamon theme (probed at runtime, -> tile_accent_apply below) or the custom
+// accentColor setting. The historical orange keeps its exact tone table, so
+// the default look stays pixel-identical; every other base is derived from
+// HSL lightness: hover lighter, light theme darker, text by luminance.
+const tile_accent_default = [255, 150, 64];
+// The colorchooser stores Gdk.RGBA strings ("rgb(r,g,b)", "rgba(r,g,b,a)").
+// #hex is accepted too (hand-edited JSON); anything else falls back below.
+const tile_accent_parse = (value) => {
+    if (typeof value !== 'string')
+        return null;
+    const rgb = value.match(/^rgba?\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*(?:,\s*[\d.]+\s*)?\)$/i);
+    if (rgb) {
+        const parts = rgb.slice(1, 4).map(Number);
+        return parts.some((c) => c > 255) ? null : parts;
+    }
+    const hex = value.match(/^#([0-9a-f]{6})$/i);
+    if (hex)
+        return [0, 2, 4].map((i) => parseInt(hex[1].slice(i, i + 2), 16));
+    return null;
+};
+// The settings dialog cannot offer an option with the value "custom"
+// (xlet-settings.py drops it), so the schema value is "own"; a stored legacy
+// "custom" (hand-edited file of an older version) keeps meaning the same thing.
+const tile_accent_is_own = (mode) => mode === 'own' || mode === 'custom';
+// The probed ink is only an accent when it is opaque, saturated enough to
+// differ from the panel greys and neither near-black (invisible) nor
+// near-white (unreadable) — anything else keeps the default orange.
+const tile_accent_from_probed = (r, g, b, a) => {
+    if (![r, g, b, a].every((n) => Number.isFinite(n)) || a < 250)
+        return null;
+    const rgb = [r, g, b].map(Math.round);
+    const max = Math.max(...rgb);
+    const min = Math.min(...rgb);
+    const l = (max + min) / 510;
+    const s = max === min ? 0 : l < 0.5 ? (max - min) / (max + min) : (max - min) / (510 - max - min);
+    if (s < 0.15 || l < 0.14 || l > 0.92)
+        return null;
+    return rgb;
+};
+const tile_accent_hsl = (rgb) => {
+    const [r, g, b] = rgb.map((v) => v / 255);
+    const max = Math.max(r, g, b);
+    const min = Math.min(r, g, b);
+    const l = (max + min) / 2;
+    const s = max === min ? 0 : (l < 0.5 ? (max - min) / (max + min) : (max - min) / (2 - max - min));
+    let h = 0;
+    if (max !== min) {
+        if (max === r)
+            h = ((g - b) / (max - min)) % 6;
+        else if (max === g)
+            h = (b - r) / (max - min) + 2;
+        else
+            h = (r - g) / (max - min) + 4;
+        h = h * 60;
+        if (h < 0)
+            h += 360;
+    }
+    return [h, s, l];
+};
+const tile_accent_rgb = (hsl) => {
+    const [h, s, l] = hsl;
+    const c = (1 - Math.abs(2 * l - 1)) * s;
+    const x = c * (1 - Math.abs(((h / 60) % 2) - 1));
+    const m = l - c / 2;
+    const parts = h < 60 ? [c, x, 0] : h < 120 ? [x, c, 0] : h < 180 ? [0, c, x] : h < 240 ? [0, x, c] : h < 300 ? [x, 0, c] : [c, 0, x];
+    return parts.map((v) => Math.round((v + m) * 255));
+};
+const tile_accent_text_on = (rgb) => {
+    const lin = (v) => {
+        v /= 255;
+        return v <= 0.04045 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4);
+    };
+    const y = 0.2126 * lin(rgb[0]) + 0.7152 * lin(rgb[1]) + 0.0722 * lin(rgb[2]);
+    return y > 0.3 ? [20, 22, 29] : [246, 247, 250];
+};
+const tile_accent_tones = (base) => {
+    if (base[0] === 255 && base[1] === 150 && base[2] === 64)
+        return {
+            base: [255, 150, 64],
+            hover: [255, 176, 112],
+            saveHover: [255, 171, 102],
+            lightBase: [217, 122, 36],
+            lightHover: [232, 154, 63],
+            textOn: [20, 22, 29],
+        };
+    const [h, s, l] = tile_accent_hsl(base);
+    const lighter = (v) => Math.min(v + 0.10, 0.92);
+    const lightBase = tile_accent_rgb([h, s, Math.min(l, 0.5)]);
+    return {
+        base: [base[0], base[1], base[2]],
+        hover: tile_accent_rgb([h, s, lighter(l)]),
+        saveHover: tile_accent_rgb([h, s, Math.min(l + 0.08, 0.92)]),
+        lightBase: lightBase,
+        lightHover: tile_accent_rgb([h, s, lighter(Math.min(l, 0.5))]),
+        textOn: tile_accent_text_on(base),
+    };
+};
+// The generated stylesheet overrides the accent rules of stylesheet.css. The
+// selectors are prefixed with .gk-panel (every accent actor is a descendant of
+// the panel root), which makes them more specific than the base rules — the
+// override does not depend on how st orders equally specific sheets. As today,
+// the light scope tints keep the base rgb — only the alphas differ.
+const tile_accent_css = (tones) => {
+    const rgb = (c) => `rgb(${c[0]}, ${c[1]}, ${c[2]})`;
+    const rgba = (c, a) => `rgba(${c[0]}, ${c[1]}, ${c[2]}, ${a})`;
+    return [
+        '/* generated by greenTile.js (accent and state colors) — manual edits are overwritten */',
+        `.gk-panel .gk-plus { color: ${rgb(tones.base)}; }`,
+        `.gk-panel .gk-plus:hover { color: ${rgb(tones.hover)}; }`,
+        `.gk-panel .gk-grip:hover { color: ${rgb(tones.base)}; }`,
+        `.gk-panel .gk-reset-btn:hover { background-color: ${rgba(tones.base, 0.18)}; border-color: ${rgb(tones.base)}; }`,
+        `.gk-panel .gk-ed-rule-active { background-color: ${rgba(tones.base, 0.08)}; }`,
+        `.gk-panel .gk-ed-rule-active:hover { background-color: ${rgba(tones.base, 0.14)}; }`,
+        `.gk-panel .gk-ed-rule-stripe { background-color: ${rgb(tones.base)}; }`,
+        `.gk-panel .gk-ed-add { color: ${rgb(tones.base)}; }`,
+        `.gk-panel .gk-ed-add:hover { color: ${rgb(tones.hover)}; }`,
+        `.gk-panel .gk-stepper-btn:hover { border-color: ${rgb(tones.base)}; }`,
+        `.gk-panel .gk-entry { selection-background-color: ${rgb(tones.base)}; selected-color: ${rgb(tones.textOn)}; }`,
+        `.gk-panel .gk-entry:focus { border-color: ${rgb(tones.base)}; }`,
+        `.gk-panel .gk-save { color: ${rgb(tones.textOn)}; background-color: ${rgb(tones.base)}; }`,
+        `.gk-panel .gk-save:hover { background-color: ${rgb(tones.saveHover)}; }`,
+        `.gk-panel.gk-light .gk-plus { color: ${rgb(tones.lightBase)}; }`,
+        `.gk-panel.gk-light .gk-plus:hover { color: ${rgb(tones.lightHover)}; }`,
+        `.gk-panel.gk-light .gk-grip:hover { color: ${rgb(tones.lightBase)}; }`,
+        `.gk-panel.gk-light .gk-reset-btn:hover { background-color: ${rgba(tones.base, 0.22)}; border-color: ${rgb(tones.lightBase)}; }`,
+        `.gk-panel.gk-light .gk-ed-rule-active { background-color: ${rgba(tones.base, 0.14)}; }`,
+        `.gk-panel.gk-light .gk-ed-rule-active:hover { background-color: ${rgba(tones.base, 0.2)}; }`,
+        `.gk-panel.gk-light .gk-ed-rule-stripe { background-color: ${rgb(tones.lightBase)}; }`,
+        `.gk-panel.gk-light .gk-ed-add { color: ${rgb(tones.lightBase)}; }`,
+        `.gk-panel.gk-light .gk-ed-add:hover { color: ${rgb(tones.lightHover)}; }`,
+        `.gk-panel.gk-light .gk-stepper-btn:hover { border-color: ${rgb(tones.lightBase)}; }`,
+        `.gk-panel.gk-light .gk-entry:focus { border-color: ${rgb(tones.lightBase)}; }`,
+    ].join('\n');
+};
+// <<< accent-model
+// >>> state-model
+// The state color tints the "Auto: on" marker and the assigned rows. The
+// default green keeps today's exact table — which in the light scope uses TWO
+// greens: the text (#3f8f22) and the tints + stripe (#4ea530) are different
+// colors today and must stay that way. Any other base derives from HSL: dark
+// keeps the base rgb, the light text sits a bit darker than the light tints
+// (mirroring the default's split).
+const tile_state_default = [156, 224, 114];
+// "green" (today's look) | "theme" (the probed theme accent) | "own" (stateColor)
+const tile_state_mode = (mode) => (mode === 'own' || mode === 'custom') ? 'own' : (mode === 'theme' ? 'theme' : 'green');
+const tile_state_tones = (base) => {
+    if (base[0] === 156 && base[1] === 224 && base[2] === 114)
+        return {
+            text: [156, 224, 114],
+            tint: [156, 224, 114],
+            lightText: [63, 143, 34],
+            lightTint: [78, 165, 48],
+        };
+    const [h, s, l] = tile_accent_hsl(base);
+    return {
+        text: [base[0], base[1], base[2]],
+        tint: [base[0], base[1], base[2]],
+        lightText: tile_accent_rgb([h, s, Math.min(l, 0.36)]),
+        lightTint: tile_accent_rgb([h, s, Math.min(l, 0.42)]),
+    };
+};
+// Same shape as tile_accent_css: the generated rules are prefixed with the
+// panel root class, so they outrank the base rules of stylesheet.css in both
+// scopes (.gk-light rules carry today's alphas, only the colors differ).
+const tile_state_css = (tones) => {
+    const rgb = (c) => `rgb(${c[0]}, ${c[1]}, ${c[2]})`;
+    const rgba = (c, a) => `rgba(${c[0]}, ${c[1]}, ${c[2]}, ${a})`;
+    return [
+        `.gk-panel .gk-auto-on { color: ${rgb(tones.text)}; border-color: ${rgba(tones.tint, 0.5)}; background-color: ${rgba(tones.tint, 0.08)}; }`,
+        `.gk-panel .gk-auto-on:hover { color: ${rgb(tones.text)}; background-color: ${rgba(tones.tint, 0.16)}; }`,
+        `.gk-panel .gk-row-assigned { background-color: ${rgba(tones.tint, 0.06)}; }`,
+        `.gk-panel .gk-row-assigned:hover { background-color: ${rgba(tones.tint, 0.13)}; }`,
+        `.gk-panel .gk-row-stripe { background-color: ${rgb(tones.tint)}; }`,
+        `.gk-panel .gk-sub { color: ${rgb(tones.text)}; }`,
+        `.gk-panel.gk-light .gk-auto-on { color: ${rgb(tones.lightText)}; border-color: ${rgba(tones.lightTint, 0.5)}; background-color: ${rgba(tones.lightTint, 0.1)}; }`,
+        `.gk-panel.gk-light .gk-auto-on:hover { color: ${rgb(tones.lightText)}; background-color: ${rgba(tones.lightTint, 0.18)}; }`,
+        `.gk-panel.gk-light .gk-row-assigned { background-color: ${rgba(tones.lightTint, 0.08)}; }`,
+        `.gk-panel.gk-light .gk-row-assigned:hover { background-color: ${rgba(tones.lightTint, 0.16)}; }`,
+        `.gk-panel.gk-light .gk-row-stripe { background-color: ${rgb(tones.lightTint)}; }`,
+        `.gk-panel.gk-light .gk-sub { color: ${rgb(tones.lightText)}; }`,
+    ].join('\n');
+};
+// <<< state-model
+
 // The preset panel follows the desktop. "system" resolves the x-apps portal color
 // scheme ('prefer-dark'/'prefer-light'); 'default' or a missing schema falls back to
 // the Cinnamon theme name (Mint's dark themes carry "Dark" in their name), then light.
@@ -2350,7 +2543,93 @@ const tile_theme_cairo = {
     light: { thumb: [183, 189, 204], outline: [195, 201, 214] },
 };
 const tile_theme_cairo_get = (key) => tile_theme_cairo[tile_theme_state.theme][key];
-const tile_theme_panel_class = () => tile_theme_state.theme === 'light' ? 'gk-panel gk-light' : 'gk-panel';
+const tile_theme_panel_class = () => (tile_theme_state.theme === 'light' ? 'gk-panel gk-light' : 'gk-panel')
+    + (tile_accent_state.gen ? ' ' + tile_accent_state.gen : '');
+// Accent + state runtime: resolves theme-probed vs. custom colors, writes the
+// generated stylesheet — one sheet carrying the accent AND state rules — into
+// the user cache dir and loads/unloads it on the current St.Theme — the same
+// mechanism Cinnamon uses for extension stylesheets, so hover/focus
+// pseudo-classes keep working and an open panel restyles at once.
+// Re-load hooks into 'theme-set' because every Cinnamon theme switch replaces
+// the whole St.Theme object.
+// gen: Cinnamon's St keeps its interned theme nodes across load_stylesheet /
+// unload_stylesheet, so a rebuilt panel would get the node computed with the OLD
+// sheet (verified live: rebuilt "+ New preset" kept the previous accent). Every
+// load therefore gives the panel root a fresh class 'gk-acc<n>'; all descendants
+// get new node keys and are matched against the current sheets. Seeded with the
+// clock so it never meets nodes left over from an earlier enable.
+const tile_accent_state = { rgb: tile_accent_default, css: '', path: null, themeObj: null, themeSig: 0, gen: '', genSeq: Date.now() };
+const tile_accent_probe = (pseudoClass) => {
+    let probe = null;
+    try {
+        probe = new tile_St.BoxLayout({ style_class: 'popup-menu-item', opacity: 0 });
+        probe.add_style_pseudo_class(pseudoClass);
+        Main.uiGroup.add_child(probe);
+        const c = probe.get_theme_node().get_background_color();
+        return tile_accent_from_probed(c.red, c.green, c.blue, c.alpha);
+    } catch (e) {
+        return null;
+    } finally {
+        if (probe)
+            probe.destroy();
+    }
+};
+const tile_accent_load = (theme, path) => {
+    try {
+        theme.load_stylesheet(path);
+        tile_accent_state.themeObj = theme;
+        tile_accent_state.gen = 'gk-acc' + (++tile_accent_state.genSeq);
+    } catch (e) {
+        global.logError('greenTile: accent stylesheet: ' + e);
+    }
+};
+const tile_accent_unload = () => {
+    if (!tile_accent_state.themeObj)
+        return;
+    try {
+        tile_accent_state.themeObj.unload_stylesheet(tile_accent_state.path);
+    } catch (e) {
+        // the old theme object is already gone after a Cinnamon theme switch
+    }
+    tile_accent_state.themeObj = null;
+};
+const tile_accent_path = () => {
+    if (!tile_accent_state.path)
+        tile_accent_state.path = GLib.build_filenamev([GLib.get_user_cache_dir(), 'greenTile@carsteneu', 'panel-accent.css']);
+    return tile_accent_state.path;
+};
+const tile_accent_apply = (config) => {
+    const own = tile_accent_is_own(config.settings.getValue('accentMode'));
+    const stateMode = tile_state_mode(config.settings.getValue('stateMode'));
+    // one probe serves both "Follow theme" modes — accent, state color or both
+    // (:active is the accent state of menu entries in most themes, :hover in the rest)
+    const probe = (!own || stateMode === 'theme') ? (tile_accent_probe('active') || tile_accent_probe('hover')) : null;
+    const rgb = own ? tile_accent_parse(config.settings.getValue('accentColor')) : probe;
+    const stateRgb = stateMode === 'own'
+        ? tile_accent_parse(config.settings.getValue('stateColor'))
+        : (stateMode === 'theme' ? probe : null);
+    const base = rgb || tile_accent_default;
+    const stateBase = stateRgb || tile_state_default;
+    // one sheet, one load: accent and state rules ride on the same generated file,
+    // so ANY color change goes through the css comparison below and bumps the
+    // root class again (a state-only change must reload too)
+    const css = tile_accent_css(tile_accent_tones(base)) + '\n' + tile_state_css(tile_state_tones(stateBase));
+    const path = tile_accent_path();
+    if (css !== tile_accent_state.css) {
+        GLib.mkdir_with_parents(GLib.path_get_dirname(path), 0o700);
+        GLib.file_set_contents(path, css);
+        tile_accent_state.css = css;
+        tile_accent_unload();
+    }
+    // set only after a successful persist: a failed write keeps painter and CSS
+    // in the SAME (old) color instead of two different ones
+    tile_accent_state.rgb = base;
+    const theme = tile_St.ThemeContext.get_for_stage(global.stage).get_theme();
+    if (tile_accent_state.themeObj && tile_accent_state.themeObj !== theme)
+        tile_accent_unload();
+    if (!tile_accent_state.themeObj)
+        tile_accent_load(theme, path);
+};
 const tile_theme_changed = () => {
     const config = tile_theme_state.config;
     if (!config)
@@ -2360,6 +2639,12 @@ const tile_theme_changed = () => {
         tile_theme_state.portal ? tile_theme_state.portal.get_string('color-scheme') : null,
         tile_theme_state.cinnamon ? tile_theme_state.cinnamon.get_string('name') : null
     );
+    try {
+        tile_accent_apply(config);
+    } catch (e) {
+        // a failing accent (unusable probe, unwritable file) keeps the old look
+        global.logError('greenTile: accent color: ' + e);
+    }
     // An open panel or editor rebuilds itself: restyling in place would leave the
     // Cairo thumbnails and the painter in the old colors.
     if (tile_panel.actor)
@@ -2377,6 +2662,12 @@ const tile_theme_init = (config) => {
             tile_theme_state.cinnamon = new tile_Gio.Settings({ schema_id: 'org.cinnamon.theme' });
             tile_theme_state.cinnamonSig = tile_theme_state.cinnamon.connect('changed::name', tile_theme_changed);
         }
+    }
+    if (tile_accent_state.themeSig === 0) {
+        // Cinnamon theme switch: loadTheme replaced the St.Theme object — the accent
+        // sheet is re-applied and the theme accent re-probed on top of the new theme
+        // (synchronously, inside tile_theme_changed).
+        tile_accent_state.themeSig = Main.themeManager.connect('theme-set', tile_theme_changed);
     }
     tile_theme_state.config = config;
     tile_theme_changed();
@@ -2400,6 +2691,16 @@ const tile_theme_shutdown = () => {
         tile_theme_state.cinnamon = null;
         tile_theme_state.cinnamonSig = 0;
     }
+    if (tile_accent_state.themeSig) {
+        try {
+            Main.themeManager.disconnect(tile_accent_state.themeSig);
+        } catch (e) {
+            // signal was already gone
+        }
+        tile_accent_state.themeSig = 0;
+    }
+    // the panel is closed here; the accent sheet comes off the theme with it
+    tile_accent_unload();
     tile_theme_state.config = null;
 };
 // "Gap between windows  − 8 px +" in the list view. Each click stores the value and,

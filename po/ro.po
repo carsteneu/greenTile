@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: greenTile 0.1.0\n"
 "Report-Msgid-Bugs-To: https://github.com/carsteneu\n"
-"POT-Creation-Date: 2026-09-29 14:36+0200\n"
+"POT-Creation-Date: 2026-09-29 14:56+0200\n"
 "PO-Revision-Date: 2022-08-06 01:55+0200\n"
 "Last-Translator: \n"
 "Language-Team: Romanian\n"
@@ -20,139 +20,139 @@ msgstr ""
 "X-Generator: Poedit 3.0.1\n"
 
 #. settings-schema.json->excludeAppPicker->options
-#: greenTile.js:381
+#: greenTile.js:387
 msgid "Add application …"
 msgstr ""
 
-#: greenTile.js:400
+#: greenTile.js:406
 msgid "Window floats"
 msgstr ""
 
-#: greenTile.js:400
+#: greenTile.js:406
 msgid "Window tiles again"
 msgstr ""
 
-#: greenTile.js:1986
+#: greenTile.js:1992
 #, javascript-format
 msgid "assigned — workspace %d"
 msgstr ""
 
-#: greenTile.js:2045
+#: greenTile.js:2053
 msgid "Please enter a name."
 msgstr ""
 
-#: greenTile.js:2068
+#: greenTile.js:2076
 #, javascript-format
 msgid "from %d"
 msgstr ""
 
-#: greenTile.js:2184
+#: greenTile.js:2193
 msgid "Rules (by window count)"
 msgstr ""
 
-#: greenTile.js:2188
+#: greenTile.js:2197
 msgid "Rule"
 msgstr ""
 
-#: greenTile.js:2189
+#: greenTile.js:2198
 msgid "Delete rule"
 msgstr ""
 
-#: greenTile.js:2197
+#: greenTile.js:2206
 msgid "Rule applies from"
 msgstr ""
 
-#: greenTile.js:2204
+#: greenTile.js:2213
 msgid "windows"
 msgstr ""
 
-#: greenTile.js:2206
+#: greenTile.js:2215
 msgid "Painter"
 msgstr ""
 
-#: greenTile.js:2221
+#: greenTile.js:2230
 msgid ""
 "Click or drag: the row sets how many windows the column holds. Right-click "
 "removes a column."
 msgstr ""
 
-#: greenTile.js:2226
+#: greenTile.js:2235
 msgid "Name"
 msgstr ""
 
-#: greenTile.js:2227
+#: greenTile.js:2236
 msgid "Preset name"
 msgstr ""
 
-#: greenTile.js:2231
+#: greenTile.js:2240
 msgid "Save"
 msgstr ""
 
-#: greenTile.js:2248
+#: greenTile.js:2257
 #, javascript-format
 msgid "Result: %s"
 msgstr ""
 
-#: greenTile.js:2408
+#: greenTile.js:2711
 msgid "Gap between windows"
 msgstr ""
 
-#: greenTile.js:2413
+#: greenTile.js:2716
 #, javascript-format
 msgid "%d px"
 msgstr ""
 
-#: greenTile.js:2432
+#: greenTile.js:2735
 msgid "Reset sizes"
 msgstr ""
 
-#: greenTile.js:2463
+#: greenTile.js:2766
 #, javascript-format
 msgid "Presets — workspace %d · %s"
 msgstr ""
 
-#: greenTile.js:2465
+#: greenTile.js:2768
 msgid "Create preset"
 msgstr ""
 
-#: greenTile.js:2465
+#: greenTile.js:2768
 #, javascript-format
 msgid "Edit %s"
 msgstr ""
 
-#: greenTile.js:2469
+#: greenTile.js:2772
 msgid "Back"
 msgstr ""
 
-#: greenTile.js:2478
+#: greenTile.js:2781
 #, fuzzy
 #| msgid "Auto close"
 msgid "Auto: on"
 msgstr "Închidere automată"
 
-#: greenTile.js:2478
+#: greenTile.js:2781
 #, fuzzy
 #| msgid "Auto close"
 msgid "Auto: off"
 msgstr "Închidere automată"
 
-#: greenTile.js:2499
+#: greenTile.js:2802
 msgid "Dark theme"
 msgstr ""
 
-#: greenTile.js:2499
+#: greenTile.js:2802
 msgid "Light theme"
 msgstr ""
 
-#: greenTile.js:2619
+#: greenTile.js:2922
 msgid "No presets yet."
 msgstr ""
 
-#: greenTile.js:2634
+#: greenTile.js:2937
 msgid "New preset"
 msgstr ""
 
-#: greenTile.js:2637
+#: greenTile.js:2940
 msgid "Click a row to apply it to this workspace and tile right away"
 msgstr ""
 
@@ -329,4 +329,55 @@ msgstr ""
 
 #. settings-schema.json->panelTheme->options
 msgid "Dark"
+msgstr ""
+
+#. settings-schema.json->accentMode->description
+msgid "Accent color"
+msgstr ""
+
+#. settings-schema.json->accentMode->tooltip
+msgid ""
+"Follow theme tracks the accent color of the Cinnamon theme live. Custom uses "
+"the color below."
+msgstr ""
+
+#. settings-schema.json->accentMode->options
+#. settings-schema.json->stateMode->options
+msgid "Follow theme"
+msgstr ""
+
+#. settings-schema.json->accentMode->options
+#. settings-schema.json->stateMode->options
+msgid "Custom"
+msgstr ""
+
+#. settings-schema.json->accentColor->description
+msgid "Custom accent color"
+msgstr ""
+
+#. settings-schema.json->accentColor->tooltip
+msgid "Accent of the preset panel and editor when Accent color is Custom."
+msgstr ""
+
+#. settings-schema.json->stateMode->description
+msgid "State color"
+msgstr ""
+
+#. settings-schema.json->stateMode->tooltip
+msgid ""
+"Color of the \"Auto: on\" marker and the assigned rows. Green keeps today's "
+"look. Follow theme tracks the accent color of the Cinnamon theme live. "
+"Custom uses the color below."
+msgstr ""
+
+#. settings-schema.json->stateMode->options
+msgid "Green"
+msgstr ""
+
+#. settings-schema.json->stateColor->description
+msgid "Custom state color"
+msgstr ""
+
+#. settings-schema.json->stateColor->tooltip
+msgid "State color of the preset panel when State color is Custom."
 msgstr ""

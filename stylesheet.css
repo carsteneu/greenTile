@@ -79,6 +79,10 @@
     background-color: rgba(255, 255, 255, 0.08);
 }
 
+/* The state rules below (the green of "Auto: on", assigned rows and the row
+   stripe down to .gk-sub) are overridden at runtime by the generated
+   stylesheet (setting "State color"); keep them in sync with
+   tile_state_css in greenTile.js. */
 .gk-auto-on {
     color: #9ce072;
     border-color: rgba(156, 224, 114, 0.5);
@@ -153,6 +157,9 @@
     background-color: rgba(255, 255, 255, 0.08);
 }
 
+/* The accent rules below (orange tones down to .gk-light .gk-entry:focus) are
+   overridden at runtime by the generated accent stylesheet (setting
+   "Accent color"); keep them in sync with tile_accent_css in greenTile.js. */
 .gk-plus {
     color: #ff9640;
     font-size: 16px;
@@ -487,6 +494,8 @@
     background-color: rgba(0, 0, 0, 0.06);
 }
 
+/* The light state rules below are overridden at runtime by the generated
+   stylesheet (setting "State color"). */
 .gk-light .gk-auto-on {
     color: #3f8f22;
     border-color: rgba(78, 165, 48, 0.5);
