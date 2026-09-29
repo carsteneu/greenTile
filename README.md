@@ -2,7 +2,7 @@
 
 Window tiling for Cinnamon with column rules, presets per monitor and workspace, an auto mode and snap-on-release.
 
-greenTile is a fork of **gTile** (version 2.2.1), see [Origin](#origin). Like gTile, greenTile is licensed under the **GNU GPL v3** (see `LICENSE`). The classic gTile grid (`Super+G`) is still included.
+greenTile is a fork of **gTile** (version 2.2.1), see [Origin](#origin). Like gTile, greenTile is licensed under the **GNU GPL v3** (see `LICENSE`). The classic gTile grid (`Super+G`) was removed.
 
 - **UUID:** `greenTile@carsteneu`
 - **Tested with:** Cinnamon 6.6 (Linux Mint)
@@ -17,7 +17,7 @@ greenTile is based on **gTile** (UUID `gTile@shuairan`), version 2.2.1:
 
 The starting point was the shipped webpack bundle `5.4/gTile.js` of gTile 2.2.1, i.e. the code base for Cinnamon 5.4 and later that was introduced in gTile 2.2.0. greenTile modifies this bundle directly; gTile's TypeScript sources (`src/` in the Spices repository) are not used.
 
-**Taken over from gTile:** the extension skeleton, the classic grid (`Super+G`) with its settings, the icons (`icons/`, `icon.png`) and the translation sources (`po/`; they are not compiled or installed by the deploy steps below).
+**Taken over from gTile:** the extension skeleton, `icon.png` and the translation sources (`po/`; they are not compiled or installed by the deploy steps below). The classic grid (`Super+G`) with its settings and the grid icons were removed.
 
 **Changed or added in greenTile:** column hotkeys, auto mode with snap-on-release and animation, own window collector, presets per monitor and workspace plus the preset panel, new UUID and a flat directory layout without version subfolders. Modified by carsten_eu since 2026-09-04.
 
@@ -32,7 +32,6 @@ The starting point was the shipped webpack bundle `5.4/gTile.js` of gTile 2.2.1,
 | `Super+Ctrl+P` | Open/close the preset panel for the monitor of the focused window |
 | `Super+Alt+Right` / `Super+Alt+Left` | Make the focused tiled window wider / narrower (tap = 1 px, hold to speed up) |
 | `Super+Alt+Down` / `Super+Alt+Up` | Make the focused tiled window taller / shorter |
-| `Super+G` | Classic gTile grid |
 
 All keys can be changed in the extension settings (Extensions manager, or ⚙ in the preset panel).
 
@@ -47,7 +46,7 @@ In the panel (`Super+Ctrl+P`):
 - **＋ New preset:** open the editor with an empty preset
 - **✕ in the title bar** or `Esc` closes the panel. While the list is open, greenTile takes the `Esc` key, so applications do not receive it until the panel is closed.
 - **Auto: on / Auto: off in the title bar** shows whether automatic tiling is on for this monitor and workspace (green = on). Clicking it switches it, exactly like `Super+Ctrl+A` / `Super+Ctrl+D`; switching it on tiles right away.
-- **Gap between windows − N px +** below the list sets the gap between tiled windows (0 to 48 px in steps of 2, default 0). Only the sides where two windows meet move in; windows stay flush with the screen edges. The value applies to all greenTile layouts (auto grid, presets, `Super+Ctrl+3/6`), not to the classic `Super+G` grid. On a workspace with automatic tiling on, every click retiles right away, so the new gap shows live; elsewhere it applies from the next tiling. Stored in the setting `windowGap`.
+- **Gap between windows − N px +** below the list sets the gap between tiled windows (0 to 48 px in steps of 2, default 0). Only the sides where two windows meet move in; windows stay flush with the screen edges. The value applies to all greenTile layouts (auto grid, presets, `Super+Ctrl+3/6`). On a workspace with automatic tiling on, every click retiles right away, so the new gap shows live; elsewhere it applies from the next tiling. Stored in the setting `windowGap`.
 - **Reset sizes** appears next to it when borders were moved on this monitor and workspace (see [Moving borders](#moving-borders)); it returns every window count there to equal sizes and retiles.
 - **⚙ in the title bar** closes the panel and opens the extension's settings dialog (pages **Settings** and **Hotkeys**).
 - The panel can be dragged by its title bar and keeps its position when you switch workspaces. If that position is no longer on any monitor (external display unplugged), the panel opens centred again.
@@ -99,7 +98,7 @@ Tiled windows do not have to share the area equally. Where automatic tiling is o
 - No window gets narrower or lower than 120 px.
 - The borders are stored per monitor, workspace **and window count** in the `layouts` setting (field `splits`, fractions of the screen, so they survive resolution changes and the gap setting). With 3 windows you get the borders you set for 3 windows; when a fourth window opens, the layout for 4 applies, and closing it brings the 3-window borders back. Borders are ignored (equal sizes) when the layout they were made for no longer applies, e.g. after the preset or its rule changed.
 - **Reset sizes** in the preset panel removes all borders of the monitor and workspace.
-- Not for `Super+Ctrl+3/6` and not for the classic `Super+G` grid. With automatic tiling off, resizing a window stays a free resize.
+- Not for `Super+Ctrl+3/6`. With automatic tiling off, resizing a window stays a free resize.
 - Known limitation: applications with their own minimum size may refuse to shrink to their cell; windows can then overlap.
 
 ## Per-monitor layouts
@@ -120,7 +119,6 @@ D=~/.local/share/cinnamon/extensions/greenTile@carsteneu
 mkdir -p "$D"
 node --check greenTile.js
 cp extension.js greenTile.js metadata.json settings-schema.json stylesheet.css icon.png LICENSE "$D"/
-cp -r icons "$D"/
 for po in po/*.po; do
   lang=$(basename "$po" .po)
   mkdir -p ~/.local/share/locale/"$lang"/LC_MESSAGES
