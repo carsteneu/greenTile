@@ -95,33 +95,34 @@ test('text on accent switches sides by luminance', () => {
 test('generated CSS carries every accent selector in both scopes', () => {
     const css = m.tile_accent_css(m.tile_accent_tones([255, 150, 64]));
     for (const selector of [
-        '.gk-plus { color: rgb(255, 150, 64); }',
-        '.gk-plus:hover { color: rgb(255, 176, 112); }',
-        '.gk-grip:hover { color: rgb(255, 150, 64); }',
-        '.gk-reset-btn:hover { background-color: rgba(255, 150, 64, 0.18); border-color: rgb(255, 150, 64); }',
-        '.gk-ed-rule-active { background-color: rgba(255, 150, 64, 0.08); }',
-        '.gk-ed-rule-active:hover { background-color: rgba(255, 150, 64, 0.14); }',
-        '.gk-ed-rule-stripe { background-color: rgb(255, 150, 64); }',
-        '.gk-ed-add { color: rgb(255, 150, 64); }',
-        '.gk-ed-add:hover { color: rgb(255, 176, 112); }',
-        '.gk-stepper-btn:hover { border-color: rgb(255, 150, 64); }',
-        '.gk-entry { selection-background-color: rgb(255, 150, 64); selected-color: rgb(20, 22, 29); }',
-        '.gk-save { color: rgb(20, 22, 29); background-color: rgb(255, 150, 64); }',
-        '.gk-save:hover { background-color: rgb(255, 171, 102); }',
+        '.gk-panel .gk-plus { color: rgb(255, 150, 64); }',
+        '.gk-panel .gk-plus:hover { color: rgb(255, 176, 112); }',
+        '.gk-panel .gk-grip:hover { color: rgb(255, 150, 64); }',
+        '.gk-panel .gk-reset-btn:hover { background-color: rgba(255, 150, 64, 0.18); border-color: rgb(255, 150, 64); }',
+        '.gk-panel .gk-ed-rule-active { background-color: rgba(255, 150, 64, 0.08); }',
+        '.gk-panel .gk-ed-rule-active:hover { background-color: rgba(255, 150, 64, 0.14); }',
+        '.gk-panel .gk-ed-rule-stripe { background-color: rgb(255, 150, 64); }',
+        '.gk-panel .gk-ed-add { color: rgb(255, 150, 64); }',
+        '.gk-panel .gk-ed-add:hover { color: rgb(255, 176, 112); }',
+        '.gk-panel .gk-stepper-btn:hover { border-color: rgb(255, 150, 64); }',
+        '.gk-panel .gk-entry { selection-background-color: rgb(255, 150, 64); selected-color: rgb(20, 22, 29); }',
+        '.gk-panel .gk-entry:focus { border-color: rgb(255, 150, 64); }',
+        '.gk-panel .gk-save { color: rgb(20, 22, 29); background-color: rgb(255, 150, 64); }',
+        '.gk-panel .gk-save:hover { background-color: rgb(255, 171, 102); }',
     ])
         assert.equal(css.includes(selector), true, selector);
     for (const selector of [
-        '.gk-light .gk-plus { color: rgb(217, 122, 36); }',
-        '.gk-light .gk-plus:hover { color: rgb(232, 154, 63); }',
-        '.gk-light .gk-grip:hover { color: rgb(217, 122, 36); }',
-        '.gk-light .gk-reset-btn:hover { background-color: rgba(255, 150, 64, 0.22); border-color: rgb(217, 122, 36); }',
-        '.gk-light .gk-ed-rule-active { background-color: rgba(255, 150, 64, 0.14); }',
-        '.gk-light .gk-ed-rule-active:hover { background-color: rgba(255, 150, 64, 0.2); }',
-        '.gk-light .gk-ed-rule-stripe { background-color: rgb(217, 122, 36); }',
-        '.gk-light .gk-ed-add { color: rgb(217, 122, 36); }',
-        '.gk-light .gk-ed-add:hover { color: rgb(232, 154, 63); }',
-        '.gk-light .gk-stepper-btn:hover { border-color: rgb(217, 122, 36); }',
-        '.gk-light .gk-entry:focus { border-color: rgb(217, 122, 36); }',
+        '.gk-panel.gk-light .gk-plus { color: rgb(217, 122, 36); }',
+        '.gk-panel.gk-light .gk-plus:hover { color: rgb(232, 154, 63); }',
+        '.gk-panel.gk-light .gk-grip:hover { color: rgb(217, 122, 36); }',
+        '.gk-panel.gk-light .gk-reset-btn:hover { background-color: rgba(255, 150, 64, 0.22); border-color: rgb(217, 122, 36); }',
+        '.gk-panel.gk-light .gk-ed-rule-active { background-color: rgba(255, 150, 64, 0.14); }',
+        '.gk-panel.gk-light .gk-ed-rule-active:hover { background-color: rgba(255, 150, 64, 0.2); }',
+        '.gk-panel.gk-light .gk-ed-rule-stripe { background-color: rgb(217, 122, 36); }',
+        '.gk-panel.gk-light .gk-ed-add { color: rgb(217, 122, 36); }',
+        '.gk-panel.gk-light .gk-ed-add:hover { color: rgb(232, 154, 63); }',
+        '.gk-panel.gk-light .gk-stepper-btn:hover { border-color: rgb(217, 122, 36); }',
+        '.gk-panel.gk-light .gk-entry:focus { border-color: rgb(217, 122, 36); }',
     ])
         assert.equal(css.includes(selector), true, selector);
 });
@@ -130,4 +131,17 @@ test('generated CSS for a probed accent carries the accent, not orange', () => {
     const css = m.tile_accent_css(m.tile_accent_tones([108, 171, 205]));
     assert.equal(css.includes('rgb(108, 171, 205)'), true);
     assert.equal(css.includes('rgb(255, 150, 64)'), false);
+});
+
+test('every accent color in stylesheet.css still matches the default tone table', () => {
+    // Drift guard: if someone retunes a tone in stylesheet.css, the default-orange
+    // generated stylesheet must follow (pixel identity of the default look).
+    const sheet = fs.readFileSync(path.join(__dirname, '..', 'stylesheet.css'), 'utf8');
+    for (const hex of ['#ff9640', '#ffb070', '#ffab66', '#d97a24', '#e89a3f', '#14161d'])
+        assert.equal(sheet.includes(hex), true, hex + ' missing in stylesheet.css');
+    const tints = new Set(sheet.match(/rgba\(255, 150, 64, [0-9.]+\)/g));
+    assert.deepEqual(
+        [...tints].sort(),
+        ['rgba(255, 150, 64, 0.08)', 'rgba(255, 150, 64, 0.14)', 'rgba(255, 150, 64, 0.18)', 'rgba(255, 150, 64, 0.2)', 'rgba(255, 150, 64, 0.22)']
+    );
 });
