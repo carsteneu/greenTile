@@ -18,11 +18,12 @@
          "type": "page",
          "title": "Hotkeys",
           "sections": [
-             "autotile-hotkey-section",
-             "preset-section",
-             "resize-section",
-             "exclusion-hotkey-section"
-          ]
+              "autotile-hotkey-section",
+              "preset-section",
+              "resize-section",
+              "swap-section",
+              "exclusion-hotkey-section"
+           ]
       },
       "autotile-hotkey-section": {
          "type": "section",
@@ -50,6 +51,16 @@
             "resizeNarrowerHotkey",
             "resizeTallerHotkey",
             "resizeShorterHotkey"
+         ]
+      },
+      "swap-section": {
+         "type": "section",
+         "title": "Swap windows",
+         "keys": [
+            "swapLeftHotkey",
+            "swapRightHotkey",
+            "swapUpHotkey",
+            "swapDownHotkey"
          ]
       },
       "tiling-section": {
@@ -130,6 +141,26 @@
       "type": "keybinding",
       "default": "<Super><Alt>Up",
       "description": "Make the focused tiled window shorter"
+   },
+   "swapLeftHotkey": {
+      "type": "keybinding",
+      "default": "<Super><Ctrl>Left",
+      "description": "Swap the focused tiled window with its neighbor to the left"
+   },
+   "swapRightHotkey": {
+      "type": "keybinding",
+      "default": "<Super><Ctrl>Right",
+      "description": "Swap the focused tiled window with its neighbor to the right"
+   },
+   "swapUpHotkey": {
+      "type": "keybinding",
+      "default": "<Super><Ctrl>Up",
+      "description": "Swap the focused tiled window with its neighbor above"
+   },
+   "swapDownHotkey": {
+      "type": "keybinding",
+      "default": "<Super><Ctrl>Down",
+      "description": "Swap the focused tiled window with its neighbor below"
    },
    "presets": {
       "type": "string",

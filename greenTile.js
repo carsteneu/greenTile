@@ -100,6 +100,10 @@ class Config {
             Main.keybindingManager.addHotKey('greenTile-resize-narrower', this.resizeNarrowerHotkey, () => tile_split_hotkey(this.app, 'narrower'));
             Main.keybindingManager.addHotKey('greenTile-resize-taller', this.resizeTallerHotkey, () => tile_split_hotkey(this.app, 'taller'));
             Main.keybindingManager.addHotKey('greenTile-resize-shorter', this.resizeShorterHotkey, () => tile_split_hotkey(this.app, 'shorter'));
+            Main.keybindingManager.addHotKey('greenTile-swap-left', this.swapLeftHotkey, () => tile_swap_hotkey(this.app, 'left'));
+            Main.keybindingManager.addHotKey('greenTile-swap-right', this.swapRightHotkey, () => tile_swap_hotkey(this.app, 'right'));
+            Main.keybindingManager.addHotKey('greenTile-swap-up', this.swapUpHotkey, () => tile_swap_hotkey(this.app, 'up'));
+            Main.keybindingManager.addHotKey('greenTile-swap-down', this.swapDownHotkey, () => tile_swap_hotkey(this.app, 'down'));
         };
         this.DisableHotkey = () => {
             Main.keybindingManager.removeHotKey('greenTile-auto6');
@@ -112,6 +116,10 @@ class Config {
             Main.keybindingManager.removeHotKey('greenTile-resize-narrower');
             Main.keybindingManager.removeHotKey('greenTile-resize-taller');
             Main.keybindingManager.removeHotKey('greenTile-resize-shorter');
+            Main.keybindingManager.removeHotKey('greenTile-swap-left');
+            Main.keybindingManager.removeHotKey('greenTile-swap-right');
+            Main.keybindingManager.removeHotKey('greenTile-swap-up');
+            Main.keybindingManager.removeHotKey('greenTile-swap-down');
         };
         this.destroy = () => {
             this.DisableHotkey();
@@ -144,6 +152,10 @@ class Config {
         this.settings.bindProperty(Settings.BindingDirection.IN, 'resizeNarrowerHotkey', 'resizeNarrowerHotkey', this.EnableHotkey, null);
         this.settings.bindProperty(Settings.BindingDirection.IN, 'resizeTallerHotkey', 'resizeTallerHotkey', this.EnableHotkey, null);
         this.settings.bindProperty(Settings.BindingDirection.IN, 'resizeShorterHotkey', 'resizeShorterHotkey', this.EnableHotkey, null);
+        this.settings.bindProperty(Settings.BindingDirection.IN, 'swapLeftHotkey', 'swapLeftHotkey', this.EnableHotkey, null);
+        this.settings.bindProperty(Settings.BindingDirection.IN, 'swapRightHotkey', 'swapRightHotkey', this.EnableHotkey, null);
+        this.settings.bindProperty(Settings.BindingDirection.IN, 'swapUpHotkey', 'swapUpHotkey', this.EnableHotkey, null);
+        this.settings.bindProperty(Settings.BindingDirection.IN, 'swapDownHotkey', 'swapDownHotkey', this.EnableHotkey, null);
         this.settings.bindProperty(Settings.BindingDirection.IN, 'panelTheme', 'panelTheme', () => tile_theme_changed(), null);
         this.settings.bindProperty(Settings.BindingDirection.IN, 'accentMode', 'accentMode', () => tile_theme_changed(), null);
         this.settings.bindProperty(Settings.BindingDirection.IN, 'accentColor', 'accentColor', () => tile_theme_changed(), null);
@@ -445,10 +457,11 @@ const tile_excl_toggle_focused = (app) => {
 // app.focusMetaWindow, which goes stale because gTile tracks focus via the app-level
 // 'notify::focus-app' signal (silent on same-app window switches) — visible windows
 // get dropped. RULE: active workspace only, never pull windows across workspaces.
-const tile_collect_windows = (monitor, focusWindow) => {
+const tile_collect_windows = (monitor, focusWindow, wsIndex = null) => {
     const tracker = imports.gi.Cinnamon.WindowTracker.get_default();
     let result = [];
-    let tabList = utils_Main.getTabList();
+    let tabList = wsIndex == null ? utils_Main.getTabList()
+        : global.workspace_manager.get_workspace_by_index(wsIndex).list_windows();
     for (let i = 0; i < tabList.length; i++) {
         let w = tabList[i];
         if (w === focusWindow || w.minimized || w.get_wm_class() == null)
@@ -724,12 +737,13 @@ const tile_place_rects = (app, ordered, layout, split, area, animate) => {
         tile_place_cell(app, ordered[i], x, y, w, h, area, animate);
     }
 };
-const tile_app_auto = (app, monitorIndex, focusWindow, animate = true) => {
+const tile_app_auto = (app, monitorIndex, focusWindow, animate = true, wsIndex = null) => {
     const monitor = utils_Main.layoutManager.monitors[monitorIndex];
     if (!monitor)
         return;
+    const ws = wsIndex != null ? wsIndex : global.workspace_manager.get_active_workspace().index();
     const area = getUsableScreenArea(monitor);
-    let windows = tile_collect_windows(monitor, focusWindow);
+    let windows = tile_collect_windows(monitor, focusWindow, ws);
     tile_debug_count(monitor, focusWindow, windows);
     const focused = focusWindow && !focusWindow.minimized && focusWindow.get_monitor() === monitorIndex
         && !tile_excl_is_excluded(focusWindow);
@@ -747,8 +761,7 @@ const tile_app_auto = (app, monitorIndex, focusWindow, animate = true) => {
     const columnMajor = layout.kind === 'cols';
     const ordered = tile_sort_reading_order((focused ? [focusWindow] : []).concat(settled), columnMajor)
         .concat(tile_sort_reading_order(fresh, columnMajor));
-    const wsIndex = global.workspace_manager.get_active_workspace().index();
-    tile_place_rects(app, ordered, layout, tile_split_for(app, monitorIndex, wsIndex, n, layout), area, animate);
+    tile_place_rects(app, ordered, layout, tile_split_for(app, monitorIndex, ws, n, layout), area, animate);
 };
 // Auto-mode observer: re-tiles automatically on workspaces with automatic tiling on
 // (Super+Ctrl+A on, Super+Ctrl+D off, per workspace).
@@ -1642,16 +1655,16 @@ const tile_layout_shape = (app, monitorIndex, n) => {
     }
     return layoutState.auto ? tile_auto_shape(monitor, n) : null;
 };
-const tile_preset_retile = (app, monitorIndex, focusWindow, animate = true) => {
+const tile_preset_retile = (app, monitorIndex, focusWindow, animate = true, wsIndex = null) => {
     const monitor = utils_Main.layoutManager.monitors[monitorIndex];
     if (!monitor)
         return;
-    const wsIndex = global.workspace_manager.get_active_workspace().index();
-    const preset = tile_layout_for(app, monitorIndex, wsIndex).preset;
+    const ws = wsIndex != null ? wsIndex : global.workspace_manager.get_active_workspace().index();
+    const preset = tile_layout_for(app, monitorIndex, ws).preset;
     if (!preset)
         return;
     const area = getUsableScreenArea(monitor);
-    const windows = tile_collect_windows(monitor, focusWindow);
+    const windows = tile_collect_windows(monitor, focusWindow, ws);
     const focused = focusWindow && !focusWindow.minimized && focusWindow.get_monitor() === monitorIndex
         && !tile_excl_is_excluded(focusWindow);
     const n = windows.length + (focused ? 1 : 0);
@@ -1662,7 +1675,7 @@ const tile_preset_retile = (app, monitorIndex, focusWindow, animate = true) => {
     const split = tile_split_for(app, monitorIndex, wsIndex, n, layout);
     tile_place_rects(app, ordered, layout, split, area, animate);
     if (animate)
-        global.log('greenTile preset "' + preset.name + '" applied ws' + (wsIndex + 1) + ' mon=' + (tile_monitors.keys[monitorIndex] || '?') + ' n=' + n + ' stacks=[' + layout.rule.stacks.join(',') + ']' + (split ? ' split' : ''));
+        global.log('greenTile preset "' + preset.name + '" applied ws' + (ws + 1) + ' mon=' + (tile_monitors.keys[monitorIndex] || '?') + ' n=' + n + ' stacks=[' + layout.rule.stacks.join(',') + ']' + (split ? ' split' : ''));
 };
 // >>> auto-model (pure functions, no Cinnamon imports; tested by tests/auto-model.test.js)
 // Legacy per-workspace automatic tiling list "autoWorkspaces": rows
@@ -1811,15 +1824,15 @@ const tile_layouts_migrate = (wsPresets, autoList, mkey) => {
 // Retiles exactly one monitor: preset layout when (monitor, workspace) has one, else
 // the auto grid when automatic tiling is on. Monitors whose entry has automatic tiling
 // off are left alone — hotkeys retile directly and do not come through here.
-const tile_retile_monitor = (app, monitorIndex, focusWindow, animate = true) => {
+const tile_retile_monitor = (app, monitorIndex, focusWindow, animate = true, wsIndex = null) => {
     if (!tile_monitors.ready || !utils_Main.layoutManager.monitors[monitorIndex])
         return;
-    const wsIndex = global.workspace_manager.get_active_workspace().index();
-    const layout = tile_layout_for(app, monitorIndex, wsIndex);
+    const ws = wsIndex != null ? wsIndex : global.workspace_manager.get_active_workspace().index();
+    const layout = tile_layout_for(app, monitorIndex, ws);
     if (layout.preset)
-        tile_preset_retile(app, monitorIndex, focusWindow, animate);
+        tile_preset_retile(app, monitorIndex, focusWindow, animate, ws);
     else if (layout.auto)
-        tile_app_auto(app, monitorIndex, focusWindow, animate)
+        tile_app_auto(app, monitorIndex, focusWindow, animate, ws)
 };
 // >>> swap-model (pure functions, no Cinnamon imports; tested by tests/swap-model.test.js)
 // Keyboard window swapping (Super+Ctrl+Arrow). Cells are rects [x, y, width, height] in
@@ -1915,6 +1928,124 @@ const tile_swap_chain_step = (input) => {
     return { kind: 'workspace', delta: delta, monitor: edge.index, slot: right ? 'first' : 'last' };
 };
 // <<< swap-model
+// Super+Ctrl+Arrow hotkeys: swap the focused tiled window with its neighbor (both
+// windows sort into each other's cell, then the monitor retiles), or — when nothing
+// borders in the direction pressed — push it along the monitor chain onto the next
+// monitor/workspace, where it lands in the edge slot (insert, not swap). Focus always
+// stays on the moved window so repeated presses keep moving the same window.
+const tile_swap_override = (metaWindow, rect) => {
+    tile_sort_rect_override.set(metaWindow.get_stable_sequence(), { rect: rect, at: GLib.get_monotonic_time() / 1000 });
+};
+const tile_swap_windows_on = (monitor, wsIndex) => {
+    const tracker = imports.gi.Cinnamon.WindowTracker.get_default();
+    const ws = global.workspace_manager.get_workspace_by_index(wsIndex);
+    const result = [];
+    const list = ws.list_windows();
+    for (let i = 0; i < list.length; i++) {
+        const w = list[i];
+        if (w.minimized || w.get_wm_class() == null)
+            continue;
+        if (w.get_window_type() !== Meta.WindowType.NORMAL)
+            continue;
+        if (tile_excl_is_excluded(w))
+            continue;
+        if (utils_Main.layoutManager.monitors[w.get_monitor()] !== monitor)
+            continue;
+        if (tracker.get_window_app(w) == null)
+            continue;
+        result.push(w);
+    }
+    return result;
+};
+const tile_swap_hotkey = (app, dir) => {
+    const focusWindow = tile_focus_window();
+    if (!focusWindow || focusWindow.minimized || focusWindow.is_on_all_workspaces() || tile_excl_is_excluded(focusWindow))
+        return;
+    const monitorIndex = focusWindow.get_monitor();
+    const monitor = utils_Main.layoutManager.monitors[monitorIndex];
+    if (!monitor || !tile_monitors.ready)
+        return;
+    const wsIndex = global.workspace_manager.get_active_workspace().index();
+    const area = getUsableScreenArea(monitor);
+    const frame = focusWindow.get_frame_rect();
+    const frameRect = [frame.x, frame.y, frame.width, frame.height];
+    const windows = tile_collect_windows(monitor, focusWindow);
+    const n = windows.length + 1;
+    const layout = tile_layout_shape(app, monitorIndex, n);
+    let cells = null;
+    let ordered = null;
+    let selfIdx = -1;
+    if (layout) {
+        const split = tile_split_for(app, monitorIndex, wsIndex, n, layout);
+        cells = tile_split_rects(layout.kind, layout.shape, split, area);
+        ordered = tile_sort_reading_order([focusWindow].concat(windows), layout.kind === 'cols');
+        selfIdx = ordered.indexOf(focusWindow);
+    }
+    if (layout && selfIdx >= 0) {
+        const nb = tile_swap_neighbor(cells, selfIdx, dir);
+        if (nb != null) {
+            tile_swap_override(focusWindow, cells[nb]);
+            tile_swap_override(ordered[nb], cells[selfIdx]);
+            tile_retile_monitor(app, monitorIndex, focusWindow);
+            global.log('greenTile swap ' + dir + ' ws' + (wsIndex + 1) + ' mon=' + (tile_monitors.keys[monitorIndex] || '?') + ' n=' + n);
+            return;
+        }
+    }
+    if (dir === 'up' || dir === 'down')
+        return;
+    const step = tile_swap_chain_step({
+        dir: dir,
+        monitorIndex: monitorIndex,
+        primaryIndex: utils_Main.layoutManager.primaryIndex,
+        onlyPrimary: tile_layout_only_primary(),
+        monitors: utils_Main.layoutManager.monitors.map((m, i) => ({ index: i, x: m.x, width: m.width })),
+        workspaces: global.workspace_manager.n_workspaces(),
+        wsIndex: wsIndex,
+    });
+    if (!step)
+        return;
+    const targetMonitor = utils_Main.layoutManager.monitors[step.monitor];
+    if (!targetMonitor)
+        return;
+    // On a target monitor without active tiling the window lands untiled (move only,
+    // size kept): no slot is computed and no retile is triggered on the target.
+    if (step.kind === 'monitor') {
+        const nTarget = tile_collect_windows(targetMonitor, null).length + 1;
+        const targetLayout = tile_layout_shape(app, step.monitor, nTarget);
+        if (targetLayout) {
+            const targetSplit = tile_split_for(app, step.monitor, wsIndex, nTarget, targetLayout);
+            const targetCells = tile_split_rects(targetLayout.kind, targetLayout.shape, targetSplit, getUsableScreenArea(targetMonitor));
+            const slotIdx = tile_swap_landing_cell(targetCells, frameRect, step.slot === 'first' ? 'right' : 'left');
+            if (slotIdx != null)
+                tile_swap_override(focusWindow, targetCells[slotIdx]);
+        }
+        focusWindow.move_to_monitor(step.monitor);
+        tile_retile_monitor(app, step.monitor, focusWindow);
+        tile_retile_monitor(app, monitorIndex, null, true, wsIndex);
+        global.log('greenTile swap pushed mon=' + (tile_monitors.keys[monitorIndex] || '?') + ' -> mon=' + (tile_monitors.keys[step.monitor] || '?') + ' ws' + (wsIndex + 1));
+        return;
+    }
+    // Workspace landing: the slot is computed AFTER the switch (tile_layout_shape reads
+    // the active workspace), the count of the other windows before it. The source
+    // workspace retiles with one window less even though it is no longer active.
+    const targetWsIndex = wsIndex + step.delta;
+    if (targetWsIndex < 0 || targetWsIndex >= global.workspace_manager.n_workspaces())
+        return;
+    const nTarget = tile_swap_windows_on(targetMonitor, targetWsIndex).length + 1;
+    focusWindow.change_workspace_by_index(targetWsIndex, false, global.get_current_time());
+    global.workspace_manager.get_workspace_by_index(targetWsIndex).activate_with_focus(focusWindow, global.get_current_time());
+    const targetLayout = tile_layout_shape(app, step.monitor, nTarget);
+    if (targetLayout) {
+        const targetSplit = tile_split_for(app, step.monitor, targetWsIndex, nTarget, targetLayout);
+        const targetCells = tile_split_rects(targetLayout.kind, targetLayout.shape, targetSplit, getUsableScreenArea(targetMonitor));
+        const slotIdx = tile_swap_landing_cell(targetCells, frameRect, step.slot === 'first' ? 'right' : 'left');
+        if (slotIdx != null)
+            tile_swap_override(focusWindow, targetCells[slotIdx]);
+    }
+    tile_retile_monitor(app, step.monitor, focusWindow, true, targetWsIndex);
+    tile_retile_monitor(app, monitorIndex, null, true, wsIndex);
+    global.log('greenTile swap pushed mon=' + (tile_monitors.keys[monitorIndex] || '?') + ' -> ws' + (targetWsIndex + 1) + ' mon=' + (tile_monitors.keys[step.monitor] || '?'));
+};
 // >>> editor-model (pure functions, no Cinnamon imports; tested by tests/editor-model.test.js)
 // Preset editor model. A rule is {min, stacks}; stacks[i] = windows stacked in column i.
 // The painter grid of the approved prototype has 6 columns and 4 rows.
