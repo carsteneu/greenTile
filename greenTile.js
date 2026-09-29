@@ -152,6 +152,7 @@ class Config {
         tile_excl_apply(this.settings);
         tile_excl_app_populate(this.settings);
         this.excludeAppSignal = imports.gi.Cinnamon.AppSystem.get_default().connect('installed-changed', () => {
+            tile_excl_apply(this.settings);
             tile_excl_app_populate(this.settings);
         });
         this.EnableHotkey();
@@ -264,10 +265,13 @@ const tile_focus_window = () => {
 // Windows that are never tiled: rows of the "exclusions" list setting
 // ({ match: "class" | "title" | "app", text }) match by WM_CLASS (equals, the instance variant
 // counts too) or window title (contains) or the Cinnamon app id of the window (equals,
-// via WindowTracker — robust where WM classes lie, e.g. flatpaks), case-insensitive in
-// every variant; rows with empty text or an unknown match are ignored. On top, Super+G
-// toggles the focused window ad hoc — in-memory only, per window, forgotten when the
-// window is unmanaged.
+// via WindowTracker — robust where WM classes lie, e.g. flatpaks). An app row also matches
+// when the picked app's StartupWMClass equals the window's WM_CLASS or instance — the
+// WindowTracker may map the window to a different .desktop entry of the same program
+// (NoDisplay launchers, Xwayland siblings), and the StartupWMClass still identifies it,
+// case-insensitive in every variant; rows with empty text or an unknown match are ignored.
+// On top, Super+G toggles the focused window ad hoc — in-memory only, per window,
+// forgotten when the window is unmanaged.
 const tile_excl_rows_normalize = (rows) => {
     if (!Array.isArray(rows))
         return [];
@@ -283,7 +287,7 @@ const tile_excl_rows_normalize = (rows) => {
     }
     return result;
 };
-const tile_excl_match = (wmClass, wmInstance, title, rows, appId) => {
+const tile_excl_match = (wmClass, wmInstance, title, rows, appId, appClasses) => {
     const t = typeof title === 'string' ? title.toLowerCase() : '';
     const id = typeof appId === 'string' ? appId.toLowerCase() : '';
     for (let i = 0; i < rows.length; i++) {
@@ -295,8 +299,17 @@ const tile_excl_match = (wmClass, wmInstance, title, rows, appId) => {
         }
         else if (row.match === 'title' && t && t.indexOf(row.text.toLowerCase()) !== -1)
             return true;
-        else if (row.match === 'app' && id && id === row.text.toLowerCase())
-            return true;
+        else if (row.match === 'app') {
+            if (id && id === row.text.toLowerCase())
+                return true;
+            const swc = appClasses ? appClasses[row.text] : null;
+            if (typeof swc === 'string' && swc) {
+                const s = swc.toLowerCase();
+                if ((typeof wmClass === 'string' && wmClass.toLowerCase() === s)
+                    || (typeof wmInstance === 'string' && wmInstance.toLowerCase() === s))
+                    return true;
+            }
+        }
     }
     return false;
 };
@@ -344,7 +357,7 @@ const tile_excl_toggle_set = (map, seq, on) => {
         map.delete(seq);
 };
 // <<< exclude-model
-const tile_excl = { toggled: new Map(), rows: [] };
+const tile_excl = { toggled: new Map(), rows: [], classes: {} };
 const tile_excl_is_excluded = (w) => {
     if (w == null)
         return false;
@@ -353,10 +366,26 @@ const tile_excl_is_excluded = (w) => {
     if (tile_excl.rows.length === 0)
         return false;
     const app = imports.gi.Cinnamon.WindowTracker.get_default().get_window_app(w);
-    return tile_excl_match(w.get_wm_class(), w.get_wm_class_instance(), w.get_title(), tile_excl.rows, app ? app.get_id() : null);
+    return tile_excl_match(w.get_wm_class(), w.get_wm_class_instance(), w.get_title(), tile_excl.rows, app ? app.get_id() : null, tile_excl.classes);
+};
+// StartupWMClass per app row, resolved once per apply (not per window per retile); the
+// value is null for uninstalled apps or apps that declare no StartupWMClass — those rows
+// fall back to the id compare. Rebuilt with the rows themselves on installed-changed.
+const tile_excl_app_classes = (rows) => {
+    const appSystem = imports.gi.Cinnamon.AppSystem.get_default();
+    const result = {};
+    for (let i = 0; i < rows.length; i++) {
+        if (rows[i].match !== 'app' || result[rows[i].text] !== undefined)
+            continue;
+        const app = appSystem.lookup_app(rows[i].text);
+        const info = app ? app.get_app_info() : null;
+        result[rows[i].text] = info ? info.get_startup_wm_class() : null;
+    }
+    return result;
 };
 const tile_excl_apply = (settings) => {
     tile_excl.rows = tile_excl_rows_normalize(settings.getValue('exclusions'));
+    tile_excl.classes = tile_excl_app_classes(tile_excl.rows);
 };
 // Retile every monitor whose layout can place windows: preset layouts directly, auto
 // grids debounced (consistent with other debounced retiles).

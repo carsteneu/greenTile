@@ -82,6 +82,44 @@ test('match: app equals the app id, case-insensitive; null never matches', () =>
     assert.equal(m.tile_excl_match('Gimp', 'gimp', 'Any title', rows, 'random.desktop'), false);
 });
 
+test('match: app also matches the rule app StartupWMClass against the window class, case-insensitive', () => {
+    const rows = [{ match: 'app', text: 'anytype.desktop' }];
+    const classes = { 'anytype.desktop': 'anytype' };
+    // WindowTracker may map the window to a NoDisplay sibling desktop of the same program
+    assert.equal(m.tile_excl_match('anytype', 'anytype', 'Anytype', rows, 'anytype-xwayland.desktop', classes), true);
+    const brave = [{ match: 'app', text: 'com.brave.Browser.desktop' }];
+    const braveClasses = { 'com.brave.Browser.desktop': 'brave-browser' };
+    assert.equal(m.tile_excl_match('Brave-browser', 'Brave-browser', 'Brave', brave, 'com.brave.Browser.desktop', braveClasses), true);
+    assert.equal(m.tile_excl_match('BRAVE-BROWSER', null, null, brave, null, braveClasses), true);
+});
+
+test('match: app StartupWMClass compares the window instance too', () => {
+    const rows = [{ match: 'app', text: 'foo.desktop' }];
+    const classes = { 'foo.desktop': 'Foo' };
+    assert.equal(m.tile_excl_match(null, 'foo', 'x', rows, 'other.desktop', classes), true);
+    assert.equal(m.tile_excl_match(null, 'other-instance', 'x', rows, 'other.desktop', classes), false);
+});
+
+test('match: app StartupWMClass mismatch with a different app id does not match', () => {
+    const rows = [{ match: 'app', text: 'anytype.desktop' }];
+    const classes = { 'anytype.desktop': 'anytype' };
+    assert.equal(m.tile_excl_match('other-class', 'other-class', 'x', rows, 'elsewhere.desktop', classes), false);
+});
+
+test('match: app row with null StartupWMClass falls back to id compare only', () => {
+    const rows = [{ match: 'app', text: 'SciTE.desktop' }];
+    const classes = { 'SciTE.desktop': null };
+    assert.equal(m.tile_excl_match('SciTE', 'SciTE', 'x', rows, 'other.desktop', classes), false);
+    assert.equal(m.tile_excl_match('SciTE', 'SciTE', 'x', rows, 'SciTE.desktop', classes), true);
+});
+
+test('match: app row tolerates a missing or empty appClasses map (id only)', () => {
+    const rows = [{ match: 'app', text: 'org.gimp.GIMP.desktop:flatpak' }];
+    assert.equal(m.tile_excl_match('gimp', 'gimp', 'x', rows, 'org.gimp.GIMP.desktop:flatpak'), true);
+    assert.equal(m.tile_excl_match('gimp', 'gimp', 'x', rows, 'org.gimp.GIMP.desktop:flatpak', undefined), true);
+    assert.equal(m.tile_excl_match('Gimp', 'gimp', 'x', rows, null, {}), false);
+});
+
 test('rows_append appends a normalized app row only once', () => {
     assert.deepEqual(
         m.tile_excl_rows_append([{ match: 'class', text: 'Firefox' }], 'org.gimp.GIMP.desktop:flatpak'),
