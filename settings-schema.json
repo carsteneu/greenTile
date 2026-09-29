@@ -10,7 +10,8 @@
          "title": "Settings",
          "sections": [
             "tiling-section",
-            "panel-section"
+            "panel-section",
+            "exclusion-section"
          ]
       },
       "hotkeys-tab": {
@@ -19,7 +20,8 @@
           "sections": [
              "autotile-hotkey-section",
              "preset-section",
-             "resize-section"
+             "resize-section",
+             "exclusion-hotkey-section"
           ]
       },
       "autotile-hotkey-section": {
@@ -55,6 +57,20 @@
          "title": "Tiling",
          "keys": [
             "tileAnimation"
+         ]
+      },
+      "exclusion-section": {
+         "type": "section",
+         "title": "Never tile",
+         "keys": [
+            "exclusions"
+         ]
+      },
+      "exclusion-hotkey-section": {
+         "type": "section",
+         "title": "Never tile",
+         "keys": [
+            "excludeHotkey"
          ]
       },
       "panel-section": {
@@ -114,6 +130,20 @@
       "type": "string",
       "default": "[]",
       "description": "Preset definitions (JSON)"
+   },
+   "excludeHotkey": {
+      "type": "keybinding",
+      "default": "<Super>g",
+      "description": "Toggle 'never tile' for the focused window"
+   },
+   "exclusions": {
+      "type": "list",
+      "description": "Windows matching one of these rows are never tiled; they float freely wherever you put them",
+      "columns": [
+         {"id": "match", "title": "Match", "type": "options", "options": {"Window class": "class", "Title contains": "title"}},
+         {"id": "text", "title": "Text", "type": "string"}
+      ],
+      "default": []
    },
    "wsPresets": {
       "type": "string",

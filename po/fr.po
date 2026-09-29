@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: greenTile 0.1.0\n"
 "Report-Msgid-Bugs-To: https://github.com/carsteneu\n"
-"POT-Creation-Date: 2026-09-29 12:52+0200\n"
+"POT-Creation-Date: 2026-09-29 13:37+0200\n"
 "PO-Revision-Date: 2025-02-05 18:38+0100\n"
 "Last-Translator: claudiux\n"
 "Language-Team: French\n"
@@ -18,127 +18,135 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "X-Generator: Poedit 3.4.2\n"
 
-#: greenTile.js:1809
+#: greenTile.js:323
+msgid "Window floats"
+msgstr ""
+
+#: greenTile.js:323
+msgid "Window tiles again"
+msgstr ""
+
+#: greenTile.js:1909
 #, javascript-format
 msgid "assigned — workspace %d"
 msgstr ""
 
-#: greenTile.js:1868
+#: greenTile.js:1968
 msgid "Please enter a name."
 msgstr ""
 
-#: greenTile.js:1891
+#: greenTile.js:1991
 #, javascript-format
 msgid "from %d"
 msgstr ""
 
-#: greenTile.js:2007
+#: greenTile.js:2107
 msgid "Rules (by window count)"
 msgstr ""
 
-#: greenTile.js:2011
+#: greenTile.js:2111
 msgid "Rule"
 msgstr ""
 
-#: greenTile.js:2012
+#: greenTile.js:2112
 msgid "Delete rule"
 msgstr ""
 
-#: greenTile.js:2020
+#: greenTile.js:2120
 msgid "Rule applies from"
 msgstr ""
 
-#: greenTile.js:2027
+#: greenTile.js:2127
 msgid "windows"
 msgstr ""
 
-#: greenTile.js:2029
+#: greenTile.js:2129
 msgid "Painter"
 msgstr ""
 
-#: greenTile.js:2044
+#: greenTile.js:2144
 msgid ""
 "Click or drag: the row sets how many windows the column holds. Right-click "
 "removes a column."
 msgstr ""
 
-#: greenTile.js:2049
+#: greenTile.js:2149
 msgid "Name"
 msgstr ""
 
-#: greenTile.js:2050
+#: greenTile.js:2150
 msgid "Preset name"
 msgstr ""
 
-#: greenTile.js:2054
+#: greenTile.js:2154
 msgid "Save"
 msgstr ""
 
-#: greenTile.js:2071
+#: greenTile.js:2171
 #, javascript-format
 msgid "Result: %s"
 msgstr ""
 
-#: greenTile.js:2231
+#: greenTile.js:2331
 msgid "Gap between windows"
 msgstr ""
 
-#: greenTile.js:2236
+#: greenTile.js:2336
 #, javascript-format
 msgid "%d px"
 msgstr ""
 
-#: greenTile.js:2255
+#: greenTile.js:2355
 msgid "Reset sizes"
 msgstr ""
 
-#: greenTile.js:2286
+#: greenTile.js:2386
 #, javascript-format
 msgid "Presets — workspace %d · %s"
 msgstr ""
 
-#: greenTile.js:2288
+#: greenTile.js:2388
 msgid "Create preset"
 msgstr ""
 
-#: greenTile.js:2288
+#: greenTile.js:2388
 #, javascript-format
 msgid "Edit %s"
 msgstr ""
 
-#: greenTile.js:2292
+#: greenTile.js:2392
 msgid "Back"
 msgstr ""
 
-#: greenTile.js:2301
+#: greenTile.js:2401
 #, fuzzy
 #| msgid "Auto close"
 msgid "Auto: on"
 msgstr "Fermeture auto"
 
-#: greenTile.js:2301
+#: greenTile.js:2401
 #, fuzzy
 #| msgid "Auto close"
 msgid "Auto: off"
 msgstr "Fermeture auto"
 
-#: greenTile.js:2322
+#: greenTile.js:2422
 msgid "Dark theme"
 msgstr ""
 
-#: greenTile.js:2322
+#: greenTile.js:2422
 msgid "Light theme"
 msgstr ""
 
-#: greenTile.js:2442
+#: greenTile.js:2542
 msgid "No presets yet."
 msgstr ""
 
-#: greenTile.js:2457
+#: greenTile.js:2557
 msgid "New preset"
 msgstr ""
 
-#: greenTile.js:2460
+#: greenTile.js:2560
 msgid "Click a row to apply it to this workspace and tile right away"
 msgstr ""
 
@@ -178,6 +186,11 @@ msgstr ""
 
 #. settings-schema.json->tiling-section->title
 msgid "Tiling"
+msgstr ""
+
+#. settings-schema.json->exclusion-section->title
+#. settings-schema.json->exclusion-hotkey-section->title
+msgid "Never tile"
 msgstr ""
 
 #. settings-schema.json->panel-section->title
@@ -222,6 +235,24 @@ msgstr ""
 
 #. settings-schema.json->presets->description
 msgid "Preset definitions (JSON)"
+msgstr ""
+
+#. settings-schema.json->excludeHotkey->description
+msgid "Toggle 'never tile' for the focused window"
+msgstr ""
+
+#. settings-schema.json->exclusions->description
+msgid ""
+"Windows matching one of these rows are never tiled; they float freely "
+"wherever you put them"
+msgstr ""
+
+#. settings-schema.json->exclusions->columns->title
+msgid "Match"
+msgstr ""
+
+#. settings-schema.json->exclusions->columns->title
+msgid "Text"
 msgstr ""
 
 #. settings-schema.json->wsPresets->description

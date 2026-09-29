@@ -30,6 +30,7 @@ The starting point was the shipped webpack bundle `5.4/gTile.js` of gTile 2.2.1,
 | `Super+Ctrl+A` | Turn automatic tiling on for the focused monitor and the active workspace and tile now (with its preset if one is assigned, otherwise with the auto grid); pressing it again tiles again |
 | `Super+Ctrl+D` | Turn automatic tiling off for the focused monitor and the active workspace (also pauses its preset) |
 | `Super+Ctrl+P` | Open/close the preset panel for the monitor of the focused window |
+| `Super+G` | Never tile the focused window — press again to tile it again (forgotten when the window is closed) |
 | `Super+Alt+Right` / `Super+Alt+Left` | Make the focused tiled window wider / narrower (tap = 1 px, hold to speed up) |
 | `Super+Alt+Down` / `Super+Alt+Up` | Make the focused tiled window taller / shorter |
 
@@ -90,6 +91,12 @@ Without a preset the auto grid applies, depending on the monitor width:
 - **narrower than 2100 px:** up to 3 windows in one row, from 4 windows on 3 columns with stacks (4 = 1·1·2, 5 = 1·2·2, 6 = 2·2·2)
 
 In every case only visible windows of the **active** workspace are tiled, never windows from other workspaces. Minimized windows are left out. The order follows the current position on screen, so windows you rearranged by hand keep their place.
+
+## Excluding windows
+
+Windows on the **Never tile** list (settings dialog, **Settings** page) are left alone by greenTile: they are never tiled — not by auto mode, presets, `Super+Ctrl+3/6` or snap-on-release — and not counted for the layout, so the rest tiles as if they were not there. The resize hotkeys ignore them too; they float freely wherever you put them. A row matches by **Window class** (the WM_CLASS equals the text — the class or the instance, case-insensitive) or **Title contains** (the window title contains the text, case-insensitive). Empty rows are ignored. Changes apply live.
+
+For a single window, press `Super+G` while it has focus: the rest of its monitor retiles and the window floats (a short OSD shows "Window floats"). Press `Super+G` again and it is tiled back in ("Window tiles again"). This ad-hoc state is kept in memory per window and forgotten when the window is closed — it is **not** saved to the list.
 
 ## Moving borders
 

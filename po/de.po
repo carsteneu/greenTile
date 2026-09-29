@@ -9,7 +9,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: greenTile 0.1.0\n"
 "Report-Msgid-Bugs-To: https://github.com/carsteneu\n"
-"POT-Creation-Date: 2026-09-29 12:52+0200\n"
+"POT-Creation-Date: 2026-09-29 13:37+0200\n"
 "PO-Revision-Date: 2026-09-28 17:17+0200\n"
 "Last-Translator: carsten_eu\n"
 "Language-Team: German\n"
@@ -20,45 +20,53 @@ msgstr ""
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 "X-Generator: Poedit 2.3\n"
 
-#: greenTile.js:1809
+#: greenTile.js:323
+msgid "Window floats"
+msgstr "Fenster schwebt frei"
+
+#: greenTile.js:323
+msgid "Window tiles again"
+msgstr "Fenster wird wieder gekachelt"
+
+#: greenTile.js:1909
 #, javascript-format
 msgid "assigned — workspace %d"
 msgstr "zugewiesen — Fläche %d"
 
-#: greenTile.js:1868
+#: greenTile.js:1968
 msgid "Please enter a name."
 msgstr "Bitte einen Namen eingeben."
 
-#: greenTile.js:1891
+#: greenTile.js:1991
 #, javascript-format
 msgid "from %d"
 msgstr "ab %d"
 
-#: greenTile.js:2007
+#: greenTile.js:2107
 msgid "Rules (by window count)"
 msgstr "Regeln (nach Fensterzahl)"
 
-#: greenTile.js:2011
+#: greenTile.js:2111
 msgid "Rule"
 msgstr "Regel"
 
-#: greenTile.js:2012
+#: greenTile.js:2112
 msgid "Delete rule"
 msgstr "Regel löschen"
 
-#: greenTile.js:2020
+#: greenTile.js:2120
 msgid "Rule applies from"
 msgstr "Regel gilt ab"
 
-#: greenTile.js:2027
+#: greenTile.js:2127
 msgid "windows"
 msgstr "Fenstern"
 
-#: greenTile.js:2029
+#: greenTile.js:2129
 msgid "Painter"
 msgstr "Malerei"
 
-#: greenTile.js:2044
+#: greenTile.js:2144
 msgid ""
 "Click or drag: the row sets how many windows the column holds. Right-click "
 "removes a column."
@@ -66,79 +74,79 @@ msgstr ""
 "Klicken oder ziehen: Die Zeile legt fest, wie viele Fenster die Spalte "
 "aufnimmt. Rechtsklick entfernt eine Spalte."
 
-#: greenTile.js:2049
+#: greenTile.js:2149
 msgid "Name"
 msgstr "Name"
 
-#: greenTile.js:2050
+#: greenTile.js:2150
 msgid "Preset name"
 msgstr "Name des Presets"
 
-#: greenTile.js:2054
+#: greenTile.js:2154
 msgid "Save"
 msgstr "Speichern"
 
-#: greenTile.js:2071
+#: greenTile.js:2171
 #, javascript-format
 msgid "Result: %s"
 msgstr "Ergebnis: %s"
 
-#: greenTile.js:2231
+#: greenTile.js:2331
 msgid "Gap between windows"
 msgstr "Abstand zwischen Fenstern"
 
-#: greenTile.js:2236
+#: greenTile.js:2336
 #, javascript-format
 msgid "%d px"
 msgstr "%d px"
 
-#: greenTile.js:2255
+#: greenTile.js:2355
 msgid "Reset sizes"
 msgstr "Größen zurücksetzen"
 
-#: greenTile.js:2286
+#: greenTile.js:2386
 #, javascript-format
 msgid "Presets — workspace %d · %s"
 msgstr "Presets — Arbeitsfläche %d · %s"
 
-#: greenTile.js:2288
+#: greenTile.js:2388
 msgid "Create preset"
 msgstr "Neues Preset"
 
-#: greenTile.js:2288
+#: greenTile.js:2388
 #, javascript-format
 msgid "Edit %s"
 msgstr "%s bearbeiten"
 
-#: greenTile.js:2292
+#: greenTile.js:2392
 msgid "Back"
 msgstr "zurück"
 
-#: greenTile.js:2301
+#: greenTile.js:2401
 msgid "Auto: on"
 msgstr "Auto: an"
 
-#: greenTile.js:2301
+#: greenTile.js:2401
 msgid "Auto: off"
 msgstr "Auto: aus"
 
-#: greenTile.js:2322
+#: greenTile.js:2422
 msgid "Dark theme"
 msgstr "Dunkles Design"
 
-#: greenTile.js:2322
+#: greenTile.js:2422
 msgid "Light theme"
 msgstr "Helles Design"
 
-#: greenTile.js:2442
+#: greenTile.js:2542
 msgid "No presets yet."
 msgstr "Noch keine Presets vorhanden."
 
-#: greenTile.js:2457
+#: greenTile.js:2557
 msgid "New preset"
 msgstr "Neu anlegen"
 
-#: greenTile.js:2460
+#: greenTile.js:2560
 msgid "Click a row to apply it to this workspace and tile right away"
 msgstr "Klick auf eine Zeile = sofort auf dieser Fläche anwenden & kacheln"
 
@@ -177,6 +185,11 @@ msgstr "Größe gekachelter Fenster ändern"
 #. settings-schema.json->tiling-section->title
 msgid "Tiling"
 msgstr "Kacheln"
+
+#. settings-schema.json->exclusion-section->title
+#. settings-schema.json->exclusion-hotkey-section->title
+msgid "Never tile"
+msgstr "Nie kacheln"
 
 #. settings-schema.json->panel-section->title
 msgid "Preset panel"
@@ -225,6 +238,26 @@ msgstr "Fokussiertes gekacheltes Fenster niedriger machen"
 msgid "Preset definitions (JSON)"
 msgstr "Preset-Definitionen (JSON)"
 
+#. settings-schema.json->excludeHotkey->description
+msgid "Toggle 'never tile' for the focused window"
+msgstr "„Nie kacheln“ für das fokussierte Fenster ein- und ausschalten"
+
+#. settings-schema.json->exclusions->description
+msgid ""
+"Windows matching one of these rows are never tiled; they float freely "
+"wherever you put them"
+msgstr ""
+"Fenster, die auf eine dieser Zeilen passen, werden nie gekachelt — sie "
+"schweben frei, egal wo sie abgelegt werden"
+
+#. settings-schema.json->exclusions->columns->title
+msgid "Match"
+msgstr "Abgleich"
+
+#. settings-schema.json->exclusions->columns->title
+msgid "Text"
+msgstr "Text"
+
 #. settings-schema.json->wsPresets->description
 msgid "Workspace to preset assignments (JSON)"
 msgstr "Zuordnung von Arbeitsflächen zu Presets (JSON)"
@@ -263,7 +296,8 @@ msgstr "Kacheln animieren"
 
 #. settings-schema.json->tileAnimation->tooltip
 msgid "Windows glide into their new place. Off: they jump there at once."
-msgstr "Fenster gleiten an ihren neuen Platz. Aus: Sie springen sofort dorthin."
+msgstr ""
+"Fenster gleiten an ihren neuen Platz. Aus: Sie springen sofort dorthin."
 
 #. settings-schema.json->panelTheme->description
 msgid "Theme of the preset panel"
