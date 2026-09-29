@@ -1812,7 +1812,7 @@ const tile_drop_target = (app, w, px, py, fromMonitor, startFrame) => {
     const others = tile_collect_windows(monitor, null, wsIndex).filter((t) => t !== w);
     const windows = same ? others.concat([w]) : others;
     const n = windows.length;
-    if (n < 2)
+    if (n < (same ? 2 : 1))
         return null;
     const layout = tile_layout_shape(app, monitorIndex, n);
     if (!layout)
@@ -1839,7 +1839,11 @@ const tile_drop_target = (app, w, px, py, fromMonitor, startFrame) => {
     }
     if (ci === -1 || ci >= ordered.length)
         return null;
-    if (fromIndex === -1 || fromIndex === ci)
+    // fromIndex -1: cross-monitor drop, A is appended fresh (tile_drop_layout).
+    // On the own monitor A's index must exist and the target cell must not be A's.
+    if (same && fromIndex === -1)
+        return null;
+    if (fromIndex === ci)
         return null;
     const zone = tile_drop_zone(cellRects[ci], px, py);
     if (!zone)
@@ -1862,6 +1866,10 @@ const tile_drop_tick = (app) => {
         return true;
     }
     const monitor = utils_Main.layoutManager.monitors[hit.monitorIndex];
+    if (!monitor) {
+        tile_drop_stop();
+        return false;
+    }
     const area = getUsableScreenArea(monitor);
     const rects = tile_split_rects(hit.next.kind, hit.next.shape, null, area);
     // A's cell in the new layout; a cross-monitor A sits at the end of the order
@@ -1888,6 +1896,8 @@ const tile_drop_end = (app, w, op) => {
         return false;
     const p = global.get_pointer();
     const hit = tile_drop_target(app, w, p[0], p[1], fromMonitor, start);
+    if (!hit || !hit.next)
+        return false;
     const wsIndex = global.workspace_manager.get_active_workspace().index();
     const layouts = tile_layouts_parse(app.config.settings.getValue('layouts') || '');
     if (layouts === null)
@@ -1902,6 +1912,9 @@ const tile_drop_end = (app, w, op) => {
     const area = getUsableScreenArea(monitor);
     const orderedByNext = hit.next.order.map((i) => (i === hit.ordered.length ? w : hit.ordered[i]));
     tile_place_rects(app, orderedByNext, { kind: hit.next.kind, shape: hit.next.shape }, null, area, true);
+    // Overrides from a recent resize/swap must not re-sort the freshly placed order.
+    for (const t of orderedByNext)
+        tile_sort_rect_override.delete(t.get_stable_sequence());
     if (fromMonitor !== hit.monitorIndex)
         tile_auto_schedule_monitor(app, fromMonitor, 250);
     global.log('greenTile drag split ws' + (wsIndex + 1) + ' mon=' + ref.mkey + ' n=' + n + ' ' + hit.next.kind + '=[' + hit.next.shape.join(',') + ']');
@@ -1952,7 +1965,7 @@ const tile_preset_retile = (app, monitorIndex, focusWindow, animate = true, wsIn
     const layout = tile_layout_shape(app, monitorIndex, n);
     if (!layout || !layout.rule)
         return;
-    const ordered = tile_sort_reading_order((focused ? [focusWindow] : []).concat(windows), true);
+    const ordered = tile_sort_reading_order((focused ? [focusWindow] : []).concat(windows), layout.kind === 'cols');
     const split = tile_split_for(app, monitorIndex, ws, n, layout);
     tile_place_rects(app, ordered, layout, split, area, animate);
     if (animate)
@@ -2055,6 +2068,8 @@ const tile_layouts_set = (layouts, mkey, wskey, patch) => {
         else if (isObject(patch.splits)) {
             const splits = isObject(entry.splits) ? Object.assign({}, entry.splits) : {};
             for (const count of Object.keys(patch.splits)) {
+                if (!/^\d+$/.test(count))
+                    continue;
                 const value = patch.splits[count];
                 if (value === null)
                     delete splits[count];
@@ -2076,6 +2091,8 @@ const tile_layouts_set = (layouts, mkey, wskey, patch) => {
         else if (isObject(patch.shapes)) {
             const shapes = isObject(entry.shapes) ? Object.assign({}, entry.shapes) : {};
             for (const count of Object.keys(patch.shapes)) {
+                if (!/^\d+$/.test(count))
+                    continue;
                 const value = patch.shapes[count];
                 if (value === null)
                     delete shapes[count];

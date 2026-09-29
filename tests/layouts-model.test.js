@@ -163,6 +163,16 @@ test('invalid splits patch values are ignored', () => {
     assert.deepEqual(l2, { M: { '1': { preset: 'p1' } } });
 });
 
+test('splits and shapes patch keys are numeric window counts', () => {
+    const l = m.tile_layouts_set({}, 'M', '1', {
+        splits: { '-1': { cols: [0.5] } },
+        shapes: { 'oops': JSON.parse('{"kind":"cols","shape":[2,1]}') },
+    });
+    assert.deepEqual(l, {});
+    const l2 = m.tile_layouts_set({}, 'M', '1', { shapes: { '2': { kind: 'cols', shape: [2] }, '-1': { kind: 'cols', shape: [2] } } });
+    assert.deepEqual(m.tile_layouts_shapes(l2, 'M', '1'), { '2': { kind: 'cols', shape: [2] } });
+});
+
 test('shape_valid accepts cols/rows with integer parts summing to n', () => {
     assert.deepEqual(m.tile_shape_valid({ kind: 'cols', shape: [2, 1] }, 3), { kind: 'cols', shape: [2, 1] });
     assert.deepEqual(m.tile_shape_valid({ kind: 'rows', shape: [3] }, 3), { kind: 'rows', shape: [3] });
