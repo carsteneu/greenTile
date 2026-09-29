@@ -621,8 +621,14 @@ const tile_app_columns = (app, cols) => {
 // by the next retile, ignored after TILE_SORT_OVERRIDE_MS when no retile came).
 const tile_sort_rect_override = new Map();
 const TILE_SORT_OVERRIDE_MS = 2000;
+const tile_sort_prune_overrides = (now) => {
+    for (const [seq, o] of tile_sort_rect_override)
+        if (now - o.at > TILE_SORT_OVERRIDE_MS)
+            tile_sort_rect_override.delete(seq);
+};
 const tile_sort_reading_order = (windows, columnMajor) => {
     const now = GLib.get_monotonic_time() / 1000;
+    tile_sort_prune_overrides(now);
     const rects = windows.map((w) => {
         const seq = w.get_stable_sequence();
         const o = tile_sort_rect_override.get(seq);
