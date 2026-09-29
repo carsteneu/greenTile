@@ -155,6 +155,10 @@ Known limitation: entries are keyed by workspace number, as before, so they shif
 
 ## Installation and deploy
 
+From a release zip (end users): download `greenTile-<version>.zip` from [Releases](https://github.com/carsteneu/greenTile/releases), unzip it and run `./install.sh` — it copies the extension to `~/.local/share/cinnamon/extensions/greenTile@carsteneu/` and compiles the translations (gettext's `msgfmt`; without it the extension runs in English). Then restart Cinnamon (`Ctrl+Alt+Esc`) and enable greenTile in System Settings → Extensions. The zip is built and attached automatically whenever a `v*` tag is pushed (`.github/workflows/release.yml`, `build-release.sh`).
+
+From a checkout (development, live deploy):
+
 ```bash
 D=~/.local/share/cinnamon/extensions/greenTile@carsteneu
 mkdir -p "$D"

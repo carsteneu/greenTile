@@ -1,0 +1,20 @@
+name: release
+
+# A pushed v* tag builds the install zip (build-release.sh) and attaches it
+# to a GitHub Release for that tag.
+on:
+  push:
+    tags: ['v*']
+
+permissions:
+  contents: write
+
+jobs:
+  zip:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: ./build-release.sh
+      - run: gh release create "$GITHUB_REF_NAME" dist/*.zip --title "greenTile ${GITHUB_REF_NAME#v}" --notes "Unzip, run ./install.sh, restart Cinnamon (Ctrl+Alt+Esc), then enable greenTile in System Settings → Extensions. Details in the README."
+        env:
+          GH_TOKEN: ${{ github.token }}
