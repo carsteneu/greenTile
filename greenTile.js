@@ -220,7 +220,7 @@ class Config {
             this.settings.bindProperty(Settings.BindingDirection.IN, nameOverride, nameOverride, this.updateGridSettings, null);
         }
         this.EnableHotkey();
-        tile_theme_init(this.app);
+        tile_theme_init(this);
         tile_monitors_refresh(app, () => {
             tile_layouts_migrate_once(app);
             tile_auto_connect_all(app);
@@ -2267,7 +2267,9 @@ const tile_theme_resolve = (setting, colorScheme, themeName) => {
 // Live theme state, set up per App (Config). Reads the panelTheme setting, the x-apps
 // portal color scheme and the Cinnamon theme name; under "system" a change of the
 // scheme rebuilds the open panel right away. Disconnected in Config.destroy.
-const tile_theme_state = { theme: 'dark', app: null, portal: null, portalSig: 0, cinnamon: null, cinnamonSig: 0 };
+// tile_theme_init gets the Config itself, not the app: it runs inside the Config
+// constructor, where app.config is not assigned yet.
+const tile_theme_state = { theme: 'dark', config: null, portal: null, portalSig: 0, cinnamon: null, cinnamonSig: 0 };
 // Cairo colors for the thumbnails and the painter's dashed outline, per theme; the CSS
 // classes cover the rest. Dark is today's look, one to one.
 const tile_theme_cairo = {
@@ -2277,20 +2279,20 @@ const tile_theme_cairo = {
 const tile_theme_cairo_get = (key) => tile_theme_cairo[tile_theme_state.theme][key];
 const tile_theme_panel_class = () => tile_theme_state.theme === 'light' ? 'gk-panel gk-light' : 'gk-panel';
 const tile_theme_changed = () => {
-    const app = tile_theme_state.app;
-    if (!app)
+    const config = tile_theme_state.config;
+    if (!config)
         return;
     tile_theme_state.theme = tile_theme_resolve(
-        app.config.settings.getValue('panelTheme'),
+        config.settings.getValue('panelTheme'),
         tile_theme_state.portal ? tile_theme_state.portal.get_string('color-scheme') : null,
         tile_theme_state.cinnamon ? tile_theme_state.cinnamon.get_string('name') : null
     );
     // An open panel or editor rebuilds itself: restyling in place would leave the
     // Cairo thumbnails and the painter in the old colors.
     if (tile_panel.actor)
-        tile_panel_rebuild(app);
+        tile_panel_rebuild(config.app);
 };
-const tile_theme_init = (app) => {
+const tile_theme_init = (config) => {
     if (tile_theme_state.portal === null) {
         const source = tile_Gio.SettingsSchemaSource.get_default();
         if (source && source.lookup('org.x.apps.portal', true)) {
@@ -2302,7 +2304,7 @@ const tile_theme_init = (app) => {
             tile_theme_state.cinnamonSig = tile_theme_state.cinnamon.connect('changed::name', tile_theme_changed);
         }
     }
-    tile_theme_state.app = app;
+    tile_theme_state.config = config;
     tile_theme_changed();
 };
 const tile_theme_shutdown = () => {
@@ -2324,7 +2326,7 @@ const tile_theme_shutdown = () => {
         tile_theme_state.cinnamon = null;
         tile_theme_state.cinnamonSig = 0;
     }
-    tile_theme_state.app = null;
+    tile_theme_state.config = null;
 };
 // "Gap between windows  − 8 px +" in the list view. Each click stores the value and,
 // when automatic tiling is on for this workspace, retiles it shortly after (debounced,
