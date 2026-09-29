@@ -710,7 +710,8 @@ const tile_split_remember = (app, ref, split, flushNow) => {
         return false;
     });
 };
-// true when the monitor + workspace has stored (or pending) splits — shows the reset button
+// true when the monitor + workspace has stored (or pending) splits or dragged shapes —
+// shows the reset button
 const tile_split_any = (app, monitorIndex, wsIndex) => {
     const ref = tile_split_ref(monitorIndex, wsIndex, 0);
     if (!ref)
@@ -721,7 +722,8 @@ const tile_split_any = (app, monitorIndex, wsIndex) => {
             return true;
     }
     const layouts = tile_layouts_parse(app.config.settings.getValue('layouts') || '');
-    return Object.keys(tile_layouts_splits(layouts, ref.mkey, ref.wskey)).length > 0;
+    return Object.keys(tile_layouts_splits(layouts, ref.mkey, ref.wskey)).length > 0
+        || Object.keys(tile_layouts_shapes(layouts, ref.mkey, ref.wskey)).length > 0;
 };
 const tile_split_reset = (app, monitorIndex, wsIndex) => {
     const ref = tile_split_ref(monitorIndex, wsIndex, 0);
@@ -732,7 +734,7 @@ const tile_split_reset = (app, monitorIndex, wsIndex) => {
         if (key.indexOf(prefix) === 0)
             tile_split_pending.delete(key);
     }
-    tile_layout_set(app, monitorIndex, wsIndex, { splits: null });
+    tile_layout_set(app, monitorIndex, wsIndex, { splits: null, shapes: null });
     global.log('greenTile sizes reset ws' + (wsIndex + 1) + ' mon=' + ref.mkey);
 };
 // Places the ordered windows into the cells of the layout (split or equal division).
@@ -763,7 +765,12 @@ const tile_app_auto = (app, monitorIndex, focusWindow, animate = true, wsIndex =
     let fresh = windows.filter((w) => pending.has(w.get_stable_sequence()));
     let settled = windows.filter((w) => !pending.has(w.get_stable_sequence()));
     // Sort direction follows the layout: column-major for columns, rows for rows.
-    const layout = tile_auto_shape(monitor, n);
+    // Dragged shapes (drop-model) win over the auto grid too: resolve through
+    // tile_layout_shape_ws, so the swap landing path (another workspace) also reads
+    // the shape stored for that workspace. No tiling when nothing applies.
+    const layout = tile_layout_shape_ws(app, monitorIndex, ws, n);
+    if (!layout)
+        return;
     const columnMajor = layout.kind === 'cols';
     const ordered = tile_sort_reading_order((focused ? [focusWindow] : []).concat(settled), columnMajor)
         .concat(tile_sort_reading_order(fresh, columnMajor));
@@ -1733,22 +1740,35 @@ const tile_drop_fits = (kind, shape, width, height, gap, minPx) => {
     return major >= minPx && minor >= minPx;
 };
 // <<< drop-model
-// Layout greenTile tiles for n windows on this monitor and the active workspace: the
-// preset rule filled to n (tile_fill_stacks), or the automatic grid. null when nothing
-// is tiled (no rule matches, or no preset and automatic tiling off).
-const tile_layout_shape = (app, monitorIndex, n) => {
+// Layout greenTile tiles for n windows on this monitor and the given workspace: the
+// preset rule filled to n (tile_fill_stacks), or the automatic grid — with a stored
+// dragged shape (drop-model) winning over both. null when nothing is tiled.
+const tile_layout_shape_ws = (app, monitorIndex, wsIndex, n) => {
     const monitor = utils_Main.layoutManager.monitors[monitorIndex];
     if (!monitor || n < 2)
         return null;
-    const layoutState = tile_layout_for(app, monitorIndex, global.workspace_manager.get_active_workspace().index());
+    const layoutState = tile_layout_for(app, monitorIndex, wsIndex);
+    let base = null;
     if (layoutState.preset) {
         const rule = tile_rules_pick(layoutState.preset.rules, n);
         if (!rule || !rule.stacks || rule.stacks.length === 0)
             return null;
-        return { kind: 'cols', shape: tile_fill_stacks(rule.stacks, n), rule: rule, preset: layoutState.preset };
+        base = { kind: 'cols', shape: tile_fill_stacks(rule.stacks, n), rule: rule, preset: layoutState.preset };
+    } else if (layoutState.auto) {
+        base = tile_auto_shape(monitor, n);
     }
-    return layoutState.auto ? tile_auto_shape(monitor, n) : null;
+    if (!base)
+        return null;
+    // A dragged shape for this monitor + workspace + window count wins over the
+    // preset rule / auto grid; corrupt layouts read as empty ({}), so nothing stored.
+    const ref = tile_split_ref(monitorIndex, wsIndex, n);
+    if (!ref)
+        return base;
+    const layouts = tile_layouts_parse(app.config.settings.getValue('layouts') || '');
+    return tile_layout_resolve(base, tile_layouts_shapes(layouts, ref.mkey, ref.wskey)[ref.n], n);
 };
+// Layout for the active workspace.
+const tile_layout_shape = (app, monitorIndex, n) => tile_layout_shape_ws(app, monitorIndex, global.workspace_manager.get_active_workspace().index(), n);
 const tile_preset_retile = (app, monitorIndex, focusWindow, animate = true, wsIndex = null) => {
     const monitor = utils_Main.layoutManager.monitors[monitorIndex];
     if (!monitor)
