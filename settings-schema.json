@@ -140,7 +140,7 @@
       "type": "list",
       "description": "Windows matching one of these rows are never tiled; they float freely wherever you put them",
       "columns": [
-         {"id": "match", "title": "Match", "type": "options", "options": {"Window class": "class", "Title contains": "title"}},
+         {"id": "match", "title": "Match", "type": "string", "options": {"Window class": "class", "Title contains": "title"}},
          {"id": "text", "title": "Text", "type": "string"}
       ],
       "default": []
