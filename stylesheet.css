@@ -649,6 +649,10 @@
     color: #d97a24;
 }
 
+.gk-light .gk-hint {
+    color: #5f6672;
+}
+
 .gk-light .gk-gap-row {
     border-top-color: #d5d9e2;
 }
@@ -777,6 +781,10 @@
 
 .gk-light .gk-entry:focus {
     border-color: #d97a24;
+}
+
+.gk-light .gk-ed-faint {
+    color: #5f6672;
 }
 
 .gk-light .gk-error {

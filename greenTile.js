@@ -2296,11 +2296,12 @@ const tile_theme_init = (config) => {
     if (tile_theme_state.portal === null) {
         const source = tile_Gio.SettingsSchemaSource.get_default();
         if (source && source.lookup('org.x.apps.portal', true)) {
-            tile_theme_state.portal = tile_Gio.Settings.new({ schema_id: 'org.x.apps.portal' });
+            // gjs: the object form must go through the constructor, Settings.new takes the schema id string only
+            tile_theme_state.portal = new tile_Gio.Settings({ schema_id: 'org.x.apps.portal' });
             tile_theme_state.portalSig = tile_theme_state.portal.connect('changed::color-scheme', tile_theme_changed);
         }
         if (source && source.lookup('org.cinnamon.theme', true)) {
-            tile_theme_state.cinnamon = tile_Gio.Settings.new({ schema_id: 'org.cinnamon.theme' });
+            tile_theme_state.cinnamon = new tile_Gio.Settings({ schema_id: 'org.cinnamon.theme' });
             tile_theme_state.cinnamonSig = tile_theme_state.cinnamon.connect('changed::name', tile_theme_changed);
         }
     }
