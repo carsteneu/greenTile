@@ -3720,12 +3720,12 @@ const tile_panel_open = (app) => {
             }
         }
     });
-    // The list follows the desktop: workspace and focus changes re-render it
-    // (title, assignment, thumbnail window count). The editor is never rebuilt by
-    // these signals, it would lose the draft.
+    // The list follows the desktop: a workspace switch re-renders it (title,
+    // assignment, thumbnail window count). The editor is never rebuilt by these
+    // signals, it would lose the draft.
     // Meta.WorkspaceManager emits "workspace-switched" (windowManager.js:435).
     // A rebuild during an active drag would kill the grab, so it is skipped then.
-    const onDesktopChange = () => {
+    const onWorkspaceSwitched = () => {
         if (tile_panel.view === 'editor')
             return;
         if (tile_panel.dragging)
@@ -3733,8 +3733,50 @@ const tile_panel_open = (app) => {
         else
             tile_panel_rebuild(app);
     };
-    tile_panel.sig.push({ obj: global.workspace_manager, id: global.workspace_manager.connect('workspace-switched', onDesktopChange) });
-    tile_panel.sig.push({ obj: global.display, id: global.display.connect('notify::focus-window', onDesktopChange) });
+    tile_panel.sig.push({ obj: global.workspace_manager, id: global.workspace_manager.connect('workspace-switched', onWorkspaceSwitched) });
+    // Clicking outside closes the panel, in both views, without a grab: the click
+    // still acts on whatever it hit. Chrome surfaces (Cinnamon's panels, menus,
+    // other extensions' overlays) deliver Clutter events — close when the pressed
+    // actor is not the panel or one of its children. This needs the CAPTURE phase:
+    // applet buttons handle their button presses with EVENT_STOP, so a plain
+    // stage button-press listener never sees them; captured-event passes every
+    // event on its way down, before the actor under the pointer. With the editor's
+    // modal active the stage input is FULLSCREEN (main.js pushModal), so EVERY
+    // outside click arrives here; in list mode clicks on windows and the desktop
+    // go to the clients instead — they close the panel through the focus change
+    // below.
+    tile_panel.sig.push({
+        obj: global.stage,
+        id: global.stage.connect('captured-event', (stage, event) => {
+            if (event.type() !== tile_Clutter.EventType.BUTTON_PRESS)
+                return tile_Clutter.EVENT_PROPAGATE;
+            if (tile_panel.dragging)
+                return tile_Clutter.EVENT_PROPAGATE;
+            const src = event.get_source();
+            if (src && tile_panel.actor && tile_panel.actor.contains(src))
+                return tile_Clutter.EVENT_PROPAGATE;
+            global.log('greenTile panel closed by outside click');
+            tile_panel_close();
+            return tile_Clutter.EVENT_PROPAGATE;
+        }),
+    });
+    // A click into a window or on the desktop (Nemo) never becomes a stage event
+    // in list mode, but it changes the focus: that closes the panel too, the
+    // editor included (its draft is dropped, as with Esc and Back). Any other
+    // focus change — a window opening, an app demanding attention — closes it as
+    // well; that is the price of the passive approach. Suppressed during a drag,
+    // which would otherwise lose its grab.
+    tile_panel.sig.push({
+        obj: global.display,
+        id: global.display.connect('notify::focus-window', () => {
+            if (tile_panel.dragging) {
+                global.log('greenTile close suppressed (drag)');
+                return;
+            }
+            global.log('greenTile panel closed by focus change');
+            tile_panel_close();
+        }),
+    });
     // No monitors-changed handler here: on a display change enable() recreates the whole
     // App, which closes the panel; the saved-position check above covers the next open.
     panel.connect('key-press-event', (a, event) => {
