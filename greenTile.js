@@ -1999,7 +1999,7 @@ const tile_swap_hotkey = (app, dir) => {
         primaryIndex: utils_Main.layoutManager.primaryIndex,
         onlyPrimary: tile_layout_only_primary(),
         monitors: utils_Main.layoutManager.monitors.map((m, i) => ({ index: i, x: m.x, width: m.width })),
-        workspaces: global.workspace_manager.n_workspaces(),
+        workspaces: global.screen.get_n_workspaces(),
         wsIndex: wsIndex,
     });
     if (!step)
@@ -2029,7 +2029,7 @@ const tile_swap_hotkey = (app, dir) => {
     // the active workspace), the count of the other windows before it. The source
     // workspace retiles with one window less even though it is no longer active.
     const targetWsIndex = wsIndex + step.delta;
-    if (targetWsIndex < 0 || targetWsIndex >= global.workspace_manager.n_workspaces())
+    if (targetWsIndex < 0 || targetWsIndex >= global.screen.get_n_workspaces())
         return;
     const nTarget = tile_swap_windows_on(targetMonitor, targetWsIndex).length + 1;
     focusWindow.change_workspace_by_index(targetWsIndex, false, global.get_current_time());
