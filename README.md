@@ -39,7 +39,7 @@ All keys can be changed in the extension settings (Extensions manager, or ⚙ in
 A preset is a list of rules by window count: each rule defines how many columns there are and how many windows are stacked in each column. A preset is assigned to a monitor and workspace and applies there.
 
 In the panel (`Super+Ctrl+P`):
-- **Click a row:** assign the preset to this monitor and workspace and tile right away (this also turns automatic tiling on for it if it was off)
+- **Click a row:** assign the preset to this monitor and workspace and tile right away (this also turns automatic tiling on for it if it was off). The panel stays open, so you can try several presets in a row; close it with ✕, `Esc` or `Super+Ctrl+P`.
 - **✕ in a row:** remove the assignment
 - **🔧:** open the editor for this preset
 - **＋ New preset:** open the editor with an empty preset
@@ -51,12 +51,14 @@ In the panel (`Super+Ctrl+P`):
 - **◢ in the bottom right corner** resizes the panel: width (at least 600 px) and height of the part that stretches, in the list the preset rows (at least three), in the editor the painter. List and editor keep their own size, stored in the setting `panelSize`, limited to the room on the panel's monitor (a size set on a big monitor shrinks on a small one).
 - Right after switching between list and editor, clicks are ignored for 400 ms, so the second click of a double-click does not act in the new view.
 
-The thumbnail shows the rule that would apply for the current number of windows.
+The thumbnail shows the layout a click would tile right now: the matching rule, filled to the current number of windows (see below).
+
+Tiled windows always cover the whole screen, no cell stays empty. When a rule has more cells than there are windows, the highest column loses a cell (on a tie the right one) until the count fits; with fewer windows than columns, columns drop from the right. Example: a rule `2·2` with 3 windows tiles as `2·1`, with 2 windows as `1·1`. With more windows than cells, the rightmost column takes the rest.
 
 ### Editor
 
 - **Rules (left):** one row per rule, "from N" = the rule applies from N windows on (the last rule whose N is not larger than the window count wins). Click a row to edit it. **＋ Rule** adds a rule (N + 1, copy of the highest rule), **🗑 Delete rule** removes the selected one; a preset always keeps one rule.
-- **Rule applies from [−] N [+]:** changes N of the selected rule. N can be smaller than the number of painted cells; the remaining cells then stay empty (e.g. six columns from 2 windows on).
+- **Rule applies from [−] N [+]:** changes N of the selected rule. N can be smaller than the number of painted cells; with fewer windows the layout is filled as described above, so no cell stays empty.
 - **Painter:** 6 columns × 4 rows. Click or drag: the row under the pointer sets how many windows the column holds (top = 1, bottom = 4). Dragging paints every column it passes. Right-click removes a column. With more windows than cells, the rightmost column takes the rest.
 - **Name** and **Save** (or `Enter` in the name field). Saving a preset that is assigned to the active workspace retiles it right away, unless automatic tiling is off there.
 - **← Back** or `Esc` returns to the list without saving.
@@ -78,7 +80,7 @@ While automatic tiling is on for a monitor and the active workspace:
 - New windows are appended at the end.
 
 Without a preset the auto grid applies, depending on the monitor width:
-- **2100 px and wider:** up to 6 windows in one row, beyond that balanced rows (8 = 4×2, 12 = 6×2)
+- **2100 px and wider:** up to 6 windows in one row, beyond that the windows are spread evenly over rows that each span the full width (7 = 4 + 3, 8 = 4 + 4, 12 = 6 + 6)
 - **narrower than 2100 px:** up to 3 windows in one row, from 4 windows on 3 columns with stacks (4 = 1·1·2, 5 = 1·2·2, 6 = 2·2·2)
 
 In every case only visible windows of the **active** workspace are tiled, never windows from other workspaces. Minimized windows are left out. The order follows the current position on screen, so windows you rearranged by hand keep their place.

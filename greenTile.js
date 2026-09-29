@@ -533,25 +533,20 @@ const tile_app_auto = (app, monitorIndex, focusWindow) => {
         }
         return;
     }
-    // High-res: single row with one column per window up to 6, then wrap into
-    // balanced rows (8=4×2, 12=6×2). Single window => no-op (n < 2 guard above).
-    let cols;
-    let rows;
-    if (n <= 6) {
-        cols = n;
-        rows = 1;
-    } else {
-        rows = Math.ceil(n / 6);
-        cols = Math.ceil(n / rows);
-    }
+    // High-res: single row with one column per window up to 6, then the windows are
+    // spread evenly over rows (7=4+3, 8=4+4, 12=6+6), every row spans the full width
+    // (tile_auto_rows). Single window => no-op (n < 2 guard above).
+    const rows = tile_auto_rows(n);
     ordered = tile_sort_reading_order((focused ? [focusWindow] : []).concat(settled), false)
         .concat(tile_sort_reading_order(fresh, false));
-    let cellWidth = screenWidth / cols;
-    let cellHeight = screenHeight / rows;
-    for (let index = 0; index < ordered.length; index++) {
-        let col = index % cols;
-        let row = Math.floor(index / cols);
-        tile_place_cell(app, ordered[index], screenX + col * cellWidth, screenY + row * cellHeight, cellWidth, cellHeight, [screenX, screenY, screenWidth, screenHeight]);
+    let cellHeight = screenHeight / rows.length;
+    let index = 0;
+    for (let row = 0; row < rows.length; row++) {
+        let cellWidth = screenWidth / rows[row];
+        for (let col = 0; col < rows[row]; col++) {
+            tile_place_cell(app, ordered[index], screenX + col * cellWidth, screenY + row * cellHeight, cellWidth, cellHeight, [screenX, screenY, screenWidth, screenHeight]);
+            index++;
+        }
     }
 };
 // Auto-mode observer: re-tiles automatically on workspaces with automatic tiling on
@@ -1003,16 +998,55 @@ const tile_rules_pick = (rules, n) => {
     }
     return match;
 };
-// k columns of equal width, column i gets stacks[i] equal-height cells;
-// surplus windows extend the last stack, short layouts leave cells empty.
+// >>> fill-model (pure functions, no Cinnamon imports; tested by tests/fill-model.test.js)
+// 100 % area rule: tiled windows always cover the whole usable area, no cell stays empty.
+// Layout of a painted rule for n windows. Surplus windows extend the last column. With
+// fewer windows the highest column loses one cell (on a tie the right one) until the
+// count fits; below one window per column, columns drop from the right. n < 1 returns
+// the painted rule (list thumbnail on an empty workspace).
+const tile_fill_stacks = (stacks, n) => {
+    const out = stacks.map((s) => Math.max(1, Math.floor(s) || 1));
+    if (n < 1 || out.length === 0)
+        return out;
+    if (n < out.length)
+        return out.slice(0, n).map(() => 1);
+    let total = out.reduce((a, b) => a + b, 0);
+    if (n >= total) {
+        out[out.length - 1] += n - total;
+        return out;
+    }
+    while (total > n) {
+        let hi = 0;
+        for (let c = 1; c < out.length; c++) {
+            if (out[c] >= out[hi])
+                hi = c;
+        }
+        out[hi]--;
+        total--;
+    }
+    return out;
+};
+// Wide automatic grid: up to TILE_AUTO_ROW_MAX windows side by side in one row, more
+// are spread evenly over ceil(n / max) rows, the upper rows take the surplus
+// (7 = 4+3, 9 = 5+4, 13 = 5+4+4). Every row spans the full width.
+const TILE_AUTO_ROW_MAX = 6;
+const tile_auto_rows = (n) => {
+    const count = Math.max(1, Math.ceil(n / TILE_AUTO_ROW_MAX));
+    const base = Math.floor(n / count);
+    const rem = n % count;
+    const rows = [];
+    for (let r = 0; r < count; r++)
+        rows.push(base + (r < rem ? 1 : 0));
+    return rows;
+};
+// <<< fill-model
+// k columns of equal width, column i gets stacks[i] equal-height cells, after the
+// rule was filled to the window count (tile_fill_stacks): no cell stays empty.
 const tile_place_stacks = (app, ordered, stacks, screenX, screenY, screenWidth, screenHeight) => {
-    const last = stacks.slice();
-    const surplus = ordered.length - stacks.reduce((a, b) => a + b, 0);
-    if (surplus > 0)
-        last[last.length - 1] += surplus;
-    const colWidth = screenWidth / stacks.length;
+    const last = tile_fill_stacks(stacks, ordered.length);
+    const colWidth = screenWidth / last.length;
     let idx = 0;
-    for (let c = 0; c < stacks.length; c++) {
+    for (let c = 0; c < last.length; c++) {
         const cellHeight = screenHeight / last[c];
         for (let r = 0; r < last[c]; r++) {
             tile_place_cell(app, ordered[idx], screenX + c * colWidth, screenY + r * cellHeight, colWidth, cellHeight, [screenX, screenY, screenWidth, screenHeight]);
@@ -1324,9 +1358,12 @@ const tile_panel_thumb = (stacks, opts = {}) => {
         cr.setSourceRGB(color[0] / 255, color[1] / 255, color[2] / 255);
         const cw = (W - gap * (stacks.length - 1)) / stacks.length;
         for (let c = 0; c < stacks.length; c++) {
-            const ch = (H - vgap * (stacks[c] - 1)) / stacks[c];
+            // Many stacked cells (surplus windows in the filled thumbnail): the gap shrinks
+            // so that each cell keeps at least 1px.
+            const vg = stacks[c] > 1 ? Math.max(0, Math.min(vgap, (H - stacks[c]) / (stacks[c] - 1))) : 0;
+            const ch = (H - vg * (stacks[c] - 1)) / stacks[c];
             for (let r = 0; r < stacks[c]; r++)
-                tile_panel_round_rect(cr, c * (cw + gap), r * (ch + vgap), cw, ch, radius);
+                tile_panel_round_rect(cr, c * (cw + gap), r * (ch + vg), cw, ch, Math.min(radius, ch / 2));
         }
         cr.$dispose();
     });
@@ -1355,8 +1392,11 @@ const tile_panel_row = (app, preset, n) => {
         outer.add(new tile_St.Bin({ style_class: 'gk-row-stripe' }), { x_fill: false, y_fill: true });
     const box = new tile_St.BoxLayout({ style_class: 'gk-row-box', x_expand: true });
     outer.add(box, { expand: true, x_fill: true, y_fill: true });
-    const rep = tile_rules_pick(preset.rules, n) || preset.rules.reduce((best, rule) => (!best || rule.min < best.min ? rule : best), null);
-    box.add(tile_panel_thumb(rep && rep.stacks.length ? rep.stacks : [1]), tile_panel_middle());
+    const picked = tile_rules_pick(preset.rules, n);
+    const rep = picked || preset.rules.reduce((best, rule) => (!best || rule.min < best.min ? rule : best), null);
+    // A matching rule is shown filled to the window count, exactly as a click tiles it.
+    const thumbStacks = rep && rep.stacks.length ? (picked ? tile_fill_stacks(rep.stacks, n) : rep.stacks) : [1];
+    box.add(tile_panel_thumb(thumbStacks), tile_panel_middle());
     const textBox = new tile_St.BoxLayout({ vertical: true, style_class: 'gk-row-text' });
     textBox.add(new tile_St.Label({ text: preset.name, style_class: 'gk-name' }));
     if (assignedHere)
@@ -1383,8 +1423,10 @@ const tile_panel_row = (app, preset, n) => {
         if (!tile_layout_for(app, monitorIndex, wsIndex).auto)
             tile_layout_set(app, monitorIndex, wsIndex, { auto: true });
         const focusWindow = tile_focus_window();
-        tile_panel_close();
         tile_retile_monitor(app, monitorIndex, focusWindow);
+        // The list stays open so several presets can be tried in a row; only ✕,
+        // Escape or the panel hotkey close it. Rebuild shows the new assignment.
+        tile_panel_rebuild(app);
     });
     return row;
 };
