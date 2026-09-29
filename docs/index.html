@@ -100,6 +100,13 @@ h2{font:750 clamp(34px,4.4vw,56px)/1 "Bricolage";letter-spacing:-.035em;margin:0
 .split::before{content:"";position:absolute;left:4px;top:4px;bottom:4px;width:calc(50% - 6px);border-radius:5px;background:#fff}
 .split::after{content:"";position:absolute;right:4px;top:4px;height:calc(50% - 6px);width:calc(50% - 6px);border-radius:5px;background:rgba(240,162,59,.35);outline:2px solid var(--amber);outline-offset:-2px}
 
+/* editor band: screenshot left, text right (mirrors the hero) */
+.editor-band{padding-top:0}
+.editor{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(0,1fr);gap:56px;align-items:center}
+.editor .shot figcaption{justify-content:flex-start}
+.install .btn{display:inline-block}
+code{font:500 .9em "JBMono";background:var(--sheet);border:1px solid var(--rule);border-radius:5px;padding:1px 5px}
+
 /* hotkeys */
 .hk{display:grid;grid-template-columns:1fr 1fr;gap:0 48px;border-top:1.5px solid var(--ink)}
 .hk div{display:flex;justify-content:space-between;align-items:center;gap:16px;padding:14px 0;border-bottom:1px solid var(--rule)}
@@ -116,6 +123,8 @@ footer{padding:36px 0 56px;border-top:1px solid var(--rule);display:flex;justify
   .hero-top{grid-template-columns:1fr;gap:36px}
   .shot{max-width:560px}
   .shot figcaption{justify-content:flex-start}
+  .editor{grid-template-columns:1fr;gap:32px}
+  .editor .shot{max-width:640px}
   .grid{grid-template-columns:repeat(2,1fr)}
   .card.a,.card.g{grid-column:span 2}
   .card.b{grid-row:auto}
@@ -140,7 +149,7 @@ footer{padding:36px 0 56px;border-top:1px solid var(--rule);display:flex;justify
   <header class="hero">
     <div class="hero-top">
       <div>
-        <div class="eyebrow">Extension for Cinnamon 6.6</div>
+        <div class="eyebrow">Extension for Cinnamon 6.6 and newer</div>
         <h1>Every window in <em>its place.</em></h1>
         <p class="lede">greenTile tiles your Cinnamon desktop the moment a window opens. Presets per monitor and workspace, a grid that grows with you, and windows that snap where you drop them.</p>
         <div class="cta">
@@ -210,6 +219,19 @@ footer{padding:36px 0 56px;border-top:1px solid var(--rule);display:flex;justify
   </div>
 </section>
 
+<section id="editor" class="editor-band">
+  <div class="wrap editor">
+    <figure class="shot">
+      <img src="screenshots/preset-editor.png" width="876" height="635" loading="lazy" alt="The greenTile preset editor: a rule list on the left, a 6 by 4 painter with four painted columns, a name field and Save">
+      <figcaption>The preset editor · 🔧 in a row or ＋ New preset</figcaption>
+    </figure>
+    <div>
+      <h2>Paint the layout you want.</h2>
+      <p class="sub">Click or drag in the 6 × 4 painter: each column holds as many windows as the row you pick. Add a rule for every window count that needs its own shape, give the preset a name and save. If it is assigned to the workspace, the windows move right away.</p>
+    </div>
+  </div>
+</section>
+
 <section id="keys">
   <div class="wrap">
     <h2>Ten keys. That's it.</h2>
@@ -233,17 +255,17 @@ footer{padding:36px 0 56px;border-top:1px solid var(--rule);display:flex;justify
   <div class="wrap install">
     <div>
       <h2>Up and running in a minute.</h2>
-      <p class="sub">Copy the extension into your Cinnamon folder, enable it in the Extensions manager and press <kbd>Super</kbd><kbd>Ctrl</kbd><kbd>A</kbd>. Free software under the GPL v3, a fork of gTile.</p>
+      <p class="sub">Download the zip from the latest release and run <code>install.sh</code>. Restart Cinnamon, switch greenTile on in the Extensions manager and press <kbd>Super</kbd><kbd>Ctrl</kbd><kbd>A</kbd>. Free software under the GPL v3, a fork of gTile.</p>
+      <a class="btn" href="https://github.com/carsteneu/greenTile/releases/latest">Download the latest release</a>
     </div>
-<pre><span class="c"># get it</span>
-git clone https://github.com/carsteneu/greenTile
-cd greenTile
+<pre><span class="c"># unpack the release zip and install for your user</span>
+unzip greenTile-*.zip
+cd greenTile-*/ && ./install.sh
 
-<span class="c"># install for your user</span>
-D=~/.local/share/cinnamon/extensions/<span class="g">greenTile@carsteneu</span>
-mkdir -p "$D" && cp *.js *.json *.css icon.png "$D"/
+<span class="c"># restart Cinnamon</span>
+Ctrl+Alt+Esc   <span class="c"># or Alt+F2, then r</span>
 
-<span class="c"># then: Extensions → greenTile → enable</span></pre>
+<span class="c"># then: Extensions → <span class="g">greenTile</span> → enable</span></pre>
   </div>
 </section>
 
