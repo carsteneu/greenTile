@@ -96,7 +96,7 @@ In every case only visible windows of the **active** workspace are tiled, never 
 
 Windows on the **Never tile** list (settings dialog, **Settings** page) are left alone by greenTile: they are never tiled — not by auto mode, presets, `Super+Ctrl+3/6` or snap-on-release — and not counted for the layout, so the rest tiles as if they were not there. The resize hotkeys ignore them too; they float freely wherever you put them. A row matches by **Window class** (the WM_CLASS equals the text — the class or the instance, case-insensitive) or **Title contains** (the window title contains the text, case-insensitive). Empty rows are ignored. Changes apply live.
 
-For a single window, press `Super+G` while it has focus: the rest of its monitor retiles and the window floats (a short OSD shows "Window floats"). Press `Super+G` again and it is tiled back in ("Window tiles again"). This ad-hoc state is kept in memory per window and forgotten when the window is closed — it is **not** saved to the list.
+For a single window, press `Super+G` while it has focus: the rest of its monitor retiles and the window floats (a short OSD shows "Window floats"). Press `Super+G` again and it is tiled back in ("Window tiles again"). This ad-hoc state is kept in memory per window and forgotten when the window is closed — or when the extension is disabled or the monitor setup changes. It is **not** saved to the list.
 
 ## Moving borders
 

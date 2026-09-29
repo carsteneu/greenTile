@@ -130,7 +130,7 @@ class Config {
         this.settings.bindProperty(Settings.BindingDirection.IN, 'presetHotkey', 'presetHotkey', this.EnableHotkey, null);
         this.settings.bindProperty(Settings.BindingDirection.IN, 'excludeHotkey', 'excludeHotkey', this.EnableHotkey, null);
         this.settings.bindProperty(Settings.BindingDirection.IN, 'exclusions', 'exclusions', () => {
-            tile_excl_apply(this.app);
+            tile_excl_apply(this.settings);
             tile_excl_retile(this.app);
         }, null);
         this.settings.bindProperty(Settings.BindingDirection.IN, 'resizeWiderHotkey', 'resizeWiderHotkey', this.EnableHotkey, null);
@@ -138,7 +138,7 @@ class Config {
         this.settings.bindProperty(Settings.BindingDirection.IN, 'resizeTallerHotkey', 'resizeTallerHotkey', this.EnableHotkey, null);
         this.settings.bindProperty(Settings.BindingDirection.IN, 'resizeShorterHotkey', 'resizeShorterHotkey', this.EnableHotkey, null);
         this.settings.bindProperty(Settings.BindingDirection.IN, 'panelTheme', 'panelTheme', () => tile_theme_changed(), null);
-        tile_excl_apply(this.app);
+        tile_excl_apply(this.settings);
         this.EnableHotkey();
         tile_theme_init(this);
         tile_monitors_refresh(app, () => {
@@ -296,8 +296,8 @@ const tile_excl_is_excluded = (w) => {
     return tile_excl.rows.length > 0
         && tile_excl_match(w.get_wm_class(), w.get_wm_class_instance(), w.get_title(), tile_excl.rows);
 };
-const tile_excl_apply = (app) => {
-    tile_excl.rows = tile_excl_rows_normalize(app.config.settings.getValue('exclusions'));
+const tile_excl_apply = (settings) => {
+    tile_excl.rows = tile_excl_rows_normalize(settings.getValue('exclusions'));
 };
 // Retile every monitor whose layout can place windows: preset layouts directly, auto
 // grids debounced (consistent with other debounced retiles).
