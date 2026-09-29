@@ -30,5 +30,5 @@ else
 fi
 
 echo "greenTile $UUID installed to $DEST"
-echo "Restart Cinnamon (Ctrl+Alt+Esc) or log out and back in, then enable it:"
+echo "Restart Cinnamon (Ctrl+Alt+Esc, or Alt+F2 then r) or log out and back in, then enable it:"
 echo "System Settings → Extensions → greenTile → turn on."

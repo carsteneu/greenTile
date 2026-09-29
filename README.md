@@ -155,7 +155,7 @@ Known limitation: entries are keyed by workspace number, as before, so they shif
 
 ## Installation and deploy
 
-From a release zip (end users): download `greenTile-<version>.zip` from [Releases](https://github.com/carsteneu/greenTile/releases), unzip it and run `./install.sh` — it copies the extension to `~/.local/share/cinnamon/extensions/greenTile@carsteneu/` and compiles the translations (gettext's `msgfmt`; without it the extension runs in English). Then restart Cinnamon (`Ctrl+Alt+Esc`) and enable greenTile in System Settings → Extensions. The zip is built and attached automatically whenever a `v*` tag is pushed (`.github/workflows/release.yml`, `build-release.sh`).
+From a release zip (end users): download `greenTile-<version>.zip` from [Releases](https://github.com/carsteneu/greenTile/releases), unzip it and run `./install.sh` — it copies the extension to `~/.local/share/cinnamon/extensions/greenTile@carsteneu/` and compiles the translations (gettext's `msgfmt`; without it the extension runs in English). Then restart Cinnamon (`Ctrl+Alt+Esc`, or `Alt+F2` → `r`) and enable greenTile in System Settings → Extensions. The zip is built and attached automatically whenever a `v*` tag is pushed (`.github/workflows/release.yml`, `build-release.sh`).
 
 From a checkout (development, live deploy):
 
@@ -217,7 +217,7 @@ All user-visible strings are English in the source and translated via gettext. T
 - Reload via DBus Eval as shown above; restarting Cinnamon is not necessary for code changes.
 - The UUID must not contain an underscore: Cinnamon's settings dialog (`KeybindingTable.py`) splits UUIDs at `_` to find instance numbers, does not find the keybindings of such an extension and crashes, so the dialog never opens. That is why the UUID is `greenTile@carsteneu`. If the dialog does not open, run `xlet-settings extension greenTile@carsteneu` in a terminal to see the traceback.
 - gTile 2.2.1 did not disconnect its `monitors-changed` handler on disable, so every reload left a handler behind that rebuilt a complete old instance on each monitor change (duplicate tiling, old hotkeys coming back). Fixed in greenTile; handlers left over from reloads of an older version disappear only with a Cinnamon restart.
-- Exception, translations: gettext (glibc) caches catalogs per process, including the fact that a catalog is *missing*. New or changed `.mo` files therefore only take effect after restarting Cinnamon (`Ctrl+Alt+Esc`, or log out and in). Reloading the extension is not enough.
+- Exception, translations: gettext (glibc) caches catalogs per process, including the fact that a catalog is *missing*. New or changed `.mo` files therefore only take effect after restarting Cinnamon (`Ctrl+Alt+Esc` or `Alt+F2` → `r`, or log out and in). Reloading the extension is not enough.
 
 ## License
 
