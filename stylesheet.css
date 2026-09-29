@@ -153,6 +153,9 @@
     background-color: rgba(255, 255, 255, 0.08);
 }
 
+/* The accent rules below (orange tones down to .gk-light .gk-entry:focus) are
+   overridden at runtime by the generated accent stylesheet (setting
+   "Accent color"); keep them in sync with tile_accent_css in greenTile.js. */
 .gk-plus {
     color: #ff9640;
     font-size: 16px;

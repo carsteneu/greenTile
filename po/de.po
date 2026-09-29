@@ -9,7 +9,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: greenTile 0.1.0\n"
 "Report-Msgid-Bugs-To: https://github.com/carsteneu\n"
-"POT-Creation-Date: 2026-09-29 12:52+0200\n"
+"POT-Creation-Date: 2026-09-29 13:07+0200\n"
 "PO-Revision-Date: 2026-09-28 17:17+0200\n"
 "Last-Translator: carsten_eu\n"
 "Language-Team: German\n"
@@ -20,45 +20,45 @@ msgstr ""
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 "X-Generator: Poedit 2.3\n"
 
-#: greenTile.js:1809
+#: greenTile.js:1811
 #, javascript-format
 msgid "assigned — workspace %d"
 msgstr "zugewiesen — Fläche %d"
 
-#: greenTile.js:1868
+#: greenTile.js:1872
 msgid "Please enter a name."
 msgstr "Bitte einen Namen eingeben."
 
-#: greenTile.js:1891
+#: greenTile.js:1895
 #, javascript-format
 msgid "from %d"
 msgstr "ab %d"
 
-#: greenTile.js:2007
+#: greenTile.js:2012
 msgid "Rules (by window count)"
 msgstr "Regeln (nach Fensterzahl)"
 
-#: greenTile.js:2011
+#: greenTile.js:2016
 msgid "Rule"
 msgstr "Regel"
 
-#: greenTile.js:2012
+#: greenTile.js:2017
 msgid "Delete rule"
 msgstr "Regel löschen"
 
-#: greenTile.js:2020
+#: greenTile.js:2025
 msgid "Rule applies from"
 msgstr "Regel gilt ab"
 
-#: greenTile.js:2027
+#: greenTile.js:2032
 msgid "windows"
 msgstr "Fenstern"
 
-#: greenTile.js:2029
+#: greenTile.js:2034
 msgid "Painter"
 msgstr "Malerei"
 
-#: greenTile.js:2044
+#: greenTile.js:2049
 msgid ""
 "Click or drag: the row sets how many windows the column holds. Right-click "
 "removes a column."
@@ -66,79 +66,79 @@ msgstr ""
 "Klicken oder ziehen: Die Zeile legt fest, wie viele Fenster die Spalte "
 "aufnimmt. Rechtsklick entfernt eine Spalte."
 
-#: greenTile.js:2049
+#: greenTile.js:2054
 msgid "Name"
 msgstr "Name"
 
-#: greenTile.js:2050
+#: greenTile.js:2055
 msgid "Preset name"
 msgstr "Name des Presets"
 
-#: greenTile.js:2054
+#: greenTile.js:2059
 msgid "Save"
 msgstr "Speichern"
 
-#: greenTile.js:2071
+#: greenTile.js:2076
 #, javascript-format
 msgid "Result: %s"
 msgstr "Ergebnis: %s"
 
-#: greenTile.js:2231
+#: greenTile.js:2456
 msgid "Gap between windows"
 msgstr "Abstand zwischen Fenstern"
 
-#: greenTile.js:2236
+#: greenTile.js:2461
 #, javascript-format
 msgid "%d px"
 msgstr "%d px"
 
-#: greenTile.js:2255
+#: greenTile.js:2480
 msgid "Reset sizes"
 msgstr "Größen zurücksetzen"
 
-#: greenTile.js:2286
+#: greenTile.js:2511
 #, javascript-format
 msgid "Presets — workspace %d · %s"
 msgstr "Presets — Arbeitsfläche %d · %s"
 
-#: greenTile.js:2288
+#: greenTile.js:2513
 msgid "Create preset"
 msgstr "Neues Preset"
 
-#: greenTile.js:2288
+#: greenTile.js:2513
 #, javascript-format
 msgid "Edit %s"
 msgstr "%s bearbeiten"
 
-#: greenTile.js:2292
+#: greenTile.js:2517
 msgid "Back"
 msgstr "zurück"
 
-#: greenTile.js:2301
+#: greenTile.js:2526
 msgid "Auto: on"
 msgstr "Auto: an"
 
-#: greenTile.js:2301
+#: greenTile.js:2526
 msgid "Auto: off"
 msgstr "Auto: aus"
 
-#: greenTile.js:2322
+#: greenTile.js:2547
 msgid "Dark theme"
 msgstr "Dunkles Design"
 
-#: greenTile.js:2322
+#: greenTile.js:2547
 msgid "Light theme"
 msgstr "Helles Design"
 
-#: greenTile.js:2442
+#: greenTile.js:2667
 msgid "No presets yet."
 msgstr "Noch keine Presets vorhanden."
 
-#: greenTile.js:2457
+#: greenTile.js:2682
 msgid "New preset"
 msgstr "Neu anlegen"
 
-#: greenTile.js:2460
+#: greenTile.js:2685
 msgid "Click a row to apply it to this workspace and tile right away"
 msgstr "Klick auf eine Zeile = sofort auf dieser Fläche anwenden & kacheln"
 
@@ -263,7 +263,8 @@ msgstr "Kacheln animieren"
 
 #. settings-schema.json->tileAnimation->tooltip
 msgid "Windows glide into their new place. Off: they jump there at once."
-msgstr "Fenster gleiten an ihren neuen Platz. Aus: Sie springen sofort dorthin."
+msgstr ""
+"Fenster gleiten an ihren neuen Platz. Aus: Sie springen sofort dorthin."
 
 #. settings-schema.json->panelTheme->description
 msgid "Theme of the preset panel"
@@ -288,3 +289,29 @@ msgstr "Hell"
 #. settings-schema.json->panelTheme->options
 msgid "Dark"
 msgstr "Dunkel"
+
+#. settings-schema.json->accentMode->description
+msgid "Accent color"
+msgstr "Akzentfarbe"
+
+#. settings-schema.json->accentMode->tooltip
+msgid ""
+"Follow theme tracks the accent color of the Cinnamon theme live. Custom uses "
+"the color below."
+msgstr ""
+"Designfarbe folgen übernimmt live die Akzentfarbe des Cinnamon-Designs. "
+"Custom verwendet die Farbe darunter."
+
+#. settings-schema.json->accentMode->options
+msgid "Follow theme"
+msgstr "Designfarbe folgen"
+
+#. settings-schema.json->accentColor->description
+msgid "Custom accent color"
+msgstr "Eigene Akzentfarbe"
+
+#. settings-schema.json->accentColor->tooltip
+msgid "Accent of the preset panel and editor when Accent color is Custom."
+msgstr ""
+"Akzentfarbe von Preset-Panel und Editor, wenn die Akzentfarbe auf Custom "
+"steht."
