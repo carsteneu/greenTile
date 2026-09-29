@@ -2310,14 +2310,21 @@ const tile_theme_cairo = {
     light: { thumb: [183, 189, 204], outline: [195, 201, 214] },
 };
 const tile_theme_cairo_get = (key) => tile_theme_cairo[tile_theme_state.theme][key];
-const tile_theme_panel_class = () => tile_theme_state.theme === 'light' ? 'gk-panel gk-light' : 'gk-panel';
+const tile_theme_panel_class = () => (tile_theme_state.theme === 'light' ? 'gk-panel gk-light' : 'gk-panel')
+    + (tile_accent_state.gen ? ' ' + tile_accent_state.gen : '');
 // Accent runtime: resolves theme-probed vs. custom color, writes the generated
 // accent stylesheet into the user cache dir and loads/unloads it on the current
 // St.Theme — the same mechanism Cinnamon uses for extension stylesheets, so
 // hover/focus pseudo-classes keep working and an open panel restyles at once.
 // Re-load hooks into 'theme-set' because every Cinnamon theme switch replaces
 // the whole St.Theme object.
-const tile_accent_state = { rgb: tile_accent_default, css: '', path: null, themeObj: null, themeSig: 0 };
+// gen: Cinnamon's St keeps its interned theme nodes across load_stylesheet /
+// unload_stylesheet, so a rebuilt panel would get the node computed with the OLD
+// sheet (verified live: rebuilt "+ New preset" kept the previous accent). Every
+// load therefore gives the panel root a fresh class 'gk-acc<n>'; all descendants
+// get new node keys and are matched against the current sheets. Seeded with the
+// clock so it never meets nodes left over from an earlier enable.
+const tile_accent_state = { rgb: tile_accent_default, css: '', path: null, themeObj: null, themeSig: 0, gen: '', genSeq: Date.now() };
 const tile_accent_probe = (pseudoClass) => {
     let probe = null;
     try {
@@ -2337,6 +2344,7 @@ const tile_accent_load = (theme, path) => {
     try {
         theme.load_stylesheet(path);
         tile_accent_state.themeObj = theme;
+        tile_accent_state.gen = 'gk-acc' + (++tile_accent_state.genSeq);
     } catch (e) {
         global.logError('greenTile: accent stylesheet: ' + e);
     }
