@@ -182,6 +182,7 @@ class Config {
             tile_split_flush(this.app);
             tile_auto_disconnect_all();
             tile_panel_close();
+            tile_theme_shutdown();
         };
         this.app = app;
         this.settings = new Settings.ExtensionSettings(this, 'greenTile@carsteneu');
@@ -207,6 +208,7 @@ class Config {
         this.settings.bindProperty(Settings.BindingDirection.BIDIRECTIONAL, 'useMonitorCenter', 'useMonitorCenter', () => this.app.OnCenteredToWindowChanged(), null);
         this.settings.bindProperty(Settings.BindingDirection.BIDIRECTIONAL, 'showGridOnAllMonitors', 'showGridOnAllMonitors', () => this.app.ReInitialize(), null);
         this.settings.bindProperty(Settings.BindingDirection.BIDIRECTIONAL, 'select-using-keyboard', 'selectUsingKeyboard', this.updateSettings, null);
+        this.settings.bindProperty(Settings.BindingDirection.IN, 'panelTheme', 'panelTheme', () => tile_theme_changed(), null);
         let basestr = 'grid';
         this.initGridSettings();
         for (let i = 1; i <= 4; i++) {
@@ -218,6 +220,7 @@ class Config {
             this.settings.bindProperty(Settings.BindingDirection.IN, nameOverride, nameOverride, this.updateGridSettings, null);
         }
         this.EnableHotkey();
+        tile_theme_init(this.app);
         tile_monitors_refresh(app, () => {
             tile_layouts_migrate_once(app);
             tile_auto_connect_all(app);
@@ -1865,12 +1868,13 @@ const tile_panel_round_rect = (cr, x, y, w, h, r) => {
 // Mockup: list thumbnails 54x34, gap 2px, radius 2px, fill #3d4457;
 // editor rule thumbnails 34x18, gap 2px, 1px between stacked cells, radius 1px.
 const tile_panel_thumb = (stacks, opts = {}) => {
-    const { width = 54, height = 34, gap = 2, vgap = 2, radius = 2, color = [61, 68, 87] } = opts;
+    const { width = 54, height = 34, gap = 2, vgap = 2, radius = 2, color = null } = opts;
     const area = new tile_St.DrawingArea({ width, height });
     area.connect('repaint', (a) => {
         const cr = a.get_context();
         const [W, H] = a.get_surface_size();
-        cr.setSourceRGB(color[0] / 255, color[1] / 255, color[2] / 255);
+        const paint = color || tile_theme_cairo_get('thumb');
+        cr.setSourceRGB(paint[0] / 255, paint[1] / 255, paint[2] / 255);
         const cw = (W - gap * (stacks.length - 1)) / stacks.length;
         for (let c = 0; c < stacks.length; c++) {
             // Many stacked cells (surplus windows in the filled thumbnail): the gap shrinks
@@ -1998,7 +2002,7 @@ const tile_editor_rule_row = (rule, active, last, onSelect) => {
         outer.add(new tile_St.Bin({ style_class: 'gk-ed-rule-stripe' }), { x_fill: false, y_fill: true });
     const box = new tile_St.BoxLayout({ style_class: 'gk-ed-rule-box', x_expand: true });
     box.add(new tile_St.Label({ text: _("from %d").format(rule.min), style_class: 'gk-ed-rule-label' }), { expand: true, x_fill: true, y_fill: false, y_align: tile_St.Align.MIDDLE });
-    box.add(tile_panel_thumb(rule.stacks, { width: 34, height: 18, gap: 2, vgap: 1, radius: 1, color: active ? tile_editor_accent : [61, 68, 87] }), tile_panel_middle());
+    box.add(tile_panel_thumb(rule.stacks, { width: 34, height: 18, gap: 2, vgap: 1, radius: 1, color: active ? tile_editor_accent : tile_theme_cairo_get('thumb') }), tile_panel_middle());
     outer.add(box, { expand: true, x_fill: true, y_fill: true });
     row.set_child(outer);
     row.connect('clicked', () => onSelect());
@@ -2026,7 +2030,8 @@ const tile_editor_painter = (getStacks, onChange) => {
             }
             else {
                 // empty column: dashed outline in the border colour
-                cr.setSourceRGB(42 / 255, 46 / 255, 57 / 255);
+                const outline = tile_theme_cairo_get('outline');
+                cr.setSourceRGB(outline[0] / 255, outline[1] / 255, outline[2] / 255);
                 cr.setLineWidth(1);
                 cr.setDash([3, 3], 0);
                 cr.rectangle(x + 0.5, 0.5, cw - 1, H - 1);
@@ -2259,6 +2264,68 @@ const tile_theme_resolve = (setting, colorScheme, themeName) => {
     return /dark/i.test(String(themeName || '')) ? 'dark' : 'light';
 };
 // <<< theme-model
+// Live theme state, set up per App (Config). Reads the panelTheme setting, the x-apps
+// portal color scheme and the Cinnamon theme name; under "system" a change of the
+// scheme rebuilds the open panel right away. Disconnected in Config.destroy.
+const tile_theme_state = { theme: 'dark', app: null, portal: null, portalSig: 0, cinnamon: null, cinnamonSig: 0 };
+// Cairo colors for the thumbnails and the painter's dashed outline, per theme; the CSS
+// classes cover the rest. Dark is today's look, one to one.
+const tile_theme_cairo = {
+    dark: { thumb: [61, 68, 87], outline: [42, 46, 57] },
+    light: { thumb: [200, 205, 217], outline: [195, 201, 214] },
+};
+const tile_theme_cairo_get = (key) => tile_theme_cairo[tile_theme_state.theme][key];
+const tile_theme_panel_class = () => tile_theme_state.theme === 'light' ? 'gk-panel gk-light' : 'gk-panel';
+const tile_theme_changed = () => {
+    const app = tile_theme_state.app;
+    if (!app)
+        return;
+    tile_theme_state.theme = tile_theme_resolve(
+        app.config.settings.getValue('panelTheme'),
+        tile_theme_state.portal ? tile_theme_state.portal.get_string('color-scheme') : null,
+        tile_theme_state.cinnamon ? tile_theme_state.cinnamon.get_string('name') : null
+    );
+    // An open panel or editor rebuilds itself: restyling in place would leave the
+    // Cairo thumbnails and the painter in the old colors.
+    if (tile_panel.actor)
+        tile_panel_rebuild(app);
+};
+const tile_theme_init = (app) => {
+    if (tile_theme_state.portal === null) {
+        const source = tile_Gio.SettingsSchemaSource.get_default();
+        if (source && source.lookup('org.x.apps.portal', true)) {
+            tile_theme_state.portal = tile_Gio.Settings.new({ schema_id: 'org.x.apps.portal' });
+            tile_theme_state.portalSig = tile_theme_state.portal.connect('changed::color-scheme', tile_theme_changed);
+        }
+        if (source && source.lookup('org.cinnamon.theme', true)) {
+            tile_theme_state.cinnamon = tile_Gio.Settings.new({ schema_id: 'org.cinnamon.theme' });
+            tile_theme_state.cinnamonSig = tile_theme_state.cinnamon.connect('changed::name', tile_theme_changed);
+        }
+    }
+    tile_theme_state.app = app;
+    tile_theme_changed();
+};
+const tile_theme_shutdown = () => {
+    if (tile_theme_state.portal && tile_theme_state.portalSig) {
+        try {
+            tile_theme_state.portal.disconnect(tile_theme_state.portalSig);
+        } catch (e) {
+            // signal was already gone
+        }
+        tile_theme_state.portal = null;
+        tile_theme_state.portalSig = 0;
+    }
+    if (tile_theme_state.cinnamon && tile_theme_state.cinnamonSig) {
+        try {
+            tile_theme_state.cinnamon.disconnect(tile_theme_state.cinnamonSig);
+        } catch (e) {
+            // signal was already gone
+        }
+        tile_theme_state.cinnamon = null;
+        tile_theme_state.cinnamonSig = 0;
+    }
+    tile_theme_state.app = null;
+};
 // "Gap between windows  − 8 px +" in the list view. Each click stores the value and,
 // when automatic tiling is on for this workspace, retiles it shortly after (debounced,
 // so fast repeated clicks tile once), so the new gap shows live.
@@ -2317,7 +2384,7 @@ const tile_panel_open = (app) => {
     const wsIndex = global.workspace_manager.get_active_workspace().index();
     const monitorIndex = tile_focus_monitor_index();
     const draft = tile_panel.view === 'editor' ? tile_panel.draft : null;
-    const panel = new tile_St.BoxLayout({ vertical: true, style_class: 'gk-panel', reactive: true, can_focus: true });
+    const panel = new tile_St.BoxLayout({ vertical: true, style_class: tile_theme_panel_class(), reactive: true, can_focus: true });
     const header = new tile_St.BoxLayout({ style_class: 'gk-panel-header', reactive: true });
     let titleText = _("Presets — workspace %d · %s").format(wsIndex + 1, tile_monitors.labels[monitorIndex] || '');
     if (draft)

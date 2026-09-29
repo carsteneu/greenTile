@@ -9,7 +9,8 @@
          "type": "page",
          "title": "Settings",
          "sections": [
-            "behaviour-section"
+            "behaviour-section",
+            "panel-section"
          ]
       },
       "hotkeys-tab": {
@@ -82,6 +83,13 @@
             "useMonitorCenter",
             "showGridOnAllMonitors",
             "select-using-keyboard"
+         ]
+      },
+      "panel-section": {
+         "type": "section",
+         "title": "Preset panel",
+         "keys": [
+            "panelTheme"
          ]
       },
       "help-section": {
@@ -192,6 +200,17 @@
       "step": 2,
       "units": "px",
       "default": 0
+   },
+   "panelTheme": {
+      "type": "combobox",
+      "default": "system",
+      "description": "Theme of the preset panel",
+      "tooltip": "Follow system tracks the desktop color scheme live; Light and Dark override it.",
+      "options": {
+         "Follow system": "system",
+         "Light": "light",
+         "Dark": "dark"
+      }
    },
    "animation": {
       "type": "checkbox",
