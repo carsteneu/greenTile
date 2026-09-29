@@ -1644,8 +1644,49 @@ const tile_editor_body = (app) => {
     entry.clutter_text.connect('activate', () => tile_editor_save(app, error));
     save.connect('clicked', () => tile_editor_save(app, error));
     refresh();
-    return { actor: body, entry };
+    return { actor: body, entry, painter: painter.area };
 };
+// >>> panel-size-model (pure functions, no Cinnamon imports; tested by tests/panel-size-model.test.js)
+// The preset panel can be resized with the grip in its bottom right corner, list and
+// editor separately. Setting "panelSize": {"list": {"w", "h"}, "editor": {"w", "h"}};
+// w is the panel width, h the height of the part that stretches (list: the preset
+// rows, editor: the painter). Without a stored size the panel keeps its natural size.
+const TILE_PANEL_MIN = { list: { w: 600, h: 180 }, editor: { w: 600, h: 136 } };
+const tile_panel_size_ok = (s) => s != null && typeof s === 'object'
+    && typeof s.w === 'number' && Number.isFinite(s.w) && s.w > 0
+    && typeof s.h === 'number' && Number.isFinite(s.h) && s.h > 0;
+const tile_panel_size_obj = (raw) => {
+    try {
+        const v = JSON.parse(raw || '{}');
+        return v != null && typeof v === 'object' && !Array.isArray(v) ? v : {};
+    }
+    catch (e) {
+        return {};
+    }
+};
+const tile_panel_size_parse = (raw) => {
+    const v = tile_panel_size_obj(raw);
+    return {
+        list: tile_panel_size_ok(v.list) ? { w: v.list.w, h: v.list.h } : null,
+        editor: tile_panel_size_ok(v.editor) ? { w: v.editor.w, h: v.editor.h } : null,
+    };
+};
+const tile_panel_size_set = (raw, view, size) => {
+    const parsed = tile_panel_size_parse(raw);
+    const next = {};
+    for (const key of ['list', 'editor']) {
+        if (parsed[key])
+            next[key] = parsed[key];
+    }
+    next[view] = { w: Math.round(size.w), h: Math.round(size.h) };
+    return JSON.stringify(next);
+};
+// max = room on the monitor; when it is smaller than the minimum, the minimum wins.
+const tile_panel_size_clamp = (size, min, max) => ({
+    w: Math.round(Math.max(Math.min(size.w, max.w), min.w)),
+    h: Math.round(Math.max(Math.min(size.h, max.h), min.h)),
+});
+// <<< panel-size-model
 // "Gap between windows  − 8 px +" in the list view. Each click stores the value and,
 // when automatic tiling is on for this workspace, retiles it shortly after (debounced,
 // so fast repeated clicks tile once), so the new gap shows live.
@@ -1738,6 +1779,11 @@ const tile_panel_open = (app) => {
     //   device.grab(panel)     → Clutter routes them to the panel, not to the actor under the pointer
     // Either one alone loses motion/release as soon as the pointer leaves the panel.
     let drag = null;
+    // Resize state (grip in the bottom right corner); set up further below, once the
+    // stretching part (list rows or painter) exists. Declared here for the handlers.
+    let resize = null;
+    let onResizeMotion = () => { };
+    let endResize = () => { };
     const endDrag = () => {
         if (!drag)
             return;
@@ -1754,6 +1800,10 @@ const tile_panel_open = (app) => {
         global.log('greenTile panel moved to ' + Math.round(px) + ',' + Math.round(py));
     };
     const onDragMotion = (a, event) => {
+        if (resize) {
+            onResizeMotion(event);
+            return tile_Clutter.EVENT_STOP;
+        }
         if (!drag)
             return tile_Clutter.EVENT_PROPAGATE;
         const [gx, gy] = event.get_coords();
@@ -1761,6 +1811,10 @@ const tile_panel_open = (app) => {
         return tile_Clutter.EVENT_STOP;
     };
     const onDragRelease = () => {
+        if (resize) {
+            endResize();
+            return tile_Clutter.EVENT_STOP;
+        }
         if (!drag)
             return tile_Clutter.EVENT_PROPAGATE;
         endDrag();
@@ -1785,7 +1839,10 @@ const tile_panel_open = (app) => {
     });
     panel.connect('motion-event', onDragMotion);
     panel.connect('button-release-event', onDragRelease);
-    panel.connect('destroy', () => endDrag());
+    panel.connect('destroy', () => {
+        endDrag();
+        endResize();
+    });
     // Double-click guard: right after a switch between list and editor, mouse buttons
     // on the panel are swallowed in the capture phase, before any button, row or the
     // painter sees them (a double-click on Save would otherwise assign the list row
@@ -1800,6 +1857,9 @@ const tile_panel_open = (app) => {
     let rowsBox = null;
     let scroll = null;
     let editor = null;
+    // Footer: the list's hint and, in both views, the resize grip in the corner.
+    const footer = new tile_St.BoxLayout({ style_class: 'gk-footer' });
+    const grip = new tile_St.Label({ text: '◢', style_class: 'gk-grip', reactive: true, track_hover: true });
     if (draft) {
         editor = tile_editor_body(app);
         panel.add(editor.actor);
@@ -1827,8 +1887,11 @@ const tile_panel_open = (app) => {
         const plus = new tile_St.Button({ label: '＋ ' + _("New preset"), style_class: 'gk-plus', x_fill: true, track_hover: true });
         plus.connect('clicked', () => tile_editor_open_new(app));
         panel.add(plus);
-        panel.add(new tile_St.Label({ text: _("Click a row to apply it to this workspace and tile right away"), style_class: 'gk-hint' }));
+        const hint = new tile_St.Label({ text: _("Click a row to apply it to this workspace and tile right away"), style_class: 'gk-hint' });
+        footer.add(hint, { expand: true, x_fill: true, y_fill: false, y_align: tile_St.Align.MIDDLE });
     }
+    footer.add(grip, { x_fill: false, y_fill: false, x_align: tile_St.Align.END, y_align: tile_St.Align.END });
+    panel.add(footer);
     utils_Main.layoutManager.addChrome(panel);
     tile_panel.actor = panel;
     // Monitors come and go (external display plugged in or out). A saved position
@@ -1848,16 +1911,111 @@ const tile_panel_open = (app) => {
     tile_panel.positioned = tile_panel.saved != null;
     if (tile_panel.saved)
         panel.set_position(tile_panel.saved.x, tile_panel.saved.y);
+    // Resize with the grip in the bottom right corner, same grab recipe as the title-bar
+    // drag (pushModal + device.grab). Width = panel width, height = the part that
+    // stretches (list: preset rows, editor: painter; the rules column stays fixed).
+    // Stored per view in "panelSize", limited to the room on the panel's monitor.
+    const sizeView = draft ? 'editor' : 'list';
+    const stretch = draft ? editor.painter : scroll;
+    const sizeMin = TILE_PANEL_MIN[sizeView];
+    const storedSize = tile_panel_size_parse(app.config.settings.getValue('panelSize'))[sizeView];
+    const panelMonitor = () => {
+        const [px, py] = panel.get_position();
+        return monitorAt(px + 300, py + 20) || focusMonitor();
+    };
+    // The list's scrollbar only when the rows do not fit (AUTOMATIC reserves its width
+    // even when there is nothing to scroll, see below).
+    const fitScroll = () => {
+        if (!scroll)
+            return;
+        const [, natural] = rowsBox.get_preferred_height(-1);
+        const policy = natural > scroll.get_height() + 1 ? tile_St.PolicyType.AUTOMATIC : tile_St.PolicyType.NEVER;
+        if (scroll.vscrollbar_policy !== policy)
+            scroll.vscrollbar_policy = policy;
+    };
+    if (storedSize) {
+        const m = (tile_panel.saved && monitorAt(tile_panel.saved.x + 300, tile_panel.saved.y + 20)) || focusMonitor();
+        panel.set_width(Math.max(Math.min(storedSize.w, m.width), sizeMin.w));
+        stretch.set_height(Math.max(storedSize.h, sizeMin.h));
+    }
+    grip.connect('enter-event', () => global.set_cursor(imports.gi.Cinnamon.Cursor.RESIZE_BOTTOM_RIGHT));
+    grip.connect('leave-event', () => {
+        if (!resize)
+            global.unset_cursor();
+    });
+    grip.connect('button-press-event', (a, event) => {
+        if (event.get_button() !== 1)
+            return tile_Clutter.EVENT_PROPAGATE;
+        const [gx, gy] = event.get_coords();
+        const [px, py] = panel.get_position();
+        if (isNaN(px) || isNaN(py))
+            return tile_Clutter.EVENT_PROPAGATE;
+        endDrag();
+        endResize();
+        if (!utils_Main.pushModal(panel))
+            return tile_Clutter.EVENT_PROPAGATE;
+        const device = event.get_device();
+        device.grab(panel);
+        tile_panel.dragging = true;
+        const [pw, ph] = panel.get_size();
+        const sh = stretch.get_height();
+        const m = panelMonitor();
+        resize = {
+            device, gx, gy, w: pw, h: sh, last: null,
+            max: { w: m.x + m.width - px, h: sh + (m.y + m.height - (py + ph)) },
+        };
+        global.set_cursor(imports.gi.Cinnamon.Cursor.RESIZE_BOTTOM_RIGHT);
+        return tile_Clutter.EVENT_STOP;
+    });
+    onResizeMotion = (event) => {
+        const [gx, gy] = event.get_coords();
+        const s = tile_panel_size_clamp({ w: resize.w + gx - resize.gx, h: resize.h + gy - resize.gy }, sizeMin, resize.max);
+        panel.set_width(s.w);
+        stretch.set_height(s.h);
+        fitScroll();
+        resize.last = s;
+    };
+    endResize = () => {
+        if (!resize)
+            return;
+        const r = resize;
+        resize = null;
+        r.device.ungrab();
+        try {
+            utils_Main.popModal(panel);
+        }
+        catch (e) {
+            // modal already popped (main.js pops it on actor destroy)
+        }
+        global.unset_cursor();
+        tile_panel.dragging = false;
+        if (r.last) {
+            app.config.settings.setValue('panelSize', tile_panel_size_set(app.config.settings.getValue('panelSize'), sizeView, r.last));
+            global.log('greenTile panel ' + sizeView + ' resized to ' + r.last.w + 'x' + r.last.h);
+        }
+    };
     // LIST_MAX measured live: an assigned row is 60 px, a plain row 59 px, so five
     // rows ≈ 296 px fit without the scrollbar; the sixth row scrolls.
     const LIST_MAX = 320;
-    let scrollCapped = false;
+    // With a stored size the list height is the user's, not LIST_MAX.
+    let scrollCapped = storedSize != null;
     let clamped = false;
+    let fitted = storedSize == null;
     panel.connect('notify::allocation', () => {
         // Allocation notifications can still arrive after close (destroy);
         // without this guard the centring would run on a dying actor.
         if (tile_panel.actor !== panel)
             return;
+        if (!fitted) {
+            // A size stored on a bigger monitor (5K) can be taller than this one
+            // (laptop): shrink the stretching part once, the position clamp follows.
+            fitted = true;
+            const box = panel.get_allocation_box();
+            const excess = (box.y2 - box.y1) - panelMonitor().height;
+            if (excess > 0)
+                stretch.set_height(Math.max(stretch.get_height() - excess, sizeMin.h));
+            fitScroll();
+        }
         if (!tile_panel.positioned) {
             tile_panel.positioned = true;
             clamped = true;

@@ -271,6 +271,21 @@
     padding: 8px 14px 12px 14px;
 }
 
+/* Bottom row: the list's hint and the resize grip in the corner (both views). */
+.gk-footer {
+    spacing: 0;
+}
+
+.gk-grip {
+    color: #4a5063;
+    font-size: 12px;
+    padding: 0 3px 1px 6px;
+}
+
+.gk-grip:hover {
+    color: #ff9640;
+}
+
 /* "Gap between windows  − 8 px +" between the list and New preset. */
 .gk-gap-row {
     padding: 8px 14px;

@@ -149,6 +149,10 @@
       "type": "generic",
       "default": false
    },
+   "panelSize": {
+      "type": "generic",
+      "default": ""
+   },
    "windowGap": {
       "type": "spinbutton",
       "description": "Gap between tiled windows (set with − / + in the preset panel; not shown in this dialog)",
