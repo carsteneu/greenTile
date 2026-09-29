@@ -247,10 +247,12 @@ const tile_focus_window = () => {
 };
 // >>> exclude-model (pure functions, no Cinnamon imports; tested by tests/exclude-model.test.js)
 // Windows that are never tiled: rows of the "exclusions" list setting
-// ({ match: "class" | "title", text }) match by WM_CLASS (equals, the instance variant
-// counts too) or window title (contains), case-insensitive; rows with empty text or an
-// unknown match are ignored. On top, Super+G toggles the focused window ad hoc —
-// in-memory only, per window, forgotten when the window is unmanaged.
+// ({ match: "class" | "title" | "app", text }) match by WM_CLASS (equals, the instance variant
+// counts too) or window title (contains) or the Cinnamon app id of the window (equals,
+// via WindowTracker — robust where WM classes lie, e.g. flatpaks), case-insensitive in
+// every variant; rows with empty text or an unknown match are ignored. On top, Super+G
+// toggles the focused window ad hoc — in-memory only, per window, forgotten when the
+// window is unmanaged.
 const tile_excl_rows_normalize = (rows) => {
     if (!Array.isArray(rows))
         return [];
@@ -260,14 +262,15 @@ const tile_excl_rows_normalize = (rows) => {
         if (row == null || typeof row !== 'object')
             continue;
         const text = typeof row.text === 'string' ? row.text.trim() : '';
-        if ((row.match !== 'class' && row.match !== 'title') || !text)
+        if ((row.match !== 'class' && row.match !== 'title' && row.match !== 'app') || !text)
             continue;
         result.push({ match: row.match, text: text });
     }
     return result;
 };
-const tile_excl_match = (wmClass, wmInstance, title, rows) => {
+const tile_excl_match = (wmClass, wmInstance, title, rows, appId) => {
     const t = typeof title === 'string' ? title.toLowerCase() : '';
+    const id = typeof appId === 'string' ? appId.toLowerCase() : '';
     for (let i = 0; i < rows.length; i++) {
         const row = rows[i];
         if (row.match === 'class') {
@@ -277,8 +280,45 @@ const tile_excl_match = (wmClass, wmInstance, title, rows) => {
         }
         else if (row.match === 'title' && t && t.indexOf(row.text.toLowerCase()) !== -1)
             return true;
+        else if (row.match === 'app' && id && id === row.text.toLowerCase())
+            return true;
     }
     return false;
+};
+// Appends an app exclusion row (the settings-dialog app picker) unless an identical
+// app row is already there.
+const tile_excl_rows_append = (rows, text) => {
+    const result = tile_excl_rows_normalize(rows);
+    const t = typeof text === 'string' ? text.trim() : '';
+    if (!t)
+        return result;
+    for (let i = 0; i < result.length; i++) {
+        if (result[i].match === 'app' && result[i].text === t)
+            return result;
+    }
+    result.push({ match: 'app', text: t });
+    return result;
+};
+// Combobox options for the app picker: label to app id, sorted alphabetically;
+// the placeholder comes first. Duplicate labels keep the first app.
+const tile_excl_app_options = (apps, placeholderLabel) => {
+    const list = [];
+    if (Array.isArray(apps)) {
+        for (let i = 0; i < apps.length; i++) {
+            const app = apps[i];
+            if (app && typeof app.id === 'string' && app.id && typeof app.name === 'string' && app.name)
+                list.push({ id: app.id, name: app.name });
+        }
+    }
+    list.sort((a, b) => a.name.localeCompare(b.name));
+    const options = {};
+    if (typeof placeholderLabel === 'string' && placeholderLabel)
+        options[placeholderLabel] = 'picker';
+    for (let i = 0; i < list.length; i++) {
+        if (options[list[i].name] === undefined)
+            options[list[i].name] = list[i].id;
+    }
+    return options;
 };
 const tile_excl_toggle_set = (map, seq, on) => {
     if (on)
@@ -293,8 +333,10 @@ const tile_excl_is_excluded = (w) => {
         return false;
     if (tile_excl.toggled.get(w.get_stable_sequence()))
         return true;
-    return tile_excl.rows.length > 0
-        && tile_excl_match(w.get_wm_class(), w.get_wm_class_instance(), w.get_title(), tile_excl.rows);
+    if (tile_excl.rows.length === 0)
+        return false;
+    const app = imports.gi.Cinnamon.WindowTracker.get_default().get_window_app(w);
+    return tile_excl_match(w.get_wm_class(), w.get_wm_class_instance(), w.get_title(), tile_excl.rows, app ? app.get_id() : null);
 };
 const tile_excl_apply = (settings) => {
     tile_excl.rows = tile_excl_rows_normalize(settings.getValue('exclusions'));

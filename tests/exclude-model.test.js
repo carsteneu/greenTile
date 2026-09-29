@@ -2,7 +2,7 @@
 // Tests the pure exclusion model of greenTile.js (marked block "exclude-model"),
 // extracted and evaluated without Cinnamon, like auto-model. Storage format: the
 // list setting "exclusions" of the settings dialog, rows
-// { match: "class" | "title", text: <non-empty string> }.
+// { match: "class" | "title" | "app", text: <non-empty string> }.
 const test = require('node:test');
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
@@ -13,7 +13,7 @@ const match = src.match(/\/\/ >>> exclude-model[^\n]*\n([\s\S]*?)\/\/ <<< exclud
 if (!match)
     throw new Error('exclude-model block not found in greenTile.js');
 const block = match[1];
-const names = ['tile_excl_rows_normalize', 'tile_excl_match', 'tile_excl_toggle_set'];
+const names = ['tile_excl_rows_normalize', 'tile_excl_match', 'tile_excl_toggle_set', 'tile_excl_rows_append', 'tile_excl_app_options'];
 const m = new Function(block + '\nreturn {' + names.join(',') + '};')();
 
 test('block is self-contained', () => {
@@ -47,6 +47,14 @@ test('rows_normalize trims the text and keeps class and title rows', () => {
     ]), [{ match: 'class', text: 'Firefox' }, { match: 'title', text: 'x' }]);
 });
 
+test('rows_normalize keeps app rows', () => {
+    assert.deepEqual(m.tile_excl_rows_normalize([
+        { match: 'app', text: ' org.gimp.GIMP.desktop:flatpak ' },
+        { match: 'app', text: '' },
+        { match: 'app' },
+    ]), [{ match: 'app', text: 'org.gimp.GIMP.desktop:flatpak' }]);
+});
+
 test('match: class equals the wm class or the instance, case-insensitive', () => {
     const rows = [{ match: 'class', text: 'Firefox' }];
     assert.equal(m.tile_excl_match('firefox', 'firefox', 'Any title', rows), true);
@@ -61,6 +69,46 @@ test('match: title contains the text, case-insensitive', () => {
     assert.equal(m.tile_excl_match('gvim', 'gvim', 'vim - ~/file.txt', rows), true);
     assert.equal(m.tile_excl_match('gvim', 'gvim', 'Vim - other', rows), false);
     assert.equal(m.tile_excl_match('gvim', 'gvim', null, rows), false);
+});
+
+test('match: app equals the app id, case-insensitive; null never matches', () => {
+    const rows = [{ match: 'app', text: 'org.gimp.GIMP.desktop:flatpak' }];
+    assert.equal(m.tile_excl_match('Gimp', 'gimp', 'Any title', rows, 'org.gimp.GIMP.desktop:flatpak'), true);
+    assert.equal(m.tile_excl_match('Gimp', 'gimp', 'Any title', rows, 'ORG.GIMP.GIMP.DESKTOP:FLATPAK'), true);
+    assert.equal(m.tile_excl_match('Gimp', 'gimp', 'Any title', rows, 'org.gimp.GIMP.desktop'), false);
+    assert.equal(m.tile_excl_match('Gimp', 'gimp', 'Any title', rows, null), false);
+    assert.equal(m.tile_excl_match('Gimp', 'gimp', 'Any title', rows, 42), false);
+    assert.equal(m.tile_excl_match('gimp', 'gimp', 'x', rows, 'org.gimp.GIMP.desktop:flatpak'), true);
+    assert.equal(m.tile_excl_match('Gimp', 'gimp', 'Any title', rows, 'random.desktop'), false);
+});
+
+test('rows_append appends a normalized app row only once', () => {
+    assert.deepEqual(
+        m.tile_excl_rows_append([{ match: 'class', text: 'Firefox' }], 'org.gimp.GIMP.desktop:flatpak'),
+        [{ match: 'class', text: 'Firefox' }, { match: 'app', text: 'org.gimp.GIMP.desktop:flatpak' }]);
+    const once = m.tile_excl_rows_append(undefined, 'org.gimp.GIMP.desktop:flatpak');
+    assert.deepEqual(m.tile_excl_rows_append(once, 'org.gimp.GIMP.desktop:flatpak'), once);
+    assert.deepEqual(m.tile_excl_rows_append([{ match: 'class', text: 'org.gimp.GIMP.desktop:flatpak' }], 'org.gimp.GIMP.desktop:flatpak').length, 2);
+    assert.deepEqual(m.tile_excl_rows_append([{ match: 'app', text: 'other.desktop' }], 'org.gimp.GIMP.desktop:flatpak').length, 2);
+    assert.deepEqual(m.tile_excl_rows_append([], '  org.gimp.GIMP.desktop:flatpak  '),
+        [{ match: 'app', text: 'org.gimp.GIMP.desktop:flatpak' }]);
+});
+
+test('app_options: placeholder first, then label to id sorted by name', () => {
+    const options = m.tile_excl_app_options([
+        { id: 'b.desktop', name: 'Brave' },
+        null,
+        { id: '', name: 'No id' },
+        { id: 'a.desktop', name: null },
+        { id: 'z.desktop', name: 'Terminal' },
+        { id: 'c.desktop', name: 'Dateien' },
+        { id: 'd.desktop', name: 'Terminal' },
+    ], 'Add application …');
+    assert.deepEqual(Object.keys(options), ['Add application …', 'Brave', 'Dateien', 'Terminal']);
+    assert.equal(options['Add application …'], 'picker');
+    assert.equal(options['Brave'], 'b.desktop');
+    assert.equal(options['Terminal'], 'z.desktop');
+    assert.deepEqual(m.tile_excl_app_options([], 'Add application …'), { 'Add application …': 'picker' });
 });
 
 test('match: any row wins, null fields never match', () => {
