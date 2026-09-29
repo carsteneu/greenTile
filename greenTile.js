@@ -2244,6 +2244,21 @@ const tile_panel_size_clamp = (size, min, max) => ({
     h: Math.round(Math.max(Math.min(size.h, max.h), min.h)),
 });
 // <<< panel-size-model
+// >>> theme-model (pure functions, no Cinnamon imports; tested by tests/theme-model.test.js)
+// The preset panel follows the desktop. "system" resolves the x-apps portal color
+// scheme ('prefer-dark'/'prefer-light'); 'default' or a missing schema falls back to
+// the Cinnamon theme name (Mint's dark themes carry "Dark" in their name), then light.
+// "light"/"dark" override the system, whatever it says.
+const tile_theme_resolve = (setting, colorScheme, themeName) => {
+    if (setting === 'light' || setting === 'dark')
+        return setting;
+    if (colorScheme === 'prefer-dark')
+        return 'dark';
+    if (colorScheme === 'prefer-light')
+        return 'light';
+    return /dark/i.test(String(themeName || '')) ? 'dark' : 'light';
+};
+// <<< theme-model
 // "Gap between windows  − 8 px +" in the list view. Each click stores the value and,
 // when automatic tiling is on for this workspace, retiles it shortly after (debounced,
 // so fast repeated clicks tile once), so the new gap shows live.
