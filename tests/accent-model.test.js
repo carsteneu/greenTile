@@ -14,11 +14,17 @@ const match = src.match(/\/\/ >>> accent-model[^\n]*\n([\s\S]*?)\/\/ <<< accent-
 if (!match)
     throw new Error('accent-model block not found in greenTile.js');
 const block = match[1];
-const names = ['tile_accent_default', 'tile_accent_parse', 'tile_accent_from_probed', 'tile_accent_tones', 'tile_accent_css'];
-const m = new Function(block + '\nreturn {' + names.join(',') + '};')();
+const stateMatch = src.match(/\/\/ >>> state-model[^\n]*\n([\s\S]*?)\/\/ <<< state-model/);
+if (!stateMatch)
+    throw new Error('state-model block not found in greenTile.js');
+const stateBlock = stateMatch[1];
+const names = ['tile_accent_default', 'tile_accent_parse', 'tile_accent_from_probed', 'tile_accent_tones', 'tile_accent_css', 'tile_accent_is_own'];
+const stateNames = ['tile_state_default', 'tile_state_mode', 'tile_state_tones', 'tile_state_css'];
+// the state block builds on the accent block's HSL helpers, so both evaluate together
+const m = new Function(block + '\n' + stateBlock + '\nreturn {' + names.concat(stateNames).join(',') + '};')();
 
-test('block is self-contained', () => {
-    assert.doesNotMatch(block, /imports\.|tile_St|tile_Clutter|global\.|utils_Main/);
+test('blocks are self-contained', () => {
+    assert.doesNotMatch(block + stateBlock, /imports\.|tile_St|tile_Clutter|global\.|utils_Main/);
 });
 
 test('default accent is today\'s orange', () => {
@@ -143,5 +149,94 @@ test('every accent color in stylesheet.css still matches the default tone table'
     assert.deepEqual(
         [...tints].sort(),
         ['rgba(255, 150, 64, 0.08)', 'rgba(255, 150, 64, 0.14)', 'rgba(255, 150, 64, 0.18)', 'rgba(255, 150, 64, 0.2)', 'rgba(255, 150, 64, 0.22)']
+    );
+});
+
+test('setting mode "own" also recognizes the legacy "custom" value', () => {
+    assert.equal(m.tile_accent_is_own('own'), true);
+    assert.equal(m.tile_accent_is_own('custom'), true);
+    assert.equal(m.tile_accent_is_own('theme'), false);
+    assert.equal(m.tile_accent_is_own(undefined), false);
+});
+
+test('state mode resolution keeps the legacy "custom" working', () => {
+    assert.deepEqual(m.tile_state_mode('green'), 'green');
+    assert.deepEqual(m.tile_state_mode('theme'), 'theme');
+    assert.deepEqual(m.tile_state_mode('own'), 'own');
+    assert.deepEqual(m.tile_state_mode('custom'), 'own');
+    assert.deepEqual(m.tile_state_mode('bogus'), 'green');
+    assert.deepEqual(m.tile_state_mode(undefined), 'green');
+});
+
+test('default state is today\'s green', () => {
+    assert.deepEqual(m.tile_state_default, [156, 224, 114]);
+});
+
+test('state tones for the default green are the historical values, exactly', () => {
+    assert.deepEqual(m.tile_state_tones([156, 224, 114]), {
+        text: [156, 224, 114],
+        tint: [156, 224, 114],
+        lightText: [63, 143, 34],
+        lightTint: [78, 165, 48],
+    });
+});
+
+test('derived state tones keep the base in dark and split light text from tints', () => {
+    const tones = m.tile_state_tones([108, 171, 205]);
+    const sum = (rgb) => rgb[0] + rgb[1] + rgb[2];
+    assert.deepEqual(tones.text, [108, 171, 205]);
+    assert.deepEqual(tones.tint, [108, 171, 205]);
+    assert.equal(sum(tones.lightText) < sum(tones.tint), true);
+    assert.equal(sum(tones.lightTint) < sum(tones.tint), true);
+    assert.equal(sum(tones.lightText) < sum(tones.lightTint), true);
+    assert.deepEqual(m.tile_state_tones([108, 171, 205]), tones);
+});
+
+test('generated state CSS carries every state selector in both scopes', () => {
+    const css = m.tile_state_css(m.tile_state_tones([156, 224, 114]));
+    for (const selector of [
+        '.gk-panel .gk-auto-on { color: rgb(156, 224, 114); border-color: rgba(156, 224, 114, 0.5); background-color: rgba(156, 224, 114, 0.08); }',
+        '.gk-panel .gk-auto-on:hover { color: rgb(156, 224, 114); background-color: rgba(156, 224, 114, 0.16); }',
+        '.gk-panel .gk-row-assigned { background-color: rgba(156, 224, 114, 0.06); }',
+        '.gk-panel .gk-row-assigned:hover { background-color: rgba(156, 224, 114, 0.13); }',
+        '.gk-panel .gk-row-stripe { background-color: rgb(156, 224, 114); }',
+        '.gk-panel .gk-sub { color: rgb(156, 224, 114); }',
+    ])
+        assert.equal(css.includes(selector), true, selector);
+    for (const selector of [
+        '.gk-panel.gk-light .gk-auto-on { color: rgb(63, 143, 34); border-color: rgba(78, 165, 48, 0.5); background-color: rgba(78, 165, 48, 0.1); }',
+        '.gk-panel.gk-light .gk-auto-on:hover { color: rgb(63, 143, 34); background-color: rgba(78, 165, 48, 0.18); }',
+        '.gk-panel.gk-light .gk-row-assigned { background-color: rgba(78, 165, 48, 0.08); }',
+        '.gk-panel.gk-light .gk-row-assigned:hover { background-color: rgba(78, 165, 48, 0.16); }',
+        '.gk-panel.gk-light .gk-row-stripe { background-color: rgb(78, 165, 48); }',
+        '.gk-panel.gk-light .gk-sub { color: rgb(63, 143, 34); }',
+    ])
+        assert.equal(css.includes(selector), true, selector);
+});
+
+test('generated state CSS for a custom color carries it, not the green', () => {
+    const css = m.tile_state_css(m.tile_state_tones([108, 171, 205]));
+    const tones = m.tile_state_tones([108, 171, 205]);
+    assert.equal(css.includes('rgb(108, 171, 205)'), true);
+    assert.equal(css.includes('rgb(156, 224, 114)'), false);
+    assert.equal(css.includes('rgb(63, 143, 34)'), false);
+    assert.equal(css.includes(`rgb(${tones.lightText[0]}, ${tones.lightText[1]}, ${tones.lightText[2]})`), true);
+});
+
+test('every state color in stylesheet.css still matches the default tone table', () => {
+    // Drift guard for the state green: the light theme uses TWO greens (text
+    // #3f8f22, tints and stripe #4ea530) — the default table must keep them.
+    const sheet = fs.readFileSync(path.join(__dirname, '..', 'stylesheet.css'), 'utf8');
+    for (const hex of ['#9ce072', '#3f8f22', '#4ea530'])
+        assert.equal(sheet.includes(hex), true, hex + ' missing in stylesheet.css');
+    const darkTints = new Set(sheet.match(/rgba\(156, 224, 114, [0-9.]+\)/g));
+    assert.deepEqual(
+        [...darkTints].sort(),
+        ['rgba(156, 224, 114, 0.06)', 'rgba(156, 224, 114, 0.08)', 'rgba(156, 224, 114, 0.13)', 'rgba(156, 224, 114, 0.16)', 'rgba(156, 224, 114, 0.5)']
+    );
+    const lightTints = new Set(sheet.match(/rgba\(78, 165, 48, [0-9.]+\)/g));
+    assert.deepEqual(
+        [...lightTints].sort(),
+        ['rgba(78, 165, 48, 0.08)', 'rgba(78, 165, 48, 0.1)', 'rgba(78, 165, 48, 0.16)', 'rgba(78, 165, 48, 0.18)', 'rgba(78, 165, 48, 0.5)']
     );
 });
