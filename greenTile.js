@@ -357,7 +357,7 @@ const tile_excl_toggle_set = (map, seq, on) => {
         map.delete(seq);
 };
 // <<< exclude-model
-const tile_excl = { toggled: new Map(), rows: [], classes: {} };
+const tile_excl = { toggled: new Map(), rows: [], classes: Object.create(null) };
 const tile_excl_is_excluded = (w) => {
     if (w == null)
         return false;
@@ -369,11 +369,13 @@ const tile_excl_is_excluded = (w) => {
     return tile_excl_match(w.get_wm_class(), w.get_wm_class_instance(), w.get_title(), tile_excl.rows, app ? app.get_id() : null, tile_excl.classes);
 };
 // StartupWMClass per app row, resolved once per apply (not per window per retile); the
-// value is null for uninstalled apps or apps that declare no StartupWMClass — those rows
-// fall back to the id compare. Rebuilt with the rows themselves on installed-changed.
+// value is null when AppSystem cannot resolve the rule text or the app declares no
+// StartupWMClass — those rows fall back to the id compare. Rebuilt with the rows
+// themselves on installed-changed. Null-prototype object, rule texts must not collide
+// with Object.prototype keys (see tile_excl_app_options).
 const tile_excl_app_classes = (rows) => {
     const appSystem = imports.gi.Cinnamon.AppSystem.get_default();
-    const result = {};
+    const result = Object.create(null);
     for (let i = 0; i < rows.length; i++) {
         if (rows[i].match !== 'app' || result[rows[i].text] !== undefined)
             continue;
