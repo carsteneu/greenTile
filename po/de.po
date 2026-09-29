@@ -9,7 +9,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: greenTile 0.1.0\n"
 "Report-Msgid-Bugs-To: https://github.com/carsteneu\n"
-"POT-Creation-Date: 2026-09-29 13:37+0200\n"
+"POT-Creation-Date: 2026-09-29 14:36+0200\n"
 "PO-Revision-Date: 2026-09-28 17:17+0200\n"
 "Last-Translator: carsten_eu\n"
 "Language-Team: German\n"
@@ -20,53 +20,58 @@ msgstr ""
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 "X-Generator: Poedit 2.3\n"
 
-#: greenTile.js:323
+#. settings-schema.json->excludeAppPicker->options
+#: greenTile.js:381
+msgid "Add application …"
+msgstr "Anwendung hinzufügen …"
+
+#: greenTile.js:400
 msgid "Window floats"
 msgstr "Fenster schwebt frei"
 
-#: greenTile.js:323
+#: greenTile.js:400
 msgid "Window tiles again"
 msgstr "Fenster wird wieder gekachelt"
 
-#: greenTile.js:1909
+#: greenTile.js:1986
 #, javascript-format
 msgid "assigned — workspace %d"
 msgstr "zugewiesen — Fläche %d"
 
-#: greenTile.js:1968
+#: greenTile.js:2045
 msgid "Please enter a name."
 msgstr "Bitte einen Namen eingeben."
 
-#: greenTile.js:1991
+#: greenTile.js:2068
 #, javascript-format
 msgid "from %d"
 msgstr "ab %d"
 
-#: greenTile.js:2107
+#: greenTile.js:2184
 msgid "Rules (by window count)"
 msgstr "Regeln (nach Fensterzahl)"
 
-#: greenTile.js:2111
+#: greenTile.js:2188
 msgid "Rule"
 msgstr "Regel"
 
-#: greenTile.js:2112
+#: greenTile.js:2189
 msgid "Delete rule"
 msgstr "Regel löschen"
 
-#: greenTile.js:2120
+#: greenTile.js:2197
 msgid "Rule applies from"
 msgstr "Regel gilt ab"
 
-#: greenTile.js:2127
+#: greenTile.js:2204
 msgid "windows"
 msgstr "Fenstern"
 
-#: greenTile.js:2129
+#: greenTile.js:2206
 msgid "Painter"
 msgstr "Malerei"
 
-#: greenTile.js:2144
+#: greenTile.js:2221
 msgid ""
 "Click or drag: the row sets how many windows the column holds. Right-click "
 "removes a column."
@@ -74,79 +79,79 @@ msgstr ""
 "Klicken oder ziehen: Die Zeile legt fest, wie viele Fenster die Spalte "
 "aufnimmt. Rechtsklick entfernt eine Spalte."
 
-#: greenTile.js:2149
+#: greenTile.js:2226
 msgid "Name"
 msgstr "Name"
 
-#: greenTile.js:2150
+#: greenTile.js:2227
 msgid "Preset name"
 msgstr "Name des Presets"
 
-#: greenTile.js:2154
+#: greenTile.js:2231
 msgid "Save"
 msgstr "Speichern"
 
-#: greenTile.js:2171
+#: greenTile.js:2248
 #, javascript-format
 msgid "Result: %s"
 msgstr "Ergebnis: %s"
 
-#: greenTile.js:2331
+#: greenTile.js:2408
 msgid "Gap between windows"
 msgstr "Abstand zwischen Fenstern"
 
-#: greenTile.js:2336
+#: greenTile.js:2413
 #, javascript-format
 msgid "%d px"
 msgstr "%d px"
 
-#: greenTile.js:2355
+#: greenTile.js:2432
 msgid "Reset sizes"
 msgstr "Größen zurücksetzen"
 
-#: greenTile.js:2386
+#: greenTile.js:2463
 #, javascript-format
 msgid "Presets — workspace %d · %s"
 msgstr "Presets — Arbeitsfläche %d · %s"
 
-#: greenTile.js:2388
+#: greenTile.js:2465
 msgid "Create preset"
 msgstr "Neues Preset"
 
-#: greenTile.js:2388
+#: greenTile.js:2465
 #, javascript-format
 msgid "Edit %s"
 msgstr "%s bearbeiten"
 
-#: greenTile.js:2392
+#: greenTile.js:2469
 msgid "Back"
 msgstr "zurück"
 
-#: greenTile.js:2401
+#: greenTile.js:2478
 msgid "Auto: on"
 msgstr "Auto: an"
 
-#: greenTile.js:2401
+#: greenTile.js:2478
 msgid "Auto: off"
 msgstr "Auto: aus"
 
-#: greenTile.js:2422
+#: greenTile.js:2499
 msgid "Dark theme"
 msgstr "Dunkles Design"
 
-#: greenTile.js:2422
+#: greenTile.js:2499
 msgid "Light theme"
 msgstr "Helles Design"
 
-#: greenTile.js:2542
+#: greenTile.js:2619
 msgid "No presets yet."
 msgstr "Noch keine Presets vorhanden."
 
-#: greenTile.js:2557
+#: greenTile.js:2634
 msgid "New preset"
 msgstr "Neu anlegen"
 
-#: greenTile.js:2560
+#: greenTile.js:2637
 msgid "Click a row to apply it to this workspace and tile right away"
 msgstr "Klick auf eine Zeile = sofort auf dieser Fläche anwenden & kacheln"
 
@@ -241,6 +246,18 @@ msgstr "Preset-Definitionen (JSON)"
 #. settings-schema.json->excludeHotkey->description
 msgid "Toggle 'never tile' for the focused window"
 msgstr "„Nie kacheln“ für das fokussierte Fenster ein- und ausschalten"
+
+#. settings-schema.json->excludeAppPicker->description
+msgid "Add an installed application"
+msgstr "Eine installierte Anwendung hinzufügen"
+
+#. settings-schema.json->excludeAppPicker->tooltip
+msgid ""
+"Pick an application and it is added to the list below. The combobox resets "
+"after each pick."
+msgstr ""
+"Wählt man eine Anwendung aus, landet sie in der untenstehenden Liste. Die "
+"Auswahlbox springt danach zurück."
 
 #. settings-schema.json->exclusions->description
 msgid ""

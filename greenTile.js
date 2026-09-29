@@ -115,6 +115,10 @@ class Config {
         };
         this.destroy = () => {
             this.DisableHotkey();
+            if (this.excludeAppSignal) {
+                imports.gi.Cinnamon.AppSystem.get_default().disconnect(this.excludeAppSignal);
+                this.excludeAppSignal = null;
+            }
             // resize hotkey steps not yet written (500 ms debounce) must not get lost
             tile_split_flush(this.app);
             tile_auto_disconnect_all();
@@ -133,12 +137,19 @@ class Config {
             tile_excl_apply(this.settings);
             tile_excl_retile(this.app);
         }, null);
+        this.settings.bindProperty(Settings.BindingDirection.IN, 'excludeAppPicker', 'excludeAppPickerValue', () => {
+            tile_excl_app_picked(this.settings, this.app, this.settings.getValue('excludeAppPicker'));
+        }, null);
         this.settings.bindProperty(Settings.BindingDirection.IN, 'resizeWiderHotkey', 'resizeWiderHotkey', this.EnableHotkey, null);
         this.settings.bindProperty(Settings.BindingDirection.IN, 'resizeNarrowerHotkey', 'resizeNarrowerHotkey', this.EnableHotkey, null);
         this.settings.bindProperty(Settings.BindingDirection.IN, 'resizeTallerHotkey', 'resizeTallerHotkey', this.EnableHotkey, null);
         this.settings.bindProperty(Settings.BindingDirection.IN, 'resizeShorterHotkey', 'resizeShorterHotkey', this.EnableHotkey, null);
         this.settings.bindProperty(Settings.BindingDirection.IN, 'panelTheme', 'panelTheme', () => tile_theme_changed(), null);
         tile_excl_apply(this.settings);
+        tile_excl_app_populate(this.settings);
+        this.excludeAppSignal = imports.gi.Cinnamon.AppSystem.get_default().connect('installed-changed', () => {
+            tile_excl_app_populate(this.settings);
+        });
         this.EnableHotkey();
         tile_theme_init(this);
         tile_monitors_refresh(app, () => {
@@ -352,6 +363,30 @@ const tile_excl_retile = (app) => {
         else if (layout.auto)
             tile_auto_schedule_monitor(app, i, 150);
     }
+};
+// The app picker combobox ("excludeAppPicker"): the dialog collects its options from
+// the settings file when it opens, so the extension writes them via the official
+// setOptions API at enable time and on AppSystem's installed-changed. Picking an app
+// appends the exclusion row and resets the combobox; setValue alone would not fire
+// the exclusions binding, so apply + retile run explicitly.
+const tile_excl_app_populate = (settings) => {
+    const apps = imports.gi.Cinnamon.AppSystem.get_default().get_all();
+    const list = [];
+    for (let i = 0; i < apps.length; i++) {
+        const info = apps[i].get_app_info();
+        if (!info || !info.should_show())
+            continue;
+        list.push({ id: apps[i].get_id(), name: apps[i].get_name() });
+    }
+    settings.setOptions('excludeAppPicker', tile_excl_app_options(list, _("Add application …")));
+};
+const tile_excl_app_picked = (settings, app, value) => {
+    if (typeof value !== 'string' || value === 'picker')
+        return;
+    settings.setValue('exclusions', tile_excl_rows_append(settings.getValue('exclusions'), value));
+    tile_excl_apply(settings);
+    tile_excl_retile(app);
+    settings.setValue('excludeAppPicker', 'picker');
 };
 const tile_excl_toggle_focused = (app) => {
     const w = tile_focus_window();

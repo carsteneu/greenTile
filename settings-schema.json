@@ -63,6 +63,7 @@
          "type": "section",
          "title": "Never tile",
          "keys": [
+            "excludeAppPicker",
             "exclusions"
          ]
       },
@@ -136,11 +137,20 @@
       "default": "<Super>g",
       "description": "Toggle 'never tile' for the focused window"
    },
+   "excludeAppPicker": {
+      "type": "combobox",
+      "default": "picker",
+      "description": "Add an installed application",
+      "tooltip": "Pick an application and it is added to the list below. The combobox resets after each pick.",
+      "options": {
+         "Add application …": "picker"
+      }
+   },
    "exclusions": {
       "type": "list",
       "description": "Windows matching one of these rows are never tiled; they float freely wherever you put them",
       "columns": [
-         {"id": "match", "title": "Match", "type": "string", "options": {"Window class": "class", "Title contains": "title"}},
+         {"id": "match", "title": "Match", "type": "string", "options": {"Window class": "class", "Title contains": "title", "App id": "app"}},
          {"id": "text", "title": "Text", "type": "string"}
       ],
       "default": []
