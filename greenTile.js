@@ -901,6 +901,7 @@ const tile_auto_on_grab_begin = (app, w, op) => {
     }
     if (op !== Meta.GrabOp.MOVING && op !== Meta.GrabOp.KEYBOARD_MOVING)
         return;
+    tile_drop_begin(app, w, op);
     tile_auto.grabMonitor.set(w.get_stable_sequence(), w.get_monitor());
 };
 // Edge resize of a tiled window (mouse or window menu): the moved edges become the new
@@ -1024,6 +1025,8 @@ const tile_auto_on_grab_end = (app, w, op) => {
         return;
     }
     if (op !== Meta.GrabOp.MOVING && op !== Meta.GrabOp.KEYBOARD_MOVING)
+        return;
+    if (tile_drop_end(app, w, op))
         return;
     if (w.get_workspace() !== global.workspace_manager.get_active_workspace())
         return;
@@ -1166,6 +1169,7 @@ const tile_auto_disconnect_all = () => {
     tile_auto.lastMonitor.clear();
     tile_auto.grabMonitor.clear();
     tile_auto.resizeStart.clear();
+    tile_drop_stop();
     tile_sort_rect_override.clear();
     tile_excl.toggled.clear();
     tile_auto_disconnect_workspaces();
@@ -1740,6 +1744,169 @@ const tile_drop_fits = (kind, shape, width, height, gap, minPx) => {
     return major >= minPx && minor >= minPx;
 };
 // <<< drop-model
+// Drag tracking for the zone split: while a tiled window is moved (mouse move grab),
+// a 50 ms pointer poll shows a preview of the cell a drop would produce; on release
+// over a zone of another tiled window the new layout is placed directly and stored
+// as a shape (per monitor, workspace and window count). Cancel (Esc), release in the
+// centre or outside tiled cells keeps today's snap-on-release behaviour.
+const tile_drop = { timer: 0, actor: null, seq: null, from: null, start: null, w: null };
+const tile_drop_stop = () => {
+    if (tile_drop.timer) {
+        tile_Mainloop.source_remove(tile_drop.timer);
+        tile_drop.timer = 0;
+    }
+    if (tile_drop.actor) {
+        tile_drop.actor.destroy();
+        tile_drop.actor = null;
+    }
+    tile_drop.seq = null;
+    tile_drop.from = null;
+    tile_drop.start = null;
+    tile_drop.w = null;
+};
+const tile_drop_begin = (app, w, op) => {
+    if (op !== Meta.GrabOp.MOVING || tile_drop.seq !== null)
+        return;
+    if (w.get_workspace() !== global.workspace_manager.get_active_workspace())
+        return;
+    const monitorIndex = w.get_monitor();
+    const monitor = utils_Main.layoutManager.monitors[monitorIndex];
+    if (!monitor || tile_excl_is_excluded(w))
+        return;
+    const windows = tile_collect_windows(monitor, null);
+    if (windows.indexOf(w) === -1)
+        return;
+    if (!tile_layout_shape(app, monitorIndex, windows.length))
+        return;
+    const f = w.get_frame_rect();
+    tile_drop.seq = w.get_stable_sequence();
+    tile_drop.from = monitorIndex;
+    tile_drop.start = [f.x, f.y, f.width, f.height];
+    tile_drop.w = w;
+    const rgb = tile_accent_state.rgb;
+    tile_drop.actor = new tile_St.Widget({ reactive: false, style: 'background-color: rgba(' + rgb[0] + ',' + rgb[1] + ',' + rgb[2] + ',0.25); border: 2px solid rgb(' + rgb[0] + ',' + rgb[1] + ',' + rgb[2] + ');' });
+    Main.uiGroup.add_child(tile_drop.actor);
+    tile_drop.actor.hide();
+    tile_drop.timer = tile_Mainloop.timeout_add(50, () => tile_drop_tick(app));
+};
+// Where a drop at (px, py) would land: the target cell of another tiled window and
+// the zone, plus the new layout (drop-model). null outside any zone. The target set
+// holds all tiled windows of the pointer's monitor with A in it — dragged within its
+// own monitor A keeps its reading-order place; from another monitor it is inserted
+// fresh (from = -1) and the count there grows by one.
+const tile_drop_target = (app, w, px, py, fromMonitor, startFrame) => {
+    const monitors = utils_Main.layoutManager.monitors;
+    let monitorIndex = -1;
+    for (let i = 0; i < monitors.length; i++) {
+        const m = monitors[i];
+        if (px >= m.x && px < m.x + m.width && py >= m.y && py < m.y + m.height) {
+            monitorIndex = i;
+            break;
+        }
+    }
+    if (monitorIndex === -1)
+        return null;
+    const monitor = monitors[monitorIndex];
+    const wsIndex = global.workspace_manager.get_active_workspace().index();
+    const same = (fromMonitor != null ? fromMonitor : tile_drop.from) === monitorIndex;
+    const others = tile_collect_windows(monitor, null, wsIndex).filter((t) => t !== w);
+    const windows = same ? others.concat([w]) : others;
+    const n = windows.length;
+    if (n < 2)
+        return null;
+    const layout = tile_layout_shape(app, monitorIndex, n);
+    if (!layout)
+        return null;
+    // Reading order from the grab-start geometry: A's frame follows the pointer, so
+    // its live frame would shuffle the order the stored shape is keyed by.
+    const rects = windows.map((t) => {
+        if (t === w)
+            return startFrame || tile_drop.start;
+        const f = t.get_frame_rect();
+        return [f.x, f.y, f.width, f.height];
+    });
+    const ordered = tile_sort_order(rects, layout.kind === 'cols').map((i) => windows[i]);
+    const fromIndex = ordered.indexOf(w);
+    const area = getUsableScreenArea(monitor);
+    const cellRects = tile_split_rects(layout.kind, layout.shape, tile_split_for(app, monitorIndex, wsIndex, n, layout), area);
+    let ci = -1;
+    for (let i = 0; i < cellRects.length; i++) {
+        const [cx, cy, cw, ch] = cellRects[i];
+        if (px >= cx && px < cx + cw && py >= cy && py < cy + ch) {
+            ci = i;
+            break;
+        }
+    }
+    if (ci === -1 || ci >= ordered.length)
+        return null;
+    if (fromIndex === -1 || fromIndex === ci)
+        return null;
+    const zone = tile_drop_zone(cellRects[ci], px, py);
+    if (!zone)
+        return null;
+    const next = zone === 'center' ? null : tile_drop_layout(layout.kind, layout.shape, fromIndex, ci, zone);
+    if (next && !tile_drop_fits(next.kind, next.shape, area[2], area[3], tile_gap(app), TILE_SPLIT_MIN_PX))
+        return null;
+    return { monitorIndex: monitorIndex, n: n, layout: layout, ordered: ordered, fromIndex: fromIndex, toIndex: ci, zone: zone, next: next };
+};
+const tile_drop_tick = (app) => {
+    if (tile_drop.seq === null || global.display.get_grab_op() === Meta.GrabOp.NONE) {
+        tile_drop_stop();
+        return false;
+    }
+    const p = global.get_pointer();
+    const hit = tile_drop_target(app, tile_drop.w, p[0], p[1]);
+    tile_drop.hit = hit;
+    if (!hit || !hit.next) {
+        tile_drop.actor.hide();
+        return true;
+    }
+    const monitor = utils_Main.layoutManager.monitors[hit.monitorIndex];
+    const area = getUsableScreenArea(monitor);
+    const rects = tile_split_rects(hit.next.kind, hit.next.shape, null, area);
+    // A's cell in the new layout; a cross-monitor A sits at the end of the order
+    const fresh = hit.ordered.length;
+    const at = hit.next.order.indexOf(hit.fromIndex >= 0 ? hit.fromIndex : fresh);
+    const cell = tile_gap_cell(rects[at], area, tile_gap(app));
+    tile_drop.actor.set_position(cell[0], cell[1]);
+    tile_drop.actor.set_size(cell[2], cell[3]);
+    tile_drop.actor.show();
+    return true;
+};
+// true = split applied, the grab-end handler must not run the usual snap.
+const tile_drop_end = (app, w, op) => {
+    if (tile_drop.seq === null)
+        return false;
+    const start = tile_drop.start;
+    const fromMonitor = tile_drop.from;
+    tile_drop_stop();
+    if (op !== Meta.GrabOp.MOVING)
+        return false;
+    // Esc cancel (spike 2): Muffin put the frame back at the start rect.
+    const f = w.get_frame_rect();
+    if (start && Math.abs(f.x - start[0]) <= 2 && Math.abs(f.y - start[1]) <= 2)
+        return false;
+    const p = global.get_pointer();
+    const hit = tile_drop_target(app, w, p[0], p[1], fromMonitor, start);
+    const wsIndex = global.workspace_manager.get_active_workspace().index();
+    const layouts = tile_layouts_parse(app.config.settings.getValue('layouts') || '');
+    if (layouts === null)
+        return false;
+    const n = hit.next.order.length;
+    const ref = tile_split_ref(hit.monitorIndex, wsIndex, n);
+    if (!ref)
+        return false;
+    tile_split_pending.delete(ref.key);
+    tile_layout_set(app, hit.monitorIndex, wsIndex, { shapes: { [ref.n]: { kind: hit.next.kind, shape: hit.next.shape } }, splits: { [ref.n]: null } });
+    const monitor = utils_Main.layoutManager.monitors[hit.monitorIndex];
+    const area = getUsableScreenArea(monitor);
+    const orderedByNext = hit.next.order.map((i) => (i === hit.ordered.length ? w : hit.ordered[i]));
+    tile_place_rects(app, orderedByNext, { kind: hit.next.kind, shape: hit.next.shape }, null, area, true);
+    if (fromMonitor !== hit.monitorIndex)
+        tile_auto_schedule_monitor(app, fromMonitor, 250);
+    global.log('greenTile drag split ws' + (wsIndex + 1) + ' mon=' + ref.mkey + ' n=' + n + ' ' + hit.next.kind + '=[' + hit.next.shape.join(',') + ']');
+    return true;
+};
 // Layout greenTile tiles for n windows on this monitor and the given workspace: the
 // preset rule filled to n (tile_fill_stacks), or the automatic grid — with a stored
 // dragged shape (drop-model) winning over both. null when nothing is tiled.
