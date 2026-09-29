@@ -108,7 +108,13 @@ test('app_options: placeholder first, then label to id sorted by name', () => {
     assert.equal(options['Add application …'], 'picker');
     assert.equal(options['Brave'], 'b.desktop');
     assert.equal(options['Terminal'], 'z.desktop');
-    assert.deepEqual(m.tile_excl_app_options([], 'Add application …'), { 'Add application …': 'picker' });
+    const empty = m.tile_excl_app_options([], 'Add application …');
+    assert.deepEqual(Object.keys(empty), ['Add application …']);
+    assert.equal(empty['Add application …'], 'picker');
+    const hostile = m.tile_excl_app_options([{ id: 'p.desktop', name: '__proto__' }, { id: 'c.desktop', name: 'constructor' }], 'Add application …');
+    assert.equal(hostile.__proto__, 'p.desktop');
+    assert.equal(hostile.constructor, 'c.desktop');
+    assert.deepEqual(Object.keys(hostile), ['Add application …', '__proto__', 'constructor']);
 });
 
 test('match: any row wins, null fields never match', () => {

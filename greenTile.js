@@ -311,7 +311,9 @@ const tile_excl_rows_append = (rows, text) => {
     return result;
 };
 // Combobox options for the app picker: label to app id, sorted alphabetically;
-// the placeholder comes first. Duplicate labels keep the first app.
+// the placeholder comes first. Duplicate labels keep the first app. A null-prototype
+// object keeps apps named like inherited Object.prototype properties ("constructor")
+// in the picker instead of colliding with them.
 const tile_excl_app_options = (apps, placeholderLabel) => {
     const list = [];
     if (Array.isArray(apps)) {
@@ -322,7 +324,7 @@ const tile_excl_app_options = (apps, placeholderLabel) => {
         }
     }
     list.sort((a, b) => a.name.localeCompare(b.name));
-    const options = {};
+    const options = Object.create(null);
     if (typeof placeholderLabel === 'string' && placeholderLabel)
         options[placeholderLabel] = 'picker';
     for (let i = 0; i < list.length; i++) {
