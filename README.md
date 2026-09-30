@@ -2,6 +2,8 @@
 
 Window tiling for Cinnamon: presets per monitor and workspace, an auto mode, snap-on-release, draggable borders and keyboard swapping. This README explains how to use it; the complete list of features, each with a short explanation, is in [FEATURES.md](FEATURES.md).
 
+[![greenTile in action: windows tile as they open, then a window is split into another one by drag, with a translucent preview](docs/screenshots/demo.gif)](https://youtu.be/niI0LHYb1A8)
+
 ![Preset panel](docs/screenshots/preset-panel.png)
 
 - **UUID:** `greenTile@carsteneu`
