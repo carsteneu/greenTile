@@ -54,7 +54,7 @@ The thumbnail shows what a click would tile right now. No cell ever stays empty:
 - **Rules** (left): "from N" means the rule applies from N windows on; the last matching rule wins. **＋ Rule** adds one, **🗑** deletes the selected one.
 - **Painter:** 6 columns × 4 rows. Click or drag to set how many windows a column holds (top = 1, bottom = 4). Right-click removes a column.
 - **Save** (or `Enter` in the name field) retiles right away if the preset is in use. **← Back** or `Esc` discards the draft.
-- **🗑 Delete preset** (red, next to Save) removes the preset after a confirmation and clears its workspace assignments.
+- **🗑 Delete preset** (solid red, right of Save) removes the preset after a confirmation and clears its workspace assignments. `Enter` in the name field always saves.
 
 ## Auto mode
 

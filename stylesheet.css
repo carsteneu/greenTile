@@ -458,14 +458,19 @@
 /* The delete-preset button and its inline confirmation are ALWAYS the same fixed
    red, in the dark and the light panel and under every theme accent — therefore
    they have no .gk-light overrides and never appear in the generated accent css
-   (panel-accent.css cannot restyle them). */
+   (panel-accent.css cannot restyle them). Solid red background with white text
+   for maximum contrast. */
 .gk-preset-del {
-    color: #d94343;
+    color: #ffffff;
     font-size: 15px;
+    font-weight: bold;
+    background-color: #c23636;
+    border-radius: 4px;
+    padding: 7px 14px;
 }
 
 .gk-preset-del:hover {
-    color: #e05555;
+    background-color: #d94343;
 }
 
 .gk-preset-del-row {
@@ -475,19 +480,6 @@
 .gk-preset-del-question {
     color: #d94343;
     font-size: 11px;
-}
-
-.gk-preset-del-confirm {
-    color: #ffffff;
-    font-size: 15px;
-    font-weight: bold;
-    background-color: #c23636;
-    border-radius: 4px;
-    padding: 7px 14px;
-}
-
-.gk-preset-del-confirm:hover {
-    background-color: #d94343;
 }
 
 .gk-preset-del-cancel {

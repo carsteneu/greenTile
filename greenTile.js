@@ -2877,19 +2877,21 @@ const tile_editor_body = (app) => {
     delWrap.add(presetDelBtn);
     const confirmWrap = new tile_St.BoxLayout({ style_class: 'gk-preset-del-row' });
     confirmWrap.add(new tile_St.Label({ text: _("Really delete?"), style_class: 'gk-preset-del-question' }), middle);
-    const confirmBtn = new tile_St.Button({ label: _("Delete"), style_class: 'gk-preset-del-confirm', track_hover: true });
+    const confirmBtn = new tile_St.Button({ label: _("Delete"), style_class: 'gk-preset-del', track_hover: true });
     confirmWrap.add(confirmBtn, middle);
     const cancelBtn = new tile_St.Button({ label: '✕', style_class: 'gk-preset-del-cancel', track_hover: true });
     confirmWrap.add(cancelBtn, middle);
     const save = new tile_St.Button({ label: _("Save"), style_class: 'gk-save', track_hover: true });
     const error = new tile_St.Label({ text: '', style_class: 'gk-error' });
     // A new, never-saved preset has nothing persistent to delete; Back/Esc is its discard.
+    // Save sits left, the destructive delete at the outer right; the expanding error
+    // label keeps the two apart.
+    saveRow.add(save, middle);
+    saveRow.add(error, { expand: true, x_fill: true, y_fill: false, y_align: tile_St.Align.MIDDLE });
     if (!tile_panel.draft.isNew) {
         saveRow.add(delWrap, middle);
         saveRow.add(confirmWrap, middle);
     }
-    saveRow.add(save, middle);
-    saveRow.add(error, middle);
     right.add(saveRow);
     confirmWrap.hide();
     body.add(right, { expand: true, x_fill: true, y_fill: true });

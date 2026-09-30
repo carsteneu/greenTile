@@ -45,7 +45,7 @@ Every feature in one line or two. Details and screenshots are in the [README](RE
 - **Result line**: shows the column stacks of the selected rule, e.g. `[1,2,2]`.
 - **Name check**: a preset cannot be saved without a name.
 - **Save and retile**: saving a preset in use retiles right away. `Esc` or ← Back discards the draft.
-- **Delete preset**: the red button next to Save deletes the preset after an inline confirmation and removes its workspace assignments. Hidden for a new, not-yet-saved preset.
+- **Delete preset**: the solid red button right of Save deletes the preset after an inline confirmation and removes its workspace assignments. Hidden for a new, not-yet-saved preset. `Enter` always runs Save.
 
 ## Adjusting layouts
 
