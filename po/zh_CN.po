@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: greenTile 1.1.3\n"
 "Report-Msgid-Bugs-To: https://github.com/carsteneu\n"
-"POT-Creation-Date: 2026-09-30 15:09+0200\n"
+"POT-Creation-Date: 2026-09-30 22:29+0200\n"
 "PO-Revision-Date: \n"
 "Last-Translator: \n"
 "Language-Team: Simplified Chinese\n"
@@ -19,147 +19,147 @@ msgstr ""
 "X-Generator: Poedit 3.4.4\n"
 
 #. settings-schema.json->excludeAppPicker->options
-#: greenTile.js:435
+#: greenTile.js:439
 msgid "Add application …"
 msgstr "添加应用程序…"
 
-#: greenTile.js:454
+#: greenTile.js:458
 msgid "Window floats"
 msgstr "窗口已浮动"
 
-#: greenTile.js:454
+#: greenTile.js:458
 msgid "Window tiles again"
 msgstr "窗口已恢复平铺"
 
-#: greenTile.js:2740
+#: greenTile.js:2771
 #, javascript-format
 msgid "assigned — workspace %d"
 msgstr "已分配 — 工作区 %d"
 
-#: greenTile.js:2801
+#: greenTile.js:2832
 msgid "Please enter a name."
 msgstr "请输入名称。"
 
-#: greenTile.js:2843
+#: greenTile.js:2874
 #, javascript-format
 msgid "from %d"
 msgstr "%d 个及以上"
 
-#: greenTile.js:2960
+#: greenTile.js:2991
 msgid "Rules (by window count)"
 msgstr "规则（按窗口数量）"
 
-#: greenTile.js:2964
+#: greenTile.js:2995
 msgid "Rule"
 msgstr "规则"
 
-#: greenTile.js:2965
+#: greenTile.js:2996
 msgid "Delete rule"
 msgstr "删除规则"
 
-#: greenTile.js:2973
+#: greenTile.js:3004
 msgid "Rule applies from"
 msgstr "规则适用于"
 
-#: greenTile.js:2980
+#: greenTile.js:3011
 msgid "windows"
 msgstr "个及以上窗口"
 
-#: greenTile.js:2982
+#: greenTile.js:3013
 msgid "Painter"
 msgstr "布局绘制区"
 
-#: greenTile.js:2997
+#: greenTile.js:3028
 msgid ""
 "Click or drag: the row sets how many windows the column holds. Right-click "
 "removes a column."
 msgstr "单击或拖动：所在行决定该列容纳的窗口数。右键单击可删除一列。"
 
-#: greenTile.js:3002
+#: greenTile.js:3033
 msgid "Name"
 msgstr "名称"
 
-#: greenTile.js:3003
+#: greenTile.js:3034
 msgid "Preset name"
 msgstr "预设名称"
 
-#: greenTile.js:3008
+#: greenTile.js:3039
 msgid "Delete preset"
 msgstr "删除预设"
 
-#: greenTile.js:3011
+#: greenTile.js:3042
 msgid "Really delete?"
 msgstr "确定要删除吗？"
 
-#: greenTile.js:3012
+#: greenTile.js:3043
 msgid "Delete"
 msgstr "删除"
 
-#: greenTile.js:3016
+#: greenTile.js:3047
 msgid "Save"
 msgstr "保存"
 
-#: greenTile.js:3041
+#: greenTile.js:3072
 #, javascript-format
 msgid "Result: %s"
 msgstr "结果：%s"
 
-#: greenTile.js:3661
+#: greenTile.js:3692
 msgid "Gap between windows"
 msgstr "窗口间距"
 
-#: greenTile.js:3666
+#: greenTile.js:3697
 #, javascript-format
 msgid "%d px"
 msgstr "%d px"
 
-#: greenTile.js:3685
+#: greenTile.js:3716
 msgid "Reset sizes"
 msgstr "重置大小"
 
-#: greenTile.js:3716
+#: greenTile.js:3747
 #, javascript-format
 msgid "Presets — workspace %d · %s"
 msgstr "预设 — 工作区 %d · %s"
 
-#: greenTile.js:3718
+#: greenTile.js:3749
 msgid "Create preset"
 msgstr "创建预设"
 
-#: greenTile.js:3718
+#: greenTile.js:3749
 #, javascript-format
 msgid "Edit %s"
 msgstr "编辑 %s"
 
-#: greenTile.js:3722
+#: greenTile.js:3753
 msgid "Back"
 msgstr "返回"
 
-#: greenTile.js:3731
+#: greenTile.js:3762
 msgid "Auto: on"
 msgstr "自动：开"
 
-#: greenTile.js:3731
+#: greenTile.js:3762
 msgid "Auto: off"
 msgstr "自动：关"
 
-#: greenTile.js:3752
+#: greenTile.js:3783
 msgid "Dark theme"
 msgstr "深色主题"
 
-#: greenTile.js:3752
+#: greenTile.js:3783
 msgid "Light theme"
 msgstr "浅色主题"
 
-#: greenTile.js:3872
+#: greenTile.js:3903
 msgid "No presets yet."
 msgstr "尚无预设。"
 
-#: greenTile.js:3887
+#: greenTile.js:3918
 msgid "New preset"
 msgstr "新建预设"
 
-#: greenTile.js:3890
+#: greenTile.js:3921
 msgid "Click a row to apply it to this workspace and tile right away"
 msgstr "单击某一行即可将其应用到此工作区并立即平铺"
 
@@ -171,9 +171,7 @@ msgstr "greenTile"
 msgid ""
 "Column tiling with per-workspace presets, auto mode and snap-on-release. "
 "Fork of gTile by shuairan."
-msgstr ""
-"按列平铺窗口，支持按工作区设置预设、自动模式和松开时吸附。基于 shuairan 的 "
-"gTile 分支开发。"
+msgstr "按列平铺窗口，支持按工作区设置预设、自动模式和松开时吸附。基于 shuairan 的 gTile 分支开发。"
 
 #. settings-schema.json->settings-tab->title
 msgid "Settings"
@@ -304,9 +302,7 @@ msgstr "工作区与预设的分配（JSON）"
 msgid ""
 "Automatic tiling per workspace (set with Super+Ctrl+A / Super+Ctrl+D or in "
 "the preset panel; not shown in this dialog)"
-msgstr ""
-"按工作区自动平铺（通过 Super+Ctrl+A / Super+Ctrl+D 或在预设面板中设置；不在此"
-"对话框中显示）"
+msgstr "按工作区自动平铺（通过 Super+Ctrl+A / Super+Ctrl+D 或在预设面板中设置；不在此对话框中显示）"
 
 #. settings-schema.json->autoWorkspaces->columns->title
 msgid "Workspace"
@@ -342,8 +338,17 @@ msgstr "聚焦窗口周围的边框"
 msgid ""
 "After a Super+Arrow focus move, mark the newly focused window with a thin "
 "border in the state color for three seconds."
-msgstr ""
-"使用 Super+方向键移动焦点后，用状态色细边框标记新获得焦点的窗口三秒钟。"
+msgstr "使用 Super+方向键移动焦点后，用状态色细边框标记新获得焦点的窗口三秒钟。"
+
+#. settings-schema.json->fillSingleWindow->description
+msgid "Fill the monitor with a single window"
+msgstr "用单个窗口填满显示器"
+
+#. settings-schema.json->fillSingleWindow->tooltip
+msgid ""
+"With automatic tiling or a preset on, a single tiled window fills the whole "
+"usable area instead of being left untouched."
+msgstr "启用自动平铺或预设时，单个平铺窗口会填满整个可用区域，而不是保持不变。"
 
 #. settings-schema.json->panelTheme->description
 msgid "Theme of the preset panel"
@@ -373,8 +378,8 @@ msgstr "强调色"
 
 #. settings-schema.json->accentMode->tooltip
 msgid ""
-"Follow theme tracks the accent color of the Cinnamon theme live. Custom uses "
-"the color below."
+"Follow theme tracks the accent color of the Cinnamon theme live. Custom uses"
+" the color below."
 msgstr "“跟随主题”会实时跟随 Cinnamon 主题的强调色。“自定义”使用下方的颜色。"
 
 #. settings-schema.json->accentMode->options
@@ -404,9 +409,7 @@ msgid ""
 "Color of the \"Auto: on\" marker and the assigned rows. Green keeps today's "
 "look. Follow theme tracks the accent color of the Cinnamon theme live. "
 "Custom uses the color below."
-msgstr ""
-"“自动：开”标记和已分配行的颜色。“绿色”保持当前外观。“跟随主题”会实时跟随 "
-"Cinnamon 主题的强调色。“自定义”使用下方的颜色。"
+msgstr "“自动：开”标记和已分配行的颜色。“绿色”保持当前外观。“跟随主题”会实时跟随 Cinnamon 主题的强调色。“自定义”使用下方的颜色。"
 
 #. settings-schema.json->stateMode->options
 msgid "Green"

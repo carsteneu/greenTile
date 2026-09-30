@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: greenTile 1.1.3\n"
 "Report-Msgid-Bugs-To: https://github.com/carsteneu\n"
-"POT-Creation-Date: 2026-09-30 15:09+0200\n"
+"POT-Creation-Date: 2026-09-30 22:29+0200\n"
 "PO-Revision-Date: 2023-03-31 10:43+0200\n"
 "Last-Translator: Dragone2 <dragone2@risposteinformatiche.it>\n"
 "Language-Team: Italian\n"
@@ -20,57 +20,57 @@ msgstr ""
 "X-Generator: Poedit 3.0.1\n"
 
 #. settings-schema.json->excludeAppPicker->options
-#: greenTile.js:435
+#: greenTile.js:439
 msgid "Add application …"
 msgstr "Aggiungi applicazione …"
 
-#: greenTile.js:454
+#: greenTile.js:458
 msgid "Window floats"
 msgstr "Finestra flottante"
 
-#: greenTile.js:454
+#: greenTile.js:458
 msgid "Window tiles again"
 msgstr "Finestra di nuovo affiancata"
 
-#: greenTile.js:2740
+#: greenTile.js:2771
 #, javascript-format
 msgid "assigned — workspace %d"
 msgstr "assegnata — area di lavoro %d"
 
-#: greenTile.js:2801
+#: greenTile.js:2832
 msgid "Please enter a name."
 msgstr "Inserire un nome."
 
-#: greenTile.js:2843
+#: greenTile.js:2874
 #, javascript-format
 msgid "from %d"
 msgstr "da %d"
 
-#: greenTile.js:2960
+#: greenTile.js:2991
 msgid "Rules (by window count)"
 msgstr "Regole (per numero di finestre)"
 
-#: greenTile.js:2964
+#: greenTile.js:2995
 msgid "Rule"
 msgstr "Regola"
 
-#: greenTile.js:2965
+#: greenTile.js:2996
 msgid "Delete rule"
 msgstr "Elimina regola"
 
-#: greenTile.js:2973
+#: greenTile.js:3004
 msgid "Rule applies from"
 msgstr "Regola valida a partire da"
 
-#: greenTile.js:2980
+#: greenTile.js:3011
 msgid "windows"
 msgstr "finestre"
 
-#: greenTile.js:2982
+#: greenTile.js:3013
 msgid "Painter"
 msgstr "Area di disegno"
 
-#: greenTile.js:2997
+#: greenTile.js:3028
 msgid ""
 "Click or drag: the row sets how many windows the column holds. Right-click "
 "removes a column."
@@ -78,91 +78,91 @@ msgstr ""
 "Fare clic o trascinare: la riga stabilisce quante finestre contiene la "
 "colonna. Il clic destro rimuove una colonna."
 
-#: greenTile.js:3002
+#: greenTile.js:3033
 msgid "Name"
 msgstr "Nome"
 
-#: greenTile.js:3003
+#: greenTile.js:3034
 msgid "Preset name"
 msgstr "Nome della preimpostazione"
 
-#: greenTile.js:3008
+#: greenTile.js:3039
 msgid "Delete preset"
 msgstr "Elimina preimpostazione"
 
-#: greenTile.js:3011
+#: greenTile.js:3042
 msgid "Really delete?"
 msgstr "Eliminare davvero?"
 
-#: greenTile.js:3012
+#: greenTile.js:3043
 msgid "Delete"
 msgstr "Elimina"
 
-#: greenTile.js:3016
+#: greenTile.js:3047
 msgid "Save"
 msgstr "Salva"
 
-#: greenTile.js:3041
+#: greenTile.js:3072
 #, javascript-format
 msgid "Result: %s"
 msgstr "Risultato: %s"
 
-#: greenTile.js:3661
+#: greenTile.js:3692
 msgid "Gap between windows"
 msgstr "Spaziatura tra le finestre"
 
-#: greenTile.js:3666
+#: greenTile.js:3697
 #, javascript-format
 msgid "%d px"
 msgstr "%d px"
 
-#: greenTile.js:3685
+#: greenTile.js:3716
 msgid "Reset sizes"
 msgstr "Ripristina dimensioni"
 
-#: greenTile.js:3716
+#: greenTile.js:3747
 #, javascript-format
 msgid "Presets — workspace %d · %s"
 msgstr "Preimpostazioni — area di lavoro %d · %s"
 
-#: greenTile.js:3718
+#: greenTile.js:3749
 msgid "Create preset"
 msgstr "Crea preimpostazione"
 
-#: greenTile.js:3718
+#: greenTile.js:3749
 #, javascript-format
 msgid "Edit %s"
 msgstr "Modifica %s"
 
-#: greenTile.js:3722
+#: greenTile.js:3753
 msgid "Back"
 msgstr "Indietro"
 
-#: greenTile.js:3731
+#: greenTile.js:3762
 msgid "Auto: on"
 msgstr "Auto: attivato"
 
-#: greenTile.js:3731
+#: greenTile.js:3762
 msgid "Auto: off"
 msgstr "Auto: disattivato"
 
-#: greenTile.js:3752
+#: greenTile.js:3783
 msgid "Dark theme"
 msgstr "Tema scuro"
 
-#: greenTile.js:3752
+#: greenTile.js:3783
 msgid "Light theme"
 msgstr "Tema chiaro"
 
-#: greenTile.js:3872
+#: greenTile.js:3903
 msgid "No presets yet."
 msgstr "Ancora nessuna preimpostazione."
 
-#: greenTile.js:3887
+#: greenTile.js:3918
 msgid "New preset"
 msgstr "Nuova preimpostazione"
 
-#: greenTile.js:3890
+#: greenTile.js:3921
 msgid "Click a row to apply it to this workspace and tile right away"
 msgstr ""
 "Fare clic su una riga per applicarla a questa area di lavoro e affiancare "
@@ -228,7 +228,8 @@ msgstr "Affianca tutte le finestre in 3 colonne"
 #. settings-schema.json->autotileautohotkey->description
 msgid "Turn automatic tiling on for this workspace and tile now"
 msgstr ""
-"Attiva l'affiancamento automatico per questa area di lavoro e affianca subito"
+"Attiva l'affiancamento automatico per questa area di lavoro e affianca "
+"subito"
 
 #. settings-schema.json->autotileoffhotkey->description
 msgid "Turn automatic tiling off for this workspace"
@@ -363,6 +364,18 @@ msgstr ""
 "Dopo uno spostamento del fuoco con Super+Freccia, evidenzia per tre secondi "
 "la nuova finestra a fuoco con un bordo sottile nel colore di stato."
 
+#. settings-schema.json->fillSingleWindow->description
+msgid "Fill the monitor with a single window"
+msgstr "Riempi il monitor con una singola finestra"
+
+#. settings-schema.json->fillSingleWindow->tooltip
+msgid ""
+"With automatic tiling or a preset on, a single tiled window fills the whole "
+"usable area instead of being left untouched."
+msgstr ""
+"Con affiancamento automatico o una preimpostazione attivi, una singola "
+"finestra affiancata riempie tutta l'area utile invece di restare invariata."
+
 #. settings-schema.json->panelTheme->description
 msgid "Theme of the preset panel"
 msgstr "Tema del pannello delle preimpostazioni"
@@ -393,8 +406,8 @@ msgstr "Colore di accento"
 
 #. settings-schema.json->accentMode->tooltip
 msgid ""
-"Follow theme tracks the accent color of the Cinnamon theme live. Custom uses "
-"the color below."
+"Follow theme tracks the accent color of the Cinnamon theme live. Custom uses"
+" the color below."
 msgstr ""
 "«Segui il tema» adotta in tempo reale il colore di accento del tema "
 "Cinnamon. «Personalizzato» usa il colore qui sotto."
@@ -451,5 +464,5 @@ msgstr ""
 #~ "Draw a thin border in the state color around the focused window while "
 #~ "automatic tiling is on."
 #~ msgstr ""
-#~ "Disegna un bordo sottile nel colore di stato attorno alla finestra a "
-#~ "fuoco quando l'affiancamento automatico è attivo."
+#~ "Disegna un bordo sottile nel colore di stato attorno alla finestra a fuoco "
+#~ "quando l'affiancamento automatico è attivo."

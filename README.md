@@ -77,6 +77,8 @@ Without a preset, the auto grid depends on the monitor width:
 - **2100 px and wider:** up to 6 windows in one row, then evenly spread over full-width rows (7 = 4 + 3, 8 = 4 + 4).
 - **Narrower:** up to 3 windows in one row, then 3 columns with stacks (4 = 1·1·2, 5 = 1·2·2, 6 = 2·2·2).
 
+With **Fill the monitor with a single window** on (settings, **Settings** page, off by default), a lone tiled window fills the whole usable area instead of being left untouched — with an assigned preset too, where its rule for one window applies if it has one. Switching it on retiles right away; switching it off just leaves lone windows be.
+
 ## Adjusting the layout
 
 **Moving borders.** Drag the edge of a tiled window, or use `Super+Alt+Arrow`. Neighbours follow, no window gets smaller than 120 px. Borders are remembered per monitor, workspace and window count, so opening a fourth window uses the 4-window layout and closing it brings the 3-window borders back.

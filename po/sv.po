@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: greenTile 1.1.3\n"
 "Report-Msgid-Bugs-To: https://github.com/carsteneu\n"
-"POT-Creation-Date: 2026-09-30 15:09+0200\n"
+"POT-Creation-Date: 2026-09-30 22:29+0200\n"
 "PO-Revision-Date: 2021-01-12 21:08+0100\n"
 "Last-Translator: Åke Engelbrektson <eson@svenskasprakfiler.se>\n"
 "Language-Team: Svenska Språkfiler <contactform@svenskasprakfiler.se>\n"
@@ -20,57 +20,57 @@ msgstr ""
 "X-Generator: Poedit 2.3\n"
 
 #. settings-schema.json->excludeAppPicker->options
-#: greenTile.js:435
+#: greenTile.js:439
 msgid "Add application …"
 msgstr "Lägg till program …"
 
-#: greenTile.js:454
+#: greenTile.js:458
 msgid "Window floats"
 msgstr "Fönstret flyter"
 
-#: greenTile.js:454
+#: greenTile.js:458
 msgid "Window tiles again"
 msgstr "Fönstret kaklas igen"
 
-#: greenTile.js:2740
+#: greenTile.js:2771
 #, javascript-format
 msgid "assigned — workspace %d"
 msgstr "tilldelad — arbetsyta %d"
 
-#: greenTile.js:2801
+#: greenTile.js:2832
 msgid "Please enter a name."
 msgstr "Ange ett namn."
 
-#: greenTile.js:2843
+#: greenTile.js:2874
 #, javascript-format
 msgid "from %d"
 msgstr "från %d"
 
-#: greenTile.js:2960
+#: greenTile.js:2991
 msgid "Rules (by window count)"
 msgstr "Regler (efter antal fönster)"
 
-#: greenTile.js:2964
+#: greenTile.js:2995
 msgid "Rule"
 msgstr "Regel"
 
-#: greenTile.js:2965
+#: greenTile.js:2996
 msgid "Delete rule"
 msgstr "Ta bort regel"
 
-#: greenTile.js:2973
+#: greenTile.js:3004
 msgid "Rule applies from"
 msgstr "Regeln gäller från"
 
-#: greenTile.js:2980
+#: greenTile.js:3011
 msgid "windows"
 msgstr "fönster"
 
-#: greenTile.js:2982
+#: greenTile.js:3013
 msgid "Painter"
 msgstr "Rityta"
 
-#: greenTile.js:2997
+#: greenTile.js:3028
 msgid ""
 "Click or drag: the row sets how many windows the column holds. Right-click "
 "removes a column."
@@ -78,91 +78,91 @@ msgstr ""
 "Klicka eller dra: raden anger hur många fönster kolumnen rymmer. Högerklick "
 "tar bort en kolumn."
 
-#: greenTile.js:3002
+#: greenTile.js:3033
 msgid "Name"
 msgstr "Namn"
 
-#: greenTile.js:3003
+#: greenTile.js:3034
 msgid "Preset name"
 msgstr "Namn på förinställning"
 
-#: greenTile.js:3008
+#: greenTile.js:3039
 msgid "Delete preset"
 msgstr "Ta bort förinställning"
 
-#: greenTile.js:3011
+#: greenTile.js:3042
 msgid "Really delete?"
 msgstr "Verkligen ta bort?"
 
-#: greenTile.js:3012
+#: greenTile.js:3043
 msgid "Delete"
 msgstr "Ta bort"
 
-#: greenTile.js:3016
+#: greenTile.js:3047
 msgid "Save"
 msgstr "Spara"
 
-#: greenTile.js:3041
+#: greenTile.js:3072
 #, javascript-format
 msgid "Result: %s"
 msgstr "Resultat: %s"
 
-#: greenTile.js:3661
+#: greenTile.js:3692
 msgid "Gap between windows"
 msgstr "Avstånd mellan fönster"
 
-#: greenTile.js:3666
+#: greenTile.js:3697
 #, javascript-format
 msgid "%d px"
 msgstr "%d px"
 
-#: greenTile.js:3685
+#: greenTile.js:3716
 msgid "Reset sizes"
 msgstr "Återställ storlekar"
 
-#: greenTile.js:3716
+#: greenTile.js:3747
 #, javascript-format
 msgid "Presets — workspace %d · %s"
 msgstr "Förinställningar — arbetsyta %d · %s"
 
-#: greenTile.js:3718
+#: greenTile.js:3749
 msgid "Create preset"
 msgstr "Skapa förinställning"
 
-#: greenTile.js:3718
+#: greenTile.js:3749
 #, javascript-format
 msgid "Edit %s"
 msgstr "Redigera %s"
 
-#: greenTile.js:3722
+#: greenTile.js:3753
 msgid "Back"
 msgstr "Tillbaka"
 
-#: greenTile.js:3731
+#: greenTile.js:3762
 msgid "Auto: on"
 msgstr "Auto: på"
 
-#: greenTile.js:3731
+#: greenTile.js:3762
 msgid "Auto: off"
 msgstr "Auto: av"
 
-#: greenTile.js:3752
+#: greenTile.js:3783
 msgid "Dark theme"
 msgstr "Mörkt tema"
 
-#: greenTile.js:3752
+#: greenTile.js:3783
 msgid "Light theme"
 msgstr "Ljust tema"
 
-#: greenTile.js:3872
+#: greenTile.js:3903
 msgid "No presets yet."
 msgstr "Inga förinställningar än."
 
-#: greenTile.js:3887
+#: greenTile.js:3918
 msgid "New preset"
 msgstr "Ny förinställning"
 
-#: greenTile.js:3890
+#: greenTile.js:3921
 msgid "Click a row to apply it to this workspace and tile right away"
 msgstr ""
 "Klicka på en rad för att tillämpa den på den här arbetsytan och kakla direkt"
@@ -355,8 +355,20 @@ msgid ""
 "After a Super+Arrow focus move, mark the newly focused window with a thin "
 "border in the state color for three seconds."
 msgstr ""
-"Efter ett fokusbyte med Super+Pil markeras det nyligen fokuserade fönstret i "
-"tre sekunder med en tunn ram i statusfärg."
+"Efter ett fokusbyte med Super+Pil markeras det nyligen fokuserade fönstret i"
+" tre sekunder med en tunn ram i statusfärg."
+
+#. settings-schema.json->fillSingleWindow->description
+msgid "Fill the monitor with a single window"
+msgstr "Fyll skärmen med ett enda fönster"
+
+#. settings-schema.json->fillSingleWindow->tooltip
+msgid ""
+"With automatic tiling or a preset on, a single tiled window fills the whole "
+"usable area instead of being left untouched."
+msgstr ""
+"När automatisk kakling eller en förinställning är på fyller ett ensamt "
+"kaklat fönster hela det användbara området istället för att lämnas orört."
 
 #. settings-schema.json->panelTheme->description
 msgid "Theme of the preset panel"
@@ -388,8 +400,8 @@ msgstr "Accentfärg"
 
 #. settings-schema.json->accentMode->tooltip
 msgid ""
-"Follow theme tracks the accent color of the Cinnamon theme live. Custom uses "
-"the color below."
+"Follow theme tracks the accent color of the Cinnamon theme live. Custom uses"
+" the color below."
 msgstr ""
 "Följ temat följer Cinnamon-temats accentfärg live. Anpassad använder färgen "
 "nedan."
@@ -411,7 +423,8 @@ msgstr "Anpassad accentfärg"
 #. settings-schema.json->accentColor->tooltip
 msgid "Accent of the preset panel and editor when Accent color is Custom."
 msgstr ""
-"Accent för förinställningspanelen och redigeraren när Accentfärg är Anpassad."
+"Accent för förinställningspanelen och redigeraren när Accentfärg är "
+"Anpassad."
 
 #. settings-schema.json->stateMode->description
 msgid "State color"
@@ -424,8 +437,8 @@ msgid ""
 "Custom uses the color below."
 msgstr ""
 "Färg på markeringen \"Auto: på\" och de tilldelade raderna. Grön behåller "
-"dagens utseende. Följ temat följer Cinnamon-temats accentfärg live. Anpassad "
-"använder färgen nedan."
+"dagens utseende. Följ temat följer Cinnamon-temats accentfärg live. Anpassad"
+" använder färgen nedan."
 
 #. settings-schema.json->stateMode->options
 msgid "Green"
@@ -443,5 +456,5 @@ msgstr "Statusfärg för förinställningspanelen när Statusfärg är Anpassad.
 #~ "Draw a thin border in the state color around the focused window while "
 #~ "automatic tiling is on."
 #~ msgstr ""
-#~ "Ritar en tunn ram i statusfärg runt det fokuserade fönstret när "
-#~ "automatisk kakling är på."
+#~ "Ritar en tunn ram i statusfärg runt det fokuserade fönstret när automatisk "
+#~ "kakling är på."

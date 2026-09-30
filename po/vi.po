@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: greenTile 1.1.3\n"
 "Report-Msgid-Bugs-To: https://github.com/carsteneu\n"
-"POT-Creation-Date: 2026-09-30 15:09+0200\n"
+"POT-Creation-Date: 2026-09-30 22:29+0200\n"
 "PO-Revision-Date: 2025-10-19 02:39+0700\n"
 "Last-Translator: loccun <huynhloc.contact@gmail.com>\n"
 "Language-Team: Vietnamese\n"
@@ -19,151 +19,152 @@ msgstr ""
 "X-Generator: Poedit 3.4.2\n"
 
 #. settings-schema.json->excludeAppPicker->options
-#: greenTile.js:435
+#: greenTile.js:439
 msgid "Add application …"
 msgstr "Thêm ứng dụng …"
 
-#: greenTile.js:454
+#: greenTile.js:458
 msgid "Window floats"
 msgstr "Cửa sổ nổi tự do"
 
-#: greenTile.js:454
+#: greenTile.js:458
 msgid "Window tiles again"
 msgstr "Cửa sổ được xếp ô lại"
 
-#: greenTile.js:2740
+#: greenTile.js:2771
 #, javascript-format
 msgid "assigned — workspace %d"
 msgstr "đã gán — không gian làm việc %d"
 
-#: greenTile.js:2801
+#: greenTile.js:2832
 msgid "Please enter a name."
 msgstr "Vui lòng nhập tên."
 
-#: greenTile.js:2843
+#: greenTile.js:2874
 #, javascript-format
 msgid "from %d"
 msgstr "từ %d"
 
-#: greenTile.js:2960
+#: greenTile.js:2991
 msgid "Rules (by window count)"
 msgstr "Quy tắc (theo số cửa sổ)"
 
-#: greenTile.js:2964
+#: greenTile.js:2995
 msgid "Rule"
 msgstr "Quy tắc"
 
-#: greenTile.js:2965
+#: greenTile.js:2996
 msgid "Delete rule"
 msgstr "Xóa quy tắc"
 
-#: greenTile.js:2973
+#: greenTile.js:3004
 msgid "Rule applies from"
 msgstr "Quy tắc áp dụng từ"
 
-#: greenTile.js:2980
+#: greenTile.js:3011
 msgid "windows"
 msgstr "cửa sổ"
 
-#: greenTile.js:2982
+#: greenTile.js:3013
 msgid "Painter"
 msgstr "Vùng vẽ"
 
-#: greenTile.js:2997
+#: greenTile.js:3028
 msgid ""
 "Click or drag: the row sets how many windows the column holds. Right-click "
 "removes a column."
 msgstr ""
-"Nhấp hoặc kéo: hàng xác định số cửa sổ trong cột. Nhấp chuột phải để xóa một "
-"cột."
+"Nhấp hoặc kéo: hàng xác định số cửa sổ trong cột. Nhấp chuột phải để xóa một"
+" cột."
 
-#: greenTile.js:3002
+#: greenTile.js:3033
 msgid "Name"
 msgstr "Tên"
 
-#: greenTile.js:3003
+#: greenTile.js:3034
 msgid "Preset name"
 msgstr "Tên cấu hình sẵn"
 
-#: greenTile.js:3008
+#: greenTile.js:3039
 msgid "Delete preset"
 msgstr "Xóa cấu hình sẵn"
 
-#: greenTile.js:3011
+#: greenTile.js:3042
 msgid "Really delete?"
 msgstr "Xóa thật chứ?"
 
-#: greenTile.js:3012
+#: greenTile.js:3043
 msgid "Delete"
 msgstr "Xóa"
 
-#: greenTile.js:3016
+#: greenTile.js:3047
 msgid "Save"
 msgstr "Lưu"
 
-#: greenTile.js:3041
+#: greenTile.js:3072
 #, javascript-format
 msgid "Result: %s"
 msgstr "Kết quả: %s"
 
-#: greenTile.js:3661
+#: greenTile.js:3692
 msgid "Gap between windows"
 msgstr "Khoảng cách giữa các cửa sổ"
 
-#: greenTile.js:3666
+#: greenTile.js:3697
 #, javascript-format
 msgid "%d px"
 msgstr "%d px"
 
-#: greenTile.js:3685
+#: greenTile.js:3716
 msgid "Reset sizes"
 msgstr "Đặt lại kích thước"
 
-#: greenTile.js:3716
+#: greenTile.js:3747
 #, javascript-format
 msgid "Presets — workspace %d · %s"
 msgstr "Cấu hình sẵn — không gian làm việc %d · %s"
 
-#: greenTile.js:3718
+#: greenTile.js:3749
 msgid "Create preset"
 msgstr "Tạo cấu hình sẵn"
 
-#: greenTile.js:3718
+#: greenTile.js:3749
 #, javascript-format
 msgid "Edit %s"
 msgstr "Sửa %s"
 
-#: greenTile.js:3722
+#: greenTile.js:3753
 msgid "Back"
 msgstr "Quay lại"
 
-#: greenTile.js:3731
+#: greenTile.js:3762
 msgid "Auto: on"
 msgstr "Tự động: bật"
 
-#: greenTile.js:3731
+#: greenTile.js:3762
 msgid "Auto: off"
 msgstr "Tự động: tắt"
 
-#: greenTile.js:3752
+#: greenTile.js:3783
 msgid "Dark theme"
 msgstr "Chủ đề tối"
 
-#: greenTile.js:3752
+#: greenTile.js:3783
 msgid "Light theme"
 msgstr "Chủ đề sáng"
 
-#: greenTile.js:3872
+#: greenTile.js:3903
 msgid "No presets yet."
 msgstr "Chưa có cấu hình sẵn nào."
 
-#: greenTile.js:3887
+#: greenTile.js:3918
 msgid "New preset"
 msgstr "Cấu hình sẵn mới"
 
-#: greenTile.js:3890
+#: greenTile.js:3921
 msgid "Click a row to apply it to this workspace and tile right away"
-msgstr "Nhấp vào một hàng để áp dụng cho không gian làm việc này và xếp ô ngay"
+msgstr ""
+"Nhấp vào một hàng để áp dụng cho không gian làm việc này và xếp ô ngay"
 
 #. metadata.json->name
 msgid "greenTile"
@@ -174,8 +175,8 @@ msgid ""
 "Column tiling with per-workspace presets, auto mode and snap-on-release. "
 "Fork of gTile by shuairan."
 msgstr ""
-"Xếp ô theo cột với cấu hình sẵn cho từng không gian làm việc, chế độ tự động "
-"và tự khớp khi thả. Bản fork của gTile do shuairan phát triển."
+"Xếp ô theo cột với cấu hình sẵn cho từng không gian làm việc, chế độ tự động"
+" và tự khớp khi thả. Bản fork của gTile do shuairan phát triển."
 
 #. settings-schema.json->settings-tab->title
 msgid "Settings"
@@ -356,6 +357,18 @@ msgstr ""
 "Sau khi chuyển tiêu điểm bằng Super+Mũi tên, đánh dấu cửa sổ vừa nhận tiêu "
 "điểm bằng một viền mảnh màu trạng thái trong ba giây."
 
+#. settings-schema.json->fillSingleWindow->description
+msgid "Fill the monitor with a single window"
+msgstr "Lấp đầy màn hình bằng một cửa sổ duy nhất"
+
+#. settings-schema.json->fillSingleWindow->tooltip
+msgid ""
+"With automatic tiling or a preset on, a single tiled window fills the whole "
+"usable area instead of being left untouched."
+msgstr ""
+"Khi tự động xếp ô hoặc một cấu hình sẵn đang bật, một cửa sổ được xếp ô duy "
+"nhất sẽ lấp đầy toàn bộ khu vực sử dụng được thay vì để nguyên như vậy."
+
 #. settings-schema.json->panelTheme->description
 msgid "Theme of the preset panel"
 msgstr "Chủ đề của bảng cấu hình sẵn"
@@ -386,8 +399,8 @@ msgstr "Màu nhấn"
 
 #. settings-schema.json->accentMode->tooltip
 msgid ""
-"Follow theme tracks the accent color of the Cinnamon theme live. Custom uses "
-"the color below."
+"Follow theme tracks the accent color of the Cinnamon theme live. Custom uses"
+" the color below."
 msgstr ""
 "“Theo chủ đề” lấy màu nhấn của chủ đề Cinnamon theo thời gian thực. “Tùy "
 "chỉnh” dùng màu bên dưới."
@@ -443,5 +456,5 @@ msgstr ""
 #~ "Draw a thin border in the state color around the focused window while "
 #~ "automatic tiling is on."
 #~ msgstr ""
-#~ "Vẽ một viền mảnh bằng màu trạng thái quanh cửa sổ có tiêu điểm khi tự "
-#~ "động xếp ô đang bật."
+#~ "Vẽ một viền mảnh bằng màu trạng thái quanh cửa sổ có tiêu điểm khi tự động "
+#~ "xếp ô đang bật."

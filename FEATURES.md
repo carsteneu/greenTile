@@ -18,6 +18,7 @@ Every feature in one line or two. Details and screenshots are in the [README](RE
 - **Window gap**: 0 to 48 px between tiled windows, set in the preset panel. Only inner edges move; windows stay flush with the screen edges.
 - **Directional focus**: `Super+Arrow` moves the keyboard focus to the neighbouring tiled window in that direction; at the monitor edge Left/Right continue onto the adjacent monitor. Native edge tiling everywhere else.
 - **Focus border**: after a `Super+Arrow` focus move, a thin border in the state color marks the newly focused window for three seconds; mouse and `Alt+Tab` focus changes do not show it, maximized and fullscreen windows never get it. Can be turned off.
+- **Single window fill**: when **Fill the monitor with a single window** is on, a lone tiled window on an auto-mode workspace or an assigned preset fills the whole usable area instead of being left untouched; with a preset, its rule for one window applies if it has one. Off by default, takes effect immediately.
 
 ## Presets
 

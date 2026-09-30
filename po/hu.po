@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: greenTile 1.1.3\n"
 "Report-Msgid-Bugs-To: https://github.com/carsteneu\n"
-"POT-Creation-Date: 2026-09-30 15:09+0200\n"
+"POT-Creation-Date: 2026-09-30 22:29+0200\n"
 "PO-Revision-Date: 2023-01-09 21:16+0100\n"
 "Last-Translator: Kálmán „KAMI” Szalai <kami911@gmail.com>\n"
 "Language-Team: Hungarian\n"
@@ -20,57 +20,57 @@ msgstr ""
 "X-Generator: Poedit 3.0.1\n"
 
 #. settings-schema.json->excludeAppPicker->options
-#: greenTile.js:435
+#: greenTile.js:439
 msgid "Add application …"
 msgstr "Alkalmazás hozzáadása …"
 
-#: greenTile.js:454
+#: greenTile.js:458
 msgid "Window floats"
 msgstr "Az ablak lebeg"
 
-#: greenTile.js:454
+#: greenTile.js:458
 msgid "Window tiles again"
 msgstr "Az ablak ismét csempézve"
 
-#: greenTile.js:2740
+#: greenTile.js:2771
 #, javascript-format
 msgid "assigned — workspace %d"
 msgstr "hozzárendelve — %d. munkaterület"
 
-#: greenTile.js:2801
+#: greenTile.js:2832
 msgid "Please enter a name."
 msgstr "Adj meg egy nevet."
 
-#: greenTile.js:2843
+#: greenTile.js:2874
 #, javascript-format
 msgid "from %d"
 msgstr "legalább %d"
 
-#: greenTile.js:2960
+#: greenTile.js:2991
 msgid "Rules (by window count)"
 msgstr "Szabályok (ablakszám szerint)"
 
-#: greenTile.js:2964
+#: greenTile.js:2995
 msgid "Rule"
 msgstr "Szabály"
 
-#: greenTile.js:2965
+#: greenTile.js:2996
 msgid "Delete rule"
 msgstr "Szabály törlése"
 
-#: greenTile.js:2973
+#: greenTile.js:3004
 msgid "Rule applies from"
 msgstr "A szabály érvényes legalább"
 
-#: greenTile.js:2980
+#: greenTile.js:3011
 msgid "windows"
 msgstr "ablak esetén"
 
-#: greenTile.js:2982
+#: greenTile.js:3013
 msgid "Painter"
 msgstr "Rajzterület"
 
-#: greenTile.js:2997
+#: greenTile.js:3028
 msgid ""
 "Click or drag: the row sets how many windows the column holds. Right-click "
 "removes a column."
@@ -78,94 +78,95 @@ msgstr ""
 "Kattints vagy húzd: a sor határozza meg, hány ablak fér az oszlopba. A jobb "
 "kattintás eltávolít egy oszlopot."
 
-#: greenTile.js:3002
+#: greenTile.js:3033
 msgid "Name"
 msgstr "Név"
 
-#: greenTile.js:3003
+#: greenTile.js:3034
 msgid "Preset name"
 msgstr "Előbeállítás neve"
 
-#: greenTile.js:3008
+#: greenTile.js:3039
 msgid "Delete preset"
 msgstr "Előbeállítás törlése"
 
-#: greenTile.js:3011
+#: greenTile.js:3042
 msgid "Really delete?"
 msgstr "Biztosan törlöd?"
 
-#: greenTile.js:3012
+#: greenTile.js:3043
 msgid "Delete"
 msgstr "Törlés"
 
-#: greenTile.js:3016
+#: greenTile.js:3047
 msgid "Save"
 msgstr "Mentés"
 
-#: greenTile.js:3041
+#: greenTile.js:3072
 #, javascript-format
 msgid "Result: %s"
 msgstr "Eredmény: %s"
 
-#: greenTile.js:3661
+#: greenTile.js:3692
 msgid "Gap between windows"
 msgstr "Ablakok közötti távolság"
 
-#: greenTile.js:3666
+#: greenTile.js:3697
 #, javascript-format
 msgid "%d px"
 msgstr "%d px"
 
-#: greenTile.js:3685
+#: greenTile.js:3716
 msgid "Reset sizes"
 msgstr "Méretek visszaállítása"
 
-#: greenTile.js:3716
+#: greenTile.js:3747
 #, javascript-format
 msgid "Presets — workspace %d · %s"
 msgstr "Előbeállítások — %d. munkaterület · %s"
 
-#: greenTile.js:3718
+#: greenTile.js:3749
 msgid "Create preset"
 msgstr "Előbeállítás létrehozása"
 
-#: greenTile.js:3718
+#: greenTile.js:3749
 #, javascript-format
 msgid "Edit %s"
 msgstr "%s szerkesztése"
 
-#: greenTile.js:3722
+#: greenTile.js:3753
 msgid "Back"
 msgstr "Vissza"
 
-#: greenTile.js:3731
+#: greenTile.js:3762
 msgid "Auto: on"
 msgstr "Auto: be"
 
-#: greenTile.js:3731
+#: greenTile.js:3762
 msgid "Auto: off"
 msgstr "Auto: ki"
 
-#: greenTile.js:3752
+#: greenTile.js:3783
 msgid "Dark theme"
 msgstr "Sötét téma"
 
-#: greenTile.js:3752
+#: greenTile.js:3783
 msgid "Light theme"
 msgstr "Világos téma"
 
-#: greenTile.js:3872
+#: greenTile.js:3903
 msgid "No presets yet."
 msgstr "Még nincsenek előbeállítások."
 
-#: greenTile.js:3887
+#: greenTile.js:3918
 msgid "New preset"
 msgstr "Új előbeállítás"
 
-#: greenTile.js:3890
+#: greenTile.js:3921
 msgid "Click a row to apply it to this workspace and tile right away"
 msgstr ""
-"Kattints egy sorra, hogy alkalmazd erre a munkaterületre, és azonnal csempézz"
+"Kattints egy sorra, hogy alkalmazd erre a munkaterületre, és azonnal "
+"csempézz"
 
 #. metadata.json->name
 msgid "greenTile"
@@ -176,8 +177,8 @@ msgid ""
 "Column tiling with per-workspace presets, auto mode and snap-on-release. "
 "Fork of gTile by shuairan."
 msgstr ""
-"Oszlopos csempézés munkaterületenkénti előbeállításokkal, automatikus móddal "
-"és elengedéskori illesztéssel. A shuairan által készített gTile forkja."
+"Oszlopos csempézés munkaterületenkénti előbeállításokkal, automatikus móddal"
+" és elengedéskori illesztéssel. A shuairan által készített gTile forkja."
 
 #. settings-schema.json->settings-tab->title
 msgid "Settings"
@@ -266,11 +267,13 @@ msgstr "A fókuszált csempézett ablak felcserélése a jobb oldali szomszédj�
 
 #. settings-schema.json->swapUpHotkey->description
 msgid "Swap the focused tiled window with its neighbor above"
-msgstr "A fókuszált csempézett ablak felcserélése a felette lévő szomszédjával"
+msgstr ""
+"A fókuszált csempézett ablak felcserélése a felette lévő szomszédjával"
 
 #. settings-schema.json->swapDownHotkey->description
 msgid "Swap the focused tiled window with its neighbor below"
-msgstr "A fókuszált csempézett ablak felcserélése az alatta lévő szomszédjával"
+msgstr ""
+"A fókuszált csempézett ablak felcserélése az alatta lévő szomszédjával"
 
 #. settings-schema.json->presets->description
 msgid "Preset definitions (JSON)"
@@ -358,8 +361,20 @@ msgid ""
 "After a Super+Arrow focus move, mark the newly focused window with a thin "
 "border in the state color for three seconds."
 msgstr ""
-"Super+Nyíl fókuszváltás után három másodpercig vékony, állapotszínű kerettel "
-"jelöli az újonnan fókuszba került ablakot."
+"Super+Nyíl fókuszváltás után három másodpercig vékony, állapotszínű kerettel"
+" jelöli az újonnan fókuszba került ablakot."
+
+#. settings-schema.json->fillSingleWindow->description
+msgid "Fill the monitor with a single window"
+msgstr "A monitor kitöltése egyetlen ablakkal"
+
+#. settings-schema.json->fillSingleWindow->tooltip
+msgid ""
+"With automatic tiling or a preset on, a single tiled window fills the whole "
+"usable area instead of being left untouched."
+msgstr ""
+"Automatikus csempézéssel vagy előbeállítással egyetlen csempézett ablak "
+"kitölti a teljes használható területet ahelyett, hogy érintetlenül maradna."
 
 #. settings-schema.json->panelTheme->description
 msgid "Theme of the preset panel"
@@ -370,8 +385,8 @@ msgid ""
 "Follow system tracks the desktop color scheme live; Light and Dark override "
 "it."
 msgstr ""
-"A „Rendszer követése” valós időben követi az asztal színsémáját; a „Világos” "
-"és a „Sötét” felülbírálja."
+"A „Rendszer követése” valós időben követi az asztal színsémáját; a „Világos”"
+" és a „Sötét” felülbírálja."
 
 #. settings-schema.json->panelTheme->options
 msgid "Follow system"
@@ -391,8 +406,8 @@ msgstr "Kiemelőszín"
 
 #. settings-schema.json->accentMode->tooltip
 msgid ""
-"Follow theme tracks the accent color of the Cinnamon theme live. Custom uses "
-"the color below."
+"Follow theme tracks the accent color of the Cinnamon theme live. Custom uses"
+" the color below."
 msgstr ""
 "A „Téma követése” valós időben átveszi a Cinnamon-téma kiemelőszínét. Az "
 "„Egyéni” az alábbi színt használja."
@@ -441,7 +456,8 @@ msgstr "Egyéni állapotszín"
 
 #. settings-schema.json->stateColor->tooltip
 msgid "State color of the preset panel when State color is Custom."
-msgstr "Az előbeállítás-panel állapotszíne, ha az Állapotszín értéke „Egyéni”."
+msgstr ""
+"Az előbeállítás-panel állapotszíne, ha az Állapotszín értéke „Egyéni”."
 
 #~ msgid ""
 #~ "Draw a thin border in the state color around the focused window while "
