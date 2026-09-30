@@ -39,6 +39,14 @@ test('invalidate drops the pending token (teardown)', () => {
     assert.equal(pending.is_current(token), false);
 });
 
+test('invalidate drops even the newest token after repeated begins', () => {
+    const pending = m.tile_pending_registry();
+    pending.begin();
+    const last = pending.begin();
+    pending.invalidate();
+    assert.equal(pending.is_current(last), false);
+});
+
 test('after invalidate a new begin is current again (disable -> enable)', () => {
     const pending = m.tile_pending_registry();
     pending.begin();
