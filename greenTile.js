@@ -2003,7 +2003,9 @@ const tile_preset_retile = (app, monitorIndex, focusWindow, animate = true, wsIn
     const focused = focusWindow && !focusWindow.minimized && focusWindow.get_monitor() === monitorIndex
         && !tile_excl_is_excluded(focusWindow);
     const n = windows.length + (focused ? 1 : 0);
-    const layout = tile_layout_shape(app, monitorIndex, n);
+    // the layout belongs to the workspace the windows were collected from, not the
+    // active one (explicit wsIndex callers retile workspaces that are not active)
+    const layout = tile_layout_shape_ws(app, monitorIndex, ws, n);
     if (!layout)
         return;
     const ordered = tile_sort_reading_order((focused ? [focusWindow] : []).concat(windows), layout.kind === 'cols');
