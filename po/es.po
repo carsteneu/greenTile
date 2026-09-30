@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: greenTile 0.1.0\n"
 "Report-Msgid-Bugs-To: https://github.com/carsteneu\n"
-"POT-Creation-Date: 2026-09-30 14:39+0200\n"
+"POT-Creation-Date: 2026-09-30 15:09+0200\n"
 "PO-Revision-Date: 2023-11-02 11:34-0300\n"
 "Last-Translator: \n"
 "Language-Team: Spanish\n"
@@ -18,151 +18,151 @@ msgstr ""
 "X-Generator: Poedit 3.4\n"
 
 #. settings-schema.json->excludeAppPicker->options
-#: greenTile.js:435 .yesmem/tmp/greenTile-live-backup.js:430
+#: greenTile.js:435
 msgid "Add application …"
 msgstr ""
 
-#: greenTile.js:454 .yesmem/tmp/greenTile-live-backup.js:449
+#: greenTile.js:454
 msgid "Window floats"
 msgstr ""
 
-#: greenTile.js:454 .yesmem/tmp/greenTile-live-backup.js:449
+#: greenTile.js:454
 msgid "Window tiles again"
 msgstr ""
 
-#: greenTile.js:2726 .yesmem/tmp/greenTile-live-backup.js:2608
+#: greenTile.js:2740
 #, javascript-format
 msgid "assigned — workspace %d"
 msgstr ""
 
-#: greenTile.js:2787 .yesmem/tmp/greenTile-live-backup.js:2669
+#: greenTile.js:2801
 msgid "Please enter a name."
 msgstr ""
 
-#: greenTile.js:2829 .yesmem/tmp/greenTile-live-backup.js:2711
+#: greenTile.js:2843
 #, javascript-format
 msgid "from %d"
 msgstr ""
 
-#: greenTile.js:2946 .yesmem/tmp/greenTile-live-backup.js:2828
+#: greenTile.js:2960
 msgid "Rules (by window count)"
 msgstr ""
 
-#: greenTile.js:2950 .yesmem/tmp/greenTile-live-backup.js:2832
+#: greenTile.js:2964
 msgid "Rule"
 msgstr ""
 
-#: greenTile.js:2951 .yesmem/tmp/greenTile-live-backup.js:2833
+#: greenTile.js:2965
 msgid "Delete rule"
 msgstr ""
 
-#: greenTile.js:2959 .yesmem/tmp/greenTile-live-backup.js:2841
+#: greenTile.js:2973
 msgid "Rule applies from"
 msgstr ""
 
-#: greenTile.js:2966 .yesmem/tmp/greenTile-live-backup.js:2848
+#: greenTile.js:2980
 msgid "windows"
 msgstr ""
 
-#: greenTile.js:2968 .yesmem/tmp/greenTile-live-backup.js:2850
+#: greenTile.js:2982
 msgid "Painter"
 msgstr ""
 
-#: greenTile.js:2983 .yesmem/tmp/greenTile-live-backup.js:2865
+#: greenTile.js:2997
 msgid ""
 "Click or drag: the row sets how many windows the column holds. Right-click "
 "removes a column."
 msgstr ""
 
-#: greenTile.js:2988 .yesmem/tmp/greenTile-live-backup.js:2870
+#: greenTile.js:3002
 msgid "Name"
 msgstr ""
 
-#: greenTile.js:2989 .yesmem/tmp/greenTile-live-backup.js:2871
+#: greenTile.js:3003
 msgid "Preset name"
 msgstr ""
 
-#: greenTile.js:2994 .yesmem/tmp/greenTile-live-backup.js:2876
+#: greenTile.js:3008
 msgid "Delete preset"
 msgstr "Eliminar preajuste"
 
-#: greenTile.js:2997 .yesmem/tmp/greenTile-live-backup.js:2879
+#: greenTile.js:3011
 msgid "Really delete?"
 msgstr "¿Eliminar de verdad?"
 
-#: greenTile.js:2998 .yesmem/tmp/greenTile-live-backup.js:2880
+#: greenTile.js:3012
 msgid "Delete"
 msgstr "Eliminar"
 
-#: greenTile.js:3002 .yesmem/tmp/greenTile-live-backup.js:2884
+#: greenTile.js:3016
 msgid "Save"
 msgstr ""
 
-#: greenTile.js:3027 .yesmem/tmp/greenTile-live-backup.js:2909
+#: greenTile.js:3041
 #, javascript-format
 msgid "Result: %s"
 msgstr ""
 
-#: greenTile.js:3612 .yesmem/tmp/greenTile-live-backup.js:3391
+#: greenTile.js:3661
 msgid "Gap between windows"
 msgstr ""
 
-#: greenTile.js:3617 .yesmem/tmp/greenTile-live-backup.js:3396
+#: greenTile.js:3666
 #, javascript-format
 msgid "%d px"
 msgstr ""
 
-#: greenTile.js:3636 .yesmem/tmp/greenTile-live-backup.js:3415
+#: greenTile.js:3685
 msgid "Reset sizes"
 msgstr ""
 
-#: greenTile.js:3667 .yesmem/tmp/greenTile-live-backup.js:3446
+#: greenTile.js:3716
 #, javascript-format
 msgid "Presets — workspace %d · %s"
 msgstr ""
 
-#: greenTile.js:3669 .yesmem/tmp/greenTile-live-backup.js:3448
+#: greenTile.js:3718
 msgid "Create preset"
 msgstr ""
 
-#: greenTile.js:3669 .yesmem/tmp/greenTile-live-backup.js:3448
+#: greenTile.js:3718
 #, javascript-format
 msgid "Edit %s"
 msgstr ""
 
-#: greenTile.js:3673 .yesmem/tmp/greenTile-live-backup.js:3452
+#: greenTile.js:3722
 msgid "Back"
 msgstr ""
 
-#: greenTile.js:3682 .yesmem/tmp/greenTile-live-backup.js:3461
+#: greenTile.js:3731
 #, fuzzy
 #| msgid "Auto close"
 msgid "Auto: on"
 msgstr "Cerrar automáticamente"
 
-#: greenTile.js:3682 .yesmem/tmp/greenTile-live-backup.js:3461
+#: greenTile.js:3731
 #, fuzzy
 #| msgid "Auto close"
 msgid "Auto: off"
 msgstr "Cerrar automáticamente"
 
-#: greenTile.js:3703 .yesmem/tmp/greenTile-live-backup.js:3482
+#: greenTile.js:3752
 msgid "Dark theme"
 msgstr ""
 
-#: greenTile.js:3703 .yesmem/tmp/greenTile-live-backup.js:3482
+#: greenTile.js:3752
 msgid "Light theme"
 msgstr ""
 
-#: greenTile.js:3823 .yesmem/tmp/greenTile-live-backup.js:3602
+#: greenTile.js:3872
 msgid "No presets yet."
 msgstr ""
 
-#: greenTile.js:3838 .yesmem/tmp/greenTile-live-backup.js:3617
+#: greenTile.js:3887
 msgid "New preset"
 msgstr ""
 
-#: greenTile.js:3841 .yesmem/tmp/greenTile-live-backup.js:3620
+#: greenTile.js:3890
 msgid "Click a row to apply it to this workspace and tile right away"
 msgstr ""
 
@@ -345,11 +345,11 @@ msgstr "Borde alrededor de la ventana enfocada"
 
 #. settings-schema.json->focusBorder->tooltip
 msgid ""
-"Draw a thin border in the state color around the focused window while "
-"automatic tiling is on."
+"After a Super+Arrow focus move, mark the newly focused window with a thin "
+"border in the state color for three seconds."
 msgstr ""
-"Dibuja un borde fino del color de estado alrededor de la ventana enfocada "
-"mientras el mosaico automático esté activo."
+"Tras mover el foco con Super+Flecha, marca la ventana que recibe el foco con "
+"un borde fino del color de estado durante tres segundos."
 
 #. settings-schema.json->panelTheme->description
 msgid "Theme of the preset panel"
@@ -379,8 +379,8 @@ msgstr ""
 
 #. settings-schema.json->accentMode->tooltip
 msgid ""
-"Follow theme tracks the accent color of the Cinnamon theme live. Custom uses"
-" the color below."
+"Follow theme tracks the accent color of the Cinnamon theme live. Custom uses "
+"the color below."
 msgstr ""
 
 #. settings-schema.json->accentMode->options
@@ -423,3 +423,10 @@ msgstr ""
 #. settings-schema.json->stateColor->tooltip
 msgid "State color of the preset panel when State color is Custom."
 msgstr ""
+
+#~ msgid ""
+#~ "Draw a thin border in the state color around the focused window while "
+#~ "automatic tiling is on."
+#~ msgstr ""
+#~ "Dibuja un borde fino del color de estado alrededor de la ventana enfocada "
+#~ "mientras el mosaico automático esté activo."

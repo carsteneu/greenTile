@@ -236,7 +236,7 @@
       "type": "checkbox",
       "default": true,
       "description": "Border around the focused window",
-      "tooltip": "Draw a thin border in the state color around the focused window while automatic tiling is on."
+      "tooltip": "After a Super+Arrow focus move, mark the newly focused window with a thin border in the state color for three seconds."
    },
    "panelTheme": {
       "type": "combobox",
