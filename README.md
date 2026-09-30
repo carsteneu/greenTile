@@ -25,6 +25,7 @@ Window tiling for Cinnamon: presets per monitor and workspace, an auto mode, sna
 | `Super+Ctrl+P` | Open or close the preset panel |
 | `Super+Ctrl+3` / `6` | 3 or 6 columns of equal width |
 | `Super+Ctrl+←/→/↑/↓` | Swap the focused window with its neighbour |
+| `Super+←/→/↑/↓` | Move the keyboard focus to the neighbouring tiled window (auto mode; native edge tiling elsewhere) |
 | `Super+Alt+→/←` | Focused window wider / narrower (tap = 1 px, hold to speed up) |
 | `Super+Alt+↓/↑` | Focused window taller / shorter |
 | `Super+G` | Let the focused window float; press again to tile it again |
@@ -85,6 +86,8 @@ Without a preset, the auto grid depends on the monitor width:
 The centre keeps the normal snap. `Esc` during the drag cancels. Dropping onto another monitor works too.
 
 **Swapping.** `Super+Ctrl+Arrow` swaps the focused window with its neighbour, all borders stay. Left/Right continue across monitors (the window moves over and is inserted at the edge) and past the outermost monitor to the previous or next workspace. Focus stays on the moved window, so repeated presses walk it along.
+
+**Focus and border.** `Super+Arrow` moves the keyboard focus to the neighbouring tiled window, without touching the layout. Left/Right cross over to the adjacent monitor at the edge, nothing wraps. Outside auto mode, and for windows the tiling does not manage, the key keeps its native edge-tiling behaviour. The focused tiled window carries a thin **focus border** in the state color; it can be turned off in the settings (**Border around the focused window**).
 
 Borders and dragged layouts apply only in auto mode, not to `Super+Ctrl+3/6`.
 

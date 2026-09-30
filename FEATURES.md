@@ -16,6 +16,8 @@ Every feature in one line or two. Details and screenshots are in the [README](RE
 - **Cross-monitor moves**: dragging a window to another monitor retiles both monitors.
 - **Animation**: windows glide into place in 250 ms. The window gets its final size at once, only the picture moves, so terminal text does not flicker. Can be turned off (**Animate tiling**).
 - **Window gap**: 0 to 48 px between tiled windows, set in the preset panel. Only inner edges move; windows stay flush with the screen edges.
+- **Directional focus**: `Super+Arrow` moves the keyboard focus to the neighbouring tiled window in that direction; at the monitor edge Left/Right continue onto the adjacent monitor. Native edge tiling everywhere else.
+- **Focus border**: a thin border in the state color marks the focused tiled window on auto-mode workspaces; follows every focus change, hidden for maximized and fullscreen windows. Can be turned off.
 
 ## Presets
 

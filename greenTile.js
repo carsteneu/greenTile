@@ -172,8 +172,8 @@ class Config {
         });
         this.EnableHotkey();
         tile_theme_init(this);
-        tile_focus_connect(this);
-        tile_border_init(this);
+        tile_focus_connect(this.app);
+        tile_border_init(this.app);
         tile_monitors_refresh(app, () => {
             tile_layouts_migrate_once(app);
             tile_auto_connect_all(app);
@@ -3536,7 +3536,9 @@ const tile_border_frame = (app, win) => {
 };
 const tile_border_update = () => {
     const app = tile_border_state.app;
-    if (!app || !tile_border_state.actor)
+    // app.config is missing while the Config constructor is still running: the
+    // settings binding fires before the border (and everything else) is set up
+    if (!app || !app.config || !tile_border_state.actor)
         return;
     // geometry tracking on the focused window: retiles, drags and resizes repaint
     // the border through these signals, not through a timer
