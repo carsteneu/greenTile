@@ -2312,10 +2312,11 @@ const tile_swap_chain_step = (input) => {
 // <<< swap-model
 // >>> focus-model (pure functions, no Cinnamon imports; tested by tests/focus-model.test.js)
 // Monitor-edge rules of the Super+Arrow focus movement (Super+Ctrl+Arrow swaps instead).
-// Which monitor borders in the direction (monitors ordered by geometry x, no wrap), and
-// which window on it is nearest: leftmost when entering from the left / rightmost when
-// entering from the right, then the best vertical overlap with the frame the focus comes
-// from, then the topmost. Up/down never leave the own monitor.
+// Which monitor borders in the direction (monitors ordered by geometry x, no wrap) — same
+// x-only convention as tile_swap_chain_step — and which window on it is nearest:
+// leftmost when entering from the left / rightmost when entering from the right, then the
+// best vertical overlap with the frame the focus comes from, then the topmost. Up/down
+// never leave the own monitor.
 const tile_focus_monitor_step = (input) => {
     const { dir, monitorIndex, monitors } = input;
     if (dir !== 'left' && dir !== 'right')
@@ -2486,12 +2487,13 @@ const tile_focus_hotkey = (app, dir) => (display, window) => {
         ordered = tile_sort_reading_order(windows, layout.kind === 'cols');
         const selfIdx = ordered.indexOf(window);
         // a tiling-managed focus window is one of the collected ones; anything else
-        // (floating, dialog accidentally focused) keeps the native key behaviour
-        if (selfIdx < 0) {
+        // (floating, dialog accidentally focused) keeps the native key behaviour.
+        // A cell/window mismatch is a corrupt state — native as well.
+        if (selfIdx < 0 || cells.length !== n) {
             tile_focus_push_native(window, dir);
             return;
         }
-        const nb = cells.length === n ? tile_swap_neighbor(cells, selfIdx, dir) : null;
+        const nb = tile_swap_neighbor(cells, selfIdx, dir);
         if (nb != null) {
             ordered[nb].activate(global.get_current_time());
             return;
@@ -3580,6 +3582,8 @@ const tile_border_restyle = () => {
 };
 const tile_border_init = (app) => {
     tile_border_state.app = app;
+    // runs after tile_theme_init in the Config constructor, so stateRgb is resolved
+    // already and the first style is the real state color, not the default green
     if (!tile_border_state.actor) {
         tile_border_state.actor = new tile_St.Bin({ reactive: false, style: tile_border_style() });
         global.overlay_group.add_actor(tile_border_state.actor);
