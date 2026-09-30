@@ -16,6 +16,8 @@ Window tiling for Cinnamon: presets per monitor and workspace, an auto mode, sna
 3. Restart Cinnamon (`Ctrl+Alt+Esc`, or `Alt+F2` → `r`).
 4. Enable greenTile in System Settings → Extensions.
 
+To update an installed greenTile, run `./update.sh` from the unpacked zip instead: it downloads the latest release from GitHub and installs it (needs `unzip` and `curl` or `wget`). Re-running it does nothing when the newest version is already installed; `--force` reinstalls.
+
 ## Hotkeys
 
 | Key | Action |
