@@ -2500,6 +2500,7 @@ const tile_focus_hotkey = (app, dir) => (display, window) => {
         const nb = tile_swap_neighbor(cells, selfIdx, dir);
         if (nb != null) {
             ordered[nb].activate(global.get_current_time());
+            tile_border_flash(ordered[nb]);
             return;
         }
     }
@@ -2518,6 +2519,7 @@ const tile_focus_hotkey = (app, dir) => (display, window) => {
             const pick = tile_focus_monitor_pick(cands, dir, { x: frame.x, y: frame.y, width: frame.width, height: frame.height });
             if (pick != null) {
                 cands[pick].w.activate(global.get_current_time());
+                tile_border_flash(cands[pick].w);
                 return;
             }
         }
@@ -3517,30 +3519,50 @@ const tile_theme_shutdown = () => {
     tile_theme_state.config = null;
 };
 // >>> focus-border
-// A thin border around the focused tiled window in the state color, so Super+Arrow
-// focus moves show where the focus went. Only on monitor+workspaces with automatic
-// tiling on, only for windows the tiling manages; hidden while the window is
-// minimized, maximized or fullscreen. One non-reactive actor in the overlay group
-// follows every focus and geometry change; the color updates live with the theme
-// settings (tile_accent_apply stores the resolved state rgb).
-const tile_border_state = { app: null, actor: null, win: null, winSig: [], sig: [], timer: 0 };
+// A thin border around the newly focused tiled window in the state color, shown for
+// three seconds after a Super+Arrow focus move — pure keyboard feedback, never shown
+// for mouse or Alt+Tab focus changes. Only on monitor+workspaces with automatic tiling
+// on, only for windows the tiling manages; hidden while the window is minimized,
+// maximized or fullscreen, the moment focus moves elsewhere, and when the border
+// setting is off. One non-reactive actor in the overlay group follows the flashed
+// window's geometry; the color updates live with the theme settings
+// (tile_accent_apply stores the resolved state rgb).
+const tile_border_state = { app: null, actor: null, flashWin: null, winSig: [], sig: [], timer: 0 };
 const TILE_BORDER_WIDTH = 3;
 const TILE_BORDER_TIMEOUT_MS = 3000;
 const tile_border_style = () => {
     const c = tile_accent_state.stateRgb || tile_state_default;
     return 'border: ' + TILE_BORDER_WIDTH + 'px solid rgb(' + Math.round(c[0]) + ', ' + Math.round(c[1]) + ', ' + Math.round(c[2]) + '); background-color: transparent;';
 };
-// the border is feedback, not a permanent decoration: it switches itself off after a
-// few seconds and comes back with the next focus change
+// the border is keyboard feedback, not a decoration: only the Super+Arrow focus move
+// shows it (tile_border_flash), it switches itself off after a few seconds and any
+// event that makes the flashed window focusless or unmanaged hides it again
 const tile_border_arm_timer = () => {
     if (tile_border_state.timer)
         GLib.Source.remove(tile_border_state.timer);
     tile_border_state.timer = GLib.timeout_add(GLib.PRIORITY_DEFAULT, TILE_BORDER_TIMEOUT_MS, () => {
         tile_border_state.timer = 0;
+        tile_border_state.flashWin = null;
         if (tile_border_state.actor)
             tile_border_state.actor.hide();
         return GLib.SOURCE_REMOVE;
     });
+};
+const tile_border_unbind_flash = () => {
+    for (const w of tile_border_state.winSig) {
+        try {
+            w.win.disconnect(w.id);
+        } catch (e) {}
+    }
+    tile_border_state.winSig = [];
+};
+const tile_border_rebind_flash = () => {
+    tile_border_unbind_flash();
+    const win = tile_border_state.flashWin;
+    if (win) {
+        tile_border_state.winSig.push({ win, id: win.connect('position-changed', tile_border_update) });
+        tile_border_state.winSig.push({ win, id: win.connect('size-changed', tile_border_update) });
+    }
 };
 const tile_border_setting_on = (app) => app.config.settings.getValue('focusBorder') !== false;
 const tile_border_frame = (app, win) => {
@@ -3565,23 +3587,17 @@ const tile_border_update = () => {
     // settings binding fires before the border (and everything else) is set up
     if (!app || !app.config || !tile_border_state.actor)
         return;
-    // geometry tracking on the focused window: retiles, drags and resizes repaint
-    // the border through these signals, not through a timer
-    const win = global.display.focus_window;
-    if (win !== tile_border_state.win) {
-        for (const id of tile_border_state.winSig) {
-            try {
-                tile_border_state.win.disconnect(id);
-            } catch (e) {}
-        }
-        tile_border_state.winSig = [];
-        tile_border_state.win = win;
-        if (win) {
-            tile_border_state.winSig.push(win.connect('position-changed', tile_border_update));
-            tile_border_state.winSig.push(win.connect('size-changed', tile_border_update));
-        }
+    const win = tile_border_state.flashWin;
+    const focus = global.display.focus_window;
+    // the border belongs to the keyboard-driven focus move only: a focus change to
+    // another window (mouse click, Alt+Tab, an app demanding attention) clears it
+    if (!win || focus !== win) {
+        tile_border_unbind_flash();
+        tile_border_state.flashWin = null;
+        tile_border_state.actor.hide();
+        return;
     }
-    const frame = app && win && tile_border_setting_on(app) ? tile_border_frame(app, win) : null;
+    const frame = tile_border_setting_on(app) ? tile_border_frame(app, win) : null;
     const actor = tile_border_state.actor;
     if (!frame) {
         actor.hide();
@@ -3593,6 +3609,12 @@ const tile_border_update = () => {
     actor.raise_top();
     actor.show();
     tile_border_arm_timer();
+};
+// called from the focus hotkey only — this is what makes the border keyboard feedback
+const tile_border_flash = (win) => {
+    tile_border_state.flashWin = win;
+    tile_border_rebind_flash();
+    tile_border_update();
 };
 const tile_border_restyle = () => {
     if (tile_border_state.actor)
@@ -3622,13 +3644,8 @@ const tile_border_shutdown = () => {
         } catch (e) {}
     }
     tile_border_state.sig = [];
-    for (const id of tile_border_state.winSig) {
-        try {
-            tile_border_state.win.disconnect(id);
-        } catch (e) {}
-    }
-    tile_border_state.winSig = [];
-    tile_border_state.win = null;
+    tile_border_unbind_flash();
+    tile_border_state.flashWin = null;
     tile_border_state.app = null;
     if (tile_border_state.actor) {
         tile_border_state.actor.destroy();
