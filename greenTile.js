@@ -164,6 +164,10 @@ class Config {
         this.settings.bindProperty(Settings.BindingDirection.IN, 'stateMode', 'stateMode', () => tile_theme_changed(), null);
         this.settings.bindProperty(Settings.BindingDirection.IN, 'stateColor', 'stateColor', () => tile_theme_changed(), null);
         this.settings.bindProperty(Settings.BindingDirection.IN, 'focusBorder', 'focusBorderValue', () => tile_border_update(), null);
+        this.settings.bindProperty(Settings.BindingDirection.IN, 'fillSingleWindow', 'fillSingleWindowValue', () => {
+            if (this.settings.getValue('fillSingleWindow') === true)
+                tile_single_retile(this.app);
+        }, null);
         tile_excl_apply(this.settings);
         tile_excl_app_populate(this.settings);
         this.excludeAppSignal = imports.gi.Cinnamon.AppSystem.get_default().connect('installed-changed', () => {
@@ -759,6 +763,20 @@ const tile_place_rects = (app, ordered, layout, split, area, animate) => {
 const tile_single_fill = (on, n) => on === true && n === 1;
 const tile_single_layout = { kind: 'rows', shape: [1] };
 // <<< single-model
+// The single-window option takes effect immediately: switching it on retiles every
+// monitor and workspace where greenTile tiles (preset or auto), so lone windows fill
+// at once. Switching it off just stops greenTile from touching lone windows again.
+const tile_single_retile = (app) => {
+    const monitors = utils_Main.layoutManager.monitors.length;
+    const workspaces = global.workspace_manager.get_n_workspaces();
+    for (let i = 0; i < monitors; i++) {
+        for (let ws = 0; ws < workspaces; ws++) {
+            const layout = tile_layout_for(app, i, ws);
+            if (layout.preset || layout.auto)
+                tile_retile_monitor(app, i, null, true, ws);
+        }
+    }
+};
 const tile_app_auto = (app, monitorIndex, focusWindow, animate = true, wsIndex = null) => {
     const monitor = utils_Main.layoutManager.monitors[monitorIndex];
     if (!monitor)
