@@ -7,6 +7,7 @@ Window tiling for Cinnamon: presets per monitor and workspace, an auto mode, sna
 - **UUID:** `greenTile@carsteneu`
 - **Requires:** Cinnamon 6.6 or newer (tested on Linux Mint)
 - **Website:** [carsteneu.github.io/greenTile](https://carsteneu.github.io/greenTile/)
+- **All features at a glance:** [FEATURES.md](FEATURES.md)
 
 ## Installation
 
