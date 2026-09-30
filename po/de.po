@@ -9,7 +9,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: greenTile 0.1.0\n"
 "Report-Msgid-Bugs-To: https://github.com/carsteneu\n"
-"POT-Creation-Date: 2026-09-30 12:40+0200\n"
+"POT-Creation-Date: 2026-09-30 12:50+0200\n"
 "PO-Revision-Date: 2026-09-28 17:17+0200\n"
 "Last-Translator: carsten_eu\n"
 "Language-Team: German\n"
@@ -103,67 +103,67 @@ msgstr "Löschen"
 msgid "Save"
 msgstr "Speichern"
 
-#: greenTile.js:2907
+#: greenTile.js:2909
 #, javascript-format
 msgid "Result: %s"
 msgstr "Ergebnis: %s"
 
-#: greenTile.js:3389
+#: greenTile.js:3391
 msgid "Gap between windows"
 msgstr "Abstand zwischen Fenstern"
 
-#: greenTile.js:3394
+#: greenTile.js:3396
 #, javascript-format
 msgid "%d px"
 msgstr "%d px"
 
-#: greenTile.js:3413
+#: greenTile.js:3415
 msgid "Reset sizes"
 msgstr "Größen zurücksetzen"
 
-#: greenTile.js:3444
+#: greenTile.js:3446
 #, javascript-format
 msgid "Presets — workspace %d · %s"
 msgstr "Presets — Arbeitsfläche %d · %s"
 
-#: greenTile.js:3446
+#: greenTile.js:3448
 msgid "Create preset"
 msgstr "Neues Preset"
 
-#: greenTile.js:3446
+#: greenTile.js:3448
 #, javascript-format
 msgid "Edit %s"
 msgstr "%s bearbeiten"
 
-#: greenTile.js:3450
+#: greenTile.js:3452
 msgid "Back"
 msgstr "zurück"
 
-#: greenTile.js:3459
+#: greenTile.js:3461
 msgid "Auto: on"
 msgstr "Auto: an"
 
-#: greenTile.js:3459
+#: greenTile.js:3461
 msgid "Auto: off"
 msgstr "Auto: aus"
 
-#: greenTile.js:3480
+#: greenTile.js:3482
 msgid "Dark theme"
 msgstr "Dunkles Design"
 
-#: greenTile.js:3480
+#: greenTile.js:3482
 msgid "Light theme"
 msgstr "Helles Design"
 
-#: greenTile.js:3600
+#: greenTile.js:3602
 msgid "No presets yet."
 msgstr "Noch keine Presets vorhanden."
 
-#: greenTile.js:3615
+#: greenTile.js:3617
 msgid "New preset"
 msgstr "Neu anlegen"
 
-#: greenTile.js:3618
+#: greenTile.js:3620
 msgid "Click a row to apply it to this workspace and tile right away"
 msgstr "Klick auf eine Zeile = sofort auf dieser Fläche anwenden & kacheln"
 

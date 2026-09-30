@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: greenTile 0.1.0\n"
 "Report-Msgid-Bugs-To: https://github.com/carsteneu\n"
-"POT-Creation-Date: 2026-09-30 12:40+0200\n"
+"POT-Creation-Date: 2026-09-30 12:50+0200\n"
 "PO-Revision-Date: 2025-02-05 18:38+0100\n"
 "Last-Translator: claudiux\n"
 "Language-Team: French\n"
@@ -99,71 +99,71 @@ msgstr "Supprimer"
 msgid "Save"
 msgstr ""
 
-#: greenTile.js:2907
+#: greenTile.js:2909
 #, javascript-format
 msgid "Result: %s"
 msgstr ""
 
-#: greenTile.js:3389
+#: greenTile.js:3391
 msgid "Gap between windows"
 msgstr ""
 
-#: greenTile.js:3394
+#: greenTile.js:3396
 #, javascript-format
 msgid "%d px"
 msgstr ""
 
-#: greenTile.js:3413
+#: greenTile.js:3415
 msgid "Reset sizes"
 msgstr ""
 
-#: greenTile.js:3444
+#: greenTile.js:3446
 #, javascript-format
 msgid "Presets — workspace %d · %s"
 msgstr ""
 
-#: greenTile.js:3446
+#: greenTile.js:3448
 msgid "Create preset"
 msgstr ""
 
-#: greenTile.js:3446
+#: greenTile.js:3448
 #, javascript-format
 msgid "Edit %s"
 msgstr ""
 
-#: greenTile.js:3450
+#: greenTile.js:3452
 msgid "Back"
 msgstr ""
 
-#: greenTile.js:3459
+#: greenTile.js:3461
 #, fuzzy
 #| msgid "Auto close"
 msgid "Auto: on"
 msgstr "Fermeture auto"
 
-#: greenTile.js:3459
+#: greenTile.js:3461
 #, fuzzy
 #| msgid "Auto close"
 msgid "Auto: off"
 msgstr "Fermeture auto"
 
-#: greenTile.js:3480
+#: greenTile.js:3482
 msgid "Dark theme"
 msgstr ""
 
-#: greenTile.js:3480
+#: greenTile.js:3482
 msgid "Light theme"
 msgstr ""
 
-#: greenTile.js:3600
+#: greenTile.js:3602
 msgid "No presets yet."
 msgstr ""
 
-#: greenTile.js:3615
+#: greenTile.js:3617
 msgid "New preset"
 msgstr ""
 
-#: greenTile.js:3618
+#: greenTile.js:3620
 msgid "Click a row to apply it to this workspace and tile right away"
 msgstr ""
 
