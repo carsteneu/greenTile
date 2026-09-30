@@ -4,6 +4,7 @@
 
 # internal working documents, kept local
 docs/todo.md
+docs/local/
 docs/research/
 docs/superpowers/
 .worktrees/
