@@ -2679,6 +2679,20 @@ const tile_editor_save = (app, errorLabel) => {
     if (layout.preset && layout.preset.id === preset.id && layout.auto)
         tile_retile_monitor(app, tile_focus_monitor_index(), tile_focus_window());
 };
+const tile_presets_delete = (app) => {
+    const d = tile_panel.draft;
+    if (!d)
+        return;
+    tile_presets_write(app, tile_editor_delete_preset(tile_presets_read(app), d.id));
+    const layouts = tile_layouts_parse(app.config.settings.getValue('layouts') || '');
+    // Corrupt layouts stay untouched until the setting is fixed, like tile_layout_set.
+    if (layouts === null)
+        global.log('greenTile layouts setting is corrupt, deleting preset without layout cleanup');
+    else
+        app.config.settings.setValue('layouts', JSON.stringify(tile_layouts_remove_preset(layouts, d.id)));
+    global.log('greenTile preset "' + (d.name || d.id) + '" deleted');
+    tile_editor_back(app);
+};
 const tile_editor_rule_row = (rule, active, last, onSelect) => {
     const row = new tile_St.Button({
         style_class: 'gk-ed-rule' + (active ? ' gk-ed-rule-active' : '') + (last ? ' gk-ed-rule-last' : ''),
@@ -2852,11 +2866,26 @@ const tile_editor_body = (app) => {
     nameRow.add(entry, { expand: true, x_fill: true, y_fill: false, y_align: tile_St.Align.MIDDLE });
     right.add(nameRow);
     const saveRow = new tile_St.BoxLayout({ style_class: 'gk-ed-save-row' });
+    const delWrap = new tile_St.BoxLayout();
+    const presetDelBtn = new tile_St.Button({ label: '🗑 ' + _("Delete preset"), style_class: 'gk-preset-del', track_hover: true });
+    delWrap.add(presetDelBtn);
+    const confirmWrap = new tile_St.BoxLayout({ style_class: 'gk-preset-del-row' });
+    confirmWrap.add(new tile_St.Label({ text: _("Really delete?"), style_class: 'gk-preset-del-question' }), middle);
+    const confirmBtn = new tile_St.Button({ label: _("Delete"), style_class: 'gk-preset-del-confirm', track_hover: true });
+    confirmWrap.add(confirmBtn, middle);
+    const cancelBtn = new tile_St.Button({ label: '✕', style_class: 'gk-preset-del-cancel', track_hover: true });
+    confirmWrap.add(cancelBtn, middle);
     const save = new tile_St.Button({ label: _("Save"), style_class: 'gk-save', track_hover: true });
     const error = new tile_St.Label({ text: '', style_class: 'gk-error' });
+    // A new, never-saved preset has nothing persistent to delete; Back/Esc is its discard.
+    if (!tile_panel.draft.isNew) {
+        saveRow.add(delWrap, middle);
+        saveRow.add(confirmWrap, middle);
+    }
     saveRow.add(save, middle);
     saveRow.add(error, middle);
     right.add(saveRow);
+    confirmWrap.hide();
     body.add(right, { expand: true, x_fill: true, y_fill: true });
     refresh = () => {
         const dr = tile_panel.draft;
@@ -2893,6 +2922,15 @@ const tile_editor_body = (app) => {
     });
     entry.clutter_text.connect('activate', () => tile_editor_save(app, error));
     save.connect('clicked', () => tile_editor_save(app, error));
+    presetDelBtn.connect('clicked', () => {
+        delWrap.hide();
+        confirmWrap.show();
+    });
+    cancelBtn.connect('clicked', () => {
+        confirmWrap.hide();
+        delWrap.show();
+    });
+    confirmBtn.connect('clicked', () => tile_presets_delete(app));
     refresh();
     return { actor: body, entry, painter: painter.area };
 };

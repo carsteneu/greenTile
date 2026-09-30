@@ -455,6 +455,50 @@
     font-size: 11px;
 }
 
+/* The delete-preset button and its inline confirmation are ALWAYS the same fixed
+   red, in the dark and the light panel and under every theme accent — therefore
+   they have no .gk-light overrides and never appear in the generated accent css
+   (panel-accent.css cannot restyle them). */
+.gk-preset-del {
+    color: #d94343;
+    font-size: 15px;
+}
+
+.gk-preset-del:hover {
+    color: #e05555;
+}
+
+.gk-preset-del-row {
+    spacing: 8px;
+}
+
+.gk-preset-del-question {
+    color: #d94343;
+    font-size: 11px;
+}
+
+.gk-preset-del-confirm {
+    color: #ffffff;
+    font-size: 15px;
+    font-weight: bold;
+    background-color: #c23636;
+    border-radius: 4px;
+    padding: 7px 14px;
+}
+
+.gk-preset-del-confirm:hover {
+    background-color: #d94343;
+}
+
+.gk-preset-del-cancel {
+    color: #8b91a0;
+    font-size: 15px;
+}
+
+.gk-preset-del-cancel:hover {
+    color: #e8eaf0;
+}
+
 /* Light theme ("panelTheme": "light", or "system" with a light desktop): every
    rule lives under the gk-light class that greenTile.js puts on the panel root,
    so the dark look above stays untouched. Same tones, inverted: panels and
@@ -704,4 +748,14 @@
 
 .gk-light .gk-error {
     color: #c94b4b;
+}
+
+/* Grey cancel ✕ of the delete confirmation follows the light theme; the red
+   classes stay fixed on purpose (see the dark rules above). */
+.gk-light .gk-preset-del-cancel {
+    color: #5f6672;
+}
+
+.gk-light .gk-preset-del-cancel:hover {
+    color: #2b2f3a;
 }
