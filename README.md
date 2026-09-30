@@ -1,174 +1,121 @@
-# greenTile
+# <img src="docs/icon.svg" width="32" height="32" alt=""> greenTile
 
-Window tiling for Cinnamon with column rules, presets per monitor and workspace, an auto mode and snap-on-release.
+Window tiling for Cinnamon: presets per monitor and workspace, an auto mode, snap-on-release, draggable borders and keyboard swapping.
 
-greenTile is a fork of **gTile** (version 2.2.1), see [Origin](#origin). Like gTile, greenTile is licensed under the **GNU GPL v3** (see `LICENSE`). The classic gTile grid (`Super+G`) was removed.
+![Preset panel](docs/screenshots/preset-panel.png)
 
 - **UUID:** `greenTile@carsteneu`
-- **Tested with:** Cinnamon 6.6 (Linux Mint)
+- **Requires:** Cinnamon 6.6 or newer (tested on Linux Mint)
+- **Website:** [carsteneu.github.io/greenTile](https://carsteneu.github.io/greenTile/)
 
-## Origin
+## Installation
 
-greenTile is based on **gTile** (UUID `gTile@shuairan`), version 2.2.1:
-
-- Originally developed by **vibou** as a GNOME Shell extension: [vibou/vibou.gTile](https://github.com/vibou/vibou.gTile)
-- Ported to Cinnamon by **shuairan**: [shuairan/gTile](https://github.com/shuairan/gTile) (that repository only holds the old code up to v0.7)
-- Now maintained by the community in the Linux Mint Spices repository: [linuxmint/cinnamon-spices-extensions, folder `gTile@shuairan`](https://github.com/linuxmint/cinnamon-spices-extensions/tree/master/gTile%40shuairan). Version 2.2.1 was taken from there.
-
-The starting point was the shipped webpack bundle `5.4/gTile.js` of gTile 2.2.1, i.e. the code base for Cinnamon 5.4 and later that was introduced in gTile 2.2.0. greenTile modifies this bundle directly; gTile's TypeScript sources (`src/` in the Spices repository) are not used.
-
-**Taken over from gTile:** the extension skeleton, `icon.png` and the translation sources (`po/`, since extended with greenTile's own strings). The classic grid (`Super+G`) with its settings and the grid icons were removed.
-
-**Changed or added in greenTile:** column hotkeys, auto mode with snap-on-release and animation, own window collector, presets per monitor and workspace plus the preset panel and editor, moving borders by mouse and keyboard, splitting the layout by drag, swapping windows by keyboard, the never-tile list, the window gap, panel theme plus accent and state colors, new UUID and a flat directory layout without version subfolders. Modified by carsten_eu since 2026-09-04.
+1. Download `greenTile-<version>.zip` from [Releases](https://github.com/carsteneu/greenTile/releases) and unzip it.
+2. Run `./install.sh`. It copies the extension to `~/.local/share/cinnamon/extensions/greenTile@carsteneu/` and compiles the translations (needs `msgfmt` from gettext, otherwise the UI stays English).
+3. Restart Cinnamon (`Ctrl+Alt+Esc`, or `Alt+F2` → `r`).
+4. Enable greenTile in System Settings → Extensions.
 
 ## Hotkeys
 
 | Key | Action |
 |---|---|
-| `Super+Ctrl+3` | 3 columns of equal width |
-| `Super+Ctrl+6` | 6 columns of equal width |
-| `Super+Ctrl+A` | Turn automatic tiling on for the focused monitor and the active workspace and tile now (with its preset if one is assigned, otherwise with the auto grid); pressing it again tiles again |
-| `Super+Ctrl+D` | Turn automatic tiling off for the focused monitor and the active workspace (also pauses its preset) |
-| `Super+Ctrl+P` | Open/close the preset panel for the monitor of the focused window |
-| `Super+G` | Never tile the focused window — press again to tile it again (forgotten when the window is closed) |
-| `Super+Alt+Right` / `Super+Alt+Left` | Make the focused tiled window wider / narrower (tap = 1 px, hold to speed up) |
-| `Super+Alt+Down` / `Super+Alt+Up` | Make the focused tiled window taller / shorter |
-| `Super+Ctrl+Left` / `Super+Ctrl+Right` | Swap the focused tiled window with its neighbor to the left / right (see [Swapping windows](#swapping-windows)) |
-| `Super+Ctrl+Up` / `Super+Ctrl+Down` | Swap the focused tiled window with its neighbor above / below |
+| `Super+Ctrl+A` | Auto mode on for this monitor and workspace, tile now (again: retile) |
+| `Super+Ctrl+D` | Auto mode off for this monitor and workspace (pauses its preset) |
+| `Super+Ctrl+P` | Open or close the preset panel |
+| `Super+Ctrl+3` / `6` | 3 or 6 columns of equal width |
+| `Super+Ctrl+←/→/↑/↓` | Swap the focused window with its neighbour |
+| `Super+Alt+→/←` | Focused window wider / narrower (tap = 1 px, hold to speed up) |
+| `Super+Alt+↓/↑` | Focused window taller / shorter |
+| `Super+G` | Let the focused window float; press again to tile it again |
 
-All keys can be changed in the extension settings (Extensions manager, or ⚙ in the preset panel).
-
-Tiled windows glide into their new place (250 ms). **Animate tiling** on the **Settings** page (setting `tileAnimation`, default on) turns that off: the windows then jump there at once. It applies to every greenTile layout from the next tiling on; while a resize key is held down, windows always jump.
+All keys can be changed on the **Hotkeys** page of the settings (Extensions manager, or ⚙ in the preset panel).
 
 ## Presets
 
-A preset is a list of rules by window count: each rule defines how many columns there are and how many windows are stacked in each column. A preset is assigned to a monitor and workspace and applies there. The presets themselves are stored in the setting `presets`, their assignments in `layouts` (see [Per-monitor layouts](#per-monitor-layouts)).
+A preset is a list of rules by window count. Each rule sets the number of columns and how many windows each column stacks. You assign a preset to a monitor and workspace.
 
-![Preset panel](docs/screenshots/preset-panel.png)
+**Preset panel** (`Super+Ctrl+P`, works on the monitor of the focused window):
 
-In the panel (`Super+Ctrl+P`):
-- **Click a row:** assign the preset to this monitor and workspace and tile right away (this also turns automatic tiling on for it if it was off). The panel stays open, so you can try several presets in a row; close it with ✕, `Esc`, `Super+Ctrl+P` or a click outside.
-- **✕ in a row:** remove the assignment
-- **🔧:** open the editor for this preset
-- **＋ New preset:** open the editor with an empty preset
-- **✕ in the title bar**, `Esc` or **a click outside the panel** closes it, in the list and in the editor (in the editor an outside click drops the draft, like `Esc` and Back). The click itself still goes where it was aimed — clicking a window focuses it, clicking a Cinnamon panel acts there. Closing on a focus change also happens without a click: a window that opens while the panel is open closes it too. While the list is open, greenTile takes the `Esc` key, so applications do not receive it until the panel is closed.
-- **Auto: on / Auto: off in the title bar** shows whether automatic tiling is on for this monitor and workspace (green = on). Clicking it switches it, exactly like `Super+Ctrl+A` / `Super+Ctrl+D`; switching it on tiles right away.
-- **Gap between windows − N px +** below the list sets the gap between tiled windows (0 to 48 px in steps of 2, default 0). Only the sides where two windows meet move in; windows stay flush with the screen edges. The value applies to all greenTile layouts (auto grid, presets, `Super+Ctrl+3/6`). On a workspace with automatic tiling on, every click retiles right away, so the new gap shows live; elsewhere it applies from the next tiling. Stored in the setting `windowGap`.
-- **Reset sizes** appears next to it when borders were moved or layouts dragged on this monitor and workspace (see [Moving borders](#moving-borders), [Splitting the layout by drag](#splitting-the-layout-by-drag)); it returns every window count there to equal sizes and retiles.
-- **⚙ in the title bar** closes the panel and opens the extension's settings dialog (pages **Settings** and **Hotkeys**).
-- The panel can be dragged by its title bar and keeps its position when you switch workspaces. If that position is no longer on any monitor (external display unplugged), the panel opens centred again.
-- **◢ in the bottom right corner** resizes the panel: width (at least 600 px) and height of the part that stretches, in the list the preset rows (at least three), in the editor the painter. List and editor keep their own size, stored in the setting `panelSize`, limited to the room on the panel's monitor (a size set on a big monitor shrinks on a small one).
-- **Theme:** the setting `panelTheme` (Extensions → greenTile → configure → **Settings** → **Preset panel**) decides whether the panel and the editor follow the desktop color scheme (**Follow system**, the default, applied live: switching the desktop's theme restyles an open panel right away) or always stay **Light** or **Dark**, whatever the desktop does.
-- **Theme toggle in the title bar:** the sun/moon button switches the panel between Light and Dark with one click and shows the theme a click switches to (moon in light mode); it overrides `panelTheme`, and **Follow system** stays selectable in the settings dialog.
-- **Accent color:** the setting `accentMode` (**Settings** → **Preset panel**) decides where the orange comes from: **Follow theme** (the default) picks up the accent color of the current Cinnamon theme live, also when the theme is switched later; **Custom** uses the color chosen in `accentColor`. Only the accent changes (figures, stripes, hover tones, Save button); borders and greys stay as they are.
-- **State color:** the setting `stateMode` (**Settings** → **Preset panel**) colors the "Auto: on" marker and the assigned rows: **Green** (the default) keeps today's look, **Follow theme** uses the accent color of the Cinnamon theme live, **Custom** uses the color chosen in `stateColor`.
-- Right after switching between list and editor, clicks are ignored for 400 ms, so the second click of a double-click does not act in the new view.
+- Click a row to assign the preset and tile right away. The panel stays open, so you can try several presets.
+- ✕ in a row removes the assignment, 🔧 opens the editor, **＋ New preset** starts an empty one.
+- **Auto: on / off** in the title bar shows and switches auto mode (green = on).
+- **Gap between windows** sets the gap between tiled windows (0 to 48 px). Screen edges stay flush.
+- **Reset sizes** appears when borders were moved or layouts dragged, and returns to equal sizes.
+- The sun/moon button switches between light and dark; ⚙ opens the settings.
+- Drag the title bar to move the panel, ◢ to resize it. `Esc`, ✕ or a click outside closes it.
 
-The thumbnail shows the layout a click would tile right now: the matching rule, filled to the current number of windows (see below).
-
-Tiled windows always cover the whole screen, no cell stays empty. When a rule has more cells than there are windows, the highest column loses a cell (on a tie the right one) until the count fits; with fewer windows than columns, columns drop from the right. Example: a rule `2·2` with 3 windows tiles as `2·1`, with 2 windows as `1·1`. With more windows than cells, the rightmost column takes the rest.
+The thumbnail shows what a click would tile right now. No cell ever stays empty: with fewer windows than cells, the highest column gives up a cell (on a tie the right one), with fewer windows than columns, columns drop from the right. With more windows than cells, the rightmost column takes the rest.
 
 ### Editor
 
 ![Preset editor](docs/screenshots/preset-editor.png)
 
-- **Rules (left):** one row per rule, "from N" = the rule applies from N windows on (the last rule whose N is not larger than the window count wins). Click a row to edit it. **＋ Rule** adds a rule (N + 1, copy of the highest rule), **🗑 Delete rule** removes the selected one; a preset always keeps one rule.
-- **Rule applies from [−] N [+]:** changes N of the selected rule. N can be smaller than the number of painted cells; with fewer windows the layout is filled as described above, so no cell stays empty.
-- **Painter:** 6 columns × 4 rows. Click or drag: the row under the pointer sets how many windows the column holds (top = 1, bottom = 4). Dragging paints every column it passes. Right-click removes a column. With more windows than cells, the rightmost column takes the rest.
-- **Name** and **Save** (or `Enter` in the name field). Saving a preset that is assigned to the active workspace retiles it right away, unless automatic tiling is off there.
-- **← Back** or `Esc` returns to the list without saving.
-- While the editor is open it holds the keyboard and mouse (like a dialog), so the preset hotkey does not work until you go back.
+- **Rules** (left): "from N" means the rule applies from N windows on; the last matching rule wins. **＋ Rule** adds one, **🗑** deletes the selected one.
+- **Painter:** 6 columns × 4 rows. Click or drag to set how many windows a column holds (top = 1, bottom = 4). Right-click removes a column.
+- **Save** (or `Enter` in the name field) retiles right away if the preset is in use. **← Back** or `Esc` discards the draft.
 
 ## Auto mode
 
-Automatic tiling is switched **per monitor and workspace**:
+Auto mode is switched per monitor and workspace. It is on by default where a preset is assigned, otherwise off. While it is on:
 
-- `Super+Ctrl+A` turns it on for the focused monitor and the active workspace and tiles right away. Pressing it again just tiles again.
-- `Super+Ctrl+D` turns it off for the focused monitor and the active workspace. With a preset assigned this pauses the preset: it stays assigned (and visible in the panel) but nothing is tiled until `Super+Ctrl+A`.
-- A monitor/workspace that was never switched either way is on when it has a preset and off when it has none.
-- The state is shown and switched in the title bar of the preset panel (**Auto: on / Auto: off**). It is stored in the `layouts` setting together with the preset assignments (see below) and survives reloads and restarts. Both are keyed by monitor and workspace number, so they stay with the monitor they were made for; workspace numbers shift when workspaces are removed.
+- New, closed, minimized and restored windows retile the monitor after 300 ms. New windows are appended at the end.
+- A window moved by hand snaps into the slot where you drop it. Moving it to another monitor retiles both.
+- Movements are animated (250 ms, can be turned off with **Animate tiling**).
 
-While automatic tiling is on for a monitor and the active workspace:
-- When a window is added to or removed from the active workspace, the monitor it appeared on (or was last seen on) is retiled after 300 ms (normal windows only, no dialogs). Minimizing and restoring windows also update the layout.
-- A window moved by hand snaps into the grid slot where it is dropped; its neighbours move up. Moving a window to another monitor retiles both monitors.
-- All movements are animated (250 ms). The window gets its final size immediately and only the picture glides, so terminal text does not flicker.
-- New windows are appended at the end.
+Only visible windows of the active workspace are tiled. The order follows their position on screen.
 
-Without a preset the auto grid applies, depending on the monitor width:
-- **2100 px and wider:** up to 6 windows in one row, beyond that the windows are spread evenly over rows that each span the full width (7 = 4 + 3, 8 = 4 + 4, 12 = 6 + 6)
-- **narrower than 2100 px:** up to 3 windows in one row, from 4 windows on 3 columns with stacks (4 = 1·1·2, 5 = 1·2·2, 6 = 2·2·2)
+Without a preset, the auto grid depends on the monitor width:
 
-In every case only visible windows of the **active** workspace are tiled, never windows from other workspaces. Minimized windows are left out. The order follows the current position on screen, so windows you rearranged by hand keep their place.
+- **2100 px and wider:** up to 6 windows in one row, then evenly spread over full-width rows (7 = 4 + 3, 8 = 4 + 4).
+- **Narrower:** up to 3 windows in one row, then 3 columns with stacks (4 = 1·1·2, 5 = 1·2·2, 6 = 2·2·2).
+
+## Adjusting the layout
+
+**Moving borders.** Drag the edge of a tiled window, or use `Super+Alt+Arrow`. Neighbours follow, no window gets smaller than 120 px. Borders are remembered per monitor, workspace and window count, so opening a fourth window uses the 4-window layout and closing it brings the 3-window borders back.
+
+**Splitting by drag.** While moving a window over another tiled window, a preview shows where it will land. The outer 25 % of a cell are drop zones:
+
+| Zone | Columns layout (presets, narrow grid) | Rows layout (wide grid) |
+|---|---|---|
+| top / bottom | stack above / below it in its column | new row above / below its row |
+| left / right | new column left / right of it | insert left / right of it in its row |
+
+The centre keeps the normal snap. `Esc` during the drag cancels. Dropping onto another monitor works too.
+
+**Swapping.** `Super+Ctrl+Arrow` swaps the focused window with its neighbour, all borders stay. Left/Right continue across monitors (the window moves over and is inserted at the edge) and past the outermost monitor to the previous or next workspace. Focus stays on the moved window, so repeated presses walk it along.
+
+Borders and dragged layouts apply only in auto mode, not to `Super+Ctrl+3/6`.
 
 ## Excluding windows
 
-Windows on the **Never tile** list (settings dialog, **Settings** page) are left alone by greenTile: they are never tiled — not by auto mode, presets, `Super+Ctrl+3/6` or snap-on-release — and not counted for the layout, so the rest tiles as if they were not there. The resize hotkeys ignore them too; they float freely wherever you put them. A row matches by **Window class** (the WM_CLASS equals the text — the class or the instance, case-insensitive), **Title contains** (the window title contains the text, case-insensitive) or **App id** (the application's desktop id from Cinnamon's own window-to-app mapping, case-insensitive). Empty rows are ignored. Changes apply live.
+- **Never tile list** (settings, **Settings** page): match by window class, title or app id. **Add an installed application** adds an app id row for you, which also covers flatpaks. Excluded windows float freely and do not count for the layout.
+- **`Super+G`** lets a single window float until you press it again or close the window. This is not saved.
 
-To add an application instead of editing rows by hand, use **Add an installed application** above the list: pick an app from the combobox — it is added as an **App id** row that matches every window of that application, including flatpaks whose WM classes would be wrong. The window's own desktop id may also differ from the picked app's (Cinnamon sometimes maps a program's windows to another, hidden launcher of the same program): in that case the row still matches when the window's WM_CLASS or instance equals the picked app's startup WM class, case-insensitive. The combobox resets after each pick. The options are collected when the dialog opens; after picking an app, the new row is active immediately and shows in the list the next time the dialog is opened. While the dialog stays open, edits in other widgets rewrite the list from the dialog's own copy — close the dialog (or reopen it) before editing rows further, or the picked row is dropped again.
+## Multiple monitors
 
-For a single window, press `Super+G` while it has focus: the rest of its monitor retiles and the window floats (a short OSD shows "Window floats"). Press `Super+G` again and it is tiled back in ("Window tiles again"). This ad-hoc state is kept in memory per window and forgotten when the window is closed — or when the extension is disabled or the monitor setup changes. It is **not** saved to the list.
+Presets and auto mode are stored per monitor and workspace. Monitors are recognised by vendor, product and serial, so replugging or rearranging displays keeps every assignment. After a monitor change, greenTile waits until the windows have settled and then retiles once.
 
-## Moving borders
+With `workspaces-only-on-primary` on, secondary monitors share one layout across all workspaces.
 
-Tiled windows do not have to share the area equally. Where automatic tiling is on:
+Known limitation: layouts are keyed by workspace number and shift when a workspace is removed.
 
-- **Mouse:** drag the edge of a tiled window as usual. On release the border between it and its neighbour moves there, and the neighbours follow. A vertical edge moves the column border (in the wide auto grid: the border between two windows of a row); a horizontal edge moves the border inside the column (wide auto grid: the row border). Corners move both. An edge on the screen border has no neighbour, the window snaps back. A click on the edge without dragging changes nothing.
-- **Keyboard:** `Super+Alt+Right` / `Left` make the focused window wider / narrower, `Super+Alt+Down` / `Up` taller / shorter. The window grows at its right/bottom border; the last column/cell uses its left/top border instead. One tap moves the border by 1 px, holding the key speeds up to 64 px per step. While a key is held, windows jump without animation. The keys can be changed on the Hotkeys page of the settings.
-- No window gets narrower or lower than 120 px.
-- The borders are stored per monitor, workspace **and window count** in the `layouts` setting (field `splits`, fractions of the screen, so they survive resolution changes and the gap setting). With 3 windows you get the borders you set for 3 windows; when a fourth window opens, the layout for 4 applies, and closing it brings the 3-window borders back. Borders are ignored (equal sizes) when the layout they were made for no longer applies, e.g. after the preset or its rule changed.
-- **Reset sizes** in the preset panel removes all borders and dragged layouts of the monitor and workspace.
-- Not for `Super+Ctrl+3/6`. With automatic tiling off, resizing a window stays a free resize.
-- Known limitation: applications with their own minimum size may refuse to shrink to their cell; windows can then overlap.
+## Appearance
 
-## Splitting the layout by drag
+On the **Settings** page under **Preset panel**:
 
-While you move a tiled window with the mouse, greenTile shows a translucent preview of the cell the window would take when you release it over a **zone** of another tiled window (on any monitor with active tiling). Each cell of the drop target has edge zones of 25 % of its width/height (corners go to the nearer axis); the centre keeps the usual snap-on-release behaviour.
+- **Panel theme:** follow the desktop (default), always light, or always dark.
+- **Accent color:** follow the Cinnamon theme (default) or a custom color.
+- **State color** for "Auto: on" and assigned rows: green (default), follow the theme, or custom.
 
-| Zone on the drop target | Columns layout (presets, narrow auto grid) | Rows layout (wide auto grid) |
-|---|---|---|
-| top / bottom | the window is stacked above / below it in its column | a new row with only this window is inserted above / below its row |
-| left / right | a new column with only this window is opened left / right of it | the window is inserted directly left / right of it in its row |
+## Development
 
-- The result is stored per monitor, workspace **and window count** in the `layouts` setting (field `shapes`), so it survives reloads and restarts and wins over the preset or auto layout: with 2 windows the base layout applies, and with 3 windows again the dragged one. A dragged layout replaces the moved borders of the same window count.
-- Side splits open whole columns/rows only; splitting a single cell of a stacked column is not supported.
-- Cross-monitor drops work too: the target monitor keeps one window more, the source monitor retiles with one less, and only the target stores a layout.
-- Nothing is written when you press Esc during the drag, release outside any tiled window, drop onto the dragged window's own cell or onto a zone where the layout would not change, or when a cell of the new layout would fall below the 120 px minimum — the window then snaps as usual.
-- Works with presets and the automatic grid. Keyboard moves get no zones. Not for `Super+Ctrl+3/6`.
-
-## Swapping windows
-
-`Super+Ctrl+Left/Right/Up/Down` swaps the focused tiled window with its neighbour in that direction: only the two windows exchange cells, borders (splits) and every other window keep their place. The neighbour is the cell in the pressed direction that overlaps on the perpendicular axis — from a stacked cell, Right moves to the window at about the same height in the next column.
-
-Where nothing neighbours in the pressed direction, Left/Right continue along the monitor chain, monitors ordered left to right by geometry:
-
-- Right past the rightmost monitor pushes the focused window onto the next workspace, landing in the first slot of its leftmost monitor; Left past the leftmost monitor mirrors that onto the previous workspace (last slot of the rightmost monitor). Nothing happens at the first/last workspace (no wrap).
-- Between monitors the window lands in the edge slot of the neighbour monitor, chosen by the best vertical overlap with the window so it stays at about the same height. Landing is an insert, not a swap: the target retiles with one window more, the source with one less.
-
-Focus stays on the moved window in every case, so repeated presses walk the same window along the chain. Nothing happens when no window is focused, when it is excluded from tiling or on all workspaces, for Up/Down at the top/bottom edge, and for Up/Down when nothing neighbours the window. On a monitor without an active tiling a Left/Right press moves the window there untiled (size kept) and the next press pushes it on; because a layout only starts from two windows, a landing slot exists only when at least one window is tiled on the target monitor and workspace. With Muffin's `workspaces-only-on-primary` on, workspace steps only anchor on the primary monitor and the window lands on the primary monitor (the only one whose workspaces are separate); from a non-primary monitor the chain ends at the last monitor without changing the workspace.
-
-## Per-monitor layouts
-
-Preset assignments and automatic tiling are stored per monitor **and** workspace. Every connected monitor is identified by a stable key `<vendor>|<product>|<serial>`, read from Cinnamon's display configuration. Monitors with a serial of zero or none (most built-in laptop panels) get the connector appended, e.g. `LEN|0x41a8|0x00000000|eDP`, so two identical monitors keep separate entries, and replugging or rearranging displays keeps every assignment. If the display information cannot be read, a fallback key from name and resolution is used (logged once); identical models can then collide.
-
-- On the first start after the update, the old per-workspace settings (`wsPresets`, `autoWorkspaces`) are converted **once** into `layouts` entries for the monitor that is primary at that moment, and the marker `layoutsMigrated` is set, so deleting all layouts later does not bring the old values back. The old keys remain in the settings file as a backup but are no longer read or written.
-- When Muffin's `workspaces-only-on-primary` setting is on, the other monitors show the same windows on every workspace. Their entries then use the workspace key `*` instead of a number, so one assignment covers all workspaces there; the primary monitor keeps numbered workspaces. The setting is read live, no restart needed.
-- After a monitor is plugged in or out, greenTile waits for Muffin to move the windows: it retiles once 2 seconds after the last change, at the latest 15 seconds after the first (log line `greenTile monitors settled …`).
-- The preset panel works on the monitor of the focused window; its title shows the workspace number and the monitor's name, e.g. `Presets — workspace 5 · AOC 49"`. When two connected monitors share a name, the connector is appended.
-
-Known limitation: entries are keyed by workspace number, as before, so they shift when workspaces are removed.
-
-## Installation and deploy
-
-From a release zip (end users): download `greenTile-<version>.zip` from [Releases](https://github.com/carsteneu/greenTile/releases), unzip it and run `./install.sh` — it copies the extension to `~/.local/share/cinnamon/extensions/greenTile@carsteneu/` and compiles the translations (gettext's `msgfmt`; without it the extension runs in English). Then restart Cinnamon (`Ctrl+Alt+Esc`, or `Alt+F2` → `r`) and enable greenTile in System Settings → Extensions. The zip is built and attached automatically whenever a `v*` tag is pushed (`.github/workflows/release.yml`, `build-release.sh`).
-
-From a checkout (development, live deploy):
+Deploy from a checkout and reload without restarting Cinnamon:
 
 ```bash
 D=~/.local/share/cinnamon/extensions/greenTile@carsteneu
 mkdir -p "$D"
 node --check greenTile.js
 cp extension.js greenTile.js metadata.json settings-schema.json stylesheet.css icon.png LICENSE "$D"/
-rm -rf "$D"/icons
 for po in po/*.po; do
   lang=$(basename "$po" .po)
   mkdir -p ~/.local/share/locale/"$lang"/LC_MESSAGES
@@ -178,54 +125,24 @@ dbus-send --session --print-reply --dest=org.Cinnamon /org/Cinnamon org.Cinnamon
   string:"imports.ui.extensionSystem.disableExtension('greenTile@carsteneu'); imports.ui.extensionSystem.enableExtension('greenTile@carsteneu'); 'reloaded'"
 ```
 
-The first time, enable the extension in the Cinnamon settings. **gTile@shuairan must be disabled**, otherwise both extensions claim the same keys.
+- **Tests:** `node --test tests/*.test.js` (Node 18 or newer).
+- **Releases:** pushing a `v*` tag builds the zip and attaches it to the release (`.github/workflows/release.yml`).
+- **Diagnostics:** `~/.xsession-errors` shows `JS ERROR` lines and `greenTile skipped …` lines explaining why a window was not tiled.
+- **Translations:** the domain is `greenTile@carsteneu`, template `po/greenTile@carsteneu.pot`. After changing strings, run `./makepot.sh` (needs `polib` and `pytz`). New or changed `.mo` files only take effect after a Cinnamon restart.
 
-Check: `imports.ui.extensionSystem.runningExtensions` (an array) must contain `greenTile@carsteneu`, and `~/.xsession-errors` must not show any `JS ERROR` mentioning `greenTile.js`.
+## Origin
 
-Tests for the pure models (monitor keys, layouts with migration, auto mode, preset fill rule, preset editor, borders, drag split, swapping, window gap, exclusions, panel size, theme and accent colors): `node --test tests/*.test.js` (Node 18 or newer; passing only the directory `tests/` fails on Node 22 and later). The `tests/` folder is not copied by the deploy steps.
+greenTile is a fork of **gTile** 2.2.1 (`gTile@shuairan`):
 
-## Switching from gTile
+- originally written by **vibou** for GNOME Shell: [vibou/vibou.gTile](https://github.com/vibou/vibou.gTile)
+- ported to Cinnamon by **shuairan**: [shuairan/gTile](https://github.com/shuairan/gTile)
+- maintained in the Linux Mint Spices repository: [cinnamon-spices-extensions/gTile@shuairan](https://github.com/linuxmint/cinnamon-spices-extensions/tree/master/gTile%40shuairan)
 
-Settings and presets are stored per UUID under `~/.config/cinnamon/spices/`. To take them over:
-
-```bash
-mkdir -p ~/.config/cinnamon/spices/greenTile@carsteneu
-cp ~/.config/cinnamon/spices/gTile@shuairan/gTile@shuairan.json \
-   ~/.config/cinnamon/spices/greenTile@carsteneu/greenTile@carsteneu.json
-gsettings set org.cinnamon enabled-extensions "['greenTile@carsteneu']"
-```
-
-Back to gTile: `gsettings set org.cinnamon enabled-extensions "['gTile@shuairan']"`. gTile's folder and settings are left untouched.
-
-## Translations
-
-All user-visible strings are English in the source and translated via gettext. The translation domain is the UUID `greenTile@carsteneu`; compiled catalogs are installed to `~/.local/share/locale/<lang>/LC_MESSAGES/greenTile@carsteneu.mo` (see the deploy steps above).
-
-- `po/greenTile@carsteneu.pot` is the template, `po/<lang>.po` are the translations. They were taken over from gTile, so strings added by greenTile are still untranslated in most languages; German is complete.
-- After changing translatable strings in `greenTile.js`, `settings-schema.json` or `metadata.json`, run `./makepot.sh`. It regenerates the template with Cinnamon's `cinnamon-xlet-makepot` and merges it into every `.po` file. That tool needs the Python modules `polib` and `pytz`; see the comment at the top of `makepot.sh`.
-- New language: `msginit -i po/greenTile@carsteneu.pot -o po/<lang>.po -l <lang>`, then translate and deploy.
-- Placeholders such as `%d` must be kept in the translation; the code fills them with `String.prototype.format`.
-
-## Pitfalls
-
-- Muffin 6.6: use `get_frame_rect()`; `get_outer_rect()` does not exist there.
-- Hotkeys live in two files: the default in the schema and the user value in `~/.config/cinnamon/spices/greenTile@carsteneu/greenTile@carsteneu.json`. The user value wins.
-- `Super+N` and `Super+Shift+N` belong to the window list applet; do not use them.
-- gTile's `focusMetaWindow` goes stale when switching between windows of the same application. That is why tiling uses its own window collector.
-- `grab-op-begin` and `grab-op-end` pass the display twice: `(display, display, window, op)`. When a mouse move is cancelled with `Esc`, `grab-op-end` still reports `MOVING`, but the frame is already back at its start rectangle; that is how the drag split tells a cancel from a drop.
-- `Meta.Window.change_workspace_by_index` takes two arguments `(index, append)` in Muffin 6.6. Cinnamon's own `main.js` passes a third one, which GJS drops with a "Too many arguments" warning. Trust such GJS warnings over Cinnamon's JS as a signature reference.
-- Cinnamon's settings dialog silently drops every combobox option whose value is exactly `"custom"`. That is why the "Custom" options of `accentMode` and `stateMode` use the value `own`; a stored `custom` is read as `own`.
-- St does not flush its theme-node cache when a stylesheet is loaded or unloaded at runtime: actors keep the old colors even when rebuilt. The generated accent stylesheet therefore adds a new generation class to the panel root on each change, so every node gets a fresh cache key.
-- Dragging the panel needs `Main.pushModal(actor)` **and** `device.grab(actor)` together, as in Cinnamon's `dnd.js`. Either one alone loses mouse events as soon as the pointer leaves the panel.
-- Diagnostics: lines `greenTile skipped …` in `~/.xsession-errors` state why a window was not tiled.
-- Reload via DBus Eval as shown above; restarting Cinnamon is not necessary for code changes.
-- The UUID must not contain an underscore: Cinnamon's settings dialog (`KeybindingTable.py`) splits UUIDs at `_` to find instance numbers, does not find the keybindings of such an extension and crashes, so the dialog never opens. That is why the UUID is `greenTile@carsteneu`. If the dialog does not open, run `xlet-settings extension greenTile@carsteneu` in a terminal to see the traceback.
-- gTile 2.2.1 did not disconnect its `monitors-changed` handler on disable, so every reload left a handler behind that rebuilt a complete old instance on each monitor change (duplicate tiling, old hotkeys coming back). Fixed in greenTile; handlers left over from reloads of an older version disappear only with a Cinnamon restart.
-- Exception, translations: gettext (glibc) caches catalogs per process, including the fact that a catalog is *missing*. New or changed `.mo` files therefore only take effect after restarting Cinnamon (`Ctrl+Alt+Esc` or `Alt+F2` → `r`, or log out and in). Reloading the extension is not enough.
+The starting point was gTile's shipped bundle `5.4/gTile.js`. The extension skeleton and the translation sources (`po/`) come from gTile; the classic grid was removed, everything else described above was added in greenTile. If gTile is still installed, disable it, since both claim the same keys.
 
 ## License
 
-greenTile is licensed, like gTile, under the [GNU General Public License, version 3](https://www.gnu.org/licenses/gpl-3.0.html). The full license text is in `LICENSE`.
+[GNU General Public License, version 3](https://www.gnu.org/licenses/gpl-3.0.html), like gTile. See `LICENSE`.
 
 - Original code: vibou, shuairan and the gTile contributors
 - Modifications and additions: © 2026 carsten_eu
