@@ -9,7 +9,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: greenTile 0.1.0\n"
 "Report-Msgid-Bugs-To: https://github.com/carsteneu\n"
-"POT-Creation-Date: 2026-09-30 12:21+0200\n"
+"POT-Creation-Date: 2026-09-30 12:40+0200\n"
 "PO-Revision-Date: 2026-09-28 17:17+0200\n"
 "Last-Translator: carsten_eu\n"
 "Language-Team: German\n"
@@ -33,45 +33,45 @@ msgstr "Fenster schwebt frei"
 msgid "Window tiles again"
 msgstr "Fenster wird wieder gekachelt"
 
-#: greenTile.js:2607
+#: greenTile.js:2608
 #, javascript-format
 msgid "assigned — workspace %d"
 msgstr "zugewiesen — Fläche %d"
 
-#: greenTile.js:2668
+#: greenTile.js:2669
 msgid "Please enter a name."
 msgstr "Bitte einen Namen eingeben."
 
-#: greenTile.js:2705
+#: greenTile.js:2711
 #, javascript-format
 msgid "from %d"
 msgstr "ab %d"
 
-#: greenTile.js:2822
+#: greenTile.js:2828
 msgid "Rules (by window count)"
 msgstr "Regeln (nach Fensterzahl)"
 
-#: greenTile.js:2826
+#: greenTile.js:2832
 msgid "Rule"
 msgstr "Regel"
 
-#: greenTile.js:2827
+#: greenTile.js:2833
 msgid "Delete rule"
 msgstr "Regel löschen"
 
-#: greenTile.js:2835
+#: greenTile.js:2841
 msgid "Rule applies from"
 msgstr "Regel gilt ab"
 
-#: greenTile.js:2842
+#: greenTile.js:2848
 msgid "windows"
 msgstr "Fenstern"
 
-#: greenTile.js:2844
+#: greenTile.js:2850
 msgid "Painter"
 msgstr "Malerei"
 
-#: greenTile.js:2859
+#: greenTile.js:2865
 msgid ""
 "Click or drag: the row sets how many windows the column holds. Right-click "
 "removes a column."
@@ -79,91 +79,91 @@ msgstr ""
 "Klicken oder ziehen: Die Zeile legt fest, wie viele Fenster die Spalte "
 "aufnimmt. Rechtsklick entfernt eine Spalte."
 
-#: greenTile.js:2864
+#: greenTile.js:2870
 msgid "Name"
 msgstr "Name"
 
-#: greenTile.js:2865
+#: greenTile.js:2871
 msgid "Preset name"
 msgstr "Name des Presets"
 
-#: greenTile.js:2870
+#: greenTile.js:2876
 msgid "Delete preset"
 msgstr "Preset löschen"
 
-#: greenTile.js:2873
+#: greenTile.js:2879
 msgid "Really delete?"
 msgstr "Wirklich löschen?"
 
-#: greenTile.js:2874
+#: greenTile.js:2880
 msgid "Delete"
 msgstr "Löschen"
 
-#: greenTile.js:2878
+#: greenTile.js:2884
 msgid "Save"
 msgstr "Speichern"
 
-#: greenTile.js:2901
+#: greenTile.js:2907
 #, javascript-format
 msgid "Result: %s"
 msgstr "Ergebnis: %s"
 
-#: greenTile.js:3383
+#: greenTile.js:3389
 msgid "Gap between windows"
 msgstr "Abstand zwischen Fenstern"
 
-#: greenTile.js:3388
+#: greenTile.js:3394
 #, javascript-format
 msgid "%d px"
 msgstr "%d px"
 
-#: greenTile.js:3407
+#: greenTile.js:3413
 msgid "Reset sizes"
 msgstr "Größen zurücksetzen"
 
-#: greenTile.js:3438
+#: greenTile.js:3444
 #, javascript-format
 msgid "Presets — workspace %d · %s"
 msgstr "Presets — Arbeitsfläche %d · %s"
 
-#: greenTile.js:3440
+#: greenTile.js:3446
 msgid "Create preset"
 msgstr "Neues Preset"
 
-#: greenTile.js:3440
+#: greenTile.js:3446
 #, javascript-format
 msgid "Edit %s"
 msgstr "%s bearbeiten"
 
-#: greenTile.js:3444
+#: greenTile.js:3450
 msgid "Back"
 msgstr "zurück"
 
-#: greenTile.js:3453
+#: greenTile.js:3459
 msgid "Auto: on"
 msgstr "Auto: an"
 
-#: greenTile.js:3453
+#: greenTile.js:3459
 msgid "Auto: off"
 msgstr "Auto: aus"
 
-#: greenTile.js:3474
+#: greenTile.js:3480
 msgid "Dark theme"
 msgstr "Dunkles Design"
 
-#: greenTile.js:3474
+#: greenTile.js:3480
 msgid "Light theme"
 msgstr "Helles Design"
 
-#: greenTile.js:3594
+#: greenTile.js:3600
 msgid "No presets yet."
 msgstr "Noch keine Presets vorhanden."
 
-#: greenTile.js:3609
+#: greenTile.js:3615
 msgid "New preset"
 msgstr "Neu anlegen"
 
-#: greenTile.js:3612
+#: greenTile.js:3618
 msgid "Click a row to apply it to this workspace and tile right away"
 msgstr "Klick auf eine Zeile = sofort auf dieser Fläche anwenden & kacheln"
 

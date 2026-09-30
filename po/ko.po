@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: greenTile 0.1.0\n"
 "Report-Msgid-Bugs-To: https://github.com/carsteneu\n"
-"POT-Creation-Date: 2026-09-30 12:21+0200\n"
+"POT-Creation-Date: 2026-09-30 12:40+0200\n"
 "PO-Revision-Date: 2024-08-11 23:42+0900\n"
 "Last-Translator: Kevin Kim <chaeya@gmail.com>\n"
 "Language-Team: Korean\n"
@@ -31,139 +31,139 @@ msgstr ""
 msgid "Window tiles again"
 msgstr ""
 
-#: greenTile.js:2607
+#: greenTile.js:2608
 #, javascript-format
 msgid "assigned — workspace %d"
 msgstr ""
 
-#: greenTile.js:2668
+#: greenTile.js:2669
 msgid "Please enter a name."
 msgstr ""
 
-#: greenTile.js:2705
+#: greenTile.js:2711
 #, javascript-format
 msgid "from %d"
 msgstr ""
 
-#: greenTile.js:2822
+#: greenTile.js:2828
 msgid "Rules (by window count)"
 msgstr ""
 
-#: greenTile.js:2826
+#: greenTile.js:2832
 msgid "Rule"
 msgstr ""
 
-#: greenTile.js:2827
+#: greenTile.js:2833
 msgid "Delete rule"
 msgstr ""
 
-#: greenTile.js:2835
+#: greenTile.js:2841
 msgid "Rule applies from"
 msgstr ""
 
-#: greenTile.js:2842
+#: greenTile.js:2848
 msgid "windows"
 msgstr ""
 
-#: greenTile.js:2844
+#: greenTile.js:2850
 msgid "Painter"
 msgstr ""
 
-#: greenTile.js:2859
+#: greenTile.js:2865
 msgid ""
 "Click or drag: the row sets how many windows the column holds. Right-click "
 "removes a column."
 msgstr ""
 
-#: greenTile.js:2864
+#: greenTile.js:2870
 msgid "Name"
 msgstr ""
 
-#: greenTile.js:2865
+#: greenTile.js:2871
 msgid "Preset name"
 msgstr ""
 
-#: greenTile.js:2870
+#: greenTile.js:2876
 msgid "Delete preset"
 msgstr "프리셋 삭제"
 
-#: greenTile.js:2873
+#: greenTile.js:2879
 msgid "Really delete?"
 msgstr "정말 삭제할까요?"
 
-#: greenTile.js:2874
+#: greenTile.js:2880
 msgid "Delete"
 msgstr "삭제"
 
-#: greenTile.js:2878
+#: greenTile.js:2884
 msgid "Save"
 msgstr ""
 
-#: greenTile.js:2901
+#: greenTile.js:2907
 #, javascript-format
 msgid "Result: %s"
 msgstr ""
 
-#: greenTile.js:3383
+#: greenTile.js:3389
 msgid "Gap between windows"
 msgstr ""
 
-#: greenTile.js:3388
+#: greenTile.js:3394
 #, javascript-format
 msgid "%d px"
 msgstr ""
 
-#: greenTile.js:3407
+#: greenTile.js:3413
 msgid "Reset sizes"
 msgstr ""
 
-#: greenTile.js:3438
+#: greenTile.js:3444
 #, javascript-format
 msgid "Presets — workspace %d · %s"
 msgstr ""
 
-#: greenTile.js:3440
+#: greenTile.js:3446
 msgid "Create preset"
 msgstr ""
 
-#: greenTile.js:3440
+#: greenTile.js:3446
 #, javascript-format
 msgid "Edit %s"
 msgstr ""
 
-#: greenTile.js:3444
+#: greenTile.js:3450
 msgid "Back"
 msgstr ""
 
-#: greenTile.js:3453
+#: greenTile.js:3459
 #, fuzzy
 #| msgid "Auto close"
 msgid "Auto: on"
 msgstr "자동 닫기"
 
-#: greenTile.js:3453
+#: greenTile.js:3459
 #, fuzzy
 #| msgid "Auto close"
 msgid "Auto: off"
 msgstr "자동 닫기"
 
-#: greenTile.js:3474
+#: greenTile.js:3480
 msgid "Dark theme"
 msgstr ""
 
-#: greenTile.js:3474
+#: greenTile.js:3480
 msgid "Light theme"
 msgstr ""
 
-#: greenTile.js:3594
+#: greenTile.js:3600
 msgid "No presets yet."
 msgstr ""
 
-#: greenTile.js:3609
+#: greenTile.js:3615
 msgid "New preset"
 msgstr ""
 
-#: greenTile.js:3612
+#: greenTile.js:3618
 msgid "Click a row to apply it to this workspace and tile right away"
 msgstr ""
 
@@ -368,8 +368,8 @@ msgstr ""
 
 #. settings-schema.json->accentMode->tooltip
 msgid ""
-"Follow theme tracks the accent color of the Cinnamon theme live. Custom uses"
-" the color below."
+"Follow theme tracks the accent color of the Cinnamon theme live. Custom uses "
+"the color below."
 msgstr ""
 
 #. settings-schema.json->accentMode->options
