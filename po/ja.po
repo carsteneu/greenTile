@@ -21,67 +21,69 @@ msgstr ""
 #. settings-schema.json->excludeAppPicker->options
 #: greenTile.js:435
 msgid "Add application …"
-msgstr ""
+msgstr "アプリケーションを追加…"
 
 #: greenTile.js:454
 msgid "Window floats"
-msgstr ""
+msgstr "ウィンドウはフローティング"
 
 #: greenTile.js:454
 msgid "Window tiles again"
-msgstr ""
+msgstr "ウィンドウを再びタイル配置"
 
 #: greenTile.js:2740
 #, javascript-format
 msgid "assigned — workspace %d"
-msgstr ""
+msgstr "割り当て済み — ワークスペース %d"
 
 #: greenTile.js:2801
 msgid "Please enter a name."
-msgstr ""
+msgstr "名前を入力してください。"
 
 #: greenTile.js:2843
 #, javascript-format
 msgid "from %d"
-msgstr ""
+msgstr "%d 以上"
 
 #: greenTile.js:2960
 msgid "Rules (by window count)"
-msgstr ""
+msgstr "ルール (ウィンドウ数別)"
 
 #: greenTile.js:2964
 msgid "Rule"
-msgstr ""
+msgstr "ルール"
 
 #: greenTile.js:2965
 msgid "Delete rule"
-msgstr ""
+msgstr "ルールを削除"
 
 #: greenTile.js:2973
 msgid "Rule applies from"
-msgstr ""
+msgstr "ルールの適用条件:"
 
 #: greenTile.js:2980
 msgid "windows"
-msgstr ""
+msgstr "ウィンドウ以上"
 
 #: greenTile.js:2982
 msgid "Painter"
-msgstr ""
+msgstr "レイアウト描画"
 
 #: greenTile.js:2997
 msgid ""
 "Click or drag: the row sets how many windows the column holds. Right-click "
 "removes a column."
 msgstr ""
+"クリックまたはドラッグ: 行で列に収めるウィンドウ数を指定します。右クリックで"
+"列を削除します。"
 
 #: greenTile.js:3002
 msgid "Name"
-msgstr ""
+msgstr "名前"
 
 #: greenTile.js:3003
 msgid "Preset name"
-msgstr ""
+msgstr "プリセット名"
 
 #: greenTile.js:3008
 msgid "Delete preset"
@@ -97,248 +99,251 @@ msgstr "削除"
 
 #: greenTile.js:3016
 msgid "Save"
-msgstr ""
+msgstr "保存"
 
 #: greenTile.js:3041
 #, javascript-format
 msgid "Result: %s"
-msgstr ""
+msgstr "結果: %s"
 
 #: greenTile.js:3661
 msgid "Gap between windows"
-msgstr ""
+msgstr "ウィンドウ間の間隔"
 
 #: greenTile.js:3666
 #, javascript-format
 msgid "%d px"
-msgstr ""
+msgstr "%d px"
 
 #: greenTile.js:3685
 msgid "Reset sizes"
-msgstr ""
+msgstr "サイズをリセット"
 
 #: greenTile.js:3716
 #, javascript-format
 msgid "Presets — workspace %d · %s"
-msgstr ""
+msgstr "プリセット — ワークスペース %d · %s"
 
 #: greenTile.js:3718
 msgid "Create preset"
-msgstr ""
+msgstr "プリセットを作成"
 
 #: greenTile.js:3718
 #, javascript-format
 msgid "Edit %s"
-msgstr ""
+msgstr "%s を編集"
 
 #: greenTile.js:3722
 msgid "Back"
-msgstr ""
+msgstr "戻る"
 
 #: greenTile.js:3731
-#, fuzzy
-#| msgid "Auto close"
 msgid "Auto: on"
-msgstr "自動で閉じる"
+msgstr "自動: オン"
 
 #: greenTile.js:3731
-#, fuzzy
-#| msgid "Auto close"
 msgid "Auto: off"
-msgstr "自動で閉じる"
+msgstr "自動: オフ"
 
 #: greenTile.js:3752
 msgid "Dark theme"
-msgstr ""
+msgstr "ダークテーマ"
 
 #: greenTile.js:3752
 msgid "Light theme"
-msgstr ""
+msgstr "ライトテーマ"
 
 #: greenTile.js:3872
 msgid "No presets yet."
-msgstr ""
+msgstr "プリセットはまだありません。"
 
 #: greenTile.js:3887
 msgid "New preset"
-msgstr ""
+msgstr "新規プリセット"
 
 #: greenTile.js:3890
 msgid "Click a row to apply it to this workspace and tile right away"
-msgstr ""
+msgstr "行をクリックすると、このワークスペースに適用してすぐにタイル配置します"
 
 #. metadata.json->name
-#, fuzzy
-#| msgid "gTile"
 msgid "greenTile"
-msgstr "gTile"
+msgstr "greenTile"
 
 #. metadata.json->description
 msgid ""
 "Column tiling with per-workspace presets, auto mode and snap-on-release. "
 "Fork of gTile by shuairan."
 msgstr ""
+"ワークスペースごとのプリセット、自動モード、ドロップ時のスナップに対応した列"
+"タイル配置。shuairan 氏の gTile のフォークです。"
 
 #. settings-schema.json->settings-tab->title
 msgid "Settings"
-msgstr ""
+msgstr "設定"
 
 #. settings-schema.json->hotkeys-tab->title
 msgid "Hotkeys"
 msgstr "ホットキー"
 
 #. settings-schema.json->autotile-hotkey-section->title
-#, fuzzy
-#| msgid "Auto tile two lists"
 msgid "Auto-Tile Hotkeys"
-msgstr "2 列のリストで自動配置"
+msgstr "自動タイル配置のホットキー"
 
 #. settings-schema.json->preset-section->title
 msgid "Workspace Presets"
-msgstr ""
+msgstr "ワークスペースのプリセット"
 
 #. settings-schema.json->resize-section->title
 msgid "Resize tiled windows"
-msgstr ""
+msgstr "タイル配置したウィンドウのサイズ変更"
 
 #. settings-schema.json->swap-section->title
 msgid "Swap windows"
-msgstr ""
+msgstr "ウィンドウの入れ替え"
 
 #. settings-schema.json->tiling-section->title
 msgid "Tiling"
-msgstr ""
+msgstr "タイル配置"
 
 #. settings-schema.json->exclusion-section->title
 #. settings-schema.json->exclusion-hotkey-section->title
 msgid "Never tile"
-msgstr ""
+msgstr "タイル配置しない"
 
 #. settings-schema.json->panel-section->title
 msgid "Preset panel"
-msgstr ""
+msgstr "プリセットパネル"
 
 #. settings-schema.json->autotile6hotkey->description
 msgid "Tile all windows into 6 columns"
-msgstr ""
+msgstr "すべてのウィンドウを 6 列にタイル配置"
 
 #. settings-schema.json->autotile3hotkey->description
 msgid "Tile all windows into 3 columns"
-msgstr ""
+msgstr "すべてのウィンドウを 3 列にタイル配置"
 
 #. settings-schema.json->autotileautohotkey->description
 msgid "Turn automatic tiling on for this workspace and tile now"
-msgstr ""
+msgstr "このワークスペースの自動タイル配置をオンにして今すぐタイル配置"
 
 #. settings-schema.json->autotileoffhotkey->description
 msgid "Turn automatic tiling off for this workspace"
-msgstr ""
+msgstr "このワークスペースの自動タイル配置をオフにする"
 
 #. settings-schema.json->presetHotkey->description
 msgid "Open the preset panel"
-msgstr ""
+msgstr "プリセットパネルを開く"
 
 #. settings-schema.json->resizeWiderHotkey->description
 msgid "Make the focused tiled window wider (tap = 1 px, hold to speed up)"
 msgstr ""
+"フォーカスされたタイルウィンドウの幅を広げる (1 回押す = 1 px、長押しで加速)"
 
 #. settings-schema.json->resizeNarrowerHotkey->description
 msgid "Make the focused tiled window narrower"
-msgstr ""
+msgstr "フォーカスされたタイルウィンドウの幅を狭める"
 
 #. settings-schema.json->resizeTallerHotkey->description
 msgid "Make the focused tiled window taller"
-msgstr ""
+msgstr "フォーカスされたタイルウィンドウの高さを伸ばす"
 
 #. settings-schema.json->resizeShorterHotkey->description
 msgid "Make the focused tiled window shorter"
-msgstr ""
+msgstr "フォーカスされたタイルウィンドウの高さを縮める"
 
 #. settings-schema.json->swapLeftHotkey->description
 msgid "Swap the focused tiled window with its neighbor to the left"
-msgstr ""
+msgstr "フォーカスされたタイルウィンドウを左隣のウィンドウと入れ替える"
 
 #. settings-schema.json->swapRightHotkey->description
 msgid "Swap the focused tiled window with its neighbor to the right"
-msgstr ""
+msgstr "フォーカスされたタイルウィンドウを右隣のウィンドウと入れ替える"
 
 #. settings-schema.json->swapUpHotkey->description
 msgid "Swap the focused tiled window with its neighbor above"
-msgstr ""
+msgstr "フォーカスされたタイルウィンドウを上のウィンドウと入れ替える"
 
 #. settings-schema.json->swapDownHotkey->description
 msgid "Swap the focused tiled window with its neighbor below"
-msgstr ""
+msgstr "フォーカスされたタイルウィンドウを下のウィンドウと入れ替える"
 
 #. settings-schema.json->presets->description
 msgid "Preset definitions (JSON)"
-msgstr ""
+msgstr "プリセット定義 (JSON)"
 
 #. settings-schema.json->excludeHotkey->description
 msgid "Toggle 'never tile' for the focused window"
-msgstr ""
+msgstr "フォーカスされたウィンドウの「タイル配置しない」を切り替える"
 
 #. settings-schema.json->excludeAppPicker->description
 msgid "Add an installed application"
-msgstr ""
+msgstr "インストール済みのアプリケーションを追加"
 
 #. settings-schema.json->excludeAppPicker->tooltip
 msgid ""
 "Pick an application and it is added to the list below. The combobox resets "
 "after each pick."
 msgstr ""
+"アプリケーションを選ぶと下のリストに追加されます。コンボボックスは選択するた"
+"びにリセットされます。"
 
 #. settings-schema.json->exclusions->description
 msgid ""
 "Windows matching one of these rows are never tiled; they float freely "
 "wherever you put them"
 msgstr ""
+"これらの行のいずれかに一致するウィンドウはタイル配置されず、置いた場所で自由"
+"にフローティングします"
 
 #. settings-schema.json->exclusions->columns->title
 msgid "Match"
-msgstr ""
+msgstr "照合対象"
 
 #. settings-schema.json->exclusions->columns->title
 msgid "Text"
-msgstr ""
+msgstr "テキスト"
 
 #. settings-schema.json->wsPresets->description
 msgid "Workspace to preset assignments (JSON)"
-msgstr ""
+msgstr "ワークスペースへのプリセット割り当て (JSON)"
 
 #. settings-schema.json->autoWorkspaces->description
 msgid ""
 "Automatic tiling per workspace (set with Super+Ctrl+A / Super+Ctrl+D or in "
 "the preset panel; not shown in this dialog)"
 msgstr ""
+"ワークスペースごとの自動タイル配置 (Super+Ctrl+A / Super+Ctrl+D またはプリ"
+"セットパネルで設定。このダイアログには表示されません)"
 
 #. settings-schema.json->autoWorkspaces->columns->title
 msgid "Workspace"
-msgstr ""
+msgstr "ワークスペース"
 
 #. settings-schema.json->autoWorkspaces->columns->title
 msgid "Tile automatically"
-msgstr ""
+msgstr "自動タイル配置"
 
 #. settings-schema.json->windowGap->description
 msgid ""
 "Gap between tiled windows (set with − / + in the preset panel; not shown in "
 "this dialog)"
 msgstr ""
+"タイル配置したウィンドウ間の間隔 (プリセットパネルの − / + で設定。このダイア"
+"ログには表示されません)"
 
 #. settings-schema.json->windowGap->units
-#, fuzzy
-#| msgid "x"
 msgid "px"
-msgstr "x"
+msgstr "px"
 
 #. settings-schema.json->tileAnimation->description
 msgid "Animate tiling"
-msgstr ""
+msgstr "タイル配置をアニメーション表示"
 
 #. settings-schema.json->tileAnimation->tooltip
 msgid "Windows glide into their new place. Off: they jump there at once."
 msgstr ""
+"ウィンドウが新しい位置へ滑らかに移動します。オフ: すぐにその位置へ移動しま"
+"す。"
 
 #. settings-schema.json->focusBorder->description
 msgid "Border around the focused window"
@@ -354,57 +359,63 @@ msgstr ""
 
 #. settings-schema.json->panelTheme->description
 msgid "Theme of the preset panel"
-msgstr ""
+msgstr "プリセットパネルのテーマ"
 
 #. settings-schema.json->panelTheme->tooltip
 msgid ""
 "Follow system tracks the desktop color scheme live; Light and Dark override "
 "it."
 msgstr ""
+"「システムに従う」はデスクトップの配色にリアルタイムで追従します。「ライト」"
+"と「ダーク」はそれを上書きします。"
 
 #. settings-schema.json->panelTheme->options
 msgid "Follow system"
-msgstr ""
+msgstr "システムに従う"
 
 #. settings-schema.json->panelTheme->options
 msgid "Light"
-msgstr ""
+msgstr "ライト"
 
 #. settings-schema.json->panelTheme->options
 msgid "Dark"
-msgstr ""
+msgstr "ダーク"
 
 #. settings-schema.json->accentMode->description
 msgid "Accent color"
-msgstr ""
+msgstr "アクセントカラー"
 
 #. settings-schema.json->accentMode->tooltip
 msgid ""
 "Follow theme tracks the accent color of the Cinnamon theme live. Custom uses "
 "the color below."
 msgstr ""
+"「テーマに従う」は Cinnamon テーマのアクセントカラーにリアルタイムで追従しま"
+"す。「カスタム」は下で指定した色を使用します。"
 
 #. settings-schema.json->accentMode->options
 #. settings-schema.json->stateMode->options
 msgid "Follow theme"
-msgstr ""
+msgstr "テーマに従う"
 
 #. settings-schema.json->accentMode->options
 #. settings-schema.json->stateMode->options
 msgid "Custom"
-msgstr ""
+msgstr "カスタム"
 
 #. settings-schema.json->accentColor->description
 msgid "Custom accent color"
-msgstr ""
+msgstr "カスタムアクセントカラー"
 
 #. settings-schema.json->accentColor->tooltip
 msgid "Accent of the preset panel and editor when Accent color is Custom."
 msgstr ""
+"「アクセントカラー」が「カスタム」のときのプリセットパネルとエディターのアク"
+"セントカラー。"
 
 #. settings-schema.json->stateMode->description
 msgid "State color"
-msgstr ""
+msgstr "状態色"
 
 #. settings-schema.json->stateMode->tooltip
 msgid ""
@@ -412,18 +423,21 @@ msgid ""
 "look. Follow theme tracks the accent color of the Cinnamon theme live. "
 "Custom uses the color below."
 msgstr ""
+"「自動: オン」の表示と割り当て済みの行の色。「緑」は現在の見た目を維持しま"
+"す。「テーマに従う」は Cinnamon テーマのアクセントカラーにリアルタイムで追従"
+"します。「カスタム」は下で指定した色を使用します。"
 
 #. settings-schema.json->stateMode->options
 msgid "Green"
-msgstr ""
+msgstr "緑"
 
 #. settings-schema.json->stateColor->description
 msgid "Custom state color"
-msgstr ""
+msgstr "カスタム状態色"
 
 #. settings-schema.json->stateColor->tooltip
 msgid "State color of the preset panel when State color is Custom."
-msgstr ""
+msgstr "「状態色」が「カスタム」のときのプリセットパネルの状態色。"
 
 #~ msgid ""
 #~ "Draw a thin border in the state color around the focused window while "

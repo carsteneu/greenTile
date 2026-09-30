@@ -21,67 +21,69 @@ msgstr ""
 #. settings-schema.json->excludeAppPicker->options
 #: greenTile.js:435
 msgid "Add application …"
-msgstr ""
+msgstr "Ajouter une application …"
 
 #: greenTile.js:454
 msgid "Window floats"
-msgstr ""
+msgstr "Fenêtre flottante"
 
 #: greenTile.js:454
 msgid "Window tiles again"
-msgstr ""
+msgstr "Fenêtre de nouveau tuilée"
 
 #: greenTile.js:2740
 #, javascript-format
 msgid "assigned — workspace %d"
-msgstr ""
+msgstr "attribué — espace de travail %d"
 
 #: greenTile.js:2801
 msgid "Please enter a name."
-msgstr ""
+msgstr "Veuillez saisir un nom."
 
 #: greenTile.js:2843
 #, javascript-format
 msgid "from %d"
-msgstr ""
+msgstr "dès %d"
 
 #: greenTile.js:2960
 msgid "Rules (by window count)"
-msgstr ""
+msgstr "Règles (selon le nombre de fenêtres)"
 
 #: greenTile.js:2964
 msgid "Rule"
-msgstr ""
+msgstr "Règle"
 
 #: greenTile.js:2965
 msgid "Delete rule"
-msgstr ""
+msgstr "Supprimer la règle"
 
 #: greenTile.js:2973
 msgid "Rule applies from"
-msgstr ""
+msgstr "La règle s'applique à partir de"
 
 #: greenTile.js:2980
 msgid "windows"
-msgstr ""
+msgstr "fenêtres"
 
 #: greenTile.js:2982
 msgid "Painter"
-msgstr ""
+msgstr "Zone de dessin"
 
 #: greenTile.js:2997
 msgid ""
 "Click or drag: the row sets how many windows the column holds. Right-click "
 "removes a column."
 msgstr ""
+"Cliquez ou faites glisser : la ligne définit le nombre de fenêtres que "
+"contient la colonne. Un clic droit supprime une colonne."
 
 #: greenTile.js:3002
 msgid "Name"
-msgstr ""
+msgstr "Nom"
 
 #: greenTile.js:3003
 msgid "Preset name"
-msgstr ""
+msgstr "Nom du préréglage"
 
 #: greenTile.js:3008
 msgid "Delete preset"
@@ -97,248 +99,257 @@ msgstr "Supprimer"
 
 #: greenTile.js:3016
 msgid "Save"
-msgstr ""
+msgstr "Enregistrer"
 
 #: greenTile.js:3041
 #, javascript-format
 msgid "Result: %s"
-msgstr ""
+msgstr "Résultat : %s"
 
 #: greenTile.js:3661
 msgid "Gap between windows"
-msgstr ""
+msgstr "Espacement entre les fenêtres"
 
 #: greenTile.js:3666
 #, javascript-format
 msgid "%d px"
-msgstr ""
+msgstr "%d px"
 
 #: greenTile.js:3685
 msgid "Reset sizes"
-msgstr ""
+msgstr "Réinitialiser les tailles"
 
 #: greenTile.js:3716
 #, javascript-format
 msgid "Presets — workspace %d · %s"
-msgstr ""
+msgstr "Préréglages — espace de travail %d · %s"
 
 #: greenTile.js:3718
 msgid "Create preset"
-msgstr ""
+msgstr "Créer un préréglage"
 
 #: greenTile.js:3718
 #, javascript-format
 msgid "Edit %s"
-msgstr ""
+msgstr "Modifier %s"
 
 #: greenTile.js:3722
 msgid "Back"
-msgstr ""
+msgstr "Retour"
 
 #: greenTile.js:3731
-#, fuzzy
-#| msgid "Auto close"
 msgid "Auto: on"
-msgstr "Fermeture auto"
+msgstr "Auto : activé"
 
 #: greenTile.js:3731
-#, fuzzy
-#| msgid "Auto close"
 msgid "Auto: off"
-msgstr "Fermeture auto"
+msgstr "Auto : désactivé"
 
 #: greenTile.js:3752
 msgid "Dark theme"
-msgstr ""
+msgstr "Thème sombre"
 
 #: greenTile.js:3752
 msgid "Light theme"
-msgstr ""
+msgstr "Thème clair"
 
 #: greenTile.js:3872
 msgid "No presets yet."
-msgstr ""
+msgstr "Aucun préréglage pour l'instant."
 
 #: greenTile.js:3887
 msgid "New preset"
-msgstr ""
+msgstr "Nouveau préréglage"
 
 #: greenTile.js:3890
 msgid "Click a row to apply it to this workspace and tile right away"
 msgstr ""
+"Cliquez sur une ligne pour l'appliquer à cet espace de travail et tuiler "
+"immédiatement"
 
 #. metadata.json->name
-#, fuzzy
-#| msgid "gTile"
 msgid "greenTile"
-msgstr "gTile"
+msgstr "greenTile"
 
 #. metadata.json->description
 msgid ""
 "Column tiling with per-workspace presets, auto mode and snap-on-release. "
 "Fork of gTile by shuairan."
 msgstr ""
+"Tuilage en colonnes avec préréglages par espace de travail, mode automatique "
+"et ancrage au relâchement. Dérivé de gTile par shuairan."
 
 #. settings-schema.json->settings-tab->title
 msgid "Settings"
-msgstr ""
+msgstr "Paramètres"
 
 #. settings-schema.json->hotkeys-tab->title
 msgid "Hotkeys"
 msgstr "Raccourcis clavier"
 
 #. settings-schema.json->autotile-hotkey-section->title
-#, fuzzy
-#| msgid "Auto tile two lists"
 msgid "Auto-Tile Hotkeys"
-msgstr "Mosaïque auto des deux listes"
+msgstr "Raccourcis clavier du tuilage automatique"
 
 #. settings-schema.json->preset-section->title
 msgid "Workspace Presets"
-msgstr ""
+msgstr "Préréglages des espaces de travail"
 
 #. settings-schema.json->resize-section->title
 msgid "Resize tiled windows"
-msgstr ""
+msgstr "Redimensionner les fenêtres tuilées"
 
 #. settings-schema.json->swap-section->title
 msgid "Swap windows"
-msgstr ""
+msgstr "Échanger les fenêtres"
 
 #. settings-schema.json->tiling-section->title
 msgid "Tiling"
-msgstr ""
+msgstr "Tuilage"
 
 #. settings-schema.json->exclusion-section->title
 #. settings-schema.json->exclusion-hotkey-section->title
 msgid "Never tile"
-msgstr ""
+msgstr "Ne jamais tuiler"
 
 #. settings-schema.json->panel-section->title
 msgid "Preset panel"
-msgstr ""
+msgstr "Panneau des préréglages"
 
 #. settings-schema.json->autotile6hotkey->description
 msgid "Tile all windows into 6 columns"
-msgstr ""
+msgstr "Tuiler toutes les fenêtres en 6 colonnes"
 
 #. settings-schema.json->autotile3hotkey->description
 msgid "Tile all windows into 3 columns"
-msgstr ""
+msgstr "Tuiler toutes les fenêtres en 3 colonnes"
 
 #. settings-schema.json->autotileautohotkey->description
 msgid "Turn automatic tiling on for this workspace and tile now"
 msgstr ""
+"Activer le tuilage automatique pour cet espace de travail et tuiler "
+"maintenant"
 
 #. settings-schema.json->autotileoffhotkey->description
 msgid "Turn automatic tiling off for this workspace"
-msgstr ""
+msgstr "Désactiver le tuilage automatique pour cet espace de travail"
 
 #. settings-schema.json->presetHotkey->description
 msgid "Open the preset panel"
-msgstr ""
+msgstr "Ouvrir le panneau des préréglages"
 
 #. settings-schema.json->resizeWiderHotkey->description
 msgid "Make the focused tiled window wider (tap = 1 px, hold to speed up)"
 msgstr ""
+"Rendre la fenêtre tuilée active plus large (appui = 1 px, maintenir pour "
+"accélérer)"
 
 #. settings-schema.json->resizeNarrowerHotkey->description
 msgid "Make the focused tiled window narrower"
-msgstr ""
+msgstr "Rendre la fenêtre tuilée active plus étroite"
 
 #. settings-schema.json->resizeTallerHotkey->description
 msgid "Make the focused tiled window taller"
-msgstr ""
+msgstr "Rendre la fenêtre tuilée active plus haute"
 
 #. settings-schema.json->resizeShorterHotkey->description
 msgid "Make the focused tiled window shorter"
-msgstr ""
+msgstr "Rendre la fenêtre tuilée active plus basse"
 
 #. settings-schema.json->swapLeftHotkey->description
 msgid "Swap the focused tiled window with its neighbor to the left"
-msgstr ""
+msgstr "Échanger la fenêtre tuilée active avec sa voisine de gauche"
 
 #. settings-schema.json->swapRightHotkey->description
 msgid "Swap the focused tiled window with its neighbor to the right"
-msgstr ""
+msgstr "Échanger la fenêtre tuilée active avec sa voisine de droite"
 
 #. settings-schema.json->swapUpHotkey->description
 msgid "Swap the focused tiled window with its neighbor above"
-msgstr ""
+msgstr "Échanger la fenêtre tuilée active avec sa voisine du dessus"
 
 #. settings-schema.json->swapDownHotkey->description
 msgid "Swap the focused tiled window with its neighbor below"
-msgstr ""
+msgstr "Échanger la fenêtre tuilée active avec sa voisine du dessous"
 
 #. settings-schema.json->presets->description
 msgid "Preset definitions (JSON)"
-msgstr ""
+msgstr "Définitions des préréglages (JSON)"
 
 #. settings-schema.json->excludeHotkey->description
 msgid "Toggle 'never tile' for the focused window"
-msgstr ""
+msgstr "Activer/désactiver « Ne jamais tuiler » pour la fenêtre active"
 
 #. settings-schema.json->excludeAppPicker->description
 msgid "Add an installed application"
-msgstr ""
+msgstr "Ajouter une application installée"
 
 #. settings-schema.json->excludeAppPicker->tooltip
 msgid ""
 "Pick an application and it is added to the list below. The combobox resets "
 "after each pick."
 msgstr ""
+"Choisissez une application : elle est ajoutée à la liste ci-dessous. La "
+"liste déroulante se réinitialise après chaque choix."
 
 #. settings-schema.json->exclusions->description
 msgid ""
 "Windows matching one of these rows are never tiled; they float freely "
 "wherever you put them"
 msgstr ""
+"Les fenêtres correspondant à l'une de ces lignes ne sont jamais tuilées ; "
+"elles flottent librement là où vous les placez"
 
 #. settings-schema.json->exclusions->columns->title
 msgid "Match"
-msgstr ""
+msgstr "Correspondance"
 
 #. settings-schema.json->exclusions->columns->title
 msgid "Text"
-msgstr ""
+msgstr "Texte"
 
 #. settings-schema.json->wsPresets->description
 msgid "Workspace to preset assignments (JSON)"
-msgstr ""
+msgstr "Attribution des préréglages aux espaces de travail (JSON)"
 
 #. settings-schema.json->autoWorkspaces->description
 msgid ""
 "Automatic tiling per workspace (set with Super+Ctrl+A / Super+Ctrl+D or in "
 "the preset panel; not shown in this dialog)"
 msgstr ""
+"Tuilage automatique par espace de travail (réglé avec Super+Ctrl+A / "
+"Super+Ctrl+D ou dans le panneau des préréglages ; non affiché dans cette "
+"boîte de dialogue)"
 
 #. settings-schema.json->autoWorkspaces->columns->title
 msgid "Workspace"
-msgstr ""
+msgstr "Espace de travail"
 
 #. settings-schema.json->autoWorkspaces->columns->title
 msgid "Tile automatically"
-msgstr ""
+msgstr "Tuiler automatiquement"
 
 #. settings-schema.json->windowGap->description
 msgid ""
 "Gap between tiled windows (set with − / + in the preset panel; not shown in "
 "this dialog)"
 msgstr ""
+"Espacement entre les fenêtres tuilées (réglé avec − / + dans le panneau des "
+"préréglages ; non affiché dans cette boîte de dialogue)"
 
 #. settings-schema.json->windowGap->units
-#, fuzzy
-#| msgid "x"
 msgid "px"
-msgstr "x"
+msgstr "px"
 
 #. settings-schema.json->tileAnimation->description
 msgid "Animate tiling"
-msgstr ""
+msgstr "Animer le tuilage"
 
 #. settings-schema.json->tileAnimation->tooltip
 msgid "Windows glide into their new place. Off: they jump there at once."
 msgstr ""
+"Les fenêtres glissent vers leur nouvelle place. Désactivé : elles y sautent "
+"instantanément."
 
 #. settings-schema.json->focusBorder->description
 msgid "Border around the focused window"
@@ -354,57 +365,63 @@ msgstr ""
 
 #. settings-schema.json->panelTheme->description
 msgid "Theme of the preset panel"
-msgstr ""
+msgstr "Thème du panneau des préréglages"
 
 #. settings-schema.json->panelTheme->tooltip
 msgid ""
 "Follow system tracks the desktop color scheme live; Light and Dark override "
 "it."
 msgstr ""
+"« Suivre le système » suit en direct le jeu de couleurs du bureau ; « Clair "
+"» et « Sombre » le remplacent."
 
 #. settings-schema.json->panelTheme->options
 msgid "Follow system"
-msgstr ""
+msgstr "Suivre le système"
 
 #. settings-schema.json->panelTheme->options
 msgid "Light"
-msgstr ""
+msgstr "Clair"
 
 #. settings-schema.json->panelTheme->options
 msgid "Dark"
-msgstr ""
+msgstr "Sombre"
 
 #. settings-schema.json->accentMode->description
 msgid "Accent color"
-msgstr ""
+msgstr "Couleur d'accentuation"
 
 #. settings-schema.json->accentMode->tooltip
 msgid ""
 "Follow theme tracks the accent color of the Cinnamon theme live. Custom uses "
 "the color below."
 msgstr ""
+"« Suivre le thème » reprend en direct la couleur d'accentuation du thème "
+"Cinnamon. « Personnalisée » utilise la couleur ci-dessous."
 
 #. settings-schema.json->accentMode->options
 #. settings-schema.json->stateMode->options
 msgid "Follow theme"
-msgstr ""
+msgstr "Suivre le thème"
 
 #. settings-schema.json->accentMode->options
 #. settings-schema.json->stateMode->options
 msgid "Custom"
-msgstr ""
+msgstr "Personnalisée"
 
 #. settings-schema.json->accentColor->description
 msgid "Custom accent color"
-msgstr ""
+msgstr "Couleur d'accentuation personnalisée"
 
 #. settings-schema.json->accentColor->tooltip
 msgid "Accent of the preset panel and editor when Accent color is Custom."
 msgstr ""
+"Accentuation du panneau des préréglages et de l'éditeur lorsque « Couleur "
+"d'accentuation » est sur « Personnalisée »."
 
 #. settings-schema.json->stateMode->description
 msgid "State color"
-msgstr ""
+msgstr "Couleur d'état"
 
 #. settings-schema.json->stateMode->tooltip
 msgid ""
@@ -412,18 +429,24 @@ msgid ""
 "look. Follow theme tracks the accent color of the Cinnamon theme live. "
 "Custom uses the color below."
 msgstr ""
+"Couleur du marqueur « Auto : activé » et des lignes attribuées. « Vert » "
+"conserve l'apparence actuelle. « Suivre le thème » reprend en direct la "
+"couleur d'accentuation du thème Cinnamon. « Personnalisée » utilise la "
+"couleur ci-dessous."
 
 #. settings-schema.json->stateMode->options
 msgid "Green"
-msgstr ""
+msgstr "Vert"
 
 #. settings-schema.json->stateColor->description
 msgid "Custom state color"
-msgstr ""
+msgstr "Couleur d'état personnalisée"
 
 #. settings-schema.json->stateColor->tooltip
 msgid "State color of the preset panel when State color is Custom."
 msgstr ""
+"Couleur d'état du panneau des préréglages lorsque « Couleur d'état » est sur "
+"« Personnalisée »."
 
 #~ msgid ""
 #~ "Draw a thin border in the state color around the focused window while "

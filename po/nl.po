@@ -20,67 +20,69 @@ msgstr ""
 #. settings-schema.json->excludeAppPicker->options
 #: greenTile.js:435
 msgid "Add application …"
-msgstr ""
+msgstr "Toepassing toevoegen …"
 
 #: greenTile.js:454
 msgid "Window floats"
-msgstr ""
+msgstr "Venster zweeft"
 
 #: greenTile.js:454
 msgid "Window tiles again"
-msgstr ""
+msgstr "Venster wordt weer getegeld"
 
 #: greenTile.js:2740
 #, javascript-format
 msgid "assigned — workspace %d"
-msgstr ""
+msgstr "toegewezen — werkblad %d"
 
 #: greenTile.js:2801
 msgid "Please enter a name."
-msgstr ""
+msgstr "Voer een naam in."
 
 #: greenTile.js:2843
 #, javascript-format
 msgid "from %d"
-msgstr ""
+msgstr "vanaf %d"
 
 #: greenTile.js:2960
 msgid "Rules (by window count)"
-msgstr ""
+msgstr "Regels (naar aantal vensters)"
 
 #: greenTile.js:2964
 msgid "Rule"
-msgstr ""
+msgstr "Regel"
 
 #: greenTile.js:2965
 msgid "Delete rule"
-msgstr ""
+msgstr "Regel verwijderen"
 
 #: greenTile.js:2973
 msgid "Rule applies from"
-msgstr ""
+msgstr "Regel geldt vanaf"
 
 #: greenTile.js:2980
 msgid "windows"
-msgstr ""
+msgstr "vensters"
 
 #: greenTile.js:2982
 msgid "Painter"
-msgstr ""
+msgstr "Tekenvlak"
 
 #: greenTile.js:2997
 msgid ""
 "Click or drag: the row sets how many windows the column holds. Right-click "
 "removes a column."
 msgstr ""
+"Klik of sleep: de rij bepaalt hoeveel vensters de kolom bevat. Rechtsklik "
+"verwijdert een kolom."
 
 #: greenTile.js:3002
 msgid "Name"
-msgstr ""
+msgstr "Naam"
 
 #: greenTile.js:3003
 msgid "Preset name"
-msgstr ""
+msgstr "Naam van voorinstelling"
 
 #: greenTile.js:3008
 msgid "Delete preset"
@@ -96,248 +98,254 @@ msgstr "Verwijderen"
 
 #: greenTile.js:3016
 msgid "Save"
-msgstr ""
+msgstr "Opslaan"
 
 #: greenTile.js:3041
 #, javascript-format
 msgid "Result: %s"
-msgstr ""
+msgstr "Resultaat: %s"
 
 #: greenTile.js:3661
 msgid "Gap between windows"
-msgstr ""
+msgstr "Ruimte tussen vensters"
 
 #: greenTile.js:3666
 #, javascript-format
 msgid "%d px"
-msgstr ""
+msgstr "%d px"
 
 #: greenTile.js:3685
 msgid "Reset sizes"
-msgstr ""
+msgstr "Afmetingen herstellen"
 
 #: greenTile.js:3716
 #, javascript-format
 msgid "Presets — workspace %d · %s"
-msgstr ""
+msgstr "Voorinstellingen — werkblad %d · %s"
 
 #: greenTile.js:3718
 msgid "Create preset"
-msgstr ""
+msgstr "Voorinstelling maken"
 
 #: greenTile.js:3718
 #, javascript-format
 msgid "Edit %s"
-msgstr ""
+msgstr "%s bewerken"
 
 #: greenTile.js:3722
 msgid "Back"
-msgstr ""
+msgstr "Terug"
 
 #: greenTile.js:3731
-#, fuzzy
-#| msgid "Auto close"
 msgid "Auto: on"
-msgstr "Automatisch sluiten"
+msgstr "Auto: aan"
 
 #: greenTile.js:3731
-#, fuzzy
-#| msgid "Auto close"
 msgid "Auto: off"
-msgstr "Automatisch sluiten"
+msgstr "Auto: uit"
 
 #: greenTile.js:3752
 msgid "Dark theme"
-msgstr ""
+msgstr "Donker thema"
 
 #: greenTile.js:3752
 msgid "Light theme"
-msgstr ""
+msgstr "Licht thema"
 
 #: greenTile.js:3872
 msgid "No presets yet."
-msgstr ""
+msgstr "Nog geen voorinstellingen."
 
 #: greenTile.js:3887
 msgid "New preset"
-msgstr ""
+msgstr "Nieuwe voorinstelling"
 
 #: greenTile.js:3890
 msgid "Click a row to apply it to this workspace and tile right away"
 msgstr ""
+"Klik op een rij om deze op dit werkblad toe te passen en meteen te tegelen"
 
 #. metadata.json->name
-#, fuzzy
-#| msgid "gTile"
 msgid "greenTile"
-msgstr "gTile"
+msgstr "greenTile"
 
 #. metadata.json->description
 msgid ""
 "Column tiling with per-workspace presets, auto mode and snap-on-release. "
 "Fork of gTile by shuairan."
 msgstr ""
+"Tegelen in kolommen met voorinstellingen per werkblad, automatische modus en "
+"uitlijnen bij loslaten. Fork van gTile door shuairan."
 
 #. settings-schema.json->settings-tab->title
 msgid "Settings"
-msgstr ""
+msgstr "Instellingen"
 
 #. settings-schema.json->hotkeys-tab->title
 msgid "Hotkeys"
 msgstr "Sneltoetsen"
 
 #. settings-schema.json->autotile-hotkey-section->title
-#, fuzzy
-#| msgid "Auto tile two lists"
 msgid "Auto-Tile Hotkeys"
-msgstr "Automatisch tegelen van twee lijsten"
+msgstr "Sneltoetsen voor automatisch tegelen"
 
 #. settings-schema.json->preset-section->title
 msgid "Workspace Presets"
-msgstr ""
+msgstr "Voorinstellingen voor werkbladen"
 
 #. settings-schema.json->resize-section->title
 msgid "Resize tiled windows"
-msgstr ""
+msgstr "Grootte van getegelde vensters wijzigen"
 
 #. settings-schema.json->swap-section->title
 msgid "Swap windows"
-msgstr ""
+msgstr "Vensters verwisselen"
 
 #. settings-schema.json->tiling-section->title
 msgid "Tiling"
-msgstr ""
+msgstr "Tegelen"
 
 #. settings-schema.json->exclusion-section->title
 #. settings-schema.json->exclusion-hotkey-section->title
 msgid "Never tile"
-msgstr ""
+msgstr "Nooit tegelen"
 
 #. settings-schema.json->panel-section->title
 msgid "Preset panel"
-msgstr ""
+msgstr "Voorinstellingenpaneel"
 
 #. settings-schema.json->autotile6hotkey->description
 msgid "Tile all windows into 6 columns"
-msgstr ""
+msgstr "Alle vensters in 6 kolommen tegelen"
 
 #. settings-schema.json->autotile3hotkey->description
 msgid "Tile all windows into 3 columns"
-msgstr ""
+msgstr "Alle vensters in 3 kolommen tegelen"
 
 #. settings-schema.json->autotileautohotkey->description
 msgid "Turn automatic tiling on for this workspace and tile now"
-msgstr ""
+msgstr "Automatisch tegelen voor dit werkblad inschakelen en nu tegelen"
 
 #. settings-schema.json->autotileoffhotkey->description
 msgid "Turn automatic tiling off for this workspace"
-msgstr ""
+msgstr "Automatisch tegelen voor dit werkblad uitschakelen"
 
 #. settings-schema.json->presetHotkey->description
 msgid "Open the preset panel"
-msgstr ""
+msgstr "Voorinstellingenpaneel openen"
 
 #. settings-schema.json->resizeWiderHotkey->description
 msgid "Make the focused tiled window wider (tap = 1 px, hold to speed up)"
 msgstr ""
+"Het gefocuste getegelde venster breder maken (tikken = 1 px, ingedrukt "
+"houden versnelt)"
 
 #. settings-schema.json->resizeNarrowerHotkey->description
 msgid "Make the focused tiled window narrower"
-msgstr ""
+msgstr "Het gefocuste getegelde venster smaller maken"
 
 #. settings-schema.json->resizeTallerHotkey->description
 msgid "Make the focused tiled window taller"
-msgstr ""
+msgstr "Het gefocuste getegelde venster hoger maken"
 
 #. settings-schema.json->resizeShorterHotkey->description
 msgid "Make the focused tiled window shorter"
-msgstr ""
+msgstr "Het gefocuste getegelde venster lager maken"
 
 #. settings-schema.json->swapLeftHotkey->description
 msgid "Swap the focused tiled window with its neighbor to the left"
-msgstr ""
+msgstr "Het gefocuste getegelde venster verwisselen met het buurvenster links"
 
 #. settings-schema.json->swapRightHotkey->description
 msgid "Swap the focused tiled window with its neighbor to the right"
-msgstr ""
+msgstr "Het gefocuste getegelde venster verwisselen met het buurvenster rechts"
 
 #. settings-schema.json->swapUpHotkey->description
 msgid "Swap the focused tiled window with its neighbor above"
 msgstr ""
+"Het gefocuste getegelde venster verwisselen met het buurvenster erboven"
 
 #. settings-schema.json->swapDownHotkey->description
 msgid "Swap the focused tiled window with its neighbor below"
 msgstr ""
+"Het gefocuste getegelde venster verwisselen met het buurvenster eronder"
 
 #. settings-schema.json->presets->description
 msgid "Preset definitions (JSON)"
-msgstr ""
+msgstr "Definities van voorinstellingen (JSON)"
 
 #. settings-schema.json->excludeHotkey->description
 msgid "Toggle 'never tile' for the focused window"
-msgstr ""
+msgstr "'Nooit tegelen' in- of uitschakelen voor het gefocuste venster"
 
 #. settings-schema.json->excludeAppPicker->description
 msgid "Add an installed application"
-msgstr ""
+msgstr "Een geïnstalleerde toepassing toevoegen"
 
 #. settings-schema.json->excludeAppPicker->tooltip
 msgid ""
 "Pick an application and it is added to the list below. The combobox resets "
 "after each pick."
 msgstr ""
+"Kies een toepassing en die wordt aan de lijst hieronder toegevoegd. De "
+"keuzelijst wordt na elke keuze teruggezet."
 
 #. settings-schema.json->exclusions->description
 msgid ""
 "Windows matching one of these rows are never tiled; they float freely "
 "wherever you put them"
 msgstr ""
+"Vensters die met een van deze rijen overeenkomen, worden nooit getegeld; ze "
+"zweven vrij, waar ze ook worden neergezet"
 
 #. settings-schema.json->exclusions->columns->title
 msgid "Match"
-msgstr ""
+msgstr "Vergelijking"
 
 #. settings-schema.json->exclusions->columns->title
 msgid "Text"
-msgstr ""
+msgstr "Tekst"
 
 #. settings-schema.json->wsPresets->description
 msgid "Workspace to preset assignments (JSON)"
-msgstr ""
+msgstr "Toewijzing van voorinstellingen aan werkbladen (JSON)"
 
 #. settings-schema.json->autoWorkspaces->description
 msgid ""
 "Automatic tiling per workspace (set with Super+Ctrl+A / Super+Ctrl+D or in "
 "the preset panel; not shown in this dialog)"
 msgstr ""
+"Automatisch tegelen per werkblad (in te stellen met Super+Ctrl+A / "
+"Super+Ctrl+D of in het voorinstellingenpaneel; niet getoond in dit venster)"
 
 #. settings-schema.json->autoWorkspaces->columns->title
 msgid "Workspace"
-msgstr ""
+msgstr "Werkblad"
 
 #. settings-schema.json->autoWorkspaces->columns->title
 msgid "Tile automatically"
-msgstr ""
+msgstr "Automatisch tegelen"
 
 #. settings-schema.json->windowGap->description
 msgid ""
 "Gap between tiled windows (set with − / + in the preset panel; not shown in "
 "this dialog)"
 msgstr ""
+"Ruimte tussen getegelde vensters (in te stellen met − / + in het "
+"voorinstellingenpaneel; niet getoond in dit venster)"
 
 #. settings-schema.json->windowGap->units
-#, fuzzy
-#| msgid "x"
 msgid "px"
-msgstr "x"
+msgstr "px"
 
 #. settings-schema.json->tileAnimation->description
 msgid "Animate tiling"
-msgstr ""
+msgstr "Tegelen animeren"
 
 #. settings-schema.json->tileAnimation->tooltip
 msgid "Windows glide into their new place. Off: they jump there at once."
 msgstr ""
+"Vensters glijden naar hun nieuwe plek. Uit: ze springen er meteen heen."
 
 #. settings-schema.json->focusBorder->description
 msgid "Border around the focused window"
@@ -353,57 +361,63 @@ msgstr ""
 
 #. settings-schema.json->panelTheme->description
 msgid "Theme of the preset panel"
-msgstr ""
+msgstr "Thema van het voorinstellingenpaneel"
 
 #. settings-schema.json->panelTheme->tooltip
 msgid ""
 "Follow system tracks the desktop color scheme live; Light and Dark override "
 "it."
 msgstr ""
+"Systeem volgen volgt live het kleurenschema van het bureaublad; Licht en "
+"Donker overschrijven dit."
 
 #. settings-schema.json->panelTheme->options
 msgid "Follow system"
-msgstr ""
+msgstr "Systeem volgen"
 
 #. settings-schema.json->panelTheme->options
 msgid "Light"
-msgstr ""
+msgstr "Licht"
 
 #. settings-schema.json->panelTheme->options
 msgid "Dark"
-msgstr ""
+msgstr "Donker"
 
 #. settings-schema.json->accentMode->description
 msgid "Accent color"
-msgstr ""
+msgstr "Accentkleur"
 
 #. settings-schema.json->accentMode->tooltip
 msgid ""
 "Follow theme tracks the accent color of the Cinnamon theme live. Custom uses "
 "the color below."
 msgstr ""
+"Thema volgen neemt live de accentkleur van het Cinnamon-thema over. "
+"Aangepast gebruikt de kleur hieronder."
 
 #. settings-schema.json->accentMode->options
 #. settings-schema.json->stateMode->options
 msgid "Follow theme"
-msgstr ""
+msgstr "Thema volgen"
 
 #. settings-schema.json->accentMode->options
 #. settings-schema.json->stateMode->options
 msgid "Custom"
-msgstr ""
+msgstr "Aangepast"
 
 #. settings-schema.json->accentColor->description
 msgid "Custom accent color"
-msgstr ""
+msgstr "Aangepaste accentkleur"
 
 #. settings-schema.json->accentColor->tooltip
 msgid "Accent of the preset panel and editor when Accent color is Custom."
 msgstr ""
+"Accent van het voorinstellingenpaneel en de editor als Accentkleur op "
+"Aangepast staat."
 
 #. settings-schema.json->stateMode->description
 msgid "State color"
-msgstr ""
+msgstr "Statuskleur"
 
 #. settings-schema.json->stateMode->tooltip
 msgid ""
@@ -411,18 +425,23 @@ msgid ""
 "look. Follow theme tracks the accent color of the Cinnamon theme live. "
 "Custom uses the color below."
 msgstr ""
+"Kleur van de markering \"Auto: aan\" en de toegewezen rijen. Groen behoudt "
+"het huidige uiterlijk. Thema volgen neemt live de accentkleur van het "
+"Cinnamon-thema over. Aangepast gebruikt de kleur hieronder."
 
 #. settings-schema.json->stateMode->options
 msgid "Green"
-msgstr ""
+msgstr "Groen"
 
 #. settings-schema.json->stateColor->description
 msgid "Custom state color"
-msgstr ""
+msgstr "Aangepaste statuskleur"
 
 #. settings-schema.json->stateColor->tooltip
 msgid "State color of the preset panel when State color is Custom."
 msgstr ""
+"Statuskleur van het voorinstellingenpaneel als Statuskleur op Aangepast "
+"staat."
 
 #~ msgid ""
 #~ "Draw a thin border in the state color around the focused window while "

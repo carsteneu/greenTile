@@ -358,7 +358,7 @@ msgid ""
 "border in the state color for three seconds."
 msgstr ""
 "Markiert nach einem Fokuswechsel mit Super+Pfeil das neu fokussierte Fenster "
-"drei Sekunden lang mit einem dünnen Rahmen in der Zustandsfarbe."
+"drei Sekunden lang mit einem dünnen Rahmen in der Statusfarbe."
 
 #. settings-schema.json->panelTheme->description
 msgid "Theme of the preset panel"

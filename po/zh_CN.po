@@ -21,67 +21,67 @@ msgstr ""
 #. settings-schema.json->excludeAppPicker->options
 #: greenTile.js:435
 msgid "Add application …"
-msgstr ""
+msgstr "添加应用程序…"
 
 #: greenTile.js:454
 msgid "Window floats"
-msgstr ""
+msgstr "窗口已浮动"
 
 #: greenTile.js:454
 msgid "Window tiles again"
-msgstr ""
+msgstr "窗口已恢复平铺"
 
 #: greenTile.js:2740
 #, javascript-format
 msgid "assigned — workspace %d"
-msgstr ""
+msgstr "已分配 — 工作区 %d"
 
 #: greenTile.js:2801
 msgid "Please enter a name."
-msgstr ""
+msgstr "请输入名称。"
 
 #: greenTile.js:2843
 #, javascript-format
 msgid "from %d"
-msgstr ""
+msgstr "%d 个及以上"
 
 #: greenTile.js:2960
 msgid "Rules (by window count)"
-msgstr ""
+msgstr "规则（按窗口数量）"
 
 #: greenTile.js:2964
 msgid "Rule"
-msgstr ""
+msgstr "规则"
 
 #: greenTile.js:2965
 msgid "Delete rule"
-msgstr ""
+msgstr "删除规则"
 
 #: greenTile.js:2973
 msgid "Rule applies from"
-msgstr ""
+msgstr "规则适用于"
 
 #: greenTile.js:2980
 msgid "windows"
-msgstr ""
+msgstr "个及以上窗口"
 
 #: greenTile.js:2982
 msgid "Painter"
-msgstr ""
+msgstr "布局绘制区"
 
 #: greenTile.js:2997
 msgid ""
 "Click or drag: the row sets how many windows the column holds. Right-click "
 "removes a column."
-msgstr ""
+msgstr "单击或拖动：所在行决定该列容纳的窗口数。右键单击可删除一列。"
 
 #: greenTile.js:3002
 msgid "Name"
-msgstr ""
+msgstr "名称"
 
 #: greenTile.js:3003
 msgid "Preset name"
-msgstr ""
+msgstr "预设名称"
 
 #: greenTile.js:3008
 msgid "Delete preset"
@@ -97,248 +97,242 @@ msgstr "删除"
 
 #: greenTile.js:3016
 msgid "Save"
-msgstr ""
+msgstr "保存"
 
 #: greenTile.js:3041
 #, javascript-format
 msgid "Result: %s"
-msgstr ""
+msgstr "结果：%s"
 
 #: greenTile.js:3661
 msgid "Gap between windows"
-msgstr ""
+msgstr "窗口间距"
 
 #: greenTile.js:3666
 #, javascript-format
 msgid "%d px"
-msgstr ""
+msgstr "%d px"
 
 #: greenTile.js:3685
 msgid "Reset sizes"
-msgstr ""
+msgstr "重置大小"
 
 #: greenTile.js:3716
 #, javascript-format
 msgid "Presets — workspace %d · %s"
-msgstr ""
+msgstr "预设 — 工作区 %d · %s"
 
 #: greenTile.js:3718
 msgid "Create preset"
-msgstr ""
+msgstr "创建预设"
 
 #: greenTile.js:3718
 #, javascript-format
 msgid "Edit %s"
-msgstr ""
+msgstr "编辑 %s"
 
 #: greenTile.js:3722
 msgid "Back"
-msgstr ""
+msgstr "返回"
 
 #: greenTile.js:3731
-#, fuzzy
-#| msgid "Auto close"
 msgid "Auto: on"
-msgstr "自动关闭"
+msgstr "自动：开"
 
 #: greenTile.js:3731
-#, fuzzy
-#| msgid "Auto close"
 msgid "Auto: off"
-msgstr "自动关闭"
+msgstr "自动：关"
 
 #: greenTile.js:3752
 msgid "Dark theme"
-msgstr ""
+msgstr "深色主题"
 
 #: greenTile.js:3752
 msgid "Light theme"
-msgstr ""
+msgstr "浅色主题"
 
 #: greenTile.js:3872
 msgid "No presets yet."
-msgstr ""
+msgstr "尚无预设。"
 
 #: greenTile.js:3887
 msgid "New preset"
-msgstr ""
+msgstr "新建预设"
 
 #: greenTile.js:3890
 msgid "Click a row to apply it to this workspace and tile right away"
-msgstr ""
+msgstr "单击某一行即可将其应用到此工作区并立即平铺"
 
 #. metadata.json->name
-#, fuzzy
-#| msgid "gTile"
 msgid "greenTile"
-msgstr "G平铺"
+msgstr "greenTile"
 
 #. metadata.json->description
 msgid ""
 "Column tiling with per-workspace presets, auto mode and snap-on-release. "
 "Fork of gTile by shuairan."
 msgstr ""
+"按列平铺窗口，支持按工作区设置预设、自动模式和松开时吸附。基于 shuairan 的 "
+"gTile 分支开发。"
 
 #. settings-schema.json->settings-tab->title
 msgid "Settings"
-msgstr ""
+msgstr "设置"
 
 #. settings-schema.json->hotkeys-tab->title
 msgid "Hotkeys"
 msgstr "热键"
 
 #. settings-schema.json->autotile-hotkey-section->title
-#, fuzzy
-#| msgid "Auto tile two lists"
 msgid "Auto-Tile Hotkeys"
-msgstr "自动平铺两个列表"
+msgstr "自动平铺热键"
 
 #. settings-schema.json->preset-section->title
 msgid "Workspace Presets"
-msgstr ""
+msgstr "工作区预设"
 
 #. settings-schema.json->resize-section->title
 msgid "Resize tiled windows"
-msgstr ""
+msgstr "调整平铺窗口大小"
 
 #. settings-schema.json->swap-section->title
 msgid "Swap windows"
-msgstr ""
+msgstr "交换窗口"
 
 #. settings-schema.json->tiling-section->title
 msgid "Tiling"
-msgstr ""
+msgstr "平铺"
 
 #. settings-schema.json->exclusion-section->title
 #. settings-schema.json->exclusion-hotkey-section->title
 msgid "Never tile"
-msgstr ""
+msgstr "从不平铺"
 
 #. settings-schema.json->panel-section->title
 msgid "Preset panel"
-msgstr ""
+msgstr "预设面板"
 
 #. settings-schema.json->autotile6hotkey->description
 msgid "Tile all windows into 6 columns"
-msgstr ""
+msgstr "将所有窗口平铺为 6 列"
 
 #. settings-schema.json->autotile3hotkey->description
 msgid "Tile all windows into 3 columns"
-msgstr ""
+msgstr "将所有窗口平铺为 3 列"
 
 #. settings-schema.json->autotileautohotkey->description
 msgid "Turn automatic tiling on for this workspace and tile now"
-msgstr ""
+msgstr "为此工作区开启自动平铺并立即平铺"
 
 #. settings-schema.json->autotileoffhotkey->description
 msgid "Turn automatic tiling off for this workspace"
-msgstr ""
+msgstr "为此工作区关闭自动平铺"
 
 #. settings-schema.json->presetHotkey->description
 msgid "Open the preset panel"
-msgstr ""
+msgstr "打开预设面板"
 
 #. settings-schema.json->resizeWiderHotkey->description
 msgid "Make the focused tiled window wider (tap = 1 px, hold to speed up)"
-msgstr ""
+msgstr "增加聚焦的平铺窗口的宽度（按一下 = 1 px，按住可加速）"
 
 #. settings-schema.json->resizeNarrowerHotkey->description
 msgid "Make the focused tiled window narrower"
-msgstr ""
+msgstr "减小聚焦的平铺窗口的宽度"
 
 #. settings-schema.json->resizeTallerHotkey->description
 msgid "Make the focused tiled window taller"
-msgstr ""
+msgstr "增加聚焦的平铺窗口的高度"
 
 #. settings-schema.json->resizeShorterHotkey->description
 msgid "Make the focused tiled window shorter"
-msgstr ""
+msgstr "减小聚焦的平铺窗口的高度"
 
 #. settings-schema.json->swapLeftHotkey->description
 msgid "Swap the focused tiled window with its neighbor to the left"
-msgstr ""
+msgstr "将聚焦的平铺窗口与左侧相邻窗口交换"
 
 #. settings-schema.json->swapRightHotkey->description
 msgid "Swap the focused tiled window with its neighbor to the right"
-msgstr ""
+msgstr "将聚焦的平铺窗口与右侧相邻窗口交换"
 
 #. settings-schema.json->swapUpHotkey->description
 msgid "Swap the focused tiled window with its neighbor above"
-msgstr ""
+msgstr "将聚焦的平铺窗口与上方相邻窗口交换"
 
 #. settings-schema.json->swapDownHotkey->description
 msgid "Swap the focused tiled window with its neighbor below"
-msgstr ""
+msgstr "将聚焦的平铺窗口与下方相邻窗口交换"
 
 #. settings-schema.json->presets->description
 msgid "Preset definitions (JSON)"
-msgstr ""
+msgstr "预设定义（JSON）"
 
 #. settings-schema.json->excludeHotkey->description
 msgid "Toggle 'never tile' for the focused window"
-msgstr ""
+msgstr "切换聚焦窗口的“从不平铺”状态"
 
 #. settings-schema.json->excludeAppPicker->description
 msgid "Add an installed application"
-msgstr ""
+msgstr "添加已安装的应用程序"
 
 #. settings-schema.json->excludeAppPicker->tooltip
 msgid ""
 "Pick an application and it is added to the list below. The combobox resets "
 "after each pick."
-msgstr ""
+msgstr "选择一个应用程序即可将其添加到下方列表。每次选择后组合框都会重置。"
 
 #. settings-schema.json->exclusions->description
 msgid ""
 "Windows matching one of these rows are never tiled; they float freely "
 "wherever you put them"
-msgstr ""
+msgstr "与其中任一行匹配的窗口永不平铺，无论放在哪里都会自由浮动"
 
 #. settings-schema.json->exclusions->columns->title
 msgid "Match"
-msgstr ""
+msgstr "匹配对象"
 
 #. settings-schema.json->exclusions->columns->title
 msgid "Text"
-msgstr ""
+msgstr "文本"
 
 #. settings-schema.json->wsPresets->description
 msgid "Workspace to preset assignments (JSON)"
-msgstr ""
+msgstr "工作区与预设的分配（JSON）"
 
 #. settings-schema.json->autoWorkspaces->description
 msgid ""
 "Automatic tiling per workspace (set with Super+Ctrl+A / Super+Ctrl+D or in "
 "the preset panel; not shown in this dialog)"
 msgstr ""
+"按工作区自动平铺（通过 Super+Ctrl+A / Super+Ctrl+D 或在预设面板中设置；不在此"
+"对话框中显示）"
 
 #. settings-schema.json->autoWorkspaces->columns->title
 msgid "Workspace"
-msgstr ""
+msgstr "工作区"
 
 #. settings-schema.json->autoWorkspaces->columns->title
 msgid "Tile automatically"
-msgstr ""
+msgstr "自动平铺"
 
 #. settings-schema.json->windowGap->description
 msgid ""
 "Gap between tiled windows (set with − / + in the preset panel; not shown in "
 "this dialog)"
-msgstr ""
+msgstr "平铺窗口之间的间距（在预设面板中通过 − / + 设置；不在此对话框中显示）"
 
 #. settings-schema.json->windowGap->units
-#, fuzzy
-#| msgid "x"
 msgid "px"
-msgstr "x"
+msgstr "px"
 
 #. settings-schema.json->tileAnimation->description
 msgid "Animate tiling"
-msgstr ""
+msgstr "平铺动画"
 
 #. settings-schema.json->tileAnimation->tooltip
 msgid "Windows glide into their new place. Off: they jump there at once."
-msgstr ""
+msgstr "窗口平滑移动到新位置。关闭时：窗口立即跳到新位置。"
 
 #. settings-schema.json->focusBorder->description
 msgid "Border around the focused window"
@@ -353,57 +347,57 @@ msgstr ""
 
 #. settings-schema.json->panelTheme->description
 msgid "Theme of the preset panel"
-msgstr ""
+msgstr "预设面板的主题"
 
 #. settings-schema.json->panelTheme->tooltip
 msgid ""
 "Follow system tracks the desktop color scheme live; Light and Dark override "
 "it."
-msgstr ""
+msgstr "“跟随系统”会实时跟随桌面配色方案；“浅色”和“深色”会覆盖它。"
 
 #. settings-schema.json->panelTheme->options
 msgid "Follow system"
-msgstr ""
+msgstr "跟随系统"
 
 #. settings-schema.json->panelTheme->options
 msgid "Light"
-msgstr ""
+msgstr "浅色"
 
 #. settings-schema.json->panelTheme->options
 msgid "Dark"
-msgstr ""
+msgstr "深色"
 
 #. settings-schema.json->accentMode->description
 msgid "Accent color"
-msgstr ""
+msgstr "强调色"
 
 #. settings-schema.json->accentMode->tooltip
 msgid ""
 "Follow theme tracks the accent color of the Cinnamon theme live. Custom uses "
 "the color below."
-msgstr ""
+msgstr "“跟随主题”会实时跟随 Cinnamon 主题的强调色。“自定义”使用下方的颜色。"
 
 #. settings-schema.json->accentMode->options
 #. settings-schema.json->stateMode->options
 msgid "Follow theme"
-msgstr ""
+msgstr "跟随主题"
 
 #. settings-schema.json->accentMode->options
 #. settings-schema.json->stateMode->options
 msgid "Custom"
-msgstr ""
+msgstr "自定义"
 
 #. settings-schema.json->accentColor->description
 msgid "Custom accent color"
-msgstr ""
+msgstr "自定义强调色"
 
 #. settings-schema.json->accentColor->tooltip
 msgid "Accent of the preset panel and editor when Accent color is Custom."
-msgstr ""
+msgstr "当“强调色”为“自定义”时，预设面板和编辑器使用的强调色。"
 
 #. settings-schema.json->stateMode->description
 msgid "State color"
-msgstr ""
+msgstr "状态色"
 
 #. settings-schema.json->stateMode->tooltip
 msgid ""
@@ -411,18 +405,20 @@ msgid ""
 "look. Follow theme tracks the accent color of the Cinnamon theme live. "
 "Custom uses the color below."
 msgstr ""
+"“自动：开”标记和已分配行的颜色。“绿色”保持当前外观。“跟随主题”会实时跟随 "
+"Cinnamon 主题的强调色。“自定义”使用下方的颜色。"
 
 #. settings-schema.json->stateMode->options
 msgid "Green"
-msgstr ""
+msgstr "绿色"
 
 #. settings-schema.json->stateColor->description
 msgid "Custom state color"
-msgstr ""
+msgstr "自定义状态色"
 
 #. settings-schema.json->stateColor->tooltip
 msgid "State color of the preset panel when State color is Custom."
-msgstr ""
+msgstr "当“状态色”为“自定义”时，预设面板使用的状态色。"
 
 #~ msgid ""
 #~ "Draw a thin border in the state color around the focused window while "

@@ -21,67 +21,69 @@ msgstr ""
 #. settings-schema.json->excludeAppPicker->options
 #: greenTile.js:435
 msgid "Add application …"
-msgstr ""
+msgstr "Thêm ứng dụng …"
 
 #: greenTile.js:454
 msgid "Window floats"
-msgstr ""
+msgstr "Cửa sổ nổi tự do"
 
 #: greenTile.js:454
 msgid "Window tiles again"
-msgstr ""
+msgstr "Cửa sổ được xếp ô lại"
 
 #: greenTile.js:2740
 #, javascript-format
 msgid "assigned — workspace %d"
-msgstr ""
+msgstr "đã gán — không gian làm việc %d"
 
 #: greenTile.js:2801
 msgid "Please enter a name."
-msgstr ""
+msgstr "Vui lòng nhập tên."
 
 #: greenTile.js:2843
 #, javascript-format
 msgid "from %d"
-msgstr ""
+msgstr "từ %d"
 
 #: greenTile.js:2960
 msgid "Rules (by window count)"
-msgstr ""
+msgstr "Quy tắc (theo số cửa sổ)"
 
 #: greenTile.js:2964
 msgid "Rule"
-msgstr ""
+msgstr "Quy tắc"
 
 #: greenTile.js:2965
 msgid "Delete rule"
-msgstr ""
+msgstr "Xóa quy tắc"
 
 #: greenTile.js:2973
 msgid "Rule applies from"
-msgstr ""
+msgstr "Quy tắc áp dụng từ"
 
 #: greenTile.js:2980
 msgid "windows"
-msgstr ""
+msgstr "cửa sổ"
 
 #: greenTile.js:2982
 msgid "Painter"
-msgstr ""
+msgstr "Vùng vẽ"
 
 #: greenTile.js:2997
 msgid ""
 "Click or drag: the row sets how many windows the column holds. Right-click "
 "removes a column."
 msgstr ""
+"Nhấp hoặc kéo: hàng xác định số cửa sổ trong cột. Nhấp chuột phải để xóa một "
+"cột."
 
 #: greenTile.js:3002
 msgid "Name"
-msgstr ""
+msgstr "Tên"
 
 #: greenTile.js:3003
 msgid "Preset name"
-msgstr ""
+msgstr "Tên cấu hình sẵn"
 
 #: greenTile.js:3008
 msgid "Delete preset"
@@ -97,248 +99,250 @@ msgstr "Xóa"
 
 #: greenTile.js:3016
 msgid "Save"
-msgstr ""
+msgstr "Lưu"
 
 #: greenTile.js:3041
 #, javascript-format
 msgid "Result: %s"
-msgstr ""
+msgstr "Kết quả: %s"
 
 #: greenTile.js:3661
 msgid "Gap between windows"
-msgstr ""
+msgstr "Khoảng cách giữa các cửa sổ"
 
 #: greenTile.js:3666
 #, javascript-format
 msgid "%d px"
-msgstr ""
+msgstr "%d px"
 
 #: greenTile.js:3685
 msgid "Reset sizes"
-msgstr ""
+msgstr "Đặt lại kích thước"
 
 #: greenTile.js:3716
 #, javascript-format
 msgid "Presets — workspace %d · %s"
-msgstr ""
+msgstr "Cấu hình sẵn — không gian làm việc %d · %s"
 
 #: greenTile.js:3718
 msgid "Create preset"
-msgstr ""
+msgstr "Tạo cấu hình sẵn"
 
 #: greenTile.js:3718
 #, javascript-format
 msgid "Edit %s"
-msgstr ""
+msgstr "Sửa %s"
 
 #: greenTile.js:3722
 msgid "Back"
-msgstr ""
+msgstr "Quay lại"
 
 #: greenTile.js:3731
-#, fuzzy
-#| msgid "Auto close"
 msgid "Auto: on"
-msgstr "Tự động đóng"
+msgstr "Tự động: bật"
 
 #: greenTile.js:3731
-#, fuzzy
-#| msgid "Auto close"
 msgid "Auto: off"
-msgstr "Tự động đóng"
+msgstr "Tự động: tắt"
 
 #: greenTile.js:3752
 msgid "Dark theme"
-msgstr ""
+msgstr "Chủ đề tối"
 
 #: greenTile.js:3752
 msgid "Light theme"
-msgstr ""
+msgstr "Chủ đề sáng"
 
 #: greenTile.js:3872
 msgid "No presets yet."
-msgstr ""
+msgstr "Chưa có cấu hình sẵn nào."
 
 #: greenTile.js:3887
 msgid "New preset"
-msgstr ""
+msgstr "Cấu hình sẵn mới"
 
 #: greenTile.js:3890
 msgid "Click a row to apply it to this workspace and tile right away"
-msgstr ""
+msgstr "Nhấp vào một hàng để áp dụng cho không gian làm việc này và xếp ô ngay"
 
 #. metadata.json->name
-#, fuzzy
-#| msgid "gTile"
 msgid "greenTile"
-msgstr "gTile"
+msgstr "greenTile"
 
 #. metadata.json->description
 msgid ""
 "Column tiling with per-workspace presets, auto mode and snap-on-release. "
 "Fork of gTile by shuairan."
 msgstr ""
+"Xếp ô theo cột với cấu hình sẵn cho từng không gian làm việc, chế độ tự động "
+"và tự khớp khi thả. Bản fork của gTile do shuairan phát triển."
 
 #. settings-schema.json->settings-tab->title
 msgid "Settings"
-msgstr ""
+msgstr "Cài đặt"
 
 #. settings-schema.json->hotkeys-tab->title
 msgid "Hotkeys"
 msgstr "Phím tắt"
 
 #. settings-schema.json->autotile-hotkey-section->title
-#, fuzzy
-#| msgid "Auto tile two lists"
 msgid "Auto-Tile Hotkeys"
-msgstr "Tự động xếp ô hai danh sách"
+msgstr "Phím tắt tự động xếp ô"
 
 #. settings-schema.json->preset-section->title
 msgid "Workspace Presets"
-msgstr ""
+msgstr "Cấu hình sẵn cho không gian làm việc"
 
 #. settings-schema.json->resize-section->title
 msgid "Resize tiled windows"
-msgstr ""
+msgstr "Đổi kích thước cửa sổ đã xếp ô"
 
 #. settings-schema.json->swap-section->title
 msgid "Swap windows"
-msgstr ""
+msgstr "Hoán đổi cửa sổ"
 
 #. settings-schema.json->tiling-section->title
 msgid "Tiling"
-msgstr ""
+msgstr "Xếp ô"
 
 #. settings-schema.json->exclusion-section->title
 #. settings-schema.json->exclusion-hotkey-section->title
 msgid "Never tile"
-msgstr ""
+msgstr "Không bao giờ xếp ô"
 
 #. settings-schema.json->panel-section->title
 msgid "Preset panel"
-msgstr ""
+msgstr "Bảng cấu hình sẵn"
 
 #. settings-schema.json->autotile6hotkey->description
 msgid "Tile all windows into 6 columns"
-msgstr ""
+msgstr "Xếp tất cả cửa sổ thành 6 cột"
 
 #. settings-schema.json->autotile3hotkey->description
 msgid "Tile all windows into 3 columns"
-msgstr ""
+msgstr "Xếp tất cả cửa sổ thành 3 cột"
 
 #. settings-schema.json->autotileautohotkey->description
 msgid "Turn automatic tiling on for this workspace and tile now"
-msgstr ""
+msgstr "Bật tự động xếp ô cho không gian làm việc này và xếp ô ngay"
 
 #. settings-schema.json->autotileoffhotkey->description
 msgid "Turn automatic tiling off for this workspace"
-msgstr ""
+msgstr "Tắt tự động xếp ô cho không gian làm việc này"
 
 #. settings-schema.json->presetHotkey->description
 msgid "Open the preset panel"
-msgstr ""
+msgstr "Mở bảng cấu hình sẵn"
 
 #. settings-schema.json->resizeWiderHotkey->description
 msgid "Make the focused tiled window wider (tap = 1 px, hold to speed up)"
 msgstr ""
+"Làm cửa sổ đã xếp ô có tiêu điểm rộng hơn (nhấn = 1 px, giữ để tăng tốc)"
 
 #. settings-schema.json->resizeNarrowerHotkey->description
 msgid "Make the focused tiled window narrower"
-msgstr ""
+msgstr "Làm cửa sổ đã xếp ô có tiêu điểm hẹp hơn"
 
 #. settings-schema.json->resizeTallerHotkey->description
 msgid "Make the focused tiled window taller"
-msgstr ""
+msgstr "Làm cửa sổ đã xếp ô có tiêu điểm cao hơn"
 
 #. settings-schema.json->resizeShorterHotkey->description
 msgid "Make the focused tiled window shorter"
-msgstr ""
+msgstr "Làm cửa sổ đã xếp ô có tiêu điểm thấp hơn"
 
 #. settings-schema.json->swapLeftHotkey->description
 msgid "Swap the focused tiled window with its neighbor to the left"
-msgstr ""
+msgstr "Hoán đổi cửa sổ đã xếp ô có tiêu điểm với cửa sổ bên trái"
 
 #. settings-schema.json->swapRightHotkey->description
 msgid "Swap the focused tiled window with its neighbor to the right"
-msgstr ""
+msgstr "Hoán đổi cửa sổ đã xếp ô có tiêu điểm với cửa sổ bên phải"
 
 #. settings-schema.json->swapUpHotkey->description
 msgid "Swap the focused tiled window with its neighbor above"
-msgstr ""
+msgstr "Hoán đổi cửa sổ đã xếp ô có tiêu điểm với cửa sổ phía trên"
 
 #. settings-schema.json->swapDownHotkey->description
 msgid "Swap the focused tiled window with its neighbor below"
-msgstr ""
+msgstr "Hoán đổi cửa sổ đã xếp ô có tiêu điểm với cửa sổ phía dưới"
 
 #. settings-schema.json->presets->description
 msgid "Preset definitions (JSON)"
-msgstr ""
+msgstr "Định nghĩa cấu hình sẵn (JSON)"
 
 #. settings-schema.json->excludeHotkey->description
 msgid "Toggle 'never tile' for the focused window"
-msgstr ""
+msgstr "Bật/tắt “Không bao giờ xếp ô” cho cửa sổ có tiêu điểm"
 
 #. settings-schema.json->excludeAppPicker->description
 msgid "Add an installed application"
-msgstr ""
+msgstr "Thêm một ứng dụng đã cài đặt"
 
 #. settings-schema.json->excludeAppPicker->tooltip
 msgid ""
 "Pick an application and it is added to the list below. The combobox resets "
 "after each pick."
 msgstr ""
+"Chọn một ứng dụng để thêm vào danh sách bên dưới. Hộp chọn sẽ được đặt lại "
+"sau mỗi lần chọn."
 
 #. settings-schema.json->exclusions->description
 msgid ""
 "Windows matching one of these rows are never tiled; they float freely "
 "wherever you put them"
 msgstr ""
+"Cửa sổ khớp với một trong các dòng này sẽ không bao giờ được xếp ô; chúng "
+"nổi tự do ở bất cứ đâu bạn đặt"
 
 #. settings-schema.json->exclusions->columns->title
 msgid "Match"
-msgstr ""
+msgstr "Khớp theo"
 
 #. settings-schema.json->exclusions->columns->title
 msgid "Text"
-msgstr ""
+msgstr "Văn bản"
 
 #. settings-schema.json->wsPresets->description
 msgid "Workspace to preset assignments (JSON)"
-msgstr ""
+msgstr "Gán cấu hình sẵn cho không gian làm việc (JSON)"
 
 #. settings-schema.json->autoWorkspaces->description
 msgid ""
 "Automatic tiling per workspace (set with Super+Ctrl+A / Super+Ctrl+D or in "
 "the preset panel; not shown in this dialog)"
 msgstr ""
+"Tự động xếp ô theo từng không gian làm việc (đặt bằng Super+Ctrl+A / "
+"Super+Ctrl+D hoặc trong bảng cấu hình sẵn; không hiển thị trong hộp thoại "
+"này)"
 
 #. settings-schema.json->autoWorkspaces->columns->title
 msgid "Workspace"
-msgstr ""
+msgstr "Không gian làm việc"
 
 #. settings-schema.json->autoWorkspaces->columns->title
 msgid "Tile automatically"
-msgstr ""
+msgstr "Tự động xếp ô"
 
 #. settings-schema.json->windowGap->description
 msgid ""
 "Gap between tiled windows (set with − / + in the preset panel; not shown in "
 "this dialog)"
 msgstr ""
+"Khoảng cách giữa các cửa sổ đã xếp ô (đặt bằng − / + trong bảng cấu hình "
+"sẵn; không hiển thị trong hộp thoại này)"
 
 #. settings-schema.json->windowGap->units
-#, fuzzy
-#| msgid "x"
 msgid "px"
-msgstr "x"
+msgstr "px"
 
 #. settings-schema.json->tileAnimation->description
 msgid "Animate tiling"
-msgstr ""
+msgstr "Hiệu ứng động khi xếp ô"
 
 #. settings-schema.json->tileAnimation->tooltip
 msgid "Windows glide into their new place. Off: they jump there at once."
-msgstr ""
+msgstr "Cửa sổ lướt êm đến vị trí mới. Tắt: chúng nhảy đến đó ngay lập tức."
 
 #. settings-schema.json->focusBorder->description
 msgid "Border around the focused window"
@@ -354,57 +358,63 @@ msgstr ""
 
 #. settings-schema.json->panelTheme->description
 msgid "Theme of the preset panel"
-msgstr ""
+msgstr "Chủ đề của bảng cấu hình sẵn"
 
 #. settings-schema.json->panelTheme->tooltip
 msgid ""
 "Follow system tracks the desktop color scheme live; Light and Dark override "
 "it."
 msgstr ""
+"“Theo hệ thống” bám theo bảng màu của màn hình nền theo thời gian thực; "
+"“Sáng” và “Tối” sẽ ghi đè lên."
 
 #. settings-schema.json->panelTheme->options
 msgid "Follow system"
-msgstr ""
+msgstr "Theo hệ thống"
 
 #. settings-schema.json->panelTheme->options
 msgid "Light"
-msgstr ""
+msgstr "Sáng"
 
 #. settings-schema.json->panelTheme->options
 msgid "Dark"
-msgstr ""
+msgstr "Tối"
 
 #. settings-schema.json->accentMode->description
 msgid "Accent color"
-msgstr ""
+msgstr "Màu nhấn"
 
 #. settings-schema.json->accentMode->tooltip
 msgid ""
 "Follow theme tracks the accent color of the Cinnamon theme live. Custom uses "
 "the color below."
 msgstr ""
+"“Theo chủ đề” lấy màu nhấn của chủ đề Cinnamon theo thời gian thực. “Tùy "
+"chỉnh” dùng màu bên dưới."
 
 #. settings-schema.json->accentMode->options
 #. settings-schema.json->stateMode->options
 msgid "Follow theme"
-msgstr ""
+msgstr "Theo chủ đề"
 
 #. settings-schema.json->accentMode->options
 #. settings-schema.json->stateMode->options
 msgid "Custom"
-msgstr ""
+msgstr "Tùy chỉnh"
 
 #. settings-schema.json->accentColor->description
 msgid "Custom accent color"
-msgstr ""
+msgstr "Màu nhấn tùy chỉnh"
 
 #. settings-schema.json->accentColor->tooltip
 msgid "Accent of the preset panel and editor when Accent color is Custom."
 msgstr ""
+"Màu nhấn của bảng cấu hình sẵn và trình chỉnh sửa khi “Màu nhấn” là “Tùy "
+"chỉnh”."
 
 #. settings-schema.json->stateMode->description
 msgid "State color"
-msgstr ""
+msgstr "Màu trạng thái"
 
 #. settings-schema.json->stateMode->tooltip
 msgid ""
@@ -412,18 +422,22 @@ msgid ""
 "look. Follow theme tracks the accent color of the Cinnamon theme live. "
 "Custom uses the color below."
 msgstr ""
+"Màu của dấu “Tự động: bật” và các hàng đã gán. “Xanh lá” giữ giao diện hiện "
+"tại. “Theo chủ đề” lấy màu nhấn của chủ đề Cinnamon theo thời gian thực. "
+"“Tùy chỉnh” dùng màu bên dưới."
 
 #. settings-schema.json->stateMode->options
 msgid "Green"
-msgstr ""
+msgstr "Xanh lá"
 
 #. settings-schema.json->stateColor->description
 msgid "Custom state color"
-msgstr ""
+msgstr "Màu trạng thái tùy chỉnh"
 
 #. settings-schema.json->stateColor->tooltip
 msgid "State color of the preset panel when State color is Custom."
 msgstr ""
+"Màu trạng thái của bảng cấu hình sẵn khi “Màu trạng thái” là “Tùy chỉnh”."
 
 #~ msgid ""
 #~ "Draw a thin border in the state color around the focused window while "

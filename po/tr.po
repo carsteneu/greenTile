@@ -24,67 +24,69 @@ msgstr ""
 #. settings-schema.json->excludeAppPicker->options
 #: greenTile.js:435
 msgid "Add application …"
-msgstr ""
+msgstr "Uygulama ekle …"
 
 #: greenTile.js:454
 msgid "Window floats"
-msgstr ""
+msgstr "Pencere serbest"
 
 #: greenTile.js:454
 msgid "Window tiles again"
-msgstr ""
+msgstr "Pencere yeniden döşeniyor"
 
 #: greenTile.js:2740
 #, javascript-format
 msgid "assigned — workspace %d"
-msgstr ""
+msgstr "atandı — çalışma alanı %d"
 
 #: greenTile.js:2801
 msgid "Please enter a name."
-msgstr ""
+msgstr "Lütfen bir ad girin."
 
 #: greenTile.js:2843
 #, javascript-format
 msgid "from %d"
-msgstr ""
+msgstr "%d ve üzeri"
 
 #: greenTile.js:2960
 msgid "Rules (by window count)"
-msgstr ""
+msgstr "Kurallar (pencere sayısına göre)"
 
 #: greenTile.js:2964
 msgid "Rule"
-msgstr ""
+msgstr "Kural"
 
 #: greenTile.js:2965
 msgid "Delete rule"
-msgstr ""
+msgstr "Kuralı sil"
 
 #: greenTile.js:2973
 msgid "Rule applies from"
-msgstr ""
+msgstr "Kural geçerli:"
 
 #: greenTile.js:2980
 msgid "windows"
-msgstr ""
+msgstr "pencereden itibaren"
 
 #: greenTile.js:2982
 msgid "Painter"
-msgstr ""
+msgstr "Çizim alanı"
 
 #: greenTile.js:2997
 msgid ""
 "Click or drag: the row sets how many windows the column holds. Right-click "
 "removes a column."
 msgstr ""
+"Tıklayın veya sürükleyin: satır, sütunun kaç pencere alacağını belirler. Sağ "
+"tıklama bir sütunu kaldırır."
 
 #: greenTile.js:3002
 msgid "Name"
-msgstr ""
+msgstr "Ad"
 
 #: greenTile.js:3003
 msgid "Preset name"
-msgstr ""
+msgstr "Ön ayar adı"
 
 #: greenTile.js:3008
 msgid "Delete preset"
@@ -100,248 +102,250 @@ msgstr "Sil"
 
 #: greenTile.js:3016
 msgid "Save"
-msgstr ""
+msgstr "Kaydet"
 
 #: greenTile.js:3041
 #, javascript-format
 msgid "Result: %s"
-msgstr ""
+msgstr "Sonuç: %s"
 
 #: greenTile.js:3661
 msgid "Gap between windows"
-msgstr ""
+msgstr "Pencereler arası boşluk"
 
 #: greenTile.js:3666
 #, javascript-format
 msgid "%d px"
-msgstr ""
+msgstr "%d px"
 
 #: greenTile.js:3685
 msgid "Reset sizes"
-msgstr ""
+msgstr "Boyutları sıfırla"
 
 #: greenTile.js:3716
 #, javascript-format
 msgid "Presets — workspace %d · %s"
-msgstr ""
+msgstr "Ön ayarlar — çalışma alanı %d · %s"
 
 #: greenTile.js:3718
 msgid "Create preset"
-msgstr ""
+msgstr "Ön ayar oluştur"
 
 #: greenTile.js:3718
 #, javascript-format
 msgid "Edit %s"
-msgstr ""
+msgstr "Düzenle: %s"
 
 #: greenTile.js:3722
 msgid "Back"
-msgstr ""
+msgstr "Geri"
 
 #: greenTile.js:3731
-#, fuzzy
-#| msgid "Auto close"
 msgid "Auto: on"
-msgstr "Otomatik kapat"
+msgstr "Otomatik: açık"
 
 #: greenTile.js:3731
-#, fuzzy
-#| msgid "Auto close"
 msgid "Auto: off"
-msgstr "Otomatik kapat"
+msgstr "Otomatik: kapalı"
 
 #: greenTile.js:3752
 msgid "Dark theme"
-msgstr ""
+msgstr "Koyu tema"
 
 #: greenTile.js:3752
 msgid "Light theme"
-msgstr ""
+msgstr "Açık tema"
 
 #: greenTile.js:3872
 msgid "No presets yet."
-msgstr ""
+msgstr "Henüz ön ayar yok."
 
 #: greenTile.js:3887
 msgid "New preset"
-msgstr ""
+msgstr "Yeni ön ayar"
 
 #: greenTile.js:3890
 msgid "Click a row to apply it to this workspace and tile right away"
-msgstr ""
+msgstr "Bu çalışma alanına uygulamak ve hemen döşemek için bir satıra tıklayın"
 
 #. metadata.json->name
-#, fuzzy
-#| msgid "gTile"
 msgid "greenTile"
-msgstr "gTile"
+msgstr "greenTile"
 
 #. metadata.json->description
 msgid ""
 "Column tiling with per-workspace presets, auto mode and snap-on-release. "
 "Fork of gTile by shuairan."
 msgstr ""
+"Çalışma alanı başına ön ayarlar, otomatik kip ve bırakınca yerine oturtma "
+"ile sütun döşeme. shuairan'ın gTile uygulamasının çatalıdır."
 
 #. settings-schema.json->settings-tab->title
 msgid "Settings"
-msgstr ""
+msgstr "Ayarlar"
 
 #. settings-schema.json->hotkeys-tab->title
 msgid "Hotkeys"
 msgstr "Kısayol tuşları"
 
 #. settings-schema.json->autotile-hotkey-section->title
-#, fuzzy
-#| msgid "Auto tile two lists"
 msgid "Auto-Tile Hotkeys"
-msgstr "İki listeyi otomatik döşe"
+msgstr "Otomatik döşeme kısayol tuşları"
 
 #. settings-schema.json->preset-section->title
 msgid "Workspace Presets"
-msgstr ""
+msgstr "Çalışma alanı ön ayarları"
 
 #. settings-schema.json->resize-section->title
 msgid "Resize tiled windows"
-msgstr ""
+msgstr "Döşenmiş pencereleri yeniden boyutlandır"
 
 #. settings-schema.json->swap-section->title
 msgid "Swap windows"
-msgstr ""
+msgstr "Pencerelerin yerini değiştir"
 
 #. settings-schema.json->tiling-section->title
 msgid "Tiling"
-msgstr ""
+msgstr "Döşeme"
 
 #. settings-schema.json->exclusion-section->title
 #. settings-schema.json->exclusion-hotkey-section->title
 msgid "Never tile"
-msgstr ""
+msgstr "Asla döşeme"
 
 #. settings-schema.json->panel-section->title
 msgid "Preset panel"
-msgstr ""
+msgstr "Ön ayar paneli"
 
 #. settings-schema.json->autotile6hotkey->description
 msgid "Tile all windows into 6 columns"
-msgstr ""
+msgstr "Tüm pencereleri 6 sütuna döşe"
 
 #. settings-schema.json->autotile3hotkey->description
 msgid "Tile all windows into 3 columns"
-msgstr ""
+msgstr "Tüm pencereleri 3 sütuna döşe"
 
 #. settings-schema.json->autotileautohotkey->description
 msgid "Turn automatic tiling on for this workspace and tile now"
-msgstr ""
+msgstr "Bu çalışma alanı için otomatik döşemeyi aç ve hemen döşe"
 
 #. settings-schema.json->autotileoffhotkey->description
 msgid "Turn automatic tiling off for this workspace"
-msgstr ""
+msgstr "Bu çalışma alanı için otomatik döşemeyi kapat"
 
 #. settings-schema.json->presetHotkey->description
 msgid "Open the preset panel"
-msgstr ""
+msgstr "Ön ayar panelini aç"
 
 #. settings-schema.json->resizeWiderHotkey->description
 msgid "Make the focused tiled window wider (tap = 1 px, hold to speed up)"
 msgstr ""
+"Odaklanmış döşenmiş pencereyi genişlet (dokunma = 1 px, basılı tutunca "
+"hızlanır)"
 
 #. settings-schema.json->resizeNarrowerHotkey->description
 msgid "Make the focused tiled window narrower"
-msgstr ""
+msgstr "Odaklanmış döşenmiş pencereyi daralt"
 
 #. settings-schema.json->resizeTallerHotkey->description
 msgid "Make the focused tiled window taller"
-msgstr ""
+msgstr "Odaklanmış döşenmiş pencerenin yüksekliğini artır"
 
 #. settings-schema.json->resizeShorterHotkey->description
 msgid "Make the focused tiled window shorter"
-msgstr ""
+msgstr "Odaklanmış döşenmiş pencerenin yüksekliğini azalt"
 
 #. settings-schema.json->swapLeftHotkey->description
 msgid "Swap the focused tiled window with its neighbor to the left"
-msgstr ""
+msgstr "Odaklanmış döşenmiş pencerenin yerini soldaki komşusuyla değiştir"
 
 #. settings-schema.json->swapRightHotkey->description
 msgid "Swap the focused tiled window with its neighbor to the right"
-msgstr ""
+msgstr "Odaklanmış döşenmiş pencerenin yerini sağdaki komşusuyla değiştir"
 
 #. settings-schema.json->swapUpHotkey->description
 msgid "Swap the focused tiled window with its neighbor above"
-msgstr ""
+msgstr "Odaklanmış döşenmiş pencerenin yerini üstteki komşusuyla değiştir"
 
 #. settings-schema.json->swapDownHotkey->description
 msgid "Swap the focused tiled window with its neighbor below"
-msgstr ""
+msgstr "Odaklanmış döşenmiş pencerenin yerini alttaki komşusuyla değiştir"
 
 #. settings-schema.json->presets->description
 msgid "Preset definitions (JSON)"
-msgstr ""
+msgstr "Ön ayar tanımları (JSON)"
 
 #. settings-schema.json->excludeHotkey->description
 msgid "Toggle 'never tile' for the focused window"
-msgstr ""
+msgstr "Odaklanmış pencere için “Asla döşeme” ayarını aç/kapat"
 
 #. settings-schema.json->excludeAppPicker->description
 msgid "Add an installed application"
-msgstr ""
+msgstr "Yüklü bir uygulama ekle"
 
 #. settings-schema.json->excludeAppPicker->tooltip
 msgid ""
 "Pick an application and it is added to the list below. The combobox resets "
 "after each pick."
 msgstr ""
+"Seçtiğiniz uygulama aşağıdaki listeye eklenir. Açılır kutu her seçimden "
+"sonra sıfırlanır."
 
 #. settings-schema.json->exclusions->description
 msgid ""
 "Windows matching one of these rows are never tiled; they float freely "
 "wherever you put them"
 msgstr ""
+"Bu satırlardan biriyle eşleşen pencereler hiçbir zaman döşenmez; nereye "
+"koyarsanız orada serbestçe durur"
 
 #. settings-schema.json->exclusions->columns->title
 msgid "Match"
-msgstr ""
+msgstr "Eşleşme"
 
 #. settings-schema.json->exclusions->columns->title
 msgid "Text"
-msgstr ""
+msgstr "Metin"
 
 #. settings-schema.json->wsPresets->description
 msgid "Workspace to preset assignments (JSON)"
-msgstr ""
+msgstr "Çalışma alanlarına ön ayar atamaları (JSON)"
 
 #. settings-schema.json->autoWorkspaces->description
 msgid ""
 "Automatic tiling per workspace (set with Super+Ctrl+A / Super+Ctrl+D or in "
 "the preset panel; not shown in this dialog)"
 msgstr ""
+"Çalışma alanı başına otomatik döşeme (Super+Ctrl+A / Super+Ctrl+D ile veya "
+"ön ayar panelinden ayarlanır; bu iletişim kutusunda gösterilmez)"
 
 #. settings-schema.json->autoWorkspaces->columns->title
 msgid "Workspace"
-msgstr ""
+msgstr "Çalışma alanı"
 
 #. settings-schema.json->autoWorkspaces->columns->title
 msgid "Tile automatically"
-msgstr ""
+msgstr "Otomatik döşe"
 
 #. settings-schema.json->windowGap->description
 msgid ""
 "Gap between tiled windows (set with − / + in the preset panel; not shown in "
 "this dialog)"
 msgstr ""
+"Döşenmiş pencereler arası boşluk (ön ayar panelinde − / + ile ayarlanır; bu "
+"iletişim kutusunda gösterilmez)"
 
 #. settings-schema.json->windowGap->units
-#, fuzzy
-#| msgid "x"
 msgid "px"
-msgstr "x"
+msgstr "px"
 
 #. settings-schema.json->tileAnimation->description
 msgid "Animate tiling"
-msgstr ""
+msgstr "Döşemeyi canlandır"
 
 #. settings-schema.json->tileAnimation->tooltip
 msgid "Windows glide into their new place. Off: they jump there at once."
-msgstr ""
+msgstr "Pencereler yeni yerlerine kayarak geçer. Kapalı: hemen oraya atlarlar."
 
 #. settings-schema.json->focusBorder->description
 msgid "Border around the focused window"
@@ -357,57 +361,63 @@ msgstr ""
 
 #. settings-schema.json->panelTheme->description
 msgid "Theme of the preset panel"
-msgstr ""
+msgstr "Ön ayar panelinin teması"
 
 #. settings-schema.json->panelTheme->tooltip
 msgid ""
 "Follow system tracks the desktop color scheme live; Light and Dark override "
 "it."
 msgstr ""
+"“Sistemi izle” masaüstü renk düzenini canlı olarak takip eder; “Açık” ve "
+"“Koyu” bunu geçersiz kılar."
 
 #. settings-schema.json->panelTheme->options
 msgid "Follow system"
-msgstr ""
+msgstr "Sistemi izle"
 
 #. settings-schema.json->panelTheme->options
 msgid "Light"
-msgstr ""
+msgstr "Açık"
 
 #. settings-schema.json->panelTheme->options
 msgid "Dark"
-msgstr ""
+msgstr "Koyu"
 
 #. settings-schema.json->accentMode->description
 msgid "Accent color"
-msgstr ""
+msgstr "Vurgu rengi"
 
 #. settings-schema.json->accentMode->tooltip
 msgid ""
 "Follow theme tracks the accent color of the Cinnamon theme live. Custom uses "
 "the color below."
 msgstr ""
+"“Temayı izle” Cinnamon temasının vurgu rengini canlı olarak takip eder. "
+"“Özel” aşağıdaki rengi kullanır."
 
 #. settings-schema.json->accentMode->options
 #. settings-schema.json->stateMode->options
 msgid "Follow theme"
-msgstr ""
+msgstr "Temayı izle"
 
 #. settings-schema.json->accentMode->options
 #. settings-schema.json->stateMode->options
 msgid "Custom"
-msgstr ""
+msgstr "Özel"
 
 #. settings-schema.json->accentColor->description
 msgid "Custom accent color"
-msgstr ""
+msgstr "Özel vurgu rengi"
 
 #. settings-schema.json->accentColor->tooltip
 msgid "Accent of the preset panel and editor when Accent color is Custom."
 msgstr ""
+"“Vurgu rengi” “Özel” olarak ayarlandığında ön ayar paneli ve düzenleyicinin "
+"vurgu rengi."
 
 #. settings-schema.json->stateMode->description
 msgid "State color"
-msgstr ""
+msgstr "Durum rengi"
 
 #. settings-schema.json->stateMode->tooltip
 msgid ""
@@ -415,18 +425,22 @@ msgid ""
 "look. Follow theme tracks the accent color of the Cinnamon theme live. "
 "Custom uses the color below."
 msgstr ""
+"“Otomatik: açık” işaretinin ve atanmış satırların rengi. “Yeşil” bugünkü "
+"görünümü korur. “Temayı izle” Cinnamon temasının vurgu rengini canlı olarak "
+"takip eder. “Özel” aşağıdaki rengi kullanır."
 
 #. settings-schema.json->stateMode->options
 msgid "Green"
-msgstr ""
+msgstr "Yeşil"
 
 #. settings-schema.json->stateColor->description
 msgid "Custom state color"
-msgstr ""
+msgstr "Özel durum rengi"
 
 #. settings-schema.json->stateColor->tooltip
 msgid "State color of the preset panel when State color is Custom."
 msgstr ""
+"“Durum rengi” “Özel” olarak ayarlandığında ön ayar panelinin durum rengi."
 
 #~ msgid ""
 #~ "Draw a thin border in the state color around the focused window while "

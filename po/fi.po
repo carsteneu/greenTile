@@ -22,67 +22,69 @@ msgstr ""
 #. settings-schema.json->excludeAppPicker->options
 #: greenTile.js:435
 msgid "Add application …"
-msgstr ""
+msgstr "Lisää sovellus …"
 
 #: greenTile.js:454
 msgid "Window floats"
-msgstr ""
+msgstr "Ikkuna kelluu"
 
 #: greenTile.js:454
 msgid "Window tiles again"
-msgstr ""
+msgstr "Ikkuna laatoitetaan taas"
 
 #: greenTile.js:2740
 #, javascript-format
 msgid "assigned — workspace %d"
-msgstr ""
+msgstr "määritetty — työtila %d"
 
 #: greenTile.js:2801
 msgid "Please enter a name."
-msgstr ""
+msgstr "Anna nimi."
 
 #: greenTile.js:2843
 #, javascript-format
 msgid "from %d"
-msgstr ""
+msgstr "%d alkaen"
 
 #: greenTile.js:2960
 msgid "Rules (by window count)"
-msgstr ""
+msgstr "Säännöt (ikkunamäärän mukaan)"
 
 #: greenTile.js:2964
 msgid "Rule"
-msgstr ""
+msgstr "Sääntö"
 
 #: greenTile.js:2965
 msgid "Delete rule"
-msgstr ""
+msgstr "Poista sääntö"
 
 #: greenTile.js:2973
 msgid "Rule applies from"
-msgstr ""
+msgstr "Sääntö koskee vähintään"
 
 #: greenTile.js:2980
 msgid "windows"
-msgstr ""
+msgstr "ikkunaa"
 
 #: greenTile.js:2982
 msgid "Painter"
-msgstr ""
+msgstr "Piirtoalue"
 
 #: greenTile.js:2997
 msgid ""
 "Click or drag: the row sets how many windows the column holds. Right-click "
 "removes a column."
 msgstr ""
+"Napsauta tai vedä: rivi määrää, montako ikkunaa sarakkeeseen mahtuu. Oikea "
+"napsautus poistaa sarakkeen."
 
 #: greenTile.js:3002
 msgid "Name"
-msgstr ""
+msgstr "Nimi"
 
 #: greenTile.js:3003
 msgid "Preset name"
-msgstr ""
+msgstr "Esiasetuksen nimi"
 
 #: greenTile.js:3008
 msgid "Delete preset"
@@ -98,248 +100,257 @@ msgstr "Poista"
 
 #: greenTile.js:3016
 msgid "Save"
-msgstr ""
+msgstr "Tallenna"
 
 #: greenTile.js:3041
 #, javascript-format
 msgid "Result: %s"
-msgstr ""
+msgstr "Tulos: %s"
 
 #: greenTile.js:3661
 msgid "Gap between windows"
-msgstr ""
+msgstr "Ikkunoiden väli"
 
 #: greenTile.js:3666
 #, javascript-format
 msgid "%d px"
-msgstr ""
+msgstr "%d px"
 
 #: greenTile.js:3685
 msgid "Reset sizes"
-msgstr ""
+msgstr "Palauta koot"
 
 #: greenTile.js:3716
 #, javascript-format
 msgid "Presets — workspace %d · %s"
-msgstr ""
+msgstr "Esiasetukset — työtila %d · %s"
 
 #: greenTile.js:3718
 msgid "Create preset"
-msgstr ""
+msgstr "Luo esiasetus"
 
 #: greenTile.js:3718
 #, javascript-format
 msgid "Edit %s"
-msgstr ""
+msgstr "Muokkaa: %s"
 
 #: greenTile.js:3722
 msgid "Back"
-msgstr ""
+msgstr "Takaisin"
 
 #: greenTile.js:3731
-#, fuzzy
-#| msgid "Auto close"
 msgid "Auto: on"
-msgstr "Autom. sulku"
+msgstr "Auto: päällä"
 
 #: greenTile.js:3731
-#, fuzzy
-#| msgid "Auto close"
 msgid "Auto: off"
-msgstr "Autom. sulku"
+msgstr "Auto: pois"
 
 #: greenTile.js:3752
 msgid "Dark theme"
-msgstr ""
+msgstr "Tumma teema"
 
 #: greenTile.js:3752
 msgid "Light theme"
-msgstr ""
+msgstr "Vaalea teema"
 
 #: greenTile.js:3872
 msgid "No presets yet."
-msgstr ""
+msgstr "Ei vielä esiasetuksia."
 
 #: greenTile.js:3887
 msgid "New preset"
-msgstr ""
+msgstr "Uusi esiasetus"
 
 #: greenTile.js:3890
 msgid "Click a row to apply it to this workspace and tile right away"
 msgstr ""
+"Napsauta riviä ottaaksesi sen käyttöön tässä työtilassa ja laatoittaaksesi "
+"heti"
 
 #. metadata.json->name
-#, fuzzy
-#| msgid "gTile"
 msgid "greenTile"
-msgstr "gTile"
+msgstr "greenTile"
 
 #. metadata.json->description
 msgid ""
 "Column tiling with per-workspace presets, auto mode and snap-on-release. "
 "Fork of gTile by shuairan."
 msgstr ""
+"Ikkunoiden laatoitus sarakkeisiin: työtilakohtaiset esiasetukset, "
+"automaattitila ja paikalleen napsahdus vapautettaessa. Haara gTile-"
+"laajennuksesta (tekijä shuairan)."
 
 #. settings-schema.json->settings-tab->title
 msgid "Settings"
-msgstr ""
+msgstr "Asetukset"
 
 #. settings-schema.json->hotkeys-tab->title
 msgid "Hotkeys"
 msgstr "Pikanäppäimet"
 
 #. settings-schema.json->autotile-hotkey-section->title
-#, fuzzy
-#| msgid "Auto tile two lists"
 msgid "Auto-Tile Hotkeys"
-msgstr "Autom. laatta ja kaksi listaa"
+msgstr "Automaattisen laatoituksen pikanäppäimet"
 
 #. settings-schema.json->preset-section->title
 msgid "Workspace Presets"
-msgstr ""
+msgstr "Työtilojen esiasetukset"
 
 #. settings-schema.json->resize-section->title
 msgid "Resize tiled windows"
-msgstr ""
+msgstr "Laatoitettujen ikkunoiden koon muuttaminen"
 
 #. settings-schema.json->swap-section->title
 msgid "Swap windows"
-msgstr ""
+msgstr "Ikkunoiden paikanvaihto"
 
 #. settings-schema.json->tiling-section->title
 msgid "Tiling"
-msgstr ""
+msgstr "Laatoitus"
 
 #. settings-schema.json->exclusion-section->title
 #. settings-schema.json->exclusion-hotkey-section->title
 msgid "Never tile"
-msgstr ""
+msgstr "Älä koskaan laatoita"
 
 #. settings-schema.json->panel-section->title
 msgid "Preset panel"
-msgstr ""
+msgstr "Esiasetuspaneeli"
 
 #. settings-schema.json->autotile6hotkey->description
 msgid "Tile all windows into 6 columns"
-msgstr ""
+msgstr "Laatoita kaikki ikkunat 6 sarakkeeseen"
 
 #. settings-schema.json->autotile3hotkey->description
 msgid "Tile all windows into 3 columns"
-msgstr ""
+msgstr "Laatoita kaikki ikkunat 3 sarakkeeseen"
 
 #. settings-schema.json->autotileautohotkey->description
 msgid "Turn automatic tiling on for this workspace and tile now"
-msgstr ""
+msgstr "Ota automaattinen laatoitus käyttöön tässä työtilassa ja laatoita heti"
 
 #. settings-schema.json->autotileoffhotkey->description
 msgid "Turn automatic tiling off for this workspace"
-msgstr ""
+msgstr "Poista automaattinen laatoitus käytöstä tässä työtilassa"
 
 #. settings-schema.json->presetHotkey->description
 msgid "Open the preset panel"
-msgstr ""
+msgstr "Avaa esiasetuspaneeli"
 
 #. settings-schema.json->resizeWiderHotkey->description
 msgid "Make the focused tiled window wider (tap = 1 px, hold to speed up)"
 msgstr ""
+"Levennä kohdistettua laatoitettua ikkunaa (napautus = 1 px, pitäminen "
+"nopeuttaa)"
 
 #. settings-schema.json->resizeNarrowerHotkey->description
 msgid "Make the focused tiled window narrower"
-msgstr ""
+msgstr "Kavenna kohdistettua laatoitettua ikkunaa"
 
 #. settings-schema.json->resizeTallerHotkey->description
 msgid "Make the focused tiled window taller"
-msgstr ""
+msgstr "Korota kohdistettua laatoitettua ikkunaa"
 
 #. settings-schema.json->resizeShorterHotkey->description
 msgid "Make the focused tiled window shorter"
-msgstr ""
+msgstr "Madalla kohdistettua laatoitettua ikkunaa"
 
 #. settings-schema.json->swapLeftHotkey->description
 msgid "Swap the focused tiled window with its neighbor to the left"
 msgstr ""
+"Vaihda kohdistetun laatoitetun ikkunan paikkaa vasemman naapurin kanssa"
 
 #. settings-schema.json->swapRightHotkey->description
 msgid "Swap the focused tiled window with its neighbor to the right"
-msgstr ""
+msgstr "Vaihda kohdistetun laatoitetun ikkunan paikkaa oikean naapurin kanssa"
 
 #. settings-schema.json->swapUpHotkey->description
 msgid "Swap the focused tiled window with its neighbor above"
 msgstr ""
+"Vaihda kohdistetun laatoitetun ikkunan paikkaa yläpuolisen naapurin kanssa"
 
 #. settings-schema.json->swapDownHotkey->description
 msgid "Swap the focused tiled window with its neighbor below"
 msgstr ""
+"Vaihda kohdistetun laatoitetun ikkunan paikkaa alapuolisen naapurin kanssa"
 
 #. settings-schema.json->presets->description
 msgid "Preset definitions (JSON)"
-msgstr ""
+msgstr "Esiasetusten määritykset (JSON)"
 
 #. settings-schema.json->excludeHotkey->description
 msgid "Toggle 'never tile' for the focused window"
-msgstr ""
+msgstr "Kytke ”Älä koskaan laatoita” päälle tai pois kohdistetulle ikkunalle"
 
 #. settings-schema.json->excludeAppPicker->description
 msgid "Add an installed application"
-msgstr ""
+msgstr "Lisää asennettu sovellus"
 
 #. settings-schema.json->excludeAppPicker->tooltip
 msgid ""
 "Pick an application and it is added to the list below. The combobox resets "
 "after each pick."
 msgstr ""
+"Valitse sovellus, niin se lisätään alla olevaan luetteloon. Valintaluettelo "
+"palautuu jokaisen valinnan jälkeen."
 
 #. settings-schema.json->exclusions->description
 msgid ""
 "Windows matching one of these rows are never tiled; they float freely "
 "wherever you put them"
 msgstr ""
+"Ikkunoita, jotka vastaavat jotakin näistä riveistä, ei koskaan laatoiteta; "
+"ne kelluvat vapaasti siellä, mihin ne sijoitat"
 
 #. settings-schema.json->exclusions->columns->title
 msgid "Match"
-msgstr ""
+msgstr "Täsmäys"
 
 #. settings-schema.json->exclusions->columns->title
 msgid "Text"
-msgstr ""
+msgstr "Teksti"
 
 #. settings-schema.json->wsPresets->description
 msgid "Workspace to preset assignments (JSON)"
-msgstr ""
+msgstr "Työtilojen ja esiasetusten liitokset (JSON)"
 
 #. settings-schema.json->autoWorkspaces->description
 msgid ""
 "Automatic tiling per workspace (set with Super+Ctrl+A / Super+Ctrl+D or in "
 "the preset panel; not shown in this dialog)"
 msgstr ""
+"Automaattinen laatoitus työtilakohtaisesti (asetetaan näppäimillä "
+"Super+Ctrl+A / Super+Ctrl+D tai esiasetuspaneelissa; ei näy tässä ikkunassa)"
 
 #. settings-schema.json->autoWorkspaces->columns->title
 msgid "Workspace"
-msgstr ""
+msgstr "Työtila"
 
 #. settings-schema.json->autoWorkspaces->columns->title
 msgid "Tile automatically"
-msgstr ""
+msgstr "Laatoita automaattisesti"
 
 #. settings-schema.json->windowGap->description
 msgid ""
 "Gap between tiled windows (set with − / + in the preset panel; not shown in "
 "this dialog)"
 msgstr ""
+"Laatoitettujen ikkunoiden väli (asetetaan painikkeilla − / + "
+"esiasetuspaneelissa; ei näy tässä ikkunassa)"
 
 #. settings-schema.json->windowGap->units
-#, fuzzy
-#| msgid "x"
 msgid "px"
-msgstr "x"
+msgstr "px"
 
 #. settings-schema.json->tileAnimation->description
 msgid "Animate tiling"
-msgstr ""
+msgstr "Animoi laatoitus"
 
 #. settings-schema.json->tileAnimation->tooltip
 msgid "Windows glide into their new place. Off: they jump there at once."
 msgstr ""
+"Ikkunat liukuvat uuteen paikkaansa. Pois päältä: ne hyppäävät sinne heti."
 
 #. settings-schema.json->focusBorder->description
 msgid "Border around the focused window"
@@ -355,57 +366,63 @@ msgstr ""
 
 #. settings-schema.json->panelTheme->description
 msgid "Theme of the preset panel"
-msgstr ""
+msgstr "Esiasetuspaneelin teema"
 
 #. settings-schema.json->panelTheme->tooltip
 msgid ""
 "Follow system tracks the desktop color scheme live; Light and Dark override "
 "it."
 msgstr ""
+"”Seuraa järjestelmää” seuraa työpöydän väriteemaa reaaliajassa; ”Vaalea” ja "
+"”Tumma” ohittavat sen."
 
 #. settings-schema.json->panelTheme->options
 msgid "Follow system"
-msgstr ""
+msgstr "Seuraa järjestelmää"
 
 #. settings-schema.json->panelTheme->options
 msgid "Light"
-msgstr ""
+msgstr "Vaalea"
 
 #. settings-schema.json->panelTheme->options
 msgid "Dark"
-msgstr ""
+msgstr "Tumma"
 
 #. settings-schema.json->accentMode->description
 msgid "Accent color"
-msgstr ""
+msgstr "Korostusväri"
 
 #. settings-schema.json->accentMode->tooltip
 msgid ""
 "Follow theme tracks the accent color of the Cinnamon theme live. Custom uses "
 "the color below."
 msgstr ""
+"”Seuraa teemaa” käyttää Cinnamon-teeman korostusväriä reaaliajassa. "
+"”Mukautettu” käyttää alla olevaa väriä."
 
 #. settings-schema.json->accentMode->options
 #. settings-schema.json->stateMode->options
 msgid "Follow theme"
-msgstr ""
+msgstr "Seuraa teemaa"
 
 #. settings-schema.json->accentMode->options
 #. settings-schema.json->stateMode->options
 msgid "Custom"
-msgstr ""
+msgstr "Mukautettu"
 
 #. settings-schema.json->accentColor->description
 msgid "Custom accent color"
-msgstr ""
+msgstr "Mukautettu korostusväri"
 
 #. settings-schema.json->accentColor->tooltip
 msgid "Accent of the preset panel and editor when Accent color is Custom."
 msgstr ""
+"Esiasetuspaneelin ja muokkaimen korostusväri, kun Korostusväri on "
+"”Mukautettu”."
 
 #. settings-schema.json->stateMode->description
 msgid "State color"
-msgstr ""
+msgstr "Tilaväri"
 
 #. settings-schema.json->stateMode->tooltip
 msgid ""
@@ -413,18 +430,21 @@ msgid ""
 "look. Follow theme tracks the accent color of the Cinnamon theme live. "
 "Custom uses the color below."
 msgstr ""
+"”Auto: päällä” -merkin ja määritettyjen rivien väri. ”Vihreä” säilyttää "
+"nykyisen ulkoasun. ”Seuraa teemaa” käyttää Cinnamon-teeman korostusväriä "
+"reaaliajassa. ”Mukautettu” käyttää alla olevaa väriä."
 
 #. settings-schema.json->stateMode->options
 msgid "Green"
-msgstr ""
+msgstr "Vihreä"
 
 #. settings-schema.json->stateColor->description
 msgid "Custom state color"
-msgstr ""
+msgstr "Mukautettu tilaväri"
 
 #. settings-schema.json->stateColor->tooltip
 msgid "State color of the preset panel when State color is Custom."
-msgstr ""
+msgstr "Esiasetuspaneelin tilaväri, kun Tilaväri on ”Mukautettu”."
 
 #~ msgid ""
 #~ "Draw a thin border in the state color around the focused window while "

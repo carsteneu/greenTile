@@ -22,67 +22,69 @@ msgstr ""
 #. settings-schema.json->excludeAppPicker->options
 #: greenTile.js:435
 msgid "Add application …"
-msgstr ""
+msgstr "Tilføj program …"
 
 #: greenTile.js:454
 msgid "Window floats"
-msgstr ""
+msgstr "Vinduet svæver"
 
 #: greenTile.js:454
 msgid "Window tiles again"
-msgstr ""
+msgstr "Vinduet flises igen"
 
 #: greenTile.js:2740
 #, javascript-format
 msgid "assigned — workspace %d"
-msgstr ""
+msgstr "tildelt — arbejdsområde %d"
 
 #: greenTile.js:2801
 msgid "Please enter a name."
-msgstr ""
+msgstr "Angiv et navn."
 
 #: greenTile.js:2843
 #, javascript-format
 msgid "from %d"
-msgstr ""
+msgstr "fra %d"
 
 #: greenTile.js:2960
 msgid "Rules (by window count)"
-msgstr ""
+msgstr "Regler (efter antal vinduer)"
 
 #: greenTile.js:2964
 msgid "Rule"
-msgstr ""
+msgstr "Regel"
 
 #: greenTile.js:2965
 msgid "Delete rule"
-msgstr ""
+msgstr "Slet regel"
 
 #: greenTile.js:2973
 msgid "Rule applies from"
-msgstr ""
+msgstr "Reglen gælder fra"
 
 #: greenTile.js:2980
 msgid "windows"
-msgstr ""
+msgstr "vinduer"
 
 #: greenTile.js:2982
 msgid "Painter"
-msgstr ""
+msgstr "Tegneflade"
 
 #: greenTile.js:2997
 msgid ""
 "Click or drag: the row sets how many windows the column holds. Right-click "
 "removes a column."
 msgstr ""
+"Klik eller træk: rækken bestemmer, hvor mange vinduer kolonnen rummer. "
+"Højreklik fjerner en kolonne."
 
 #: greenTile.js:3002
 msgid "Name"
-msgstr ""
+msgstr "Navn"
 
 #: greenTile.js:3003
 msgid "Preset name"
-msgstr ""
+msgstr "Navn på forudindstilling"
 
 #: greenTile.js:3008
 msgid "Delete preset"
@@ -98,248 +100,253 @@ msgstr "Slet"
 
 #: greenTile.js:3016
 msgid "Save"
-msgstr ""
+msgstr "Gem"
 
 #: greenTile.js:3041
 #, javascript-format
 msgid "Result: %s"
-msgstr ""
+msgstr "Resultat: %s"
 
 #: greenTile.js:3661
 msgid "Gap between windows"
-msgstr ""
+msgstr "Afstand mellem vinduer"
 
 #: greenTile.js:3666
 #, javascript-format
 msgid "%d px"
-msgstr ""
+msgstr "%d px"
 
 #: greenTile.js:3685
 msgid "Reset sizes"
-msgstr ""
+msgstr "Nulstil størrelser"
 
 #: greenTile.js:3716
 #, javascript-format
 msgid "Presets — workspace %d · %s"
-msgstr ""
+msgstr "Forudindstillinger — arbejdsområde %d · %s"
 
 #: greenTile.js:3718
 msgid "Create preset"
-msgstr ""
+msgstr "Opret forudindstilling"
 
 #: greenTile.js:3718
 #, javascript-format
 msgid "Edit %s"
-msgstr ""
+msgstr "Rediger %s"
 
 #: greenTile.js:3722
 msgid "Back"
-msgstr ""
+msgstr "Tilbage"
 
 #: greenTile.js:3731
-#, fuzzy
-#| msgid "Auto close"
 msgid "Auto: on"
-msgstr "Luk automatisk"
+msgstr "Auto: til"
 
 #: greenTile.js:3731
-#, fuzzy
-#| msgid "Auto close"
 msgid "Auto: off"
-msgstr "Luk automatisk"
+msgstr "Auto: fra"
 
 #: greenTile.js:3752
 msgid "Dark theme"
-msgstr ""
+msgstr "Mørkt tema"
 
 #: greenTile.js:3752
 msgid "Light theme"
-msgstr ""
+msgstr "Lyst tema"
 
 #: greenTile.js:3872
 msgid "No presets yet."
-msgstr ""
+msgstr "Ingen forudindstillinger endnu."
 
 #: greenTile.js:3887
 msgid "New preset"
-msgstr ""
+msgstr "Ny forudindstilling"
 
 #: greenTile.js:3890
 msgid "Click a row to apply it to this workspace and tile right away"
 msgstr ""
+"Klik på en række for at anvende den på dette arbejdsområde og flise med det "
+"samme"
 
 #. metadata.json->name
-#, fuzzy
-#| msgid "gTile"
 msgid "greenTile"
-msgstr "gTile"
+msgstr "greenTile"
 
 #. metadata.json->description
 msgid ""
 "Column tiling with per-workspace presets, auto mode and snap-on-release. "
 "Fork of gTile by shuairan."
 msgstr ""
+"Flisning i kolonner med forudindstillinger pr. arbejdsområde, automatisk "
+"tilstand og indpasning ved slip. Fork af gTile af shuairan."
 
 #. settings-schema.json->settings-tab->title
 msgid "Settings"
-msgstr ""
+msgstr "Indstillinger"
 
 #. settings-schema.json->hotkeys-tab->title
 msgid "Hotkeys"
 msgstr "Genvejstaster"
 
 #. settings-schema.json->autotile-hotkey-section->title
-#, fuzzy
-#| msgid "Auto tile two lists"
 msgid "Auto-Tile Hotkeys"
-msgstr "Autom. udlægning to lister"
+msgstr "Genvejstaster til automatisk flisning"
 
 #. settings-schema.json->preset-section->title
 msgid "Workspace Presets"
-msgstr ""
+msgstr "Forudindstillinger for arbejdsområder"
 
 #. settings-schema.json->resize-section->title
 msgid "Resize tiled windows"
-msgstr ""
+msgstr "Tilpas størrelse på flisede vinduer"
 
 #. settings-schema.json->swap-section->title
 msgid "Swap windows"
-msgstr ""
+msgstr "Byt om på vinduer"
 
 #. settings-schema.json->tiling-section->title
 msgid "Tiling"
-msgstr ""
+msgstr "Flisning"
 
 #. settings-schema.json->exclusion-section->title
 #. settings-schema.json->exclusion-hotkey-section->title
 msgid "Never tile"
-msgstr ""
+msgstr "Flis aldrig"
 
 #. settings-schema.json->panel-section->title
 msgid "Preset panel"
-msgstr ""
+msgstr "Forudindstillingspanel"
 
 #. settings-schema.json->autotile6hotkey->description
 msgid "Tile all windows into 6 columns"
-msgstr ""
+msgstr "Flis alle vinduer i 6 kolonner"
 
 #. settings-schema.json->autotile3hotkey->description
 msgid "Tile all windows into 3 columns"
-msgstr ""
+msgstr "Flis alle vinduer i 3 kolonner"
 
 #. settings-schema.json->autotileautohotkey->description
 msgid "Turn automatic tiling on for this workspace and tile now"
-msgstr ""
+msgstr "Slå automatisk flisning til for dette arbejdsområde, og flis nu"
 
 #. settings-schema.json->autotileoffhotkey->description
 msgid "Turn automatic tiling off for this workspace"
-msgstr ""
+msgstr "Slå automatisk flisning fra for dette arbejdsområde"
 
 #. settings-schema.json->presetHotkey->description
 msgid "Open the preset panel"
-msgstr ""
+msgstr "Åbn forudindstillingspanelet"
 
 #. settings-schema.json->resizeWiderHotkey->description
 msgid "Make the focused tiled window wider (tap = 1 px, hold to speed up)"
 msgstr ""
+"Gør det fokuserede flisede vindue bredere (tryk = 1 px, hold nede for at øge "
+"farten)"
 
 #. settings-schema.json->resizeNarrowerHotkey->description
 msgid "Make the focused tiled window narrower"
-msgstr ""
+msgstr "Gør det fokuserede flisede vindue smallere"
 
 #. settings-schema.json->resizeTallerHotkey->description
 msgid "Make the focused tiled window taller"
-msgstr ""
+msgstr "Gør det fokuserede flisede vindue højere"
 
 #. settings-schema.json->resizeShorterHotkey->description
 msgid "Make the focused tiled window shorter"
-msgstr ""
+msgstr "Gør det fokuserede flisede vindue lavere"
 
 #. settings-schema.json->swapLeftHotkey->description
 msgid "Swap the focused tiled window with its neighbor to the left"
-msgstr ""
+msgstr "Byt det fokuserede flisede vindue om med naboen til venstre"
 
 #. settings-schema.json->swapRightHotkey->description
 msgid "Swap the focused tiled window with its neighbor to the right"
-msgstr ""
+msgstr "Byt det fokuserede flisede vindue om med naboen til højre"
 
 #. settings-schema.json->swapUpHotkey->description
 msgid "Swap the focused tiled window with its neighbor above"
-msgstr ""
+msgstr "Byt det fokuserede flisede vindue om med naboen ovenover"
 
 #. settings-schema.json->swapDownHotkey->description
 msgid "Swap the focused tiled window with its neighbor below"
-msgstr ""
+msgstr "Byt det fokuserede flisede vindue om med naboen nedenunder"
 
 #. settings-schema.json->presets->description
 msgid "Preset definitions (JSON)"
-msgstr ""
+msgstr "Definitioner af forudindstillinger (JSON)"
 
 #. settings-schema.json->excludeHotkey->description
 msgid "Toggle 'never tile' for the focused window"
-msgstr ""
+msgstr "Slå 'flis aldrig' til/fra for det fokuserede vindue"
 
 #. settings-schema.json->excludeAppPicker->description
 msgid "Add an installed application"
-msgstr ""
+msgstr "Tilføj et installeret program"
 
 #. settings-schema.json->excludeAppPicker->tooltip
 msgid ""
 "Pick an application and it is added to the list below. The combobox resets "
 "after each pick."
 msgstr ""
+"Vælg et program, så føjes det til listen nedenfor. Rullelisten nulstilles "
+"efter hvert valg."
 
 #. settings-schema.json->exclusions->description
 msgid ""
 "Windows matching one of these rows are never tiled; they float freely "
 "wherever you put them"
 msgstr ""
+"Vinduer, der matcher en af disse rækker, flises aldrig; de svæver frit, "
+"uanset hvor du placerer dem"
 
 #. settings-schema.json->exclusions->columns->title
 msgid "Match"
-msgstr ""
+msgstr "Sammenligning"
 
 #. settings-schema.json->exclusions->columns->title
 msgid "Text"
-msgstr ""
+msgstr "Tekst"
 
 #. settings-schema.json->wsPresets->description
 msgid "Workspace to preset assignments (JSON)"
-msgstr ""
+msgstr "Tildeling af forudindstillinger til arbejdsområder (JSON)"
 
 #. settings-schema.json->autoWorkspaces->description
 msgid ""
 "Automatic tiling per workspace (set with Super+Ctrl+A / Super+Ctrl+D or in "
 "the preset panel; not shown in this dialog)"
 msgstr ""
+"Automatisk flisning pr. arbejdsområde (indstilles med Super+Ctrl+A / "
+"Super+Ctrl+D eller i forudindstillingspanelet; vises ikke i denne dialog)"
 
 #. settings-schema.json->autoWorkspaces->columns->title
 msgid "Workspace"
-msgstr ""
+msgstr "Arbejdsområde"
 
 #. settings-schema.json->autoWorkspaces->columns->title
 msgid "Tile automatically"
-msgstr ""
+msgstr "Flis automatisk"
 
 #. settings-schema.json->windowGap->description
 msgid ""
 "Gap between tiled windows (set with − / + in the preset panel; not shown in "
 "this dialog)"
 msgstr ""
+"Afstand mellem flisede vinduer (indstilles med − / + i "
+"forudindstillingspanelet; vises ikke i denne dialog)"
 
 #. settings-schema.json->windowGap->units
-#, fuzzy
-#| msgid "x"
 msgid "px"
-msgstr "x"
+msgstr "px"
 
 #. settings-schema.json->tileAnimation->description
 msgid "Animate tiling"
-msgstr ""
+msgstr "Animér flisning"
 
 #. settings-schema.json->tileAnimation->tooltip
 msgid "Windows glide into their new place. Off: they jump there at once."
 msgstr ""
+"Vinduerne glider på plads på deres nye sted. Fra: de springer straks derhen."
 
 #. settings-schema.json->focusBorder->description
 msgid "Border around the focused window"
@@ -355,57 +362,63 @@ msgstr ""
 
 #. settings-schema.json->panelTheme->description
 msgid "Theme of the preset panel"
-msgstr ""
+msgstr "Tema for forudindstillingspanelet"
 
 #. settings-schema.json->panelTheme->tooltip
 msgid ""
 "Follow system tracks the desktop color scheme live; Light and Dark override "
 "it."
 msgstr ""
+"Følg system følger skrivebordets farveskema live; Lyst og Mørkt "
+"tilsidesætter det."
 
 #. settings-schema.json->panelTheme->options
 msgid "Follow system"
-msgstr ""
+msgstr "Følg system"
 
 #. settings-schema.json->panelTheme->options
 msgid "Light"
-msgstr ""
+msgstr "Lyst"
 
 #. settings-schema.json->panelTheme->options
 msgid "Dark"
-msgstr ""
+msgstr "Mørkt"
 
 #. settings-schema.json->accentMode->description
 msgid "Accent color"
-msgstr ""
+msgstr "Accentfarve"
 
 #. settings-schema.json->accentMode->tooltip
 msgid ""
 "Follow theme tracks the accent color of the Cinnamon theme live. Custom uses "
 "the color below."
 msgstr ""
+"Følg tema følger Cinnamon-temaets accentfarve live. Tilpasset bruger farven "
+"nedenfor."
 
 #. settings-schema.json->accentMode->options
 #. settings-schema.json->stateMode->options
 msgid "Follow theme"
-msgstr ""
+msgstr "Følg tema"
 
 #. settings-schema.json->accentMode->options
 #. settings-schema.json->stateMode->options
 msgid "Custom"
-msgstr ""
+msgstr "Tilpasset"
 
 #. settings-schema.json->accentColor->description
 msgid "Custom accent color"
-msgstr ""
+msgstr "Tilpasset accentfarve"
 
 #. settings-schema.json->accentColor->tooltip
 msgid "Accent of the preset panel and editor when Accent color is Custom."
 msgstr ""
+"Accent for forudindstillingspanelet og editoren, når Accentfarve er sat til "
+"Tilpasset."
 
 #. settings-schema.json->stateMode->description
 msgid "State color"
-msgstr ""
+msgstr "Statusfarve"
 
 #. settings-schema.json->stateMode->tooltip
 msgid ""
@@ -413,18 +426,23 @@ msgid ""
 "look. Follow theme tracks the accent color of the Cinnamon theme live. "
 "Custom uses the color below."
 msgstr ""
+"Farve på markeringen \"Auto: til\" og de tildelte rækker. Grøn bevarer det "
+"nuværende udseende. Følg tema følger Cinnamon-temaets accentfarve live. "
+"Tilpasset bruger farven nedenfor."
 
 #. settings-schema.json->stateMode->options
 msgid "Green"
-msgstr ""
+msgstr "Grøn"
 
 #. settings-schema.json->stateColor->description
 msgid "Custom state color"
-msgstr ""
+msgstr "Tilpasset statusfarve"
 
 #. settings-schema.json->stateColor->tooltip
 msgid "State color of the preset panel when State color is Custom."
 msgstr ""
+"Statusfarve for forudindstillingspanelet, når Statusfarve er sat til "
+"Tilpasset."
 
 #~ msgid ""
 #~ "Draw a thin border in the state color around the focused window while "

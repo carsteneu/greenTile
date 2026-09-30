@@ -21,67 +21,69 @@ msgstr ""
 #. settings-schema.json->excludeAppPicker->options
 #: greenTile.js:435
 msgid "Add application …"
-msgstr ""
+msgstr "Добавить приложение …"
 
 #: greenTile.js:454
 msgid "Window floats"
-msgstr ""
+msgstr "Окно свободно"
 
 #: greenTile.js:454
 msgid "Window tiles again"
-msgstr ""
+msgstr "Окно снова в разбиении"
 
 #: greenTile.js:2740
 #, javascript-format
 msgid "assigned — workspace %d"
-msgstr ""
+msgstr "назначено — рабочая область %d"
 
 #: greenTile.js:2801
 msgid "Please enter a name."
-msgstr ""
+msgstr "Введите название."
 
 #: greenTile.js:2843
 #, javascript-format
 msgid "from %d"
-msgstr ""
+msgstr "от %d"
 
 #: greenTile.js:2960
 msgid "Rules (by window count)"
-msgstr ""
+msgstr "Правила (по числу окон)"
 
 #: greenTile.js:2964
 msgid "Rule"
-msgstr ""
+msgstr "Правило"
 
 #: greenTile.js:2965
 msgid "Delete rule"
-msgstr ""
+msgstr "Удалить правило"
 
 #: greenTile.js:2973
 msgid "Rule applies from"
-msgstr ""
+msgstr "Правило действует от"
 
 #: greenTile.js:2980
 msgid "windows"
-msgstr ""
+msgstr "окон"
 
 #: greenTile.js:2982
 msgid "Painter"
-msgstr ""
+msgstr "Область рисования"
 
 #: greenTile.js:2997
 msgid ""
 "Click or drag: the row sets how many windows the column holds. Right-click "
 "removes a column."
 msgstr ""
+"Щелчок или перетаскивание: строка задаёт, сколько окон вмещает столбец. "
+"Щелчок правой кнопкой удаляет столбец."
 
 #: greenTile.js:3002
 msgid "Name"
-msgstr ""
+msgstr "Название"
 
 #: greenTile.js:3003
 msgid "Preset name"
-msgstr ""
+msgstr "Название преднастройки"
 
 #: greenTile.js:3008
 msgid "Delete preset"
@@ -97,248 +99,256 @@ msgstr "Удалить"
 
 #: greenTile.js:3016
 msgid "Save"
-msgstr ""
+msgstr "Сохранить"
 
 #: greenTile.js:3041
 #, javascript-format
 msgid "Result: %s"
-msgstr ""
+msgstr "Результат: %s"
 
 #: greenTile.js:3661
 msgid "Gap between windows"
-msgstr ""
+msgstr "Отступ между окнами"
 
 #: greenTile.js:3666
 #, javascript-format
 msgid "%d px"
-msgstr ""
+msgstr "%d px"
 
 #: greenTile.js:3685
 msgid "Reset sizes"
-msgstr ""
+msgstr "Сбросить размеры"
 
 #: greenTile.js:3716
 #, javascript-format
 msgid "Presets — workspace %d · %s"
-msgstr ""
+msgstr "Преднастройки — рабочая область %d · %s"
 
 #: greenTile.js:3718
 msgid "Create preset"
-msgstr ""
+msgstr "Создать преднастройку"
 
 #: greenTile.js:3718
 #, javascript-format
 msgid "Edit %s"
-msgstr ""
+msgstr "Изменить %s"
 
 #: greenTile.js:3722
 msgid "Back"
-msgstr ""
+msgstr "Назад"
 
 #: greenTile.js:3731
-#, fuzzy
-#| msgid "Auto close"
 msgid "Auto: on"
-msgstr "Автоматически закрывать"
+msgstr "Авто: вкл."
 
 #: greenTile.js:3731
-#, fuzzy
-#| msgid "Auto close"
 msgid "Auto: off"
-msgstr "Автоматически закрывать"
+msgstr "Авто: выкл."
 
 #: greenTile.js:3752
 msgid "Dark theme"
-msgstr ""
+msgstr "Тёмная тема"
 
 #: greenTile.js:3752
 msgid "Light theme"
-msgstr ""
+msgstr "Светлая тема"
 
 #: greenTile.js:3872
 msgid "No presets yet."
-msgstr ""
+msgstr "Преднастроек пока нет."
 
 #: greenTile.js:3887
 msgid "New preset"
-msgstr ""
+msgstr "Новая преднастройка"
 
 #: greenTile.js:3890
 msgid "Click a row to apply it to this workspace and tile right away"
 msgstr ""
+"Щёлкните строку, чтобы применить её к этой рабочей области и сразу разбить "
+"окна"
 
 #. metadata.json->name
-#, fuzzy
-#| msgid "gTile"
 msgid "greenTile"
-msgstr "gTile"
+msgstr "greenTile"
 
 #. metadata.json->description
 msgid ""
 "Column tiling with per-workspace presets, auto mode and snap-on-release. "
 "Fork of gTile by shuairan."
 msgstr ""
+"Разбиение окон на столбцы с преднастройками для каждой рабочей области, "
+"автоматическим режимом и привязкой при отпускании. Форк gTile от shuairan."
 
 #. settings-schema.json->settings-tab->title
 msgid "Settings"
-msgstr ""
+msgstr "Настройки"
 
 #. settings-schema.json->hotkeys-tab->title
 msgid "Hotkeys"
 msgstr "Клавиатурные сочетания"
 
 #. settings-schema.json->autotile-hotkey-section->title
-#, fuzzy
-#| msgid "Auto tile two lists"
 msgid "Auto-Tile Hotkeys"
-msgstr "Автотайлинг в деве стопки"
+msgstr "Клавиатурные сочетания автоматического разбиения"
 
 #. settings-schema.json->preset-section->title
 msgid "Workspace Presets"
-msgstr ""
+msgstr "Преднастройки рабочих областей"
 
 #. settings-schema.json->resize-section->title
 msgid "Resize tiled windows"
-msgstr ""
+msgstr "Изменение размера окон в разбиении"
 
 #. settings-schema.json->swap-section->title
 msgid "Swap windows"
-msgstr ""
+msgstr "Обмен окон местами"
 
 #. settings-schema.json->tiling-section->title
 msgid "Tiling"
-msgstr ""
+msgstr "Разбиение"
 
 #. settings-schema.json->exclusion-section->title
 #. settings-schema.json->exclusion-hotkey-section->title
 msgid "Never tile"
-msgstr ""
+msgstr "Без разбиения"
 
 #. settings-schema.json->panel-section->title
 msgid "Preset panel"
-msgstr ""
+msgstr "Панель преднастроек"
 
 #. settings-schema.json->autotile6hotkey->description
 msgid "Tile all windows into 6 columns"
-msgstr ""
+msgstr "Разбить все окна на 6 столбцов"
 
 #. settings-schema.json->autotile3hotkey->description
 msgid "Tile all windows into 3 columns"
-msgstr ""
+msgstr "Разбить все окна на 3 столбца"
 
 #. settings-schema.json->autotileautohotkey->description
 msgid "Turn automatic tiling on for this workspace and tile now"
 msgstr ""
+"Включить автоматическое разбиение для этой рабочей области и сразу разбить "
+"окна"
 
 #. settings-schema.json->autotileoffhotkey->description
 msgid "Turn automatic tiling off for this workspace"
-msgstr ""
+msgstr "Выключить автоматическое разбиение для этой рабочей области"
 
 #. settings-schema.json->presetHotkey->description
 msgid "Open the preset panel"
-msgstr ""
+msgstr "Открыть панель преднастроек"
 
 #. settings-schema.json->resizeWiderHotkey->description
 msgid "Make the focused tiled window wider (tap = 1 px, hold to speed up)"
 msgstr ""
+"Сделать активное окно в разбиении шире (нажатие = 1 px, удержание ускоряет)"
 
 #. settings-schema.json->resizeNarrowerHotkey->description
 msgid "Make the focused tiled window narrower"
-msgstr ""
+msgstr "Сделать активное окно в разбиении уже"
 
 #. settings-schema.json->resizeTallerHotkey->description
 msgid "Make the focused tiled window taller"
-msgstr ""
+msgstr "Сделать активное окно в разбиении выше"
 
 #. settings-schema.json->resizeShorterHotkey->description
 msgid "Make the focused tiled window shorter"
-msgstr ""
+msgstr "Сделать активное окно в разбиении ниже"
 
 #. settings-schema.json->swapLeftHotkey->description
 msgid "Swap the focused tiled window with its neighbor to the left"
-msgstr ""
+msgstr "Поменять активное окно в разбиении местами с соседним слева"
 
 #. settings-schema.json->swapRightHotkey->description
 msgid "Swap the focused tiled window with its neighbor to the right"
-msgstr ""
+msgstr "Поменять активное окно в разбиении местами с соседним справа"
 
 #. settings-schema.json->swapUpHotkey->description
 msgid "Swap the focused tiled window with its neighbor above"
-msgstr ""
+msgstr "Поменять активное окно в разбиении местами с соседним сверху"
 
 #. settings-schema.json->swapDownHotkey->description
 msgid "Swap the focused tiled window with its neighbor below"
-msgstr ""
+msgstr "Поменять активное окно в разбиении местами с соседним снизу"
 
 #. settings-schema.json->presets->description
 msgid "Preset definitions (JSON)"
-msgstr ""
+msgstr "Определения преднастроек (JSON)"
 
 #. settings-schema.json->excludeHotkey->description
 msgid "Toggle 'never tile' for the focused window"
-msgstr ""
+msgstr "Переключить «Без разбиения» для активного окна"
 
 #. settings-schema.json->excludeAppPicker->description
 msgid "Add an installed application"
-msgstr ""
+msgstr "Добавить установленное приложение"
 
 #. settings-schema.json->excludeAppPicker->tooltip
 msgid ""
 "Pick an application and it is added to the list below. The combobox resets "
 "after each pick."
 msgstr ""
+"Выбранное приложение добавляется в список ниже. После каждого выбора "
+"раскрывающийся список сбрасывается."
 
 #. settings-schema.json->exclusions->description
 msgid ""
 "Windows matching one of these rows are never tiled; they float freely "
 "wherever you put them"
 msgstr ""
+"Окна, подходящие под одну из этих строк, никогда не включаются в разбиение; "
+"они свободно остаются там, куда их поместили"
 
 #. settings-schema.json->exclusions->columns->title
 msgid "Match"
-msgstr ""
+msgstr "Сопоставление"
 
 #. settings-schema.json->exclusions->columns->title
 msgid "Text"
-msgstr ""
+msgstr "Текст"
 
 #. settings-schema.json->wsPresets->description
 msgid "Workspace to preset assignments (JSON)"
-msgstr ""
+msgstr "Назначение преднастроек рабочим областям (JSON)"
 
 #. settings-schema.json->autoWorkspaces->description
 msgid ""
 "Automatic tiling per workspace (set with Super+Ctrl+A / Super+Ctrl+D or in "
 "the preset panel; not shown in this dialog)"
 msgstr ""
+"Автоматическое разбиение для каждой рабочей области (включается сочетаниями "
+"Super+Ctrl+A / Super+Ctrl+D или на панели преднастроек; в этом диалоге не "
+"показывается)"
 
 #. settings-schema.json->autoWorkspaces->columns->title
 msgid "Workspace"
-msgstr ""
+msgstr "Рабочая область"
 
 #. settings-schema.json->autoWorkspaces->columns->title
 msgid "Tile automatically"
-msgstr ""
+msgstr "Разбивать автоматически"
 
 #. settings-schema.json->windowGap->description
 msgid ""
 "Gap between tiled windows (set with − / + in the preset panel; not shown in "
 "this dialog)"
 msgstr ""
+"Отступ между окнами в разбиении (задаётся кнопками − / + на панели "
+"преднастроек; в этом диалоге не показывается)"
 
 #. settings-schema.json->windowGap->units
-#, fuzzy
-#| msgid "x"
 msgid "px"
-msgstr "x"
+msgstr "px"
 
 #. settings-schema.json->tileAnimation->description
 msgid "Animate tiling"
-msgstr ""
+msgstr "Анимировать разбиение"
 
 #. settings-schema.json->tileAnimation->tooltip
 msgid "Windows glide into their new place. Off: they jump there at once."
 msgstr ""
+"Окна плавно перемещаются на новое место. Если выключено, они сразу "
+"оказываются там."
 
 #. settings-schema.json->focusBorder->description
 msgid "Border around the focused window"
@@ -354,57 +364,63 @@ msgstr ""
 
 #. settings-schema.json->panelTheme->description
 msgid "Theme of the preset panel"
-msgstr ""
+msgstr "Тема панели преднастроек"
 
 #. settings-schema.json->panelTheme->tooltip
 msgid ""
 "Follow system tracks the desktop color scheme live; Light and Dark override "
 "it."
 msgstr ""
+"«Как в системе» отслеживает цветовую схему рабочего стола в реальном "
+"времени; «Светлая» и «Тёмная» её переопределяют."
 
 #. settings-schema.json->panelTheme->options
 msgid "Follow system"
-msgstr ""
+msgstr "Как в системе"
 
 #. settings-schema.json->panelTheme->options
 msgid "Light"
-msgstr ""
+msgstr "Светлая"
 
 #. settings-schema.json->panelTheme->options
 msgid "Dark"
-msgstr ""
+msgstr "Тёмная"
 
 #. settings-schema.json->accentMode->description
 msgid "Accent color"
-msgstr ""
+msgstr "Акцентный цвет"
 
 #. settings-schema.json->accentMode->tooltip
 msgid ""
 "Follow theme tracks the accent color of the Cinnamon theme live. Custom uses "
 "the color below."
 msgstr ""
+"«Как в теме» в реальном времени берёт акцентный цвет темы Cinnamon. «Свой» "
+"использует цвет, выбранный ниже."
 
 #. settings-schema.json->accentMode->options
 #. settings-schema.json->stateMode->options
 msgid "Follow theme"
-msgstr ""
+msgstr "Как в теме"
 
 #. settings-schema.json->accentMode->options
 #. settings-schema.json->stateMode->options
 msgid "Custom"
-msgstr ""
+msgstr "Свой"
 
 #. settings-schema.json->accentColor->description
 msgid "Custom accent color"
-msgstr ""
+msgstr "Свой акцентный цвет"
 
 #. settings-schema.json->accentColor->tooltip
 msgid "Accent of the preset panel and editor when Accent color is Custom."
 msgstr ""
+"Акцент панели преднастроек и редактора, когда для параметра «Акцентный цвет» "
+"выбрано «Свой»."
 
 #. settings-schema.json->stateMode->description
 msgid "State color"
-msgstr ""
+msgstr "Цвет состояния"
 
 #. settings-schema.json->stateMode->tooltip
 msgid ""
@@ -412,18 +428,23 @@ msgid ""
 "look. Follow theme tracks the accent color of the Cinnamon theme live. "
 "Custom uses the color below."
 msgstr ""
+"Цвет метки «Авто: вкл.» и назначенных строк. «Зелёный» сохраняет привычный "
+"вид. «Как в теме» в реальном времени берёт акцентный цвет темы Cinnamon. "
+"«Свой» использует цвет, выбранный ниже."
 
 #. settings-schema.json->stateMode->options
 msgid "Green"
-msgstr ""
+msgstr "Зелёный"
 
 #. settings-schema.json->stateColor->description
 msgid "Custom state color"
-msgstr ""
+msgstr "Свой цвет состояния"
 
 #. settings-schema.json->stateColor->tooltip
 msgid "State color of the preset panel when State color is Custom."
 msgstr ""
+"Цвет состояния панели преднастроек, когда для параметра «Цвет состояния» "
+"выбрано «Свой»."
 
 #~ msgid ""
 #~ "Draw a thin border in the state color around the focused window while "

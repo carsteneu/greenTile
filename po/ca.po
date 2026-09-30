@@ -21,67 +21,69 @@ msgstr ""
 #. settings-schema.json->excludeAppPicker->options
 #: greenTile.js:435
 msgid "Add application …"
-msgstr ""
+msgstr "Afegeix una aplicació …"
 
 #: greenTile.js:454
 msgid "Window floats"
-msgstr ""
+msgstr "La finestra flota"
 
 #: greenTile.js:454
 msgid "Window tiles again"
-msgstr ""
+msgstr "La finestra torna al mosaic"
 
 #: greenTile.js:2740
 #, javascript-format
 msgid "assigned — workspace %d"
-msgstr ""
+msgstr "assignada — espai de treball %d"
 
 #: greenTile.js:2801
 msgid "Please enter a name."
-msgstr ""
+msgstr "Introdueix un nom."
 
 #: greenTile.js:2843
 #, javascript-format
 msgid "from %d"
-msgstr ""
+msgstr "a partir de %d"
 
 #: greenTile.js:2960
 msgid "Rules (by window count)"
-msgstr ""
+msgstr "Regles (segons el nombre de finestres)"
 
 #: greenTile.js:2964
 msgid "Rule"
-msgstr ""
+msgstr "Regla"
 
 #: greenTile.js:2965
 msgid "Delete rule"
-msgstr ""
+msgstr "Esborra la regla"
 
 #: greenTile.js:2973
 msgid "Rule applies from"
-msgstr ""
+msgstr "La regla s'aplica a partir de"
 
 #: greenTile.js:2980
 msgid "windows"
-msgstr ""
+msgstr "finestres"
 
 #: greenTile.js:2982
 msgid "Painter"
-msgstr ""
+msgstr "Àrea de dibuix"
 
 #: greenTile.js:2997
 msgid ""
 "Click or drag: the row sets how many windows the column holds. Right-click "
 "removes a column."
 msgstr ""
+"Fes clic o arrossega: la fila determina quantes finestres té la columna. El "
+"clic dret elimina una columna."
 
 #: greenTile.js:3002
 msgid "Name"
-msgstr ""
+msgstr "Nom"
 
 #: greenTile.js:3003
 msgid "Preset name"
-msgstr ""
+msgstr "Nom de la predefinició"
 
 #: greenTile.js:3008
 msgid "Delete preset"
@@ -97,248 +99,255 @@ msgstr "Esborra"
 
 #: greenTile.js:3016
 msgid "Save"
-msgstr ""
+msgstr "Desa"
 
 #: greenTile.js:3041
 #, javascript-format
 msgid "Result: %s"
-msgstr ""
+msgstr "Resultat: %s"
 
 #: greenTile.js:3661
 msgid "Gap between windows"
-msgstr ""
+msgstr "Espai entre finestres"
 
 #: greenTile.js:3666
 #, javascript-format
 msgid "%d px"
-msgstr ""
+msgstr "%d px"
 
 #: greenTile.js:3685
 msgid "Reset sizes"
-msgstr ""
+msgstr "Restableix les mides"
 
 #: greenTile.js:3716
 #, javascript-format
 msgid "Presets — workspace %d · %s"
-msgstr ""
+msgstr "Predefinicions — espai de treball %d · %s"
 
 #: greenTile.js:3718
 msgid "Create preset"
-msgstr ""
+msgstr "Crea una predefinició"
 
 #: greenTile.js:3718
 #, javascript-format
 msgid "Edit %s"
-msgstr ""
+msgstr "Edita %s"
 
 #: greenTile.js:3722
 msgid "Back"
-msgstr ""
+msgstr "Enrere"
 
 #: greenTile.js:3731
-#, fuzzy
-#| msgid "Auto close"
 msgid "Auto: on"
-msgstr "Tancar automàticament"
+msgstr "Auto: activat"
 
 #: greenTile.js:3731
-#, fuzzy
-#| msgid "Auto close"
 msgid "Auto: off"
-msgstr "Tancar automàticament"
+msgstr "Auto: desactivat"
 
 #: greenTile.js:3752
 msgid "Dark theme"
-msgstr ""
+msgstr "Tema fosc"
 
 #: greenTile.js:3752
 msgid "Light theme"
-msgstr ""
+msgstr "Tema clar"
 
 #: greenTile.js:3872
 msgid "No presets yet."
-msgstr ""
+msgstr "Encara no hi ha cap predefinició."
 
 #: greenTile.js:3887
 msgid "New preset"
-msgstr ""
+msgstr "Predefinició nova"
 
 #: greenTile.js:3890
 msgid "Click a row to apply it to this workspace and tile right away"
 msgstr ""
+"Fes clic en una fila per aplicar-la a aquest espai de treball i posar les "
+"finestres en mosaic immediatament"
 
 #. metadata.json->name
-#, fuzzy
-#| msgid "gTile"
 msgid "greenTile"
-msgstr "gTile"
+msgstr "greenTile"
 
 #. metadata.json->description
 msgid ""
 "Column tiling with per-workspace presets, auto mode and snap-on-release. "
 "Fork of gTile by shuairan."
 msgstr ""
+"Mosaic en columnes amb predefinicions per espai de treball, mode automàtic i "
+"ajust en deixar anar. Bifurcació del gTile de shuairan."
 
 #. settings-schema.json->settings-tab->title
 msgid "Settings"
-msgstr ""
+msgstr "Configuració"
 
 #. settings-schema.json->hotkeys-tab->title
 msgid "Hotkeys"
 msgstr "Dreceres"
 
 #. settings-schema.json->autotile-hotkey-section->title
-#, fuzzy
-#| msgid "Auto tile two lists"
 msgid "Auto-Tile Hotkeys"
-msgstr "Col·locar les finestres en dues llistes"
+msgstr "Dreceres del mosaic automàtic"
 
 #. settings-schema.json->preset-section->title
 msgid "Workspace Presets"
-msgstr ""
+msgstr "Predefinicions dels espais de treball"
 
 #. settings-schema.json->resize-section->title
 msgid "Resize tiled windows"
-msgstr ""
+msgstr "Redimensiona les finestres en mosaic"
 
 #. settings-schema.json->swap-section->title
 msgid "Swap windows"
-msgstr ""
+msgstr "Intercanvia les finestres"
 
 #. settings-schema.json->tiling-section->title
 msgid "Tiling"
-msgstr ""
+msgstr "Mosaic"
 
 #. settings-schema.json->exclusion-section->title
 #. settings-schema.json->exclusion-hotkey-section->title
 msgid "Never tile"
-msgstr ""
+msgstr "No posar mai en mosaic"
 
 #. settings-schema.json->panel-section->title
 msgid "Preset panel"
-msgstr ""
+msgstr "Tauler de predefinicions"
 
 #. settings-schema.json->autotile6hotkey->description
 msgid "Tile all windows into 6 columns"
-msgstr ""
+msgstr "Posa totes les finestres en mosaic de 6 columnes"
 
 #. settings-schema.json->autotile3hotkey->description
 msgid "Tile all windows into 3 columns"
-msgstr ""
+msgstr "Posa totes les finestres en mosaic de 3 columnes"
 
 #. settings-schema.json->autotileautohotkey->description
 msgid "Turn automatic tiling on for this workspace and tile now"
 msgstr ""
+"Activa el mosaic automàtic en aquest espai de treball i posa les finestres "
+"en mosaic ara"
 
 #. settings-schema.json->autotileoffhotkey->description
 msgid "Turn automatic tiling off for this workspace"
-msgstr ""
+msgstr "Desactiva el mosaic automàtic en aquest espai de treball"
 
 #. settings-schema.json->presetHotkey->description
 msgid "Open the preset panel"
-msgstr ""
+msgstr "Obre el tauler de predefinicions"
 
 #. settings-schema.json->resizeWiderHotkey->description
 msgid "Make the focused tiled window wider (tap = 1 px, hold to speed up)"
 msgstr ""
+"Fes més ampla la finestra enfocada en mosaic (toc = 1 px, mantén premut per "
+"accelerar)"
 
 #. settings-schema.json->resizeNarrowerHotkey->description
 msgid "Make the focused tiled window narrower"
-msgstr ""
+msgstr "Fes més estreta la finestra enfocada en mosaic"
 
 #. settings-schema.json->resizeTallerHotkey->description
 msgid "Make the focused tiled window taller"
-msgstr ""
+msgstr "Fes més alta la finestra enfocada en mosaic"
 
 #. settings-schema.json->resizeShorterHotkey->description
 msgid "Make the focused tiled window shorter"
-msgstr ""
+msgstr "Fes més baixa la finestra enfocada en mosaic"
 
 #. settings-schema.json->swapLeftHotkey->description
 msgid "Swap the focused tiled window with its neighbor to the left"
-msgstr ""
+msgstr "Intercanvia la finestra enfocada en mosaic amb la veïna de l'esquerra"
 
 #. settings-schema.json->swapRightHotkey->description
 msgid "Swap the focused tiled window with its neighbor to the right"
-msgstr ""
+msgstr "Intercanvia la finestra enfocada en mosaic amb la veïna de la dreta"
 
 #. settings-schema.json->swapUpHotkey->description
 msgid "Swap the focused tiled window with its neighbor above"
-msgstr ""
+msgstr "Intercanvia la finestra enfocada en mosaic amb la veïna de dalt"
 
 #. settings-schema.json->swapDownHotkey->description
 msgid "Swap the focused tiled window with its neighbor below"
-msgstr ""
+msgstr "Intercanvia la finestra enfocada en mosaic amb la veïna de baix"
 
 #. settings-schema.json->presets->description
 msgid "Preset definitions (JSON)"
-msgstr ""
+msgstr "Definicions de les predefinicions (JSON)"
 
 #. settings-schema.json->excludeHotkey->description
 msgid "Toggle 'never tile' for the focused window"
-msgstr ""
+msgstr "Commuta «no posar mai en mosaic» per a la finestra enfocada"
 
 #. settings-schema.json->excludeAppPicker->description
 msgid "Add an installed application"
-msgstr ""
+msgstr "Afegeix una aplicació instal·lada"
 
 #. settings-schema.json->excludeAppPicker->tooltip
 msgid ""
 "Pick an application and it is added to the list below. The combobox resets "
 "after each pick."
 msgstr ""
+"Tria una aplicació i s'afegirà a la llista de sota. El quadre combinat es "
+"restableix després de cada tria."
 
 #. settings-schema.json->exclusions->description
 msgid ""
 "Windows matching one of these rows are never tiled; they float freely "
 "wherever you put them"
 msgstr ""
+"Les finestres que coincideixen amb alguna d'aquestes files no es posen mai "
+"en mosaic; floten lliurement allà on les deixis"
 
 #. settings-schema.json->exclusions->columns->title
 msgid "Match"
-msgstr ""
+msgstr "Coincidència"
 
 #. settings-schema.json->exclusions->columns->title
 msgid "Text"
-msgstr ""
+msgstr "Text"
 
 #. settings-schema.json->wsPresets->description
 msgid "Workspace to preset assignments (JSON)"
-msgstr ""
+msgstr "Assignacions de predefinicions als espais de treball (JSON)"
 
 #. settings-schema.json->autoWorkspaces->description
 msgid ""
 "Automatic tiling per workspace (set with Super+Ctrl+A / Super+Ctrl+D or in "
 "the preset panel; not shown in this dialog)"
 msgstr ""
+"Mosaic automàtic per espai de treball (es defineix amb Super+Ctrl+A / "
+"Super+Ctrl+D o al tauler de predefinicions; no es mostra en aquest diàleg)"
 
 #. settings-schema.json->autoWorkspaces->columns->title
 msgid "Workspace"
-msgstr ""
+msgstr "Espai de treball"
 
 #. settings-schema.json->autoWorkspaces->columns->title
 msgid "Tile automatically"
-msgstr ""
+msgstr "Mosaic automàtic"
 
 #. settings-schema.json->windowGap->description
 msgid ""
 "Gap between tiled windows (set with − / + in the preset panel; not shown in "
 "this dialog)"
 msgstr ""
+"Espai entre les finestres en mosaic (es defineix amb − / + al tauler de "
+"predefinicions; no es mostra en aquest diàleg)"
 
 #. settings-schema.json->windowGap->units
-#, fuzzy
-#| msgid "x"
 msgid "px"
-msgstr "x"
+msgstr "px"
 
 #. settings-schema.json->tileAnimation->description
 msgid "Animate tiling"
-msgstr ""
+msgstr "Anima el mosaic"
 
 #. settings-schema.json->tileAnimation->tooltip
 msgid "Windows glide into their new place. Off: they jump there at once."
 msgstr ""
+"Les finestres llisquen fins al seu lloc nou. Desactivat: hi salten de cop."
 
 #. settings-schema.json->focusBorder->description
 msgid "Border around the focused window"
@@ -354,57 +363,63 @@ msgstr ""
 
 #. settings-schema.json->panelTheme->description
 msgid "Theme of the preset panel"
-msgstr ""
+msgstr "Tema del tauler de predefinicions"
 
 #. settings-schema.json->panelTheme->tooltip
 msgid ""
 "Follow system tracks the desktop color scheme live; Light and Dark override "
 "it."
 msgstr ""
+"Segueix el sistema s'adapta en directe a l'esquema de colors de "
+"l'escriptori; Clar i Fosc el substitueixen."
 
 #. settings-schema.json->panelTheme->options
 msgid "Follow system"
-msgstr ""
+msgstr "Segueix el sistema"
 
 #. settings-schema.json->panelTheme->options
 msgid "Light"
-msgstr ""
+msgstr "Clar"
 
 #. settings-schema.json->panelTheme->options
 msgid "Dark"
-msgstr ""
+msgstr "Fosc"
 
 #. settings-schema.json->accentMode->description
 msgid "Accent color"
-msgstr ""
+msgstr "Color d'èmfasi"
 
 #. settings-schema.json->accentMode->tooltip
 msgid ""
 "Follow theme tracks the accent color of the Cinnamon theme live. Custom uses "
 "the color below."
 msgstr ""
+"Segueix el tema adopta en directe el color d'èmfasi del tema de Cinnamon. "
+"Personalitzat utilitza el color de sota."
 
 #. settings-schema.json->accentMode->options
 #. settings-schema.json->stateMode->options
 msgid "Follow theme"
-msgstr ""
+msgstr "Segueix el tema"
 
 #. settings-schema.json->accentMode->options
 #. settings-schema.json->stateMode->options
 msgid "Custom"
-msgstr ""
+msgstr "Personalitzat"
 
 #. settings-schema.json->accentColor->description
 msgid "Custom accent color"
-msgstr ""
+msgstr "Color d'èmfasi personalitzat"
 
 #. settings-schema.json->accentColor->tooltip
 msgid "Accent of the preset panel and editor when Accent color is Custom."
 msgstr ""
+"Èmfasi del tauler de predefinicions i de l'editor quan Color d'èmfasi és "
+"Personalitzat."
 
 #. settings-schema.json->stateMode->description
 msgid "State color"
-msgstr ""
+msgstr "Color d'estat"
 
 #. settings-schema.json->stateMode->tooltip
 msgid ""
@@ -412,18 +427,23 @@ msgid ""
 "look. Follow theme tracks the accent color of the Cinnamon theme live. "
 "Custom uses the color below."
 msgstr ""
+"Color del marcador «Auto: activat» i de les files assignades. Verd manté "
+"l'aspecte actual. Segueix el tema adopta en directe el color d'èmfasi del "
+"tema de Cinnamon. Personalitzat utilitza el color de sota."
 
 #. settings-schema.json->stateMode->options
 msgid "Green"
-msgstr ""
+msgstr "Verd"
 
 #. settings-schema.json->stateColor->description
 msgid "Custom state color"
-msgstr ""
+msgstr "Color d'estat personalitzat"
 
 #. settings-schema.json->stateColor->tooltip
 msgid "State color of the preset panel when State color is Custom."
 msgstr ""
+"Color d'estat del tauler de predefinicions quan Color d'estat és "
+"Personalitzat."
 
 #~ msgid ""
 #~ "Draw a thin border in the state color around the focused window while "
