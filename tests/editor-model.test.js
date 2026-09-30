@@ -16,7 +16,7 @@ const names = [
     'tile_editor_cols', 'tile_editor_rows', 'tile_editor_clamp', 'tile_editor_paint',
     'tile_editor_paint_range', 'tile_editor_remove', 'tile_editor_sort', 'tile_editor_add_rule',
     'tile_editor_delete_rule', 'tile_editor_step_min', 'tile_editor_validate',
-    'tile_editor_new_id', 'tile_editor_commit',
+    'tile_editor_new_id', 'tile_editor_commit', 'tile_editor_delete_preset',
 ];
 const m = new Function(block + '\nreturn {' + names.join(',') + '};')();
 
@@ -148,3 +148,13 @@ test('commit replaces by id in place or appends, without mutating', () => {
     assert.deepEqual(appended.map((p) => p.id), ['p1', 'p2', 'p3']);
     assert.equal(presets[0].name, 'A');
 });
+
+test('delete_preset drops only the preset with that id, without mutating', () => {
+    const presets = [{ id: 'p1', name: 'A' }, { id: 'p2', name: 'B' }, { id: 'p3', name: 'C' }];
+    const next = m.tile_editor_delete_preset(presets, 'p2');
+    assert.deepEqual(next.map((p) => p.id), ['p1', 'p3']);
+    assert.equal(presets.length, 3);
+    assert.deepEqual(m.tile_editor_delete_preset(presets, 'gone').map((p) => p.id), ['p1', 'p2', 'p3']);
+    assert.deepEqual(m.tile_editor_delete_preset([], 'p1'), []);
+});
+

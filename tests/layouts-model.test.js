@@ -18,7 +18,7 @@ const extract = (name) => {
 };
 const layoutsBlock = extract('layouts-model');
 const code = extract('auto-model') + '\n' + layoutsBlock;
-const names = ['tile_auto_list_map', 'tile_layouts_parse', 'tile_layouts_entry', 'tile_layouts_set', 'tile_layouts_migrate', 'tile_layouts_splits', 'tile_shape_valid', 'tile_layouts_shapes', 'tile_layout_resolve'];
+const names = ['tile_auto_list_map', 'tile_layouts_parse', 'tile_layouts_entry', 'tile_layouts_set', 'tile_layouts_migrate', 'tile_layouts_splits', 'tile_shape_valid', 'tile_layouts_shapes', 'tile_layout_resolve', 'tile_layouts_remove_preset'];
 const m = new Function(code + '\nreturn {' + names.join(',') + '};')();
 
 test('block is self-contained', () => {
@@ -214,3 +214,26 @@ test('tile_layouts_shapes reads the raw shapes object, {} when missing or invali
     assert.deepEqual(m.tile_layouts_shapes(null, 'M', '2'), {});
     assert.deepEqual(m.tile_layouts_shapes({}, 'X', '1'), {});
 });
+
+test('remove_preset strips the id everywhere, empty entries and monitors vanish', () => {
+    const layouts = {
+        M: { '5': { preset: 'p1' }, '6': { preset: 'p1', auto: false, splits: { '2': sp3 } } },
+        N: { '*': { preset: 'p2', shapes: { '2': { kind: 'cols', shape: [2] } } }, '7': { preset: 'p1', auto: true } },
+        P: { '1': { auto: true } },
+    };
+    const next = m.tile_layouts_remove_preset(layouts, 'p1');
+    assert.deepEqual(next, {
+        M: { '6': { auto: false, splits: { '2': sp3 } } },
+        N: { '*': { preset: 'p2', shapes: { '2': { kind: 'cols', shape: [2] } } }, '7': { auto: true } },
+        P: { '1': { auto: true } },
+    });
+    assert.deepEqual(layouts.M['5'], { preset: 'p1' });
+});
+
+test('remove_preset leaves everything unchanged for an unknown id', () => {
+    const layouts = { M: { '5': { preset: 'p1' }, '6': { auto: false } } };
+    assert.deepEqual(m.tile_layouts_remove_preset(layouts, 'gone'), layouts);
+    assert.deepEqual(m.tile_layouts_remove_preset({}, 'p1'), {});
+    assert.deepEqual(m.tile_layouts_remove_preset(null, 'p1'), {});
+});
+

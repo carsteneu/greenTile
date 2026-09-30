@@ -2115,6 +2115,28 @@ const tile_layouts_set = (layouts, mkey, wskey, patch) => {
         next[mkey] = monitor;
     return next;
 };
+// Removes every reference to a deleted preset id, same semantics as ✕ unassign:
+// the preset key goes, explicit auto/splits/shapes stay, empty entries and
+// monitors are dropped. Unknown ids leave the layouts untouched.
+const tile_layouts_remove_preset = (layouts, presetId) => {
+    const isObject = (v) => Object.prototype.toString.call(v) === '[object Object]';
+    const next = JSON.parse(JSON.stringify(isObject(layouts) ? layouts : {}));
+    for (const mkey of Object.keys(next)) {
+        if (!isObject(next[mkey]))
+            continue;
+        for (const wskey of Object.keys(next[mkey])) {
+            const entry = next[mkey][wskey];
+            if (!isObject(entry) || entry.preset !== presetId)
+                continue;
+            delete entry.preset;
+            if (Object.keys(entry).length === 0)
+                delete next[mkey][wskey];
+        }
+        if (Object.keys(next[mkey]).length === 0)
+            delete next[mkey];
+    }
+    return next;
+};
 const tile_layouts_migrate = (wsPresets, autoList, mkey) => {
     const autoMap = tile_auto_list_map(autoList);
     const presets = (wsPresets && typeof wsPresets === 'object' && !Array.isArray(wsPresets)) ? wsPresets : {};
@@ -2465,6 +2487,7 @@ const tile_editor_commit = (presets, preset) => {
     next[i] = preset;
     return next;
 };
+const tile_editor_delete_preset = (presets, id) => presets.filter((p) => p.id !== id);
 // <<< editor-model
 // Preset panel — view 1 (selection list) and, further below, view 2 (editor);
 // design tokens from the approved HTML mockup (docs/superpowers/specs/2026-09-28-preset-ui-design.md).
