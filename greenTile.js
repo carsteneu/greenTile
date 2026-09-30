@@ -1100,11 +1100,23 @@ const tile_auto_track_window = (app, w) => {
     tile_auto.lastMonitor.set(seq, w.get_monitor());
     tile_auto.tracked.push([w, mid, uid, seq]);
 };
+// >>> teardown-model (pure, no Cinnamon imports; tested by tests/teardown-model.test.js)
+// Disconnects every [target, ...ids] entry; a throwing disconnect (signal already
+// gone) is swallowed so every entry is attempted — callers then reset their lists.
+const tile_disconnect_each = (entries) => {
+    for (const [target, ...ids] of entries)
+        for (const id of ids) {
+            try {
+                target.disconnect(id);
+            }
+            catch (e) {
+                // signal was already gone
+            }
+        }
+};
+// <<< teardown-model
 const tile_auto_disconnect_workspaces = () => {
-    for (const [ws, a, r] of tile_auto.workspaceSignals) {
-        ws.disconnect(a);
-        ws.disconnect(r);
-    }
+    tile_disconnect_each(tile_auto.workspaceSignals);
     tile_auto.workspaceSignals = [];
 };
 const tile_auto_connect_workspace = (app, ws) => {
@@ -1182,8 +1194,7 @@ const tile_auto_disconnect_all = () => {
     tile_sort_rect_override.clear();
     tile_excl.toggled.clear();
     tile_auto_disconnect_workspaces();
-    for (const [obj, id] of tile_auto.signals)
-        obj.disconnect(id);
+    tile_disconnect_each(tile_auto.signals);
     tile_auto.signals = [];
     for (const [w] of tile_auto.tracked.slice())
         tile_auto_untrack(w);
