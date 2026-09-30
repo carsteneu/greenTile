@@ -2485,7 +2485,13 @@ const tile_focus_hotkey = (app, dir) => (display, window) => {
         cells = tile_split_rects(layout.kind, layout.shape, split, getUsableScreenArea(monitor));
         ordered = tile_sort_reading_order(windows, layout.kind === 'cols');
         const selfIdx = ordered.indexOf(window);
-        const nb = cells.length === n && selfIdx >= 0 ? tile_swap_neighbor(cells, selfIdx, dir) : null;
+        // a tiling-managed focus window is one of the collected ones; anything else
+        // (floating, dialog accidentally focused) keeps the native key behaviour
+        if (selfIdx < 0) {
+            tile_focus_push_native(window, dir);
+            return;
+        }
+        const nb = cells.length === n ? tile_swap_neighbor(cells, selfIdx, dir) : null;
         if (nb != null) {
             ordered[nb].activate(global.get_current_time());
             return;
