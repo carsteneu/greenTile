@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: greenTile 0.1.0\n"
 "Report-Msgid-Bugs-To: https://github.com/carsteneu\n"
-"POT-Creation-Date: 2026-09-29 16:14+0200\n"
+"POT-Creation-Date: 2026-09-30 12:21+0200\n"
 "PO-Revision-Date: \n"
 "Last-Translator: \n"
 "Language-Team: Simplified Chinese\n"
@@ -31,127 +31,139 @@ msgstr ""
 msgid "Window tiles again"
 msgstr ""
 
-#: greenTile.js:2248
+#: greenTile.js:2607
 #, javascript-format
 msgid "assigned — workspace %d"
 msgstr ""
 
-#: greenTile.js:2309
+#: greenTile.js:2668
 msgid "Please enter a name."
 msgstr ""
 
-#: greenTile.js:2332
+#: greenTile.js:2705
 #, javascript-format
 msgid "from %d"
 msgstr ""
 
-#: greenTile.js:2449
+#: greenTile.js:2822
 msgid "Rules (by window count)"
 msgstr ""
 
-#: greenTile.js:2453
+#: greenTile.js:2826
 msgid "Rule"
 msgstr ""
 
-#: greenTile.js:2454
+#: greenTile.js:2827
 msgid "Delete rule"
 msgstr ""
 
-#: greenTile.js:2462
+#: greenTile.js:2835
 msgid "Rule applies from"
 msgstr ""
 
-#: greenTile.js:2469
+#: greenTile.js:2842
 msgid "windows"
 msgstr ""
 
-#: greenTile.js:2471
+#: greenTile.js:2844
 msgid "Painter"
 msgstr ""
 
-#: greenTile.js:2486
+#: greenTile.js:2859
 msgid ""
 "Click or drag: the row sets how many windows the column holds. Right-click "
 "removes a column."
 msgstr ""
 
-#: greenTile.js:2491
+#: greenTile.js:2864
 msgid "Name"
 msgstr ""
 
-#: greenTile.js:2492
+#: greenTile.js:2865
 msgid "Preset name"
 msgstr ""
 
-#: greenTile.js:2496
+#: greenTile.js:2870
+msgid "Delete preset"
+msgstr "删除预设"
+
+#: greenTile.js:2873
+msgid "Really delete?"
+msgstr "确定要删除吗？"
+
+#: greenTile.js:2874
+msgid "Delete"
+msgstr "删除"
+
+#: greenTile.js:2878
 msgid "Save"
 msgstr ""
 
-#: greenTile.js:2513
+#: greenTile.js:2901
 #, javascript-format
 msgid "Result: %s"
 msgstr ""
 
-#: greenTile.js:2986
+#: greenTile.js:3383
 msgid "Gap between windows"
 msgstr ""
 
-#: greenTile.js:2991
+#: greenTile.js:3388
 #, javascript-format
 msgid "%d px"
 msgstr ""
 
-#: greenTile.js:3010
+#: greenTile.js:3407
 msgid "Reset sizes"
 msgstr ""
 
-#: greenTile.js:3041
+#: greenTile.js:3438
 #, javascript-format
 msgid "Presets — workspace %d · %s"
 msgstr ""
 
-#: greenTile.js:3043
+#: greenTile.js:3440
 msgid "Create preset"
 msgstr ""
 
-#: greenTile.js:3043
+#: greenTile.js:3440
 #, javascript-format
 msgid "Edit %s"
 msgstr ""
 
-#: greenTile.js:3047
+#: greenTile.js:3444
 msgid "Back"
 msgstr ""
 
-#: greenTile.js:3056
+#: greenTile.js:3453
 #, fuzzy
 #| msgid "Auto close"
 msgid "Auto: on"
 msgstr "自动关闭"
 
-#: greenTile.js:3056
+#: greenTile.js:3453
 #, fuzzy
 #| msgid "Auto close"
 msgid "Auto: off"
 msgstr "自动关闭"
 
-#: greenTile.js:3077
+#: greenTile.js:3474
 msgid "Dark theme"
 msgstr ""
 
-#: greenTile.js:3077
+#: greenTile.js:3474
 msgid "Light theme"
 msgstr ""
 
-#: greenTile.js:3197
+#: greenTile.js:3594
 msgid "No presets yet."
 msgstr ""
 
-#: greenTile.js:3212
+#: greenTile.js:3609
 msgid "New preset"
 msgstr ""
 
-#: greenTile.js:3215
+#: greenTile.js:3612
 msgid "Click a row to apply it to this workspace and tile right away"
 msgstr ""
 
@@ -356,8 +368,8 @@ msgstr ""
 
 #. settings-schema.json->accentMode->tooltip
 msgid ""
-"Follow theme tracks the accent color of the Cinnamon theme live. Custom uses "
-"the color below."
+"Follow theme tracks the accent color of the Cinnamon theme live. Custom uses"
+" the color below."
 msgstr ""
 
 #. settings-schema.json->accentMode->options
