@@ -1217,7 +1217,8 @@ const tile_settle_start = (app) => {
 // wsIndex -> preset id. Rule choice: last rule with min <= window count.
 const tile_presets_read = (app) => {
     try {
-        return JSON.parse(app.config.settings.getValue('presets') || '[]');
+        const v = JSON.parse(app.config.settings.getValue('presets') || '[]');
+        return Array.isArray(v) ? v : [];
     }
     catch (e) {
         return [];
@@ -2685,9 +2686,14 @@ const tile_presets_delete = (app) => {
         return;
     tile_presets_write(app, tile_editor_delete_preset(tile_presets_read(app), d.id));
     const layouts = tile_layouts_parse(app.config.settings.getValue('layouts') || '');
-    // Corrupt layouts stay untouched until the setting is fixed, like tile_layout_set.
-    if (layouts === null)
-        global.log('greenTile layouts setting is corrupt, deleting preset without layout cleanup');
+    // Corrupt layouts stay untouched until the setting is fixed, like tile_layout_set,
+    // which logs the same condition only once.
+    if (layouts === null) {
+        if (!tile_layouts_write_guard_logged) {
+            tile_layouts_write_guard_logged = true;
+            global.log('greenTile layouts setting is corrupt, deleting preset without layout cleanup');
+        }
+    }
     else
         app.config.settings.setValue('layouts', JSON.stringify(tile_layouts_remove_preset(layouts, d.id)));
     global.log('greenTile preset "' + (d.name || d.id) + '" deleted');
