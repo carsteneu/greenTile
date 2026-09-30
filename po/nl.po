@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: greenTile 1.1.3\n"
 "Report-Msgid-Bugs-To: https://github.com/carsteneu\n"
-"POT-Creation-Date: 2026-09-30 15:09+0200\n"
+"POT-Creation-Date: 2026-09-30 22:29+0200\n"
 "PO-Revision-Date: 2024-04-17 10:36+0200\n"
 "Last-Translator: qadzek\n"
 "Language-Team: Dutch\n"
@@ -18,57 +18,57 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 
 #. settings-schema.json->excludeAppPicker->options
-#: greenTile.js:435
+#: greenTile.js:439
 msgid "Add application …"
 msgstr "Toepassing toevoegen …"
 
-#: greenTile.js:454
+#: greenTile.js:458
 msgid "Window floats"
 msgstr "Venster zweeft"
 
-#: greenTile.js:454
+#: greenTile.js:458
 msgid "Window tiles again"
 msgstr "Venster wordt weer getegeld"
 
-#: greenTile.js:2740
+#: greenTile.js:2771
 #, javascript-format
 msgid "assigned — workspace %d"
 msgstr "toegewezen — werkblad %d"
 
-#: greenTile.js:2801
+#: greenTile.js:2832
 msgid "Please enter a name."
 msgstr "Voer een naam in."
 
-#: greenTile.js:2843
+#: greenTile.js:2874
 #, javascript-format
 msgid "from %d"
 msgstr "vanaf %d"
 
-#: greenTile.js:2960
+#: greenTile.js:2991
 msgid "Rules (by window count)"
 msgstr "Regels (naar aantal vensters)"
 
-#: greenTile.js:2964
+#: greenTile.js:2995
 msgid "Rule"
 msgstr "Regel"
 
-#: greenTile.js:2965
+#: greenTile.js:2996
 msgid "Delete rule"
 msgstr "Regel verwijderen"
 
-#: greenTile.js:2973
+#: greenTile.js:3004
 msgid "Rule applies from"
 msgstr "Regel geldt vanaf"
 
-#: greenTile.js:2980
+#: greenTile.js:3011
 msgid "windows"
 msgstr "vensters"
 
-#: greenTile.js:2982
+#: greenTile.js:3013
 msgid "Painter"
 msgstr "Tekenvlak"
 
-#: greenTile.js:2997
+#: greenTile.js:3028
 msgid ""
 "Click or drag: the row sets how many windows the column holds. Right-click "
 "removes a column."
@@ -76,91 +76,91 @@ msgstr ""
 "Klik of sleep: de rij bepaalt hoeveel vensters de kolom bevat. Rechtsklik "
 "verwijdert een kolom."
 
-#: greenTile.js:3002
+#: greenTile.js:3033
 msgid "Name"
 msgstr "Naam"
 
-#: greenTile.js:3003
+#: greenTile.js:3034
 msgid "Preset name"
 msgstr "Naam van voorinstelling"
 
-#: greenTile.js:3008
+#: greenTile.js:3039
 msgid "Delete preset"
 msgstr "Voorinstelling verwijderen"
 
-#: greenTile.js:3011
+#: greenTile.js:3042
 msgid "Really delete?"
 msgstr "Echt verwijderen?"
 
-#: greenTile.js:3012
+#: greenTile.js:3043
 msgid "Delete"
 msgstr "Verwijderen"
 
-#: greenTile.js:3016
+#: greenTile.js:3047
 msgid "Save"
 msgstr "Opslaan"
 
-#: greenTile.js:3041
+#: greenTile.js:3072
 #, javascript-format
 msgid "Result: %s"
 msgstr "Resultaat: %s"
 
-#: greenTile.js:3661
+#: greenTile.js:3692
 msgid "Gap between windows"
 msgstr "Ruimte tussen vensters"
 
-#: greenTile.js:3666
+#: greenTile.js:3697
 #, javascript-format
 msgid "%d px"
 msgstr "%d px"
 
-#: greenTile.js:3685
+#: greenTile.js:3716
 msgid "Reset sizes"
 msgstr "Afmetingen herstellen"
 
-#: greenTile.js:3716
+#: greenTile.js:3747
 #, javascript-format
 msgid "Presets — workspace %d · %s"
 msgstr "Voorinstellingen — werkblad %d · %s"
 
-#: greenTile.js:3718
+#: greenTile.js:3749
 msgid "Create preset"
 msgstr "Voorinstelling maken"
 
-#: greenTile.js:3718
+#: greenTile.js:3749
 #, javascript-format
 msgid "Edit %s"
 msgstr "%s bewerken"
 
-#: greenTile.js:3722
+#: greenTile.js:3753
 msgid "Back"
 msgstr "Terug"
 
-#: greenTile.js:3731
+#: greenTile.js:3762
 msgid "Auto: on"
 msgstr "Auto: aan"
 
-#: greenTile.js:3731
+#: greenTile.js:3762
 msgid "Auto: off"
 msgstr "Auto: uit"
 
-#: greenTile.js:3752
+#: greenTile.js:3783
 msgid "Dark theme"
 msgstr "Donker thema"
 
-#: greenTile.js:3752
+#: greenTile.js:3783
 msgid "Light theme"
 msgstr "Licht thema"
 
-#: greenTile.js:3872
+#: greenTile.js:3903
 msgid "No presets yet."
 msgstr "Nog geen voorinstellingen."
 
-#: greenTile.js:3887
+#: greenTile.js:3918
 msgid "New preset"
 msgstr "Nieuwe voorinstelling"
 
-#: greenTile.js:3890
+#: greenTile.js:3921
 msgid "Click a row to apply it to this workspace and tile right away"
 msgstr ""
 "Klik op een rij om deze op dit werkblad toe te passen en meteen te tegelen"
@@ -174,8 +174,8 @@ msgid ""
 "Column tiling with per-workspace presets, auto mode and snap-on-release. "
 "Fork of gTile by shuairan."
 msgstr ""
-"Tegelen in kolommen met voorinstellingen per werkblad, automatische modus en "
-"uitlijnen bij loslaten. Fork van gTile door shuairan."
+"Tegelen in kolommen met voorinstellingen per werkblad, automatische modus en"
+" uitlijnen bij loslaten. Fork van gTile door shuairan."
 
 #. settings-schema.json->settings-tab->title
 msgid "Settings"
@@ -258,7 +258,8 @@ msgstr "Het gefocuste getegelde venster verwisselen met het buurvenster links"
 
 #. settings-schema.json->swapRightHotkey->description
 msgid "Swap the focused tiled window with its neighbor to the right"
-msgstr "Het gefocuste getegelde venster verwisselen met het buurvenster rechts"
+msgstr ""
+"Het gefocuste getegelde venster verwisselen met het buurvenster rechts"
 
 #. settings-schema.json->swapUpHotkey->description
 msgid "Swap the focused tiled window with its neighbor above"
@@ -359,6 +360,18 @@ msgstr ""
 "Markeert na een focuswissel met Super+Pijl het nieuw gefocuste venster drie "
 "seconden lang met een dunne rand in de statuskleur."
 
+#. settings-schema.json->fillSingleWindow->description
+msgid "Fill the monitor with a single window"
+msgstr "Beeldscherm vullen met één venster"
+
+#. settings-schema.json->fillSingleWindow->tooltip
+msgid ""
+"With automatic tiling or a preset on, a single tiled window fills the whole "
+"usable area instead of being left untouched."
+msgstr ""
+"Met automatisch tegelen of een voorinstelling actief vult één getegeld "
+"venster het hele bruikbare gebied in plaats van onaangeroerd te blijven."
+
 #. settings-schema.json->panelTheme->description
 msgid "Theme of the preset panel"
 msgstr "Thema van het voorinstellingenpaneel"
@@ -389,8 +402,8 @@ msgstr "Accentkleur"
 
 #. settings-schema.json->accentMode->tooltip
 msgid ""
-"Follow theme tracks the accent color of the Cinnamon theme live. Custom uses "
-"the color below."
+"Follow theme tracks the accent color of the Cinnamon theme live. Custom uses"
+" the color below."
 msgstr ""
 "Thema volgen neemt live de accentkleur van het Cinnamon-thema over. "
 "Aangepast gebruikt de kleur hieronder."

@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: greenTile 1.1.3\n"
 "Report-Msgid-Bugs-To: https://github.com/carsteneu\n"
-"POT-Creation-Date: 2026-09-30 15:09+0200\n"
+"POT-Creation-Date: 2026-09-30 22:29+0200\n"
 "PO-Revision-Date: \n"
 "Last-Translator: blogdron\n"
 "Language-Team: Russian\n"
@@ -19,57 +19,57 @@ msgstr ""
 "X-Generator: Poedit 3.4\n"
 
 #. settings-schema.json->excludeAppPicker->options
-#: greenTile.js:435
+#: greenTile.js:439
 msgid "Add application …"
 msgstr "Добавить приложение …"
 
-#: greenTile.js:454
+#: greenTile.js:458
 msgid "Window floats"
 msgstr "Окно свободно"
 
-#: greenTile.js:454
+#: greenTile.js:458
 msgid "Window tiles again"
 msgstr "Окно снова в разбиении"
 
-#: greenTile.js:2740
+#: greenTile.js:2771
 #, javascript-format
 msgid "assigned — workspace %d"
 msgstr "назначено — рабочая область %d"
 
-#: greenTile.js:2801
+#: greenTile.js:2832
 msgid "Please enter a name."
 msgstr "Введите название."
 
-#: greenTile.js:2843
+#: greenTile.js:2874
 #, javascript-format
 msgid "from %d"
 msgstr "от %d"
 
-#: greenTile.js:2960
+#: greenTile.js:2991
 msgid "Rules (by window count)"
 msgstr "Правила (по числу окон)"
 
-#: greenTile.js:2964
+#: greenTile.js:2995
 msgid "Rule"
 msgstr "Правило"
 
-#: greenTile.js:2965
+#: greenTile.js:2996
 msgid "Delete rule"
 msgstr "Удалить правило"
 
-#: greenTile.js:2973
+#: greenTile.js:3004
 msgid "Rule applies from"
 msgstr "Правило действует от"
 
-#: greenTile.js:2980
+#: greenTile.js:3011
 msgid "windows"
 msgstr "окон"
 
-#: greenTile.js:2982
+#: greenTile.js:3013
 msgid "Painter"
 msgstr "Область рисования"
 
-#: greenTile.js:2997
+#: greenTile.js:3028
 msgid ""
 "Click or drag: the row sets how many windows the column holds. Right-click "
 "removes a column."
@@ -77,91 +77,91 @@ msgstr ""
 "Щелчок или перетаскивание: строка задаёт, сколько окон вмещает столбец. "
 "Щелчок правой кнопкой удаляет столбец."
 
-#: greenTile.js:3002
+#: greenTile.js:3033
 msgid "Name"
 msgstr "Название"
 
-#: greenTile.js:3003
+#: greenTile.js:3034
 msgid "Preset name"
 msgstr "Название преднастройки"
 
-#: greenTile.js:3008
+#: greenTile.js:3039
 msgid "Delete preset"
 msgstr "Удалить преднастройку"
 
-#: greenTile.js:3011
+#: greenTile.js:3042
 msgid "Really delete?"
 msgstr "Действительно удалить?"
 
-#: greenTile.js:3012
+#: greenTile.js:3043
 msgid "Delete"
 msgstr "Удалить"
 
-#: greenTile.js:3016
+#: greenTile.js:3047
 msgid "Save"
 msgstr "Сохранить"
 
-#: greenTile.js:3041
+#: greenTile.js:3072
 #, javascript-format
 msgid "Result: %s"
 msgstr "Результат: %s"
 
-#: greenTile.js:3661
+#: greenTile.js:3692
 msgid "Gap between windows"
 msgstr "Отступ между окнами"
 
-#: greenTile.js:3666
+#: greenTile.js:3697
 #, javascript-format
 msgid "%d px"
 msgstr "%d px"
 
-#: greenTile.js:3685
+#: greenTile.js:3716
 msgid "Reset sizes"
 msgstr "Сбросить размеры"
 
-#: greenTile.js:3716
+#: greenTile.js:3747
 #, javascript-format
 msgid "Presets — workspace %d · %s"
 msgstr "Преднастройки — рабочая область %d · %s"
 
-#: greenTile.js:3718
+#: greenTile.js:3749
 msgid "Create preset"
 msgstr "Создать преднастройку"
 
-#: greenTile.js:3718
+#: greenTile.js:3749
 #, javascript-format
 msgid "Edit %s"
 msgstr "Изменить %s"
 
-#: greenTile.js:3722
+#: greenTile.js:3753
 msgid "Back"
 msgstr "Назад"
 
-#: greenTile.js:3731
+#: greenTile.js:3762
 msgid "Auto: on"
 msgstr "Авто: вкл."
 
-#: greenTile.js:3731
+#: greenTile.js:3762
 msgid "Auto: off"
 msgstr "Авто: выкл."
 
-#: greenTile.js:3752
+#: greenTile.js:3783
 msgid "Dark theme"
 msgstr "Тёмная тема"
 
-#: greenTile.js:3752
+#: greenTile.js:3783
 msgid "Light theme"
 msgstr "Светлая тема"
 
-#: greenTile.js:3872
+#: greenTile.js:3903
 msgid "No presets yet."
 msgstr "Преднастроек пока нет."
 
-#: greenTile.js:3887
+#: greenTile.js:3918
 msgid "New preset"
 msgstr "Новая преднастройка"
 
-#: greenTile.js:3890
+#: greenTile.js:3921
 msgid "Click a row to apply it to this workspace and tile right away"
 msgstr ""
 "Щёлкните строку, чтобы применить её к этой рабочей области и сразу разбить "
@@ -362,6 +362,18 @@ msgstr ""
 "После перемещения фокуса клавишами Super+стрелка новое активное окно на три "
 "секунды выделяется тонкой рамкой цвета состояния."
 
+#. settings-schema.json->fillSingleWindow->description
+msgid "Fill the monitor with a single window"
+msgstr "Заполнить монитор одним окном"
+
+#. settings-schema.json->fillSingleWindow->tooltip
+msgid ""
+"With automatic tiling or a preset on, a single tiled window fills the whole "
+"usable area instead of being left untouched."
+msgstr ""
+"Если включена автоматическая разбивка или преднастройка, одно разбитое окно "
+"занимает всю доступную область вместо того, чтобы оставаться нетронутым."
+
 #. settings-schema.json->panelTheme->description
 msgid "Theme of the preset panel"
 msgstr "Тема панели преднастроек"
@@ -392,8 +404,8 @@ msgstr "Акцентный цвет"
 
 #. settings-schema.json->accentMode->tooltip
 msgid ""
-"Follow theme tracks the accent color of the Cinnamon theme live. Custom uses "
-"the color below."
+"Follow theme tracks the accent color of the Cinnamon theme live. Custom uses"
+" the color below."
 msgstr ""
 "«Как в теме» в реальном времени берёт акцентный цвет темы Cinnamon. «Свой» "
 "использует цвет, выбранный ниже."
@@ -415,8 +427,8 @@ msgstr "Свой акцентный цвет"
 #. settings-schema.json->accentColor->tooltip
 msgid "Accent of the preset panel and editor when Accent color is Custom."
 msgstr ""
-"Акцент панели преднастроек и редактора, когда для параметра «Акцентный цвет» "
-"выбрано «Свой»."
+"Акцент панели преднастроек и редактора, когда для параметра «Акцентный цвет»"
+" выбрано «Свой»."
 
 #. settings-schema.json->stateMode->description
 msgid "State color"

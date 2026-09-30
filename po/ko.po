@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: greenTile 1.1.3\n"
 "Report-Msgid-Bugs-To: https://github.com/carsteneu\n"
-"POT-Creation-Date: 2026-09-30 15:09+0200\n"
+"POT-Creation-Date: 2026-09-30 22:29+0200\n"
 "PO-Revision-Date: 2024-08-11 23:42+0900\n"
 "Last-Translator: Kevin Kim <chaeya@gmail.com>\n"
 "Language-Team: Korean\n"
@@ -19,149 +19,147 @@ msgstr ""
 "X-Generator: Poedit 3.4.2\n"
 
 #. settings-schema.json->excludeAppPicker->options
-#: greenTile.js:435
+#: greenTile.js:439
 msgid "Add application …"
 msgstr "애플리케이션 추가…"
 
-#: greenTile.js:454
+#: greenTile.js:458
 msgid "Window floats"
 msgstr "창 플로팅"
 
-#: greenTile.js:454
+#: greenTile.js:458
 msgid "Window tiles again"
 msgstr "창 다시 타일링"
 
-#: greenTile.js:2740
+#: greenTile.js:2771
 #, javascript-format
 msgid "assigned — workspace %d"
 msgstr "할당됨 — 작업 공간 %d"
 
-#: greenTile.js:2801
+#: greenTile.js:2832
 msgid "Please enter a name."
 msgstr "이름을 입력하세요."
 
-#: greenTile.js:2843
+#: greenTile.js:2874
 #, javascript-format
 msgid "from %d"
 msgstr "%d개 이상"
 
-#: greenTile.js:2960
+#: greenTile.js:2991
 msgid "Rules (by window count)"
 msgstr "규칙 (창 개수별)"
 
-#: greenTile.js:2964
+#: greenTile.js:2995
 msgid "Rule"
 msgstr "규칙"
 
-#: greenTile.js:2965
+#: greenTile.js:2996
 msgid "Delete rule"
 msgstr "규칙 삭제"
 
-#: greenTile.js:2973
+#: greenTile.js:3004
 msgid "Rule applies from"
 msgstr "규칙 적용 조건:"
 
-#: greenTile.js:2980
+#: greenTile.js:3011
 msgid "windows"
 msgstr "개 창 이상"
 
-#: greenTile.js:2982
+#: greenTile.js:3013
 msgid "Painter"
 msgstr "레이아웃 그리기"
 
-#: greenTile.js:2997
+#: greenTile.js:3028
 msgid ""
 "Click or drag: the row sets how many windows the column holds. Right-click "
 "removes a column."
-msgstr ""
-"클릭 또는 드래그: 행으로 열에 들어갈 창 개수를 정합니다. 오른쪽 클릭하면 열"
-"이 제거됩니다."
+msgstr "클릭 또는 드래그: 행으로 열에 들어갈 창 개수를 정합니다. 오른쪽 클릭하면 열이 제거됩니다."
 
-#: greenTile.js:3002
+#: greenTile.js:3033
 msgid "Name"
 msgstr "이름"
 
-#: greenTile.js:3003
+#: greenTile.js:3034
 msgid "Preset name"
 msgstr "프리셋 이름"
 
-#: greenTile.js:3008
+#: greenTile.js:3039
 msgid "Delete preset"
 msgstr "프리셋 삭제"
 
-#: greenTile.js:3011
+#: greenTile.js:3042
 msgid "Really delete?"
 msgstr "정말 삭제할까요?"
 
-#: greenTile.js:3012
+#: greenTile.js:3043
 msgid "Delete"
 msgstr "삭제"
 
-#: greenTile.js:3016
+#: greenTile.js:3047
 msgid "Save"
 msgstr "저장"
 
-#: greenTile.js:3041
+#: greenTile.js:3072
 #, javascript-format
 msgid "Result: %s"
 msgstr "결과: %s"
 
-#: greenTile.js:3661
+#: greenTile.js:3692
 msgid "Gap between windows"
 msgstr "창 사이 간격"
 
-#: greenTile.js:3666
+#: greenTile.js:3697
 #, javascript-format
 msgid "%d px"
 msgstr "%d px"
 
-#: greenTile.js:3685
+#: greenTile.js:3716
 msgid "Reset sizes"
 msgstr "크기 초기화"
 
-#: greenTile.js:3716
+#: greenTile.js:3747
 #, javascript-format
 msgid "Presets — workspace %d · %s"
 msgstr "프리셋 — 작업 공간 %d · %s"
 
-#: greenTile.js:3718
+#: greenTile.js:3749
 msgid "Create preset"
 msgstr "프리셋 만들기"
 
-#: greenTile.js:3718
+#: greenTile.js:3749
 #, javascript-format
 msgid "Edit %s"
 msgstr "%s 편집"
 
-#: greenTile.js:3722
+#: greenTile.js:3753
 msgid "Back"
 msgstr "뒤로"
 
-#: greenTile.js:3731
+#: greenTile.js:3762
 msgid "Auto: on"
 msgstr "자동: 켬"
 
-#: greenTile.js:3731
+#: greenTile.js:3762
 msgid "Auto: off"
 msgstr "자동: 끔"
 
-#: greenTile.js:3752
+#: greenTile.js:3783
 msgid "Dark theme"
 msgstr "어두운 테마"
 
-#: greenTile.js:3752
+#: greenTile.js:3783
 msgid "Light theme"
 msgstr "밝은 테마"
 
-#: greenTile.js:3872
+#: greenTile.js:3903
 msgid "No presets yet."
 msgstr "아직 프리셋이 없습니다."
 
-#: greenTile.js:3887
+#: greenTile.js:3918
 msgid "New preset"
 msgstr "새 프리셋"
 
-#: greenTile.js:3890
+#: greenTile.js:3921
 msgid "Click a row to apply it to this workspace and tile right away"
 msgstr "행을 클릭하면 이 작업 공간에 적용하고 바로 타일링합니다"
 
@@ -173,9 +171,7 @@ msgstr "greenTile"
 msgid ""
 "Column tiling with per-workspace presets, auto mode and snap-on-release. "
 "Fork of gTile by shuairan."
-msgstr ""
-"작업 공간별 프리셋, 자동 모드, 놓을 때 스냅을 지원하는 열 타일링입니다. "
-"shuairan의 gTile에서 포크했습니다."
+msgstr "작업 공간별 프리셋, 자동 모드, 놓을 때 스냅을 지원하는 열 타일링입니다. shuairan의 gTile에서 포크했습니다."
 
 #. settings-schema.json->settings-tab->title
 msgid "Settings"
@@ -282,17 +278,13 @@ msgstr "설치된 애플리케이션 추가"
 msgid ""
 "Pick an application and it is added to the list below. The combobox resets "
 "after each pick."
-msgstr ""
-"애플리케이션을 선택하면 아래 목록에 추가됩니다. 콤보 상자는 선택할 때마다 초"
-"기화됩니다."
+msgstr "애플리케이션을 선택하면 아래 목록에 추가됩니다. 콤보 상자는 선택할 때마다 초기화됩니다."
 
 #. settings-schema.json->exclusions->description
 msgid ""
 "Windows matching one of these rows are never tiled; they float freely "
 "wherever you put them"
-msgstr ""
-"이 행 중 하나와 일치하는 창은 타일링되지 않으며, 놓은 위치에서 자유롭게 떠 있"
-"습니다"
+msgstr "이 행 중 하나와 일치하는 창은 타일링되지 않으며, 놓은 위치에서 자유롭게 떠 있습니다"
 
 #. settings-schema.json->exclusions->columns->title
 msgid "Match"
@@ -311,8 +303,8 @@ msgid ""
 "Automatic tiling per workspace (set with Super+Ctrl+A / Super+Ctrl+D or in "
 "the preset panel; not shown in this dialog)"
 msgstr ""
-"작업 공간별 자동 타일링 (Super+Ctrl+A / Super+Ctrl+D 또는 프리셋 패널에서 설"
-"정, 이 대화 상자에는 표시되지 않음)"
+"작업 공간별 자동 타일링 (Super+Ctrl+A / Super+Ctrl+D 또는 프리셋 패널에서 설정, 이 대화 상자에는 표시되지 "
+"않음)"
 
 #. settings-schema.json->autoWorkspaces->columns->title
 msgid "Workspace"
@@ -326,9 +318,7 @@ msgstr "자동 타일링"
 msgid ""
 "Gap between tiled windows (set with − / + in the preset panel; not shown in "
 "this dialog)"
-msgstr ""
-"타일링된 창 사이 간격 (프리셋 패널의 − / +로 설정, 이 대화 상자에는 표시되지 "
-"않음)"
+msgstr "타일링된 창 사이 간격 (프리셋 패널의 − / +로 설정, 이 대화 상자에는 표시되지 않음)"
 
 #. settings-schema.json->windowGap->units
 msgid "px"
@@ -350,9 +340,17 @@ msgstr "포커스된 창 주위의 테두리"
 msgid ""
 "After a Super+Arrow focus move, mark the newly focused window with a thin "
 "border in the state color for three seconds."
-msgstr ""
-"Super+화살표로 포커스를 옮기면 새로 포커스된 창을 3초 동안 상태 색의 얇은 테"
-"두리로 표시합니다."
+msgstr "Super+화살표로 포커스를 옮기면 새로 포커스된 창을 3초 동안 상태 색의 얇은 테두리로 표시합니다."
+
+#. settings-schema.json->fillSingleWindow->description
+msgid "Fill the monitor with a single window"
+msgstr "단일 창으로 모니터 채우기"
+
+#. settings-schema.json->fillSingleWindow->tooltip
+msgid ""
+"With automatic tiling or a preset on, a single tiled window fills the whole "
+"usable area instead of being left untouched."
+msgstr "자동 타일링 또는 프리셋이 켜져 있으면 타일링된 단일 창이 그대로 두지 않고 사용 가능한 전체 영역을 채웁니다."
 
 #. settings-schema.json->panelTheme->description
 msgid "Theme of the preset panel"
@@ -362,9 +360,7 @@ msgstr "프리셋 패널 테마"
 msgid ""
 "Follow system tracks the desktop color scheme live; Light and Dark override "
 "it."
-msgstr ""
-"'시스템 설정 따르기'는 데스크톱 색 구성표를 실시간으로 따르며, '밝게'와 '어둡"
-"게'는 이를 무시합니다."
+msgstr "'시스템 설정 따르기'는 데스크톱 색 구성표를 실시간으로 따르며, '밝게'와 '어둡게'는 이를 무시합니다."
 
 #. settings-schema.json->panelTheme->options
 msgid "Follow system"
@@ -384,11 +380,9 @@ msgstr "강조 색"
 
 #. settings-schema.json->accentMode->tooltip
 msgid ""
-"Follow theme tracks the accent color of the Cinnamon theme live. Custom uses "
-"the color below."
-msgstr ""
-"'테마 따르기'는 Cinnamon 테마의 강조 색을 실시간으로 따릅니다. '사용자 지"
-"정'은 아래 색을 사용합니다."
+"Follow theme tracks the accent color of the Cinnamon theme live. Custom uses"
+" the color below."
+msgstr "'테마 따르기'는 Cinnamon 테마의 강조 색을 실시간으로 따릅니다. '사용자 지정'은 아래 색을 사용합니다."
 
 #. settings-schema.json->accentMode->options
 #. settings-schema.json->stateMode->options
@@ -418,9 +412,8 @@ msgid ""
 "look. Follow theme tracks the accent color of the Cinnamon theme live. "
 "Custom uses the color below."
 msgstr ""
-"'자동: 켬' 표시와 할당된 행의 색입니다. '녹색'은 현재 모양을 유지합니다. '테"
-"마 따르기'는 Cinnamon 테마의 강조 색을 실시간으로 따릅니다. '사용자 지정'은 "
-"아래 색을 사용합니다."
+"'자동: 켬' 표시와 할당된 행의 색입니다. '녹색'은 현재 모양을 유지합니다. '테마 따르기'는 Cinnamon 테마의 강조 색을 "
+"실시간으로 따릅니다. '사용자 지정'은 아래 색을 사용합니다."
 
 #. settings-schema.json->stateMode->options
 msgid "Green"
@@ -437,6 +430,4 @@ msgstr "'상태 색'이 '사용자 지정'일 때 프리셋 패널의 상태 색
 #~ msgid ""
 #~ "Draw a thin border in the state color around the focused window while "
 #~ "automatic tiling is on."
-#~ msgstr ""
-#~ "자동 타일링이 켜져 있는 동안 포커스된 창 주위에 상태 색으로 얇은 테두리를 "
-#~ "그립니다."
+#~ msgstr "자동 타일링이 켜져 있는 동안 포커스된 창 주위에 상태 색으로 얇은 테두리를 그립니다."

@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: greenTile 1.1.3\n"
 "Report-Msgid-Bugs-To: https://github.com/carsteneu\n"
-"POT-Creation-Date: 2026-09-30 15:09+0200\n"
+"POT-Creation-Date: 2026-09-30 22:29+0200\n"
 "PO-Revision-Date: 2023-12-07 15:21+0100\n"
 "Last-Translator: Alan Mortensen <alanmortensen.am@gmail.com>\n"
 "Language-Team: Danish\n"
@@ -20,57 +20,57 @@ msgstr ""
 "X-Generator: Poedit 3.0.1\n"
 
 #. settings-schema.json->excludeAppPicker->options
-#: greenTile.js:435
+#: greenTile.js:439
 msgid "Add application …"
 msgstr "Tilføj program …"
 
-#: greenTile.js:454
+#: greenTile.js:458
 msgid "Window floats"
 msgstr "Vinduet svæver"
 
-#: greenTile.js:454
+#: greenTile.js:458
 msgid "Window tiles again"
 msgstr "Vinduet flises igen"
 
-#: greenTile.js:2740
+#: greenTile.js:2771
 #, javascript-format
 msgid "assigned — workspace %d"
 msgstr "tildelt — arbejdsområde %d"
 
-#: greenTile.js:2801
+#: greenTile.js:2832
 msgid "Please enter a name."
 msgstr "Angiv et navn."
 
-#: greenTile.js:2843
+#: greenTile.js:2874
 #, javascript-format
 msgid "from %d"
 msgstr "fra %d"
 
-#: greenTile.js:2960
+#: greenTile.js:2991
 msgid "Rules (by window count)"
 msgstr "Regler (efter antal vinduer)"
 
-#: greenTile.js:2964
+#: greenTile.js:2995
 msgid "Rule"
 msgstr "Regel"
 
-#: greenTile.js:2965
+#: greenTile.js:2996
 msgid "Delete rule"
 msgstr "Slet regel"
 
-#: greenTile.js:2973
+#: greenTile.js:3004
 msgid "Rule applies from"
 msgstr "Reglen gælder fra"
 
-#: greenTile.js:2980
+#: greenTile.js:3011
 msgid "windows"
 msgstr "vinduer"
 
-#: greenTile.js:2982
+#: greenTile.js:3013
 msgid "Painter"
 msgstr "Tegneflade"
 
-#: greenTile.js:2997
+#: greenTile.js:3028
 msgid ""
 "Click or drag: the row sets how many windows the column holds. Right-click "
 "removes a column."
@@ -78,91 +78,91 @@ msgstr ""
 "Klik eller træk: rækken bestemmer, hvor mange vinduer kolonnen rummer. "
 "Højreklik fjerner en kolonne."
 
-#: greenTile.js:3002
+#: greenTile.js:3033
 msgid "Name"
 msgstr "Navn"
 
-#: greenTile.js:3003
+#: greenTile.js:3034
 msgid "Preset name"
 msgstr "Navn på forudindstilling"
 
-#: greenTile.js:3008
+#: greenTile.js:3039
 msgid "Delete preset"
 msgstr "Slet forudindstilling"
 
-#: greenTile.js:3011
+#: greenTile.js:3042
 msgid "Really delete?"
 msgstr "Vil du virkelig slette?"
 
-#: greenTile.js:3012
+#: greenTile.js:3043
 msgid "Delete"
 msgstr "Slet"
 
-#: greenTile.js:3016
+#: greenTile.js:3047
 msgid "Save"
 msgstr "Gem"
 
-#: greenTile.js:3041
+#: greenTile.js:3072
 #, javascript-format
 msgid "Result: %s"
 msgstr "Resultat: %s"
 
-#: greenTile.js:3661
+#: greenTile.js:3692
 msgid "Gap between windows"
 msgstr "Afstand mellem vinduer"
 
-#: greenTile.js:3666
+#: greenTile.js:3697
 #, javascript-format
 msgid "%d px"
 msgstr "%d px"
 
-#: greenTile.js:3685
+#: greenTile.js:3716
 msgid "Reset sizes"
 msgstr "Nulstil størrelser"
 
-#: greenTile.js:3716
+#: greenTile.js:3747
 #, javascript-format
 msgid "Presets — workspace %d · %s"
 msgstr "Forudindstillinger — arbejdsområde %d · %s"
 
-#: greenTile.js:3718
+#: greenTile.js:3749
 msgid "Create preset"
 msgstr "Opret forudindstilling"
 
-#: greenTile.js:3718
+#: greenTile.js:3749
 #, javascript-format
 msgid "Edit %s"
 msgstr "Rediger %s"
 
-#: greenTile.js:3722
+#: greenTile.js:3753
 msgid "Back"
 msgstr "Tilbage"
 
-#: greenTile.js:3731
+#: greenTile.js:3762
 msgid "Auto: on"
 msgstr "Auto: til"
 
-#: greenTile.js:3731
+#: greenTile.js:3762
 msgid "Auto: off"
 msgstr "Auto: fra"
 
-#: greenTile.js:3752
+#: greenTile.js:3783
 msgid "Dark theme"
 msgstr "Mørkt tema"
 
-#: greenTile.js:3752
+#: greenTile.js:3783
 msgid "Light theme"
 msgstr "Lyst tema"
 
-#: greenTile.js:3872
+#: greenTile.js:3903
 msgid "No presets yet."
 msgstr "Ingen forudindstillinger endnu."
 
-#: greenTile.js:3887
+#: greenTile.js:3918
 msgid "New preset"
 msgstr "Ny forudindstilling"
 
-#: greenTile.js:3890
+#: greenTile.js:3921
 msgid "Click a row to apply it to this workspace and tile right away"
 msgstr ""
 "Klik på en række for at anvende den på dette arbejdsområde og flise med det "
@@ -240,8 +240,8 @@ msgstr "Åbn forudindstillingspanelet"
 #. settings-schema.json->resizeWiderHotkey->description
 msgid "Make the focused tiled window wider (tap = 1 px, hold to speed up)"
 msgstr ""
-"Gør det fokuserede flisede vindue bredere (tryk = 1 px, hold nede for at øge "
-"farten)"
+"Gør det fokuserede flisede vindue bredere (tryk = 1 px, hold nede for at øge"
+" farten)"
 
 #. settings-schema.json->resizeNarrowerHotkey->description
 msgid "Make the focused tiled window narrower"
@@ -360,6 +360,18 @@ msgstr ""
 "Efter et fokusskift med Super+Pil markeres det nyligt fokuserede vindue i "
 "tre sekunder med en tynd ramme i statusfarve."
 
+#. settings-schema.json->fillSingleWindow->description
+msgid "Fill the monitor with a single window"
+msgstr "Fyld skærmen med et enkelt vindue"
+
+#. settings-schema.json->fillSingleWindow->tooltip
+msgid ""
+"With automatic tiling or a preset on, a single tiled window fills the whole "
+"usable area instead of being left untouched."
+msgstr ""
+"Med automatisk flisning eller en forudindstilling aktiveret fylder et enkelt"
+" fliset vindue hele det anvendelige område i stedet for at blive urørt."
+
 #. settings-schema.json->panelTheme->description
 msgid "Theme of the preset panel"
 msgstr "Tema for forudindstillingspanelet"
@@ -390,8 +402,8 @@ msgstr "Accentfarve"
 
 #. settings-schema.json->accentMode->tooltip
 msgid ""
-"Follow theme tracks the accent color of the Cinnamon theme live. Custom uses "
-"the color below."
+"Follow theme tracks the accent color of the Cinnamon theme live. Custom uses"
+" the color below."
 msgstr ""
 "Følg tema følger Cinnamon-temaets accentfarve live. Tilpasset bruger farven "
 "nedenfor."

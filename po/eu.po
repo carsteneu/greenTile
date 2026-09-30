@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: greenTile 1.1.3\n"
 "Report-Msgid-Bugs-To: https://github.com/carsteneu\n"
-"POT-Creation-Date: 2026-09-30 15:09+0200\n"
+"POT-Creation-Date: 2026-09-30 22:29+0200\n"
 "PO-Revision-Date: 2024-05-30 9:50+1\n"
 "Last-Translator: Muxutruk <muxutruk2@users.noreply.github.com>\n"
 "Language-Team: Basque <muxutruk2@users.noreply.github.com>\n"
@@ -18,57 +18,57 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 
 #. settings-schema.json->excludeAppPicker->options
-#: greenTile.js:435
+#: greenTile.js:439
 msgid "Add application …"
 msgstr "Gehitu aplikazioa …"
 
-#: greenTile.js:454
+#: greenTile.js:458
 msgid "Window floats"
 msgstr "Leihoa flotatzen dago"
 
-#: greenTile.js:454
+#: greenTile.js:458
 msgid "Window tiles again"
 msgstr "Leihoa mosaikoan dago berriro"
 
-#: greenTile.js:2740
+#: greenTile.js:2771
 #, javascript-format
 msgid "assigned — workspace %d"
 msgstr "esleituta — %d. laneko area"
 
-#: greenTile.js:2801
+#: greenTile.js:2832
 msgid "Please enter a name."
 msgstr "Idatzi izen bat."
 
-#: greenTile.js:2843
+#: greenTile.js:2874
 #, javascript-format
 msgid "from %d"
 msgstr "gutxienez %d"
 
-#: greenTile.js:2960
+#: greenTile.js:2991
 msgid "Rules (by window count)"
 msgstr "Arauak (leiho kopuruaren arabera)"
 
-#: greenTile.js:2964
+#: greenTile.js:2995
 msgid "Rule"
 msgstr "Araua"
 
-#: greenTile.js:2965
+#: greenTile.js:2996
 msgid "Delete rule"
 msgstr "Ezabatu araua"
 
-#: greenTile.js:2973
+#: greenTile.js:3004
 msgid "Rule applies from"
 msgstr "Araua aplikatzen da gutxienez"
 
-#: greenTile.js:2980
+#: greenTile.js:3011
 msgid "windows"
 msgstr "leihorekin"
 
-#: greenTile.js:2982
+#: greenTile.js:3013
 msgid "Painter"
 msgstr "Marrazketa-eremua"
 
-#: greenTile.js:2997
+#: greenTile.js:3028
 msgid ""
 "Click or drag: the row sets how many windows the column holds. Right-click "
 "removes a column."
@@ -76,95 +76,95 @@ msgstr ""
 "Egin klik edo arrastatu: errenkadak zehazten du zutabeak zenbat leiho "
 "hartzen dituen. Eskuineko klikak zutabe bat kentzen du."
 
-#: greenTile.js:3002
+#: greenTile.js:3033
 msgid "Name"
 msgstr "Izena"
 
-#: greenTile.js:3003
+#: greenTile.js:3034
 msgid "Preset name"
 msgstr "Aurrezarpenaren izena"
 
-#: greenTile.js:3008
+#: greenTile.js:3039
 msgid "Delete preset"
 msgstr "Ezabatu aurrezarpena"
 
-#: greenTile.js:3011
+#: greenTile.js:3042
 msgid "Really delete?"
 msgstr "Benetan ezabatu?"
 
-#: greenTile.js:3012
+#: greenTile.js:3043
 msgid "Delete"
 msgstr "Ezabatu"
 
-#: greenTile.js:3016
+#: greenTile.js:3047
 msgid "Save"
 msgstr "Gorde"
 
-#: greenTile.js:3041
+#: greenTile.js:3072
 #, javascript-format
 msgid "Result: %s"
 msgstr "Emaitza: %s"
 
-#: greenTile.js:3661
+#: greenTile.js:3692
 msgid "Gap between windows"
 msgstr "Leihoen arteko tartea"
 
-#: greenTile.js:3666
+#: greenTile.js:3697
 #, javascript-format
 msgid "%d px"
 msgstr "%d px"
 
-#: greenTile.js:3685
+#: greenTile.js:3716
 msgid "Reset sizes"
 msgstr "Berrezarri tamainak"
 
-#: greenTile.js:3716
+#: greenTile.js:3747
 #, javascript-format
 msgid "Presets — workspace %d · %s"
 msgstr "Aurrezarpenak — %d. laneko area · %s"
 
-#: greenTile.js:3718
+#: greenTile.js:3749
 msgid "Create preset"
 msgstr "Sortu aurrezarpena"
 
-#: greenTile.js:3718
+#: greenTile.js:3749
 #, javascript-format
 msgid "Edit %s"
 msgstr "Editatu %s"
 
-#: greenTile.js:3722
+#: greenTile.js:3753
 msgid "Back"
 msgstr "Atzera"
 
-#: greenTile.js:3731
+#: greenTile.js:3762
 msgid "Auto: on"
 msgstr "Auto: aktibatuta"
 
-#: greenTile.js:3731
+#: greenTile.js:3762
 msgid "Auto: off"
 msgstr "Auto: desaktibatuta"
 
-#: greenTile.js:3752
+#: greenTile.js:3783
 msgid "Dark theme"
 msgstr "Gai iluna"
 
-#: greenTile.js:3752
+#: greenTile.js:3783
 msgid "Light theme"
 msgstr "Gai argia"
 
-#: greenTile.js:3872
+#: greenTile.js:3903
 msgid "No presets yet."
 msgstr "Oraindik ez dago aurrezarpenik."
 
-#: greenTile.js:3887
+#: greenTile.js:3918
 msgid "New preset"
 msgstr "Aurrezarpen berria"
 
-#: greenTile.js:3890
+#: greenTile.js:3921
 msgid "Click a row to apply it to this workspace and tile right away"
 msgstr ""
-"Egin klik errenkada batean laneko area honi aplikatzeko eta leihoak berehala "
-"mosaikoan antolatzeko"
+"Egin klik errenkada batean laneko area honi aplikatzeko eta leihoak berehala"
+" mosaikoan antolatzeko"
 
 #. metadata.json->name
 msgid "greenTile"
@@ -288,8 +288,8 @@ msgid ""
 "Pick an application and it is added to the list below. The combobox resets "
 "after each pick."
 msgstr ""
-"Aukeratu aplikazio bat eta beheko zerrendara gehituko da. Konbinazio-koadroa "
-"berrezarri egiten da aukeraketa bakoitzaren ondoren."
+"Aukeratu aplikazio bat eta beheko zerrendara gehituko da. Konbinazio-koadroa"
+" berrezarri egiten da aukeraketa bakoitzaren ondoren."
 
 #. settings-schema.json->exclusions->description
 msgid ""
@@ -362,6 +362,19 @@ msgstr ""
 "Super+Gezia erabilita fokua mugitu ondoren, fokua jaso duen leihoa egoera "
 "koloreko ertz mehe batekin markatzen du hiru segundoz."
 
+#. settings-schema.json->fillSingleWindow->description
+msgid "Fill the monitor with a single window"
+msgstr "Bete monitorea leiho bakarrarekin"
+
+#. settings-schema.json->fillSingleWindow->tooltip
+msgid ""
+"With automatic tiling or a preset on, a single tiled window fills the whole "
+"usable area instead of being left untouched."
+msgstr ""
+"Mosaiko automatikoa edo aurrezarpena aktibatuta dagoenean, mosaikoko leiho "
+"bakar batek erabilgarri dagoen eremu osoa betetzen du, dagoen bezala uztea "
+"beharrean."
+
 #. settings-schema.json->panelTheme->description
 msgid "Theme of the preset panel"
 msgstr "Aurrezarpenen panelaren gaia"
@@ -392,8 +405,8 @@ msgstr "Nabarmentze-kolorea"
 
 #. settings-schema.json->accentMode->tooltip
 msgid ""
-"Follow theme tracks the accent color of the Cinnamon theme live. Custom uses "
-"the color below."
+"Follow theme tracks the accent color of the Cinnamon theme live. Custom uses"
+" the color below."
 msgstr ""
 "Jarraitu gaiari aukerak Cinnamon gaiaren nabarmentze-kolorea jarraitzen du "
 "zuzenean. Pertsonalizatua aukerak beheko kolorea erabiltzen du."
@@ -451,5 +464,5 @@ msgstr ""
 #~ "Draw a thin border in the state color around the focused window while "
 #~ "automatic tiling is on."
 #~ msgstr ""
-#~ "Mosaiko automatikoa aktibatuta dagoen bitartean, ertza marrazten du "
-#~ "fokuako leihoaren inguruan egoera kolorez."
+#~ "Mosaiko automatikoa aktibatuta dagoen bitartean, ertza marrazten du fokuako "
+#~ "leihoaren inguruan egoera kolorez."
