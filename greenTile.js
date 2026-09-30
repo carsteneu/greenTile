@@ -750,6 +750,15 @@ const tile_place_rects = (app, ordered, layout, split, area, animate) => {
         tile_place_cell(app, ordered[i], x, y, w, h, area, animate);
     }
 };
+// >>> single-model (pure functions, no Cinnamon imports; tested by tests/single-model.test.js)
+// "Fill the monitor with a single window" (opt-in, default off): with automatic tiling
+// or an assigned preset, a lone window is tiled over the whole usable area instead of
+// being left untouched. tile_single_fill is the guard predicate for n windows under
+// the option state; tile_single_layout is the layout behind a preset that has no rule
+// for one window (a rule for n = 1 wins over it).
+const tile_single_fill = (on, n) => on === true && n === 1;
+const tile_single_layout = { kind: 'rows', shape: [1] };
+// <<< single-model
 const tile_app_auto = (app, monitorIndex, focusWindow, animate = true, wsIndex = null) => {
     const monitor = utils_Main.layoutManager.monitors[monitorIndex];
     if (!monitor)
@@ -761,7 +770,7 @@ const tile_app_auto = (app, monitorIndex, focusWindow, animate = true, wsIndex =
     const focused = focusWindow && !focusWindow.minimized && focusWindow.get_monitor() === monitorIndex
         && !tile_excl_is_excluded(focusWindow);
     let n = windows.length + (focused ? 1 : 0);
-    if (n < 2)
+    if (n < 2 && !tile_single_fill(app.config.settings.getValue('fillSingleWindow'), n))
         return;
     // New windows (opened while automatic tiling is on) append at the end — their spawn
     // position is meaningless for the reading order. Cleared after each tiling.
@@ -1935,15 +1944,19 @@ const tile_drop_end = (app, w, op) => {
 // dragged shape (drop-model) winning over both. null when nothing is tiled.
 const tile_layout_shape_ws = (app, monitorIndex, wsIndex, n) => {
     const monitor = utils_Main.layoutManager.monitors[monitorIndex];
-    if (!monitor || n < 2)
+    const single = tile_single_fill(app.config.settings.getValue('fillSingleWindow'), n);
+    if (!monitor || (n < 2 && !single))
         return null;
     const layoutState = tile_layout_for(app, monitorIndex, wsIndex);
     let base = null;
     if (layoutState.preset) {
         const rule = tile_rules_pick(layoutState.preset.rules, n);
-        if (!rule || !rule.stacks || rule.stacks.length === 0)
+        if (rule && rule.stacks && rule.stacks.length !== 0)
+            base = { kind: 'cols', shape: tile_fill_stacks(rule.stacks, n), rule: rule, preset: layoutState.preset };
+        else if (single)
+            base = tile_single_layout;
+        else
             return null;
-        base = { kind: 'cols', shape: tile_fill_stacks(rule.stacks, n), rule: rule, preset: layoutState.preset };
     } else if (layoutState.auto) {
         base = tile_auto_shape(monitor, n);
     }
@@ -1973,13 +1986,13 @@ const tile_preset_retile = (app, monitorIndex, focusWindow, animate = true, wsIn
         && !tile_excl_is_excluded(focusWindow);
     const n = windows.length + (focused ? 1 : 0);
     const layout = tile_layout_shape(app, monitorIndex, n);
-    if (!layout || !layout.rule)
+    if (!layout)
         return;
     const ordered = tile_sort_reading_order((focused ? [focusWindow] : []).concat(windows), layout.kind === 'cols');
     const split = tile_split_for(app, monitorIndex, ws, n, layout);
     tile_place_rects(app, ordered, layout, split, area, animate);
     if (animate)
-        global.log('greenTile preset "' + preset.name + '" applied ws' + (ws + 1) + ' mon=' + (tile_monitors.keys[monitorIndex] || '?') + ' n=' + n + ' stacks=[' + layout.rule.stacks.join(',') + ']' + (split ? ' split' : ''));
+        global.log('greenTile preset "' + preset.name + '" applied ws' + (ws + 1) + ' mon=' + (tile_monitors.keys[monitorIndex] || '?') + ' n=' + n + ' stacks=[' + (layout.rule ? layout.rule.stacks.join(',') : '1') + ']' + (split ? ' split' : ''));
 };
 // >>> auto-model (pure functions, no Cinnamon imports; tested by tests/auto-model.test.js)
 // Legacy per-workspace automatic tiling list "autoWorkspaces": rows
