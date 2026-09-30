@@ -1,6 +1,6 @@
 # <img src="docs/icon.svg" width="32" height="32" alt=""> greenTile
 
-Window tiling for Cinnamon: presets per monitor and workspace, an auto mode, snap-on-release, draggable borders and keyboard swapping.
+Window tiling for Cinnamon: presets per monitor and workspace, an auto mode, snap-on-release, draggable borders and keyboard swapping. This README explains how to use it; the complete list of features, each with a short explanation, is in [FEATURES.md](FEATURES.md).
 
 ![Preset panel](docs/screenshots/preset-panel.png)
 
@@ -107,6 +107,8 @@ On the **Settings** page under **Preset panel**:
 - **Panel theme:** follow the desktop (default), always light, or always dark.
 - **Accent color:** follow the Cinnamon theme (default) or a custom color.
 - **State color** for "Auto: on" and assigned rows: green (default), follow the theme, or custom.
+
+Looking for a specific feature? [FEATURES.md](FEATURES.md) lists all of them.
 
 ## Development
 
