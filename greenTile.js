@@ -857,6 +857,10 @@ const tile_auto_deactivate = (app) => {
     tile_layout_set(app, monitorIndex, wsIndex, { auto: false });
     tile_auto.pending.delete(monitorIndex);
     global.log('greenTile auto tiling off for ws' + wsIndex);
+    // no retile follows auto off — the border has no geometry event to hide it,
+    // so refresh right here (tile_border_update is defined later in the file but
+    // is only ever CALLED at runtime)
+    tile_border_update();
 };
 const tile_auto_on_window_added = (app, ws, w) => {
     if (ws !== global.workspace_manager.get_active_workspace())
