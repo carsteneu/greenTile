@@ -228,19 +228,19 @@
       "default": 0
    },
    "tileAnimation": {
-      "type": "checkbox",
+      "type": "switch",
       "default": true,
       "description": "Animate tiling",
       "tooltip": "Windows glide into their new place. Off: they jump there at once."
    },
    "focusBorder": {
-      "type": "checkbox",
+      "type": "switch",
       "default": true,
       "description": "Border around the focused window",
       "tooltip": "After a Super+Arrow focus move, mark the newly focused window with a thin border in the state color for three seconds."
    },
    "fillSingleWindow": {
-      "type": "checkbox",
+      "type": "switch",
       "default": false,
       "description": "Fill the monitor with a single window",
       "tooltip": "With automatic tiling or a preset on, a single tiled window fills the whole usable area instead of being left untouched."
