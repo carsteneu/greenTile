@@ -107,6 +107,18 @@ h2{font:750 clamp(34px,4.4vw,56px)/1 "Bricolage";letter-spacing:-.035em;margin:0
 .install .btn{display:inline-block}
 code{font:500 .9em "JBMono";background:var(--sheet);border:1px solid var(--rule);border-radius:5px;padding:1px 5px}
 
+/* video tour: poster until clicked, then the youtube-nocookie player (no request to YouTube before) */
+.tour{padding-top:0}
+.player{position:relative;aspect-ratio:16/9;border-radius:var(--r);overflow:hidden;background:var(--ink);box-shadow:0 18px 50px rgba(19,32,26,.22)}
+.player button{all:unset;cursor:pointer;position:absolute;inset:0;display:block}
+.player img,.player iframe{position:absolute;inset:0;width:100%;height:100%;border:0;display:block;object-fit:cover}
+.player .play{position:absolute;left:50%;top:50%;width:92px;height:92px;margin:-46px 0 0 -46px;border-radius:50%;background:var(--leaf);box-shadow:0 8px 30px rgba(0,0,0,.35);transition:transform .15s}
+.player .play::after{content:"";position:absolute;left:36px;top:28px;border-style:solid;border-width:18px 0 18px 30px;border-color:transparent transparent transparent #fff}
+.player button:hover .play,.player button:focus-visible .play{transform:scale(1.08)}
+.player button:focus-visible{outline:3px solid var(--amber);outline-offset:-3px}
+.tour .note{font-size:14px;color:var(--mute);margin:14px 0 0}
+.tour .note a{color:inherit}
+
 /* details: illustrated feature cards */
 .dt-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
 .dt{background:var(--sheet);border:1px solid #D6DED1;border-radius:var(--r);padding:12px 12px 24px;display:flex;flex-direction:column;gap:8px}
@@ -155,7 +167,7 @@ footer{padding:36px 0 56px;border-top:1px solid var(--rule);display:flex;justify
 <div class="wrap">
   <nav>
     <a class="mark" href="#"><i><b></b><b></b><b></b></i>greenTile</a>
-    <ul><li><a href="#features">Features</a></li><li><a href="#details">Details</a></li><li><a href="#keys">Hotkeys</a></li><li><a href="#install">Install</a></li></ul>
+    <ul><li><a href="#tour">Video</a></li><li><a href="#features">Features</a></li><li><a href="#details">Details</a></li><li><a href="#keys">Hotkeys</a></li><li><a href="#install">Install</a></li></ul>
     <a class="gh" href="#install">github.com/carsteneu/greenTile</a>
   </nav>
 
@@ -182,6 +194,20 @@ footer{padding:36px 0 56px;border-top:1px solid var(--rule);display:flex;justify
     </div>
   </header>
 </div>
+
+<section id="tour" class="tour">
+  <div class="wrap">
+    <h2>See it in six minutes.</h2>
+    <p class="sub">Every feature, recorded on a 49″ ultrawide: auto mode, presets, drag split, borders, swapping and the settings.</p>
+    <div class="player" id="player">
+      <button type="button" id="play" aria-label="Play the greenTile video tour (loads the player from youtube-nocookie.com)">
+        <img src="screenshots/tour-poster.jpg" width="1280" height="720" loading="lazy" alt="greenTile: tiling for Cinnamon, six windows in one row">
+        <span class="play" aria-hidden="true"></span>
+      </button>
+    </div>
+    <p class="note">Clicking play loads the video from YouTube (youtube-nocookie.com); nothing is loaded from YouTube before that. Or watch it <a href="https://youtu.be/niI0LHYb1A8">on YouTube</a>.</p>
+  </div>
+</section>
 
 <section id="features">
   <div class="wrap">
@@ -389,6 +415,17 @@ if (q.has("static")) {
   document.documentElement.classList.add("static");
   show();
 } else { show(); setInterval(show, 1600); }
+
+// video tour: replace the poster with the player only after a click
+document.getElementById("play").addEventListener("click", () => {
+  const f = document.createElement("iframe");
+  f.src = "https://www.youtube-nocookie.com/embed/niI0LHYb1A8?autoplay=1&rel=0";
+  f.title = "greenTile video tour";
+  f.allow = "autoplay; encrypted-media; picture-in-picture; fullscreen";
+  f.allowFullscreen = true;
+  f.referrerPolicy = "strict-origin-when-cross-origin";
+  document.getElementById("player").replaceChildren(f);
+});
 </script>
 </body>
 </html>
