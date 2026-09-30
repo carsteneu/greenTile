@@ -129,6 +129,7 @@ class Config {
             }
             // resize hotkey steps not yet written (500 ms debounce) must not get lost
             tile_split_flush(this.app);
+            tile_monitors_shutdown();
             tile_auto_disconnect_all();
             tile_panel_close();
             tile_theme_shutdown();
@@ -1252,18 +1253,31 @@ const tile_Gio = imports.gi.Gio;
 const tile_monitors = { keys: [], labels: [], ready: false };
 let tile_monitors_fallback_logged = false;
 let tile_muffin_settings = null;
-let tile_monitors_epoch = 0;
+// >>> lifecycle-model (pure factory, no Cinnamon imports; tested by tests/lifecycle-model.test.js)
+// Tracks the current pending operation: begin() marks a new one and returns its token,
+// is_current() tells whether that token may still act, invalidate() drops everything
+// in flight (teardown). A superset of the old ++epoch monitor-refresh guard.
+const tile_pending_registry = () => {
+    let epoch = 0;
+    return {
+        begin: () => ++epoch,
+        is_current: (token) => token === epoch,
+        invalidate: () => epoch++,
+    };
+};
+// <<< lifecycle-model
+const tile_monitors_pending = tile_pending_registry();
 const tile_monitors_refresh = (app, onReady) => {
     // Monitor changes destroy and recreate the App; a late reply for a refresh that
     // belongs to a destroyed App must not connect observers or write registry state.
-    const epoch = ++tile_monitors_epoch;
+    const epoch = tile_monitors_pending.begin();
     tile_monitors.ready = false;
     tile_monitors.keys = [];
     tile_monitors.labels = [];
     tile_Gio.DBus.session.call('org.cinnamon.Muffin.DisplayConfig', '/org/cinnamon/Muffin/DisplayConfig',
         'org.cinnamon.Muffin.DisplayConfig', 'GetCurrentState', null, null,
         tile_Gio.DBusCallFlags.NONE, 3000, null, (source, result) => {
-            if (epoch !== tile_monitors_epoch)
+            if (!tile_monitors_pending.is_current(epoch))
                 return;
             let states = [];
             try {
@@ -1300,6 +1314,10 @@ const tile_monitors_refresh = (app, onReady) => {
             global.log('greenTile monitors: ' + keys.map((k, i) => i + '=' + k).join(', '));
             onReady();
         });
+};
+// Teardown: a reply still in flight must not connect observers to a destroyed App.
+const tile_monitors_shutdown = () => {
+    tile_monitors_pending.invalidate();
 };
 const tile_monitor_index_of = (metaWindow) => metaWindow.get_monitor();
 const tile_focus_monitor_index = () => {
