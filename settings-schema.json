@@ -67,7 +67,8 @@
          "type": "section",
          "title": "Tiling",
          "keys": [
-            "tileAnimation"
+            "tileAnimation",
+            "focusBorder"
          ]
       },
       "exclusion-section": {
@@ -230,6 +231,12 @@
       "default": true,
       "description": "Animate tiling",
       "tooltip": "Windows glide into their new place. Off: they jump there at once."
+   },
+   "focusBorder": {
+      "type": "checkbox",
+      "default": true,
+      "description": "Border around the focused window",
+      "tooltip": "Draw a thin border in the state color around the focused window while automatic tiling is on."
    },
    "panelTheme": {
       "type": "combobox",

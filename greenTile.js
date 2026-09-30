@@ -132,6 +132,8 @@ class Config {
             tile_auto_disconnect_all();
             tile_panel_close();
             tile_theme_shutdown();
+            tile_focus_disconnect();
+            tile_border_shutdown();
         };
         this.app = app;
         this.settings = new Settings.ExtensionSettings(this, 'greenTile@carsteneu');
@@ -161,6 +163,7 @@ class Config {
         this.settings.bindProperty(Settings.BindingDirection.IN, 'accentColor', 'accentColor', () => tile_theme_changed(), null);
         this.settings.bindProperty(Settings.BindingDirection.IN, 'stateMode', 'stateMode', () => tile_theme_changed(), null);
         this.settings.bindProperty(Settings.BindingDirection.IN, 'stateColor', 'stateColor', () => tile_theme_changed(), null);
+        this.settings.bindProperty(Settings.BindingDirection.IN, 'focusBorder', 'focusBorderValue', () => tile_border_update(), null);
         tile_excl_apply(this.settings);
         tile_excl_app_populate(this.settings);
         this.excludeAppSignal = imports.gi.Cinnamon.AppSystem.get_default().connect('installed-changed', () => {
@@ -169,6 +172,8 @@ class Config {
         });
         this.EnableHotkey();
         tile_theme_init(this);
+        tile_focus_connect(this);
+        tile_border_init(this);
         tile_monitors_refresh(app, () => {
             tile_layouts_migrate_once(app);
             tile_auto_connect_all(app);
@@ -2435,6 +2440,89 @@ const tile_swap_hotkey = (app, dir) => {
     tile_retile_monitor(app, monitorIndex, null, true, wsIndex);
     global.log('greenTile swap pushed mon=' + (tile_monitors.keys[monitorIndex] || '?') + ' -> ws' + (targetWsIndex + 1) + ' mon=' + (tile_monitors.keys[step.monitor] || '?'));
 };
+// >>> focus-runtime
+// Super+Arrow moves the keyboard focus on monitor+workspaces where automatic tiling is
+// on: the neighbouring tiled window in that direction is activated, nothing is moved or
+// retiled. Cinnamon's own push-tile keybindings are taken over wholesale (the gsettings
+// bindings stay in org.cinnamon.desktop.keybindings.wm, so rebinding push-tile keeps
+// working). Wherever the tiling has nothing to say — other monitor/workspace states, a
+// focused window greenTile does not manage (floating, excluded, dialog) — push_tile runs
+// with the received window, the exact native behaviour. Left/right cross over to the
+// adjacent monitor at the edge (no wrap); up/down never leave the monitor or workspace.
+// (In-layout neighbour: the swap-model search above — same cells, same semantics.)
+const tile_focus_motion = (dir) => ({
+    left: Meta.MotionDirection.LEFT,
+    right: Meta.MotionDirection.RIGHT,
+    up: Meta.MotionDirection.UP,
+    down: Meta.MotionDirection.DOWN,
+}[dir]);
+const tile_focus_push_native = (window, dir) => {
+    global.display.push_tile(window, tile_focus_motion(dir));
+};
+const tile_focus_hotkey = (app, dir) => (display, window) => {
+    if (!window)
+        return; // native has no window to push either
+    if (window.minimized || window.is_on_all_workspaces() || tile_excl_is_excluded(window)) {
+        tile_focus_push_native(window, dir);
+        return;
+    }
+    const monitorIndex = window.get_monitor();
+    const monitor = utils_Main.layoutManager.monitors[monitorIndex];
+    const wsIndex = global.workspace_manager.get_active_workspace().index();
+    if (!monitor || !tile_monitors.ready || !tile_layout_for(app, monitorIndex, wsIndex).auto) {
+        tile_focus_push_native(window, dir);
+        return;
+    }
+    // The focus window sits in the cell the current layout gives it; the neighbour is
+    // whatever the tiling would place next to it in that direction.
+    const windows = tile_collect_windows(monitor, null, wsIndex);
+    let cells = null;
+    let ordered = null;
+    const n = windows.length;
+    const layout = n ? tile_layout_shape(app, monitorIndex, n) : null;
+    if (layout) {
+        const split = tile_split_for(app, monitorIndex, wsIndex, n, layout);
+        cells = tile_split_rects(layout.kind, layout.shape, split, getUsableScreenArea(monitor));
+        ordered = tile_sort_reading_order(windows, layout.kind === 'cols');
+        const selfIdx = ordered.indexOf(window);
+        const nb = cells.length === n && selfIdx >= 0 ? tile_swap_neighbor(cells, selfIdx, dir) : null;
+        if (nb != null) {
+            ordered[nb].activate(global.get_current_time());
+            return;
+        }
+    }
+    if (dir === 'left' || dir === 'right') {
+        const step = tile_focus_monitor_step({
+            dir: dir,
+            monitorIndex: monitorIndex,
+            monitors: utils_Main.layoutManager.monitors.map((m, i) => ({ index: i, x: m.x })),
+        });
+        if (step != null) {
+            const frame = window.get_frame_rect();
+            const cands = tile_collect_windows(utils_Main.layoutManager.monitors[step], null, wsIndex).map((w, i) => {
+                const r = w.get_frame_rect();
+                return { index: i, x: r.x, y: r.y, width: r.width, height: r.height, w: w };
+            });
+            const pick = tile_focus_monitor_pick(cands, dir, { x: frame.x, y: frame.y, width: frame.width, height: frame.height });
+            if (pick != null) {
+                cands[pick].w.activate(global.get_current_time());
+                return;
+            }
+        }
+    }
+};
+// Registered once per enable cycle; null restores muffin's own handlers (verified:
+// Super+Arrow tiles natively again after that).
+const tile_focus_binding_names = ['push-tile-left', 'push-tile-right', 'push-tile-up', 'push-tile-down'];
+const tile_focus_connect = (app) => {
+    for (const name of tile_focus_binding_names)
+        Meta.keybindings_set_custom_handler(name, tile_focus_hotkey(app, name.slice('push-tile-'.length)));
+};
+const tile_focus_disconnect = () => {
+    for (const name of tile_focus_binding_names)
+        Meta.keybindings_set_custom_handler(name, null);
+};
+// <<< focus-runtime
 // >>> editor-model (pure functions, no Cinnamon imports; tested by tests/editor-model.test.js)
 // Preset editor model. A rule is {min, stacks}; stacks[i] = windows stacked in column i.
 // The painter grid of the approved prototype has 6 columns and 4 rows.
@@ -3334,11 +3422,14 @@ const tile_accent_apply = (config) => {
     // set only after a successful persist: a failed write keeps painter and CSS
     // in the SAME (old) color instead of two different ones
     tile_accent_state.rgb = base;
+    tile_accent_state.stateRgb = stateBase;
     const theme = tile_St.ThemeContext.get_for_stage(global.stage).get_theme();
     if (tile_accent_state.themeObj && tile_accent_state.themeObj !== theme)
         tile_accent_unload();
     if (!tile_accent_state.themeObj)
         tile_accent_load(theme, path);
+    // the focus border is the same color live: a state/theme switch repaints it here
+    tile_border_restyle();
 };
 const tile_theme_changed = () => {
     const config = tile_theme_state.config;
@@ -3413,6 +3504,104 @@ const tile_theme_shutdown = () => {
     tile_accent_unload();
     tile_theme_state.config = null;
 };
+// >>> focus-border
+// A thin border around the focused tiled window in the state color, so Super+Arrow
+// focus moves show where the focus went. Only on monitor+workspaces with automatic
+// tiling on, only for windows the tiling manages; hidden while the window is
+// minimized, maximized or fullscreen. One non-reactive actor in the overlay group
+// follows every focus and geometry change; the color updates live with the theme
+// settings (tile_accent_apply stores the resolved state rgb).
+const tile_border_state = { app: null, actor: null, win: null, winSig: [], sig: [] };
+const TILE_BORDER_WIDTH = 3;
+const tile_border_style = () => {
+    const c = tile_accent_state.stateRgb || tile_state_default;
+    return 'border: ' + TILE_BORDER_WIDTH + 'px solid rgb(' + Math.round(c[0]) + ', ' + Math.round(c[1]) + ', ' + Math.round(c[2]) + '); background-color: transparent;';
+};
+const tile_border_setting_on = (app) => app.config.settings.getValue('focusBorder') !== false;
+const tile_border_frame = (app, win) => {
+    if (win.minimized || win.is_on_all_workspaces()
+        || win.get_window_type() !== Meta.WindowType.NORMAL || tile_excl_is_excluded(win))
+        return null;
+    const monitorIndex = win.get_monitor();
+    const monitor = utils_Main.layoutManager.monitors[monitorIndex];
+    if (!monitor || !tile_monitors.ready)
+        return null;
+    const wsIndex = global.workspace_manager.get_active_workspace().index();
+    if (!tile_layout_for(app, monitorIndex, wsIndex).auto)
+        return null;
+    if (win.get_maximized() || win.is_fullscreen())
+        return null;
+    // invisible to the tiling = invisible to the border (floating, excluded, dialog)
+    return tile_collect_windows(monitor, null, wsIndex).includes(win) ? win.get_frame_rect() : null;
+};
+const tile_border_update = () => {
+    const app = tile_border_state.app;
+    if (!app || !tile_border_state.actor)
+        return;
+    // geometry tracking on the focused window: retiles, drags and resizes repaint
+    // the border through these signals, not through a timer
+    const win = global.display.focus_window;
+    if (win !== tile_border_state.win) {
+        for (const id of tile_border_state.winSig) {
+            try {
+                tile_border_state.win.disconnect(id);
+            } catch (e) {}
+        }
+        tile_border_state.winSig = [];
+        tile_border_state.win = win;
+        if (win) {
+            tile_border_state.winSig.push(win.connect('position-changed', tile_border_update));
+            tile_border_state.winSig.push(win.connect('size-changed', tile_border_update));
+        }
+    }
+    const frame = app && win && tile_border_setting_on(app) ? tile_border_frame(app, win) : null;
+    const actor = tile_border_state.actor;
+    if (!frame) {
+        actor.hide();
+        return;
+    }
+    actor.set_style(tile_border_style());
+    actor.set_position(Math.round(frame.x), Math.round(frame.y));
+    actor.set_size(Math.round(frame.width), Math.round(frame.height));
+    actor.raise_top();
+    actor.show();
+};
+const tile_border_restyle = () => {
+    if (tile_border_state.actor)
+        tile_border_state.actor.set_style(tile_border_style());
+};
+const tile_border_init = (app) => {
+    tile_border_state.app = app;
+    if (!tile_border_state.actor) {
+        tile_border_state.actor = new tile_St.Bin({ reactive: false, style: tile_border_style() });
+        global.overlay_group.add_actor(tile_border_state.actor);
+        tile_border_state.actor.hide();
+        tile_border_state.sig.push({ obj: global.display, id: global.display.connect('notify::focus-window', tile_border_update) });
+        tile_border_state.sig.push({ obj: global.workspace_manager, id: global.workspace_manager.connect('workspace-switched', tile_border_update) });
+    }
+    tile_border_update();
+};
+const tile_border_shutdown = () => {
+    for (const s of tile_border_state.sig) {
+        try {
+            s.obj.disconnect(s.id);
+        } catch (e) {}
+    }
+    tile_border_state.sig = [];
+    for (const id of tile_border_state.winSig) {
+        try {
+            tile_border_state.win.disconnect(id);
+        } catch (e) {}
+    }
+    tile_border_state.winSig = [];
+    tile_border_state.win = null;
+    tile_border_state.app = null;
+    if (tile_border_state.actor) {
+        tile_border_state.actor.destroy();
+        tile_border_state.actor = null;
+    }
+};
+// <<< focus-border
 // "Gap between windows  − 8 px +" in the list view. Each click stores the value and,
 // when automatic tiling is on for this workspace, retiles it shortly after (debounced,
 // so fast repeated clicks tile once), so the new gap shows live.
