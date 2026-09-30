@@ -6,7 +6,7 @@
 # Åke Engelbrektson <eson@svenskasprakfiler.se>, 2017, 2019, 2021
 msgid ""
 msgstr ""
-"Project-Id-Version: greenTile 1.1.1\n"
+"Project-Id-Version: greenTile 1.1.2\n"
 "Report-Msgid-Bugs-To: https://github.com/carsteneu\n"
 "POT-Creation-Date: 2026-09-30 15:09+0200\n"
 "PO-Revision-Date: 2021-01-12 21:08+0100\n"
