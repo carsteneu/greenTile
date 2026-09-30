@@ -135,7 +135,9 @@ class Config {
             tile_theme_shutdown();
             tile_focus_disconnect();
             tile_border_shutdown();
-            // settings dialog changes must no longer reach the destroyed app
+            // settings dialog changes must no longer reach the destroyed app;
+            // a dialog still open then throws in cinnamonDBus — Cinnamon's behaviour
+            // for every finalized xlet
             this.settings.finalize();
         };
         this.app = app;

@@ -15,8 +15,12 @@ const src = fs.readFileSync(path.join(__dirname, '..', 'greenTile.js'), 'utf8');
 
 const configStart = src.indexOf('class Config');
 const configEnd = src.indexOf(';// CONCATENATED MODULE: ../base/utils.ts');
+if (configStart === -1 || configEnd === -1)
+    throw new Error('Config class not found in greenTile.js');
 const config = src.slice(configStart, configEnd);
 const destroyStart = config.indexOf('this.destroy = () => {');
+if (destroyStart === -1)
+    throw new Error('destroy not found in Config');
 const destroyBody = config.slice(destroyStart, config.indexOf('this.app = app;'));
 
 const enableStart = src.indexOf('const enable = () => {');
