@@ -3523,11 +3523,24 @@ const tile_theme_shutdown = () => {
 // minimized, maximized or fullscreen. One non-reactive actor in the overlay group
 // follows every focus and geometry change; the color updates live with the theme
 // settings (tile_accent_apply stores the resolved state rgb).
-const tile_border_state = { app: null, actor: null, win: null, winSig: [], sig: [] };
+const tile_border_state = { app: null, actor: null, win: null, winSig: [], sig: [], timer: 0 };
 const TILE_BORDER_WIDTH = 3;
+const TILE_BORDER_TIMEOUT_MS = 3000;
 const tile_border_style = () => {
     const c = tile_accent_state.stateRgb || tile_state_default;
     return 'border: ' + TILE_BORDER_WIDTH + 'px solid rgb(' + Math.round(c[0]) + ', ' + Math.round(c[1]) + ', ' + Math.round(c[2]) + '); background-color: transparent;';
+};
+// the border is feedback, not a permanent decoration: it switches itself off after a
+// few seconds and comes back with the next focus change
+const tile_border_arm_timer = () => {
+    if (tile_border_state.timer)
+        GLib.Source.remove(tile_border_state.timer);
+    tile_border_state.timer = GLib.timeout_add(GLib.PRIORITY_DEFAULT, TILE_BORDER_TIMEOUT_MS, () => {
+        tile_border_state.timer = 0;
+        if (tile_border_state.actor)
+            tile_border_state.actor.hide();
+        return GLib.SOURCE_REMOVE;
+    });
 };
 const tile_border_setting_on = (app) => app.config.settings.getValue('focusBorder') !== false;
 const tile_border_frame = (app, win) => {
@@ -3579,6 +3592,7 @@ const tile_border_update = () => {
     actor.set_size(Math.round(frame.width), Math.round(frame.height));
     actor.raise_top();
     actor.show();
+    tile_border_arm_timer();
 };
 const tile_border_restyle = () => {
     if (tile_border_state.actor)
@@ -3598,6 +3612,10 @@ const tile_border_init = (app) => {
     tile_border_update();
 };
 const tile_border_shutdown = () => {
+    if (tile_border_state.timer) {
+        GLib.Source.remove(tile_border_state.timer);
+        tile_border_state.timer = 0;
+    }
     for (const s of tile_border_state.sig) {
         try {
             s.obj.disconnect(s.id);
