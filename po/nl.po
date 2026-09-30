@@ -6,7 +6,7 @@
 # qadzek, 2024.
 msgid ""
 msgstr ""
-"Project-Id-Version: greenTile 1.1.2\n"
+"Project-Id-Version: greenTile 1.1.3\n"
 "Report-Msgid-Bugs-To: https://github.com/carsteneu\n"
 "POT-Creation-Date: 2026-09-30 15:09+0200\n"
 "PO-Revision-Date: 2024-04-17 10:36+0200\n"
