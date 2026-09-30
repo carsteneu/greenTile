@@ -135,6 +135,8 @@ class Config {
             tile_theme_shutdown();
             tile_focus_disconnect();
             tile_border_shutdown();
+            // settings dialog changes must no longer reach the destroyed app
+            this.settings.finalize();
         };
         this.app = app;
         this.settings = new Settings.ExtensionSettings(this, 'greenTile@carsteneu');
