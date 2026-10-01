@@ -33,7 +33,7 @@ function seedOldInstall(home) {
 }
 
 // the unpacked release next to a copy of install.sh: $HERE/$UUID
-function makeSource(x, { onePo = false } = {}) {
+function makeSource(x) {
     const here = path.join(x.dir, 'release');
     mkdir(path.join(here, UUID, 'po'));
     fs.copyFileSync(path.join(ROOT, 'install.sh'), path.join(here, 'install.sh'));
@@ -49,9 +49,7 @@ function makeSource(x, { onePo = false } = {}) {
     fs.copyFileSync(path.join(ROOT, 'LICENSE'), path.join(src, 'LICENSE'));
     const po = (id) => `msgid ""\nmsgstr ""\n"Content-Type: text/plain; charset=UTF-8\\n"\n\nmsgid "a"\nmsgstr "${id}"\n`;
     write(path.join(src, 'po', 'de.po'), po('de'));
-    if (!onePo) {
-        write(path.join(src, 'po', 'it.po'), po('it'));
-    }
+    write(path.join(src, 'po', 'it.po'), po('it'));
     return { src };
 }
 

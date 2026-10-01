@@ -67,6 +67,12 @@ BACKUP="$STAGE/old"
 if [ -e "$DEST" ]; then
     mv "$DEST" "$BACKUP"
 fi
+if [ -e "$DEST" ]; then
+    # $DEST is back while our backup holds the moved-away tree — most likely
+    # a second install.sh running concurrently; do not touch anything.
+    echo "install.sh: $DEST appeared during the install (another install.sh running?) — aborting, nothing was changed." >&2
+    exit 1
+fi
 if ! mv "$NEW" "$DEST"; then
     if [ -e "$BACKUP" ]; then
         if mv "$BACKUP" "$DEST"; then
@@ -84,7 +90,11 @@ fi
 for mofile in "$STAGE"/locale/*/LC_MESSAGES/*.mo; do
     [ -e "$mofile" ] || continue
     lang=$(basename "$(dirname "$(dirname "$mofile")")")
-    mkdir -p "$HOME/.local/share/locale/$lang/LC_MESSAGES"
+    # same failure class as the mv below: report, keep going
+    if ! mkdir -p "$HOME/.local/share/locale/$lang/LC_MESSAGES"; then
+        echo "Note: could not install the $lang translation — the extension works without it (English)." >&2
+        continue
+    fi
     if ! mv "$mofile" "$HOME/.local/share/locale/$lang/LC_MESSAGES/$UUID.mo"; then
         echo "Note: could not install the $lang translation — the extension works without it (English)." >&2
     fi
