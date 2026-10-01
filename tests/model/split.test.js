@@ -274,3 +274,87 @@ test('sort order: gaps between tiled windows do not merge groups', () => {
 test('sort order: zero-size rects do not throw', () => {
     assert.deepEqual(m.sortOrder([[10, 0, 0, 0], [0, 0, 0, 0]], true), [1, 0]);
 });
+
+// splitMinimal: read-time effective geometry. Raises every FINAL (post-gapCell)
+// cell size to minPx where feasible, fair deterministic shortfall otherwise, without
+// changing the stored fractions. The ground truth here is the real placement
+// pipeline: splitRects -> gapCell, exactly what placeRects (lib/tiling/place.js) runs.
+const g = require('../helpers/cinnamon-loader').load('./lib/model/gap.js');
+const finals = (kind, shape, split, area, gap) => m.splitRects(kind, shape, split, area).map((r) => g.gapCell(r, area, gap));
+
+test('minimal: legacy edge cell 120 with a later gap renders final 120, stored fractions stay', () => {
+    // border set at the gap-0 clamp: cell 120 of 2000; then gap 48 (todo_fixes issue 8)
+    const s = { kind: 'cols', shape: [1, 1], major: [120 / 2000, 1880 / 2000], minor: [[1], [1]] };
+    const stored = JSON.parse(JSON.stringify(s));
+    const a = [0, 0, 2000, 600];
+    assert.equal(finals('cols', [1, 1], s, a, 48)[0][2], 96, 'pinned before the fix: 96 px wide');
+    const out = m.splitMinimal('cols', [1, 1], s, a, 48, m.SPLIT_MIN_PX);
+    assert.equal(finals('cols', [1, 1], out, a, 48)[0][2], 120, 'edge frame raised to the minimum');
+    assert.equal(finals('cols', [1, 1], out, a, 48)[1][2], 1832, 'the neighbour funds the raise');
+    assert.deepEqual(s, stored, 'the stored split is untouched');
+});
+
+test('minimal: inner cell 60+gap with gap 48 renders final 120 (todo_fixes: measured worst case)', () => {
+    const s = { kind: 'cols', shape: [1, 1, 1], major: [0.05, 0.9, 0.05], minor: [[1], [1], [1]] };
+    const a = [0, 0, 1200, 600];
+    const out = m.splitMinimal('cols', [1, 1, 1], s, a, 48, m.SPLIT_MIN_PX);
+    const fr = finals('cols', [1, 1, 1], out, a, 48);
+    assert.equal(fr[0][2], 120, 'left edge cell raised');
+    assert.equal(fr[1][2], 864, 'feeder cell shrinks only by the need');
+    assert.equal(fr[2][2], 120, 'right edge cell raised');
+});
+
+test('minimal: works on the minor axis and for rows kind, both axes', () => {
+    // cols: one column, a stacked pair where the upper cell is 60 px of 600 with gap 48
+    const s = { kind: 'cols', shape: [2], major: [1], minor: [[60 / 600, 540 / 600]] };
+    const a = [0, 0, 1200, 600];
+    const out = m.splitMinimal('cols', [2], s, a, 48, m.SPLIT_MIN_PX);
+    const fr = finals('cols', [2], out, a, 48);
+    assert.equal(fr[0][3], 120, 'upper cell of the stack raised');
+    // rows kind: the narrow cells sit in the minor (x) direction
+    const r = { kind: 'rows', shape: [2], major: [1], minor: [[0.05, 0.95]] };
+    const rout = m.splitMinimal('rows', [2], r, a, 48, m.SPLIT_MIN_PX);
+    const rfr = finals('rows', [2], rout, a, 48);
+    assert.equal(rfr[0][2], 120, 'narrow cell of the row raised');
+});
+
+test('minimal: a split that already keeps the minimum is returned unchanged', () => {
+    const s = { kind: 'cols', shape: [1, 2], major: [0.6, 0.4], minor: [[1], [0.25, 0.75]] };
+    assert.equal(m.splitMinimal('cols', [1, 2], s, area, 48, m.SPLIT_MIN_PX), s, 'same reference');
+    assert.equal(m.splitMinimal('cols', [1, 2], null, area, 48, m.SPLIT_MIN_PX), null, 'no split, no correction: null stays null');
+});
+
+test('minimal: infeasible span falls back to fair deterministic equal shares and keeps tiling', () => {
+    // 9 single-cell columns of 1000 px, gap 48: edge loss 24+24, inner 7 full gaps
+    // = 384 px, 616 px remain for 9 cells < 9 * 120 — every cell gets the same final
+    // size, the first 4 receive the 4 px remainder (largest remainder, deterministic).
+    const a = [0, 0, 1000, 600];
+    const shape = [1, 1, 1, 1, 1, 1, 1, 1, 1];
+    const out = m.splitMinimal('cols', shape, null, a, 48, m.SPLIT_MIN_PX);
+    assert.ok(out, 'an infeasible span still tiles');
+    const fr = finals('cols', shape, out, a, 48);
+    fr.forEach((r, i) => assert.ok(r[2] >= 68, `cell ${i} keeps a fair share: ${r[2]}`));
+    assert.deepEqual(fr.map((r) => r[2]), [69, 69, 69, 69, 68, 68, 68, 68, 68]);
+});
+
+test('minimal: fractional area, final sizes are integers, no overlap, minimum kept', () => {
+    const s = { kind: 'cols', shape: [2, 2], major: [0.05, 0.95], minor: [[0.1, 0.9], [0.001, 0.999]] };
+    const a = [10, 20, 1920, 1170];
+    const out = m.splitMinimal('cols', [2, 2], s, a, 48, m.SPLIT_MIN_PX);
+    const fr = finals('cols', [2, 2], out, a, 48);
+    fr.forEach((r) => {
+        assert.ok(Number.isInteger(r[0]) && Number.isInteger(r[2]), 'integer x geometry');
+        assert.ok(Number.isInteger(r[1]) && Number.isInteger(r[3]), 'integer y geometry');
+        assert.ok(r[2] >= m.SPLIT_MIN_PX && r[3] >= m.SPLIT_MIN_PX, 'minimum kept');
+    });
+    assert.ok(fr[0][0] + fr[0][2] <= fr[2][0], 'columns do not overlap');
+    assert.ok(fr[0][1] + fr[0][3] <= fr[1][1], 'stacked cells do not overlap');
+});
+
+test('minimal: surfacing the corrected split stays valid and preserves kind/shape', () => {
+    const s = { kind: 'cols', shape: [1, 1], major: [120 / 2000, 1880 / 2000], minor: [[1], [1]] };
+    const a = [0, 0, 2000, 600];
+    const out = m.splitMinimal('cols', [1, 1], s, a, 48, m.SPLIT_MIN_PX);
+    assert.equal(out.kind, 'cols');
+    assert.notEqual(m.splitValid('cols', [1, 1], out), null, 'corrected split passes splitValid');
+});
