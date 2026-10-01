@@ -609,6 +609,63 @@ test('saving a shared preset retiles each monitor\'s ACTIVE workspace only; inac
     assert.deepEqual(w4.rect, [0, 550, 2000, 550]);
 });
 
+test('retiles of inactive workspaces leave the pending records for the active workspace', () => {
+    const tweener = makeTweenerRecorder();
+    const { env, ext } = makeEnv(tweener, { windowGap: 0 });
+    enableOnMonitor(env, ext);
+    makeWorkspace(env);
+    const ws1wins = [];
+    makeWorkspace(env).list_windows = () => ws1wins;
+    env.activeWorkspace = { index: () => 0 };
+    const w1 = makeWindow(env, 71, [10, 10, 400, 300], 0);
+    const w2 = makeWindow(env, 72, [500, 0, 400, 300], 0);
+    env.tabList.push(w1, w2);
+    env.display.focus_window = w1;
+    const app = ext.session.app;
+    app.ops.presetsWrite(app, [{ id: 'p1', name: 'Halves', rules: [{ min: 2, stacks: [1, 1] }] }]);
+    app.ops.layoutSet(app, 0, 0, { preset: 'p1' });
+    app.ops.layoutSet(app, 0, 1, { preset: 'p1' });
+    app.ops.retileMonitor(app, 0);
+    // a fresh window opens on the ACTIVE workspace: the debounce has not fired yet
+    const fresh = makeWindow(env, 73, [10, 10, 300, 200], 0);
+    env.tabList.push(fresh);
+    app.auto.onWindowAdded(app, env.workspaceManager.get_active_workspace(), fresh);
+    // an unrelated retile of the inactive workspace 1 must not consume the record
+    const w3 = makeWindow(env, 74, [10, 10, 300, 200], 0);
+    const w4 = makeWindow(env, 74, [400, 0, 300, 200], 0);
+    ws1wins.push(w3, w4);
+    app.ops.retileMonitor(app, 0, null, false, 1);
+    assert.equal(app.auto.pendingTake(0).size, 1, 'the pending record survived the inactive retile');
+});
+
+test('a focused fresh window appends last too (panel preset row click, swap)', () => {
+    const tweener = makeTweenerRecorder();
+    const { env, ext } = makeEnv(tweener, { windowGap: 0 });
+    enableOnMonitor(env, ext);
+    makeWorkspace(env);
+    env.activeWorkspace = { index: () => 0 };
+    const w1 = makeWindow(env, 81, [10, 10, 400, 300]);
+    const w2 = makeWindow(env, 82, [500, 0, 400, 300]);
+    env.tabList.push(w1, w2);
+    env.display.focus_window = w1;
+    const app = ext.session.app;
+    app.ops.presetsWrite(app, [{ id: 'p1', name: 'Halves', rules: [{ min: 2, stacks: [1, 1] }] }]);
+    app.ops.layoutSet(app, 0, 0, { preset: 'p1' });
+    app.ops.retileMonitor(app, 0);
+    assert.deepEqual(w1.rect, [0, 0, 1000, 1100]);
+    // the fresh window keeps focus (like a preset row click right after opening):
+    // fillStacks([1,1], 3) is [1,2] — the fresh window ends up in the LAST stack
+    const fresh = makeWindow(env, 73, [10, 10, 400, 300]);
+    env.tabList.push(fresh);
+    app.auto.onWindowAdded(app, env.workspaceManager.get_active_workspace(), fresh);
+    env.display.focus_window = fresh;
+    app.ops.retileMonitor(app, 0, fresh);
+    assert.deepEqual(w1.rect, [0, 0, 1000, 1100], 'settled window keeps the first cell');
+    assert.deepEqual(w2.rect, [1000, 0, 1000, 550], 'second settled window follows in reading order');
+    assert.deepEqual(fresh.rect, [1000, 550, 1000, 550], 'the focused fresh window appends last');
+    assert.equal(app.auto.pendingTake(0).size, 0, 'pending consumed');
+});
+
 // ---------------- presets + layouts through the ops facade ----------------
 
 test('preset writing, layout assignment and monitor retile round-trip through the ops facade', () => {
