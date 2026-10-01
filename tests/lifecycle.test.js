@@ -111,6 +111,19 @@ test('a late DisplayConfig reply for a destroyed App touches nothing (epoch guar
     assert.equal(env.liveTimers().length, timers, 'no timer scheduled by the stale reply');
 });
 
+test('enable twice without disable stacks a second session (documented behaviour, same leak class as the old module vars)', () => {
+    const { env, greenTile } = loadGreenTile();
+    greenTile.enable();
+    greenTile.enable();
+    env.flushDisplayConfigNoReply();
+    assert.equal(env.layoutManager.count('monitors-changed'), 2, 'each enable wires its own session handler');
+    assert.equal(env.display.count('grab-op-begin'), 2, 'the auto observers connect per session: they stack');
+    assert.deepEqual(env.greenTileHotkeys(), HOTKEY_NAMES, 'hotkey names overwrite by name, no duplication');
+    greenTile.disable();
+    assert.equal(env.layoutManager.count('monitors-changed'), 1,
+        'disable destroys only the newest session — the leak class of the original `app`/monitorChangedSignal overwrites, left unchanged by mandate');
+});
+
 test('disable takes the monitors-changed handler down first: a monitor change cannot resurrect an App', () => {
     const { env, greenTile } = loadGreenTile();
     greenTile.enable();

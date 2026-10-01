@@ -52,6 +52,17 @@ test('extension.js reaches init/enable/disable through require("./greenTile")', 
     ext.init({ uuid: 'greenTile@carsteneu' });
 });
 
+test('extension.js forwards init/enable/disable as member calls (this-session coupling)', () => {
+    const extSrc = fs.readFileSync(extensionPath, 'utf8');
+    assert.match(extSrc, /gtile\.init\(/, 'member-style init call');
+    assert.match(extSrc, /gtile\.enable\(\)/,
+        'member-style enable call — the extension session rides `this` on greenTile\'s module.exports, '
+        + 'a destructured/unbound call would leave `this` undefined');
+    assert.match(extSrc, /gtile\.disable\(\)/, 'member-style disable call');
+    assert.ok(!/const\s*\{\s*(?:init|enable|disable)[\s,}]/.test(extSrc),
+        'no destructured forwarding of the lifecycle entry points');
+});
+
 test('no webpack leftovers, gTile provenance markers preserved, header intact', () => {
     const src = fs.readFileSync(greenTilePath, 'utf8');
     assert.ok(!src.includes('__webpack'), 'webpack runtime identifiers must be gone');

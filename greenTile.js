@@ -2863,8 +2863,9 @@ const enable = function () {
     // One extension session per enable(): it outlives every App recreation and
     // carries the state that must survive them (settle wait, fallback-logged
     // flag, the monitors-changed handler on its own scope). Cinnamon calls
-    // enable()/disable() as methods on the exports object (extension.js), so
-    // the session rides `this` — no module-level state remains.
+    // extension.js's exports member-style (extensionSystem.js) and extension.js
+    // forwards as gtile.enable()/gtile.disable() member calls — so `this` is
+    // the exports object and the session rides it, no module-level state left.
     this.session = new Session({
         signalManager: new tile_SignalManager(),
         layoutManager: Main.layoutManager,
@@ -2887,8 +2888,9 @@ const disable = function () {
         // disable/enable cycle then kept a handler bound to the OLD module, and each
         // monitor change resurrected a complete old App (hotkeys and tiling
         // observers included) per stale handler: duplicate retiles, zombie bindings.
-        // The release now rides the session scope: the session goes down after
-        // the App, taking the monitors-changed handler with it.
+        // The release rides the session scope: Session.destroy() takes the
+        // monitors-changed handler down FIRST, then the App dies — the zombie
+        // path stays closed even when app.destroy() throws.
     if (this.session) {
         this.session.destroy();
         this.session = null;
