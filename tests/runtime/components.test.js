@@ -218,7 +218,7 @@ const makeGio = (env) => ({
 });
 
 const displayReply = (monitors, throwError) => ({
-    call_finish(result) {
+    call_finish(_result) {
         if (throwError)
             {throw throwError;}
         return { deep_unpack: () => [[], monitors.map((m) => [[m[0], m[1], m[2], m[3]], []])] };
@@ -311,7 +311,6 @@ test('onlyPrimary lazily creates the muffin settings exactly once', () => {
 test('a failed GetCurrentState reply is logged, refresh still completes with fallbacks', () => {
     const { env, monitors, logs } = makeMonitors({ 'DP-1': 1 });
     monitors.refresh(() => {});
-    const caught = null;
     withReply(env, [], new Error('boom'));
     assert.equal(monitors.ready, true, 'the fallback path still publishes the registry');
     assert.deepEqual(monitors.keys, ['name:Screen-0|1920x1080', 'name:Screen-1|1280x1024']);
@@ -538,7 +537,6 @@ test('auto activate/deactivate: layout stored when off, retile follows, border r
     assert.deepEqual(calls.layoutSet, [{ monitorIndex: 1, wsIndex: 3, patch: { auto: true } }],
         'activating a paused monitor stores auto on for the monitor+workspace');
     assert.deepEqual(logs, ['greenTile auto tiling on for ws3']);
-    const focus = { get_monitor: () => 1 };
     const { logs: logs2, calls: calls2, auto: auto2 } = makeAuto({ focus: null, auto: true });
     auto2.activate('app');
     assert.deepEqual(calls2.layoutSet, [], 'already-on monitor: no settings write');

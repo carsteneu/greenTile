@@ -21,7 +21,7 @@ const checkSanity = (val, setting) => {
         case 'radiogroup':
             found = false;
             for (const opt in setting['options']) {
-                if (val == setting['options'][opt]) {
+                if (val === setting['options'][opt]) {
                     found = true;
                     break;
                 }
@@ -34,7 +34,7 @@ const checkSanity = (val, setting) => {
 
 const doUpgrade = (current, templateData) => {
     for (const key in templateData) {
-        if (key == '__md5__') continue;
+        if (key === '__md5__') continue;
         const props = templateData[key];
         if (!('type' in props) || !('default' in props)) continue;
         let oldValue = null;

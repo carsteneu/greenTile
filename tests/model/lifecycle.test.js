@@ -4,8 +4,6 @@
 // by a newer refresh (monitor change) or invalidated by teardown (App destroy).
 const test = require('node:test');
 const assert = require('node:assert/strict');
-const fs = require('node:fs');
-const path = require('node:path');
 
 const m = require('../helpers/cinnamon-loader').load('./lib/model/lifecycle.js');
 

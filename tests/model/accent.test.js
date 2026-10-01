@@ -89,7 +89,7 @@ test('probe chain keeps the default when no stage qualifies', () => {
     assert.equal(m.accentProbeFirst(() => null), null);
     // a grey calendar day (Mint-Y-Dark-Grey) is rejected inside accentProbe
     // by the model — the chain itself only walks stage by stage
-    const greyTheme = (className, pseudoClass) =>
+    const greyTheme = (className, _pseudoClass) =>
         className === 'popup-menu-item' ? null : [112, 115, 122];
     assert.deepEqual(m.accentProbeFirst(greyTheme), [112, 115, 122]);
 });

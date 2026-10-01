@@ -68,22 +68,22 @@ const buildGraph = () => {
 const findCycle = (graph) => {
     const open = new Set();
     const done = new Set();
-    const path = [];
+    const trail = [];
     const visit = (node) => {
         if (done.has(node))
             {return null;}
         if (open.has(node)) {
-            const at = path.indexOf(node);
-            return path.slice(at).concat(node);
+            const at = trail.indexOf(node);
+            return trail.slice(at).concat(node);
         }
         open.add(node);
-        path.push(node);
+        trail.push(node);
         for (const dep of graph.get(node) || []) {
             const cycle = visit(dep);
             if (cycle)
                 {return cycle;}
         }
-        path.pop();
+        trail.pop();
         open.delete(node);
         done.add(node);
         return null;

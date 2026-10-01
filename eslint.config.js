@@ -15,6 +15,7 @@ const rules = {
         args: 'after-used',
         argsIgnorePattern: '^_',
         varsIgnorePattern: '^_',
+        caughtErrorsIgnorePattern: '^_',
     }],
     'eqeqeq': ['error', 'always', { null: 'ignore' }],
     'prefer-const': 'error',

@@ -328,7 +328,7 @@ const createCinnamonEnv = (options) => {
                         enumerable: true,
                         configurable: true,
                         get: () => (values.has(key) ? values.get(key) : undefined),
-                        set: (v) => instance.setValue(key, v),
+                        set: (v) => { instance.setValue(key, v); },
                     });
                 }
                 this.bindings.push({ key, prop, cb: cb ? () => cb.call(owner) : undefined, data });
