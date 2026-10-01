@@ -128,8 +128,10 @@ Deploy from a checkout and reload without restarting Cinnamon:
 ```bash
 D=~/.local/share/cinnamon/extensions/greenTile@carsteneu
 mkdir -p "$D"
-node --check greenTile.js
-cp extension.js greenTile.js metadata.json settings-schema.json stylesheet.css icon.png LICENSE "$D"/
+node --check extension.js
+cp extension.js metadata.json settings-schema.json stylesheet.css icon.png LICENSE "$D"/
+rm -rf "$D/lib"
+cp -R lib "$D/lib"
 for po in po/*.po; do
   lang=$(basename "$po" .po)
   mkdir -p ~/.local/share/locale/"$lang"/LC_MESSAGES
@@ -139,10 +141,18 @@ dbus-send --session --print-reply --dest=org.Cinnamon /org/Cinnamon org.Cinnamon
   string:"imports.ui.extensionSystem.disableExtension('greenTile@carsteneu'); imports.ui.extensionSystem.enableExtension('greenTile@carsteneu'); 'reloaded'"
 ```
 
-- **Tests:** `node --test tests/*.test.js` (Node 18 or newer).
+extension.js is the single entry and requires the modules from `lib/` — always
+deploy `lib/` alongside it. Copying extension.js alone fails at load time. A
+`greenTile.js` left over from an older install is dead code under the new build
+(Cinnamon loads extension.js only) — delete it for hygiene.
+
+- **Tests:** `node --test tests/` — recursive, one command for the whole tree, every file exactly once (Node 18 or newer).
+- **Tooling:** `npm ci` once, then `npm run check` — tests, typecheck and lint in one run. Types are JSDoc checked with `tsc --checkJs` (`npm run typecheck`); there are no TypeScript sources and no build step, everything ships as plain JavaScript.
+- **CI:** `.github/workflows/ci.yml` runs `npm run check` on every push and pull request.
+- **Release guard:** `tests/architecture/shipped-files.test.js` freezes the zip surface: dev-only material (npm configs, types, tests, research, CI) must never reach `build-release.sh` or `lib/`.
 - **Releases:** pushing a `v*` tag builds the zip and attaches it to the release (`.github/workflows/release.yml`).
 - **Diagnostics:** `~/.xsession-errors` shows `JS ERROR` lines and `greenTile skipped …` lines explaining why a window was not tiled.
-- **Translations:** the domain is `greenTile@carsteneu`, template `po/greenTile@carsteneu.pot`. After changing strings, run `./makepot.sh` (needs `polib` and `pytz`). New or changed `.mo` files only take effect after a Cinnamon restart.
+- **Translations:** the domain is `greenTile@carsteneu`, template `po/greenTile@carsteneu.pot`. After changing strings, run `./makepot.sh` (needs gettext and cinnamon-xlet-makepot; the script scans a staging copy of the shipped files only, never tests or dev tooling — point `MAKEPOT_PYTHON` at an interpreter with `polib`/`pytz` if they are not installed system-wide). New or changed `.mo` files only take effect after a Cinnamon restart.
 
 ## Origin
 

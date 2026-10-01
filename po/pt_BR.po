@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: greenTile 1.2.0\n"
 "Report-Msgid-Bugs-To: https://github.com/carsteneu\n"
-"POT-Creation-Date: 2026-09-30 22:29+0200\n"
+"POT-Creation-Date: 2026-10-01 15:46+0200\n"
 "PO-Revision-Date: 2022-02-09 15:35-0300\n"
 "Last-Translator: Marcelo Aof\n"
 "Language-Team: Brazilian Portuguese\n"
@@ -19,58 +19,40 @@ msgstr ""
 "Plural-Forms: nplurals=2; plural=(n > 1);\n"
 "X-Generator: Poedit 3.0.1\n"
 
-#. settings-schema.json->excludeAppPicker->options
-#: greenTile.js:439
-msgid "Add application …"
-msgstr "Adicionar aplicativo …"
-
-#: greenTile.js:458
-msgid "Window floats"
-msgstr "Janela flutua livremente"
-
-#: greenTile.js:458
-msgid "Window tiles again"
-msgstr "Janela volta a ficar lado a lado"
-
-#: greenTile.js:2771
-#, javascript-format
-msgid "assigned — workspace %d"
-msgstr "atribuída — área de trabalho %d"
-
-#: greenTile.js:2832
+#: lib/ui/editor.js:66
 msgid "Please enter a name."
 msgstr "Insira um nome."
 
-#: greenTile.js:2874
+#: lib/ui/editor.js:122
 #, javascript-format
 msgid "from %d"
 msgstr "a partir de %d"
 
-#: greenTile.js:2991
+#: lib/ui/editor.js:267
 msgid "Rules (by window count)"
 msgstr "Regras (por número de janelas)"
 
-#: greenTile.js:2995
+#: lib/ui/editor.js:271
 msgid "Rule"
 msgstr "Regra"
 
-#: greenTile.js:2996
+#: lib/ui/editor.js:272
 msgid "Delete rule"
 msgstr "Excluir regra"
 
-#: greenTile.js:3004
+#: lib/ui/editor.js:280
 msgid "Rule applies from"
 msgstr "A regra vale a partir de"
 
-#: greenTile.js:3011
+#: lib/ui/editor.js:287
 msgid "windows"
 msgstr "janelas"
 
-#: greenTile.js:3013
+#: lib/ui/editor.js:289
 msgid "Painter"
 msgstr "Área de desenho"
 
-#: greenTile.js:3028
+#: lib/ui/editor.js:306
 msgid ""
 "Click or drag: the row sets how many windows the column holds. Right-click "
 "removes a column."
@@ -78,91 +60,96 @@ msgstr ""
 "Clique ou arraste: a linha define quantas janelas a coluna comporta. O "
 "clique direito remove uma coluna."
 
-#: greenTile.js:3033
+#: lib/ui/editor.js:311
 msgid "Name"
 msgstr "Nome"
 
-#: greenTile.js:3034
+#: lib/ui/editor.js:312
 msgid "Preset name"
 msgstr "Nome da predefinição"
 
-#: greenTile.js:3039
+#: lib/ui/editor.js:317
 msgid "Delete preset"
 msgstr "Excluir predefinição"
 
-#: greenTile.js:3042
+#: lib/ui/editor.js:320
 msgid "Really delete?"
 msgstr "Excluir mesmo?"
 
-#: greenTile.js:3043
+#: lib/ui/editor.js:321
 msgid "Delete"
 msgstr "Excluir"
 
-#: greenTile.js:3047
+#: lib/ui/editor.js:325
 msgid "Save"
 msgstr "Salvar"
 
-#: greenTile.js:3072
+#: lib/ui/editor.js:350
 #, javascript-format
 msgid "Result: %s"
 msgstr "Resultado: %s"
 
-#: greenTile.js:3692
+#: lib/ui/panel.js:77
+#, javascript-format
+msgid "assigned — workspace %d"
+msgstr "atribuída — área de trabalho %d"
+
+#: lib/ui/panel.js:117
 msgid "Gap between windows"
 msgstr "Espaço entre janelas"
 
-#: greenTile.js:3697
+#: lib/ui/panel.js:123
 #, javascript-format
 msgid "%d px"
 msgstr "%d px"
 
-#: greenTile.js:3716
+#: lib/ui/panel.js:143
 msgid "Reset sizes"
 msgstr "Redefinir tamanhos"
 
-#: greenTile.js:3747
+#: lib/ui/panel.js:186
 #, javascript-format
 msgid "Presets — workspace %d · %s"
 msgstr "Predefinições — área de trabalho %d · %s"
 
-#: greenTile.js:3749
+#: lib/ui/panel.js:188
 msgid "Create preset"
 msgstr "Criar predefinição"
 
-#: greenTile.js:3749
+#: lib/ui/panel.js:188
 #, javascript-format
 msgid "Edit %s"
 msgstr "Editar %s"
 
-#: greenTile.js:3753
+#: lib/ui/panel.js:193
 msgid "Back"
 msgstr "Voltar"
 
-#: greenTile.js:3762
+#: lib/ui/panel.js:202
 msgid "Auto: on"
 msgstr "Auto: ligado"
 
-#: greenTile.js:3762
+#: lib/ui/panel.js:202
 msgid "Auto: off"
 msgstr "Auto: desligado"
 
-#: greenTile.js:3783
+#: lib/ui/panel.js:225
 msgid "Dark theme"
 msgstr "Tema escuro"
 
-#: greenTile.js:3783
+#: lib/ui/panel.js:225
 msgid "Light theme"
 msgstr "Tema claro"
 
-#: greenTile.js:3903
+#: lib/ui/panel.js:357
 msgid "No presets yet."
 msgstr "Nenhuma predefinição ainda."
 
-#: greenTile.js:3918
+#: lib/ui/panel.js:374
 msgid "New preset"
 msgstr "Nova predefinição"
 
-#: greenTile.js:3921
+#: lib/ui/panel.js:377
 msgid "Click a row to apply it to this workspace and tile right away"
 msgstr ""
 "Clique em uma linha para aplicá-la a esta área de trabalho e organizar as "
@@ -188,7 +175,7 @@ msgstr "Configurações"
 msgid "Hotkeys"
 msgstr "Atalhos de teclado"
 
-#. settings-schema.json->autotile-hotkey-section->title
+#. settings-schema.json->columns-hotkey-section->title
 msgid "Auto-Tile Hotkeys"
 msgstr "Atalhos de teclado do lado a lado automático"
 
@@ -217,21 +204,21 @@ msgstr "Nunca organizar lado a lado"
 msgid "Preset panel"
 msgstr "Painel de predefinições"
 
-#. settings-schema.json->autotile6hotkey->description
+#. settings-schema.json->columns6Hotkey->description
 msgid "Tile all windows into 6 columns"
 msgstr "Organizar todas as janelas lado a lado em 6 colunas"
 
-#. settings-schema.json->autotile3hotkey->description
+#. settings-schema.json->columns3Hotkey->description
 msgid "Tile all windows into 3 columns"
 msgstr "Organizar todas as janelas lado a lado em 3 colunas"
 
-#. settings-schema.json->autotileautohotkey->description
+#. settings-schema.json->autoOnHotkey->description
 msgid "Turn automatic tiling on for this workspace and tile now"
 msgstr ""
 "Ativar o lado a lado automático nesta área de trabalho e organizar as "
 "janelas agora"
 
-#. settings-schema.json->autotileoffhotkey->description
+#. settings-schema.json->autoOffHotkey->description
 msgid "Turn automatic tiling off for this workspace"
 msgstr "Desativar o lado a lado automático nesta área de trabalho"
 
@@ -293,6 +280,10 @@ msgstr ""
 "Escolha um aplicativo e ele será adicionado à lista abaixo. A caixa de "
 "seleção é redefinida após cada escolha."
 
+#. settings-schema.json->excludeAppPicker->options
+msgid "Add application …"
+msgstr "Adicionar aplicativo …"
+
 #. settings-schema.json->exclusions->description
 msgid ""
 "Windows matching one of these rows are never tiled; they float freely "
@@ -308,27 +299,6 @@ msgstr "Correspondência"
 #. settings-schema.json->exclusions->columns->title
 msgid "Text"
 msgstr "Texto"
-
-#. settings-schema.json->wsPresets->description
-msgid "Workspace to preset assignments (JSON)"
-msgstr "Atribuições de predefinições às áreas de trabalho (JSON)"
-
-#. settings-schema.json->autoWorkspaces->description
-msgid ""
-"Automatic tiling per workspace (set with Super+Ctrl+A / Super+Ctrl+D or in "
-"the preset panel; not shown in this dialog)"
-msgstr ""
-"Lado a lado automático por área de trabalho (definido com Super+Ctrl+A / "
-"Super+Ctrl+D ou no painel de predefinições; não exibido nesta caixa de "
-"diálogo)"
-
-#. settings-schema.json->autoWorkspaces->columns->title
-msgid "Workspace"
-msgstr "Área de trabalho"
-
-#. settings-schema.json->autoWorkspaces->columns->title
-msgid "Tile automatically"
-msgstr "Organizar automaticamente"
 
 #. settings-schema.json->windowGap->description
 msgid ""
@@ -460,9 +430,11 @@ msgstr ""
 "Cor de estado do painel de predefinições quando Cor de estado está em "
 "Personalizada."
 
-#~ msgid ""
-#~ "Draw a thin border in the state color around the focused window while "
-#~ "automatic tiling is on."
-#~ msgstr ""
-#~ "Desenha uma borda fina na cor de estado ao redor da janela focada enquanto o"
-#~ " ladrilho automático estiver ativo."
+#: .yesmem/tmp/makepot-stage/greenTile@carsteneu/lib/runtime/exclusions.js:201
+#| msgid "windows"
+msgid "Window floats"
+msgstr "Janela flutua livremente"
+
+#: .yesmem/tmp/makepot-stage/greenTile@carsteneu/lib/runtime/exclusions.js:201
+msgid "Window tiles again"
+msgstr "Janela volta a ficar lado a lado"
