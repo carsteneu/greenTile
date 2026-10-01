@@ -572,6 +572,43 @@ test('infeasible space: a resize just stops instead of storing an undersized arr
     assert.deepEqual(env.logErrors, [], 'no errors');
 });
 
+test('saving a shared preset retiles each monitor\'s ACTIVE workspace only; inactive ones adopt on switch', () => {
+    const tweener = makeTweenerRecorder();
+    const { env, ext } = makeEnv(tweener, { windowGap: 0 });
+    enableOnMonitor(env, ext);
+    makeWorkspace(env);
+    const ws1wins = [];
+    makeWorkspace(env).list_windows = () => ws1wins;
+    env.activeWorkspace = { index: () => 0 };
+    const w1 = makeWindow(env, 51, [10, 10, 400, 300], 0);
+    const w2 = makeWindow(env, 52, [500, 0, 400, 300], 0);
+    env.tabList.push(w1, w2);
+    env.display.focus_window = w1;
+    const app = ext.session.app;
+    app.ops.presetsWrite(app, [{ id: 'p1', name: 'Halves', rules: [{ min: 2, stacks: [1, 1] }] }]);
+    app.ops.layoutSet(app, 0, 0, { preset: 'p1' });
+    app.ops.layoutSet(app, 0, 1, { preset: 'p1' });
+    app.ops.retileMonitor(app, 0);
+    assert.deepEqual(w1.rect, [0, 0, 1000, 1100]);
+    // two windows sitting on the inactive workspace 1, assigned the same preset
+    const w3 = makeWindow(env, 53, [10, 10, 300, 200], 0);
+    const w4 = makeWindow(env, 54, [400, 0, 300, 200], 0);
+    ws1wins.push(w3, w4);
+    // save a one-stack-of-two rule: the active workspace adopts it immediately
+    const before = appliedLogs(env, 'Halves').length;
+    savePresetWithRules(ext, 'p1', [{ min: 2, stacks: [2] }]);
+    assert.equal(appliedLogs(env, 'Halves').slice(before).length, 1, 'exactly the active workspace retiled');
+    assert.deepEqual(w1.rect, [0, 0, 2000, 550], 'active workspace stacked');
+    assert.deepEqual(w2.rect, [0, 550, 2000, 550]);
+    assert.deepEqual(w3.rect, [10, 10, 300, 200], 'inactive workspace untouched by the save');
+    assert.deepEqual(w4.rect, [400, 0, 300, 200]);
+    // adopting happens on the next retile of that workspace after switching
+    env.activeWorkspace = { index: () => 1 };
+    app.ops.retileMonitor(app, 0, null, false, 1);
+    assert.deepEqual(w3.rect, [0, 0, 2000, 550], 'inactive workspace adopted the rule on switch');
+    assert.deepEqual(w4.rect, [0, 550, 2000, 550]);
+});
+
 // ---------------- presets + layouts through the ops facade ----------------
 
 test('preset writing, layout assignment and monitor retile round-trip through the ops facade', () => {
