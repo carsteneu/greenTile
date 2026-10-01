@@ -1,8 +1,7 @@
 'use strict';
 // Model purity, enforced on the shipped module sources: the lib/model modules must
 // stay free of every Cinnamon reference so they load and run in plain Node (tests)
-// and cannot reach the desktop from inside a model call. This restores the
-// per-block "self-contained" assertions the extraction retired: an imports./global./Meta.
+// and cannot reach the desktop from inside a model call. An imports./global./Meta.
 // access inside a function body would load fine everywhere and only fail when
 // Cinnamon calls it — no loader or resolver test can catch that, only this grep can.
 const test = require('node:test');

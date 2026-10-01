@@ -82,7 +82,7 @@
 /* The state rules below (the green of "Auto: on", assigned rows and the row
    stripe down to .gk-sub) are overridden at runtime by the generated
    stylesheet (setting "State color"); keep them in sync with
-   tile_state_css in greenTile.js. */
+   stateCss in lib/model/state.js. */
 .gk-auto-on {
     color: #9ce072;
     border-color: rgba(156, 224, 114, 0.5);
@@ -159,7 +159,7 @@
 
 /* The accent rules below (orange tones down to .gk-light .gk-entry:focus) are
    overridden at runtime by the generated accent stylesheet (setting
-   "Accent color"); keep them in sync with tile_accent_css in greenTile.js. */
+   "Accent color"); keep them in sync with accentCss in lib/model/accent.js. */
 .gk-plus {
     color: #ff9640;
     font-size: 16px;
@@ -492,7 +492,7 @@
 }
 
 /* Light theme ("panelTheme": "light", or "system" with a light desktop): every
-   rule lives under the gk-light class that greenTile.js puts on the panel root,
+   rule lives under the gk-light class that lib/runtime/theme.js puts on the panel root,
    so the dark look above stays untouched. Same tones, inverted: panels and
    fields go white-grey, text goes dark, greens and oranges are darkened for
    contrast on the light background. */

@@ -36,9 +36,9 @@ test('settings-keys.js is frozen and covers every persisted schema key exactly',
         {assert.equal(keys[key], key, 'the constant value is the key itself');}
 });
 
-test('the renamed hotkey keys and the legacy drops leave exactly this schema key set', () => {
-    // whitelist instead of a banned list: the schema must carry exactly these
-    // persisted keys after the rename and the legacy-key removal
+test('the schema carries exactly this persisted key set', () => {
+    // whitelist instead of a banned list: any added, renamed or dropped key
+    // must be a deliberate change of this list
     assert.deepEqual(SCHEMA_KEYS, [
         'accentColor', 'accentMode', 'autoOffHotkey', 'autoOnHotkey',
         'columns3Hotkey', 'columns6Hotkey', 'excludeAppPicker', 'excludeHotkey',

@@ -33,8 +33,9 @@ cp -R lib "$STAGE/$UUID/lib"
 
 "$PYTHON" "$(command -v cinnamon-xlet-makepot)" -o "$STAGE.pot" "$STAGE/$UUID"
 # cinnamon-xlet-makepot/xgettext only extract the `_` keyword. lib/runtime/
-# exclusions.js receives take-_ via `translate:` (lib/app/app.js) — extract
-# those literals with a second xgettext pass and merge both templates.
+# exclusions.js receives gettext as the injected `translate` function
+# (lib/app/app.js) — extract those literals with a second xgettext pass and
+# merge both templates.
 find "$STAGE/$UUID" -name '*.js' | sort | xargs xgettext \
     --language=JavaScript --from-code=UTF-8 --keyword=translate \
     --package-version="$VERSION" --output="$STAGE.translate.pot"
