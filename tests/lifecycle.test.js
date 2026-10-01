@@ -151,7 +151,7 @@ test('disable/enable on the same loaded module yields exactly one live session s
 });
 
 // Fake MetaWindow / workspace: signal accounting + just enough geometry for the
-// auto-tiling observer paths the real greenTile.js runs against.
+// auto-tiling observer paths the real extension runs against.
 const makeWindow = (seq) => {
     const handlers = [];
     let nextId = 1;

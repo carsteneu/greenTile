@@ -16,6 +16,10 @@ fi
 
 mkdir -p "$DEST"
 cp "$SRC"/*.js "$SRC"/*.json "$SRC"/*.css "$SRC"/icon.png "$DEST/"
+# a greenTile.js left over from an older install would still be loaded by
+# Cinnamon and shadow the new composition root — remove it (4c-B: extension.js
+# is the single entry)
+rm -f "$DEST/greenTile.js"
 # lib/ is a tree of module files; replace it wholesale, so an install over an
 # older version cannot mix new modules with stale ones the new code does not require.
 rm -rf "$DEST/lib"

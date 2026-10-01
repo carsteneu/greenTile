@@ -1,5 +1,5 @@
 'use strict';
-// Fake Cinnamon runtime for lifecycle tests against the REAL greenTile.js.
+// Fake Cinnamon runtime for lifecycle tests against the REAL extension.js.
 // Behavioral fakes cover the paths greenTile touches on enable()/disable() and
 // the monitors-changed recreation: signal hubs on Main/global objects, the
 // keybinding manager, Meta custom keybindings, one shared GLib source-id space,
