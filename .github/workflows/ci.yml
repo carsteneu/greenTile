@@ -1,7 +1,9 @@
 name: ci
 
-# Test, typecheck and lint every push and pull request. The release zip is
-# built by release.yml on v* tags only.
+# Test, typecheck and lint every push and pull request on the oldest supported
+# Node (18, package.json engines) and a current LTS, and check that the release
+# zip ships the runtime files only. The release itself is built by release.yml
+# on v* tags.
 on:
   push:
     branches: ['**']
@@ -13,10 +15,40 @@ permissions:
 jobs:
   check:
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        node: [18, 22]
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: 18
+          node-version: ${{ matrix.node }}
       - run: npm ci
       - run: npm run check
+
+  zip:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: ./build-release.sh
+      - name: zip contains the runtime files and nothing dev-only
+        run: |
+          set -eu
+          zip=$(ls dist/*.zip)
+          unzip -Z1 "$zip" > zip.lst
+          root=$(head -n1 zip.lst)
+          for f in install.sh update.sh greenTile@carsteneu/extension.js greenTile@carsteneu/metadata.json \
+                   greenTile@carsteneu/settings-schema.json greenTile@carsteneu/stylesheet.css \
+                   greenTile@carsteneu/icon.png greenTile@carsteneu/lib/app/app.js greenTile@carsteneu/po/de.po; do
+            grep -qx "$root$f" zip.lst || { echo "missing in zip: $f"; exit 1; }
+          done
+          if grep -E '(package(-lock)?\.json|tsconfig|eslint|/types/|/tests/|node_modules|\.github|/docs/|greenTile\.js$)' zip.lst; then
+            echo "dev-only or obsolete files in the zip"; exit 1
+          fi
+          mkdir unpacked && unzip -q "$zip" -d unpacked
+          find unpacked -name '*.js' -print0 | xargs -0 -n1 node --check
+          echo "zip ok: $(wc -l < zip.lst) entries"

@@ -146,11 +146,11 @@ dbus-send --session --print-reply --dest=org.Cinnamon /org/Cinnamon org.Cinnamon
 extension.js is the single entry and requires the modules from `lib/` — always
 deploy `lib/` alongside it. Copying extension.js alone fails at load time.
 
-- **Tests:** `node --test tests/` — recursive, one command for the whole tree, every file exactly once (Node 18 or newer).
+- **Tests:** `npm test` (or `node --test tests/*/*.test.js`) — every test file exactly once, on Node 18 or newer. Test files live one level below `tests/` (`tests/<area>/<name>.test.js`); `node --test tests/` would only work on Node 18/20.
 - **Tooling:** `npm ci` once, then `npm run check` — tests, typecheck and lint in one run. Types are JSDoc checked with `tsc --checkJs` (`npm run typecheck`); there are no TypeScript sources and no build step, everything ships as plain JavaScript.
-- **CI:** `.github/workflows/ci.yml` runs `npm run check` on every push and pull request.
+- **CI:** `.github/workflows/ci.yml` runs `npm run check` on Node 18 and 22 for every push and pull request, and builds the release zip to check that it holds the runtime files only.
 - **Release guard:** `tests/architecture/shipped-files.test.js` freezes the zip surface: dev-only material (npm configs, types, tests, research, CI) must never reach `build-release.sh` or `lib/`.
-- **Releases:** pushing a `v*` tag builds the zip and attaches it to the release (`.github/workflows/release.yml`).
+- **Releases:** pushing a `v*` tag runs the checks, verifies that the tag matches the version in `metadata.json`, builds the zip and attaches it to the release (`.github/workflows/release.yml`).
 - **Diagnostics:** `~/.xsession-errors` shows `JS ERROR` lines and `greenTile skipped …` lines explaining why a window was not tiled.
 - **Translations:** the domain is `greenTile@carsteneu`, template `po/greenTile@carsteneu.pot`. After changing strings, run `./makepot.sh` (needs gettext and cinnamon-xlet-makepot; the script scans a staging copy of the shipped files only, never tests or dev tooling — point `MAKEPOT_PYTHON` at an interpreter with `polib`/`pytz` if they are not installed system-wide). New or changed `.mo` files only take effect after a Cinnamon restart.
 

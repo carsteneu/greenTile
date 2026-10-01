@@ -1,7 +1,8 @@
 name: release
 
-# A pushed v* tag builds the install zip (build-release.sh) and attaches it
-# to a GitHub Release for that tag.
+# A pushed v* tag runs the same checks as ci.yml, then builds the install zip
+# (build-release.sh) and attaches it to a GitHub Release for that tag. A failing
+# check stops the release before anything is published.
 on:
   push:
     tags: ['v*']
@@ -14,6 +15,15 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm ci
+      - run: npm run check
+      - name: tag matches metadata.json version
+        run: |
+          v=$(node -p "require('./metadata.json').version")
+          [ "v$v" = "$GITHUB_REF_NAME" ] || { echo "tag $GITHUB_REF_NAME does not match metadata.json version $v"; exit 1; }
       - run: ./build-release.sh
       - run: gh release create "$GITHUB_REF_NAME" dist/*.zip --title "greenTile ${GITHUB_REF_NAME#v}" --notes "Unzip, run ./install.sh, restart Cinnamon (Ctrl+Alt+Esc), then enable greenTile in System Settings → Extensions. Details in the README."
         env:
