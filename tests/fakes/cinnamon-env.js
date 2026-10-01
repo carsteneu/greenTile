@@ -187,6 +187,10 @@ const createCinnamonEnv = (options) => {
         },
     });
     env.workspaceManager = signalHub('workspaceManager');
+    // active workspace identity for the auto-tiling observer paths; null until a
+    // test opts in (windows with get_workspace() -> null match it)
+    env.activeWorkspace = null;
+    env.workspaceManager.get_active_workspace = () => env.activeWorkspace;
     env.windowManager = signalHub('windowManager');
     env.appSystem = Object.assign(signalHub('AppSystem'), {
         get_all() {
@@ -339,6 +343,10 @@ const createCinnamonEnv = (options) => {
                 env.customBindings.set(name, fn);
         },
         MaximizeFlags: { HORIZONTAL: 2, VERTICAL: 4 },
+        // value 6 mirrors the real Meta.WindowType.NORMAL enum weight; only the
+        // identity comparison with greenTile's own Meta.WindowType.NORMAL read
+        // matters, which is the same fake object
+        WindowType: { NORMAL: 6, DIALOG: 3 },
         MonitorManager: {
             get: () => ({ get_monitor_for_connector: () => -1 }),
         },

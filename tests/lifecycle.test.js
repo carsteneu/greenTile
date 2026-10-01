@@ -149,3 +149,109 @@ test('disable/enable on the same loaded module yields exactly one live session s
     assert.equal(env.display.count('grab-op-begin'), 1);
     assert.equal(env.liveTimers().length, 0, 'no leftover settle timer across the cycle');
 });
+
+// Fake MetaWindow / workspace: signal accounting + just enough geometry for the
+// auto-tiling observer paths the real greenTile.js runs against.
+const makeWindow = (seq) => {
+    const handlers = [];
+    let nextId = 1;
+    const windowHub = {
+        minimized: false,
+        connect(sig, cb) {
+            handlers.push({ sig, cb, id: nextId });
+            return nextId++;
+        },
+        disconnect(id) {
+            const at = handlers.findIndex((h) => h.id === id);
+            if (at === -1)
+                throw new Error('window: no such signal handler ' + id);
+            handlers.splice(at, 1);
+        },
+        count(sig) {
+            return handlers.filter((h) => !sig || h.sig === sig).length;
+        },
+        emit(sig, ...args) {
+            for (const h of handlers.slice())
+                if (h.sig === sig)
+                    h.cb(...args);
+        },
+        get_stable_sequence: () => seq,
+        get_window_type: () => 6, // Meta.WindowType.NORMAL in the fake Meta
+        get_wm_class: () => 'FakeWindow',
+        get_monitor: () => 0,
+        get_workspace: () => null, // === activeWorkspace (null) in the default env
+    };
+    return windowHub;
+};
+const makeWorkspace = () => {
+    const handlers = [];
+    let nextId = 1;
+    return {
+        __hub: 'workspace',
+        windows: [],
+        connect(sig, cb) {
+            handlers.push({ sig, cb, id: nextId });
+            return nextId++;
+        },
+        disconnect(id) {
+            const at = handlers.findIndex((h) => h.id === id);
+            if (at === -1)
+                throw new Error('workspace: no such signal handler ' + id);
+            handlers.splice(at, 1);
+        },
+        count(sig) {
+            return handlers.filter((h) => !sig || h.sig === sig).length;
+        },
+        list_windows: () => [],
+    };
+};
+
+test('auto observer: a tracked window releases both per-window handlers when it is unmanaged', () => {
+    const { env, greenTile } = loadGreenTile();
+    greenTile.enable();
+    env.flushDisplayConfigNoReply();
+    const w = makeWindow(11);
+    env.display.emit('window-created', w);
+    assert.equal(w.count('notify::minimized'), 1, 'minimize tracking connected once');
+    assert.equal(w.count('unmanaged'), 1, 'unmanaged cleanup connected once');
+    w.emit('unmanaged');
+    assert.equal(w.count('notify::minimized'), 0, 'notify::minimized handler released');
+    assert.equal(w.count('unmanaged'), 0, 'unmanaged handler released');
+    greenTile.disable();
+    assert.equal(env.totalHandlers(), 0, 'the release path is destroy-tolerant');
+});
+
+test('auto observer: notify::n-workspaces reconnect leaves exactly one window-added/removed pair per workspace', () => {
+    const { env, greenTile } = loadGreenTile();
+    const ws0 = makeWorkspace();
+    env.workspaces.push(ws0);
+    greenTile.enable();
+    env.flushDisplayConfigNoReply();
+    const pairCount = (ws) => ws.count('window-added') + ws.count('window-removed');
+    assert.equal(pairCount(ws0), 2, 'initial connect: one added/removed pair');
+    const ws1 = makeWorkspace();
+    env.workspaces.push(ws1);
+    env.screen.emit('notify::n-workspaces');
+    assert.equal(pairCount(ws0), 2, 'old workspace dropped and reconnected, not stacked');
+    assert.equal(pairCount(ws1), 2, 'new workspace connected exactly once');
+    assert.equal(env.screen.count('notify::n-workspaces'), 1, 'the global reconnect handler stays single');
+    greenTile.disable();
+    assert.equal(pairCount(ws0), 0, 'workspace handlers released on disable');
+    assert.equal(pairCount(ws1), 0, 'workspace handlers released on disable');
+    assert.equal(env.totalHandlers(), 0);
+});
+
+test('auto observer: monitors-changed removes pending per-monitor debounce timers (no stale retile)', () => {
+    const { env, greenTile } = loadGreenTile();
+    greenTile.enable();
+    env.flushDisplayConfigNoReply();
+    const w = makeWindow(7);
+    env.display.emit('window-created', w);
+    w.emit('notify::minimized');
+    assert.equal(env.liveTimers().filter((t) => t.ms === 300).length, 1, 'auto debounce timer pending');
+    env.layoutManager.emit('monitors-changed');
+    env.flushDisplayConfigNoReply();
+    assert.equal(env.liveTimers().filter((t) => t.ms === 300).length, 0, 'debounce timer died with the App');
+    greenTile.disable();
+    assert.equal(env.liveTimers().length, 0, 'disable still leaves 0 timers');
+});
