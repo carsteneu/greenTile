@@ -97,7 +97,7 @@ type ConfigFacade = {
 type OpsFacade = {
     focusWindow(): CinnamonWindow | null;
     focusMonitorIndex(): number;
-    collectWindows(monitor: CinnamonMonitor, focus: CinnamonWindow | null, ws?: number): CinnamonWindow[];
+    collectWindows(app: AppFacade, monitor: CinnamonMonitor, focus: CinnamonWindow | null, ws?: number): CinnamonWindow[];
     layoutFor(app: AppFacade, monitorIndex: number, wsIndex: number): { preset: Preset | null; auto: boolean };
     layoutSet(app: AppFacade, monitorIndex: number, wsIndex: number, patch: {}): void;
     retileMonitor(app: AppFacade, monitorIndex: number, focused: CinnamonWindow | null, animate?: boolean, wsIndex?: number | null): void;
@@ -157,7 +157,8 @@ type SplitFacade = {
     flush(app: AppFacade): void;
     hotkey(app: AppFacade, action: string): void;
     destroy(): void;
-    reset(): void;
+    any(app: AppFacade, monitorIndex: number, wsIndex: number): boolean;
+    reset(app: AppFacade, monitorIndex: number, wsIndex: number): void;
 };
 
 /** Monitor registry facade (lib/runtime/monitors.js). */
