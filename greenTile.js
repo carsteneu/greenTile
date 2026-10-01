@@ -37,20 +37,11 @@
 
 // Pure model blocks, extracted to lib/model/. Paths are root-relative on purpose:
 // Cinnamon resolves every nested require against the xlet root (fileUtils.js).
-const { tile_gap_value, tile_gap_cell } = require('./lib/model/gap');
-const { tile_single_fill, tile_single_layout } = require('./lib/model/single');
-const { tile_disconnect_each } = require('./lib/model/teardown');
-const { tile_fill_stacks, tile_auto_rows, tile_auto_narrow_stacks } = require('./lib/model/fill');
-const { TILE_SPLIT_MIN_PX, tile_split_valid, tile_split_rects, tile_split_cell_at, tile_split_border_pos, tile_split_move, tile_split_key_target, tile_split_accel, tile_split_op_edges, tile_split_frame_edges, tile_sort_order } = require('./lib/model/split');
-const { tile_drop_zone, tile_drop_layout, tile_drop_fits } = require('./lib/model/drop');
-const { tile_layouts_parse, tile_layouts_entry, tile_layouts_splits, tile_layouts_shapes, tile_layouts_set, tile_layouts_migrate, tile_layout_resolve } = require('./lib/model/layouts');
 const { Split } = require('./lib/runtime/split');
 const { Drop } = require('./lib/runtime/drop');
 const { Theme } = require('./lib/runtime/theme');
 const { Border } = require('./lib/runtime/border');
 const { Focus } = require('./lib/runtime/focus');
-const { tile_swap_neighbor, tile_swap_landing_cell, tile_swap_chain_step } = require('./lib/model/swap');
-const { tile_focus_monitor_step, tile_focus_monitor_pick } = require('./lib/model/focus');
 const { Session } = require('./lib/runtime/session');
 const { Monitors } = require('./lib/runtime/monitors');
 const { Auto } = require('./lib/runtime/auto');
@@ -174,9 +165,9 @@ class Config {
     }
 }
 
+
 // ---- Utils (derived from gTile src/base/utils.ts) ----
-// getPanelHeight/getUsableScreenArea and every tile_* service moved to
-// lib/tiling/ (loop 4c-A); greenTile.js consumes them through the requires above.
+// The utils section moved to lib/tiling/ (loop 4c-A).
 
 // ---- App (derived from gTile src/base/app.ts) ----
 class App {
