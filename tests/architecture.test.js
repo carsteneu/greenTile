@@ -30,12 +30,14 @@ const requireRe = /\brequire\(\s*(['"])([^'"\n]+)\1\s*\)/g;
 
 // Layer rules as data: a module may only require its own layer or lower ones
 // (or a rule that names a concrete file). The entry extension.js may require
-// only the composition root (lib/app) and the session runtime.
+// only the composition root (lib/app) and the session runtime. The leaf
+// constants module lib/app/settings-keys.js is the exception every reader of
+// settings may require — it is the single place carrying the key strings.
 const LAYER_RULES = [
     { dir: 'lib/model', allows: ['lib/model'] },
-    { dir: 'lib/tiling', allows: ['lib/model', 'lib/tiling'] },
-    { dir: 'lib/runtime', allows: ['lib/model', 'lib/tiling', 'lib/runtime'] },
-    { dir: 'lib/ui', allows: ['lib/model', 'lib/tiling', 'lib/runtime', 'lib/ui'] },
+    { dir: 'lib/tiling', allows: ['lib/model', 'lib/tiling', 'lib/app/settings-keys.js'] },
+    { dir: 'lib/runtime', allows: ['lib/model', 'lib/tiling', 'lib/runtime', 'lib/app/settings-keys.js'] },
+    { dir: 'lib/ui', allows: ['lib/model', 'lib/tiling', 'lib/runtime', 'lib/ui', 'lib/app/settings-keys.js'] },
     { dir: 'lib/app', allows: ['lib/model', 'lib/tiling', 'lib/runtime', 'lib/ui', 'lib/app'] },
     { dir: 'extension.js', allows: ['lib/app', 'lib/runtime/session.js'] },
 ];

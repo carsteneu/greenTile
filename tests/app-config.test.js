@@ -73,9 +73,16 @@ test('the theme settings controls fire the theme handler (accent sheet reloads)'
     const { env, ext } = loadExtension();
     ext.enable();
     env.flushDisplayConfigNoReply();
-    const loads = env.stTheme.loads.length;
-    settingsInstance(env).bindings.find((b) => b.prop === 'accentMode').cb();
-    assert.ok(env.stTheme.loads.length > loads, 'theme.changed ran: the accent sheet went through reload');
+    const inst = settingsInstance(env);
+    const gen = ext.session.app.theme.gen;
+    // a custom accent changes the generated css, so the handler must reload
+    // the sheet (an identical look deliberately skips the reload)
+    inst.setValue('accentMode', 'own');
+    inst.setValue('accentColor', 'rgb(10,20,30)');
+    inst.bindings.find((b) => b.prop === 'accentMode').cb();
+    assert.equal(env.stTheme.unloads.length, 1, 'theme.changed ran: the old sheet was unloaded');
+    assert.equal(env.stTheme.loads.length, 1, 'the reloaded sheet is the single live one');
+    assert.notEqual(ext.session.app.theme.gen, gen, 'the reload took a fresh accent generation');
 });
 
 test('a monitors-changed App recreation re-derives every binding config without stacking registrations', () => {
