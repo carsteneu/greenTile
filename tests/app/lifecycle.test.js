@@ -803,3 +803,89 @@ test('a throwing flush during monitors-changed does not abort the recreation: th
     assert.equal(env.totalHandlers(), 0, 'disable after the recovered recreation is clean');
     assert.equal(env.liveTimers().length, 0, 'no timer left');
 });
+
+// Rollback on partial initialization (todo_fixes.md #3): a Config constructor
+// failing mid-way must release everything it already acquired — on the first
+// start and on an App recreation after a monitor change.
+const failAddHotKey = (env, name) => {
+    const real = env.keybindingManager.addHotKey;
+    env.keybindingManager.addHotKey = function (bindingName, ...rest) {
+        if (bindingName === name) {
+            throw new Error('injected hotkey failure');
+        }
+        return real.call(this, bindingName, ...rest);
+    };
+    return () => { env.keybindingManager.addHotKey = real; };
+};
+
+test('an enable failing at the 3rd hotkey rolls back hotkeys, installed-changed and settings; a later enable registers exactly once', () => {
+    const { env, ext } = loadExtension();
+    const restore = failAddHotKey(env, 'greenTile-autoN');
+    assert.throws(() => ext.enable(), /injected hotkey failure/, 'the enable fails at the injected hotkey');
+    assert.deepEqual(env.greenTileHotkeys(), [], 'the earlier hotkeys are rolled back');
+    assert.equal(env.appSystem.count('installed-changed'), 0, 'the installed-changed handler is released');
+    assert.equal(env.settingsSlots.get('greenTile@carsteneu'), null, 'the settings slot is finalized');
+    assert.equal(env.totalHandlers(), 0, 'no handler left');
+    assert.deepEqual([...env.customBindings.keys()], [], 'no Meta bindings');
+    restore();
+    ext.enable();
+    env.flushDisplayConfigNoReply();
+    assert.deepEqual(env.greenTileHotkeys(), HOTKEY_NAMES, 'exactly the 14 hotkeys, once');
+    assert.equal(env.appSystem.count('installed-changed'), 1, 'exactly one installed-changed');
+    assert.equal(env.settingsInstances[0].finalized, true, 'the rolled-back instance stays finalized');
+    ext.disable();
+    assert.equal(env.totalHandlers(), 0);
+});
+
+test('a failure at focus.connect rolls back hotkeys, installed-changed, theme sheet and settings', () => {
+    const { env, ext } = loadExtension();
+    const realSet = env.gi.Meta.keybindings_set_custom_handler;
+    env.gi.Meta.keybindings_set_custom_handler = function (name, fn) {
+        if (name === 'push-tile-down') {
+            throw new Error('injected focus failure');
+        }
+        return realSet(name, fn);
+    };
+    env.layoutManager.monitors.push({ x: 0, y: 0, width: 2000, height: 1100 });
+    assert.throws(() => ext.enable(), /injected focus failure/, 'the enable fails at the injected focus connect');
+    env.layoutManager.monitors.pop();
+    env.gi.Meta.keybindings_set_custom_handler = realSet;
+    assert.deepEqual(env.greenTileHotkeys(), [], 'hotkeys rolled back');
+    assert.equal(env.appSystem.count('installed-changed'), 0, 'installed-changed rolled back');
+    assert.equal(env.stTheme.loads.length, 0, 'the accent sheet was unloaded by the rollback');
+    assert.equal(env.themeManager.count('theme-set'), 0, 'the theme-set handler was released');
+    assert.equal(env.settingsSlots.get('greenTile@carsteneu'), null, 'settings finalized');
+    assert.equal(env.totalHandlers(), 0, 'nothing else stays connected');
+    ext.enable();
+    env.flushDisplayConfigNoReply();
+    assert.deepEqual(env.greenTileHotkeys(), HOTKEY_NAMES, 'the retry registers exactly once');
+    assert.equal(env.appSystem.count('installed-changed'), 1);
+    ext.disable();
+    assert.equal(env.totalHandlers(), 0);
+});
+
+test('a failed App recreation leaves no App and no resources; the next monitor change succeeds exactly once', () => {
+    const { env, ext } = loadExtension();
+    ext.enable();
+    env.flushDisplayConfigNoReply();
+    const firstSettings = env.settingsInstances[0];
+    const restore = failAddHotKey(env, 'greenTile-auto3');
+    assert.throws(() => env.layoutManager.emit('monitors-changed'), /injected hotkey failure/, 'the recreation fails at the injected hotkey');
+    restore();
+    assert.equal(ext.session.app, null, 'the session keeps no half-destroyed App');
+    assert.deepEqual(env.greenTileHotkeys(), [], 'no hotkeys left');
+    assert.equal(env.appSystem.count('installed-changed'), 0, 'the recreation rolled back its handler');
+    assert.equal(env.layoutManager.count('monitors-changed'), 1,
+        'the session handler stays armed: the next monitor change retries');
+    assert.equal(env.totalHandlers(), 1, 'old App destroyed, new one rolled back: only the session handler remains');
+    assert.equal(firstSettings.finalized, true, 'the old settings are finalized');
+    env.layoutManager.emit('monitors-changed');
+    env.flushDisplayConfigNoReply();
+    assert.equal(ext.session.app !== null, true, 'the next monitor change recreates the App');
+    assert.deepEqual(env.greenTileHotkeys(), HOTKEY_NAMES, 'exactly the 14 hotkeys, once');
+    assert.equal(env.appSystem.count('installed-changed'), 1, 'exactly one installed-changed, not two');
+    ext.disable();
+    assert.equal(env.totalHandlers(), 0);
+    ext.disable();
+    assert.equal(env.totalHandlers(), 0, 'repeated disable after a failed recreation stays safe');
+});
