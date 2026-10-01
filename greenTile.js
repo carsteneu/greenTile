@@ -890,6 +890,7 @@ class App {
         });
         // Explicit UI facade (one place): the tiling functions the preset panel
         // (lib/ui) calls — frozen, so nothing beyond these lookups is reachable.
+        // Model modules are required by lib/ui directly (no facade needed).
         this.ops = Object.freeze({
             focusWindow: tile_focus_window,
             getFocusApp: getFocusApp,
