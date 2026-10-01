@@ -12,7 +12,7 @@ const split = load('./lib/model/split.js');
 
 test('option off: no window count is singled out (n < 2 guards stay in charge)', () => {
     for (let n = 0; n <= 10; n++)
-        assert.equal(m.singleFill(false, n), false, 'n=' + n);
+        {assert.equal(m.singleFill(false, n), false, 'n=' + n);}
     assert.equal(m.singleFill(undefined, 1), false);
 });
 

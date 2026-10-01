@@ -13,7 +13,7 @@ const makeStub = () => new Proxy(function () {}, {
     construct: () => makeStub(),
     get: (t, p) => {
         if (p === Symbol.toPrimitive)
-            return () => '';
+            {return () => '';}
         return makeStub();
     },
     set: () => true,
@@ -22,9 +22,9 @@ const makeStub = () => new Proxy(function () {}, {
 const proxyStub = (branch) => new Proxy(function () {}, {
     get: (t, p) => {
         if (p === Symbol.toPrimitive)
-            return () => '';
+            {return () => '';}
         if (p in branch)
-            return branch[p];
+            {return branch[p];}
         return makeStub();
     },
     apply: () => makeStub(),
@@ -46,7 +46,7 @@ class FakeSignalManager {
     connect(obj, sigName, callback, bind, force) {
         if (!force
             && this._storage.some(([s, o, c]) => s === sigName && o === obj && c === callback))
-            return;
+            {return;}
         const id = obj.connect(sigName, callback);
         this._storage.push([sigName, obj, callback, id]);
         return id;
@@ -73,7 +73,7 @@ const signalHub = (name) => {
         disconnect(id) {
             const at = handlers.findIndex((h) => h.id === id);
             if (at === -1)
-                throw new Error(name + ': no such signal handler ' + id);
+                {throw new Error(name + ': no such signal handler ' + id);}
             handlers.splice(at, 1);
         },
         count(sigName) {
@@ -81,8 +81,8 @@ const signalHub = (name) => {
         },
         emit(sigName, ...args) {
             for (const h of handlers.slice())
-                if (h.sigName === sigName)
-                    h.callback(...args);
+                {if (h.sigName === sigName)
+                    {h.callback(...args);}}
         },
     };
 };
@@ -148,12 +148,12 @@ const createCinnamonEnv = (options) => {
         primaryIndex: 0,
         addChrome(a) {
             if (!env.chromeChildren.includes(a))
-                env.chromeChildren.push(a);
+                {env.chromeChildren.push(a);}
         },
         removeChrome(a) {
             const at = env.chromeChildren.indexOf(a);
             if (at !== -1)
-                env.chromeChildren.splice(at, 1);
+                {env.chromeChildren.splice(at, 1);}
         },
     });
     env.themeManager = signalHub('themeManager');
@@ -174,7 +174,7 @@ const createCinnamonEnv = (options) => {
         remove_child(a) {
             const at = this.children.indexOf(a);
             if (at !== -1)
-                this.children.splice(at, 1);
+                {this.children.splice(at, 1);}
         },
     };
     const mainBranch = {
@@ -236,36 +236,36 @@ const createCinnamonEnv = (options) => {
         remove_actor(a) {
             const at = env.overlayChildren.indexOf(a);
             if (at !== -1)
-                env.overlayChildren.splice(at, 1);
+                {env.overlayChildren.splice(at, 1);}
         },
     };
 
     env.global = new Proxy(function () {}, {
         get: (t, p) => {
             if (p === Symbol.toPrimitive)
-                return () => '';
+                {return () => '';}
             if (p === 'display')
-                return env.display;
+                {return env.display;}
             if (p === 'screen')
-                return env.screen;
+                {return env.screen;}
             if (p === 'workspace_manager')
-                return env.workspaceManager;
+                {return env.workspaceManager;}
             if (p === 'window_manager')
-                return env.windowManager;
+                {return env.windowManager;}
             if (p === 'stage')
-                return env.stage;
+                {return env.stage;}
             if (p === 'overlay_group')
-                return env.overlayGroup;
+                {return env.overlayGroup;}
             if (p === 'log')
-                return (...a) => env.logs.push(a.map(String).join(' '));
+                {return (...a) => env.logs.push(a.map(String).join(' '));}
             if (p === 'logError')
-                return (...a) => env.logErrors.push(a.map(String).join(' '));
+                {return (...a) => env.logErrors.push(a.map(String).join(' '));}
             if (p === 'get_current_time')
-                return () => 0;
+                {return () => 0;}
             if (p === 'get_pointer')
-                return () => [0, 0];
+                {return () => [0, 0];}
             if (p === 'set_cursor' || p === 'unset_cursor')
-                return () => {};
+                {return () => {};}
             return makeStub();
         },
         apply: () => makeStub(),
@@ -282,7 +282,7 @@ const createCinnamonEnv = (options) => {
         },
         source_remove(id) {
             if (!env.timers.delete(id))
-                throw new Error('mainloop: no such source ' + id);
+                {throw new Error('mainloop: no such source ' + id);}
         },
     };
     env.glib = {
@@ -296,7 +296,7 @@ const createCinnamonEnv = (options) => {
         Source: {
             remove(id) {
                 if (!env.timers.delete(id))
-                    throw new Error('glib: no such source ' + id);
+                    {throw new Error('glib: no such source ' + id);}
             },
         },
         get_monotonic_time: () => 0,
@@ -339,7 +339,7 @@ const createCinnamonEnv = (options) => {
             setOptions() {},
             getValue(key) {
                 if (!values.has(key))
-                    throw new Error('fake settings: no default for "' + key + '" (uuid ' + uuid + ')');
+                    {throw new Error('fake settings: no default for "' + key + '" (uuid ' + uuid + ')');}
                 return values.get(key);
             },
             setValue(key, v) {
@@ -373,7 +373,7 @@ const createCinnamonEnv = (options) => {
         unload_stylesheet(path) {
             const at = this.loads.indexOf(path);
             if (at !== -1)
-                this.loads.splice(at, 1);
+                {this.loads.splice(at, 1);}
             this.unloads.push(path);
         },
     };
@@ -432,7 +432,7 @@ const createCinnamonEnv = (options) => {
             disconnect(id) {
                 const at = this._handlers.findIndex((h) => h.id === id);
                 if (at !== -1)
-                    this._handlers.splice(at, 1);
+                    {this._handlers.splice(at, 1);}
             }
             count(sigName) {
                 return this._handlers.filter((h) => !sigName || h.sigName === sigName).length;
@@ -442,9 +442,9 @@ const createCinnamonEnv = (options) => {
     const meta = {
         keybindings_set_custom_handler(name, fn) {
             if (fn === null)
-                env.customBindings.delete(name);
+                {env.customBindings.delete(name);}
             else
-                env.customBindings.set(name, fn);
+                {env.customBindings.set(name, fn);}
         },
         MaximizeFlags: { HORIZONTAL: 2, VERTICAL: 4 },
         // value 6 mirrors the real Meta.WindowType.NORMAL enum weight; only the
@@ -481,7 +481,7 @@ const createCinnamonEnv = (options) => {
         disconnect(id) {
             const at = this._handlers.findIndex((h) => h.id === id);
             if (at === -1)
-                throw new Error('fake actor: no such signal handler ' + id);
+                {throw new Error('fake actor: no such signal handler ' + id);}
             this._handlers.splice(at, 1);
         }
         count(sigName) {
@@ -489,12 +489,12 @@ const createCinnamonEnv = (options) => {
         }
         emit(sigName, ...args) {
             for (const h of this._handlers.slice())
-                if (h.sigName === sigName)
-                    h.cb(...args);
+                {if (h.sigName === sigName)
+                    {h.cb(...args);}}
         }
         add(child) {
             if (!this.children.includes(child))
-                this.children.push(child);
+                {this.children.push(child);}
         }
         add_actor(child) {
             this.add(child);
@@ -502,7 +502,7 @@ const createCinnamonEnv = (options) => {
         remove_child(child) {
             const at = this.children.indexOf(child);
             if (at !== -1)
-                this.children.splice(at, 1);
+                {this.children.splice(at, 1);}
         }
         destroy_all_children() {
             this.children = [];
@@ -543,7 +543,7 @@ const createCinnamonEnv = (options) => {
         queue_repaint() {}
         destroy() {
             if (this.destroyed)
-                return;
+                {return;}
             this.destroyed = true;
             this._handlers.length = 0;
         }
@@ -566,15 +566,15 @@ const createCinnamonEnv = (options) => {
     env.imports = new Proxy(function () {}, {
         get: (t, p) => {
             if (p === Symbol.toPrimitive)
-                return () => '';
+                {return () => '';}
             if (p === 'ui')
-                return env.ui;
+                {return env.ui;}
             if (p === 'gi')
-                return env.gi;
+                {return env.gi;}
             if (p === 'mainloop')
-                return env.mainloop;
+                {return env.mainloop;}
             if (p === 'misc')
-                return proxyStub({ signalManager: { SignalManager: FakeSignalManager } });
+                {return proxyStub({ signalManager: { SignalManager: FakeSignalManager } });}
             return makeStub();
         },
         apply: () => makeStub(),
@@ -590,7 +590,7 @@ const createCinnamonEnv = (options) => {
         const queued = env.queuedDBus;
         env.queuedDBus = [];
         for (const cb of queued)
-            cb({ call_finish() { throw new Error('fake: no DisplayConfig reply'); } }, null);
+            {cb({ call_finish() { throw new Error('fake: no DisplayConfig reply'); } }, null);}
     };
     return env;
 };

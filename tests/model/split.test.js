@@ -204,7 +204,7 @@ test('accel: tap = 1 px, repeats add 1 px up to 64, new press or other key resta
     assert.equal(r.step, 3);
     let s = r.state;
     for (let i = 0; i < 100; i++)
-        s = m.splitAccel(s, 'wider', 1530 + 30 * (i + 1), 600).state;
+        {s = m.splitAccel(s, 'wider', 1530 + 30 * (i + 1), 600).state;}
     assert.equal(s.step, 64);
     assert.equal(m.splitAccel(s, 'wider', s.last + 601, 600).step, 1);
     assert.equal(m.splitAccel(s, 'taller', s.last + 30, 600).step, 1);

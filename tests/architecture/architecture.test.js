@@ -19,9 +19,9 @@ const shippedJs = (function collect(dir, prefix) {
     for (const entry of fs.readdirSync(dir, { withFileTypes: true }).sort((a, b) => a.name.localeCompare(b.name))) {
         const rel = prefix ? `${prefix}/${entry.name}` : entry.name;
         if (entry.isDirectory())
-            out.push(...collect(path.join(dir, entry.name), rel));
+            {out.push(...collect(path.join(dir, entry.name), rel));}
         else if (entry.name.endsWith('.js'))
-            out.push(rel);
+            {out.push(rel);}
     }
     return out;
 })(path.join(ROOT, 'lib'), 'lib').concat(['extension.js']);
@@ -53,7 +53,7 @@ const buildGraph = () => {
             // gi./ui./misc./perf. specifiers reach the Cinnamon imports global
             // and never enter the file graph
             if (/^(?:gi|ui|misc|perf)\./.test(match[2]))
-                continue;
+                {continue;}
             const target = match[2].replace(/\.\//g, '');
             targets.push(target.endsWith('.js') ? target : target + '.js');
         }
@@ -71,7 +71,7 @@ const findCycle = (graph) => {
     const path = [];
     const visit = (node) => {
         if (done.has(node))
-            return null;
+            {return null;}
         if (open.has(node)) {
             const at = path.indexOf(node);
             return path.slice(at).concat(node);
@@ -81,7 +81,7 @@ const findCycle = (graph) => {
         for (const dep of graph.get(node) || []) {
             const cycle = visit(dep);
             if (cycle)
-                return cycle;
+                {return cycle;}
         }
         path.pop();
         open.delete(node);
@@ -91,7 +91,7 @@ const findCycle = (graph) => {
     for (const start of graph.keys()) {
         const cycle = visit(start);
         if (cycle)
-            return cycle;
+            {return cycle;}
     }
     return null;
 };
@@ -109,13 +109,13 @@ test('lib layers may only require their own or lower layers', () => {
     for (const [file, deps] of graph) {
         const layer = layerOf(file);
         if (!layer || layer.allows === null)
-            continue;
+            {continue;}
         for (const dep of deps) {
             const depLayer = layerOf(dep);
             // allows lists layer dirs; a rule may also name a concrete file
             // (the entry's session runtime: lib/runtime/session.js)
             if ((depLayer && layer.allows.includes(depLayer.dir)) || layer.allows.includes(dep))
-                continue;
+                {continue;}
             violations.push(file + ' -> ' + dep + ' (layer ' + layer.dir + ' forbids '
                 + (depLayer ? depLayer.dir : dep) + ')');
         }
@@ -128,10 +128,10 @@ test('nothing outside lib/app and extension.js requires the composition root', (
     const violations = [];
     for (const [file, deps] of graph) {
         if (file === 'extension.js' || file.startsWith('lib/app/'))
-            continue;
+            {continue;}
         for (const dep of deps) {
             if (dep.startsWith('lib/app/'))
-                violations.push(file + ' -> ' + dep + ' (lower layer must not depend on the composition root)');
+                {violations.push(file + ' -> ' + dep + ' (lower layer must not depend on the composition root)');}
         }
     }
     assert.deepEqual(violations, [], 'composition-root dependents');

@@ -35,18 +35,18 @@ const fakeSignalManager = () => {
         disconnect(sigName, obj, callback) {
             const doomed = this.getSignals(sigName, obj, callback).filter(([, o, , id]) => isConnected(o, id));
             for (const [, o, , id] of doomed)
-                o.disconnect(id);
+                {o.disconnect(id);}
             for (const entry of doomed) {
                 const at = storage.indexOf(entry);
                 if (at !== -1)
-                    storage.splice(at, 1);
+                    {storage.splice(at, 1);}
             }
         },
         disconnectAllSignals() {
             this.disconnectAllCalls += 1;
             const doomed = storage.filter(([, o, , id]) => isConnected(o, id));
             for (const [, o, , id] of doomed)
-                o.disconnect(id);
+                {o.disconnect(id);}
             storage.length = 0;
         },
     };
@@ -74,7 +74,7 @@ const fakeMainloop = () => {
             const result = entry.cb();
             // GJS mainloop semantics: truthy return keeps the source scheduled
             if (result)
-                live.set(id, entry);
+                {live.set(id, entry);}
             return result;
         },
     };

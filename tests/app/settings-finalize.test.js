@@ -15,7 +15,7 @@ const configSrc = fs.readFileSync(path.join(__dirname, '..', '..', 'lib', 'app',
 
 const destroyStart = configSrc.indexOf('    destroy() {');
 if (destroyStart === -1)
-    throw new Error('destroy method not found in lib/app/config.js');
+    {throw new Error('destroy method not found in lib/app/config.js');}
 const destroyBody = configSrc.slice(destroyStart, configSrc.indexOf('\n    }\n', destroyStart));
 
 const extensionSrc = fs.readFileSync(path.join(__dirname, '..', '..', 'extension.js'), 'utf8');

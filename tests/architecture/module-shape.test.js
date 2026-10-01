@@ -43,9 +43,9 @@ const shippedJs = (function collect(dir, prefix) {
     for (const entry of fs.readdirSync(dir, { withFileTypes: true }).sort((a, b) => a.name.localeCompare(b.name))) {
         const rel = prefix ? `${prefix}/${entry.name}` : entry.name;
         if (entry.isDirectory())
-            out.push(...collect(path.join(dir, entry.name), rel));
+            {out.push(...collect(path.join(dir, entry.name), rel));}
         else if (entry.name.endsWith('.js'))
-            out.push(rel);
+            {out.push(rel);}
     }
     return out;
 })(path.join(ROOT, 'lib'), 'lib').concat(['extension.js']);
