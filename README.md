@@ -142,9 +142,9 @@ dbus-send --session --print-reply --dest=org.Cinnamon /org/Cinnamon org.Cinnamon
 ```
 
 extension.js is the single entry and requires the modules from `lib/` — always
-deploy `lib/` alongside it. Copying extension.js alone fails at load time. If an
-older install left a `greenTile.js` in the extension folder, delete it (Cinnamon
-would load the stale copy).
+deploy `lib/` alongside it. Copying extension.js alone fails at load time. A
+`greenTile.js` left over from an older install is dead code under the new build
+(Cinnamon loads extension.js only) — delete it for hygiene.
 
 - **Tests:** `node --test tests/*.test.js` (Node 18 or newer).
 - **Releases:** pushing a `v*` tag builds the zip and attaches it to the release (`.github/workflows/release.yml`).

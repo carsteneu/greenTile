@@ -22,6 +22,38 @@ const loadExtension = () => {
 
 const settingsInstance = (env) => env.settingsInstances.find((s) => s.uuid === 'greenTile@carsteneu');
 
+// Source-sliced order pins (same test style as settings-finalize): the App
+// construction order and the BINDINGS declaration order are the invariants the
+// 4c-B move promised to keep — regressions that reorder them must fail here.
+const constructorOrder = ['excl', 'hotkeys', 'panel', 'monitors', 'split', 'theme', 'border', 'focus', 'drop', 'auto', 'ops', 'config'];
+
+test('App constructs every per-App component in the documented order, Config last', () => {
+    const src = fs.readFileSync(path.join(ROOT, 'lib', 'app', 'app.js'), 'utf8');
+    const start = src.indexOf('constructor(session, cinnamon)');
+    const body = src.slice(start, src.indexOf('\n    }\n', start));
+    const positions = constructorOrder.map((k) => {
+        const at = body.indexOf(`this.${k} = `);
+        assert.ok(at > -1, `this.${k} assignment missing`);
+        return at;
+    });
+    const sorted = [...positions].sort((a, b) => a - b);
+    assert.deepEqual(positions, sorted, 'component assignment order drifted from the documented order');
+    assert.match(body.slice(positions[positions.length - 1]), /new Config\(this\)/, 'Config is constructed last');
+});
+
+test('Config.BINDINGS declares the binds in the documented key order', () => {
+    const src = fs.readFileSync(path.join(ROOT, 'lib', 'app', 'config.js'), 'utf8');
+    const start = src.indexOf('const BINDINGS');
+    const end = src.indexOf(']);', start);
+    const body = src.slice(start, end);
+    const declared = [...body.matchAll(/key: SETTINGS_KEYS\.([a-zA-Z0-9]+)/g)].map((m) => m[1]);
+    assert.equal(declared.length, 23, '23 bindings declared');
+    const expectedFirst = ['columns6Hotkey', 'columns3Hotkey', 'autoOnHotkey', 'autoOffHotkey',
+        'presetHotkey', 'excludeHotkey', 'exclusions'];
+    assert.deepEqual(declared.slice(0, 7), expectedFirst, 'hotkeys first, exclusions before the picker flow');
+    assert.equal(declared[declared.length - 1], 'fillSingleWindow', 'fillSingleWindow stays the last bind');
+});
+
 const BOUND_PROPS = [
     'columns6Hotkey', 'columns3Hotkey', 'autoOnHotkey', 'autoOffHotkey',
     'presetHotkey', 'excludeHotkey',

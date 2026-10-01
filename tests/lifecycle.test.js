@@ -584,10 +584,10 @@ test('panel: hotkey re-registration while the list is open keeps the Escape bind
     env.activeWorkspace = { index: () => 0 };
     env.keybindingManager.hotkeys.get('greenTile-preset').cb();
     assert.ok(env.keybindingManager.hotkeys.get('greenTile-panel-esc'), 'Escape bound while the list is open');
-    // the settings dialog path: any hotkey setting change re-runs EnableHotkey
+    // the settings dialog path: any hotkey setting change re-runs registerHotkeys
     settingsInstance(env).bindings.find((b) => b.key === 'presetHotkey').cb();
     assert.ok(env.keybindingManager.hotkeys.get('greenTile-panel-esc'),
-        'EnableHotkey must not drop the Escape binding (panel owner binds/unbinds it per open/close)');
+        'registerHotkeys must not drop the Escape binding (panel owner binds/unbinds it per open/close)');
     assert.deepEqual(env.greenTileHotkeys().filter((n) => n !== 'greenTile-panel-esc').sort(), HOTKEY_NAMES,
         'the 14 static hotkeys are re-registered exactly once');
     // Escape still closes the panel

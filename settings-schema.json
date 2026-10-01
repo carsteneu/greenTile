@@ -18,12 +18,12 @@
          "type": "page",
          "title": "Hotkeys",
       "sections": [
-          "columns-hotkey-section",
-              "preset-section",
-              "resize-section",
-              "swap-section",
-              "exclusion-hotkey-section"
-           ]
+         "columns-hotkey-section",
+         "preset-section",
+         "resize-section",
+         "swap-section",
+         "exclusion-hotkey-section"
+      ]
       },
       "columns-hotkey-section": {
          "type": "section",
