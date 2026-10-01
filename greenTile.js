@@ -116,34 +116,34 @@ class Config {
         };
         this.app = app;
         this.settings = new Settings.ExtensionSettings(this, 'greenTile@carsteneu');
-        this.settings.bindProperty(Settings.BindingDirection.IN, 'autotile6hotkey', 'autotile6Hotkey', this.EnableHotkey, null);
-        this.settings.bindProperty(Settings.BindingDirection.IN, 'autotile3hotkey', 'autotile3Hotkey', this.EnableHotkey, null);
-        this.settings.bindProperty(Settings.BindingDirection.IN, 'autotileautohotkey', 'autotileAutoHotkey', this.EnableHotkey, null);
-        this.settings.bindProperty(Settings.BindingDirection.IN, 'autotileoffhotkey', 'autotileOffHotkey', this.EnableHotkey, null);
-        this.settings.bindProperty(Settings.BindingDirection.IN, 'presetHotkey', 'presetHotkey', this.EnableHotkey, null);
-        this.settings.bindProperty(Settings.BindingDirection.IN, 'excludeHotkey', 'excludeHotkey', this.EnableHotkey, null);
-        this.settings.bindProperty(Settings.BindingDirection.IN, 'exclusions', 'exclusions', () => {
+        this.settings.bind('autotile6hotkey', 'autotile6Hotkey', this.EnableHotkey, null);
+        this.settings.bind('autotile3hotkey', 'autotile3Hotkey', this.EnableHotkey, null);
+        this.settings.bind('autotileautohotkey', 'autotileAutoHotkey', this.EnableHotkey, null);
+        this.settings.bind('autotileoffhotkey', 'autotileOffHotkey', this.EnableHotkey, null);
+        this.settings.bind('presetHotkey', 'presetHotkey', this.EnableHotkey, null);
+        this.settings.bind('excludeHotkey', 'excludeHotkey', this.EnableHotkey, null);
+        this.settings.bind('exclusions', 'exclusions', () => {
             tile_excl_apply(this.settings);
             tile_excl_retile(this.app);
         }, null);
-        this.settings.bindProperty(Settings.BindingDirection.IN, 'excludeAppPicker', 'excludeAppPickerValue', () => {
+        this.settings.bind('excludeAppPicker', 'excludeAppPickerValue', () => {
             tile_excl_app_picked(this.settings, this.app, this.settings.getValue('excludeAppPicker'));
         }, null);
-        this.settings.bindProperty(Settings.BindingDirection.IN, 'resizeWiderHotkey', 'resizeWiderHotkey', this.EnableHotkey, null);
-        this.settings.bindProperty(Settings.BindingDirection.IN, 'resizeNarrowerHotkey', 'resizeNarrowerHotkey', this.EnableHotkey, null);
-        this.settings.bindProperty(Settings.BindingDirection.IN, 'resizeTallerHotkey', 'resizeTallerHotkey', this.EnableHotkey, null);
-        this.settings.bindProperty(Settings.BindingDirection.IN, 'resizeShorterHotkey', 'resizeShorterHotkey', this.EnableHotkey, null);
-        this.settings.bindProperty(Settings.BindingDirection.IN, 'swapLeftHotkey', 'swapLeftHotkey', this.EnableHotkey, null);
-        this.settings.bindProperty(Settings.BindingDirection.IN, 'swapRightHotkey', 'swapRightHotkey', this.EnableHotkey, null);
-        this.settings.bindProperty(Settings.BindingDirection.IN, 'swapUpHotkey', 'swapUpHotkey', this.EnableHotkey, null);
-        this.settings.bindProperty(Settings.BindingDirection.IN, 'swapDownHotkey', 'swapDownHotkey', this.EnableHotkey, null);
-        this.settings.bindProperty(Settings.BindingDirection.IN, 'panelTheme', 'panelTheme', () => tile_theme_changed(), null);
-        this.settings.bindProperty(Settings.BindingDirection.IN, 'accentMode', 'accentMode', () => tile_theme_changed(), null);
-        this.settings.bindProperty(Settings.BindingDirection.IN, 'accentColor', 'accentColor', () => tile_theme_changed(), null);
-        this.settings.bindProperty(Settings.BindingDirection.IN, 'stateMode', 'stateMode', () => tile_theme_changed(), null);
-        this.settings.bindProperty(Settings.BindingDirection.IN, 'stateColor', 'stateColor', () => tile_theme_changed(), null);
-        this.settings.bindProperty(Settings.BindingDirection.IN, 'focusBorder', 'focusBorderValue', () => tile_border_update(), null);
-        this.settings.bindProperty(Settings.BindingDirection.IN, 'fillSingleWindow', 'fillSingleWindowValue', () => {
+        this.settings.bind('resizeWiderHotkey', 'resizeWiderHotkey', this.EnableHotkey, null);
+        this.settings.bind('resizeNarrowerHotkey', 'resizeNarrowerHotkey', this.EnableHotkey, null);
+        this.settings.bind('resizeTallerHotkey', 'resizeTallerHotkey', this.EnableHotkey, null);
+        this.settings.bind('resizeShorterHotkey', 'resizeShorterHotkey', this.EnableHotkey, null);
+        this.settings.bind('swapLeftHotkey', 'swapLeftHotkey', this.EnableHotkey, null);
+        this.settings.bind('swapRightHotkey', 'swapRightHotkey', this.EnableHotkey, null);
+        this.settings.bind('swapUpHotkey', 'swapUpHotkey', this.EnableHotkey, null);
+        this.settings.bind('swapDownHotkey', 'swapDownHotkey', this.EnableHotkey, null);
+        this.settings.bind('panelTheme', 'panelTheme', () => tile_theme_changed(), null);
+        this.settings.bind('accentMode', 'accentMode', () => tile_theme_changed(), null);
+        this.settings.bind('accentColor', 'accentColor', () => tile_theme_changed(), null);
+        this.settings.bind('stateMode', 'stateMode', () => tile_theme_changed(), null);
+        this.settings.bind('stateColor', 'stateColor', () => tile_theme_changed(), null);
+        this.settings.bind('focusBorder', 'focusBorderValue', () => tile_border_update(), null);
+        this.settings.bind('fillSingleWindow', 'fillSingleWindowValue', () => {
             if (this.settings.getValue('fillSingleWindow') === true)
                 tile_single_retile(this.app);
         }, null);
