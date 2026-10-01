@@ -14,6 +14,9 @@ const { cinnamonLoad, load, ROOT } = require('./cinnamon-loader');
 const { createCinnamonEnv } = require('./fakes/cinnamon-env');
 
 const loadGreenTile = () => {
+    // process-local by design: node:test runs each test file in its own child
+    // process, and build-release.sh ships tests/ never — the fake globals
+    // cannot reach the desktop or shipped code
     const env = createCinnamonEnv();
     globalThis.imports = env.imports;
     globalThis.global = env.global;

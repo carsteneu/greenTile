@@ -245,6 +245,10 @@ const createCinnamonEnv = (options) => {
             bindings: [],
             finalized: false,
             bind(key, prop, cb, data) {
+                // divergence from real Cinnamon: bindWithObject defines the bound
+                // property on the bind object; greenTile.js only reads via
+                // getValue/setValue and bound callbacks — keep the fakes frozen
+                // so the lifecycle baseline numbers stay comparable
                 this.bindings.push({ key, prop, cb, data });
             },
             bindProperty(direction, key, prop, cb, data) {
