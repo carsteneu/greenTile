@@ -43,7 +43,8 @@ jobs:
           root=$(head -n1 zip.lst)
           for f in install.sh update.sh greenTile@carsteneu/extension.js greenTile@carsteneu/metadata.json \
                    greenTile@carsteneu/settings-schema.json greenTile@carsteneu/stylesheet.css \
-                   greenTile@carsteneu/icon.png greenTile@carsteneu/lib/app/app.js greenTile@carsteneu/po/de.po; do
+                   greenTile@carsteneu/icon.png greenTile@carsteneu/LICENSE \
+                   greenTile@carsteneu/lib/app/app.js greenTile@carsteneu/po/de.po; do
             grep -qx "$root$f" zip.lst || { echo "missing in zip: $f"; exit 1; }
           done
           if grep -E '(package(-lock)?\.json|tsconfig|eslint|/types/|/tests/|node_modules|\.github|/docs/|greenTile\.js$)' zip.lst; then
