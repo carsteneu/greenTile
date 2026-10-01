@@ -1,6 +1,5 @@
 'use strict';
-// Tests the pure pending-op epoch of greenTile.js (marked block "lifecycle-model"),
-// extracted and evaluated without Cinnamon, like monitor-model. The registry guards
+// Tests the pure pending-op epoch (lib/model/lifecycle.js). The registry guards
 // tile_monitors_refresh: a late DBus reply is ignored when it is stale — superseded
 // by a newer refresh (monitor change) or invalidated by teardown (App destroy).
 const test = require('node:test');
@@ -8,16 +7,7 @@ const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const path = require('node:path');
 
-const src = fs.readFileSync(path.join(__dirname, '..', 'greenTile.js'), 'utf8');
-const match = src.match(/\/\/ >>> lifecycle-model[^\n]*\n([\s\S]*?)\/\/ <<< lifecycle-model/);
-if (!match)
-    throw new Error('lifecycle-model block not found in greenTile.js');
-const block = match[1];
-const m = new Function(block + '\nreturn {tile_pending_registry};')();
-
-test('block is self-contained', () => {
-    assert.doesNotMatch(block, /imports\.|tile_St|tile_Clutter|global\.|utils_Main/);
-});
+const m = require('./cinnamon-loader').load('./lib/model/lifecycle.js');
 
 test('a fresh token is current', () => {
     const pending = m.tile_pending_registry();

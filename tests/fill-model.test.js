@@ -1,27 +1,14 @@
 'use strict';
-// Tests the pure 100 % area model of greenTile.js (marked block "fill-model"),
-// extracted and evaluated without Cinnamon, like gap-model and editor-model.
+// Tests the pure 100 % area model (lib/model/fill.js).
 // tile_fill_stacks turns a painted rule into the layout for n windows so that no
 // cell stays empty; tile_auto_rows spreads n windows over the rows of the wide
 // automatic grid so that every row spans the full width.
 const test = require('node:test');
 const assert = require('node:assert/strict');
-const fs = require('node:fs');
-const path = require('node:path');
 
-const src = fs.readFileSync(path.join(__dirname, '..', 'greenTile.js'), 'utf8');
-const match = src.match(/\/\/ >>> fill-model[^\n]*\n([\s\S]*?)\/\/ <<< fill-model/);
-if (!match)
-    throw new Error('fill-model block not found in greenTile.js');
-const block = match[1];
-const names = ['tile_fill_stacks', 'tile_auto_rows', 'tile_auto_narrow_stacks', 'TILE_AUTO_ROW_MAX'];
-const m = new Function(block + '\nreturn {' + names.join(',') + '};')();
+const m = require('./cinnamon-loader').load('./lib/model/fill.js');
 
 const sum = (a) => a.reduce((x, y) => x + y, 0);
-
-test('block is self-contained', () => {
-    assert.doesNotMatch(block, /imports\.|tile_St|tile_Clutter|global\.|utils_Main/);
-});
 
 test('exact fit keeps the painted rule', () => {
     assert.deepEqual(m.tile_fill_stacks([1, 2, 2], 5), [1, 2, 2]);

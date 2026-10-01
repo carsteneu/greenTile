@@ -1,27 +1,14 @@
 'use strict';
-// Tests the pure window gap model of greenTile.js (marked block "gap-model"),
-// extracted and evaluated without Cinnamon, like auto-model and editor-model.
+// Tests the pure window gap model (lib/model/gap.js).
 // A tiled cell is shrunk by half the gap on every side that borders another cell,
 // so two neighbouring windows end up exactly one gap apart; sides on the edge of
 // the usable screen area stay flush.
 const test = require('node:test');
 const assert = require('node:assert/strict');
-const fs = require('node:fs');
-const path = require('node:path');
 
-const src = fs.readFileSync(path.join(__dirname, '..', 'greenTile.js'), 'utf8');
-const match = src.match(/\/\/ >>> gap-model[^\n]*\n([\s\S]*?)\/\/ <<< gap-model/);
-if (!match)
-    throw new Error('gap-model block not found in greenTile.js');
-const block = match[1];
-const names = ['tile_gap_value', 'tile_gap_cell', 'TILE_GAP_MAX', 'TILE_GAP_STEP'];
-const m = new Function(block + '\nreturn {' + names.join(',') + '};')();
+const m = require('./cinnamon-loader').load('./lib/model/gap.js');
 
 const area = [0, 30, 1920, 1170];
-
-test('block is self-contained', () => {
-    assert.doesNotMatch(block, /imports\.|tile_St|tile_Clutter|global\.|utils_Main/);
-});
 
 test('gap 0 leaves the cell unchanged', () => {
     assert.deepEqual(m.tile_gap_cell([0, 30, 960, 1170], area, 0), [0, 30, 960, 1170]);

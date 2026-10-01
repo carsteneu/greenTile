@@ -1,28 +1,10 @@
 'use strict';
-// Tests the pure editor model of greenTile.js. The bundle cannot be loaded in
-// Node (it needs Cinnamon's imports), so the marked block is extracted and
-// evaluated on its own. The block must not reference anything outside itself.
+// Tests the pure editor model (lib/model/editor.js). The module is loaded through the
+// shared Cinnamon-mimicking loader; it must not reference anything outside itself.
 const test = require('node:test');
 const assert = require('node:assert/strict');
-const fs = require('node:fs');
-const path = require('node:path');
 
-const src = fs.readFileSync(path.join(__dirname, '..', 'greenTile.js'), 'utf8');
-const match = src.match(/\/\/ >>> editor-model[^\n]*\n([\s\S]*?)\/\/ <<< editor-model/);
-if (!match)
-    throw new Error('editor-model block not found in greenTile.js');
-const block = match[1];
-const names = [
-    'tile_editor_cols', 'tile_editor_rows', 'tile_editor_clamp', 'tile_editor_paint',
-    'tile_editor_paint_range', 'tile_editor_remove', 'tile_editor_sort', 'tile_editor_add_rule',
-    'tile_editor_delete_rule', 'tile_editor_step_min', 'tile_editor_validate',
-    'tile_editor_new_id', 'tile_editor_commit', 'tile_editor_delete_preset',
-];
-const m = new Function(block + '\nreturn {' + names.join(',') + '};')();
-
-test('block is self-contained', () => {
-    assert.doesNotMatch(block, /imports\.|tile_St|tile_Clutter|global\.|utils_Main/);
-});
+const m = require('./cinnamon-loader').load('./lib/model/editor.js');
 
 test('grid size matches the prototype', () => {
     assert.equal(m.tile_editor_cols, 6);

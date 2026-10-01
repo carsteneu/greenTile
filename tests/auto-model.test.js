@@ -1,24 +1,12 @@
 'use strict';
-// Tests the pure per-workspace auto model of greenTile.js (marked block
-// "auto-model"), extracted and evaluated without Cinnamon, like editor-model.
+// Tests the pure per-workspace auto model (lib/model/auto.js), loaded through the
+// shared Cinnamon-mimicking loader.
 // Storage format: the list setting "autoWorkspaces" shown on the General page of
 // the settings dialog, rows { workspace: <number from 1>, auto: <boolean> }.
 const test = require('node:test');
 const assert = require('node:assert/strict');
-const fs = require('node:fs');
-const path = require('node:path');
 
-const src = fs.readFileSync(path.join(__dirname, '..', 'greenTile.js'), 'utf8');
-const match = src.match(/\/\/ >>> auto-model[^\n]*\n([\s\S]*?)\/\/ <<< auto-model/);
-if (!match)
-    throw new Error('auto-model block not found in greenTile.js');
-const block = match[1];
-const names = ['tile_auto_list_map', 'tile_auto_ws_active', 'tile_auto_list_set'];
-const m = new Function(block + '\nreturn {' + names.join(',') + '};')();
-
-test('block is self-contained', () => {
-    assert.doesNotMatch(block, /imports\.|tile_St|tile_Clutter|global\.|utils_Main/);
-});
+const m = require('./cinnamon-loader').load('./lib/model/auto.js');
 
 test('list_map turns rows (workspace numbers from 1) into a map by workspace index', () => {
     assert.deepEqual(m.tile_auto_list_map([{ workspace: 5, auto: false }, { workspace: 1, auto: true }]), { 4: false, 0: true });

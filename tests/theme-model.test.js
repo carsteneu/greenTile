@@ -1,24 +1,12 @@
 'use strict';
-// Tests the pure theme model of greenTile.js (marked block "theme-model"),
-// extracted and evaluated without Cinnamon, like the other model blocks.
+// Tests the pure theme model (lib/model/theme.js), loaded through the shared
+// Cinnamon-mimicking loader.
 // It resolves the "panelTheme" setting ("system" | "light" | "dark") plus the
 // system color scheme and the Cinnamon theme name to 'light' or 'dark'.
 const test = require('node:test');
 const assert = require('node:assert/strict');
-const fs = require('node:fs');
-const path = require('node:path');
 
-const src = fs.readFileSync(path.join(__dirname, '..', 'greenTile.js'), 'utf8');
-const match = src.match(/\/\/ >>> theme-model[^\n]*\n([\s\S]*?)\/\/ <<< theme-model/);
-if (!match)
-    throw new Error('theme-model block not found in greenTile.js');
-const block = match[1];
-const names = ['tile_theme_resolve', 'tile_theme_toggle_target'];
-const m = new Function(block + '\nreturn {' + names.join(',') + '};')();
-
-test('block is self-contained', () => {
-    assert.doesNotMatch(block, /imports\.|tile_St|tile_Clutter|global\.|utils_Main/);
-});
+const m = require('./cinnamon-loader').load('./lib/model/theme.js');
 
 test('manual light and dark win over the system, whatever the scheme', () => {
     for (const scheme of ['prefer-dark', 'prefer-light', 'default', 'weird', null, undefined])
