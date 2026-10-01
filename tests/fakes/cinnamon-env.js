@@ -275,7 +275,10 @@ const createCinnamonEnv = (options) => {
         DBus: {
             session: {
                 call(bus, path, iface, method, ...rest) {
-                    env.queuedDBus.push(rest[rest.length - 1]);
+                    // GJS passes callback (+ optional user_data) last; queue the
+                    // last function regardless of the exact trailing shape
+                    const fns = rest.filter((a) => typeof a === 'function');
+                    env.queuedDBus.push(fns[fns.length - 1] || (() => {}));
                 },
             },
         },

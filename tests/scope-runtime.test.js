@@ -9,13 +9,14 @@ const assert = require('node:assert/strict');
 const { Scope, createScope } = require('../lib/runtime/scope');
 
 // Fake SignalManager mirroring /usr/share/cinnamon/js/misc/signalManager.js:
-// storage entries [sigName, obj, callback, id], disconnect/disconnectAllSignals
-// release through obj.disconnect(id) in ONE throw-propagating loop and update
-// the storage only afterwards — exactly the behaviour destroy() must tolerate.
+// storage entries [sigName, obj, callback, id], _signalIsConnected skips plain
+// JS objects without signalHandlerIsConnected (returns false), disconnect/
+// disconnectAllSignals release through obj.disconnect(id) in ONE throw-
+// propagating loop and update the storage only afterwards.
 const fakeSignalManager = () => {
     const storage = [];
     let nextId = 1;
-    const isConnected = (obj, id) => !obj.signalHandlerIsConnected || obj.signalHandlerIsConnected(id);
+    const isConnected = (obj, id) => 'signalHandlerIsConnected' in obj ? obj.signalHandlerIsConnected(id) : false;
     return {
         storage,
         connectCalls: [],
@@ -194,11 +195,12 @@ test('one throwing cleanup does not stop the others', () => {
 test('one throwing timer removal does not stop removing the remaining timers', () => {
     const { scope, mainloop } = makeScope();
     scope.timeout(10, () => {});
-    const second = scope.timeout(20, () => {});
-    mainloop.source_remove = () => { throw new Error('source already gone'); };
+    scope.timeout(20, () => {});
+    let attempts = 0;
+    mainloop.source_remove = () => { attempts += 1; throw new Error('source already gone'); };
     // must not throw despite every removal failing
     scope.destroy();
-    assert.equal(second, second);
+    assert.equal(attempts, 2, 'every timer removal attempted');
 });
 
 test('destroy is idempotent', () => {
@@ -222,10 +224,16 @@ test('one throwing signal disconnect must not skip the remaining signals (tile_d
     const sm = fakeSignalManager();
     const scope = new Scope({ signalManager: sm, mainloop: fakeMainloop(), glib: makeGlib() });
     const released = [];
-    const healthy = (name) => ({
-        signalHandlerIsConnected: () => true,
-        disconnect(id) { released.push(name + ':' + id); },
-    });
+    const healthy = (name) => {
+        let connected = true;
+        return {
+            signalHandlerIsConnected: () => connected,
+            disconnect(id) {
+                connected = false;
+                released.push(name + ':' + id);
+            },
+        };
+    };
     const broken = {
         signalHandlerIsConnected: () => true,
         disconnect() { throw new Error('handler already gone'); },
@@ -235,7 +243,31 @@ test('one throwing signal disconnect must not skip the remaining signals (tile_d
     scope.connect(healthy('third'), 'c', () => {});
     scope.destroy();
     assert.equal(released.length, 2, 'both healthy signals released');
-    assert.deepEqual(sm.storage.map(([, o]) => o), [broken], 'only the broken entry stays stored');
+    assert.equal(sm.storage.length, 3, 'storage only resets via a successful disconnectAllSignals');
+});
+
+test('plain JS targets are released directly even when the SignalManager would skip them', () => {
+    const sm = fakeSignalManager();
+    const scope = new Scope({ signalManager: sm, mainloop: fakeMainloop(), glib: makeGlib() });
+    const released = [];
+    const mk = (name) => ({
+        disconnect(id) { released.push(name + ':' + id); },
+    });
+    scope.connect(mk('a'), 'sig-a', () => {});
+    scope.connect(mk('b'), 'sig-b', () => {});
+    scope.destroy();
+    assert.equal(released.length, 2, 'released via direct obj.disconnect, not via the filtered SM path');
+    assert.deepEqual(sm.storage, [], 'storage resets cleanly when nothing is connected anymore');
+});
+
+test('mutation methods throw after destroy (stale reentry must surface)', () => {
+    const { scope } = makeScope();
+    scope.destroy();
+    const target = {};
+    assert.throws(() => scope.connect(target, 'sig', () => {}), /scope destroyed/);
+    assert.throws(() => scope.timeout(10, () => {}), /scope destroyed/);
+    assert.throws(() => scope.timeoutGL(0, 10, () => {}), /scope destroyed/);
+    assert.throws(() => scope.cleanup(() => {}), /scope destroyed/);
 });
 
 test('a throwing timer callback untracks the source and rethrows', () => {

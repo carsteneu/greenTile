@@ -18,7 +18,10 @@ const loadGreenTile = () => {
     globalThis.imports = env.imports;
     globalThis.global = env.global;
     const src = fs.readFileSync(path.join(ROOT, 'greenTile.js'), 'utf8');
-    return { env, greenTile: cinnamonLoad(src, load, 'greenTile.js') };
+    const greenTile = cinnamonLoad(src, load, 'greenTile.js');
+    // production lifecycle runs init(metadata) before enable()
+    greenTile.init({ uuid: 'greenTile@carsteneu' });
+    return { env, greenTile };
 };
 
 const HOTKEY_NAMES = [
@@ -38,7 +41,6 @@ const FOCUS_BINDINGS = ['push-tile-down', 'push-tile-left', 'push-tile-right', '
 test('enable connects the documented handler set exactly once', () => {
     const { env, greenTile } = loadGreenTile();
     assert.equal(env.totalHandlers(), 0);
-    greenTile.init({ uuid: 'greenTile@carsteneu' });
     greenTile.enable();
     env.flushDisplayConfigNoReply();
     assert.deepEqual(env.greenTileHotkeys(), HOTKEY_NAMES);
