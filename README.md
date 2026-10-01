@@ -146,7 +146,7 @@ deploy `lib/` alongside it. Copying extension.js alone fails at load time. A
 `greenTile.js` left over from an older install is dead code under the new build
 (Cinnamon loads extension.js only) — delete it for hygiene.
 
-- **Tests:** `node --test tests/*.test.js` (Node 18 or newer).
+- **Tests:** `node --test tests/` — recursive, one command for the whole tree, every file exactly once (Node 18 or newer).
 - **Releases:** pushing a `v*` tag builds the zip and attaches it to the release (`.github/workflows/release.yml`).
 - **Diagnostics:** `~/.xsession-errors` shows `JS ERROR` lines and `greenTile skipped …` lines explaining why a window was not tiled.
 - **Translations:** the domain is `greenTile@carsteneu`, template `po/greenTile@carsteneu.pot`. After changing strings, run `./makepot.sh` (needs `polib` and `pytz`). New or changed `.mo` files only take effect after a Cinnamon restart.
