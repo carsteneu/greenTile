@@ -328,6 +328,20 @@ test('split: a corrupt layouts setting logs the corrupt line once across an App 
     assert.equal(corruptLines(), 1, 'log-once across the App recreation (session flag)');
 });
 
+test('split: a pending split that a drop replaces expires from the pending map (forget)', () => {
+    const { env, greenTile } = loadGreenTile();
+    enableWithMonitor(env, greenTile);
+    const app = greenTile.session.app;
+    const ref = app.split.ref(app, 0, 0, 2);
+    app.split.remember(app, ref, { 0: 0.4, 1: 1 }, false);
+    assert.equal(env.liveTimers().filter((t) => t.ms === 500).length, 1, 'flush timer pending');
+    app.split.forget(ref.key);
+    greenTile.disable();
+    const layoutsWrites = settingsInstance(env).callLog.filter((c) => c.op === 'setValue' && c.key === 'layouts');
+    assert.equal(layoutsWrites.length, 0, 'the forgotten split is not written anywhere');
+    assert.equal(env.liveTimers().length, 0, 'no timers left');
+});
+
 test('drop: disable during an active drag destroys the preview actor and removes the 50 ms tick timer', () => {
     const { env, greenTile } = loadGreenTile();
     enableWithMonitor(env, greenTile);
