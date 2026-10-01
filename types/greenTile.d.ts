@@ -21,15 +21,18 @@ type WsKey = string;
 /** Movable-border model of a filled layout; fractions sum to 1 per axis. */
 type Split = {
     kind: 'cols' | 'rows';
-    shape: number[];
+    shape: readonly number[];
     major: number[];
     minor: number[][];
 };
 
-/** Dragged-shape override as stored in "layouts": { kind, shape }. */
+/** Dragged-shape override as stored in "layouts": { kind, shape } plus the
+ * source rule/preset metadata the layout editor keeps attached. */
 type DragLayout = {
     kind: 'cols' | 'rows';
-    shape: number[];
+    shape: readonly number[];
+    rule?: Rule;
+    preset?: Preset;
 };
 
 /** A preset rule: applies from `min` windows on, `stacks` = windows per column. */
@@ -97,7 +100,7 @@ type ConfigFacade = {
 type OpsFacade = {
     focusWindow(): CinnamonWindow | null;
     focusMonitorIndex(): number;
-    collectWindows(app: AppFacade, monitor: CinnamonMonitor, focus: CinnamonWindow | null, ws?: number): CinnamonWindow[];
+    collectWindows(app: AppFacade, monitor: CinnamonMonitor, focus: CinnamonWindow | null, ws?: number | null): CinnamonWindow[];
     layoutFor(app: AppFacade, monitorIndex: number, wsIndex: number): { preset: Preset | null; auto: boolean };
     layoutSet(app: AppFacade, monitorIndex: number, wsIndex: number, patch: {}): void;
     retileMonitor(app: AppFacade, monitorIndex: number, focused: CinnamonWindow | null, animate?: boolean, wsIndex?: number | null): void;
@@ -150,7 +153,7 @@ type AutoFacade = {
 
 /** Split-runtime facade (lib/runtime/split.js). */
 type SplitFacade = {
-    for(app: AppFacade, monitorIndex: number, wsIndex: number, windowCount: number, layout: Layout): Split | null;
+    for(app: AppFacade, monitorIndex: number, wsIndex: number, windowCount: number, layout: DragLayout): SplitShape | null;
     onResizeEnd(app: AppFacade, win: CinnamonWindow, op: string): void;
     ref(app: AppFacade, monitorIndex: number, wsIndex: number, n: number): { key: string; mkey: string; wskey: string; n: string } | null;
     forget(refKey: string): void;
@@ -212,8 +215,11 @@ type AppFacade = {
 /** gettext binding, lib/ui/i18n.js */
 type TranslateFn = (msgid: string) => string;
 
-/** RGB color triplet [r, g, b], each 0–255 (accent, state and theme models). */
-type Rgb = [number, number, number];
+/** RGB color triplet [r, g, b], each 0–255 (accent, state and theme models). Model constants are Object.freeze'd, so the triplet is readonly for consumers. */
+type Rgb = readonly [number, number, number];
+
+/** The model split (kind per orientation, cell grid) produced by lib/model/split.js. Same shape as the global  Split  above; the alias keeps JSDoc unambiguous inside lib/runtime/split.js, whose class exports the name Split. */
+type SplitShape = Split;
 
 /** HSL color triplet [h (0–360), s (0–1), l (0–1)] as produced by accentHsl. */
 type Hsl = [number, number, number];

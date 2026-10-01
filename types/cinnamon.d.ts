@@ -9,16 +9,7 @@
  * module bound, and `imports` and `global` are true globals of the shell.
  */
 
-/**
- * Cinnamon resolves every require against the xlet root, not the importing
- * file (fileUtils.js requireModule) — a specifier starting './lib/…' means
- * <xlet-root>/lib/… from anywhere. tsc can only resolve file-relative, so this
- * wildcard types those modules as `any` instead of failing them. *The* escape
- * for cross-module shape flow; everything inside a module stays fully checked.
- * (Pattern may not start with './' — TS2436 — but tsc still registers the
- * template; the one diagnostic is suppressed below.)
- * @ts-ignore */
-declare module "./lib/*";
+
 
 type AnyRecord = Record<string, any>;
 
@@ -90,3 +81,9 @@ declare const global: {
     set_cursor(type: string): void;
     unset_cursor(): void;
 };
+
+// Cinnamon extends String with a printf-style format() in its JS framework
+// (js/misc/format.js); used for translated "%d"-style literals.
+interface String {
+    format(...args: unknown[]): string;
+}
