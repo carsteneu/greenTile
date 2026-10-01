@@ -36,11 +36,18 @@ test('settings-keys.js is frozen and covers every persisted schema key exactly',
         assert.equal(keys[key], key, 'the constant value is the key itself');
 });
 
-test('the renamed hotkey keys are in the schema and the legacy keys are gone', () => {
-    for (const key of ['columns6Hotkey', 'columns3Hotkey', 'autoOnHotkey', 'autoOffHotkey'])
-        assert.ok(schema[key], 'renamed key missing: ' + key);
-    assert.deepEqual(SCHEMA_KEYS.filter((k) => ['wsPresets', 'autoWorkspaces', 'layoutsMigrated'].includes(k)), [],
-        'the legacy keys must be dropped from the schema');
+test('the renamed hotkey keys and the legacy drops leave exactly this schema key set', () => {
+    // whitelist instead of a banned list: the schema must carry exactly these
+    // persisted keys after the rename and the legacy-key removal
+    assert.deepEqual(SCHEMA_KEYS, [
+        'accentColor', 'accentMode', 'autoOffHotkey', 'autoOnHotkey',
+        'columns3Hotkey', 'columns6Hotkey', 'excludeAppPicker', 'excludeHotkey',
+        'exclusions', 'fillSingleWindow', 'focusBorder', 'layouts', 'panelSize',
+        'panelTheme', 'presetHotkey', 'presets', 'resizeNarrowerHotkey',
+        'resizeShorterHotkey', 'resizeTallerHotkey', 'resizeWiderHotkey',
+        'stateColor', 'stateMode', 'swapDownHotkey', 'swapLeftHotkey',
+        'swapRightHotkey', 'swapUpHotkey', 'tileAnimation', 'windowGap',
+    ].sort());
 });
 
 test('no raw settings key string outside lib/app/settings-keys.js', () => {

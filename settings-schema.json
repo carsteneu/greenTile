@@ -17,15 +17,15 @@
       "hotkeys-tab": {
          "type": "page",
          "title": "Hotkeys",
-          "sections": [
-              "autotile-hotkey-section",
+      "sections": [
+          "columns-hotkey-section",
               "preset-section",
               "resize-section",
               "swap-section",
               "exclusion-hotkey-section"
            ]
       },
-      "autotile-hotkey-section": {
+      "columns-hotkey-section": {
          "type": "section",
          "title": "Auto-Tile Hotkeys",
          "keys": [
