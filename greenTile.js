@@ -71,7 +71,7 @@ const Tweener = imports.ui.tweener;
 const Mainloop = imports.mainloop;
 const Gio = imports.gi.Gio;
 
-;// CONCATENATED MODULE: ../base/config.ts
+// ---- Config (derived from gTile src/base/config.ts) ----
 class Config {
     constructor(app) {
         // The hotkeys component carries the fixed greenTile binding names: register
@@ -166,7 +166,7 @@ class Config {
     }
 }
 
-;// CONCATENATED MODULE: ../base/utils.ts
+// ---- Utils (derived from gTile src/base/utils.ts) ----
 const getPanelHeight = (panel) => {
     return panel.height
         || panel.actor.get_height();
@@ -696,7 +696,6 @@ const tile_swap_hotkey = (app, dir) => {
     tile_retile_monitor(app, monitorIndex, null, true, wsIndex);
     global.log('greenTile swap pushed mon=' + (app.monitors.keys[monitorIndex] || '?') + ' -> ws' + (targetWsIndex + 1) + ' mon=' + (app.monitors.keys[step.monitor] || '?'));
 };
-// >>> focus-runtime
 // Super+Arrow moves the keyboard focus on monitor+workspaces where automatic tiling is
 // on: the neighbouring tiled window in that direction is activated, nothing is moved or
 // retiled. Cinnamon's own push-tile keybindings are taken over wholesale (the gsettings
@@ -776,11 +775,10 @@ const tile_focus_hotkey = (app, dir) => (display, window) => {
         }
     }
 };
-// <<< focus-runtime
 const getFocusApp = () => {
     return global.display.focus_window;
 };
-;// CONCATENATED MODULE: ../base/app.ts
+// ---- App (derived from gTile src/base/app.ts) ----
 class App {
     constructor(platform, session, cinnamon) {
         this.platform = platform;
@@ -911,7 +909,7 @@ class App {
         this.config.destroy();
     }
 }
-;// CONCATENATED MODULE: ./utils.ts
+// ---- Utils (derived from gTile src/utils.ts) ----
 const reset_window = (metaWindow) => {
     metaWindow === null || metaWindow === void 0 ? void 0 : metaWindow.unmaximize(Meta.MaximizeFlags.HORIZONTAL);
     metaWindow === null || metaWindow === void 0 ? void 0 : metaWindow.unmaximize(Meta.MaximizeFlags.VERTICAL);
@@ -924,7 +922,7 @@ const move_resize_window = (metaWindow, x, y, width, height) => {
     metaWindow.move_frame(true, x, y);
 };
 
-;// CONCATENATED MODULE: ./extension.ts
+// ---- Extension (derived from gTile src/extension.ts) ----
 
 const platform = Object.freeze({
     move_resize_window: move_resize_window,

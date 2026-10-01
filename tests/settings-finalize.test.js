@@ -14,7 +14,7 @@ const path = require('node:path');
 const src = fs.readFileSync(path.join(__dirname, '..', 'greenTile.js'), 'utf8');
 
 const configStart = src.indexOf('class Config');
-const configEnd = src.indexOf(';// CONCATENATED MODULE: ../base/utils.ts');
+const configEnd = src.indexOf('// ---- Utils (derived from gTile src/base/utils.ts) ----');
 if (configStart === -1 || configEnd === -1)
     throw new Error('Config class not found in greenTile.js');
 const config = src.slice(configStart, configEnd);
