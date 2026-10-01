@@ -133,7 +133,11 @@ const createCinnamonEnv = (options) => {
         cancellables: [],
         tabList: [],
         uiGroupChildren: [],
+        overlayChildren: [],
         gioSettings: [],
+        // schema values for fake Gio.Settings.get_string, keyed by schema_id:
+        // { 'org.x.apps.portal': { 'color-scheme': 'prefer-dark' } }
+        schemaValues: {},
     };
 
     // --- Main.* objects
@@ -200,7 +204,11 @@ const createCinnamonEnv = (options) => {
             return 'FakeMonitor-' + i;
         },
     });
-    env.workspaceManager = signalHub('workspaceManager');
+    env.workspaceManager = Object.assign(signalHub('workspaceManager'), {
+        get_workspace_by_index(i) {
+            return env.workspaces[i];
+        },
+    });
     // active workspace identity for the auto-tiling observer paths; null until a
     // test opts in (windows with get_workspace() -> null match it)
     env.activeWorkspace = null;
@@ -212,7 +220,16 @@ const createCinnamonEnv = (options) => {
         },
     });
     env.stage = makeStub();
-    env.overlayGroup = { add_actor() {}, remove_actor() {} };
+    env.overlayGroup = {
+        add_actor(a) {
+            env.overlayChildren.push(a);
+        },
+        remove_actor(a) {
+            const at = env.overlayChildren.indexOf(a);
+            if (at !== -1)
+                env.overlayChildren.splice(at, 1);
+        },
+    };
 
     env.global = new Proxy(function () {}, {
         get: (t, p) => {
@@ -324,6 +341,25 @@ const createCinnamonEnv = (options) => {
     };
 
     // --- gi branches (unknown namespaces fall into deep stubs)
+    // schema source: every lookup succeeds (greenTile registers the portal and
+    // cinnamon theme schemas); a test opts out by nulling env.schemaSource
+    env.schemaSource = { lookup: () => ({}) };
+    // fake St.Theme: records the stylesheet load/unload balance on the live
+    // theme object (unload of a not-loaded sheet still lands in unloads, real
+    // St would throw — the production code releases it in its own try/catch)
+    env.stTheme = {
+        loads: [],
+        unloads: [],
+        load_stylesheet(path) {
+            this.loads.push(path);
+        },
+        unload_stylesheet(path) {
+            const at = this.loads.indexOf(path);
+            if (at !== -1)
+                this.loads.splice(at, 1);
+            this.unloads.push(path);
+        },
+    };
     const gio = {
         DBusCallFlags: { NONE: 'none' },
         Cancellable: class {
@@ -349,17 +385,40 @@ const createCinnamonEnv = (options) => {
             },
         },
         SettingsSchemaSource: {
-            get_default: () => null,
+            get_default: () => env.schemaSource,
         },
         Settings: class {
             constructor(opts) {
-                env.gioSettings.push(opts && opts.schema_id);
+                this.schema_id = opts && opts.schema_id;
+                this._handlers = [];
+                this._nextHandlerId = 1;
+                env.gioSettings.push(this);
+            }
+            // reads ride the test's schemaValues (empty string keeps the theme
+            // resolution falling back: '' is falsy, portal scheme and cinnamon
+            // name then resolve light)
+            get_string(key) {
+                const perSchema = env.schemaValues[this.schema_id];
+                return (perSchema && perSchema[key]) || '';
             }
             get_uint() {
                 return 500;
             }
             get_boolean() {
                 return false;
+            }
+            connect(sigName, callback) {
+                const id = this._nextHandlerId++;
+                this._handlers.push({ sigName, callback, id });
+                return id;
+            }
+            disconnect(id) {
+                const at = this._handlers.findIndex((h) => h.id === id);
+                if (at !== -1)
+                    this._handlers.splice(at, 1);
+            }
+            count(sigName) {
+                return this._handlers.filter((h) => !sigName || h.sigName === sigName).length;
             }
         },
     };
@@ -390,12 +449,21 @@ const createCinnamonEnv = (options) => {
             constructor(opts) {
                 Object.assign(this, opts);
                 this.style = this.style || '';
+                this.destroyed = false;
             }
             hide() {}
             show() {}
-            destroy() {}
+            set_style(style) {
+                this.style = style;
+            }
+            raise_top() {}
+            set_position() {}
+            set_size() {}
+            destroy() {
+                this.destroyed = true;
+            }
         },
-        ThemeContext: { get_for_stage: () => makeStub() },
+        ThemeContext: { get_for_stage: () => ({ get_theme: () => env.stTheme }) },
         // drop preview actor: records its lifetime for the drag assertions
         Widget: class {
             constructor(opts) {

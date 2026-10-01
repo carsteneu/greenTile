@@ -375,3 +375,178 @@ test('drop: disable during an active drag destroys the preview actor and removes
     assert.equal(env.liveTimers().filter((t) => t.ms === 50).length, 0, '50 ms tick timer removed');
     assert.equal(env.liveTimers().length, 0, 'nothing left running');
 });
+
+// Theme/accent/border/focus runtime (lib/runtime/{theme,border,focus}.js): the
+// accent stylesheet, the border actor, the theme sources and the Meta bindings
+// are per App and must be fully released by disable; every App recreation takes
+// a strictly greater accent generation (the sequence is seeded on the session).
+const enableWithLayouts = (env, greenTile) => {
+    greenTile.enable();
+    env.layoutManager.monitors.push({ x: 0, y: 0, width: 2000, height: 1100 });
+    env.flushDisplayConfigNoReply();
+    // automatic tiling on for monitor 0 / active workspace 0, keyed exactly the
+    // way the extension itself writes it
+    const app = greenTile.session.app;
+    const ref0 = app.split.ref(app, 0, 0, 2);
+    const layouts = {};
+    layouts[ref0.mkey] = {};
+    layouts[ref0.mkey][ref0.wskey] = { auto: true };
+    settingsInstance(env).setValue('layouts', JSON.stringify(layouts));
+};
+
+test('disable unloads the accent stylesheet, releases the theme sources and destroys the border actor', () => {
+    const { env, greenTile } = loadGreenTile();
+    enableWithMonitor(env, greenTile);
+    const app = greenTile.session.app;
+    assert.match(app.theme.gen, /^gk-acc\d+$/, 'enable loaded the accent sheet with a generation class');
+    assert.equal(env.stTheme.loads.length, 1, 'one generated stylesheet loaded on the live theme');
+    greenTile.disable();
+    assert.equal(env.stTheme.loads.length, 0, 'the accent stylesheet is unloaded');
+    assert.equal(env.stTheme.unloads.length, 1, 'the sheet went through unload_stylesheet');
+    const portal = env.gioSettings.find((s) => s.schema_id === 'org.x.apps.portal');
+    const cinnamon = env.gioSettings.find((s) => s.schema_id === 'org.cinnamon.theme');
+    assert.ok(portal && cinnamon, 'portal and cinnamon settings were created per App');
+    assert.equal(portal.count('changed::color-scheme'), 0, 'portal handler released');
+    assert.equal(cinnamon.count('changed::name'), 0, 'cinnamon handler released');
+    assert.equal(env.themeManager.count('theme-set'), 0, 'themeManager handler released');
+    assert.equal(env.overlayChildren.length, 1, 'the border actor sits in the overlay group');
+    assert.equal(env.overlayChildren[0].destroyed, true, 'the border actor was destroyed');
+    assert.deepEqual([...env.customBindings.keys()], [], 'the 4 Meta custom bindings are reset to null');
+});
+
+// Flash window with its own handler accounting: the border binds position- and
+// size-changed on the flashed window per flash and releases the previous pair
+// as soon as another window is flashed.
+const makeFlashWindow = (seq) => {
+    const handlers = [];
+    let nextId = 1;
+    const window = {
+        minimized: false,
+        connect(sig, cb) {
+            handlers.push({ sig, cb, id: nextId });
+            return nextId++;
+        },
+        disconnect(id) {
+            const at = handlers.findIndex((h) => h.id === id);
+            if (at === -1)
+                throw new Error('flash window: no such signal handler ' + id);
+            handlers.splice(at, 1);
+        },
+        count(sig) {
+            return handlers.filter((h) => !sig || h.sig === sig).length;
+        },
+        get_stable_sequence: () => seq,
+        get_window_type: () => 6,
+        get_wm_class: () => 'FakeWindow',
+        get_monitor: () => 0,
+        get_workspace: () => null,
+        is_on_all_workspaces: () => false,
+        get_maximized: () => 0,
+        is_fullscreen: () => false,
+        get_frame_rect: () => ({ x: 10, y: 10, width: 400, height: 300 }),
+    };
+    return window;
+};
+
+test('a focus flash binds exactly two handlers on the flashed window, a second flash releases the first pair, disable removes timer and actor', () => {
+    const { env, greenTile } = loadGreenTile();
+    const w1 = makeFlashWindow(21);
+    const w2 = makeFlashWindow(22);
+    const ws0 = makeWorkspace();
+    ws0.list_windows = () => [w1, w2];
+    env.workspaces.push(ws0);
+    env.activeWorkspace = { index: () => 0 };
+    enableWithLayouts(env, greenTile);
+    settingsInstance(env).setValue('focusBorder', true); // setValue alone fires no binding
+    const app = greenTile.session.app;
+    env.display.focus_window = w1;
+    app.border.flash(w1);
+    assert.equal(w1.count('position-changed'), 1, 'first flash binds position-changed');
+    assert.equal(w1.count('size-changed'), 1, 'first flash binds size-changed');
+    // the auto-tiling observer's own per-window tracking may coexist on the hub;
+    // the flash itself adds exactly the two border handlers
+    assert.equal(w1.count('position-changed') + w1.count('size-changed'), 2,
+        'the flash binds exactly the two border handlers');
+    assert.equal(env.liveTimers().filter((t) => t.ms === 3000).length, 1, 'the 3 s hide timer is armed');
+    // flashing another window releases the first pair
+    env.display.focus_window = w2;
+    app.border.flash(w2);
+    assert.equal(w1.count('position-changed'), 0, 'the first pair was released');
+    assert.equal(w1.count('size-changed'), 0);
+    assert.equal(w2.count('position-changed'), 1, 'second flash binds its own pair');
+    assert.equal(w2.count('size-changed'), 1);
+    greenTile.disable();
+    assert.equal(w2.count('position-changed'), 0, 'the remaining pair is released on disable');
+    assert.equal(w2.count('size-changed'), 0);
+    assert.equal(env.liveTimers().filter((t) => t.ms === 3000).length, 0, 'the border timer is removed');
+    assert.equal(env.overlayChildren.every((a) => a.destroyed), true, 'the border actor is destroyed');
+});
+
+test('monitors-changed: the recreated App loads the accent sheet with a strictly greater generation', () => {
+    const { env, greenTile } = loadGreenTile();
+    greenTile.enable();
+    env.flushDisplayConfigNoReply();
+    const gen1 = greenTile.session.app.theme.gen;
+    env.layoutManager.emit('monitors-changed');
+    env.flushDisplayConfigNoReply();
+    const gen2 = greenTile.session.app.theme.gen;
+    const n1 = Number(gen1.slice('gk-acc'.length));
+    const n2 = Number(gen2.slice('gk-acc'.length));
+    assert.ok(Number.isFinite(n1) && Number.isFinite(n2), 'both generations are gk-acc<n> classes');
+    assert.ok(n2 > n1, 'the new App must take a greater generation than the old one (session-seeded sequence)');
+});
+
+test('re-enable seeds the accent sequence from the clock: the new session never reuses the previous session classes', () => {
+    const { env, greenTile } = loadGreenTile();
+    // enable passes Date.now into the session; stub the global around the cycle
+    // (restored in finally) so the seed can be advanced deterministically
+    const realNow = Date.now;
+    let fakeClock = 1000000;
+    Date.now = () => fakeClock;
+    try {
+        greenTile.enable();
+        env.flushDisplayConfigNoReply();
+        const first = greenTile.session.app.theme.gen;
+        greenTile.disable();
+        const nFirst = Number(first.slice('gk-acc'.length));
+        assert.ok(Number.isFinite(nFirst) && nFirst > fakeClock, 'the first session seeded from the clock (one load: clock+1)');
+        fakeClock = 5000000;
+        greenTile.enable();
+        env.flushDisplayConfigNoReply();
+        const second = greenTile.session.app.theme.gen;
+        const nSecond = Number(second.slice('gk-acc'.length));
+        assert.ok(Number.isFinite(nSecond), 'the second session took a gk-acc<n> class');
+        assert.ok(nSecond > nFirst, 'the new session\'s first generation differs from and is greater than every class of the earlier session (clock seed, no interned-node clash)');
+    }
+    finally {
+        Date.now = realNow;
+    }
+});
+
+test('theme/border settings bindings firing mid-Config and after disable stay guarded no-ops', () => {
+    const { env, greenTile } = loadGreenTile();
+    greenTile.enable();
+    env.flushDisplayConfigNoReply();
+    const inst = settingsInstance(env);
+    const fire = (key) => inst.bindings.find((b) => b.key === key).cb();
+    // the settings dialog path (remoteUpdate) can deliver a changed:: at any
+    // moment — including inside the Config construction window, where the
+    // components still answer unchanged with their guard no-ops. The window's
+    // exact state (config/app not yet assigned) is poked directly here; the
+    // fields are the guards theme.changed()/border.update() read.
+    const app = greenTile.session.app;
+    const savedConfig = app.theme._config;
+    app.theme._config = null;
+    assert.doesNotThrow(() => ['panelTheme', 'accentMode', 'accentColor', 'stateMode', 'stateColor'].forEach(fire),
+        'the theme bindings with no config set do not throw');
+    const savedApp = app.border._app;
+    app.border._app = null;
+    assert.doesNotThrow(() => fire('focusBorder'), 'the border binding with no app set does not throw');
+    app.theme._config = savedConfig;
+    app.border._app = savedApp;
+    assert.doesNotThrow(() => fire('panelTheme'), 'the resolved path does not throw either');
+    assert.doesNotThrow(() => fire('focusBorder'));
+    greenTile.disable();
+    assert.doesNotThrow(() => fire('panelTheme'), 'a theme binding after disable stays silent');
+    assert.doesNotThrow(() => fire('focusBorder'), 'a border binding after disable stays silent');
+});
