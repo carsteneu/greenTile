@@ -361,6 +361,106 @@ test('a fresh window on another monitor appends at that monitor\'s end without t
     assert.equal(app.auto.pendingTake(1).size, 0, 'monitor 1 pending consumed');
 });
 
+// ---------------- fixes: preset save retiles every active monitor-workspace (issue 7) ----------------
+
+// drive the real editor: open the draft, apply the changed rules, click Save
+const savePresetWithRules = (ext, presetId, rules) => {
+    const { editorOpen, editorBody } = load('./lib/ui/editor.js');
+    const app = ext.session.app;
+    editorOpen(app, app.ops.presetsRead(app).find((p) => p.id === presetId));
+    app.panel.draft.rules = rules;
+    const body = editorBody(app);
+    const findSave = (actor) => {
+        for (const child of actor.children || []) {
+            if (child.style_class === 'gk-save') {
+                return child;
+            }
+            const found = findSave(child);
+            if (found) {
+                return found;
+            }
+        }
+        return null;
+    };
+    const save = findSave(body.actor);
+    assert.ok(save, 'the editor body exposes the save button');
+    save.emit('clicked');
+};
+
+const appliedLogs = (env, name) => env.logs.filter((l) => l.indexOf('greenTile preset "' + name + '" applied') === 0);
+
+test('saving a shared preset retiles every monitor-workspace where it is active, not just the focused one', () => {
+    const tweener = makeTweenerRecorder();
+    const { env, ext } = makeEnv(tweener, { windowGap: 0 });
+    const mon2 = { x: 2000, y: 0, width: 1000, height: 1100 };
+    enableOnMonitors(env, ext, [MONITOR, mon2]);
+    makeWorkspace(env);
+    env.activeWorkspace = { index: () => 0 };
+    const w1 = makeWindow(env, 51, [10, 10, 400, 300], 0);
+    const w2 = makeWindow(env, 52, [500, 0, 400, 300], 0);
+    const w3 = makeWindow(env, 53, [2000 + 10, 10, 300, 300], 1);
+    const w4 = makeWindow(env, 54, [2000 + 340, 0, 300, 300], 1);
+    const w5 = makeWindow(env, 55, [2000 + 670, 0, 300, 300], 1);
+    env.tabList.push(w1, w2, w3, w4, w5);
+    env.display.focus_window = w1;
+    const app = ext.session.app;
+    app.ops.presetsWrite(app, [{ id: 'p1', name: 'Halves', rules: [{ min: 2, stacks: [1, 1] }] }]);
+    app.ops.layoutSet(app, 0, 0, { preset: 'p1' });
+    app.ops.layoutSet(app, 1, 0, { preset: 'p1' });
+    app.ops.retileMonitor(app, 0);
+    app.ops.retileMonitor(app, 1);
+    assert.equal(appliedLogs(env, 'Halves').length, 2, 'both monitors applied the preset once');
+    assert.deepEqual(w3.rect, [2000, 0, 500, 1100]);
+    // save a 3-column rule: both monitor-workspaces adopt it immediately
+    const before = appliedLogs(env, 'Halves').length;
+    savePresetWithRules(ext, 'p1', [{ min: 2, stacks: [1, 1] }, { min: 3, stacks: [1, 1, 1] }]);
+    const after = appliedLogs(env, 'Halves').slice(before);
+    assert.equal(after.length, 2, 'both monitors retiled on the save');
+    assert.equal(after.filter((l) => l.indexOf('FakeMonitor-0') !== -1).length, 1,
+        'the focused monitor retiled');
+    assert.equal(after.filter((l) => l.indexOf('FakeMonitor-1') !== -1).length, 1,
+        'the unfocused monitor retiled too');
+    // monitor 1 (n=3) picked the new min-3 rule and spreads three columns
+    assert.deepEqual(w3.rect, [2000, 0, 333, 1100], 'monitor 1 adopted the new rule');
+    assert.deepEqual(w4.rect, [2333, 0, 334, 1100]);
+    assert.deepEqual(w5.rect, [2667, 0, 333, 1100]);
+    assert.deepEqual(w1.rect, [0, 0, 1000, 1100], 'monitor 0 keeps the min-2 halves');
+});
+
+test('a paused focused monitor does not block the save on other active monitor-workspaces', () => {
+    const tweener = makeTweenerRecorder();
+    const { env, ext } = makeEnv(tweener, { windowGap: 0 });
+    const mon2 = { x: 2000, y: 0, width: 1000, height: 1100 };
+    enableOnMonitors(env, ext, [MONITOR, mon2]);
+    makeWorkspace(env);
+    env.activeWorkspace = { index: () => 0 };
+    const w1 = makeWindow(env, 51, [10, 10, 400, 300], 0);
+    const w2 = makeWindow(env, 52, [500, 0, 400, 300], 0);
+    const w3 = makeWindow(env, 53, [2000 + 10, 10, 300, 300], 1);
+    const w4 = makeWindow(env, 54, [2000 + 340, 0, 300, 300], 1);
+    const w5 = makeWindow(env, 55, [2000 + 670, 0, 300, 300], 1);
+    env.tabList.push(w1, w2, w3, w4, w5);
+    env.display.focus_window = w1;
+    const app = ext.session.app;
+    app.ops.presetsWrite(app, [{ id: 'p1', name: 'Halves', rules: [{ min: 2, stacks: [1, 1] }] }]);
+    app.ops.layoutSet(app, 0, 0, { preset: 'p1' });
+    app.ops.layoutSet(app, 1, 0, { preset: 'p1' });
+    app.ops.retileMonitor(app, 0);
+    app.ops.retileMonitor(app, 1);
+    // Super+Ctrl+D pauses monitor 0 (the focused one)
+    app.ops.layoutSet(app, 0, 0, { auto: false });
+    const before = appliedLogs(env, 'Halves').length;
+    savePresetWithRules(ext, 'p1', [{ min: 2, stacks: [1, 1] }, { min: 3, stacks: [1, 1, 1] }]);
+    const after = appliedLogs(env, 'Halves').slice(before);
+    assert.equal(after.length, 1, 'only the active monitor retiled after the save');
+    assert.equal(after.filter((l) => l.indexOf('FakeMonitor-0') !== -1).length, 0,
+        'the paused monitor stayed untouched');
+    assert.equal(after.filter((l) => l.indexOf('FakeMonitor-1') !== -1).length, 1,
+        'the active monitor retiled although focus sits on the paused one');
+    assert.deepEqual(w1.rect, [0, 0, 1000, 1100], 'paused monitor 0 keeps its tiling');
+    assert.deepEqual(w3.rect, [2000, 0, 333, 1100], 'monitor 1 adopted the new rule');
+});
+
 // ---------------- presets + layouts through the ops facade ----------------
 
 test('preset writing, layout assignment and monitor retile round-trip through the ops facade', () => {

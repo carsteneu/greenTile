@@ -369,10 +369,12 @@ test('drop: disable during an active drag destroys the preview actor and removes
     env.activeWorkspace = { index: () => 0 };
     env.tabList.push(makeDragWindow(11, [10, 10, 400, 300]), makeDragWindow(12, [500, 10, 400, 300]));
     app.drop.begin(app, env.tabList[0], env.gi.Meta.GrabOp.MOVING);
-    assert.equal(env.uiGroupChildren.length, 1, 'preview actor added to the ui group');
+    const preview = env.uiGroupChildren[0];
+    assert.ok(preview, 'preview actor added to the ui group');
     assert.equal(env.liveTimers().filter((t) => t.ms === 50).length, 1, '50 ms tick timer running');
     ext.disable();
-    assert.equal(env.uiGroupChildren[0].destroyed, true, 'preview actor destroyed');
+    assert.equal(env.uiGroupChildren.includes(preview), false, 'destroy removed the preview from the ui group');
+    assert.equal(preview.destroyed, true, 'preview actor destroyed');
     assert.equal(env.liveTimers().filter((t) => t.ms === 50).length, 0, '50 ms tick timer removed');
     assert.equal(env.liveTimers().length, 0, 'nothing left running');
 });
