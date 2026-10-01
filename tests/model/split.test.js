@@ -280,7 +280,7 @@ test('sort order: zero-size rects do not throw', () => {
 // changing the stored fractions. The ground truth here is the real placement
 // pipeline: splitRects -> gapCell, exactly what placeRects (lib/tiling/place.js) runs.
 const g = require('../helpers/cinnamon-loader').load('./lib/model/gap.js');
-const finals = (kind, shape, split, area, gap) => m.splitRects(kind, shape, split, area).map((r) => g.gapCell(r, area, gap));
+const finals = (kind, shape, split, box, gap) => m.splitRects(kind, shape, split, box).map((r) => g.gapCell(r, box, gap));
 
 test('minimal: legacy edge cell 120 with a later gap renders final 120, stored fractions stay', () => {
     // border set at the gap-0 clamp: cell 120 of 2000; then gap 48 (todo_fixes issue 8)
