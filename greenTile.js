@@ -45,6 +45,8 @@ const { tile_fill_stacks, tile_auto_rows, tile_auto_narrow_stacks } = require('.
 const { TILE_SPLIT_MIN_PX, tile_split_valid, tile_split_rects, tile_split_cell_at, tile_split_border_pos, tile_split_move, tile_split_key_target, tile_split_accel, tile_split_op_edges, tile_split_frame_edges, tile_sort_order } = require('./lib/model/split');
 const { tile_drop_zone, tile_drop_layout, tile_drop_fits } = require('./lib/model/drop');
 const { tile_layouts_parse, tile_layouts_entry, tile_layouts_splits, tile_layouts_shapes, tile_layouts_set, tile_layouts_remove_preset, tile_layouts_migrate, tile_layout_resolve } = require('./lib/model/layouts');
+const { Split } = require('./lib/runtime/split');
+const { Drop } = require('./lib/runtime/drop');
 const { tile_swap_neighbor, tile_swap_landing_cell, tile_swap_chain_step } = require('./lib/model/swap');
 const { tile_focus_monitor_step, tile_focus_monitor_pick } = require('./lib/model/focus');
 const { tile_editor_cols, tile_editor_rows, tile_editor_min_floor, tile_editor_clamp, tile_editor_paint, tile_editor_paint_range, tile_editor_remove, tile_editor_sort, tile_editor_add_rule, tile_editor_delete_rule, tile_editor_step_min, tile_editor_validate, tile_editor_new_id, tile_editor_commit, tile_editor_delete_preset } = require('./lib/model/editor');
@@ -72,10 +74,10 @@ class Config {
             Main.keybindingManager.addHotKey('greenTile-autoOff', this.autotileOffHotkey, () => this.app.auto.deactivate(this.app));
             Main.keybindingManager.addHotKey('greenTile-preset', this.presetHotkey, () => tile_panel_toggle(this.app));
             Main.keybindingManager.addHotKey('greenTile-exclude', this.excludeHotkey, () => tile_excl_toggle_focused(this.app));
-            Main.keybindingManager.addHotKey('greenTile-resize-wider', this.resizeWiderHotkey, () => tile_split_hotkey(this.app, 'wider'));
-            Main.keybindingManager.addHotKey('greenTile-resize-narrower', this.resizeNarrowerHotkey, () => tile_split_hotkey(this.app, 'narrower'));
-            Main.keybindingManager.addHotKey('greenTile-resize-taller', this.resizeTallerHotkey, () => tile_split_hotkey(this.app, 'taller'));
-            Main.keybindingManager.addHotKey('greenTile-resize-shorter', this.resizeShorterHotkey, () => tile_split_hotkey(this.app, 'shorter'));
+            Main.keybindingManager.addHotKey('greenTile-resize-wider', this.resizeWiderHotkey, () => this.app.split.hotkey(this.app, 'wider'));
+            Main.keybindingManager.addHotKey('greenTile-resize-narrower', this.resizeNarrowerHotkey, () => this.app.split.hotkey(this.app, 'narrower'));
+            Main.keybindingManager.addHotKey('greenTile-resize-taller', this.resizeTallerHotkey, () => this.app.split.hotkey(this.app, 'taller'));
+            Main.keybindingManager.addHotKey('greenTile-resize-shorter', this.resizeShorterHotkey, () => this.app.split.hotkey(this.app, 'shorter'));
             Main.keybindingManager.addHotKey('greenTile-swap-left', this.swapLeftHotkey, () => tile_swap_hotkey(this.app, 'left'));
             Main.keybindingManager.addHotKey('greenTile-swap-right', this.swapRightHotkey, () => tile_swap_hotkey(this.app, 'right'));
             Main.keybindingManager.addHotKey('greenTile-swap-up', this.swapUpHotkey, () => tile_swap_hotkey(this.app, 'up'));
@@ -104,9 +106,13 @@ class Config {
                 this.excludeAppSignal = null;
             }
             // resize hotkey steps not yet written (500 ms debounce) must not get lost
-            tile_split_flush(this.app);
+            this.app.split.flush(this.app);
             this.app.monitors.destroy();
             this.app.auto.destroy();
+            // both stay teardown-only: they remove timers/actors, they must not
+            // write settings (finalize happens below)
+            this.app.split.destroy();
+            this.app.drop.destroy();
             // The settle wait lives on the session, not on this App: its timer dies
             // with the App, its start time survives while a change is pending.
             this.app.session.settle.teardown();
@@ -463,94 +469,6 @@ const tile_sort_reading_order = (app, windows, columnMajor) => {
 const tile_auto_shape = (monitor, n) => (monitor.width < 2100 && n > 3)
     ? { kind: 'cols', shape: tile_auto_narrow_stacks(n) }
     : { kind: 'rows', shape: tile_auto_rows(n) };
-// Movable borders (lib/model/split.js): a split the resize hotkeys have not written yet wins
-// over the stored one; a stored split counts only when it fits the layout.
-// tile_split_pending: key "mkey\nwskey\nn" -> { mkey, wskey, n, split }, written to the
-// settings by tile_split_flush (500 ms after the last hotkey step, at once for the mouse).
-const tile_split_pending = new Map();
-const tile_split_flush_timer = { id: 0 };
-const TILE_SPLIT_FLUSH_MS = 500;
-const tile_split_ref = (app, monitorIndex, wsIndex, n) => {
-    const mkey = app.monitors.keys[monitorIndex];
-    if (!mkey)
-        return null;
-    const wskey = app.monitors.wsKey(monitorIndex, wsIndex);
-    return { key: mkey + '\n' + wskey + '\n' + n, mkey: mkey, wskey: wskey, n: String(n) };
-};
-const tile_split_for = (app, monitorIndex, wsIndex, n, layout) => {
-    const ref = tile_split_ref(app, monitorIndex, wsIndex, n);
-    if (!ref)
-        return null;
-    const pending = tile_split_pending.get(ref.key);
-    if (pending)
-        return tile_split_valid(layout.kind, layout.shape, pending.split);
-    const layouts = tile_layouts_parse(app.config.settings.getValue('layouts') || '');
-    return tile_split_valid(layout.kind, layout.shape, tile_layouts_splits(layouts, ref.mkey, ref.wskey)[ref.n]);
-};
-const tile_split_flush = (app) => {
-    if (tile_split_flush_timer.id) {
-        tile_Mainloop.source_remove(tile_split_flush_timer.id);
-        tile_split_flush_timer.id = 0;
-    }
-    if (tile_split_pending.size === 0)
-        return;
-    let layouts = tile_layouts_parse(app.config.settings.getValue('layouts') || '');
-    if (layouts === null) {
-        // corrupt setting: same rule as tile_layout_set, never overwrite it
-        tile_split_pending.clear();
-        if (!tile_split_flush_timer.corruptLogged) {
-            tile_split_flush_timer.corruptLogged = true;
-            global.log('greenTile layouts setting is corrupt, splits not written');
-        }
-        return;
-    }
-    tile_split_flush_timer.corruptLogged = false;
-    for (const entry of tile_split_pending.values())
-        layouts = tile_layouts_set(layouts, entry.mkey, entry.wskey, { splits: { [entry.n]: entry.split } });
-    tile_split_pending.clear();
-    app.config.settings.setValue('layouts', JSON.stringify(layouts));
-};
-const tile_split_remember = (app, ref, split, flushNow) => {
-    tile_split_pending.set(ref.key, { mkey: ref.mkey, wskey: ref.wskey, n: ref.n, split: split });
-    if (flushNow) {
-        tile_split_flush(app);
-        return;
-    }
-    if (tile_split_flush_timer.id)
-        tile_Mainloop.source_remove(tile_split_flush_timer.id);
-    tile_split_flush_timer.id = tile_Mainloop.timeout_add(TILE_SPLIT_FLUSH_MS, () => {
-        tile_split_flush_timer.id = 0;
-        tile_split_flush(app);
-        return false;
-    });
-};
-// true when the monitor + workspace has stored (or pending) splits or dragged shapes —
-// shows the reset button
-const tile_split_any = (app, monitorIndex, wsIndex) => {
-    const ref = tile_split_ref(app, monitorIndex, wsIndex, 0);
-    if (!ref)
-        return false;
-    const prefix = ref.mkey + '\n' + ref.wskey + '\n';
-    for (const key of tile_split_pending.keys()) {
-        if (key.indexOf(prefix) === 0)
-            return true;
-    }
-    const layouts = tile_layouts_parse(app.config.settings.getValue('layouts') || '');
-    return Object.keys(tile_layouts_splits(layouts, ref.mkey, ref.wskey)).length > 0
-        || Object.keys(tile_layouts_shapes(layouts, ref.mkey, ref.wskey)).length > 0;
-};
-const tile_split_reset = (app, monitorIndex, wsIndex) => {
-    const ref = tile_split_ref(app, monitorIndex, wsIndex, 0);
-    if (!ref)
-        return;
-    const prefix = ref.mkey + '\n' + ref.wskey + '\n';
-    for (const key of Array.from(tile_split_pending.keys())) {
-        if (key.indexOf(prefix) === 0)
-            tile_split_pending.delete(key);
-    }
-    tile_layout_set(app, monitorIndex, wsIndex, { splits: null, shapes: null });
-    global.log('greenTile sizes reset ws' + (wsIndex + 1) + ' mon=' + ref.mkey);
-};
 // Places the ordered windows into the cells of the layout (split or equal division).
 const tile_place_rects = (app, ordered, layout, split, area, animate) => {
     const rects = tile_split_rects(layout.kind, layout.shape, split, area);
@@ -601,7 +519,7 @@ const tile_app_auto = (app, monitorIndex, focusWindow, animate = true, wsIndex =
     const columnMajor = layout.kind === 'cols';
     const ordered = tile_sort_reading_order(app, (focused ? [focusWindow] : []).concat(settled), columnMajor)
         .concat(tile_sort_reading_order(app, fresh, columnMajor));
-    tile_place_rects(app, ordered, layout, tile_split_for(app, monitorIndex, ws, n, layout), area, animate);
+    tile_place_rects(app, ordered, layout, app.split.for(app, monitorIndex, ws, n, layout), area, animate);
 };
 // Auto-mode observer: re-tiles automatically on workspaces with automatic tiling on
 // (Super+Ctrl+A on, Super+Ctrl+D off, per workspace) — with the runtime state as a
@@ -616,118 +534,6 @@ const tile_Mainloop = imports.mainloop;
 // Muffin grab op number -> name (RESIZING_E, KEYBOARD_RESIZING_UNKNOWN, ...).
 const tile_grab_op_name = (op) => Object.keys(Meta.GrabOp).find((k) => Meta.GrabOp[k] === op) || '';
 const tile_grab_is_resize = (op) => /RESIZING/.test(tile_grab_op_name(op));
-// Edge resize of a tiled window (mouse or window menu): the moved edges become the new
-// borders of the layout (lib/model/split.js), stored for this monitor, workspace and window
-// count; the neighbours follow in the retile. Edges on the monitor border have no
-// neighbour: the window snaps back. With automatic tiling off it stays a free resize.
-const tile_split_on_resize_end = (app, w, op) => {
-    const seq = w.get_stable_sequence();
-    const start = app.auto.resizeStartTake(seq);
-    const active = global.workspace_manager.get_active_workspace();
-    if (!start || w.get_workspace() !== active)
-        return;
-    const monitorIndex = w.get_monitor();
-    const wsIndex = active.index();
-    if (!tile_layout_for(app, monitorIndex, wsIndex).auto)
-        return;
-    const monitor = utils_Main.layoutManager.monitors[monitorIndex];
-    if (!monitor || start.monitor !== monitorIndex) {
-        app.auto.scheduleMonitor(app, monitorIndex, 250);
-        return;
-    }
-    const windows = tile_collect_windows(monitor, null);
-    if (windows.indexOf(w) === -1)
-        return;
-    const n = windows.length;
-    const layout = tile_layout_shape(app, monitorIndex, n);
-    const ref = tile_split_ref(app, monitorIndex, wsIndex, n);
-    if (!layout || !ref)
-        return;
-    // The retile sorts the dragged window by its frame at grab start, so a moved left or
-    // top edge never pushes it into another cell (tile_sort_reading_order).
-    app.auto.sortOverride(seq, start.rect, GLib.get_monotonic_time() / 1000);
-    const area = getUsableScreenArea(monitor);
-    let split = tile_split_for(app, monitorIndex, wsIndex, n, layout);
-    const idx = tile_split_cell_at(tile_split_rects(layout.kind, layout.shape, split, area), start.rect);
-    const f = w.get_frame_rect();
-    const end = [f.x, f.y, f.width, f.height];
-    // Only edges that really moved count: a click on the edge without dragging must not
-    // store anything (the frame edge never sits exactly on the computed border — rounding,
-    // terminals snap their size to character cells).
-    const moved = tile_split_frame_edges(start.rect, end);
-    const named = tile_split_op_edges(tile_grab_op_name(op));
-    const edges = named.length ? named.filter((e) => moved.indexOf(e) !== -1) : moved;
-    // The gap sits half on each side of a border (tile_gap_cell): border = frame edge + half gap outward.
-    const gap = tile_gap(app);
-    const lead = Math.floor(gap / 2);
-    const trail = gap - lead;
-    const pos = { left: f.x - lead, right: f.x + f.width + trail, top: f.y - lead, bottom: f.y + f.height + trail };
-    let changed = false;
-    for (const edge of edges) {
-        const next = idx < 0 ? null : tile_split_move(layout.kind, layout.shape, split, idx, edge, pos[edge], area, TILE_SPLIT_MIN_PX);
-        if (next) {
-            split = next;
-            changed = true;
-        }
-    }
-    if (changed) {
-        tile_split_remember(app, ref, split, true);
-        global.log('greenTile split stored ws' + (wsIndex + 1) + ' mon=' + ref.mkey + ' n=' + n + ' edges=' + edges.join('+'));
-    }
-    app.auto.scheduleMonitor(app, monitorIndex, 250);
-};
-// Resize hotkeys (Super+Alt+arrows): move a border of the focused window's cell. A tap
-// moves 1 px, holding the key accelerates (tile_split_accel). Retiles without animation
-// at every step; the split is written 500 ms after the last step.
-const tile_split_keys = { state: null };
-let tile_keyboard_settings = null;
-const tile_split_repeat_threshold = () => {
-    try {
-        if (!tile_keyboard_settings)
-            tile_keyboard_settings = new tile_Gio.Settings({ schema_id: 'org.cinnamon.desktop.peripherals.keyboard' });
-        return tile_keyboard_settings.get_uint('delay') + 100;
-    }
-    catch (e) {
-        return 600;
-    }
-};
-const tile_split_hotkey = (app, action) => {
-    const w = tile_focus_window();
-    if (!w)
-        return;
-    const monitorIndex = w.get_monitor();
-    const wsIndex = global.workspace_manager.get_active_workspace().index();
-    if (!tile_layout_for(app, monitorIndex, wsIndex).auto)
-        return;
-    const monitor = utils_Main.layoutManager.monitors[monitorIndex];
-    if (!monitor)
-        return;
-    const windows = tile_collect_windows(monitor, null);
-    // only windows of the layout (tile_focus_window may fall back to another window)
-    if (windows.indexOf(w) === -1)
-        return;
-    const n = windows.length;
-    const layout = tile_layout_shape(app, monitorIndex, n);
-    const ref = tile_split_ref(app, monitorIndex, wsIndex, n);
-    if (!layout || !ref)
-        return;
-    const area = getUsableScreenArea(monitor);
-    const split = tile_split_for(app, monitorIndex, wsIndex, n, layout);
-    const f = w.get_frame_rect();
-    const idx = tile_split_cell_at(tile_split_rects(layout.kind, layout.shape, split, area), [f.x, f.y, f.width, f.height]);
-    const target = idx < 0 ? null : tile_split_key_target(layout.kind, layout.shape, idx, action);
-    if (!target)
-        return;
-    const accel = tile_split_accel(tile_split_keys.state, action, GLib.get_monotonic_time() / 1000, tile_split_repeat_threshold());
-    tile_split_keys.state = accel.state;
-    const from = tile_split_border_pos(layout.kind, layout.shape, split, idx, target.edge, area);
-    const next = tile_split_move(layout.kind, layout.shape, split, idx, target.edge, from + target.sign * accel.step, area, TILE_SPLIT_MIN_PX);
-    // at the minimum size the border stays: no retile and no new flush timer per repeat
-    if (!next || (split && JSON.stringify(next) === JSON.stringify(split)))
-        return;
-    tile_split_remember(app, ref, next, false);
-    tile_retile_monitor(app, monitorIndex, null, false);
-};
 
 // Per-workspace preset tiling: rules by window count, stored in extension settings
 // (survives spice reinstalls — settings live in ~/.config/cinnamon/spices).
@@ -820,182 +626,6 @@ const tile_rules_pick = (rules, n) => {
     }
     return match;
 };
-// Drag tracking for the zone split: while a tiled window is moved (mouse move grab),
-// a 50 ms pointer poll shows a preview of the cell a drop would produce; on release
-// over a zone of another tiled window the new layout is placed directly and stored
-// as a shape (per monitor, workspace and window count). Cancel (Esc), release in the
-// centre or outside tiled cells keeps today's snap-on-release behaviour.
-const tile_drop = { timer: 0, actor: null, seq: null, from: null, start: null, w: null };
-const tile_drop_stop = () => {
-    if (tile_drop.timer) {
-        tile_Mainloop.source_remove(tile_drop.timer);
-        tile_drop.timer = 0;
-    }
-    if (tile_drop.actor) {
-        tile_drop.actor.destroy();
-        tile_drop.actor = null;
-    }
-    tile_drop.seq = null;
-    tile_drop.from = null;
-    tile_drop.start = null;
-    tile_drop.w = null;
-};
-const tile_drop_begin = (app, w, op) => {
-    if (op !== Meta.GrabOp.MOVING || tile_drop.seq !== null)
-        return;
-    if (w.get_workspace() !== global.workspace_manager.get_active_workspace())
-        return;
-    const monitorIndex = w.get_monitor();
-    const monitor = utils_Main.layoutManager.monitors[monitorIndex];
-    if (!monitor || tile_excl_is_excluded(w))
-        return;
-    const windows = tile_collect_windows(monitor, null);
-    if (windows.indexOf(w) === -1)
-        return;
-    if (!tile_layout_shape(app, monitorIndex, windows.length))
-        return;
-    const f = w.get_frame_rect();
-    tile_drop.seq = w.get_stable_sequence();
-    tile_drop.from = monitorIndex;
-    tile_drop.start = [f.x, f.y, f.width, f.height];
-    tile_drop.w = w;
-    const rgb = tile_accent_state.rgb;
-    tile_drop.actor = new tile_St.Widget({ reactive: false, style: 'background-color: rgba(' + rgb[0] + ',' + rgb[1] + ',' + rgb[2] + ',0.25); border: 2px solid rgb(' + rgb[0] + ',' + rgb[1] + ',' + rgb[2] + ');' });
-    Main.uiGroup.add_child(tile_drop.actor);
-    tile_drop.actor.hide();
-    tile_drop.timer = tile_Mainloop.timeout_add(50, () => tile_drop_tick(app));
-};
-// Where a drop at (px, py) would land: the target cell of another tiled window and
-// the zone, plus the new layout (lib/model/drop.js). null outside any zone. The target set
-// holds all tiled windows of the pointer's monitor with A in it — dragged within its
-// own monitor A keeps its reading-order place; from another monitor it is inserted
-// fresh (from = -1) and the count there grows by one.
-const tile_drop_target = (app, w, px, py, fromMonitor, startFrame) => {
-    const monitors = utils_Main.layoutManager.monitors;
-    let monitorIndex = -1;
-    for (let i = 0; i < monitors.length; i++) {
-        const m = monitors[i];
-        if (px >= m.x && px < m.x + m.width && py >= m.y && py < m.y + m.height) {
-            monitorIndex = i;
-            break;
-        }
-    }
-    if (monitorIndex === -1)
-        return null;
-    const monitor = monitors[monitorIndex];
-    const wsIndex = global.workspace_manager.get_active_workspace().index();
-    const same = (fromMonitor != null ? fromMonitor : tile_drop.from) === monitorIndex;
-    const others = tile_collect_windows(monitor, null, wsIndex).filter((t) => t !== w);
-    const windows = same ? others.concat([w]) : others;
-    const n = windows.length;
-    if (n < (same ? 2 : 1))
-        return null;
-    const layout = tile_layout_shape(app, monitorIndex, n);
-    if (!layout)
-        return null;
-    // Reading order from the grab-start geometry: A's frame follows the pointer, so
-    // its live frame would shuffle the order the stored shape is keyed by.
-    const rects = windows.map((t) => {
-        if (t === w)
-            return startFrame || tile_drop.start;
-        const f = t.get_frame_rect();
-        return [f.x, f.y, f.width, f.height];
-    });
-    const ordered = tile_sort_order(rects, layout.kind === 'cols').map((i) => windows[i]);
-    const fromIndex = ordered.indexOf(w);
-    const area = getUsableScreenArea(monitor);
-    const cellRects = tile_split_rects(layout.kind, layout.shape, tile_split_for(app, monitorIndex, wsIndex, n, layout), area);
-    let ci = -1;
-    for (let i = 0; i < cellRects.length; i++) {
-        const [cx, cy, cw, ch] = cellRects[i];
-        if (px >= cx && px < cx + cw && py >= cy && py < cy + ch) {
-            ci = i;
-            break;
-        }
-    }
-    if (ci === -1 || ci >= ordered.length)
-        return null;
-    // fromIndex -1: cross-monitor drop, A is appended fresh (tile_drop_layout).
-    // On the own monitor A's index must exist and the target cell must not be A's.
-    if (same && fromIndex === -1)
-        return null;
-    if (fromIndex === ci)
-        return null;
-    const zone = tile_drop_zone(cellRects[ci], px, py);
-    if (!zone)
-        return null;
-    const next = zone === 'center' ? null : tile_drop_layout(layout.kind, layout.shape, fromIndex, ci, zone);
-    if (next && !tile_drop_fits(next.kind, next.shape, area[2], area[3], tile_gap(app), TILE_SPLIT_MIN_PX))
-        return null;
-    return { monitorIndex: monitorIndex, n: n, layout: layout, ordered: ordered, fromIndex: fromIndex, toIndex: ci, zone: zone, next: next };
-};
-const tile_drop_tick = (app) => {
-    if (tile_drop.seq === null || global.display.get_grab_op() === Meta.GrabOp.NONE) {
-        tile_drop_stop();
-        return false;
-    }
-    const p = global.get_pointer();
-    const hit = tile_drop_target(app, tile_drop.w, p[0], p[1]);
-    tile_drop.hit = hit;
-    if (!hit || !hit.next) {
-        tile_drop.actor.hide();
-        return true;
-    }
-    const monitor = utils_Main.layoutManager.monitors[hit.monitorIndex];
-    if (!monitor) {
-        tile_drop_stop();
-        return false;
-    }
-    const area = getUsableScreenArea(monitor);
-    const rects = tile_split_rects(hit.next.kind, hit.next.shape, null, area);
-    // A's cell in the new layout; a cross-monitor A sits at the end of the order
-    const fresh = hit.ordered.length;
-    const at = hit.next.order.indexOf(hit.fromIndex >= 0 ? hit.fromIndex : fresh);
-    const cell = tile_gap_cell(rects[at], area, tile_gap(app));
-    tile_drop.actor.set_position(cell[0], cell[1]);
-    tile_drop.actor.set_size(cell[2], cell[3]);
-    tile_drop.actor.show();
-    return true;
-};
-// true = split applied, the grab-end handler must not run the usual snap.
-const tile_drop_end = (app, w, op) => {
-    if (tile_drop.seq === null)
-        return false;
-    const start = tile_drop.start;
-    const fromMonitor = tile_drop.from;
-    tile_drop_stop();
-    if (op !== Meta.GrabOp.MOVING)
-        return false;
-    // Esc cancel (spike 2): Muffin put the frame back at the start rect.
-    const f = w.get_frame_rect();
-    if (start && Math.abs(f.x - start[0]) <= 2 && Math.abs(f.y - start[1]) <= 2)
-        return false;
-    const p = global.get_pointer();
-    const hit = tile_drop_target(app, w, p[0], p[1], fromMonitor, start);
-    if (!hit || !hit.next)
-        return false;
-    const wsIndex = global.workspace_manager.get_active_workspace().index();
-    const layouts = tile_layouts_parse(app.config.settings.getValue('layouts') || '');
-    if (layouts === null)
-        return false;
-    const n = hit.next.order.length;
-    const ref = tile_split_ref(app, hit.monitorIndex, wsIndex, n);
-    if (!ref)
-        return false;
-    tile_split_pending.delete(ref.key);
-    tile_layout_set(app, hit.monitorIndex, wsIndex, { shapes: { [ref.n]: { kind: hit.next.kind, shape: hit.next.shape } }, splits: { [ref.n]: null } });
-    const monitor = utils_Main.layoutManager.monitors[hit.monitorIndex];
-    const area = getUsableScreenArea(monitor);
-    const orderedByNext = hit.next.order.map((i) => (i === hit.ordered.length ? w : hit.ordered[i]));
-    tile_place_rects(app, orderedByNext, { kind: hit.next.kind, shape: hit.next.shape }, null, area, true);
-    // Overrides from a recent resize/swap must not re-sort the freshly placed order.
-    for (const t of orderedByNext)
-        app.auto.sortClear(t.get_stable_sequence());
-    if (fromMonitor !== hit.monitorIndex)
-        app.auto.scheduleMonitor(app, fromMonitor, 250);
-    global.log('greenTile drag split ws' + (wsIndex + 1) + ' mon=' + ref.mkey + ' n=' + n + ' ' + hit.next.kind + '=[' + hit.next.shape.join(',') + ']');
-    return true;
-};
 // Layout greenTile tiles for n windows on this monitor and the given workspace: the
 // preset rule filled to n (tile_fill_stacks), or the automatic grid — with a stored
 // dragged shape (lib/model/drop.js) winning over both. null when nothing is tiled.
@@ -1021,7 +651,7 @@ const tile_layout_shape_ws = (app, monitorIndex, wsIndex, n) => {
         return null;
     // A dragged shape for this monitor + workspace + window count wins over the
     // preset rule / auto grid; corrupt layouts read as empty ({}), so nothing stored.
-    const ref = tile_split_ref(app, monitorIndex, wsIndex, n);
+    const ref = app.split.ref(app, monitorIndex, wsIndex, n);
     if (!ref)
         return base;
     const layouts = tile_layouts_parse(app.config.settings.getValue('layouts') || '');
@@ -1048,7 +678,7 @@ const tile_preset_retile = (app, monitorIndex, focusWindow, animate = true, wsIn
     if (!layout)
         return;
     const ordered = tile_sort_reading_order(app, (focused ? [focusWindow] : []).concat(windows), layout.kind === 'cols');
-    const split = tile_split_for(app, monitorIndex, ws, n, layout);
+    const split = app.split.for(app, monitorIndex, ws, n, layout);
     tile_place_rects(app, ordered, layout, split, area, animate);
     if (animate)
         global.log('greenTile preset "' + preset.name + '" applied ws' + (ws + 1) + ' mon=' + (app.monitors.keys[monitorIndex] || '?') + ' n=' + n + ' stacks=[' + (layout.rule ? layout.rule.stacks.join(',') : '1') + ']' + (split ? ' split' : ''));
@@ -1093,7 +723,7 @@ const tile_swap_hotkey = (app, dir) => {
     let ordered = null;
     let selfIdx = -1;
     if (layout) {
-        const split = tile_split_for(app, monitorIndex, wsIndex, n, layout);
+        const split = app.split.for(app, monitorIndex, wsIndex, n, layout);
         cells = tile_split_rects(layout.kind, layout.shape, split, area);
         ordered = tile_sort_reading_order(app, [focusWindow].concat(windows), layout.kind === 'cols');
         selfIdx = ordered.indexOf(focusWindow);
@@ -1130,7 +760,7 @@ const tile_swap_hotkey = (app, dir) => {
         const nTarget = tile_collect_windows(targetMonitor, null).length + 1;
         const targetLayout = tile_layout_shape(app, step.monitor, nTarget);
         if (targetLayout) {
-            const targetSplit = tile_split_for(app, step.monitor, wsIndex, nTarget, targetLayout);
+            const targetSplit = app.split.for(app, step.monitor, wsIndex, nTarget, targetLayout);
             const targetCells = tile_split_rects(targetLayout.kind, targetLayout.shape, targetSplit, getUsableScreenArea(targetMonitor));
             const slotIdx = tile_swap_landing_cell(targetCells, frameRect, step.slot === 'first' ? 'right' : 'left');
             if (slotIdx != null)
@@ -1156,7 +786,7 @@ const tile_swap_hotkey = (app, dir) => {
     global.workspace_manager.get_workspace_by_index(targetWsIndex).activate_with_focus(focusWindow, global.get_current_time());
     const targetLayout = tile_layout_shape(app, step.monitor, nTarget);
     if (targetLayout) {
-        const targetSplit = tile_split_for(app, step.monitor, targetWsIndex, nTarget, targetLayout);
+        const targetSplit = app.split.for(app, step.monitor, targetWsIndex, nTarget, targetLayout);
         const targetCells = tile_split_rects(targetLayout.kind, targetLayout.shape, targetSplit, getUsableScreenArea(targetMonitor));
         const slotIdx = tile_swap_landing_cell(targetCells, frameRect, step.slot === 'first' ? 'right' : 'left');
         if (slotIdx != null)
@@ -1207,7 +837,7 @@ const tile_focus_hotkey = (app, dir) => (display, window) => {
     const n = windows.length;
     const layout = n ? tile_layout_shape(app, monitorIndex, n) : null;
     if (layout) {
-        const split = tile_split_for(app, monitorIndex, wsIndex, n, layout);
+        const split = app.split.for(app, monitorIndex, wsIndex, n, layout);
         cells = tile_split_rects(layout.kind, layout.shape, split, getUsableScreenArea(monitor));
         ordered = tile_sort_reading_order(app, windows, layout.kind === 'cols');
         const selfIdx = ordered.indexOf(window);
@@ -2052,10 +1682,10 @@ const tile_panel_gap_row = (app) => {
     // clears them for every window count and retiles; the rebuild hides the button again.
     const monitorIndex = tile_focus_monitor_index();
     const wsIndex = global.workspace_manager.get_active_workspace().index();
-    if (tile_split_any(app, monitorIndex, wsIndex)) {
+    if (app.split.any(app, monitorIndex, wsIndex)) {
         const reset = new tile_St.Button({ label: _("Reset sizes"), style_class: 'gk-reset-btn', track_hover: true });
         reset.connect('clicked', () => {
-            tile_split_reset(app, monitorIndex, wsIndex);
+            app.split.reset(app, monitorIndex, wsIndex);
             if (tile_layout_for(app, monitorIndex, wsIndex).auto)
                 tile_retile_monitor(app, monitorIndex, null);
             tile_panel_rebuild(app);
@@ -2543,6 +2173,37 @@ class App {
             global: cinnamon.global,
             session: session,
         });
+        this.split = new Split({
+            mainloop: tile_Mainloop,
+            glib: GLib,
+            gio: tile_Gio,
+            global: cinnamon.global,
+            main: cinnamon.main,
+            focusWindow: tile_focus_window,
+            layoutFor: tile_layout_for,
+            layoutShape: tile_layout_shape,
+            layoutSet: tile_layout_set,
+            collectWindows: tile_collect_windows,
+            usableArea: getUsableScreenArea,
+            gap: tile_gap,
+            retileMonitor: tile_retile_monitor,
+            grabOpName: tile_grab_op_name,
+        });
+        this.drop = new Drop({
+            meta: cinnamon.meta,
+            main: cinnamon.main,
+            global: cinnamon.global,
+            mainloop: tile_Mainloop,
+            st: tile_St,
+            collectWindows: tile_collect_windows,
+            excludeCheck: tile_excl_is_excluded,
+            layoutShape: tile_layout_shape,
+            layoutSet: tile_layout_set,
+            usableArea: getUsableScreenArea,
+            gap: tile_gap,
+            placeRects: tile_place_rects,
+            accentRgb: () => tile_accent_state.rgb,
+        });
         this.auto = new Auto({
             mainloop: tile_Mainloop,
             meta: cinnamon.meta,
@@ -2557,10 +2218,10 @@ class App {
             retileMonitor: tile_retile_monitor,
             borderUpdate: tile_border_update,
             grabIsResize: tile_grab_is_resize,
-            dropBegin: tile_drop_begin,
-            dropEnd: tile_drop_end,
-            dropStop: tile_drop_stop,
-            resizeEnd: tile_split_on_resize_end,
+            dropBegin: (grabApp, w, op) => grabApp.drop.begin(grabApp, w, op),
+            dropEnd: (grabApp, w, op) => grabApp.drop.end(grabApp, w, op),
+            dropStop: () => this.drop.stop(),
+            resizeEnd: (grabApp, w, op) => grabApp.split.onResizeEnd(grabApp, w, op),
             exclToggleDelete: (seq) => tile_excl.toggled.delete(seq),
             exclToggleClear: () => tile_excl.toggled.clear(),
         });

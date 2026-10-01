@@ -32,7 +32,7 @@ test('Config.destroy finalizes the settings object', () => {
 
 test('finalize runs last, after every teardown step that still needs settings', () => {
     const finalizeAt = destroyBody.indexOf('this.settings.finalize()');
-    assert.ok(finalizeAt > destroyBody.indexOf('tile_split_flush'), 'after tile_split_flush (writes layouts)');
+    assert.ok(finalizeAt > destroyBody.indexOf('split.flush'), 'after split.flush (writes pending layouts)');
     assert.ok(finalizeAt > destroyBody.indexOf('tile_border_shutdown'), 'after the last teardown helper');
     assert.ok(finalizeAt > destroyBody.indexOf('this.DisableHotkey()'), 'after the hotkey removal');
 });

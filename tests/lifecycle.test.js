@@ -255,3 +255,123 @@ test('auto observer: monitors-changed removes pending per-monitor debounce timer
     greenTile.disable();
     assert.equal(env.liveTimers().length, 0, 'disable still leaves 0 timers');
 });
+
+// Split/drop runtime (lib/runtime/split.js, lib/runtime/drop.js): the pending
+// split state is per App and rides the Config.destroy flush; the corrupt-
+// layouts log-once flag rides the session. A remember() with flushNow=false is
+// exactly what one resize-hotkey step produces.
+const enableWithMonitor = (env, greenTile) => {
+    greenTile.enable();
+    env.layoutManager.monitors.push({ x: 0, y: 0, width: 2000, height: 1100 });
+    env.flushDisplayConfigNoReply();
+};
+
+const settingsInstance = (env) => env.settingsInstances.find((s) => s.uuid === 'greenTile@carsteneu');
+
+test('split: a pending hotkey-step split leaves the 500 ms flush timer; disable flushes it into the settings before finalize', () => {
+    const { env, greenTile } = loadGreenTile();
+    enableWithMonitor(env, greenTile);
+    const app = greenTile.session.app;
+    const ref = app.split.ref(app, 0, 0, 2);
+    assert.ok(ref, 'monitor key resolved from the fake DisplayConfig reply');
+    // split values are { <border index>: fraction } objects (tile_split_move output)
+    app.split.remember(app, ref, { 0: 0.5, 1: 1 }, false);
+    assert.equal(env.liveTimers().filter((t) => t.ms === 500).length, 1, 'the 500 ms flush timer is pending');
+    greenTile.disable();
+    const inst = settingsInstance(env);
+    const layoutsWrites = inst.callLog.filter((c) => c.op === 'setValue' && c.key === 'layouts' && !c.finalized);
+    assert.equal(layoutsWrites.length, 1, 'the pending split was flushed into the settings');
+    assert.ok(layoutsWrites[0].value.indexOf(ref.mkey) !== -1, 'written under the monitor key');
+    assert.equal(inst.callLog.findIndex((c) => c.op === 'finalize'), inst.callLog.length - 1, 'finalize runs last');
+    assert.ok(inst.callLog.indexOf(layoutsWrites[0]) < inst.callLog.findIndex((c) => c.op === 'finalize'),
+        'setValue(layouts) observed BEFORE finalize');
+    assert.equal(env.liveTimers().length, 0, 'no timers left after disable');
+});
+
+test('split: monitors-changed flushes a pending split into the OLD App settings; the new App starts with an empty pending map', () => {
+    const { env, greenTile } = loadGreenTile();
+    enableWithMonitor(env, greenTile);
+    const app = greenTile.session.app;
+    const ref = app.split.ref(app, 0, 0, 2);
+    app.split.remember(app, ref, { 0: 0.5, 1: 1 }, false);
+    env.layoutManager.emit('monitors-changed');
+    env.flushDisplayConfigNoReply();
+    const app2 = greenTile.session.app;
+    assert.notEqual(app2, app, 'the App was recreated');
+    const writes = settingsInstance(env).callLog.filter((c) => c.op === 'setValue' && c.key === 'layouts');
+    assert.equal(writes.length, 1, 'the pending split reached the settings during the recreation');
+    assert.ok(writes[0].finalized === false, 'written before finalize');
+    greenTile.disable();
+    const writesAfter = settingsInstance(env).callLog.filter((c) => c.op === 'setValue' && c.key === 'layouts');
+    assert.equal(writesAfter.length, 1, 'no second flush on disable: the new App had a pending-free map');
+});
+
+test('split: a corrupt layouts setting logs the corrupt line once across an App recreation', () => {
+    const { env, greenTile } = loadGreenTile();
+    enableWithMonitor(env, greenTile);
+    const app = greenTile.session.app;
+    const ref = app.split.ref(app, 0, 0, 2);
+    const corruptLines = () => env.logs.filter((l) => l === 'greenTile layouts setting is corrupt, splits not written').length;
+    settingsInstance(env).setValue('layouts', '{"mkey": broken');
+    app.split.remember(app, ref, [0.5], false);
+    app.split.flush(app);
+    assert.equal(corruptLines(), 1, 'logged once for the first corrupt flush');
+    app.split.remember(app, ref, [0.6], false);
+    app.split.flush(app);
+    assert.equal(corruptLines(), 1, 'still once inside the same App');
+    env.layoutManager.emit('monitors-changed');
+    env.flushDisplayConfigNoReply();
+    const app2 = greenTile.session.app;
+    const ref2 = app2.split.ref(app2, 0, 0, 2);
+    app2.split.remember(app2, ref2, [0.7], false);
+    app2.split.flush(app2);
+    assert.equal(corruptLines(), 1, 'log-once across the App recreation (session flag)');
+});
+
+test('split: a pending split that a drop replaces expires from the pending map (forget)', () => {
+    const { env, greenTile } = loadGreenTile();
+    enableWithMonitor(env, greenTile);
+    const app = greenTile.session.app;
+    const ref = app.split.ref(app, 0, 0, 2);
+    app.split.remember(app, ref, { 0: 0.4, 1: 1 }, false);
+    assert.equal(env.liveTimers().filter((t) => t.ms === 500).length, 1, 'flush timer pending');
+    app.split.forget(ref.key);
+    greenTile.disable();
+    const layoutsWrites = settingsInstance(env).callLog.filter((c) => c.op === 'setValue' && c.key === 'layouts');
+    assert.equal(layoutsWrites.length, 0, 'the forgotten split is not written anywhere');
+    assert.equal(env.liveTimers().length, 0, 'no timers left');
+});
+
+test('drop: disable during an active drag destroys the preview actor and removes the 50 ms tick timer', () => {
+    const { env, greenTile } = loadGreenTile();
+    enableWithMonitor(env, greenTile);
+    const app = greenTile.session.app;
+    // automatic tiling on, keyed exactly the way the extension itself writes it
+    const ref0 = app.split.ref(app, 0, 0, 2);
+    const layouts = {};
+    layouts[ref0.mkey] = {};
+    layouts[ref0.mkey][ref0.wskey] = { auto: true };
+    settingsInstance(env).setValue('layouts', JSON.stringify(layouts));
+    const makeDragWindow = (seq, rect) => ({
+        get_stable_sequence: () => seq,
+        get_window_type: () => 6,
+        get_wm_class: () => 'FakeWindow',
+        get_monitor: () => 0,
+        get_workspace: () => env.activeWorkspace,
+        minimized: false,
+        get_frame_rect: () => ({ x: rect[0], y: rect[1], width: rect[2], height: rect[3] }),
+        unmaximize() {},
+        move_resize_frame() {},
+        move_frame() {},
+        get_compositor_private: () => null,
+    });
+    env.activeWorkspace = { index: () => 0 };
+    env.tabList.push(makeDragWindow(11, [10, 10, 400, 300]), makeDragWindow(12, [500, 10, 400, 300]));
+    app.drop.begin(app, env.tabList[0], env.gi.Meta.GrabOp.MOVING);
+    assert.equal(env.uiGroupChildren.length, 1, 'preview actor added to the ui group');
+    assert.equal(env.liveTimers().filter((t) => t.ms === 50).length, 1, '50 ms tick timer running');
+    greenTile.disable();
+    assert.equal(env.uiGroupChildren[0].destroyed, true, 'preview actor destroyed');
+    assert.equal(env.liveTimers().filter((t) => t.ms === 50).length, 0, '50 ms tick timer removed');
+    assert.equal(env.liveTimers().length, 0, 'nothing left running');
+});
