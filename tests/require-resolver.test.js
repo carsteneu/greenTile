@@ -27,8 +27,10 @@ const shippedJs = (function collect(dir, prefix) {
 const requireRe = /\brequire\(\s*(['"])([^'"\n]+)\1\s*\)/g;
 
 const resolveCinnamon = (spec) => {
-    // gi.X / ui.X / misc.X reach the imports global at runtime — nothing to check here
-    if (/^[a-z]+\./.test(spec))
+    // only the real Cinnamon import namespaces reach the imports global at runtime
+    // (fileUtils.js checks gi., ui., misc., perf. and the importNames list) — anything
+    // else must resolve as a root-relative file
+    if (/^(?:gi|ui|misc|perf)\./.test(spec))
         return null;
     assert.ok(!spec.includes('..'), `require('${spec}') uses '../' — fileUtils turns it into '.<name>' (broken)`);
     assert.ok(spec.startsWith('./'), `require('${spec}') is not root-relative './'`);

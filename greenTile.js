@@ -471,7 +471,7 @@ const tile_sort_reading_order = (windows, columnMajor) => {
 const tile_auto_shape = (monitor, n) => (monitor.width < 2100 && n > 3)
     ? { kind: 'cols', shape: tile_auto_narrow_stacks(n) }
     : { kind: 'rows', shape: tile_auto_rows(n) };
-// Movable borders (split-model): a split the resize hotkeys have not written yet wins
+// Movable borders (lib/model/split.js): a split the resize hotkeys have not written yet wins
 // over the stored one; a stored split counts only when it fits the layout.
 // tile_split_pending: key "mkey\nwskey\nn" -> { mkey, wskey, n, split }, written to the
 // settings by tile_split_flush (500 ms after the last hotkey step, at once for the mouse).
@@ -601,7 +601,7 @@ const tile_app_auto = (app, monitorIndex, focusWindow, animate = true, wsIndex =
     let fresh = windows.filter((w) => pending.has(w.get_stable_sequence()));
     let settled = windows.filter((w) => !pending.has(w.get_stable_sequence()));
     // Sort direction follows the layout: column-major for columns, rows for rows.
-    // Dragged shapes (drop-model) win over the auto grid too: resolve through
+    // Dragged shapes (lib/model/drop.js) win over the auto grid too: resolve through
     // tile_layout_shape_ws, so the swap landing path (another workspace) also reads
     // the shape stored for that workspace. No tiling when nothing applies.
     const layout = tile_layout_shape_ws(app, monitorIndex, ws, n);
@@ -745,7 +745,7 @@ const tile_auto_on_grab_begin = (app, w, op) => {
     tile_auto.grabMonitor.set(w.get_stable_sequence(), w.get_monitor());
 };
 // Edge resize of a tiled window (mouse or window menu): the moved edges become the new
-// borders of the layout (split-model), stored for this monitor, workspace and window
+// borders of the layout (lib/model/split.js), stored for this monitor, workspace and window
 // count; the neighbours follow in the retile. Edges on the monitor border have no
 // neighbour: the window snaps back. With automatic tiling off it stays a free resize.
 const tile_split_on_resize_end = (app, w, op) => {
@@ -1250,7 +1250,7 @@ const tile_drop_begin = (app, w, op) => {
     tile_drop.timer = tile_Mainloop.timeout_add(50, () => tile_drop_tick(app));
 };
 // Where a drop at (px, py) would land: the target cell of another tiled window and
-// the zone, plus the new layout (drop-model). null outside any zone. The target set
+// the zone, plus the new layout (lib/model/drop.js). null outside any zone. The target set
 // holds all tiled windows of the pointer's monitor with A in it — dragged within its
 // own monitor A keeps its reading-order place; from another monitor it is inserted
 // fresh (from = -1) and the count there grows by one.
@@ -1382,7 +1382,7 @@ const tile_drop_end = (app, w, op) => {
 };
 // Layout greenTile tiles for n windows on this monitor and the given workspace: the
 // preset rule filled to n (tile_fill_stacks), or the automatic grid — with a stored
-// dragged shape (drop-model) winning over both. null when nothing is tiled.
+// dragged shape (lib/model/drop.js) winning over both. null when nothing is tiled.
 const tile_layout_shape_ws = (app, monitorIndex, wsIndex, n) => {
     const monitor = utils_Main.layoutManager.monitors[monitorIndex];
     const single = tile_single_fill(app.config.settings.getValue('fillSingleWindow'), n);
@@ -1559,7 +1559,7 @@ const tile_swap_hotkey = (app, dir) => {
 // focused window greenTile does not manage (floating, excluded, dialog) — push_tile runs
 // with the received window, the exact native behaviour. Left/right cross over to the
 // adjacent monitor at the edge (no wrap); up/down never leave the monitor or workspace.
-// (In-layout neighbour: the swap-model search above — same cells, same semantics.)
+// (In-layout neighbour: tile_swap_neighbor in lib/model/swap.js — same cells, same semantics.)
 const tile_focus_motion = (dir) => ({
     left: Meta.MotionDirection.LEFT,
     right: Meta.MotionDirection.RIGHT,
@@ -2432,7 +2432,7 @@ const tile_panel_gap_row = (app) => {
     };
     minus.connect('clicked', () => change(-TILE_GAP_STEP));
     plus.connect('clicked', () => change(TILE_GAP_STEP));
-    // "Reset sizes": only when borders were moved on this monitor + workspace (split-model);
+    // "Reset sizes": only when borders were moved on this monitor + workspace (lib/model/split.js);
     // clears them for every window count and retiles; the rebuild hides the button again.
     const monitorIndex = tile_focus_monitor_index();
     const wsIndex = global.workspace_manager.get_active_workspace().index();

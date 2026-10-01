@@ -141,6 +141,9 @@ dbus-send --session --print-reply --dest=org.Cinnamon /org/Cinnamon org.Cinnamon
   string:"imports.ui.extensionSystem.disableExtension('greenTile@carsteneu'); imports.ui.extensionSystem.enableExtension('greenTile@carsteneu'); 'reloaded'"
 ```
 
+greenTile.js requires the model modules from `lib/model/` — always deploy `lib/`
+alongside it. Copying greenTile.js alone fails at load time.
+
 - **Tests:** `node --test tests/*.test.js` (Node 18 or newer).
 - **Releases:** pushing a `v*` tag builds the zip and attaches it to the release (`.github/workflows/release.yml`).
 - **Diagnostics:** `~/.xsession-errors` shows `JS ERROR` lines and `greenTile skipped …` lines explaining why a window was not tiled.
