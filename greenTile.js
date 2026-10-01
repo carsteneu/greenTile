@@ -47,13 +47,14 @@ const { tile_drop_zone, tile_drop_layout, tile_drop_fits } = require('./lib/mode
 const { tile_layouts_parse, tile_layouts_entry, tile_layouts_splits, tile_layouts_shapes, tile_layouts_set, tile_layouts_remove_preset, tile_layouts_migrate, tile_layout_resolve } = require('./lib/model/layouts');
 const { Split } = require('./lib/runtime/split');
 const { Drop } = require('./lib/runtime/drop');
+const { Theme } = require('./lib/runtime/theme');
+const { Border } = require('./lib/runtime/border');
+const { Focus } = require('./lib/runtime/focus');
 const { tile_swap_neighbor, tile_swap_landing_cell, tile_swap_chain_step } = require('./lib/model/swap');
 const { tile_focus_monitor_step, tile_focus_monitor_pick } = require('./lib/model/focus');
 const { tile_editor_cols, tile_editor_rows, tile_editor_min_floor, tile_editor_clamp, tile_editor_paint, tile_editor_paint_range, tile_editor_remove, tile_editor_sort, tile_editor_add_rule, tile_editor_delete_rule, tile_editor_step_min, tile_editor_validate, tile_editor_new_id, tile_editor_commit, tile_editor_delete_preset } = require('./lib/model/editor');
 const { TILE_PANEL_MIN, tile_panel_size_parse, tile_panel_size_set, tile_panel_size_clamp } = require('./lib/model/panel-size');
-const { tile_accent_default, tile_accent_parse, tile_accent_is_own, tile_accent_from_probed, tile_accent_probe_first, tile_accent_tones, tile_accent_css } = require('./lib/model/accent');
-const { tile_state_default, tile_state_mode, tile_state_tones, tile_state_css } = require('./lib/model/state');
-const { tile_theme_resolve, tile_theme_toggle_target } = require('./lib/model/theme');
+const { tile_theme_toggle_target } = require('./lib/model/theme');
 const { Session } = require('./lib/runtime/session');
 const { Monitors } = require('./lib/runtime/monitors');
 const { Auto } = require('./lib/runtime/auto');
@@ -117,9 +118,9 @@ class Config {
             // with the App, its start time survives while a change is pending.
             this.app.session.settle.teardown();
             tile_panel_close();
-            tile_theme_shutdown();
-            tile_focus_disconnect();
-            tile_border_shutdown();
+            this.app.theme.destroy();
+            this.app.focus.destroy();
+            this.app.border.destroy();
             // settings dialog changes must no longer reach the destroyed app;
             // a dialog still open then throws in cinnamonDBus — Cinnamon's behaviour
             // for every finalized xlet
@@ -148,12 +149,12 @@ class Config {
         this.settings.bind('swapRightHotkey', 'swapRightHotkey', this.EnableHotkey, null);
         this.settings.bind('swapUpHotkey', 'swapUpHotkey', this.EnableHotkey, null);
         this.settings.bind('swapDownHotkey', 'swapDownHotkey', this.EnableHotkey, null);
-        this.settings.bind('panelTheme', 'panelTheme', () => tile_theme_changed(), null);
-        this.settings.bind('accentMode', 'accentMode', () => tile_theme_changed(), null);
-        this.settings.bind('accentColor', 'accentColor', () => tile_theme_changed(), null);
-        this.settings.bind('stateMode', 'stateMode', () => tile_theme_changed(), null);
-        this.settings.bind('stateColor', 'stateColor', () => tile_theme_changed(), null);
-        this.settings.bind('focusBorder', 'focusBorderValue', () => tile_border_update(), null);
+        this.settings.bind('panelTheme', 'panelTheme', () => this.app.theme.changed(), null);
+        this.settings.bind('accentMode', 'accentMode', () => this.app.theme.changed(), null);
+        this.settings.bind('accentColor', 'accentColor', () => this.app.theme.changed(), null);
+        this.settings.bind('stateMode', 'stateMode', () => this.app.theme.changed(), null);
+        this.settings.bind('stateColor', 'stateColor', () => this.app.theme.changed(), null);
+        this.settings.bind('focusBorder', 'focusBorderValue', () => this.app.border.update(), null);
         this.settings.bind('fillSingleWindow', 'fillSingleWindowValue', () => {
             if (this.settings.getValue('fillSingleWindow') === true)
                 tile_single_retile(this.app);
@@ -165,9 +166,9 @@ class Config {
             tile_excl_app_populate(this.settings);
         });
         this.EnableHotkey();
-        tile_theme_init(this);
-        tile_focus_connect(this.app);
-        tile_border_init(this.app);
+        this.app.theme.init(this);
+        this.app.focus.connect(this.app);
+        this.app.border.init(this.app);
         app.monitors.refresh(() => {
             tile_layouts_migrate_once(app);
             app.auto.connectAll(app);
@@ -851,7 +852,7 @@ const tile_focus_hotkey = (app, dir) => (display, window) => {
         const nb = tile_swap_neighbor(cells, selfIdx, dir);
         if (nb != null) {
             ordered[nb].activate(global.get_current_time());
-            tile_border_flash(ordered[nb]);
+            app.border.flash(ordered[nb]);
             return;
         }
     }
@@ -870,22 +871,11 @@ const tile_focus_hotkey = (app, dir) => (display, window) => {
             const pick = tile_focus_monitor_pick(cands, dir, { x: frame.x, y: frame.y, width: frame.width, height: frame.height });
             if (pick != null) {
                 cands[pick].w.activate(global.get_current_time());
-                tile_border_flash(cands[pick].w);
+                app.border.flash(cands[pick].w);
                 return;
             }
         }
     }
-};
-// Registered once per enable cycle; null restores muffin's own handlers (verified:
-// Super+Arrow tiles natively again after that).
-const tile_focus_binding_names = ['push-tile-left', 'push-tile-right', 'push-tile-up', 'push-tile-down'];
-const tile_focus_connect = (app) => {
-    for (const name of tile_focus_binding_names)
-        Meta.keybindings_set_custom_handler(name, tile_focus_hotkey(app, name.slice('push-tile-'.length)));
-};
-const tile_focus_disconnect = () => {
-    for (const name of tile_focus_binding_names)
-        Meta.keybindings_set_custom_handler(name, null);
 };
 // <<< focus-runtime
 // Preset panel — view 1 (selection list) and, further below, view 2 (editor);
@@ -948,16 +938,16 @@ const tile_panel_round_rect = (cr, x, y, w, h, r) => {
     cr.closePath();
     cr.fill();
 };
-// Mockup: list thumbnails 54x34, gap 2px, radius 2px, fill per tile_theme_cairo.thumb
+// Mockup: list thumbnails 54x34, gap 2px, radius 2px, fill per TILE_THEME_CAIRO dark thumb
 // (#485064 dark / #b7bdcc light);
 // editor rule thumbnails 34x18, gap 2px, 1px between stacked cells, radius 1px.
-const tile_panel_thumb = (stacks, opts = {}) => {
+const tile_panel_thumb = (app, stacks, opts = {}) => {
     const { width = 54, height = 34, gap = 2, vgap = 2, radius = 2, color = null } = opts;
     const area = new tile_St.DrawingArea({ width, height });
     area.connect('repaint', (a) => {
         const cr = a.get_context();
         const [W, H] = a.get_surface_size();
-        const paint = color || tile_theme_cairo_get('thumb');
+        const paint = color || app.theme.cairo('thumb');
         cr.setSourceRGB(paint[0] / 255, paint[1] / 255, paint[2] / 255);
         const cw = (W - gap * (stacks.length - 1)) / stacks.length;
         for (let c = 0; c < stacks.length; c++) {
@@ -999,7 +989,7 @@ const tile_panel_row = (app, preset, n) => {
     const rep = picked || preset.rules.reduce((best, rule) => (!best || rule.min < best.min ? rule : best), null);
     // A matching rule is shown filled to the window count, exactly as a click tiles it.
     const thumbStacks = rep && rep.stacks.length ? (picked ? tile_fill_stacks(rep.stacks, n) : rep.stacks) : [1];
-    box.add(tile_panel_thumb(thumbStacks), tile_panel_middle());
+    box.add(tile_panel_thumb(app, thumbStacks), tile_panel_middle());
     const textBox = new tile_St.BoxLayout({ vertical: true, style_class: 'gk-row-text' });
     textBox.add(new tile_St.Label({ text: preset.name, style_class: 'gk-name' }));
     if (assignedHere)
@@ -1036,9 +1026,8 @@ const tile_panel_row = (app, preset, n) => {
 // Preset panel — view 2 (editor): rule list on the left, stepper + painter + name on
 // the right (layout and tokens from the approved prototype). The draft
 // {id, name, rules (sorted by min), index, isNew} is written to the settings on Save only.
-// Cairo can't read the stylesheet: tile_accent_state (updated by
-// tile_theme_changed before any panel exists) supplies the accent here.
-const tile_editor_accent = () => tile_accent_state.rgb;
+// Cairo can't read the stylesheet: the theme component's accent state (updated by
+// changed() before any panel exists) supplies the accent (app.theme.rgb).
 const tile_editor_open = (app, preset) => {
     const rules = tile_editor_sort((preset.rules || []).map((r) => ({ min: r.min, stacks: tile_editor_clamp(r.stacks || []) })));
     if (rules.length === 0)
@@ -1097,7 +1086,7 @@ const tile_presets_delete = (app) => {
     global.log('greenTile preset "' + (d.name || d.id) + '" deleted');
     tile_editor_back(app);
 };
-const tile_editor_rule_row = (rule, active, last, onSelect) => {
+const tile_editor_rule_row = (app, rule, active, last, onSelect) => {
     const row = new tile_St.Button({
         style_class: 'gk-ed-rule' + (active ? ' gk-ed-rule-active' : '') + (last ? ' gk-ed-rule-last' : ''),
         x_fill: true, y_fill: true, track_hover: true, reactive: true,
@@ -1107,7 +1096,7 @@ const tile_editor_rule_row = (rule, active, last, onSelect) => {
         outer.add(new tile_St.Bin({ style_class: 'gk-ed-rule-stripe' }), { x_fill: false, y_fill: true });
     const box = new tile_St.BoxLayout({ style_class: 'gk-ed-rule-box', x_expand: true });
     box.add(new tile_St.Label({ text: _("from %d").format(rule.min), style_class: 'gk-ed-rule-label' }), { expand: true, x_fill: true, y_fill: false, y_align: tile_St.Align.MIDDLE });
-    box.add(tile_panel_thumb(rule.stacks, { width: 34, height: 18, gap: 2, vgap: 1, radius: 1, color: active ? tile_editor_accent() : tile_theme_cairo_get('thumb') }), tile_panel_middle());
+    box.add(tile_panel_thumb(app, rule.stacks, { width: 34, height: 18, gap: 2, vgap: 1, radius: 1, color: active ? app.theme.rgb : app.theme.cairo('thumb') }), tile_panel_middle());
     outer.add(box, { expand: true, x_fill: true, y_fill: true });
     row.set_child(outer);
     row.connect('clicked', () => onSelect());
@@ -1115,7 +1104,7 @@ const tile_editor_rule_row = (rule, active, last, onSelect) => {
 };
 // Painter: 6 columns x 4 rows. Button 1 paints (row under the pointer = windows in the
 // column), dragging paints every column passed; button 3 removes the column.
-const tile_editor_painter = (getStacks, onChange) => {
+const tile_editor_painter = (app, getStacks, onChange) => {
     const frame = new tile_St.Bin({ style_class: 'gk-painter', x_fill: true, y_fill: true });
     const area = new tile_St.DrawingArea({ style_class: 'gk-painter-area', reactive: true, x_expand: true });
     frame.set_child(area);
@@ -1123,7 +1112,7 @@ const tile_editor_painter = (getStacks, onChange) => {
         const cr = a.get_context();
         const [W, H] = a.get_surface_size();
         const stacks = getStacks();
-        const accent = tile_editor_accent();
+        const accent = app.theme.rgb;
         const gap = 3;
         const cw = (W - gap * (tile_editor_cols - 1)) / tile_editor_cols;
         for (let c = 0; c < tile_editor_cols; c++) {
@@ -1136,7 +1125,7 @@ const tile_editor_painter = (getStacks, onChange) => {
             }
             else {
                 // empty column: dashed outline in the border colour
-                const outline = tile_theme_cairo_get('outline');
+                const outline = app.theme.cairo('outline');
                 cr.setSourceRGB(outline[0] / 255, outline[1] / 255, outline[2] / 255);
                 cr.setLineWidth(1);
                 cr.setDash([3, 3], 0);
@@ -1248,6 +1237,7 @@ const tile_editor_body = (app) => {
     right.add(new tile_St.Label({ text: _("Painter").toUpperCase(), style_class: 'gk-ed-label' }));
     let refresh = () => {};
     const painter = tile_editor_painter(
+        app,
         () => tile_panel.draft.rules[tile_panel.draft.index].stacks,
         (stacks) => {
             const dr = tile_panel.draft;
@@ -1297,7 +1287,7 @@ const tile_editor_body = (app) => {
         const dr = tile_panel.draft;
         rulesBox.destroy_all_children();
         dr.rules.forEach((rule, i) => {
-            rulesBox.add(tile_editor_rule_row(rule, i === dr.index, i === dr.rules.length - 1, () => {
+            rulesBox.add(tile_editor_rule_row(app, rule, i === dr.index, i === dr.rules.length - 1, () => {
                 dr.index = i;
                 refresh();
             }));
@@ -1340,320 +1330,6 @@ const tile_editor_body = (app) => {
     refresh();
     return { actor: body, entry, painter: painter.area };
 };
-// Live theme state, set up per App (Config). Reads the panelTheme setting, the x-apps
-// portal color scheme and the Cinnamon theme name; under "system" a change of the
-// scheme rebuilds the open panel right away. Disconnected in Config.destroy.
-// tile_theme_init gets the Config itself, not the app: it runs inside the Config
-// constructor, where app.config is not assigned yet.
-const tile_theme_state = { theme: 'dark', config: null, portal: null, portalSig: 0, cinnamon: null, cinnamonSig: 0 };
-// Cairo colors for the thumbnails and the painter's dashed outline, per theme; the CSS
-// classes cover the rest. Thumbs stand somewhat (not dramatically) apart from the panel
-// background: #1c1f28 in dark, #f6f7fa in light — thumb contrast 1.70→2.04 (dark,
-// lighter) and 1.49→1.76 (light, darker) against the panel. The outline pairs with the
-// CSS border tokens (#2a2e39 / #c3c9d6) and stays.
-const tile_theme_cairo = {
-    dark: { thumb: [72, 80, 100], outline: [42, 46, 57] },
-    light: { thumb: [183, 189, 204], outline: [195, 201, 214] },
-};
-const tile_theme_cairo_get = (key) => tile_theme_cairo[tile_theme_state.theme][key];
-const tile_theme_panel_class = () => (tile_theme_state.theme === 'light' ? 'gk-panel gk-light' : 'gk-panel')
-    + (tile_accent_state.gen ? ' ' + tile_accent_state.gen : '');
-// Accent + state runtime: resolves theme-probed vs. custom colors, writes the
-// generated stylesheet — one sheet carrying the accent AND state rules — into
-// the user cache dir and loads/unloads it on the current St.Theme — the same
-// mechanism Cinnamon uses for extension stylesheets, so hover/focus
-// pseudo-classes keep working and an open panel restyles at once.
-// Re-load hooks into 'theme-set' because every Cinnamon theme switch replaces
-// the whole St.Theme object.
-// gen: Cinnamon's St keeps its interned theme nodes across load_stylesheet /
-// unload_stylesheet, so a rebuilt panel would get the node computed with the OLD
-// sheet (verified live: rebuilt "+ New preset" kept the previous accent). Every
-// load therefore gives the panel root a fresh class 'gk-acc<n>'; all descendants
-// get new node keys and are matched against the current sheets. Seeded with the
-// clock so it never meets nodes left over from an earlier enable.
-const tile_accent_state = { rgb: tile_accent_default, css: '', path: null, themeObj: null, themeSig: 0, gen: '', genSeq: Date.now() };
-const tile_accent_probe = (className, pseudoClass) => {
-    let probe = null;
-    try {
-        probe = new tile_St.BoxLayout({ style_class: className, opacity: 0 });
-        probe.add_style_pseudo_class(pseudoClass);
-        Main.uiGroup.add_child(probe);
-        const c = probe.get_theme_node().get_background_color();
-        return tile_accent_from_probed(c.red, c.green, c.blue, c.alpha);
-    } catch (e) {
-        return null;
-    } finally {
-        if (probe)
-            probe.destroy();
-    }
-};
-const tile_accent_load = (theme, path) => {
-    try {
-        theme.load_stylesheet(path);
-        tile_accent_state.themeObj = theme;
-        tile_accent_state.gen = 'gk-acc' + (++tile_accent_state.genSeq);
-    } catch (e) {
-        global.logError('greenTile: accent stylesheet: ' + e);
-    }
-};
-const tile_accent_unload = () => {
-    if (!tile_accent_state.themeObj)
-        return;
-    try {
-        tile_accent_state.themeObj.unload_stylesheet(tile_accent_state.path);
-    } catch (e) {
-        // the old theme object is already gone after a Cinnamon theme switch
-    }
-    tile_accent_state.themeObj = null;
-};
-const tile_accent_path = () => {
-    if (!tile_accent_state.path)
-        tile_accent_state.path = GLib.build_filenamev([GLib.get_user_cache_dir(), 'greenTile@carsteneu', 'panel-accent.css']);
-    return tile_accent_state.path;
-};
-const tile_accent_apply = (config) => {
-    const own = tile_accent_is_own(config.settings.getValue('accentMode'));
-    const stateMode = tile_state_mode(config.settings.getValue('stateMode'));
-    // the probe chain serves both "Follow theme" modes — accent, state color
-    // or both (first theme node with a usable accent wins, see accent-model)
-    const probe = (!own || stateMode === 'theme') ? tile_accent_probe_first(tile_accent_probe) : null;
-    const rgb = own ? tile_accent_parse(config.settings.getValue('accentColor')) : probe;
-    const stateRgb = stateMode === 'own'
-        ? tile_accent_parse(config.settings.getValue('stateColor'))
-        : (stateMode === 'theme' ? probe : null);
-    const base = rgb || tile_accent_default;
-    const stateBase = stateRgb || tile_state_default;
-    // one sheet, one load: accent and state rules ride on the same generated file,
-    // so ANY color change goes through the css comparison below and bumps the
-    // root class again (a state-only change must reload too)
-    const css = tile_accent_css(tile_accent_tones(base)) + '\n' + tile_state_css(tile_state_tones(stateBase));
-    const path = tile_accent_path();
-    if (css !== tile_accent_state.css) {
-        GLib.mkdir_with_parents(GLib.path_get_dirname(path), 0o700);
-        GLib.file_set_contents(path, css);
-        tile_accent_state.css = css;
-        tile_accent_unload();
-    }
-    // set only after a successful persist: a failed write keeps painter and CSS
-    // in the SAME (old) color instead of two different ones
-    tile_accent_state.rgb = base;
-    tile_accent_state.stateRgb = stateBase;
-    const theme = tile_St.ThemeContext.get_for_stage(global.stage).get_theme();
-    if (tile_accent_state.themeObj && tile_accent_state.themeObj !== theme)
-        tile_accent_unload();
-    if (!tile_accent_state.themeObj)
-        tile_accent_load(theme, path);
-    // the focus border is the same color live: a state/theme switch repaints it here
-    tile_border_restyle();
-};
-const tile_theme_changed = () => {
-    const config = tile_theme_state.config;
-    if (!config)
-        return;
-    tile_theme_state.theme = tile_theme_resolve(
-        config.settings.getValue('panelTheme'),
-        tile_theme_state.portal ? tile_theme_state.portal.get_string('color-scheme') : null,
-        tile_theme_state.cinnamon ? tile_theme_state.cinnamon.get_string('name') : null
-    );
-    try {
-        tile_accent_apply(config);
-    } catch (e) {
-        // a failing accent (unusable probe, unwritable file) keeps the old look
-        global.logError('greenTile: accent color: ' + e);
-    }
-    // An open panel or editor rebuilds itself: restyling in place would leave the
-    // Cairo thumbnails and the painter in the old colors.
-    if (tile_panel.actor)
-        tile_panel_rebuild(config.app);
-};
-const tile_theme_init = (config) => {
-    if (tile_theme_state.portal === null) {
-        const source = tile_Gio.SettingsSchemaSource.get_default();
-        if (source && source.lookup('org.x.apps.portal', true)) {
-            // gjs: the object form must go through the constructor, Settings.new takes the schema id string only
-            tile_theme_state.portal = new tile_Gio.Settings({ schema_id: 'org.x.apps.portal' });
-            tile_theme_state.portalSig = tile_theme_state.portal.connect('changed::color-scheme', tile_theme_changed);
-        }
-        if (source && source.lookup('org.cinnamon.theme', true)) {
-            tile_theme_state.cinnamon = new tile_Gio.Settings({ schema_id: 'org.cinnamon.theme' });
-            tile_theme_state.cinnamonSig = tile_theme_state.cinnamon.connect('changed::name', tile_theme_changed);
-        }
-    }
-    if (tile_accent_state.themeSig === 0) {
-        // Cinnamon theme switch: loadTheme replaced the St.Theme object — the accent
-        // sheet is re-applied and the theme accent re-probed on top of the new theme
-        // (synchronously, inside tile_theme_changed).
-        tile_accent_state.themeSig = Main.themeManager.connect('theme-set', tile_theme_changed);
-    }
-    tile_theme_state.config = config;
-    tile_theme_changed();
-};
-const tile_theme_shutdown = () => {
-    if (tile_theme_state.portal && tile_theme_state.portalSig) {
-        try {
-            tile_theme_state.portal.disconnect(tile_theme_state.portalSig);
-        } catch (e) {
-            // signal was already gone
-        }
-        tile_theme_state.portal = null;
-        tile_theme_state.portalSig = 0;
-    }
-    if (tile_theme_state.cinnamon && tile_theme_state.cinnamonSig) {
-        try {
-            tile_theme_state.cinnamon.disconnect(tile_theme_state.cinnamonSig);
-        } catch (e) {
-            // signal was already gone
-        }
-        tile_theme_state.cinnamon = null;
-        tile_theme_state.cinnamonSig = 0;
-    }
-    if (tile_accent_state.themeSig) {
-        try {
-            Main.themeManager.disconnect(tile_accent_state.themeSig);
-        } catch (e) {
-            // signal was already gone
-        }
-        tile_accent_state.themeSig = 0;
-    }
-    // the panel is closed here; the accent sheet comes off the theme with it
-    tile_accent_unload();
-    tile_theme_state.config = null;
-};
-// >>> focus-border
-// A thin border around the newly focused tiled window in the state color, shown for
-// three seconds after a Super+Arrow focus move — pure keyboard feedback, never shown
-// for mouse or Alt+Tab focus changes. Only on monitor+workspaces with automatic tiling
-// on, only for windows the tiling manages; hidden while the window is minimized,
-// maximized or fullscreen, the moment focus moves elsewhere, and when the border
-// setting is off. One non-reactive actor in the overlay group follows the flashed
-// window's geometry; the color updates live with the theme settings
-// (tile_accent_apply stores the resolved state rgb).
-const tile_border_state = { app: null, actor: null, flashWin: null, winSig: [], sig: [], timer: 0 };
-const TILE_BORDER_WIDTH = 3;
-const TILE_BORDER_TIMEOUT_MS = 3000;
-const tile_border_style = () => {
-    const c = tile_accent_state.stateRgb || tile_state_default;
-    return 'border: ' + TILE_BORDER_WIDTH + 'px solid rgb(' + Math.round(c[0]) + ', ' + Math.round(c[1]) + ', ' + Math.round(c[2]) + '); background-color: transparent;';
-};
-// the border is keyboard feedback, not a decoration: only the Super+Arrow focus move
-// shows it (tile_border_flash), it switches itself off after a few seconds and any
-// event that makes the flashed window focusless or unmanaged hides it again
-const tile_border_arm_timer = () => {
-    if (tile_border_state.timer)
-        GLib.Source.remove(tile_border_state.timer);
-    tile_border_state.timer = GLib.timeout_add(GLib.PRIORITY_DEFAULT, TILE_BORDER_TIMEOUT_MS, () => {
-        tile_border_state.timer = 0;
-        tile_border_state.flashWin = null;
-        if (tile_border_state.actor)
-            tile_border_state.actor.hide();
-        return GLib.SOURCE_REMOVE;
-    });
-};
-const tile_border_unbind_flash = () => {
-    for (const w of tile_border_state.winSig) {
-        try {
-            w.win.disconnect(w.id);
-        } catch (e) {}
-    }
-    tile_border_state.winSig = [];
-};
-const tile_border_rebind_flash = () => {
-    tile_border_unbind_flash();
-    const win = tile_border_state.flashWin;
-    if (win) {
-        tile_border_state.winSig.push({ win, id: win.connect('position-changed', tile_border_update) });
-        tile_border_state.winSig.push({ win, id: win.connect('size-changed', tile_border_update) });
-    }
-};
-const tile_border_setting_on = (app) => app.config.settings.getValue('focusBorder') !== false;
-const tile_border_frame = (app, win) => {
-    if (win.minimized || win.is_on_all_workspaces()
-        || win.get_window_type() !== Meta.WindowType.NORMAL || tile_excl_is_excluded(win))
-        return null;
-    const monitorIndex = win.get_monitor();
-    const monitor = utils_Main.layoutManager.monitors[monitorIndex];
-    if (!monitor || !app.monitors.ready)
-        return null;
-    const wsIndex = global.workspace_manager.get_active_workspace().index();
-    if (!tile_layout_for(app, monitorIndex, wsIndex).auto)
-        return null;
-    if (win.get_maximized() || win.is_fullscreen())
-        return null;
-    // invisible to the tiling = invisible to the border (floating, excluded, dialog)
-    return tile_collect_windows(monitor, null, wsIndex).includes(win) ? win.get_frame_rect() : null;
-};
-const tile_border_update = () => {
-    const app = tile_border_state.app;
-    // app.config is missing while the Config constructor is still running: the
-    // settings binding fires before the border (and everything else) is set up
-    if (!app || !app.config || !tile_border_state.actor)
-        return;
-    const win = tile_border_state.flashWin;
-    const focus = global.display.focus_window;
-    // the border belongs to the keyboard-driven focus move only: a focus change to
-    // another window (mouse click, Alt+Tab, an app demanding attention) clears it
-    if (!win || focus !== win) {
-        tile_border_unbind_flash();
-        tile_border_state.flashWin = null;
-        tile_border_state.actor.hide();
-        return;
-    }
-    const frame = tile_border_setting_on(app) ? tile_border_frame(app, win) : null;
-    const actor = tile_border_state.actor;
-    if (!frame) {
-        actor.hide();
-        return;
-    }
-    actor.set_style(tile_border_style());
-    actor.set_position(Math.round(frame.x), Math.round(frame.y));
-    actor.set_size(Math.round(frame.width), Math.round(frame.height));
-    actor.raise_top();
-    actor.show();
-    tile_border_arm_timer();
-};
-// called from the focus hotkey only — this is what makes the border keyboard feedback
-const tile_border_flash = (win) => {
-    tile_border_state.flashWin = win;
-    tile_border_rebind_flash();
-    tile_border_update();
-};
-const tile_border_restyle = () => {
-    if (tile_border_state.actor)
-        tile_border_state.actor.set_style(tile_border_style());
-};
-const tile_border_init = (app) => {
-    tile_border_state.app = app;
-    // runs after tile_theme_init in the Config constructor, so stateRgb is resolved
-    // already and the first style is the real state color, not the default green
-    if (!tile_border_state.actor) {
-        tile_border_state.actor = new tile_St.Bin({ reactive: false, style: tile_border_style() });
-        global.overlay_group.add_actor(tile_border_state.actor);
-        tile_border_state.actor.hide();
-        tile_border_state.sig.push({ obj: global.display, id: global.display.connect('notify::focus-window', tile_border_update) });
-        tile_border_state.sig.push({ obj: global.workspace_manager, id: global.workspace_manager.connect('workspace-switched', tile_border_update) });
-    }
-    tile_border_update();
-};
-const tile_border_shutdown = () => {
-    if (tile_border_state.timer) {
-        GLib.Source.remove(tile_border_state.timer);
-        tile_border_state.timer = 0;
-    }
-    for (const s of tile_border_state.sig) {
-        try {
-            s.obj.disconnect(s.id);
-        } catch (e) {}
-    }
-    tile_border_state.sig = [];
-    tile_border_unbind_flash();
-    tile_border_state.flashWin = null;
-    tile_border_state.app = null;
-    if (tile_border_state.actor) {
-        tile_border_state.actor.destroy();
-        tile_border_state.actor = null;
-    }
-};
-// <<< focus-border
 // "Gap between windows  − 8 px +" in the list view. Each click stores the value and,
 // when automatic tiling is on for this workspace, retiles it shortly after (debounced,
 // so fast repeated clicks tile once), so the new gap shows live.
@@ -1712,7 +1388,7 @@ const tile_panel_open = (app) => {
     const wsIndex = global.workspace_manager.get_active_workspace().index();
     const monitorIndex = tile_focus_monitor_index();
     const draft = tile_panel.view === 'editor' ? tile_panel.draft : null;
-    const panel = new tile_St.BoxLayout({ vertical: true, style_class: tile_theme_panel_class(), reactive: true, can_focus: true });
+    const panel = new tile_St.BoxLayout({ vertical: true, style_class: app.theme.panelClass(), reactive: true, can_focus: true });
     const header = new tile_St.BoxLayout({ style_class: 'gk-panel-header', reactive: true });
     let titleText = _("Presets — workspace %d · %s").format(wsIndex + 1, app.monitors.labels[monitorIndex] || '');
     if (draft)
@@ -1744,7 +1420,7 @@ const tile_panel_open = (app) => {
         // Theme toggle: one click switches between light and dark; "Follow system" is
         // selectable again in the settings dialog. The glyph shows the theme a click
         // switches TO (moon in light mode, like most desktop apps do).
-        const themeShown = tile_theme_state.theme;
+        const themeShown = app.theme.theme;
         const themeBtn = new tile_St.Button({
             label: themeShown === 'light' ? '☾' : '☀',
             style_class: 'gk-close gk-theme',
@@ -1752,13 +1428,13 @@ const tile_panel_open = (app) => {
         });
         new Tooltips.Tooltip(themeBtn, themeShown === 'light' ? _("Dark theme") : _("Light theme"));
         themeBtn.connect('clicked', () => {
-            app.config.settings.setValue('panelTheme', tile_theme_toggle_target(tile_theme_state.theme));
+            app.config.settings.setValue('panelTheme', tile_theme_toggle_target(app.theme.theme));
             // Cinnamon's XletSettings.setValue only saves the settings file — the
             // IN bind callback does not fire on programmatic changes, so the panel
             // re-theme and rebuild happen here. The guard swallows stray clicks
             // that follow the rebuild, like the Back button does.
             tile_panel_guard();
-            tile_theme_changed();
+            app.theme.changed();
         });
         header.add(themeBtn);
         // ⚙ opens the extension's settings dialog on its first page; the same dialog
@@ -2189,6 +1865,31 @@ class App {
             retileMonitor: tile_retile_monitor,
             grabOpName: tile_grab_op_name,
         });
+        this.theme = new Theme({
+            st: tile_St,
+            gio: tile_Gio,
+            main: utils_Main,
+            global: cinnamon.global,
+            glib: GLib,
+            nextAccentGen: () => session.nextAccentGen(),
+            panelOpen: () => tile_panel.actor,
+            panelRebuild: (a) => tile_panel_rebuild(a),
+        });
+        this.border = new Border({
+            st: tile_St,
+            glib: GLib,
+            meta: cinnamon.meta,
+            main: utils_Main,
+            global: cinnamon.global,
+            stateRgb: () => this.theme.stateRgb,
+            exclCheck: tile_excl_is_excluded,
+            layoutFor: tile_layout_for,
+            collectWindows: tile_collect_windows,
+        });
+        this.focus = new Focus({
+            meta: cinnamon.meta,
+            hotkey: tile_focus_hotkey,
+        });
         this.drop = new Drop({
             meta: cinnamon.meta,
             main: cinnamon.main,
@@ -2202,7 +1903,7 @@ class App {
             usableArea: getUsableScreenArea,
             gap: tile_gap,
             placeRects: tile_place_rects,
-            accentRgb: () => tile_accent_state.rgb,
+            accentRgb: () => this.theme.rgb,
         });
         this.auto = new Auto({
             mainloop: tile_Mainloop,
@@ -2216,7 +1917,7 @@ class App {
             layoutFor: tile_layout_for,
             layoutSet: tile_layout_set,
             retileMonitor: tile_retile_monitor,
-            borderUpdate: tile_border_update,
+            borderUpdate: () => this.border.update(),
             grabIsResize: tile_grab_is_resize,
             dropBegin: (grabApp, w, op) => grabApp.drop.begin(grabApp, w, op),
             dropEnd: (grabApp, w, op) => grabApp.drop.end(grabApp, w, op),
