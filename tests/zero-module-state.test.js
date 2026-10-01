@@ -1,8 +1,10 @@
 'use strict';
-// Static step-3 guard: greenTile.js and lib/runtime/** must not declare mutable
-// module-level state — no top-level let/var and no top-level mutable const
-// (object/array literal, new Map/Set/WeakMap, Object.create) unless wrapped in
-// Object.freeze. Functions, classes, require results (including the Cinnamon
+// Static step-3 guard: extension.js, lib/app/** and lib/runtime/** must not
+// declare mutable module-level state — no top-level let/var and no top-level
+// mutable const (object/array literal, new Map/Set/WeakMap, Object.create)
+// unless wrapped in Object.freeze. The extension session rides the exports
+// object (Cinnamon calls enable()/disable() member-style), never a module
+// variable. Functions, classes, require results (including the Cinnamon
 // root-relative destructuring) and primitives are fine: they are immutable
 // bindings or per-load values, not shared mutable state.
 //
@@ -16,8 +18,8 @@ const fs = require('node:fs');
 const path = require('node:path');
 const { ROOT } = require('./cinnamon-loader');
 
-const FILES = ['greenTile.js'].concat(
-    ['runtime', 'ui', 'tiling'].flatMap((sub) => fs.readdirSync(path.join(ROOT, 'lib', sub))
+const FILES = ['extension.js'].concat(
+    ['app', 'runtime', 'ui', 'tiling'].flatMap((sub) => fs.readdirSync(path.join(ROOT, 'lib', sub))
         .filter((f) => f.endsWith('.js'))
         .map((f) => path.join('lib', sub, f)))
         .sort()
@@ -77,14 +79,17 @@ test('guard flags mutable top-level state and accepts the allowed forms', () => 
     assert.equal(findViolations('    let x = 0;', 'f.js').length, 0, 'only column 0 is module level');
 });
 
-test('greenTile.js, lib/runtime/**, lib/ui/** and lib/tiling/** carry no mutable module-level state', () => {
+test('extension.js, lib/app/**, lib/runtime/**, lib/ui/** and lib/tiling/** carry no mutable module-level state', () => {
     const seen = [];
     for (const file of FILES) {
         const violations = findViolations(fs.readFileSync(path.join(ROOT, file), 'utf8'), file);
         seen.push(file);
         assert.deepEqual(violations, [], file + ' has top-level mutable state');
     }
-    assert.ok(seen.includes('greenTile.js'), 'greenTile.js covered');
+    assert.ok(seen.includes('extension.js'), 'extension.js covered');
+    assert.ok(seen.includes(path.join('lib/app', 'app.js')), 'lib/app/app.js covered');
+    assert.ok(seen.includes(path.join('lib/app', 'config.js')), 'lib/app/config.js covered');
+    assert.ok(seen.includes(path.join('lib/app', 'settings-keys.js')), 'lib/app/settings-keys.js covered');
     assert.ok(seen.includes(path.join('lib/runtime', 'hotkeys.js')), 'lib/runtime/hotkeys.js covered');
     assert.ok(seen.includes(path.join('lib/runtime', 'exclusions.js')), 'lib/runtime/exclusions.js covered');
     assert.ok(seen.includes(path.join('lib/runtime', 'panel-state.js')), 'lib/runtime/panel-state.js covered');

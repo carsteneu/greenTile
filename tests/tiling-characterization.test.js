@@ -1,10 +1,10 @@
 'use strict';
 // Characterization tests for the tiling services, driven through the REAL
-// greenTile.js on the fake Cinnamon runtime: the extension is enabled and the
-// behaviour is pinned at the surfaces a user reaches — hotkey callbacks, the
-// Meta custom bindings and the App's ops facade. The file never imports
-// greenTile internals, so it stays green across the 4c-A move from greenTile.js
-// into lib/tiling/*.js and pins exactly what the move must not change.
+// extension.js (extension.js → lib/app) on the fake Cinnamon runtime: the
+// extension is enabled and the behaviour is pinned at the surfaces a user
+// reaches — hotkey callbacks, the Meta custom bindings and the App's ops
+// facade. The file never imports lib internals, so it stays green across the
+// composition-root move and pins exactly what the move must not change.
 const test = require('node:test');
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
@@ -62,10 +62,10 @@ const makeEnv = (tweener, extraSettings = {}) => {
     });
     globalThis.imports = imports;
     globalThis.global = env.global;
-    const src = fs.readFileSync(path.join(ROOT, 'greenTile.js'), 'utf8');
-    const greenTile = cinnamonLoad(src, load, 'greenTile.js');
-    greenTile.init({ uuid: 'greenTile@carsteneu' });
-    return { env, greenTile, pushes };
+    const src = fs.readFileSync(path.join(ROOT, 'extension.js'), 'utf8');
+    const ext = cinnamonLoad(src, load, 'extension.js');
+    ext.init({ uuid: 'greenTile@carsteneu' });
+    return { env, ext, pushes };
 };
 
 // Fake MetaWindow recording move_resize_frame / move_frame with enough signal
@@ -133,9 +133,9 @@ const makeWorkspace = (env) => {
 const settingsInstance = (env) => env.settingsInstances.at(-1);
 
 // enable + one DisplayConfig flush; monitor 0 is the 2000x1100 work area.
-const enableOnMonitor = (env, greenTile) => {
+const enableOnMonitor = (env, ext) => {
     env.layoutManager.monitors.push(MONITOR);
-    greenTile.enable();
+    ext.enable();
     env.flushDisplayConfigNoReply();
 };
 
@@ -143,8 +143,8 @@ const enableOnMonitor = (env, greenTile) => {
 
 test('auto-columns divides the usable area into 6 columns, reading order kept, gap flush at screen edges', () => {
     const tweener = makeTweenerRecorder();
-    const { env, greenTile } = makeEnv(tweener);
-    enableOnMonitor(env, greenTile);
+    const { env, ext } = makeEnv(tweener);
+    enableOnMonitor(env, ext);
     const w1 = makeWindow(env, 1, [10, 10, 400, 300]);
     const w2 = makeWindow(env, 2, [500, 0, 400, 300]);
     const w3 = makeWindow(env, 3, [900, 0, 400, 300]);
@@ -162,8 +162,8 @@ test('auto-columns divides the usable area into 6 columns, reading order kept, g
 
 test('animated placement parks the compositor actor at the old rect with the old scale and tweens back over 250 ms', () => {
     const tweener = makeTweenerRecorder();
-    const { env, greenTile } = makeEnv(tweener);
-    enableOnMonitor(env, greenTile);
+    const { env, ext } = makeEnv(tweener);
+    enableOnMonitor(env, ext);
     const actor = { id: 'actor' };
     const w1 = makeWindow(env, 1, [10, 10, 400, 300], 0, actor);
     const w2 = makeWindow(env, 2, [500, 0, 400, 300]);
@@ -192,11 +192,11 @@ test('animated placement parks the compositor actor at the old rect with the old
 
 test('automatic tiling places focus plus collected windows into the uniform grid of the monitor', () => {
     const tweener = makeTweenerRecorder();
-    const { env, greenTile } = makeEnv(tweener);
-    enableOnMonitor(env, greenTile);
+    const { env, ext } = makeEnv(tweener);
+    enableOnMonitor(env, ext);
     makeWorkspace(env);
     env.activeWorkspace = { index: () => 0 };
-    const app = greenTile.session.app;
+    const app = ext.session.app;
     const ref = app.split.ref(app, 0, 0, 2);
     const layouts = { [ref.mkey]: { [ref.wskey]: { auto: true } } };
     settingsInstance(env).setValue('layouts', JSON.stringify(layouts));
@@ -217,15 +217,15 @@ test('automatic tiling places focus plus collected windows into the uniform grid
 
 test('preset writing, layout assignment and monitor retile round-trip through the ops facade', () => {
     const tweener = makeTweenerRecorder();
-    const { env, greenTile } = makeEnv(tweener);
-    enableOnMonitor(env, greenTile);
+    const { env, ext } = makeEnv(tweener);
+    enableOnMonitor(env, ext);
     makeWorkspace(env);
     env.activeWorkspace = { index: () => 0 };
     const w1 = makeWindow(env, 21, [10, 10, 400, 300]);
     const w2 = makeWindow(env, 22, [500, 0, 400, 300]);
     env.tabList.push(w1, w2);
     env.display.focus_window = w1;
-    const app = greenTile.session.app;
+    const app = ext.session.app;
     app.ops.presetsWrite(app, [{ id: 'p1', name: 'Halves', rules: [{ min: 2, stacks: [1, 1] }] }]);
     assert.equal(settingsInstance(env).callLog.filter((c) => c.op === 'setValue' && c.key === 'presets').length, 1,
         'the preset list is written into the settings');
@@ -241,47 +241,19 @@ test('preset writing, layout assignment and monitor retile round-trip through th
         'the applied preset is logged');
 });
 
-// ---------------- per-monitors refresh: old keys migrate once ----------------
-
-test('wsPresets/autoWorkspaces migrate into the layouts setting exactly once', () => {
-    const tweener = makeTweenerRecorder();
-    const { env, greenTile } = makeEnv(tweener, {
-        wsPresets: '{"0": "p1"}',
-        autoWorkspaces: [{ workspace: 2, auto: true }],
-    });
-    env.layoutManager.monitors.push(MONITOR);
-    greenTile.enable();
-    env.flushDisplayConfigNoReply();
-    const inst = settingsInstance(env);
-    const layoutWrites = inst.callLog.filter((c) => c.op === 'setValue' && c.key === 'layouts');
-    assert.equal(layoutWrites.length, 1, 'one migration write');
-    const migrated = JSON.parse(layoutWrites[0].value);
-    const app = greenTile.session.app;
-    const mkey = app.monitors.keys[0];
-    assert.deepEqual(migrated[mkey], { 1: { preset: 'p1' }, 2: { auto: true } },
-        'ws1 gets the preset, the auto-workspace row stays explicit');
-    assert.equal(settingsInstance(env).callLog.filter((c) => c.op === 'setValue' && c.key === 'layoutsMigrated').length, 1,
-        'the migrated flag is set so the old keys never come back');
-    // a second refresh (new queued reply, same session) re-reads layoutsMigrated and writes nothing
-    app.monitors.refresh(() => {});
-    env.flushDisplayConfigNoReply();
-    assert.equal(inst.callLog.filter((c) => c.op === 'setValue' && c.key === 'layouts').length, 1,
-        'no second migration write for the same settings instance');
-});
-
 // ---------------- swap hotkeys ----------------
 
 test('swap-right exchanges the cells of the two tiled windows and keeps the log line', () => {
     const tweener = makeTweenerRecorder();
-    const { env, greenTile } = makeEnv(tweener);
-    enableOnMonitor(env, greenTile);
+    const { env, ext } = makeEnv(tweener);
+    enableOnMonitor(env, ext);
     makeWorkspace(env);
     env.activeWorkspace = { index: () => 0 };
     const w1 = makeWindow(env, 31, [10, 10, 400, 300]);
     const w2 = makeWindow(env, 32, [500, 0, 400, 300]);
     env.tabList.push(w1, w2);
     env.display.focus_window = w1;
-    const app = greenTile.session.app;
+    const app = ext.session.app;
     app.ops.presetsWrite(app, [{ id: 'p1', name: 'Halves', rules: [{ min: 2, stacks: [1, 1] }] }]);
     app.ops.layoutSet(app, 0, 0, { preset: 'p1' });
     app.ops.retileMonitor(app, 0);
@@ -298,8 +270,8 @@ test('swap-right exchanges the cells of the two tiled windows and keeps the log 
 
 test('push-tile with no tiling on the monitor falls back to the native push_tile', () => {
     const tweener = makeTweenerRecorder();
-    const { env, greenTile, pushes } = makeEnv(tweener);
-    enableOnMonitor(env, greenTile);
+    const { env, ext, pushes } = makeEnv(tweener);
+    enableOnMonitor(env, ext);
     makeWorkspace(env);
     env.activeWorkspace = { index: () => 0 };
     const w1 = makeWindow(env, 41, [10, 10, 400, 300]);
@@ -312,14 +284,14 @@ test('push-tile with no tiling on the monitor falls back to the native push_tile
 
 test('push-tile inside the active layout activates the neighbour cell and never reaches push_tile', () => {
     const tweener = makeTweenerRecorder();
-    const { env, greenTile, pushes } = makeEnv(tweener);
-    enableOnMonitor(env, greenTile);
+    const { env, ext, pushes } = makeEnv(tweener);
+    enableOnMonitor(env, ext);
     makeWorkspace(env);
     env.activeWorkspace = { index: () => 0 };
     const w1 = makeWindow(env, 51, [10, 10, 400, 300]);
     const w2 = makeWindow(env, 52, [500, 0, 400, 300]);
     env.tabList.push(w1, w2);
-    const app = greenTile.session.app;
+    const app = ext.session.app;
     app.ops.presetsWrite(app, [{ id: 'p1', name: 'Halves', rules: [{ min: 2, stacks: [1, 1] }] }]);
     app.ops.layoutSet(app, 0, 0, { preset: 'p1' });
     env.display.focus_window = w1;

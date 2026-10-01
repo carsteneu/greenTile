@@ -5,26 +5,20 @@
 // resolves through that slot (cinnamonDBus.js remoteUpdate). Without finalize the slot
 // keeps the destroyed app's settings object and its bound callbacks fire while the
 // extension is disabled. The slot model below replays those semantics with call
-// counters; the source tests bind the assertions to the real code.
+// counters; the source tests bind the assertions to lib/app/config.js.
 const test = require('node:test');
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const path = require('node:path');
 
-const src = fs.readFileSync(path.join(__dirname, '..', 'greenTile.js'), 'utf8');
+const configSrc = fs.readFileSync(path.join(__dirname, '..', 'lib', 'app', 'config.js'), 'utf8');
 
-const configStart = src.indexOf('class Config');
-const configEnd = src.indexOf('// ---- Utils (derived from gTile src/base/utils.ts) ----');
-if (configStart === -1 || configEnd === -1)
-    throw new Error('Config class not found in greenTile.js');
-const config = src.slice(configStart, configEnd);
-const destroyStart = config.indexOf('this.destroy = () => {');
+const destroyStart = configSrc.indexOf('    destroy() {');
 if (destroyStart === -1)
-    throw new Error('destroy not found in Config');
-const destroyBody = config.slice(destroyStart, config.indexOf('this.app = app;'));
+    throw new Error('destroy method not found in lib/app/config.js');
+const destroyBody = configSrc.slice(destroyStart, configSrc.indexOf('\n    }\n', destroyStart));
 
-const enableStart = src.indexOf('const enable = function () {');
-const enableBody = src.slice(enableStart);
+const extensionSrc = fs.readFileSync(path.join(__dirname, '..', 'extension.js'), 'utf8');
 
 test('Config.destroy finalizes the settings object', () => {
     assert.equal(destroyBody.match(/this\.settings\.finalize\(\)/g).length, 1);
@@ -32,7 +26,7 @@ test('Config.destroy finalizes the settings object', () => {
 
 test('finalize runs last, after every teardown step that still needs settings', () => {
     const finalizeAt = destroyBody.indexOf('this.settings.finalize()');
-    assert.ok(finalizeAt > destroyBody.indexOf('split.flush'), 'after split.flush (writes pending layouts)');
+    assert.ok(finalizeAt > destroyBody.indexOf('this.app.split.flush('), 'after split.flush (writes pending layouts)');
     const themeAt = destroyBody.indexOf('this.app.theme.destroy()');
     const focusAt = destroyBody.indexOf('this.app.focus.destroy()');
     const borderAt = destroyBody.indexOf('this.app.border.destroy()');
@@ -40,11 +34,11 @@ test('finalize runs last, after every teardown step that still needs settings', 
         'the theme/focus/border runtime teardowns are still called');
     assert.ok(finalizeAt > borderAt && finalizeAt > themeAt && finalizeAt > focusAt,
         'after the last teardown helper');
-    assert.ok(finalizeAt > destroyBody.indexOf('this.DisableHotkey()'), 'after the hotkey removal');
+    assert.ok(finalizeAt > destroyBody.indexOf('this.unregisterHotkeys()'), 'after the hotkey removal');
 });
 
 test('monitors-changed and disable destroy the app before the next registration', () => {
-    // The monitors-changed handler lives in the extension session now; it destroys
+    // The monitors-changed handler lives in the extension session; it destroys
     // the old App before creating the next one, and disable() tears the session —
     // whose scope releases the handler first, BEFORE the App dies — down.
     const sessionSrc = fs.readFileSync(path.join(__dirname, '..', 'lib', 'runtime', 'session.js'), 'utf8');
@@ -53,8 +47,10 @@ test('monitors-changed and disable destroy the app before the next registration'
     assert.ok(changedBody.indexOf('this.app.destroy();') > -1, 'the handler destroys the old app');
     assert.ok(changedBody.indexOf('this.app.destroy();') < changedBody.indexOf('this._deps.createApp'),
         'destroy happens before the next registration');
-    const disableStart = enableBody.indexOf('const disable = function () {');
-    const disableBody = enableBody.slice(disableStart, enableBody.indexOf('\n};', disableStart));
+    const enableStart = extensionSrc.indexOf('function enable() {');
+    const enableBody = extensionSrc.slice(enableStart);
+    const disableStart = enableBody.indexOf('function disable() {');
+    const disableBody = enableBody.slice(disableStart, enableBody.indexOf('\n}\n', disableStart));
     assert.match(disableBody, /this\.session\.destroy\(\)/);
     assert.match(enableBody, /this\.session\.start\(\)/, 'enable creates and starts the session');
 });
