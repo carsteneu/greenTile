@@ -4,6 +4,7 @@
  * Modified version of 5.4/extension.js from gTile (UUID gTile@shuairan),
  * version 2.2.1, by vibou, shuairan and the gTile contributors.
  * Modified by carsten_eu, 2026-09-28: loads ./greenTile instead of ./gTile.
+ * Modified by carsten_eu, 2026-09-30: greenTile exports init/enable/disable directly (webpack bootstrap removed).
  *
  * Copyright (C) vibou, shuairan and the gTile contributors
  * Copyright (C) 2026 carsten_eu
@@ -11,7 +12,7 @@
  * Licensed under the GNU General Public License version 3, see LICENSE.
  * SPDX-License-Identifier: GPL-3.0-only
  */
-const { gtile } = require('./greenTile');
+const gtile = require('./greenTile');
 
 /**
  * called when extension is loaded
