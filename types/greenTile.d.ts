@@ -109,17 +109,51 @@ type OpsFacade = {
     rebuild(app: AppFacade | null): void;
 };
 
+/** Settle wait after a monitor change (lib/runtime/session.js Session.settle). */
+type SettleFacade = {
+    pending: boolean;
+    started: number;
+    start(app: AppFacade): void;
+    teardown(): void;
+    consumePending(app: AppFacade): void;
+    destroy(): void;
+};
+
+/** Extension-session state that outlives an App recreation (lib/runtime/session.js). */
+type SessionFacade = {
+    settle: SettleFacade;
+    monitorFallbackLogged: boolean;
+    splitCorruptLogged: boolean;
+    layoutsWriteGuardLogged: boolean;
+    accentGenSeq: number;
+    accentCss: string;
+    panelSaved: any;
+    nextAccentGen(): string;
+    destroy(): void;
+};
+
 /** Auto-tiling facade (lib/runtime/auto.js). */
 type AutoFacade = {
     scheduleAll(app: AppFacade, delayMs: number): void;
     scheduleMonitor(app: AppFacade, monitorIndex: number, delayMs: number): void;
     pendingTake(monitorIndex: number): Set<number>;
+    activate(app: AppFacade): void;
+    deactivate(app: AppFacade): void;
+    connectAll(app: AppFacade): void;
+    resizeStartTake(seq: number): { rect: Rect; monitor: number } | undefined;
+    sortOverride(seq: number, rect: Rect, now: number): void;
+    sortTake(seq: number, now: number): Rect | null;
+    sortClear(seq: number): void;
+    sortPoll(now: number): void;
+    destroy(): void;
 };
 
 /** Split-runtime facade (lib/runtime/split.js). */
 type SplitFacade = {
     for(app: AppFacade, monitorIndex: number, wsIndex: number, windowCount: number, layout: Layout): Split | null;
     onResizeEnd(app: AppFacade, win: CinnamonWindow, op: string): void;
+    ref(app: AppFacade, monitorIndex: number, wsIndex: number, n: number): { key: string; mkey: string; wskey: string; n: string } | null;
+    forget(refKey: string): void;
 };
 
 /** Monitor registry facade (lib/runtime/monitors.js). */
@@ -135,17 +169,31 @@ type ExclFacade = {
     isExcluded(win: CinnamonWindow): boolean;
     removeToggle(seq: number): void;
     clearToggles(): void;
+    apply(settings: SettingsFacade): void;
+    start(settings: SettingsFacade): void;
+    destroy(): void;
+    picked(settings: SettingsFacade, app: AppFacade, value: any): void;
+    toggleFocused(app: AppFacade): void;
 };
 
 /** App facade: the wired component set every function under lib/ receives. */
 type AppFacade = {
     config: ConfigFacade;
+    session: SessionFacade;
     auto: AutoFacade;
     split: SplitFacade;
     monitors: MonitorsFacade;
     excl: ExclFacade;
     ops: OpsFacade;
     panel: AnyRecord;
+    /** Theme runtime (lib/runtime/theme.js). */
+    theme: AnyRecord;
+    /** Focus-border runtime (lib/runtime/border.js). */
+    border: AnyRecord;
+    /** Drag-and-drop tiling runtime (lib/runtime/drop.js). */
+    drop: AnyRecord;
+    /** Focus hotkey runtime (lib/runtime/focus.js). */
+    focus: AnyRecord;
 };
 
 /** gettext binding, lib/ui/i18n.js */

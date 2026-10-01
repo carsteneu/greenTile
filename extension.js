@@ -30,6 +30,8 @@ function init() {
  * One extension session per enable(): it outlives every App recreation and
  * carries the state that must survive them (settle wait, fallback-logged
  * flag, the monitors-changed handler on its own scope).
+ *
+ * @this {{ session: Session | null }}
  */
 function enable() {
     const Main = imports.ui.main;
@@ -59,6 +61,8 @@ function enable() {
 
 /**
  * Disables: destroys the session created by enable().
+ *
+ * @this {{ session: Session | null }}
  */
 function disable() {
     // destroy() takes the monitors-changed handler down FIRST, then the App

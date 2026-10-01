@@ -15,7 +15,9 @@
  * <xlet-root>/lib/… from anywhere. tsc can only resolve file-relative, so this
  * wildcard types those modules as `any` instead of failing them. *The* escape
  * for cross-module shape flow; everything inside a module stays fully checked.
- */
+ * (Pattern may not start with './' — TS2436 — but tsc still registers the
+ * template; the one diagnostic is suppressed below.)
+ * @ts-ignore */
 declare module "./lib/*";
 
 type AnyRecord = Record<string, any>;
