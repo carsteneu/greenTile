@@ -2869,6 +2869,7 @@ const enable = function () {
         signalManager: new tile_SignalManager(),
         layoutManager: Main.layoutManager,
         mainloop: tile_Mainloop,
+        gobject: imports.gi.GObject,
         now: Date.now,
         log: (msg) => global.log(msg),
         onSettled: (app) => tile_auto_schedule_all(app, 0),
