@@ -58,6 +58,7 @@ const { tile_theme_toggle_target } = require('./lib/model/theme');
 const { Session } = require('./lib/runtime/session');
 const { Monitors } = require('./lib/runtime/monitors');
 const { Auto } = require('./lib/runtime/auto');
+const { Hotkeys } = require('./lib/runtime/hotkeys');
 
 ;// CONCATENATED MODULE: ../base/config.ts
 
@@ -67,38 +68,28 @@ const Tooltips = imports.ui.tooltips;
 const tile_SignalManager = imports.misc.signalManager.SignalManager;
 class Config {
     constructor(app) {
+        // The hotkeys component carries the fixed greenTile binding names: register
+        // removes every name first, so a binding change re-registers exactly once.
         this.EnableHotkey = () => {
-            this.DisableHotkey();
-            Main.keybindingManager.addHotKey('greenTile-auto6', this.autotile6Hotkey, () => tile_app_columns(this.app, 6));
-            Main.keybindingManager.addHotKey('greenTile-auto3', this.autotile3Hotkey, () => tile_app_columns(this.app, 3));
-            Main.keybindingManager.addHotKey('greenTile-autoN', this.autotileAutoHotkey, () => this.app.auto.activate(this.app));
-            Main.keybindingManager.addHotKey('greenTile-autoOff', this.autotileOffHotkey, () => this.app.auto.deactivate(this.app));
-            Main.keybindingManager.addHotKey('greenTile-preset', this.presetHotkey, () => tile_panel_toggle(this.app));
-            Main.keybindingManager.addHotKey('greenTile-exclude', this.excludeHotkey, () => tile_excl_toggle_focused(this.app));
-            Main.keybindingManager.addHotKey('greenTile-resize-wider', this.resizeWiderHotkey, () => this.app.split.hotkey(this.app, 'wider'));
-            Main.keybindingManager.addHotKey('greenTile-resize-narrower', this.resizeNarrowerHotkey, () => this.app.split.hotkey(this.app, 'narrower'));
-            Main.keybindingManager.addHotKey('greenTile-resize-taller', this.resizeTallerHotkey, () => this.app.split.hotkey(this.app, 'taller'));
-            Main.keybindingManager.addHotKey('greenTile-resize-shorter', this.resizeShorterHotkey, () => this.app.split.hotkey(this.app, 'shorter'));
-            Main.keybindingManager.addHotKey('greenTile-swap-left', this.swapLeftHotkey, () => tile_swap_hotkey(this.app, 'left'));
-            Main.keybindingManager.addHotKey('greenTile-swap-right', this.swapRightHotkey, () => tile_swap_hotkey(this.app, 'right'));
-            Main.keybindingManager.addHotKey('greenTile-swap-up', this.swapUpHotkey, () => tile_swap_hotkey(this.app, 'up'));
-            Main.keybindingManager.addHotKey('greenTile-swap-down', this.swapDownHotkey, () => tile_swap_hotkey(this.app, 'down'));
+            this.app.hotkeys.register([
+                { name: 'greenTile-auto6', bindings: this.autotile6Hotkey, callback: () => tile_app_columns(this.app, 6) },
+                { name: 'greenTile-auto3', bindings: this.autotile3Hotkey, callback: () => tile_app_columns(this.app, 3) },
+                { name: 'greenTile-autoN', bindings: this.autotileAutoHotkey, callback: () => this.app.auto.activate(this.app) },
+                { name: 'greenTile-autoOff', bindings: this.autotileOffHotkey, callback: () => this.app.auto.deactivate(this.app) },
+                { name: 'greenTile-preset', bindings: this.presetHotkey, callback: () => tile_panel_toggle(this.app) },
+                { name: 'greenTile-exclude', bindings: this.excludeHotkey, callback: () => tile_excl_toggle_focused(this.app) },
+                { name: 'greenTile-resize-wider', bindings: this.resizeWiderHotkey, callback: () => this.app.split.hotkey(this.app, 'wider') },
+                { name: 'greenTile-resize-narrower', bindings: this.resizeNarrowerHotkey, callback: () => this.app.split.hotkey(this.app, 'narrower') },
+                { name: 'greenTile-resize-taller', bindings: this.resizeTallerHotkey, callback: () => this.app.split.hotkey(this.app, 'taller') },
+                { name: 'greenTile-resize-shorter', bindings: this.resizeShorterHotkey, callback: () => this.app.split.hotkey(this.app, 'shorter') },
+                { name: 'greenTile-swap-left', bindings: this.swapLeftHotkey, callback: () => tile_swap_hotkey(this.app, 'left') },
+                { name: 'greenTile-swap-right', bindings: this.swapRightHotkey, callback: () => tile_swap_hotkey(this.app, 'right') },
+                { name: 'greenTile-swap-up', bindings: this.swapUpHotkey, callback: () => tile_swap_hotkey(this.app, 'up') },
+                { name: 'greenTile-swap-down', bindings: this.swapDownHotkey, callback: () => tile_swap_hotkey(this.app, 'down') },
+            ]);
         };
         this.DisableHotkey = () => {
-            Main.keybindingManager.removeHotKey('greenTile-auto6');
-            Main.keybindingManager.removeHotKey('greenTile-auto3');
-            Main.keybindingManager.removeHotKey('greenTile-autoN');
-            Main.keybindingManager.removeHotKey('greenTile-autoOff');
-            Main.keybindingManager.removeHotKey('greenTile-preset');
-            Main.keybindingManager.removeHotKey('greenTile-exclude');
-            Main.keybindingManager.removeHotKey('greenTile-resize-wider');
-            Main.keybindingManager.removeHotKey('greenTile-resize-narrower');
-            Main.keybindingManager.removeHotKey('greenTile-resize-taller');
-            Main.keybindingManager.removeHotKey('greenTile-resize-shorter');
-            Main.keybindingManager.removeHotKey('greenTile-swap-left');
-            Main.keybindingManager.removeHotKey('greenTile-swap-right');
-            Main.keybindingManager.removeHotKey('greenTile-swap-up');
-            Main.keybindingManager.removeHotKey('greenTile-swap-down');
+            this.app.hotkeys.remove();
         };
         this.destroy = () => {
             this.DisableHotkey();
@@ -570,7 +561,6 @@ const tile_layout_for = (app, monitorIndex, wsIndex) => {
         auto: entry.auto,
     };
 };
-let tile_layouts_write_guard_logged = false;
 const tile_layout_set = (app, monitorIndex, wsIndex, patch) => {
     if (!app.monitors.ready || !app.monitors.keys[monitorIndex])
         return;
@@ -578,8 +568,8 @@ const tile_layout_set = (app, monitorIndex, wsIndex, patch) => {
     // Corrupt layouts are treated as empty on read; nothing is written (and the
     // old string is not silently replaced) until the setting itself is fixed.
     if (layouts === null) {
-        if (!tile_layouts_write_guard_logged) {
-            tile_layouts_write_guard_logged = true;
+        if (!app.session.layoutsWriteGuardLogged) {
+            app.session.layoutsWriteGuardLogged = true;
             global.log('greenTile layouts setting is corrupt, not writing it');
         }
         return;
@@ -1076,8 +1066,8 @@ const tile_presets_delete = (app) => {
     // Corrupt layouts stay untouched until the setting is fixed, like tile_layout_set,
     // which logs the same condition only once.
     if (layouts === null) {
-        if (!tile_layouts_write_guard_logged) {
-            tile_layouts_write_guard_logged = true;
+        if (!app.session.layoutsWriteGuardLogged) {
+            app.session.layoutsWriteGuardLogged = true;
             global.log('greenTile layouts setting is corrupt, deleting preset without layout cleanup');
         }
     }
@@ -1842,6 +1832,7 @@ class App {
     constructor(platform, session, cinnamon) {
         this.platform = platform;
         this.session = session;
+        this.hotkeys = new Hotkeys({ keybindingManager: cinnamon.main.keybindingManager });
         this.monitors = new Monitors({
             main: cinnamon.main,
             gio: cinnamon.gio,
@@ -1950,10 +1941,10 @@ const move_resize_window = (metaWindow, x, y, width, height) => {
 
 ;// CONCATENATED MODULE: ./extension.ts
 
-const platform = {
+const platform = Object.freeze({
     move_resize_window: move_resize_window,
     reset_window: reset_window,
-};
+});
 const init = () => {};
 const enable = function () {
     // One extension session per enable(): it outlives every App recreation and
