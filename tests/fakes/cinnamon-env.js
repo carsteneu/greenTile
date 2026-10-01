@@ -482,6 +482,11 @@ const createCinnamonEnv = (options) => {
         count(sigName) {
             return this._handlers.filter((h) => !sigName || h.sigName === sigName).length;
         }
+        emit(sigName, ...args) {
+            for (const h of this._handlers.slice())
+                if (h.sigName === sigName)
+                    h.cb(...args);
+        }
         add(child) {
             if (!this.children.includes(child))
                 this.children.push(child);
@@ -504,7 +509,10 @@ const createCinnamonEnv = (options) => {
         show() {}
         set_style() {}
         raise_top() {}
-        set_position() {}
+        set_position(x, y) {
+            this.px = x;
+            this.py = y;
+        }
         set_size() {}
         set_width() {}
         set_height() {}

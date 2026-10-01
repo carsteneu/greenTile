@@ -1338,7 +1338,7 @@ const tile_panel_open = (app) => {
         drag = null;
         app.panel.dragging = false;
         const [px, py] = panel.get_position();
-        app.panel.saved = { x: Math.round(px), y: Math.round(py) };
+        app.session.panelSaved = { x: Math.round(px), y: Math.round(py) };
         global.log('greenTile panel moved to ' + Math.round(px) + ',' + Math.round(py));
     };
     const onDragMotion = (a, event) => {
@@ -1446,14 +1446,14 @@ const tile_panel_open = (app) => {
         const focusWindow = getFocusApp();
         return (focusWindow && monitors[focusWindow.get_monitor()]) || monitors[utils_Main.layoutManager.primaryIndex] || monitors[0];
     };
-    if (app.panel.saved && !monitorAt(app.panel.saved.x + 300, app.panel.saved.y + 20)) {
-        global.log('greenTile panel position ' + app.panel.saved.x + ',' + app.panel.saved.y + ' is on no monitor, centring again');
-        app.panel.saved = null;
+    if (app.session.panelSaved && !monitorAt(app.session.panelSaved.x + 300, app.session.panelSaved.y + 20)) {
+        global.log('greenTile panel position ' + app.session.panelSaved.x + ',' + app.session.panelSaved.y + ' is on no monitor, centring again');
+        app.session.panelSaved = null;
     }
     // Keep the position across rebuilds (workspace switches, focus changes, view changes)
-    app.panel.positioned = app.panel.saved != null;
-    if (app.panel.saved)
-        panel.set_position(app.panel.saved.x, app.panel.saved.y);
+    app.panel.positioned = app.session.panelSaved != null;
+    if (app.session.panelSaved)
+        panel.set_position(app.session.panelSaved.x, app.session.panelSaved.y);
     // Resize with the grip in the bottom right corner, same grab recipe as the title-bar
     // drag (pushModal + device.grab). Width = panel width, height = the part that
     // stretches (list: preset rows, editor: painter; the rules column stays fixed).
@@ -1477,7 +1477,7 @@ const tile_panel_open = (app) => {
             scroll.vscrollbar_policy = policy;
     };
     if (storedSize) {
-        const m = (app.panel.saved && monitorAt(app.panel.saved.x + 300, app.panel.saved.y + 20)) || focusMonitor();
+        const m = (app.session.panelSaved && monitorAt(app.session.panelSaved.x + 300, app.session.panelSaved.y + 20)) || focusMonitor();
         panel.set_width(Math.max(Math.min(storedSize.w, m.width), sizeMin.w));
         stretch.set_height(Math.max(storedSize.h, sizeMin.h));
     }
@@ -1572,7 +1572,7 @@ const tile_panel_open = (app) => {
             const cx = monitor.x + Math.max(monitor.width - width, 0) / 2;
             const cy = monitor.y + Math.max(monitor.height - height, 0) / 2.5;
             panel.set_position(Math.round(cx), Math.round(cy));
-            app.panel.saved = { x: Math.round(cx), y: Math.round(cy) };
+            app.session.panelSaved = { x: Math.round(cx), y: Math.round(cy) };
         }
         if (!clamped && !app.panel.dragging) {
             // Keep the whole panel inside the monitor its title bar is on: a panel dragged
@@ -1588,7 +1588,7 @@ const tile_panel_open = (app) => {
             const ny = Math.min(Math.max(py, monitor.y), monitor.y + Math.max(monitor.height - height, 0));
             if (nx !== px || ny !== py) {
                 panel.set_position(Math.round(nx), Math.round(ny));
-                app.panel.saved = { x: Math.round(nx), y: Math.round(ny) };
+                app.session.panelSaved = { x: Math.round(nx), y: Math.round(ny) };
                 global.log('greenTile panel clamped to ' + Math.round(nx) + ',' + Math.round(ny));
             }
         }

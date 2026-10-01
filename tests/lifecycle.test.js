@@ -598,6 +598,30 @@ test('panel: hotkey re-registration while the list is open keeps the Escape bind
     assert.deepEqual(env.greenTileHotkeys(), []);
 });
 
+test('panel: the saved position rides the session across an App recreation and resets per enable', () => {
+    const { env, greenTile } = loadGreenTile();
+    enableWithMonitor(env, greenTile);
+    env.activeWorkspace = { index: () => 0 };
+    env.keybindingManager.hotkeys.get('greenTile-preset').cb();
+    let panelActor = env.chromeChildren[0];
+    panelActor.emit('notify::allocation'); // first allocation centres the panel and saves the position
+    const saved = greenTile.session.panelSaved;
+    assert.ok(saved && saved.x === 700 && saved.y === 280, 'the centred position is saved on the session');
+    env.layoutManager.emit('monitors-changed');
+    env.flushDisplayConfigNoReply();
+    env.keybindingManager.hotkeys.get('greenTile-preset').cb();
+    panelActor = env.chromeChildren[0];
+    assert.ok(panelActor, 'the panel reopened after the recreation');
+    assert.equal(panelActor.px, saved.x, 'the new panel restores the saved x');
+    assert.equal(panelActor.py, saved.y, 'the new panel restores the saved y');
+    greenTile.disable();
+    assert.equal(env.chromeChildren.length, 0, 'the panel was closed by disable');
+    greenTile.enable();
+    env.flushDisplayConfigNoReply();
+    assert.equal(greenTile.session.panelSaved, null, 'a new enable starts without a saved position');
+    greenTile.disable();
+});
+
 // Exclusions runtime (lib/runtime/exclusions.js): the toggles are per App — an
 // exclusion set for a window must not leak into a recreated App or a re-enabled
 // extension, while the rows stay re-derived from the (unchanged) settings.
