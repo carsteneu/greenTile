@@ -1672,7 +1672,7 @@ const tile_panel_open = (app) => {
     });
     // The list has no modal (it must not block the desktop), so it never gets key
     // events itself. Escape is therefore grabbed as a hotkey while the list is open
-    // (same way the classic grid binds its Escape); released in tile_panel_close.
+    // (same way the classic grid binds its Escape); released in app.panel.close().
     // Side effect: while the list is open, applications do not receive Escape.
     if (!draft) {
         utils_Main.keybindingManager.addHotKey(PANEL_ESC_NAME, 'Escape', () => app.panel.close());

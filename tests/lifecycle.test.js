@@ -628,8 +628,6 @@ test('exclusion toggle on a window is gone after monitors-changed and after disa
 
 // Session write-guard flag: the "layouts corrupt" log-once pair shares one
 // session flag — once per session across App recreations, again after re-enable.
-// Session write-guard flag: the "layouts corrupt" log-once pair shares one
-// session flag — once per session across App recreations, again after re-enable.
 // Each App recreation builds a fresh Config/ExtensionSettings, so the corrupt
 // value (still in the settings file in reality) is re-applied per instance.
 test('the layouts write-guard logs once per session across an App recreation and again after a new enable', () => {
