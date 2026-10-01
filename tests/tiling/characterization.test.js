@@ -37,12 +37,12 @@ const makeEnv = (tweener, extraSettings = {}) => {
     const imports = new Proxy(env.imports, {
         get(target, prop) {
             if (prop !== 'ui')
-                return target[prop];
+                {return target[prop];}
             const ui = target[prop];
             return new Proxy(ui, {
                 get(u, p) {
                     if (p === 'tweener')
-                        return tweener;
+                        {return tweener;}
                     if (p === 'main') {
                         // no panels on the monitor: usableArea sees the
                         // full monitor rect
@@ -50,7 +50,7 @@ const makeEnv = (tweener, extraSettings = {}) => {
                         return new Proxy(main, {
                             get(m, mp) {
                                 if (mp === 'panelManager')
-                                    return { getPanelsInMonitor: () => [] };
+                                    {return { getPanelsInMonitor: () => [] };}
                                 return m[mp];
                             },
                         });
@@ -86,7 +86,7 @@ const makeWindow = (env, seq, rect, monitor = 0, withActor = null) => {
         disconnect(id) {
             const at = handlers.findIndex((h) => h.id === id);
             if (at === -1)
-                throw new Error('window: no such handler ' + id);
+                {throw new Error('window: no such handler ' + id);}
             handlers.splice(at, 1);
         },
         count(sig) {
@@ -94,8 +94,8 @@ const makeWindow = (env, seq, rect, monitor = 0, withActor = null) => {
         },
         emit(sig, ...args) {
             for (const h of handlers.slice())
-                if (h.sig === sig)
-                    h.cb(...args);
+                {if (h.sig === sig)
+                    {h.cb(...args);}}
         },
         get_stable_sequence: () => seq,
         get_window_type: () => 6,
@@ -157,7 +157,7 @@ test('auto-columns divides the usable area into 6 columns, reading order kept, g
     assert.deepEqual(w2.moves[0], ['resize', 337, 0, 326, 1100]);
     assert.deepEqual(w3.moves[0], ['resize', 671, 0, 325, 1100]);
     for (const w of [w1, w2, w3])
-        assert.deepEqual(w.moves[1], ['move', w.moves[1][1], w.moves[1][2]], 'move_frame follows the resize at the final geometry');
+        {assert.deepEqual(w.moves[1], ['move', w.moves[1][1], w.moves[1][2]], 'move_frame follows the resize at the final geometry');}
 });
 
 test('animated placement parks the compositor actor at the old rect with the old scale and tweens back over 250 ms', () => {

@@ -1,0 +1,22 @@
+name: ci
+
+# Test, typecheck and lint every push and pull request. The release zip is
+# built by release.yml on v* tags only.
+on:
+  push:
+    branches: ['**']
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 18
+      - run: npm ci
+      - run: npm run check

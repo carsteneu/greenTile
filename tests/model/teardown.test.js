@@ -22,7 +22,7 @@ test('a throwing disconnect does not stop the loop', () => {
     const fake = () => ({ disconnect: (id) => {
         attempts.push(id);
         if (gone.has(id))
-            throw new Error('signal was already gone');
+            {throw new Error('signal was already gone');}
     } });
     m.disconnectEach([
         [fake(), 11, 12, 13],

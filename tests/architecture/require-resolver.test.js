@@ -17,9 +17,9 @@ const shippedJs = (function collect(dir, prefix) {
     for (const entry of fs.readdirSync(dir, { withFileTypes: true }).sort((a, b) => a.name.localeCompare(b.name))) {
         const rel = prefix ? `${prefix}/${entry.name}` : entry.name;
         if (entry.isDirectory())
-            out.push(...collect(path.join(dir, entry.name), rel));
+            {out.push(...collect(path.join(dir, entry.name), rel));}
         else if (entry.name.endsWith('.js'))
-            out.push(rel);
+            {out.push(rel);}
     }
     return out;
 })(path.join(ROOT, 'lib'), 'lib').concat(['extension.js']);
@@ -31,7 +31,7 @@ const resolveCinnamon = (spec) => {
     // (fileUtils.js checks gi., ui., misc., perf. and the importNames list) — anything
     // else must resolve as a root-relative file
     if (/^(?:gi|ui|misc|perf)\./.test(spec))
-        return null;
+        {return null;}
     assert.ok(!spec.includes('..'), `require('${spec}') uses '../' — fileUtils turns it into '.<name>' (broken)`);
     assert.ok(spec.startsWith('./'), `require('${spec}') is not root-relative './'`);
     const target = spec.replace(/\.\//g, '');
@@ -45,7 +45,7 @@ test('every require() in the shipped files resolves to a shipped file (Cinnamon 
         for (const match of src.matchAll(requireRe)) {
             const abs = resolveCinnamon(match[2]);
             if (abs == null)
-                continue;
+                {continue;}
             count += 1;
             assert.ok(shippedJs.includes(path.relative(ROOT, abs).replace(/\\/g, '/')),
                 `require('${match[2]}') in ${file} does not point into the shipped set (${abs})`);

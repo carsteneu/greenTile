@@ -77,7 +77,7 @@ test('probe chain returns the first color the model accepts', () => {
     let reached = false;
     const mintL = (className, pseudoClass) => {
         if (className === 'popup-menu-item' && pseudoClass === 'active')
-            return [108, 171, 205];
+            {return [108, 171, 205];}
         reached = true;
         return null;
     };
@@ -89,7 +89,7 @@ test('probe chain keeps the default when no stage qualifies', () => {
     assert.equal(m.accentProbeFirst(() => null), null);
     // a grey calendar day (Mint-Y-Dark-Grey) is rejected inside accentProbe
     // by the model — the chain itself only walks stage by stage
-    const greyTheme = (className, pseudoClass) =>
+    const greyTheme = (className, _pseudoClass) =>
         className === 'popup-menu-item' ? null : [112, 115, 122];
     assert.deepEqual(m.accentProbeFirst(greyTheme), [112, 115, 122]);
 });
@@ -138,7 +138,7 @@ test('generated CSS carries every accent selector in both scopes', () => {
         '.gk-panel .gk-save { color: rgb(20, 22, 29); background-color: rgb(255, 150, 64); }',
         '.gk-panel .gk-save:hover { background-color: rgb(255, 171, 102); }',
     ])
-        assert.equal(css.includes(selector), true, selector);
+        {assert.equal(css.includes(selector), true, selector);}
     for (const selector of [
         '.gk-panel.gk-light .gk-plus { color: rgb(217, 122, 36); }',
         '.gk-panel.gk-light .gk-plus:hover { color: rgb(232, 154, 63); }',
@@ -152,7 +152,7 @@ test('generated CSS carries every accent selector in both scopes', () => {
         '.gk-panel.gk-light .gk-stepper-btn:hover { border-color: rgb(217, 122, 36); }',
         '.gk-panel.gk-light .gk-entry:focus { border-color: rgb(217, 122, 36); }',
     ])
-        assert.equal(css.includes(selector), true, selector);
+        {assert.equal(css.includes(selector), true, selector);}
 });
 
 test('generated CSS for a probed accent carries the accent, not orange', () => {
@@ -166,7 +166,7 @@ test('every accent color in stylesheet.css still matches the default tone table'
     // generated stylesheet must follow (pixel identity of the default look).
     const sheet = fs.readFileSync(path.join(__dirname, '..', '..', 'stylesheet.css'), 'utf8');
     for (const hex of ['#ff9640', '#ffb070', '#ffab66', '#d97a24', '#e89a3f', '#14161d'])
-        assert.equal(sheet.includes(hex), true, hex + ' missing in stylesheet.css');
+        {assert.equal(sheet.includes(hex), true, hex + ' missing in stylesheet.css');}
     const tints = new Set(sheet.match(/rgba\(255, 150, 64, [0-9.]+\)/g));
     assert.deepEqual(
         [...tints].sort(),
@@ -224,7 +224,7 @@ test('generated state CSS carries every state selector in both scopes', () => {
         '.gk-panel .gk-row-stripe { background-color: rgb(156, 224, 114); }',
         '.gk-panel .gk-sub { color: rgb(156, 224, 114); }',
     ])
-        assert.equal(css.includes(selector), true, selector);
+        {assert.equal(css.includes(selector), true, selector);}
     for (const selector of [
         '.gk-panel.gk-light .gk-auto-on { color: rgb(63, 143, 34); border-color: rgba(78, 165, 48, 0.5); background-color: rgba(78, 165, 48, 0.1); }',
         '.gk-panel.gk-light .gk-auto-on:hover { color: rgb(63, 143, 34); background-color: rgba(78, 165, 48, 0.18); }',
@@ -233,7 +233,7 @@ test('generated state CSS carries every state selector in both scopes', () => {
         '.gk-panel.gk-light .gk-row-stripe { background-color: rgb(78, 165, 48); }',
         '.gk-panel.gk-light .gk-sub { color: rgb(63, 143, 34); }',
     ])
-        assert.equal(css.includes(selector), true, selector);
+        {assert.equal(css.includes(selector), true, selector);}
 });
 
 test('generated state CSS for a custom color carries it, not the green', () => {
@@ -250,7 +250,7 @@ test('every state color in stylesheet.css still matches the default tone table',
     // #3f8f22, tints and stripe #4ea530) — the default table must keep them.
     const sheet = fs.readFileSync(path.join(__dirname, '..', '..', 'stylesheet.css'), 'utf8');
     for (const hex of ['#9ce072', '#3f8f22', '#4ea530'])
-        assert.equal(sheet.includes(hex), true, hex + ' missing in stylesheet.css');
+        {assert.equal(sheet.includes(hex), true, hex + ' missing in stylesheet.css');}
     const darkTints = new Set(sheet.match(/rgba\(156, 224, 114, [0-9.]+\)/g));
     assert.deepEqual(
         [...darkTints].sort(),

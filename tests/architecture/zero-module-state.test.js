@@ -38,19 +38,19 @@ const findViolations = (src, file) => {
         }
         const m = /^const ([A-Za-z$_][\w$]*)\s*=\s*(.*)$/.exec(line);
         if (!m)
-            continue;
+            {continue;}
         let rhs = m[2].trim();
         if (rhs === '') {
             // value may start on the next line
             let j = i + 1;
             while (j < lines.length && lines[j].trim() === '')
-                j++;
+                {j++;}
             rhs = j < lines.length ? lines[j].trim() : '';
         }
         if (/^Object\.freeze\s*\(/.test(rhs))
-            continue;
+            {continue;}
         if (MUTABLE_RHS.test(rhs))
-            problems.push(file + ':' + (i + 1) + ' mutable top-level const ' + m[1] + ' = ' + rhs.slice(0, 40));
+            {problems.push(file + ':' + (i + 1) + ' mutable top-level const ' + m[1] + ' = ' + rhs.slice(0, 40));}
     }
     return problems;
 };

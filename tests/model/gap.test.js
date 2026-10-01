@@ -39,7 +39,7 @@ test('fractional cell bounds (1920/7) round to integers without gaps drifting', 
     const w = 1920 / 7;
     const cells = [0, 1, 2, 3, 4, 5, 6].map((i) => m.gapCell([i * w, 30, w, 1170], area, 8));
     for (const c of cells)
-        c.forEach((v) => assert.ok(Number.isInteger(v)));
+        {c.forEach((v) => assert.ok(Number.isInteger(v)));}
     assert.equal(cells[0][0], 0);
     assert.equal(cells[6][0] + cells[6][2], 1920);
     for (let i = 1; i < cells.length; i++) {

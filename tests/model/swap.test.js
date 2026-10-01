@@ -94,10 +94,10 @@ const chain = (dir, monitorIndex, extra) => m.swapChainStep(Object.assign({
 }, extra || {}));
 
 test('chain: monitor steps along the x-ordered monitor chain', () => {
-    assert.deepEqual(chain('right', 0), { kind: 'monitor', to: 2, slot: 'first' });
-    assert.deepEqual(chain('right', 2), { kind: 'monitor', to: 1, slot: 'first' });
-    assert.deepEqual(chain('left', 1), { kind: 'monitor', to: 2, slot: 'last' });
-    assert.deepEqual(chain('left', 2), { kind: 'monitor', to: 0, slot: 'last' });
+    assert.deepEqual(chain('right', 0), { kind: 'monitor', to: 2, monitor: 2, slot: 'first' });
+    assert.deepEqual(chain('right', 2), { kind: 'monitor', to: 1, monitor: 1, slot: 'first' });
+    assert.deepEqual(chain('left', 1), { kind: 'monitor', to: 2, monitor: 2, slot: 'last' });
+    assert.deepEqual(chain('left', 2), { kind: 'monitor', to: 0, monitor: 0, slot: 'last' });
 });
 
 test('chain: workspace step at the monitor chain ends', () => {
@@ -111,7 +111,15 @@ test('chain: no wrap at the first and last workspace', () => {
     assert.deepEqual(chain('left', 0, { wsIndex: 0 }), null);
     assert.deepEqual(chain('right', 1, { wsIndex: 12 }), null);
     // monitor steps do not depend on the workspace bounds
-    assert.deepEqual(chain('right', 0, { wsIndex: 12 }), { kind: 'monitor', to: 2, slot: 'first' });
+    assert.deepEqual(chain('right', 0, { wsIndex: 12 }), { kind: 'monitor', to: 2, monitor: 2, slot: 'first' });
+});
+
+test('chain contract: every step carries a numeric monitor for the consumer', () => {
+    const steps = [chain('right', 0), chain('right', 1), chain('left', 2)];
+    for (const step of steps) {
+        assert.equal(typeof step.monitor, 'number');
+        assert.ok(Number.isInteger(step.monitor), `monitor must be an integer, got ${step.monitor}`);
+    }
 });
 
 test('chain: workspaces-only-on-primary anchors workspace steps on the primary monitor', () => {
@@ -123,7 +131,7 @@ test('chain: workspaces-only-on-primary anchors workspace steps on the primary m
     assert.deepEqual(chain('right', 1, { onlyPrimary: true }), null);
     assert.deepEqual(chain('left', 0, { onlyPrimary: true, primaryIndex: 2 }), null);
     // monitor steps are unaffected
-    assert.deepEqual(chain('right', 0, { onlyPrimary: true }), { kind: 'monitor', to: 2, slot: 'first' });
+    assert.deepEqual(chain('right', 0, { onlyPrimary: true }), { kind: 'monitor', to: 2, monitor: 2, slot: 'first' });
 });
 
 test('chain: up/down never chain across monitors or workspaces', () => {

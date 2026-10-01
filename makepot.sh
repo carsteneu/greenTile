@@ -2,11 +2,21 @@
 # Regenerate the translation template po/greenTile@carsteneu.pot, give it a
 # proper header and merge it into every po/*.po file.
 #
-# Needs gettext (xgettext, msgmerge) and Cinnamon's cinnamon-xlet-makepot,
-# which imports the Python modules polib and pytz. If they are not installed
-# system-wide, point MAKEPOT_PYTHON at an interpreter that has them, e.g.
-#   python3 -m venv /tmp/potenv && /tmp/potenv/bin/pip install polib pytz
-#   MAKEPOT_PYTHON=/tmp/potenv/bin/python ./makepot.sh
+# HAZARD CONTAINED: cinnamon-xlet-makepot scans EVERY .js/.py below the given
+# dir, node_modules included. Running it on the repo root would pull strings
+# from tests/, dev tooling and caches into the pot. Instead only the shipped
+# files (the build-release.sh list: extension.js, metadata.json,
+# settings-schema.json, lib/) are staged into .yesmem/tmp/makepot-stage and the
+# scan runs there — never /tmp: that path is not writable in restricted
+# contexts and mixes agent state across worktrees (this staging also keeps a
+# tooling venv under .yesmem/tmp out of the scan).
+#
+# Needs gettext (xgettext, msgmerge, msgattrib, msgfmt) and Cinnamon's
+# cinnamon-xlet-makepot, which imports the Python modules polib and pytz. If
+# they are not installed system-wide, point MAKEPOT_PYTHON at an interpreter
+# that has them, e.g.
+#   python3 -m venv .yesmem/tmp/potenv && .yesmem/tmp/potenv/bin/pip install polib pytz
+#   MAKEPOT_PYTHON=.yesmem/tmp/potenv/bin/python ./makepot.sh
 set -euo pipefail
 cd "$(dirname "$0")"
 
@@ -15,7 +25,21 @@ POT="po/$UUID.pot"
 PYTHON="${MAKEPOT_PYTHON:-python3}"
 VERSION=$(python3 -c "import json; print(json.load(open('metadata.json'))['version'])")
 
-"$PYTHON" "$(command -v cinnamon-xlet-makepot)" -o "$POT" .
+STAGE=".yesmem/tmp/makepot-stage"
+rm -rf "$STAGE"
+mkdir -p "$STAGE/$UUID"
+cp extension.js metadata.json settings-schema.json "$STAGE/$UUID/"
+cp -R lib "$STAGE/$UUID/lib"
+
+"$PYTHON" "$(command -v cinnamon-xlet-makepot)" -o "$STAGE.pot" "$STAGE/$UUID"
+# cinnamon-xlet-makepot/xgettext only extract the `_` keyword. lib/runtime/
+# exclusions.js receives take-_ via `translate:` (lib/app/app.js) — extract
+# those literals with a second xgettext pass and merge both templates.
+find "$STAGE/$UUID" -name '*.js' | sort | xargs xgettext \
+    --language=JavaScript --from-code=UTF-8 --keyword=translate \
+    --package-version="$VERSION" --output="$STAGE.translate.pot"
+msgcat --use-first --output-file="$POT" "$STAGE.pot" "$STAGE.translate.pot"
+rm -rf "$STAGE" "$STAGE.pot" "$STAGE.translate.pot"
 
 # cinnamon-xlet-makepot writes xgettext's placeholder header; replace it.
 # The translator fields (PO-Revision-Date, Last-Translator, Language-Team)
@@ -47,6 +71,13 @@ PYEOF
 
 for po in po/*.po; do
     msgmerge --quiet --update --backup=none --previous "$po" "$POT"
+done
+
+# Obsolete entries (stale "#~" rows) carry no runtime meaning: drop them after
+# the merge, before the check, so the po files stay clean.
+for po in po/*.po; do
+    msgattrib --no-obsolete -o "$po.clean" "$po"
+    mv "$po.clean" "$po"
 done
 
 for po in po/*.po; do

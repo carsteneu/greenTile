@@ -21,9 +21,9 @@ const collectJs = (function collect(dir, prefix) {
     for (const entry of fs.readdirSync(dir, { withFileTypes: true }).sort((a, b) => a.name.localeCompare(b.name))) {
         const rel = prefix ? `${prefix}/${entry.name}` : entry.name;
         if (entry.isDirectory())
-            out.push(...collect(path.join(dir, entry.name), rel));
+            {out.push(...collect(path.join(dir, entry.name), rel));}
         else if (entry.name.endsWith('.js'))
-            out.push(rel);
+            {out.push(rel);}
     }
     return out;
 })(path.join(ROOT, 'lib'), 'lib');
@@ -33,7 +33,7 @@ test('settings-keys.js is frozen and covers every persisted schema key exactly',
     assert.equal(Object.isFrozen(keys), true, 'the constants object must be frozen');
     assert.deepEqual(Object.keys(keys).sort(), SCHEMA_KEYS, 'one constant per schema key, no extras');
     for (const key of SCHEMA_KEYS)
-        assert.equal(keys[key], key, 'the constant value is the key itself');
+        {assert.equal(keys[key], key, 'the constant value is the key itself');}
 });
 
 test('the renamed hotkey keys and the legacy drops leave exactly this schema key set', () => {
@@ -59,7 +59,7 @@ test('no raw settings key string outside lib/model/settings-keys.js', () => {
             // quoted literal occurrences only: logging and identifiers may
             // legitimately contain an unquoted key as a word
             if (new RegExp(`['"]${key}['"]`).test(src))
-                violations.push(file + ": '" + key + "'");
+                {violations.push(file + ": '" + key + "'");}
         }
     }
     assert.deepEqual(violations, [], 'raw settings key strings found');

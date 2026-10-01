@@ -26,7 +26,7 @@ const cinnamonLoad = (src, requireStub, filename) => {
         const varRegex = /^(?:'use strict';){0,}(const|var|let|function|class)\s+([a-zA-Z0-9_$]+)/gm;
         let match;
         while ((match = varRegex.exec(body)) != null)
-            body += `exports.${match[2]} = typeof ${match[2]} !== 'undefined' ? ${match[2]} : null;`;
+            {body += `exports.${match[2]} = typeof ${match[2]} !== 'undefined' ? ${match[2]} : null;`;}
     }
     body += `return module.exports;`;
     const fn = new Function('require', 'exports', 'module', '__meta', '__dirname', '__filename', body);
@@ -35,16 +35,16 @@ const cinnamonLoad = (src, requireStub, filename) => {
 
 const load = (spec) => {
     if (!spec.startsWith('./'))
-        throw new Error(`unsupported require '${spec}' — tests resolve root-relative './' paths only`);
+        {throw new Error(`unsupported require '${spec}' — tests resolve root-relative './' paths only`);}
     if (spec.includes('..'))
-        throw new Error(`'../' paths are mangled by Cinnamon's fileUtils and unsupported: '${spec}'`);
+        {throw new Error(`'../' paths are mangled by Cinnamon's fileUtils and unsupported: '${spec}'`);}
     const rel = spec.replace(/\.\//g, '').endsWith('.js') ? spec.replace(/\.\//g, '') : spec.replace(/\.\//g, '') + '.js';
     const abs = path.join(ROOT, rel);
     if (cache.has(abs))
-        return cache.get(abs);
+        {return cache.get(abs);}
     if (evaluating.includes(rel))
-        throw new Error('circular require: ' + evaluating.concat(rel).join(' -> ')
-            + ' — fileUtils createExports caches only after evaluation finished, a cycle re-evaluates forever');
+        {throw new Error('circular require: ' + evaluating.concat(rel).join(' -> ')
+            + ' — fileUtils createExports caches only after evaluation finished, a cycle re-evaluates forever');}
     evaluating.push(rel);
     try {
         const loaded = cinnamonLoad(fs.readFileSync(abs, 'utf8'), load, rel);

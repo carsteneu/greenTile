@@ -164,7 +164,7 @@ const makeWindow = (seq) => {
         disconnect(id) {
             const at = handlers.findIndex((h) => h.id === id);
             if (at === -1)
-                throw new Error('window: no such signal handler ' + id);
+                {throw new Error('window: no such signal handler ' + id);}
             handlers.splice(at, 1);
         },
         count(sig) {
@@ -172,8 +172,8 @@ const makeWindow = (seq) => {
         },
         emit(sig, ...args) {
             for (const h of handlers.slice())
-                if (h.sig === sig)
-                    h.cb(...args);
+                {if (h.sig === sig)
+                    {h.cb(...args);}}
         },
         get_stable_sequence: () => seq,
         get_window_type: () => 6, // Meta.WindowType.NORMAL in the fake Meta
@@ -197,7 +197,7 @@ const makeWorkspace = () => {
         disconnect(id) {
             const at = handlers.findIndex((h) => h.id === id);
             if (at === -1)
-                throw new Error('workspace: no such signal handler ' + id);
+                {throw new Error('workspace: no such signal handler ' + id);}
             handlers.splice(at, 1);
         },
         count(sig) {
@@ -430,7 +430,7 @@ const makeFlashWindow = (seq) => {
         disconnect(id) {
             const at = handlers.findIndex((h) => h.id === id);
             if (at === -1)
-                throw new Error('flash window: no such signal handler ' + id);
+                {throw new Error('flash window: no such signal handler ' + id);}
             handlers.splice(at, 1);
         },
         count(sig) {

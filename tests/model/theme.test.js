@@ -10,9 +10,9 @@ const m = require('../helpers/cinnamon-loader').load('./lib/model/theme.js');
 
 test('manual light and dark win over the system, whatever the scheme', () => {
     for (const scheme of ['prefer-dark', 'prefer-light', 'default', 'weird', null, undefined])
-        assert.equal(m.themeResolve('light', scheme, 'Mint-L-Dark-Aqua'), 'light');
+        {assert.equal(m.themeResolve('light', scheme, 'Mint-L-Dark-Aqua'), 'light');}
     for (const scheme of ['prefer-dark', 'prefer-light', 'default', 'weird', null, undefined])
-        assert.equal(m.themeResolve('dark', scheme, 'Mint-Y'), 'dark');
+        {assert.equal(m.themeResolve('dark', scheme, 'Mint-Y'), 'dark');}
 });
 
 test('system follows the color scheme', () => {
