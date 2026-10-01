@@ -6,11 +6,12 @@
  * the repo's ambient types and expects tsc to FAIL on every one of them, while
  * a set of legit call shapes must keep compiling.
  *
- * Run:  node scripts/type-contract-check.mjs
+ * Run:  node scripts/type-contract-check.mjs   (or: npm run check:types)
  * Exit: 0 — every mutation errors, every legit sample compiles.
  *       1 — otherwise (contract broken).
- * Scratch snippets land in .yesmem/tmp/type-contracts/ (gitignored). Not part
- * of npm test — run it after changing types/cinnamon.d.ts or types/greenTile.d.ts.
+ * Wired into npm run check (last leg); scratch snippets land in
+ * .yesmem/tmp/type-contracts/ (gitignored). Not part of npm test — the ten
+ * tsc programs would roughly double the suite wall time.
  */
 import { execFileSync } from 'node:child_process';
 import { dirname, join } from 'node:path';

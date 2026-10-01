@@ -11,7 +11,8 @@
         "test": "node --test tests/*/*.test.js",
         "lint": "eslint .",
         "typecheck": "tsc -p tsconfig.json",
-        "check": "npm run test && npm run typecheck && npm run lint"
+        "check:types": "node scripts/type-contract-check.mjs",
+        "check": "npm run test && npm run typecheck && npm run lint && npm run check:types"
     },
     "devDependencies": {
         "@eslint/js": "^9.0.0",

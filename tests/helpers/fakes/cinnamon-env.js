@@ -31,9 +31,13 @@ const strictNs = (name, branch) => new Proxy(function () {}, {
     get: (t, p) => {
         if (p === Symbol.toPrimitive)
             {return () => '';}
+        // non-string keys (util.inspect, JSON.stringify, engine probes) never
+        // member-typo on the lib side — silent to keep debug tooling usable
+        if (typeof p !== 'string')
+            {return makeStub();}
         if (Object.prototype.hasOwnProperty.call(branch, p))
             {return branch[p];}
-        throw new Error('fake ' + name + ': unknown member "' + String(p) + '"');
+        throw new Error('fake ' + name + ': unknown member "' + p + '"');
     },
     apply: () => {
         throw new Error('fake ' + name + ': namespaces are not callable');

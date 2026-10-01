@@ -50,6 +50,8 @@ declare const MetaNS: {
 /**
  * imports.ui.main surface greenTile calls (Cinnamon main.js) — narrow on
  * purpose so layoutManager.monitorz-style typos fail tsc (issue 12).
+ * Direct uses only: Main.uiGroup and Main.osdWindowManager flow in through
+ * the AnyRecord deps objects (lib/app/app.js) and stay untyped here.
  */
 declare const MainNS: {
     layoutManager: {
