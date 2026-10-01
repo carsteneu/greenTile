@@ -1,6 +1,6 @@
 'use strict';
 // Tests the pure pending-op epoch (lib/model/lifecycle.js). The registry guards
-// tile_monitors_refresh: a late DBus reply is ignored when it is stale — superseded
+// monitorsRefresh: a late DBus reply is ignored when it is stale — superseded
 // by a newer refresh (monitor change) or invalidated by teardown (App destroy).
 const test = require('node:test');
 const assert = require('node:assert/strict');
