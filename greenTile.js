@@ -910,12 +910,12 @@ class App {
     }
 }
 // ---- Utils (derived from gTile src/utils.ts) ----
-const reset_window = (metaWindow) => {
-    metaWindow === null || metaWindow === void 0 ? void 0 : metaWindow.unmaximize(Meta.MaximizeFlags.HORIZONTAL);
-    metaWindow === null || metaWindow === void 0 ? void 0 : metaWindow.unmaximize(Meta.MaximizeFlags.VERTICAL);
-    metaWindow === null || metaWindow === void 0 ? void 0 : metaWindow.unmaximize(Meta.MaximizeFlags.HORIZONTAL | Meta.MaximizeFlags.VERTICAL);
+const tile_window_reset = (metaWindow) => {
+    metaWindow?.unmaximize(Meta.MaximizeFlags.HORIZONTAL);
+    metaWindow?.unmaximize(Meta.MaximizeFlags.VERTICAL);
+    metaWindow?.unmaximize(Meta.MaximizeFlags.HORIZONTAL | Meta.MaximizeFlags.VERTICAL);
 };
-const move_resize_window = (metaWindow, x, y, width, height) => {
+const tile_window_move_resize = (metaWindow, x, y, width, height) => {
     if (!metaWindow)
         return;
     metaWindow.move_resize_frame(true, x, y, width, height);
@@ -924,9 +924,9 @@ const move_resize_window = (metaWindow, x, y, width, height) => {
 
 // ---- Extension (derived from gTile src/extension.ts) ----
 
-const platform = Object.freeze({
-    move_resize_window: move_resize_window,
-    reset_window: reset_window,
+const tile_platform = Object.freeze({
+    move_resize_window: tile_window_move_resize,
+    reset_window: tile_window_reset,
 });
 const init = () => {};
 const enable = function () {
@@ -945,7 +945,7 @@ const enable = function () {
         now: Date.now,
         log: (msg) => global.log(msg),
         onSettled: (app) => app.auto.scheduleAll(app, 0),
-        createApp: (session) => new App(platform, session, {
+        createApp: (session) => new App(tile_platform, session, {
             main: Main,
             gio: Gio,
             meta: Meta,
