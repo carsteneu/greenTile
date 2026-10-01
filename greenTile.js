@@ -37,7 +37,6 @@
 
 // Pure model blocks, extracted to lib/model/. Paths are root-relative on purpose:
 // Cinnamon resolves every nested require against the xlet root (fileUtils.js).
-const { tile_excl_rows_normalize, tile_excl_match, tile_excl_rows_append, tile_excl_app_options, tile_excl_toggle_set } = require('./lib/model/exclude');
 const { TILE_GAP_MAX, TILE_GAP_STEP, tile_gap_value, tile_gap_cell } = require('./lib/model/gap');
 const { tile_single_fill, tile_single_layout } = require('./lib/model/single');
 const { tile_disconnect_each } = require('./lib/model/teardown');
@@ -58,6 +57,9 @@ const { tile_theme_toggle_target } = require('./lib/model/theme');
 const { Session } = require('./lib/runtime/session');
 const { Monitors } = require('./lib/runtime/monitors');
 const { Auto } = require('./lib/runtime/auto');
+const { Hotkeys, PANEL_ESC_NAME } = require('./lib/runtime/hotkeys');
+const { Exclusions } = require('./lib/runtime/exclusions');
+const { PanelState } = require('./lib/runtime/panel-state');
 
 ;// CONCATENATED MODULE: ../base/config.ts
 
@@ -67,45 +69,32 @@ const Tooltips = imports.ui.tooltips;
 const tile_SignalManager = imports.misc.signalManager.SignalManager;
 class Config {
     constructor(app) {
+        // The hotkeys component carries the fixed greenTile binding names: register
+        // removes every name first, so a binding change re-registers exactly once.
         this.EnableHotkey = () => {
-            this.DisableHotkey();
-            Main.keybindingManager.addHotKey('greenTile-auto6', this.autotile6Hotkey, () => tile_app_columns(this.app, 6));
-            Main.keybindingManager.addHotKey('greenTile-auto3', this.autotile3Hotkey, () => tile_app_columns(this.app, 3));
-            Main.keybindingManager.addHotKey('greenTile-autoN', this.autotileAutoHotkey, () => this.app.auto.activate(this.app));
-            Main.keybindingManager.addHotKey('greenTile-autoOff', this.autotileOffHotkey, () => this.app.auto.deactivate(this.app));
-            Main.keybindingManager.addHotKey('greenTile-preset', this.presetHotkey, () => tile_panel_toggle(this.app));
-            Main.keybindingManager.addHotKey('greenTile-exclude', this.excludeHotkey, () => tile_excl_toggle_focused(this.app));
-            Main.keybindingManager.addHotKey('greenTile-resize-wider', this.resizeWiderHotkey, () => this.app.split.hotkey(this.app, 'wider'));
-            Main.keybindingManager.addHotKey('greenTile-resize-narrower', this.resizeNarrowerHotkey, () => this.app.split.hotkey(this.app, 'narrower'));
-            Main.keybindingManager.addHotKey('greenTile-resize-taller', this.resizeTallerHotkey, () => this.app.split.hotkey(this.app, 'taller'));
-            Main.keybindingManager.addHotKey('greenTile-resize-shorter', this.resizeShorterHotkey, () => this.app.split.hotkey(this.app, 'shorter'));
-            Main.keybindingManager.addHotKey('greenTile-swap-left', this.swapLeftHotkey, () => tile_swap_hotkey(this.app, 'left'));
-            Main.keybindingManager.addHotKey('greenTile-swap-right', this.swapRightHotkey, () => tile_swap_hotkey(this.app, 'right'));
-            Main.keybindingManager.addHotKey('greenTile-swap-up', this.swapUpHotkey, () => tile_swap_hotkey(this.app, 'up'));
-            Main.keybindingManager.addHotKey('greenTile-swap-down', this.swapDownHotkey, () => tile_swap_hotkey(this.app, 'down'));
+            this.app.hotkeys.register([
+                { name: 'greenTile-auto6', bindings: this.autotile6Hotkey, callback: () => tile_app_columns(this.app, 6) },
+                { name: 'greenTile-auto3', bindings: this.autotile3Hotkey, callback: () => tile_app_columns(this.app, 3) },
+                { name: 'greenTile-autoN', bindings: this.autotileAutoHotkey, callback: () => this.app.auto.activate(this.app) },
+                { name: 'greenTile-autoOff', bindings: this.autotileOffHotkey, callback: () => this.app.auto.deactivate(this.app) },
+                { name: 'greenTile-preset', bindings: this.presetHotkey, callback: () => tile_panel_toggle(this.app) },
+                { name: 'greenTile-exclude', bindings: this.excludeHotkey, callback: () => this.app.excl.toggleFocused(this.app) },
+                { name: 'greenTile-resize-wider', bindings: this.resizeWiderHotkey, callback: () => this.app.split.hotkey(this.app, 'wider') },
+                { name: 'greenTile-resize-narrower', bindings: this.resizeNarrowerHotkey, callback: () => this.app.split.hotkey(this.app, 'narrower') },
+                { name: 'greenTile-resize-taller', bindings: this.resizeTallerHotkey, callback: () => this.app.split.hotkey(this.app, 'taller') },
+                { name: 'greenTile-resize-shorter', bindings: this.resizeShorterHotkey, callback: () => this.app.split.hotkey(this.app, 'shorter') },
+                { name: 'greenTile-swap-left', bindings: this.swapLeftHotkey, callback: () => tile_swap_hotkey(this.app, 'left') },
+                { name: 'greenTile-swap-right', bindings: this.swapRightHotkey, callback: () => tile_swap_hotkey(this.app, 'right') },
+                { name: 'greenTile-swap-up', bindings: this.swapUpHotkey, callback: () => tile_swap_hotkey(this.app, 'up') },
+                { name: 'greenTile-swap-down', bindings: this.swapDownHotkey, callback: () => tile_swap_hotkey(this.app, 'down') },
+            ]);
         };
         this.DisableHotkey = () => {
-            Main.keybindingManager.removeHotKey('greenTile-auto6');
-            Main.keybindingManager.removeHotKey('greenTile-auto3');
-            Main.keybindingManager.removeHotKey('greenTile-autoN');
-            Main.keybindingManager.removeHotKey('greenTile-autoOff');
-            Main.keybindingManager.removeHotKey('greenTile-preset');
-            Main.keybindingManager.removeHotKey('greenTile-exclude');
-            Main.keybindingManager.removeHotKey('greenTile-resize-wider');
-            Main.keybindingManager.removeHotKey('greenTile-resize-narrower');
-            Main.keybindingManager.removeHotKey('greenTile-resize-taller');
-            Main.keybindingManager.removeHotKey('greenTile-resize-shorter');
-            Main.keybindingManager.removeHotKey('greenTile-swap-left');
-            Main.keybindingManager.removeHotKey('greenTile-swap-right');
-            Main.keybindingManager.removeHotKey('greenTile-swap-up');
-            Main.keybindingManager.removeHotKey('greenTile-swap-down');
+            this.app.hotkeys.remove();
         };
         this.destroy = () => {
             this.DisableHotkey();
-            if (this.excludeAppSignal) {
-                imports.gi.Cinnamon.AppSystem.get_default().disconnect(this.excludeAppSignal);
-                this.excludeAppSignal = null;
-            }
+            this.app.excl.destroy();
             // resize hotkey steps not yet written (500 ms debounce) must not get lost
             this.app.split.flush(this.app);
             this.app.monitors.destroy();
@@ -117,7 +106,7 @@ class Config {
             // The settle wait lives on the session, not on this App: its timer dies
             // with the App, its start time survives while a change is pending.
             this.app.session.settle.teardown();
-            tile_panel_close();
+            this.app.panel.close();
             this.app.theme.destroy();
             this.app.focus.destroy();
             this.app.border.destroy();
@@ -135,11 +124,11 @@ class Config {
         this.settings.bind('presetHotkey', 'presetHotkey', this.EnableHotkey, null);
         this.settings.bind('excludeHotkey', 'excludeHotkey', this.EnableHotkey, null);
         this.settings.bind('exclusions', 'exclusions', () => {
-            tile_excl_apply(this.settings);
+            this.app.excl.apply(this.settings);
             tile_excl_retile(this.app);
         }, null);
         this.settings.bind('excludeAppPicker', 'excludeAppPickerValue', () => {
-            tile_excl_app_picked(this.settings, this.app, this.settings.getValue('excludeAppPicker'));
+            this.app.excl.picked(this.settings, this.app, this.settings.getValue('excludeAppPicker'));
         }, null);
         this.settings.bind('resizeWiderHotkey', 'resizeWiderHotkey', this.EnableHotkey, null);
         this.settings.bind('resizeNarrowerHotkey', 'resizeNarrowerHotkey', this.EnableHotkey, null);
@@ -159,12 +148,7 @@ class Config {
             if (this.settings.getValue('fillSingleWindow') === true)
                 tile_single_retile(this.app);
         }, null);
-        tile_excl_apply(this.settings);
-        tile_excl_app_populate(this.settings);
-        this.excludeAppSignal = imports.gi.Cinnamon.AppSystem.get_default().connect('installed-changed', () => {
-            tile_excl_apply(this.settings);
-            tile_excl_app_populate(this.settings);
-        });
+        this.app.excl.start(this.settings);
         this.EnableHotkey();
         this.app.theme.init(this);
         this.app.focus.connect(this.app);
@@ -225,7 +209,7 @@ const getUsableScreenArea = (monitor) => {
 };
 // Diagnostics: the reason list mirrors the tile_collect_windows filters by design —
 // 'UNKNOWN' means the two have drifted apart (canary, should never appear).
-const tile_debug_count = (monitor, focusWindow, collected) => {
+const tile_debug_count = (app, monitor, focusWindow, collected) => {
     try {
         let all = global.workspace_manager.get_active_workspace().list_windows();
         let missing = [];
@@ -238,7 +222,7 @@ const tile_debug_count = (monitor, focusWindow, collected) => {
                 reasons.push('minimized');
             if (w.get_wm_class() == null)
                 reasons.push('wm_class');
-            if (tile_excl_is_excluded(w))
+            if (app.excl.isExcluded(w))
                 reasons.push('excluded');
             if (utils_Main.getTabList().indexOf(w) === -1)
                 reasons.push('not-in-tablist');
@@ -270,38 +254,6 @@ const tile_focus_window = () => {
     let tabList = utils_Main.getTabList();
     return tabList.length > 0 ? tabList[0] : null;
 };
-const tile_excl = { toggled: new Map(), rows: [], classes: Object.create(null) };
-const tile_excl_is_excluded = (w) => {
-    if (w == null)
-        return false;
-    if (tile_excl.toggled.get(w.get_stable_sequence()))
-        return true;
-    if (tile_excl.rows.length === 0)
-        return false;
-    const app = imports.gi.Cinnamon.WindowTracker.get_default().get_window_app(w);
-    return tile_excl_match(w.get_wm_class(), w.get_wm_class_instance(), w.get_title(), tile_excl.rows, app ? app.get_id() : null, tile_excl.classes);
-};
-// StartupWMClass per app row, resolved once per apply (not per window per retile); the
-// value is null when AppSystem cannot resolve the rule text or the app declares no
-// StartupWMClass — those rows fall back to the id compare. Rebuilt with the rows
-// themselves on installed-changed. Null-prototype object, rule texts must not collide
-// with Object.prototype keys (see tile_excl_app_options).
-const tile_excl_app_classes = (rows) => {
-    const appSystem = imports.gi.Cinnamon.AppSystem.get_default();
-    const result = Object.create(null);
-    for (let i = 0; i < rows.length; i++) {
-        if (rows[i].match !== 'app' || result[rows[i].text] !== undefined)
-            continue;
-        const app = appSystem.lookup_app(rows[i].text);
-        const info = app ? app.get_app_info() : null;
-        result[rows[i].text] = info ? info.get_startup_wm_class() : null;
-    }
-    return result;
-};
-const tile_excl_apply = (settings) => {
-    tile_excl.rows = tile_excl_rows_normalize(settings.getValue('exclusions'));
-    tile_excl.classes = tile_excl_app_classes(tile_excl.rows);
-};
 // Retile every monitor whose layout can place windows: preset layouts directly, auto
 // grids debounced (consistent with other debounced retiles).
 const tile_excl_retile = (app) => {
@@ -314,51 +266,11 @@ const tile_excl_retile = (app) => {
             app.auto.scheduleMonitor(app, i, 150);
     }
 };
-// The app picker combobox ("excludeAppPicker"): the dialog collects its options from
-// the settings file when it opens, so the extension writes them via the official
-// setOptions API at enable time and on AppSystem's installed-changed. Picking an app
-// appends the exclusion row and resets the combobox; setValue alone would not fire
-// the exclusions binding, so apply + retile run explicitly.
-const tile_excl_app_populate = (settings) => {
-    const apps = imports.gi.Cinnamon.AppSystem.get_default().get_all();
-    const list = [];
-    for (let i = 0; i < apps.length; i++) {
-        const info = apps[i].get_app_info();
-        if (!info || !info.should_show())
-            continue;
-        list.push({ id: apps[i].get_id(), name: apps[i].get_name() });
-    }
-    settings.setOptions('excludeAppPicker', tile_excl_app_options(list, _("Add application …")));
-};
-const tile_excl_app_picked = (settings, app, value) => {
-    if (typeof value !== 'string' || value === 'picker')
-        return;
-    settings.setValue('exclusions', tile_excl_rows_append(settings.getValue('exclusions'), value));
-    tile_excl_apply(settings);
-    tile_excl_retile(app);
-    settings.setValue('excludeAppPicker', 'picker');
-};
-const tile_excl_toggle_focused = (app) => {
-    const w = tile_focus_window();
-    if (!w)
-        return;
-    const excluded = !tile_excl_is_excluded(w);
-    tile_excl_toggle_set(tile_excl.toggled, w.get_stable_sequence(), excluded);
-    global.log('greenTile ' + (excluded ? 'never tile on: ' : 'tiling again: ') + String(w.get_wm_class()).replace(/\s+/g, ' ') + ' seq=' + w.get_stable_sequence());
-    try {
-        Main.osdWindowManager.show(w.get_monitor(), tile_Gio.ThemedIcon.new('window-restore-symbolic'),
-            excluded ? _("Window floats") : _("Window tiles again"), null);
-    }
-    catch (e) {
-        // OSD is feedback only — a failing show must not block the retile
-    }
-    tile_retile_monitor(app, w.get_monitor(), null);
-};
 // Own collector instead of gTile's GetNotFocusedWindowsOfMonitor: that one excludes
 // app.focusMetaWindow, which goes stale because gTile tracks focus via the app-level
 // 'notify::focus-app' signal (silent on same-app window switches) — visible windows
 // get dropped. RULE: active workspace only, never pull windows across workspaces.
-const tile_collect_windows = (monitor, focusWindow, wsIndex = null) => {
+const tile_collect_windows = (app, monitor, focusWindow, wsIndex = null) => {
     const tracker = imports.gi.Cinnamon.WindowTracker.get_default();
     let result = [];
     let tabList = wsIndex == null ? utils_Main.getTabList()
@@ -369,7 +281,7 @@ const tile_collect_windows = (monitor, focusWindow, wsIndex = null) => {
             continue;
         if (w.get_window_type() !== Meta.WindowType.NORMAL)
             continue;
-        if (tile_excl_is_excluded(w))
+        if (app.excl.isExcluded(w))
             continue;
         if (utils_Main.layoutManager.monitors[w.get_monitor()] !== monitor)
             continue;
@@ -432,13 +344,13 @@ const tile_app_columns = (app, cols) => {
         return;
     let monitor = utils_Main.layoutManager.monitors[focusWindow.get_monitor()];
     let [screenX, screenY, screenWidth, screenHeight] = getUsableScreenArea(monitor);
-    let windows = tile_collect_windows(monitor, focusWindow);
-    tile_debug_count(monitor, focusWindow, windows);
+    let windows = tile_collect_windows(app, monitor, focusWindow);
+    tile_debug_count(app, monitor, focusWindow, windows);
     if (windows.length === 0)
         return;
     let colWidth = screenWidth / cols;
     // An excluded focused window is not tiled, the others still fill the columns.
-    let ordered = tile_sort_reading_order(app, (tile_excl_is_excluded(focusWindow) ? windows : [focusWindow].concat(windows)), false).slice(0, cols);
+    let ordered = tile_sort_reading_order(app, (app.excl.isExcluded(focusWindow) ? windows : [focusWindow].concat(windows)), false).slice(0, cols);
     for (let index = 0; index < ordered.length; index++) {
         tile_place_cell(app, ordered[index], screenX + index * colWidth, screenY, colWidth, screenHeight, [screenX, screenY, screenWidth, screenHeight]);
     }
@@ -498,10 +410,10 @@ const tile_app_auto = (app, monitorIndex, focusWindow, animate = true, wsIndex =
         return;
     const ws = wsIndex != null ? wsIndex : global.workspace_manager.get_active_workspace().index();
     const area = getUsableScreenArea(monitor);
-    let windows = tile_collect_windows(monitor, focusWindow, ws);
-    tile_debug_count(monitor, focusWindow, windows);
+    let windows = tile_collect_windows(app, monitor, focusWindow, ws);
+    tile_debug_count(app, monitor, focusWindow, windows);
     const focused = focusWindow && !focusWindow.minimized && focusWindow.get_monitor() === monitorIndex
-        && !tile_excl_is_excluded(focusWindow);
+        && !app.excl.isExcluded(focusWindow);
     let n = windows.length + (focused ? 1 : 0);
     if (n < 2 && !tile_single_fill(app.config.settings.getValue('fillSingleWindow'), n))
         return;
@@ -570,7 +482,6 @@ const tile_layout_for = (app, monitorIndex, wsIndex) => {
         auto: entry.auto,
     };
 };
-let tile_layouts_write_guard_logged = false;
 const tile_layout_set = (app, monitorIndex, wsIndex, patch) => {
     if (!app.monitors.ready || !app.monitors.keys[monitorIndex])
         return;
@@ -578,8 +489,8 @@ const tile_layout_set = (app, monitorIndex, wsIndex, patch) => {
     // Corrupt layouts are treated as empty on read; nothing is written (and the
     // old string is not silently replaced) until the setting itself is fixed.
     if (layouts === null) {
-        if (!tile_layouts_write_guard_logged) {
-            tile_layouts_write_guard_logged = true;
+        if (!app.session.layoutsWriteGuardLogged) {
+            app.session.layoutsWriteGuardLogged = true;
             global.log('greenTile layouts setting is corrupt, not writing it');
         }
         return;
@@ -669,9 +580,9 @@ const tile_preset_retile = (app, monitorIndex, focusWindow, animate = true, wsIn
     if (!preset)
         return;
     const area = getUsableScreenArea(monitor);
-    const windows = tile_collect_windows(monitor, focusWindow, ws);
+    const windows = tile_collect_windows(app, monitor, focusWindow, ws);
     const focused = focusWindow && !focusWindow.minimized && focusWindow.get_monitor() === monitorIndex
-        && !tile_excl_is_excluded(focusWindow);
+        && !app.excl.isExcluded(focusWindow);
     const n = windows.length + (focused ? 1 : 0);
     // the layout belongs to the workspace the windows were collected from, not the
     // active one (explicit wsIndex callers retile workspaces that are not active)
@@ -707,7 +618,7 @@ const tile_swap_override = (app, metaWindow, rect) => {
 };
 const tile_swap_hotkey = (app, dir) => {
     const focusWindow = tile_focus_window();
-    if (!focusWindow || focusWindow.minimized || focusWindow.is_on_all_workspaces() || tile_excl_is_excluded(focusWindow))
+    if (!focusWindow || focusWindow.minimized || focusWindow.is_on_all_workspaces() || app.excl.isExcluded(focusWindow))
         return;
     const monitorIndex = focusWindow.get_monitor();
     const monitor = utils_Main.layoutManager.monitors[monitorIndex];
@@ -717,7 +628,7 @@ const tile_swap_hotkey = (app, dir) => {
     const area = getUsableScreenArea(monitor);
     const frame = focusWindow.get_frame_rect();
     const frameRect = [frame.x, frame.y, frame.width, frame.height];
-    const windows = tile_collect_windows(monitor, focusWindow);
+    const windows = tile_collect_windows(app, monitor, focusWindow);
     const n = windows.length + 1;
     const layout = tile_layout_shape(app, monitorIndex, n);
     let cells = null;
@@ -758,7 +669,7 @@ const tile_swap_hotkey = (app, dir) => {
     // On a target monitor without active tiling the window lands untiled (move only,
     // size kept): no slot is computed and no retile is triggered on the target.
     if (step.kind === 'monitor') {
-        const nTarget = tile_collect_windows(targetMonitor, null).length + 1;
+        const nTarget = tile_collect_windows(app, targetMonitor, null).length + 1;
         const targetLayout = tile_layout_shape(app, step.monitor, nTarget);
         if (targetLayout) {
             const targetSplit = app.split.for(app, step.monitor, wsIndex, nTarget, targetLayout);
@@ -779,7 +690,7 @@ const tile_swap_hotkey = (app, dir) => {
     // it on the source monitor. The source workspace retiles with one window less even
     // though it is no longer active.
     const targetWsIndex = wsIndex + step.delta;
-    const nTarget = tile_collect_windows(targetMonitor, null, targetWsIndex).length + 1;
+    const nTarget = tile_collect_windows(app, targetMonitor, null, targetWsIndex).length + 1;
     // Muffin's signature is (index, append); Cinnamon's main.js passes a third time
     // argument that GJS drops with a "Too many arguments" warning.
     focusWindow.change_workspace_by_index(targetWsIndex, false);
@@ -819,7 +730,7 @@ const tile_focus_push_native = (window, dir) => {
 const tile_focus_hotkey = (app, dir) => (display, window) => {
     if (!window)
         return; // native has no window to push either
-    if (window.minimized || window.is_on_all_workspaces() || tile_excl_is_excluded(window)) {
+    if (window.minimized || window.is_on_all_workspaces() || app.excl.isExcluded(window)) {
         tile_focus_push_native(window, dir);
         return;
     }
@@ -832,7 +743,7 @@ const tile_focus_hotkey = (app, dir) => (display, window) => {
     }
     // The focus window sits in the cell the current layout gives it; the neighbour is
     // whatever the tiling would place next to it in that direction.
-    const windows = tile_collect_windows(monitor, null, wsIndex);
+    const windows = tile_collect_windows(app, monitor, null, wsIndex);
     let cells = null;
     let ordered = null;
     const n = windows.length;
@@ -864,7 +775,7 @@ const tile_focus_hotkey = (app, dir) => (display, window) => {
         });
         if (step != null) {
             const frame = window.get_frame_rect();
-            const cands = tile_collect_windows(utils_Main.layoutManager.monitors[step], null, wsIndex).map((w, i) => {
+            const cands = tile_collect_windows(app, utils_Main.layoutManager.monitors[step], null, wsIndex).map((w, i) => {
                 const r = w.get_frame_rect();
                 return { index: i, x: r.x, y: r.y, width: r.width, height: r.height, w: w };
             });
@@ -883,52 +794,6 @@ const tile_focus_hotkey = (app, dir) => (display, window) => {
 const tile_St = imports.gi.St;
 const tile_Clutter = imports.gi.Clutter;
 const tile_Util = imports.misc.util;
-const tile_panel = {
-    actor: null,
-    positioned: false,
-    saved: null,
-    sig: [],
-    dragging: false,
-    // 'list' (view 1) or 'editor' (view 2); the draft is the editor's working copy
-    view: 'list',
-    draft: null,
-    // Monotonic time (µs) until which mouse buttons on the panel are ignored: the
-    // second click of a double-click must not act in the view it just opened.
-    guardUntil: 0,
-    // Escape registered as a hotkey while the list is open (it has no modal).
-    escBound: false,
-};
-const TILE_PANEL_SWITCH_GUARD_US = 400 * 1000;
-const tile_panel_guard = () => {
-    tile_panel.guardUntil = GLib.get_monotonic_time() + TILE_PANEL_SWITCH_GUARD_US;
-};
-const tile_panel_close = () => {
-    if (tile_panel.escBound) {
-        tile_panel.escBound = false;
-        utils_Main.keybindingManager.removeHotKey('greenTile-panel-esc');
-    }
-    if (!tile_panel.actor)
-        return;
-    const actor = tile_panel.actor;
-    tile_panel.actor = null;
-    tile_panel.dragging = false;
-    tile_panel.view = 'list';
-    tile_panel.draft = null;
-    tile_panel.sig.splice(0).forEach(({ obj, id }) => {
-        try {
-            obj.disconnect(id);
-        } catch (e) {
-            // signal was already gone
-        }
-    });
-    try {
-        utils_Main.layoutManager.removeChrome(actor);
-    }
-    catch (e) {
-        // not in the chrome — destroy anyway
-    }
-    actor.destroy();
-};
 const tile_panel_round_rect = (cr, x, y, w, h, r) => {
     cr.newSubPath();
     cr.arc(x + w - r, y + r, r, -Math.PI / 2, 0);
@@ -965,12 +830,12 @@ const tile_panel_thumb = (app, stacks, opts = {}) => {
 const tile_panel_middle = () => ({ x_fill: false, y_fill: false, y_align: tile_St.Align.MIDDLE });
 // Thumbnail = the rule a click would apply right now (current window count);
 // fallback: the smallest rule, so an empty workspace still shows the base layout.
-const tile_panel_window_count = () => {
+const tile_panel_window_count = (app) => {
     const focusWindow = tile_focus_window();
     if (!focusWindow)
         return 0;
     const monitor = utils_Main.layoutManager.monitors[focusWindow.get_monitor()];
-    return tile_collect_windows(monitor, focusWindow).length + (tile_excl_is_excluded(focusWindow) ? 0 : 1);
+    return tile_collect_windows(app, monitor, focusWindow).length + (app.excl.isExcluded(focusWindow) ? 0 : 1);
 };
 const tile_panel_row = (app, preset, n) => {
     const wsIndex = global.workspace_manager.get_active_workspace().index();
@@ -1033,23 +898,23 @@ const tile_editor_open = (app, preset) => {
     if (rules.length === 0)
         rules.push({ min: tile_editor_min_floor, stacks: [1, 1] });
     // Start on the rule a click in view 1 would apply right now
-    const pick = tile_rules_pick(rules, tile_panel_window_count());
-    tile_panel.draft = { id: preset.id, name: preset.name || '', rules, index: Math.max(rules.indexOf(pick), 0), isNew: !!preset.isNew };
-    tile_panel.view = 'editor';
-    tile_panel_guard();
+    const pick = tile_rules_pick(rules, tile_panel_window_count(app));
+    app.panel.draft = { id: preset.id, name: preset.name || '', rules, index: Math.max(rules.indexOf(pick), 0), isNew: !!preset.isNew };
+    app.panel.view = 'editor';
+    app.panel.guard();
     tile_panel_rebuild(app);
 };
 const tile_editor_open_new = (app) => {
     tile_editor_open(app, { id: tile_editor_new_id(tile_presets_read(app)), name: '', rules: [{ min: tile_editor_min_floor, stacks: [1, 1] }], isNew: true });
 };
 const tile_editor_back = (app) => {
-    tile_panel.view = 'list';
-    tile_panel.draft = null;
-    tile_panel_guard();
+    app.panel.view = 'list';
+    app.panel.draft = null;
+    app.panel.guard();
     tile_panel_rebuild(app);
 };
 const tile_editor_save = (app, errorLabel) => {
-    const d = tile_panel.draft;
+    const d = app.panel.draft;
     if (!d)
         return;
     if (tile_editor_validate(d) === 'name') {
@@ -1068,7 +933,7 @@ const tile_editor_save = (app, errorLabel) => {
         tile_retile_monitor(app, tile_focus_monitor_index(), tile_focus_window());
 };
 const tile_presets_delete = (app) => {
-    const d = tile_panel.draft;
+    const d = app.panel.draft;
     if (!d)
         return;
     tile_presets_write(app, tile_editor_delete_preset(tile_presets_read(app), d.id));
@@ -1076,8 +941,8 @@ const tile_presets_delete = (app) => {
     // Corrupt layouts stay untouched until the setting is fixed, like tile_layout_set,
     // which logs the same condition only once.
     if (layouts === null) {
-        if (!tile_layouts_write_guard_logged) {
-            tile_layouts_write_guard_logged = true;
+        if (!app.session.layoutsWriteGuardLogged) {
+            app.session.layoutsWriteGuardLogged = true;
             global.log('greenTile layouts setting is corrupt, deleting preset without layout cleanup');
         }
     }
@@ -1238,9 +1103,9 @@ const tile_editor_body = (app) => {
     let refresh = () => {};
     const painter = tile_editor_painter(
         app,
-        () => tile_panel.draft.rules[tile_panel.draft.index].stacks,
+        () => app.panel.draft.rules[app.panel.draft.index].stacks,
         (stacks) => {
-            const dr = tile_panel.draft;
+            const dr = app.panel.draft;
             const rule = dr.rules[dr.index];
             if (stacks.join(',') === rule.stacks.join(','))
                 return;
@@ -1256,7 +1121,7 @@ const tile_editor_body = (app) => {
     right.add(hint);
     const nameRow = new tile_St.BoxLayout({ style_class: 'gk-ed-name-row' });
     nameRow.add(new tile_St.Label({ text: _("Name").toUpperCase(), style_class: 'gk-ed-label' }), middle);
-    const entry = new tile_St.Entry({ style_class: 'gk-entry', text: tile_panel.draft.name, hint_text: _("Preset name"), can_focus: true, x_expand: true });
+    const entry = new tile_St.Entry({ style_class: 'gk-entry', text: app.panel.draft.name, hint_text: _("Preset name"), can_focus: true, x_expand: true });
     nameRow.add(entry, { expand: true, x_fill: true, y_fill: false, y_align: tile_St.Align.MIDDLE });
     right.add(nameRow);
     const saveRow = new tile_St.BoxLayout({ style_class: 'gk-ed-save-row' });
@@ -1276,7 +1141,7 @@ const tile_editor_body = (app) => {
     // label keeps the two apart.
     saveRow.add(save, middle);
     saveRow.add(error, { expand: true, x_fill: true, y_fill: false, y_align: tile_St.Align.MIDDLE });
-    if (!tile_panel.draft.isNew) {
+    if (!app.panel.draft.isNew) {
         saveRow.add(delWrap, middle);
         saveRow.add(confirmWrap, middle);
     }
@@ -1284,7 +1149,7 @@ const tile_editor_body = (app) => {
     confirmWrap.hide();
     body.add(right, { expand: true, x_fill: true, y_fill: true });
     refresh = () => {
-        const dr = tile_panel.draft;
+        const dr = app.panel.draft;
         rulesBox.destroy_all_children();
         dr.rules.forEach((rule, i) => {
             rulesBox.add(tile_editor_rule_row(app, rule, i === dr.index, i === dr.rules.length - 1, () => {
@@ -1304,16 +1169,16 @@ const tile_editor_body = (app) => {
         painter.area.queue_repaint();
     };
     const apply = (r) => {
-        tile_panel.draft.rules = r.rules;
-        tile_panel.draft.index = r.index;
+        app.panel.draft.rules = r.rules;
+        app.panel.draft.index = r.index;
         refresh();
     };
-    addBtn.connect('clicked', () => apply(tile_editor_add_rule(tile_panel.draft.rules)));
-    delBtn.connect('clicked', () => apply(tile_editor_delete_rule(tile_panel.draft.rules, tile_panel.draft.index)));
-    minus.connect('clicked', () => apply(tile_editor_step_min(tile_panel.draft.rules, tile_panel.draft.index, -1)));
-    plus.connect('clicked', () => apply(tile_editor_step_min(tile_panel.draft.rules, tile_panel.draft.index, 1)));
+    addBtn.connect('clicked', () => apply(tile_editor_add_rule(app.panel.draft.rules)));
+    delBtn.connect('clicked', () => apply(tile_editor_delete_rule(app.panel.draft.rules, app.panel.draft.index)));
+    minus.connect('clicked', () => apply(tile_editor_step_min(app.panel.draft.rules, app.panel.draft.index, -1)));
+    plus.connect('clicked', () => apply(tile_editor_step_min(app.panel.draft.rules, app.panel.draft.index, 1)));
     entry.clutter_text.connect('text-changed', () => {
-        tile_panel.draft.name = entry.get_text();
+        app.panel.draft.name = entry.get_text();
         error.text = '';
     });
     entry.clutter_text.connect('activate', () => tile_editor_save(app, error));
@@ -1375,19 +1240,19 @@ const tile_panel_gap_row = (app) => {
     return row;
 };
 const tile_panel_rebuild = (app) => {
-    if (!tile_panel.actor)
+    if (!app.panel.actor)
         return;
-    const view = tile_panel.view;
-    const draft = tile_panel.draft;
-    tile_panel_close();
-    tile_panel.view = view;
-    tile_panel.draft = draft;
+    const view = app.panel.view;
+    const draft = app.panel.draft;
+    app.panel.close();
+    app.panel.view = view;
+    app.panel.draft = draft;
     tile_panel_open(app);
 };
 const tile_panel_open = (app) => {
     const wsIndex = global.workspace_manager.get_active_workspace().index();
     const monitorIndex = tile_focus_monitor_index();
-    const draft = tile_panel.view === 'editor' ? tile_panel.draft : null;
+    const draft = app.panel.view === 'editor' ? app.panel.draft : null;
     const panel = new tile_St.BoxLayout({ vertical: true, style_class: app.theme.panelClass(), reactive: true, can_focus: true });
     const header = new tile_St.BoxLayout({ style_class: 'gk-panel-header', reactive: true });
     let titleText = _("Presets — workspace %d · %s").format(wsIndex + 1, app.monitors.labels[monitorIndex] || '');
@@ -1433,7 +1298,7 @@ const tile_panel_open = (app) => {
             // IN bind callback does not fire on programmatic changes, so the panel
             // re-theme and rebuild happen here. The guard swallows stray clicks
             // that follow the rebuild, like the Back button does.
-            tile_panel_guard();
+            app.panel.guard();
             app.theme.changed();
         });
         header.add(themeBtn);
@@ -1441,12 +1306,12 @@ const tile_panel_open = (app) => {
         // Cinnamon opens from the Extensions manager.
         const settingsBtn = new tile_St.Button({ label: '⚙', style_class: 'gk-close gk-settings', track_hover: true });
         settingsBtn.connect('clicked', () => {
-            tile_panel_close();
+            app.panel.close();
             tile_Util.spawn(['xlet-settings', 'extension', UUID, '-t', '0']);
         });
         header.add(settingsBtn);
         const closeBtn = new tile_St.Button({ label: '✕', style_class: 'gk-close', track_hover: true });
-        closeBtn.connect('clicked', () => tile_panel_close());
+        closeBtn.connect('clicked', () => app.panel.close());
         header.add(closeBtn);
     }
     panel.add(header);
@@ -1471,9 +1336,9 @@ const tile_panel_open = (app) => {
             // modal already popped (main.js pops it on actor destroy)
         }
         drag = null;
-        tile_panel.dragging = false;
+        app.panel.dragging = false;
         const [px, py] = panel.get_position();
-        tile_panel.saved = { x: Math.round(px), y: Math.round(py) };
+        app.session.panelSaved = { x: Math.round(px), y: Math.round(py) };
         global.log('greenTile panel moved to ' + Math.round(px) + ',' + Math.round(py));
     };
     const onDragMotion = (a, event) => {
@@ -1510,7 +1375,7 @@ const tile_panel_open = (app) => {
             return tile_Clutter.EVENT_PROPAGATE;
         const device = event.get_device();
         device.grab(panel);
-        tile_panel.dragging = true;
+        app.panel.dragging = true;
         drag = { dx: gx - px, dy: gy - py, device };
         return tile_Clutter.EVENT_STOP;
     });
@@ -1527,7 +1392,7 @@ const tile_panel_open = (app) => {
     panel.connect('captured-event', (a, event) => {
         const type = event.type();
         if ((type === tile_Clutter.EventType.BUTTON_PRESS || type === tile_Clutter.EventType.BUTTON_RELEASE)
-            && GLib.get_monotonic_time() < tile_panel.guardUntil)
+            && GLib.get_monotonic_time() < app.panel.guardUntil)
             return tile_Clutter.EVENT_STOP;
         return tile_Clutter.EVENT_PROPAGATE;
     });
@@ -1543,7 +1408,7 @@ const tile_panel_open = (app) => {
     }
     else {
         const presets = tile_presets_read(app);
-        const n = tile_panel_window_count();
+        const n = tile_panel_window_count(app);
         rowsBox = new tile_St.BoxLayout({ vertical: true, style_class: 'gk-rows' });
         if (presets.length === 0)
             rowsBox.add(new tile_St.Label({ text: _("No presets yet."), style_class: 'gk-muted' }));
@@ -1571,7 +1436,7 @@ const tile_panel_open = (app) => {
     footer.add(grip, { expand: true, x_fill: false, y_fill: false, x_align: tile_St.Align.END, y_align: tile_St.Align.END });
     panel.add(footer);
     utils_Main.layoutManager.addChrome(panel);
-    tile_panel.actor = panel;
+    app.panel.actor = panel;
     // Monitors come and go (external display plugged in or out). A saved position
     // whose title bar is on no current monitor would open the panel off screen, so it
     // is dropped and the panel is centred again. Probe point: title bar at list width.
@@ -1581,14 +1446,14 @@ const tile_panel_open = (app) => {
         const focusWindow = getFocusApp();
         return (focusWindow && monitors[focusWindow.get_monitor()]) || monitors[utils_Main.layoutManager.primaryIndex] || monitors[0];
     };
-    if (tile_panel.saved && !monitorAt(tile_panel.saved.x + 300, tile_panel.saved.y + 20)) {
-        global.log('greenTile panel position ' + tile_panel.saved.x + ',' + tile_panel.saved.y + ' is on no monitor, centring again');
-        tile_panel.saved = null;
+    if (app.session.panelSaved && !monitorAt(app.session.panelSaved.x + 300, app.session.panelSaved.y + 20)) {
+        global.log('greenTile panel position ' + app.session.panelSaved.x + ',' + app.session.panelSaved.y + ' is on no monitor, centring again');
+        app.session.panelSaved = null;
     }
     // Keep the position across rebuilds (workspace switches, focus changes, view changes)
-    tile_panel.positioned = tile_panel.saved != null;
-    if (tile_panel.saved)
-        panel.set_position(tile_panel.saved.x, tile_panel.saved.y);
+    app.panel.positioned = app.session.panelSaved != null;
+    if (app.session.panelSaved)
+        panel.set_position(app.session.panelSaved.x, app.session.panelSaved.y);
     // Resize with the grip in the bottom right corner, same grab recipe as the title-bar
     // drag (pushModal + device.grab). Width = panel width, height = the part that
     // stretches (list: preset rows, editor: painter; the rules column stays fixed).
@@ -1612,7 +1477,7 @@ const tile_panel_open = (app) => {
             scroll.vscrollbar_policy = policy;
     };
     if (storedSize) {
-        const m = (tile_panel.saved && monitorAt(tile_panel.saved.x + 300, tile_panel.saved.y + 20)) || focusMonitor();
+        const m = (app.session.panelSaved && monitorAt(app.session.panelSaved.x + 300, app.session.panelSaved.y + 20)) || focusMonitor();
         panel.set_width(Math.max(Math.min(storedSize.w, m.width), sizeMin.w));
         stretch.set_height(Math.max(storedSize.h, sizeMin.h));
     }
@@ -1634,7 +1499,7 @@ const tile_panel_open = (app) => {
             return tile_Clutter.EVENT_PROPAGATE;
         const device = event.get_device();
         device.grab(panel);
-        tile_panel.dragging = true;
+        app.panel.dragging = true;
         // From now on the user sets the list height: LIST_MAX must not cap it (it
         // measures the rows box, which the scroll view stretches to its own height).
         scrollCapped = true;
@@ -1669,7 +1534,7 @@ const tile_panel_open = (app) => {
             // modal already popped (main.js pops it on actor destroy)
         }
         global.unset_cursor();
-        tile_panel.dragging = false;
+        app.panel.dragging = false;
         if (r.last) {
             app.config.settings.setValue('panelSize', tile_panel_size_set(app.config.settings.getValue('panelSize'), sizeView, r.last));
             global.log('greenTile panel ' + sizeView + ' resized to ' + r.last.w + 'x' + r.last.h);
@@ -1685,7 +1550,7 @@ const tile_panel_open = (app) => {
     panel.connect('notify::allocation', () => {
         // Allocation notifications can still arrive after close (destroy);
         // without this guard the centring would run on a dying actor.
-        if (tile_panel.actor !== panel)
+        if (app.panel.actor !== panel)
             return;
         if (!fitted) {
             // A size stored on a bigger monitor (5K) can be taller than this one
@@ -1697,8 +1562,8 @@ const tile_panel_open = (app) => {
                 stretch.set_height(Math.max(stretch.get_height() - excess, sizeMin.h));
             fitScroll();
         }
-        if (!tile_panel.positioned) {
-            tile_panel.positioned = true;
+        if (!app.panel.positioned) {
+            app.panel.positioned = true;
             clamped = true;
             const monitor = focusMonitor();
             const box = panel.get_allocation_box();
@@ -1707,9 +1572,9 @@ const tile_panel_open = (app) => {
             const cx = monitor.x + Math.max(monitor.width - width, 0) / 2;
             const cy = monitor.y + Math.max(monitor.height - height, 0) / 2.5;
             panel.set_position(Math.round(cx), Math.round(cy));
-            tile_panel.saved = { x: Math.round(cx), y: Math.round(cy) };
+            app.session.panelSaved = { x: Math.round(cx), y: Math.round(cy) };
         }
-        if (!clamped && !tile_panel.dragging) {
+        if (!clamped && !app.panel.dragging) {
             // Keep the whole panel inside the monitor its title bar is on: a panel dragged
             // near the right edge would stick out, and a smaller monitor after a display
             // change has the same effect. Both views are 600 px wide; probe at the centre.
@@ -1723,7 +1588,7 @@ const tile_panel_open = (app) => {
             const ny = Math.min(Math.max(py, monitor.y), monitor.y + Math.max(monitor.height - height, 0));
             if (nx !== px || ny !== py) {
                 panel.set_position(Math.round(nx), Math.round(ny));
-                tile_panel.saved = { x: Math.round(nx), y: Math.round(ny) };
+                app.session.panelSaved = { x: Math.round(nx), y: Math.round(ny) };
                 global.log('greenTile panel clamped to ' + Math.round(nx) + ',' + Math.round(ny));
             }
         }
@@ -1742,14 +1607,14 @@ const tile_panel_open = (app) => {
     // Meta.WorkspaceManager emits "workspace-switched" (windowManager.js:435).
     // A rebuild during an active drag would kill the grab, so it is skipped then.
     const onWorkspaceSwitched = () => {
-        if (tile_panel.view === 'editor')
+        if (app.panel.view === 'editor')
             return;
-        if (tile_panel.dragging)
+        if (app.panel.dragging)
             global.log('greenTile rebuild suppressed (drag)');
         else
             tile_panel_rebuild(app);
     };
-    tile_panel.sig.push({ obj: global.workspace_manager, id: global.workspace_manager.connect('workspace-switched', onWorkspaceSwitched) });
+    app.panel.sig.push({ obj: global.workspace_manager, id: global.workspace_manager.connect('workspace-switched', onWorkspaceSwitched) });
     // Clicking outside closes the panel, in both views, without a grab: the click
     // still acts on whatever it hit. Chrome surfaces (Cinnamon's panels, menus,
     // other extensions' overlays) deliver Clutter events — close when the pressed
@@ -1761,18 +1626,18 @@ const tile_panel_open = (app) => {
     // outside click arrives here; in list mode clicks on windows and the desktop
     // go to the clients instead — they close the panel through the focus change
     // below.
-    tile_panel.sig.push({
+    app.panel.sig.push({
         obj: global.stage,
         id: global.stage.connect('captured-event', (stage, event) => {
             if (event.type() !== tile_Clutter.EventType.BUTTON_PRESS)
                 return tile_Clutter.EVENT_PROPAGATE;
-            if (tile_panel.dragging)
+            if (app.panel.dragging)
                 return tile_Clutter.EVENT_PROPAGATE;
             const src = event.get_source();
-            if (src && tile_panel.actor && tile_panel.actor.contains(src))
+            if (src && app.panel.actor && app.panel.actor.contains(src))
                 return tile_Clutter.EVENT_PROPAGATE;
             global.log('greenTile panel closed by outside click');
-            tile_panel_close();
+            app.panel.close();
             return tile_Clutter.EVENT_PROPAGATE;
         }),
     });
@@ -1782,36 +1647,36 @@ const tile_panel_open = (app) => {
     // focus change — a window opening, an app demanding attention — closes it as
     // well; that is the price of the passive approach. Suppressed during a drag,
     // which would otherwise lose its grab.
-    tile_panel.sig.push({
+    app.panel.sig.push({
         obj: global.display,
         id: global.display.connect('notify::focus-window', () => {
-            if (tile_panel.dragging) {
+            if (app.panel.dragging) {
                 global.log('greenTile close suppressed (drag)');
                 return;
             }
             global.log('greenTile panel closed by focus change');
-            tile_panel_close();
+            app.panel.close();
         }),
     });
     // No monitors-changed handler here: on a display change enable() recreates the whole
     // App, which closes the panel; the saved-position check above covers the next open.
     panel.connect('key-press-event', (a, event) => {
         if (event.get_key_symbol() === tile_Clutter.KEY_Escape) {
-            if (tile_panel.view === 'editor')
+            if (app.panel.view === 'editor')
                 tile_editor_back(app);
             else
-                tile_panel_close();
+                app.panel.close();
             return tile_Clutter.EVENT_STOP;
         }
         return tile_Clutter.EVENT_PROPAGATE;
     });
     // The list has no modal (it must not block the desktop), so it never gets key
     // events itself. Escape is therefore grabbed as a hotkey while the list is open
-    // (same way the classic grid binds its Escape); released in tile_panel_close.
+    // (same way the classic grid binds its Escape); released in app.panel.close().
     // Side effect: while the list is open, applications do not receive Escape.
     if (!draft) {
-        utils_Main.keybindingManager.addHotKey('greenTile-panel-esc', 'Escape', () => tile_panel_close());
-        tile_panel.escBound = true;
+        utils_Main.keybindingManager.addHotKey(PANEL_ESC_NAME, 'Escape', () => app.panel.close());
+        app.panel.escBound = true;
     }
     global.log('greenTile panel open' + (draft ? ' (editor)' : ''));
     if (editor) {
@@ -1829,8 +1694,8 @@ const tile_panel_open = (app) => {
         panel.grab_key_focus();
 };
 const tile_panel_toggle = (app) => {
-    if (tile_panel.actor)
-        tile_panel_close();
+    if (app.panel.actor)
+        app.panel.close();
     else
         tile_panel_open(app);
 };
@@ -1842,6 +1707,23 @@ class App {
     constructor(platform, session, cinnamon) {
         this.platform = platform;
         this.session = session;
+        this.excl = new Exclusions({
+            appSystem: cinnamon.cinnamonNs.AppSystem,
+            windowTracker: cinnamon.cinnamonNs.WindowTracker,
+            gio: cinnamon.gio,
+            main: cinnamon.main,
+            global: cinnamon.global,
+            focusWindow: tile_focus_window,
+            retileMonitor: tile_retile_monitor,
+            retile: tile_excl_retile,
+            translate: _,
+        });
+        this.hotkeys = new Hotkeys({ keybindingManager: cinnamon.main.keybindingManager });
+        this.panel = new PanelState({
+            main: cinnamon.main,
+            glib: GLib,
+            escName: PANEL_ESC_NAME,
+        });
         this.monitors = new Monitors({
             main: cinnamon.main,
             gio: cinnamon.gio,
@@ -1859,7 +1741,7 @@ class App {
             layoutFor: tile_layout_for,
             layoutShape: tile_layout_shape,
             layoutSet: tile_layout_set,
-            collectWindows: tile_collect_windows,
+            collectWindows: (monitor, focus, ws) => tile_collect_windows(this, monitor, focus, ws),
             usableArea: getUsableScreenArea,
             gap: tile_gap,
             retileMonitor: tile_retile_monitor,
@@ -1873,7 +1755,7 @@ class App {
             glib: GLib,
             session: session,
             nextAccentGen: () => session.nextAccentGen(),
-            panelOpen: () => tile_panel.actor,
+            panelOpen: () => this.panel.actor,
             panelRebuild: (a) => tile_panel_rebuild(a),
         });
         this.border = new Border({
@@ -1883,9 +1765,9 @@ class App {
             main: utils_Main,
             global: cinnamon.global,
             stateRgb: () => this.theme.stateRgb,
-            exclCheck: tile_excl_is_excluded,
+            exclCheck: (w) => this.excl.isExcluded(w),
             layoutFor: tile_layout_for,
-            collectWindows: tile_collect_windows,
+            collectWindows: (monitor, focus, ws) => tile_collect_windows(this, monitor, focus, ws),
         });
         this.focus = new Focus({
             meta: cinnamon.meta,
@@ -1897,8 +1779,8 @@ class App {
             global: cinnamon.global,
             mainloop: tile_Mainloop,
             st: tile_St,
-            collectWindows: tile_collect_windows,
-            excludeCheck: tile_excl_is_excluded,
+            collectWindows: (monitor, focus, ws) => tile_collect_windows(this, monitor, focus, ws),
+            excludeCheck: (w) => this.excl.isExcluded(w),
             layoutShape: tile_layout_shape,
             layoutSet: tile_layout_set,
             usableArea: getUsableScreenArea,
@@ -1924,8 +1806,8 @@ class App {
             dropEnd: (grabApp, w, op) => grabApp.drop.end(grabApp, w, op),
             dropStop: () => this.drop.stop(),
             resizeEnd: (grabApp, w, op) => grabApp.split.onResizeEnd(grabApp, w, op),
-            exclToggleDelete: (seq) => tile_excl.toggled.delete(seq),
-            exclToggleClear: () => tile_excl.toggled.clear(),
+            exclToggleDelete: (seq) => this.excl.removeToggle(seq),
+            exclToggleClear: () => this.excl.clearToggles(),
         });
         this.config = new Config(this);
     }
@@ -1950,18 +1832,19 @@ const move_resize_window = (metaWindow, x, y, width, height) => {
 
 ;// CONCATENATED MODULE: ./extension.ts
 
-const platform = {
+const platform = Object.freeze({
     move_resize_window: move_resize_window,
     reset_window: reset_window,
-};
+});
 const init = () => {};
 const enable = function () {
     // One extension session per enable(): it outlives every App recreation and
     // carries the state that must survive them (settle wait, fallback-logged
     // flag, the monitors-changed handler on its own scope). Cinnamon calls
     // extension.js's exports member-style (extensionSystem.js) and extension.js
-    // forwards as gtile.enable()/gtile.disable() member calls — so `this` is
-    // the exports object and the session rides it, no module-level state left.
+    // forwards as greenTile.enable()/greenTile.disable() member calls — so
+    // `this` is the exports object and the session rides it, no module-level
+    // state left.
     this.session = new Session({
         signalManager: new tile_SignalManager(),
         layoutManager: Main.layoutManager,
@@ -1976,6 +1859,7 @@ const enable = function () {
             meta: utils_Meta,
             global: global,
             gobject: imports.gi.GObject,
+            cinnamonNs: imports.gi.Cinnamon,
         }),
     });
     this.session.start();

@@ -119,6 +119,8 @@ const SETTINGS_DEFAULTS = {
     stateColor: '',
     focusBorder: false,
     fillSingleWindow: false,
+    panelSize: '',
+    windowGap: 8,
 };
 
 const createCinnamonEnv = (options) => {
@@ -134,6 +136,9 @@ const createCinnamonEnv = (options) => {
         tabList: [],
         uiGroupChildren: [],
         overlayChildren: [],
+        // chrome surface accounting for the preset panel (additive: the
+        // original addChrome/removeChrome were no-ops)
+        chromeChildren: [],
         gioSettings: [],
         // schema values for fake Gio.Settings.get_string, keyed by schema_id:
         // { 'org.x.apps.portal': { 'color-scheme': 'prefer-dark' } }
@@ -144,8 +149,15 @@ const createCinnamonEnv = (options) => {
     env.layoutManager = Object.assign(signalHub('layoutManager'), {
         monitors: [],
         primaryIndex: 0,
-        addChrome() {},
-        removeChrome() {},
+        addChrome(a) {
+            if (!env.chromeChildren.includes(a))
+                env.chromeChildren.push(a);
+        },
+        removeChrome(a) {
+            const at = env.chromeChildren.indexOf(a);
+            if (at !== -1)
+                env.chromeChildren.splice(at, 1);
+        },
     });
     env.themeManager = signalHub('themeManager');
     env.keybindingManager = {
@@ -219,7 +231,7 @@ const createCinnamonEnv = (options) => {
             return [];
         },
     });
-    env.stage = makeStub();
+    env.stage = signalHub('stage');
     env.overlayGroup = {
         add_actor(a) {
             env.overlayChildren.push(a);
@@ -444,45 +456,105 @@ const createCinnamonEnv = (options) => {
         WindowTracker: { get_default: () => ({ get_window_app: () => ({}) }) },
         Cursor: { RESIZE_BOTTOM_RIGHT: 0 },
     };
+    // Fake St actor wired like a signalHub-bearing node: records handler
+    // connect/disconnect and its destroy state. Covers every call the preset
+    // panel open/close path makes on its widgets.
+    class FakeActor {
+        constructor(opts = {}) {
+            Object.assign(this, opts);
+            this.style = this.style || '';
+            this.destroyed = false;
+            this.children = [];
+            this._handlers = [];
+            this._nextHandlerId = 1;
+        }
+        connect(sigName, cb) {
+            const id = this._nextHandlerId++;
+            this._handlers.push({ sigName, cb, id });
+            return id;
+        }
+        disconnect(id) {
+            const at = this._handlers.findIndex((h) => h.id === id);
+            if (at === -1)
+                throw new Error('fake actor: no such signal handler ' + id);
+            this._handlers.splice(at, 1);
+        }
+        count(sigName) {
+            return this._handlers.filter((h) => !sigName || h.sigName === sigName).length;
+        }
+        emit(sigName, ...args) {
+            for (const h of this._handlers.slice())
+                if (h.sigName === sigName)
+                    h.cb(...args);
+        }
+        add(child) {
+            if (!this.children.includes(child))
+                this.children.push(child);
+        }
+        add_actor(child) {
+            this.add(child);
+        }
+        remove_child(child) {
+            const at = this.children.indexOf(child);
+            if (at !== -1)
+                this.children.splice(at, 1);
+        }
+        destroy_all_children() {
+            this.children = [];
+        }
+        set_child(child) {
+            this.child = child;
+        }
+        hide() {}
+        show() {}
+        set_style() {}
+        raise_top() {}
+        set_position(x, y) {
+            this.px = x;
+            this.py = y;
+        }
+        set_size() {}
+        set_width() {}
+        set_height() {}
+        get_height() {
+            return 0;
+        }
+        get_size() {
+            return [600, 400];
+        }
+        get_position() {
+            return [0, 0];
+        }
+        get_allocation_box() {
+            return { x1: 0, y1: 0, x2: 600, y2: 400 };
+        }
+        get_preferred_height() {
+            return [0, 100];
+        }
+        contains(actor) {
+            return actor === this || this.children.includes(actor);
+        }
+        grab_key_focus() {}
+        queue_repaint() {}
+        destroy() {
+            if (this.destroyed)
+                return;
+            this.destroyed = true;
+            this._handlers.length = 0;
+        }
+    }
     const st = {
-        Bin: class {
-            constructor(opts) {
-                Object.assign(this, opts);
-                this.style = this.style || '';
-                this.destroyed = false;
-            }
-            hide() {}
-            show() {}
-            set_style(style) {
-                this.style = style;
-            }
-            raise_top() {}
-            set_position() {}
-            set_size() {}
-            destroy() {
-                this.destroyed = true;
-            }
-        },
+        Align: { START: 'start', MIDDLE: 'middle', END: 'end' },
+        PolicyType: { NEVER: 'never', AUTOMATIC: 'automatic' },
+        Bin: class extends FakeActor {},
+        Widget: class extends FakeActor {},
+        BoxLayout: class extends FakeActor {},
+        Button: class extends FakeActor {},
+        Label: class extends FakeActor {},
+        ScrollView: class extends FakeActor {},
+        Entry: class extends FakeActor {},
+        DrawingArea: class extends FakeActor {},
         ThemeContext: { get_for_stage: () => ({ get_theme: () => env.stTheme }) },
-        // drop preview actor: records its lifetime for the drag assertions
-        Widget: class {
-            constructor(opts) {
-                Object.assign(this, opts);
-                this.destroyed = false;
-                this.shown = false;
-            }
-            hide() {
-                this.shown = false;
-            }
-            show() {
-                this.shown = true;
-            }
-            set_position() {}
-            set_size() {}
-            destroy() {
-                this.destroyed = true;
-            }
-        },
     };
     env.gi = proxyStub({ GLib: env.glib, Gio: gio, Meta: meta, Cinnamon: cinnamon, St: st });
 
