@@ -17,7 +17,7 @@ const path = require('node:path');
 const { ROOT } = require('./cinnamon-loader');
 
 const FILES = ['greenTile.js'].concat(
-    ['runtime', 'ui'].flatMap((sub) => fs.readdirSync(path.join(ROOT, 'lib', sub))
+    ['runtime', 'ui', 'tiling'].flatMap((sub) => fs.readdirSync(path.join(ROOT, 'lib', sub))
         .filter((f) => f.endsWith('.js'))
         .map((f) => path.join('lib', sub, f)))
         .sort()
@@ -77,7 +77,7 @@ test('guard flags mutable top-level state and accepts the allowed forms', () => 
     assert.equal(findViolations('    let x = 0;', 'f.js').length, 0, 'only column 0 is module level');
 });
 
-test('greenTile.js, lib/runtime/** and lib/ui/** carry no mutable module-level state', () => {
+test('greenTile.js, lib/runtime/**, lib/ui/** and lib/tiling/** carry no mutable module-level state', () => {
     const seen = [];
     for (const file of FILES) {
         const violations = findViolations(fs.readFileSync(path.join(ROOT, file), 'utf8'), file);
@@ -92,4 +92,6 @@ test('greenTile.js, lib/runtime/** and lib/ui/** carry no mutable module-level s
     assert.ok(seen.includes(path.join('lib/ui', 'editor.js')), 'lib/ui/editor.js covered');
     assert.ok(seen.includes(path.join('lib/ui', 'draw.js')), 'lib/ui/draw.js covered');
     assert.ok(seen.includes(path.join('lib/ui', 'i18n.js')), 'lib/ui/i18n.js covered');
+    assert.ok(seen.includes(path.join('lib/tiling', 'layout.js')), 'lib/tiling/layout.js covered');
+    assert.ok(seen.includes(path.join('lib/tiling', 'retile.js')), 'lib/tiling/retile.js covered');
 });
