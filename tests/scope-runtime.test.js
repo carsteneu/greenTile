@@ -280,6 +280,47 @@ test('a throwing timer callback untracks the source and rethrows', () => {
     assert.equal(mainloop.removed.includes(id), false, 'dead source must not be removed again');
 });
 
+test('finalized fake GObjects are skipped, other signals still released (vendor _signalIsConnected semantics)', () => {
+    const sm = fakeSignalManager();
+    const scope = new Scope({ signalManager: sm, mainloop: fakeMainloop(), glib: makeGlib() });
+    const released = [];
+    const finalized = {
+        is_finalized: () => true,
+        disconnect() { released.push('finalized'); },
+    };
+    const healthy = mkDisconnectingTarget('healthy', released);
+    scope.connect(healthy, 'a', () => {});
+    scope.connect(finalized, 'b', () => {});
+    const another = mkDisconnectingTarget('another', released);
+    scope.connect(another, 'c', () => {});
+    scope.destroy();
+    assert.deepEqual(released, ['healthy:1', 'another:3'], 'finalized GObject untouched, others released');
+});
+
+test('already-released GObject ids are skipped when gobject is injected, connected ones released', () => {
+    const sm = fakeSignalManager();
+    const gobject = { signal_handler_is_connected: () => false };
+    const scope = new Scope({ signalManager: sm, mainloop: fakeMainloop(), glib: makeGlib(), gobject });
+    const released = [];
+    const window = {
+        is_finalized: () => false,
+        disconnect(id) { released.push('g:' + id); },
+    };
+    scope.connect(window, 'position-changed', () => {});
+    scope.destroy();
+    assert.deepEqual(released, [], 'released id must not be disconnected again');
+
+    const gobjectConnected = { signal_handler_is_connected: () => true };
+    const scope2 = new Scope({ signalManager: fakeSignalManager(), mainloop: fakeMainloop(), glib: makeGlib(), gobject: gobjectConnected });
+    scope2.connect(window, 'position-changed', () => {});
+    scope2.destroy();
+    assert.equal(released.length, 1, 'connected GObject id released');
+});
+
+const mkDisconnectingTarget = (name, released) => ({
+    disconnect(id) { released.push(name + ':' + id); },
+});
+
 test('createScope returns a Scope with the same behaviour', () => {
     const signalManager = fakeSignalManager();
     const scope = createScope({ signalManager, mainloop: fakeMainloop(), glib: makeGlib() });
