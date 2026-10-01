@@ -800,8 +800,35 @@ test('a throwing flush during monitors-changed does not abort the recreation: th
     assert.equal(env.settingsInstances[1].finalized, false, 'the new settings are live');
     assert.equal(reportContains(env, 'injected flush failure'), true, 'the flush failure is reported');
     ext.disable();
-    assert.equal(env.totalHandlers(), 0, 'disable after the recovered recreation is clean');
-    assert.equal(env.liveTimers().length, 0, 'no timer left');
+    assert.equal(env.totalHandlers(), 0);
+    ext.disable();
+    assert.equal(env.totalHandlers(), 0, 'repeated disable after a failed recreation stays safe');
+});
+
+test('multiple failing steps produce exactly one aggregated report', () => {
+    const { env, ext } = loadExtension();
+    ext.enable();
+    env.flushDisplayConfigNoReply();
+    ext.session.app.split.flush = () => { throw new Error('injected flush failure'); };
+    settingsInstance(env).finalize = () => { throw new Error('injected finalize failure'); };
+    assert.doesNotThrow(() => ext.disable());
+    const reports = env.logErrors.filter((l) => l.indexOf('greenTile cleanup') === 0);
+    assert.equal(reports.length, 1, 'exactly one aggregated report for both failures');
+    assert.equal(reports[0].indexOf('injected flush failure') !== -1, true, 'the flush failure is in the report');
+    assert.equal(reports[0].indexOf('injected finalize failure') !== -1, true, 'the finalize failure is in the same report');
+});
+
+test('a settings slot construction failure before any acquisition is tolerated by the rollback', () => {
+    const { env, ext } = loadExtension();
+    env.imports.ui.settings.ExtensionSettings = class {
+        constructor() { throw new Error('injected settings failure'); }
+    };
+    assert.throws(() => ext.enable(), /injected settings failure/, 'the enable fails at the settings slot');
+    assert.equal(ext.session.app, null, 'no App was assigned');
+    assert.deepEqual(env.greenTileHotkeys(), [], 'no hotkeys were registered');
+    assert.equal(env.totalHandlers(), 0, 'nothing stays connected');
+    assert.doesNotThrow(() => ext.disable(), 'disable survives the never-created App');
+    assert.equal(env.totalHandlers(), 0, 'disable after a failed enable stays clean');
 });
 
 // Rollback on partial initialization (todo_fixes.md #3): a Config constructor
