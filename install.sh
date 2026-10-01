@@ -16,11 +16,24 @@ if [ ! -d "$SRC" ]; then
     echo "install.sh: $SRC not found — run this script from the unpacked release zip." >&2
     exit 1
 fi
+for f in metadata.json extension.js settings-schema.json stylesheet.css icon.png LICENSE; do
+    [ -f "$SRC/$f" ] || { echo "install.sh: $f is missing in $SRC — run this script from an unpacked greenTile release zip." >&2; exit 1; }
+done
 
 PARENT=$(dirname "$DEST")
 mkdir -p "$PARENT"
 STAGE=$(mktemp -d "$PARENT/.greenTile-install.XXXXXX")
-trap 'rm -rf "$STAGE"' EXIT
+RESTORE_FAILED=""
+cleanup() {
+    # If even the restore failed, the backup inside the stage is the user's
+    # only copy — keep it and point the way back, instead of removing it.
+    if [ -n "$RESTORE_FAILED" ]; then
+        echo "install.sh: your previous installation is preserved at $STAGE/old — move it back to $DEST by hand." >&2
+        return
+    fi
+    rm -rf "$STAGE"
+}
+trap cleanup EXIT
 NEW="$STAGE/$UUID"
 
 # Stage everything first: a failure up to the swap leaves the previous
@@ -47,16 +60,21 @@ done
 
 # Replace the old installation wholesale: one rename puts the new tree in
 # place, so no partial or mixed state can survive; files the package does not
-# ship (stale modules, leftover po/, a stray old LICENSE) vanish with it. On
-# failure the backup is moved back.
+# ship (stale modules, leftover po/, a stray old LICENSE) vanish with it. A
+# failed swap moves the backup back; if even that fails, the EXIT trap keeps
+# the backup and points at it — it is the only surviving copy.
 BACKUP="$STAGE/old"
 if [ -e "$DEST" ]; then
     mv "$DEST" "$BACKUP"
 fi
 if ! mv "$NEW" "$DEST"; then
     if [ -e "$BACKUP" ]; then
-        mv "$BACKUP" "$DEST"
-        echo "install.sh: could not replace $DEST — your previous installation is intact and restored." >&2
+        if mv "$BACKUP" "$DEST"; then
+            echo "install.sh: could not replace $DEST — your previous installation is intact and restored." >&2
+        else
+            RESTORE_FAILED=1
+            echo "install.sh: replacing $DEST failed and the backup could not be restored — the previous installation is preserved at $BACKUP. Move it back to $DEST by hand." >&2
+        fi
     else
         echo "install.sh: could not install to $DEST — nothing was changed." >&2
     fi

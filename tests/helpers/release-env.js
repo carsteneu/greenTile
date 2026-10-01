@@ -10,6 +10,17 @@ const { ROOT } = require('./cinnamon-loader');
 
 const UUID = 'greenTile@carsteneu';
 const TMP = path.join(ROOT, '.yesmem', 'tmp');
+
+// fail fast with a clear message instead of confusing per-test failures
+// when the host lacks the system tools the scripts and fixtures rely on
+const toolPath = (t) => {
+    const r = spawn('which', [t], { encoding: 'utf8' });
+    return r.status === 0 ? r.stdout.trim() : '';
+};
+const REAL_MV = toolPath('mv');
+if (['mv', 'zip', 'unzip', 'msgfmt'].some((t) => !toolPath(t))) {
+    throw new Error('shell-script tests need the mv, zip, unzip and msgfmt tools on PATH');
+}
 // Version the curl stub serves from .../releases/latest
 const LATEST = '9.9.9';
 
@@ -173,7 +184,7 @@ const copyScript = (dir, name) => {
 };
 
 module.exports = {
-    UUID, TMP, LATEST, EXT,
+    UUID, TMP, LATEST, EXT, REAL_MV,
     makeFixtureZip, makeEnv, seedInstalled,
     installedVersion, downloadedVersion,
     runScript, copyScript, mkdir, write,

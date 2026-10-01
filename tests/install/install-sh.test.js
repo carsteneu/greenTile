@@ -7,7 +7,7 @@ const test = require('node:test');
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const path = require('node:path');
-const { UUID, EXT, LATEST, TMP, runScript, mkdir, write } = require('../helpers/release-env');
+const { UUID, EXT, LATEST, TMP, REAL_MV, runScript, mkdir, write } = require('../helpers/release-env');
 const { ROOT } = require('../helpers/cinnamon-loader');
 
 const cleanups = [];
@@ -68,16 +68,17 @@ function makeInstallEnv(name, { msgfmt = 'real', failSwap = false } = {}) {
     }
     if (failSwap) {
         // counting mv stub for injection: every mv whose target ends in the
-        // marked failBookmark fails exactly once, then delegates. This kills
-        // the non-atomic swap without production-side test hooks.
+        // marked failBookmark fails while the failure count in $GT_MVLOG is
+        // below GT_FAIL_MV_TIMES, then delegates. Marks hit the swap and
+        // (with a second budget) the restore — no production-side test hooks.
         write(path.join(x.bin, 'mv'), `#!/usr/bin/env bash
 log="\${GT_MVLOG:?}"
 n=$(cat "$log" 2>/dev/null || echo 0)
 if [ -n "\${GT_FAIL_MV_MARK:-}" ]; then
     case "\${@: -1}" in
         *"\${GT_FAIL_MV_MARK}")
-            if [ "$n" = 0 ]; then
-                echo 1 > "$log"
+            if [ "$n" -lt "\${GT_FAIL_MV_TIMES:-1}" ]; then
+                echo $((n + 1)) > "$log"
                 exit 7
             fi
             ;;
@@ -92,13 +93,14 @@ exec "\${GT_REAL_MV:?}" "$@"
     x.env = {
         HOME: x.home,
         PATH: `${x.bin}:${process.env.PATH}`,
-        GT_REAL_MV: '/bin/mv',
+        GT_REAL_MV: REAL_MV,
     };
     if (failSwap) {
         x.env.GT_MVLOG = x.mvlog;
         // the swap's target basename is the UUID; backup and .mo moves do not
         // end in the UUID, so injection hits the swap and only the swap
         x.env.GT_FAIL_MV_MARK = UUID;
+        x.env.GT_FAIL_MV_TIMES = x.env.GT_FAIL_MV_TIMES || '1';
     }
     return x;
 }
@@ -218,4 +220,23 @@ test('update with failing swap: previous installation is restored', () => {
     assert.equal(fs.readFileSync(path.join(src, 'extension.js'), 'utf8').trim(), '// NEW extension');
     oldInstallIntact(x);
     assert.equal(readMetaVersion(x), '1.2.0');
+});
+
+test('update with failed restore: backup is kept for manual recovery', () => {
+    const x = makeInstallEnv('install-restore-fails', { failSwap: true });
+    const { src } = makeSource(x);
+    seedOldInstall(x.home);
+    x.env.GT_FAIL_MV_TIMES = '2'; // swap fails, then the restore fails too
+    const r = runInstall(x);
+    assert.ok(r.status !== 0, 'failed restore must fail the install');
+    assert.equal(fs.readFileSync(path.join(src, 'extension.js'), 'utf8').trim(), '// NEW extension');
+    assert.ok(!fs.existsSync(extDir(x)), 'no half installation must exist');
+    assert.ok(r.stderr.includes('preserved at'), `stderr must point at the backup: ${r.stderr}`);
+    // the kept stage is the user's only copy now: the old lib module and
+    // entry file must still be readable inside $STAGE/old
+    const parent = path.join(x.home, '.local', 'share', 'cinnamon', 'extensions');
+    const kept = fs.readdirSync(parent).filter((e) => e.startsWith('.greenTile-install.'));
+    assert.equal(kept.length, 1, `stage not preserved: ${kept.join(', ')}`);
+    assert.equal(fs.readFileSync(path.join(parent, kept[0], 'old', 'lib', 'old.js'), 'utf8').trim(), 'var old = 1;', 'old lib module lost from the backup');
+    assert.ok(fs.readFileSync(path.join(parent, kept[0], 'old', 'extension.js'), 'utf8').includes('OLD extension'), 'old extension lost from the backup');
 });

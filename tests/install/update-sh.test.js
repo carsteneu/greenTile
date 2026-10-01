@@ -118,6 +118,14 @@ test('unreachable release URL: claims it cannot determine the latest release', (
     assert.equal(installedVersion(x.home), null);
 });
 
+test('API returns no tag: the releases/latest redirect fallback takes over', () => {
+    const { x, script } = setup('update-head-fallback', 'none');
+    const r = runScript(script, [], { ...x.env, GT_CURL_API_FAIL: '1' });
+    assert.equal(r.status, 0, `stderr: ${r.stderr}`);
+    assert.equal(installedVersion(x.home), LATEST);
+    assert.equal(downloadedVersion(x.stublog), LATEST);
+});
+
 test('download failure: clear error and no change to an existing installation', () => {
     const { x, script } = setup('update-dl-fail', '1.2.0');
     const r = runScript(script, [], { ...x.env, GT_CURL_DL_FAIL: '1' });
