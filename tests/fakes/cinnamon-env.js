@@ -32,22 +32,23 @@ const proxyStub = (branch) => new Proxy(function () {}, {
 });
 
 // Fake SignalManager mirroring /usr/share/cinnamon/js/misc/signalManager.js:
-// storage entries [sigName, obj, callback, id], identical connects dedupe (a
-// second connect on (sigName, obj, callback) is a no-op), getSignals drives the
-// runtime Scope release path (obj.disconnect per entry by the scope itself) and
-// disconnectAllSignals only resets the storage afterwards.
+// storage entries [sigName, obj, callback, id] with the REAL connect id the
+// target returns (the runtime Scope releases obj.disconnect per that id; the
+// real SignalManager stores obj.connect()'s return value the same way),
+// identical connects dedupe (a second connect on (sigName, obj, callback) is
+// a no-op), getSignals drives the runtime Scope release path (obj.disconnect
+// per entry by the scope itself) and disconnectAllSignals only resets the
+// storage afterwards.
 class FakeSignalManager {
     constructor() {
         this._storage = [];
-        this._nextId = 1;
     }
     connect(obj, sigName, callback, bind, force) {
         if (!force
             && this._storage.some(([s, o, c]) => s === sigName && o === obj && c === callback))
             return;
-        const id = this._nextId++;
+        const id = obj.connect(sigName, callback);
         this._storage.push([sigName, obj, callback, id]);
-        obj.connect(sigName, callback);
         return id;
     }
     getSignals() {
@@ -186,6 +187,10 @@ const createCinnamonEnv = (options) => {
         },
     });
     env.workspaceManager = signalHub('workspaceManager');
+    // active workspace identity for the auto-tiling observer paths; null until a
+    // test opts in (windows with get_workspace() -> null match it)
+    env.activeWorkspace = null;
+    env.workspaceManager.get_active_workspace = () => env.activeWorkspace;
     env.windowManager = signalHub('windowManager');
     env.appSystem = Object.assign(signalHub('AppSystem'), {
         get_all() {
@@ -338,6 +343,10 @@ const createCinnamonEnv = (options) => {
                 env.customBindings.set(name, fn);
         },
         MaximizeFlags: { HORIZONTAL: 2, VERTICAL: 4 },
+        // value 6 mirrors the real Meta.WindowType.NORMAL enum weight; only the
+        // identity comparison with greenTile's own Meta.WindowType.NORMAL read
+        // matters, which is the same fake object
+        WindowType: { NORMAL: 6, DIALOG: 3 },
         MonitorManager: {
             get: () => ({ get_monitor_for_connector: () => -1 }),
         },
