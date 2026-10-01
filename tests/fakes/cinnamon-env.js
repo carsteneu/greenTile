@@ -32,22 +32,23 @@ const proxyStub = (branch) => new Proxy(function () {}, {
 });
 
 // Fake SignalManager mirroring /usr/share/cinnamon/js/misc/signalManager.js:
-// storage entries [sigName, obj, callback, id], identical connects dedupe (a
-// second connect on (sigName, obj, callback) is a no-op), getSignals drives the
-// runtime Scope release path (obj.disconnect per entry by the scope itself) and
-// disconnectAllSignals only resets the storage afterwards.
+// storage entries [sigName, obj, callback, id] with the REAL connect id the
+// target returns (the runtime Scope releases obj.disconnect per that id; the
+// real SignalManager stores obj.connect()'s return value the same way),
+// identical connects dedupe (a second connect on (sigName, obj, callback) is
+// a no-op), getSignals drives the runtime Scope release path (obj.disconnect
+// per entry by the scope itself) and disconnectAllSignals only resets the
+// storage afterwards.
 class FakeSignalManager {
     constructor() {
         this._storage = [];
-        this._nextId = 1;
     }
     connect(obj, sigName, callback, bind, force) {
         if (!force
             && this._storage.some(([s, o, c]) => s === sigName && o === obj && c === callback))
             return;
-        const id = this._nextId++;
+        const id = obj.connect(sigName, callback);
         this._storage.push([sigName, obj, callback, id]);
-        obj.connect(sigName, callback);
         return id;
     }
     getSignals() {
