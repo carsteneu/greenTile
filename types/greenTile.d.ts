@@ -154,6 +154,10 @@ type SplitFacade = {
     onResizeEnd(app: AppFacade, win: CinnamonWindow, op: string): void;
     ref(app: AppFacade, monitorIndex: number, wsIndex: number, n: number): { key: string; mkey: string; wskey: string; n: string } | null;
     forget(refKey: string): void;
+    flush(app: AppFacade): void;
+    hotkey(app: AppFacade, action: string): void;
+    destroy(): void;
+    reset(): void;
 };
 
 /** Monitor registry facade (lib/runtime/monitors.js). */
@@ -163,6 +167,8 @@ type MonitorsFacade = {
     labels: string[];
     wsKey(monitorIndex: number, wsIndex: number): WsKey;
     onlyPrimary(): boolean;
+    refresh(onReady: () => void): void;
+    destroy(): void;
 };
 
 /** Exclusion facade (lib/runtime/exclusions.js). */
@@ -195,6 +201,11 @@ type AppFacade = {
     drop: AnyRecord;
     /** Focus hotkey runtime (lib/runtime/focus.js). */
     focus: AnyRecord;
+    /** Hotkey owner (lib/runtime/hotkeys.js). */
+    hotkeys: {
+        register(bindings: Array<{ name: string; bindings: any; callback: () => void }>): void;
+        remove(): void;
+    };
 };
 
 /** gettext binding, lib/ui/i18n.js */
