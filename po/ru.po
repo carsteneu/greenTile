@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: greenTile 1.2.0\n"
 "Report-Msgid-Bugs-To: https://github.com/carsteneu\n"
-"POT-Creation-Date: 2026-10-01 15:08+0200\n"
+"POT-Creation-Date: 2026-10-01 15:46+0200\n"
 "PO-Revision-Date: \n"
 "Last-Translator: blogdron\n"
 "Language-Team: Russian\n"
@@ -374,8 +374,8 @@ msgstr "Акцентный цвет"
 
 #. settings-schema.json->accentMode->tooltip
 msgid ""
-"Follow theme tracks the accent color of the Cinnamon theme live. Custom uses "
-"the color below."
+"Follow theme tracks the accent color of the Cinnamon theme live. Custom uses"
+" the color below."
 msgstr ""
 "«Как в теме» в реальном времени берёт акцентный цвет темы Cinnamon. «Свой» "
 "использует цвет, выбранный ниже."
@@ -397,8 +397,8 @@ msgstr "Свой акцентный цвет"
 #. settings-schema.json->accentColor->tooltip
 msgid "Accent of the preset panel and editor when Accent color is Custom."
 msgstr ""
-"Акцент панели преднастроек и редактора, когда для параметра «Акцентный цвет» "
-"выбрано «Свой»."
+"Акцент панели преднастроек и редактора, когда для параметра «Акцентный цвет»"
+" выбрано «Свой»."
 
 #. settings-schema.json->stateMode->description
 msgid "State color"
@@ -427,3 +427,12 @@ msgid "State color of the preset panel when State color is Custom."
 msgstr ""
 "Цвет состояния панели преднастроек, когда для параметра «Цвет состояния» "
 "выбрано «Свой»."
+
+#: .yesmem/tmp/makepot-stage/greenTile@carsteneu/lib/runtime/exclusions.js:201
+#| msgid "windows"
+msgid "Window floats"
+msgstr "Окно свободно"
+
+#: .yesmem/tmp/makepot-stage/greenTile@carsteneu/lib/runtime/exclusions.js:201
+msgid "Window tiles again"
+msgstr "Окно снова в разбиении"

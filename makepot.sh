@@ -31,8 +31,15 @@ mkdir -p "$STAGE/$UUID"
 cp extension.js metadata.json settings-schema.json "$STAGE/$UUID/"
 cp -R lib "$STAGE/$UUID/lib"
 
-"$PYTHON" "$(command -v cinnamon-xlet-makepot)" -o "$POT" "$STAGE/$UUID"
-rm -rf "$STAGE"
+"$PYTHON" "$(command -v cinnamon-xlet-makepot)" -o "$STAGE.pot" "$STAGE/$UUID"
+# cinnamon-xlet-makepot/xgettext only extract the `_` keyword. lib/runtime/
+# exclusions.js receives take-_ via `translate:` (lib/app/app.js) — extract
+# those literals with a second xgettext pass and merge both templates.
+find "$STAGE/$UUID" -name '*.js' | sort | xargs xgettext \
+    --language=JavaScript --from-code=UTF-8 --keyword=translate \
+    --package-version="$VERSION" --output="$STAGE.translate.pot"
+msgcat --use-first --output-file="$POT" "$STAGE.pot" "$STAGE.translate.pot"
+rm -rf "$STAGE" "$STAGE.pot" "$STAGE.translate.pot"
 
 # cinnamon-xlet-makepot writes xgettext's placeholder header; replace it.
 # The translator fields (PO-Revision-Date, Last-Translator, Language-Team)

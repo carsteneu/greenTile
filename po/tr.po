@@ -10,7 +10,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: greenTile 1.2.0\n"
 "Report-Msgid-Bugs-To: https://github.com/carsteneu\n"
-"POT-Creation-Date: 2026-10-01 15:08+0200\n"
+"POT-Creation-Date: 2026-10-01 15:46+0200\n"
 "PO-Revision-Date: 2025-03-05 17:30+0300\n"
 "Last-Translator: Erdem Uygun <uygun.erdem@gmail.com>\n"
 "Language-Team: Turkish <dev@pardus.org.tr>\n"
@@ -59,8 +59,8 @@ msgid ""
 "Click or drag: the row sets how many windows the column holds. Right-click "
 "removes a column."
 msgstr ""
-"Tıklayın veya sürükleyin: satır, sütunun kaç pencere alacağını belirler. Sağ "
-"tıklama bir sütunu kaldırır."
+"Tıklayın veya sürükleyin: satır, sütunun kaç pencere alacağını belirler. Sağ"
+" tıklama bir sütunu kaldırır."
 
 #: lib/ui/editor.js:311
 msgid "Name"
@@ -153,7 +153,8 @@ msgstr "Yeni ön ayar"
 
 #: lib/ui/panel.js:377
 msgid "Click a row to apply it to this workspace and tile right away"
-msgstr "Bu çalışma alanına uygulamak ve hemen döşemek için bir satıra tıklayın"
+msgstr ""
+"Bu çalışma alanına uygulamak ve hemen döşemek için bir satıra tıklayın"
 
 #. metadata.json->name
 msgid "greenTile"
@@ -316,7 +317,8 @@ msgstr "Döşemeyi canlandır"
 
 #. settings-schema.json->tileAnimation->tooltip
 msgid "Windows glide into their new place. Off: they jump there at once."
-msgstr "Pencereler yeni yerlerine kayarak geçer. Kapalı: hemen oraya atlarlar."
+msgstr ""
+"Pencereler yeni yerlerine kayarak geçer. Kapalı: hemen oraya atlarlar."
 
 #. settings-schema.json->focusBorder->description
 msgid "Border around the focused window"
@@ -372,8 +374,8 @@ msgstr "Vurgu rengi"
 
 #. settings-schema.json->accentMode->tooltip
 msgid ""
-"Follow theme tracks the accent color of the Cinnamon theme live. Custom uses "
-"the color below."
+"Follow theme tracks the accent color of the Cinnamon theme live. Custom uses"
+" the color below."
 msgstr ""
 "“Temayı izle” Cinnamon temasının vurgu rengini canlı olarak takip eder. "
 "“Özel” aşağıdaki rengi kullanır."
@@ -424,3 +426,12 @@ msgstr "Özel durum rengi"
 msgid "State color of the preset panel when State color is Custom."
 msgstr ""
 "“Durum rengi” “Özel” olarak ayarlandığında ön ayar panelinin durum rengi."
+
+#: .yesmem/tmp/makepot-stage/greenTile@carsteneu/lib/runtime/exclusions.js:201
+#| msgid "windows"
+msgid "Window floats"
+msgstr "Pencere serbest"
+
+#: .yesmem/tmp/makepot-stage/greenTile@carsteneu/lib/runtime/exclusions.js:201
+msgid "Window tiles again"
+msgstr "Pencere yeniden döşeniyor"

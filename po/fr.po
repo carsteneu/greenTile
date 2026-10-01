@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: greenTile 1.2.0\n"
 "Report-Msgid-Bugs-To: https://github.com/carsteneu\n"
-"POT-Creation-Date: 2026-10-01 15:08+0200\n"
+"POT-Creation-Date: 2026-10-01 15:46+0200\n"
 "PO-Revision-Date: 2025-02-05 18:38+0100\n"
 "Last-Translator: claudiux\n"
 "Language-Team: French\n"
@@ -163,8 +163,8 @@ msgid ""
 "Column tiling with per-workspace presets, auto mode and snap-on-release. "
 "Fork of gTile by shuairan."
 msgstr ""
-"Tuilage en colonnes avec préréglages par espace de travail, mode automatique "
-"et ancrage au relâchement. Dérivé de gTile par shuairan."
+"Tuilage en colonnes avec préréglages par espace de travail, mode automatique"
+" et ancrage au relâchement. Dérivé de gTile par shuairan."
 
 #. settings-schema.json->settings-tab->title
 msgid "Settings"
@@ -375,8 +375,8 @@ msgstr "Couleur d'accentuation"
 
 #. settings-schema.json->accentMode->tooltip
 msgid ""
-"Follow theme tracks the accent color of the Cinnamon theme live. Custom uses "
-"the color below."
+"Follow theme tracks the accent color of the Cinnamon theme live. Custom uses"
+" the color below."
 msgstr ""
 "« Suivre le thème » reprend en direct la couleur d'accentuation du thème "
 "Cinnamon. « Personnalisée » utilise la couleur ci-dessous."
@@ -427,5 +427,14 @@ msgstr "Couleur d'état personnalisée"
 #. settings-schema.json->stateColor->tooltip
 msgid "State color of the preset panel when State color is Custom."
 msgstr ""
-"Couleur d'état du panneau des préréglages lorsque « Couleur d'état » est sur "
-"« Personnalisée »."
+"Couleur d'état du panneau des préréglages lorsque « Couleur d'état » est sur"
+" « Personnalisée »."
+
+#: .yesmem/tmp/makepot-stage/greenTile@carsteneu/lib/runtime/exclusions.js:201
+#| msgid "windows"
+msgid "Window floats"
+msgstr "Fenêtre flottante"
+
+#: .yesmem/tmp/makepot-stage/greenTile@carsteneu/lib/runtime/exclusions.js:201
+msgid "Window tiles again"
+msgstr "Fenêtre de nouveau tuilée"

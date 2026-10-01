@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: greenTile 1.2.0\n"
 "Report-Msgid-Bugs-To: https://github.com/carsteneu\n"
-"POT-Creation-Date: 2026-10-01 15:08+0200\n"
+"POT-Creation-Date: 2026-10-01 15:46+0200\n"
 "PO-Revision-Date: 2023-11-02 11:34-0300\n"
 "Last-Translator: \n"
 "Language-Team: Spanish\n"
@@ -331,8 +331,8 @@ msgid ""
 "After a Super+Arrow focus move, mark the newly focused window with a thin "
 "border in the state color for three seconds."
 msgstr ""
-"Tras mover el foco con Super+Flecha, marca la ventana que recibe el foco con "
-"un borde fino del color de estado durante tres segundos."
+"Tras mover el foco con Super+Flecha, marca la ventana que recibe el foco con"
+" un borde fino del color de estado durante tres segundos."
 
 #. settings-schema.json->fillSingleWindow->description
 msgid "Fill the monitor with a single window"
@@ -376,8 +376,8 @@ msgstr "Color de acento"
 
 #. settings-schema.json->accentMode->tooltip
 msgid ""
-"Follow theme tracks the accent color of the Cinnamon theme live. Custom uses "
-"the color below."
+"Follow theme tracks the accent color of the Cinnamon theme live. Custom uses"
+" the color below."
 msgstr ""
 "«Seguir el tema» adopta en vivo el color de acento del tema de Cinnamon. "
 "«Personalizado» usa el color de abajo."
@@ -399,8 +399,8 @@ msgstr "Color de acento personalizado"
 #. settings-schema.json->accentColor->tooltip
 msgid "Accent of the preset panel and editor when Accent color is Custom."
 msgstr ""
-"Acento del panel de preajustes y del editor cuando «Color de acento» está en "
-"«Personalizado»."
+"Acento del panel de preajustes y del editor cuando «Color de acento» está en"
+" «Personalizado»."
 
 #. settings-schema.json->stateMode->description
 msgid "State color"
@@ -429,3 +429,12 @@ msgid "State color of the preset panel when State color is Custom."
 msgstr ""
 "Color de estado del panel de preajustes cuando «Color de estado» está en "
 "«Personalizado»."
+
+#: .yesmem/tmp/makepot-stage/greenTile@carsteneu/lib/runtime/exclusions.js:201
+#| msgid "windows"
+msgid "Window floats"
+msgstr "Ventana flotante"
+
+#: .yesmem/tmp/makepot-stage/greenTile@carsteneu/lib/runtime/exclusions.js:201
+msgid "Window tiles again"
+msgstr "Ventana de nuevo en mosaico"

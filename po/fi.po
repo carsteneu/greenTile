@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: greenTile 1.2.0\n"
 "Report-Msgid-Bugs-To: https://github.com/carsteneu\n"
-"POT-Creation-Date: 2026-10-01 15:08+0200\n"
+"POT-Creation-Date: 2026-10-01 15:46+0200\n"
 "PO-Revision-Date: 2024-07-25 20:23+0300\n"
 "Last-Translator: Kimmo Kujansuu <mrkujansuu@gmail.com>\n"
 "Language-Team: Finnish\n"
@@ -215,7 +215,8 @@ msgstr "Laatoita kaikki ikkunat 3 sarakkeeseen"
 
 #. settings-schema.json->autoOnHotkey->description
 msgid "Turn automatic tiling on for this workspace and tile now"
-msgstr "Ota automaattinen laatoitus käyttöön tässä työtilassa ja laatoita heti"
+msgstr ""
+"Ota automaattinen laatoitus käyttöön tässä työtilassa ja laatoita heti"
 
 #. settings-schema.json->autoOffHotkey->description
 msgid "Turn automatic tiling off for this workspace"
@@ -378,8 +379,8 @@ msgstr "Korostusväri"
 
 #. settings-schema.json->accentMode->tooltip
 msgid ""
-"Follow theme tracks the accent color of the Cinnamon theme live. Custom uses "
-"the color below."
+"Follow theme tracks the accent color of the Cinnamon theme live. Custom uses"
+" the color below."
 msgstr ""
 "”Seuraa teemaa” käyttää Cinnamon-teeman korostusväriä reaaliajassa. "
 "”Mukautettu” käyttää alla olevaa väriä."
@@ -429,3 +430,12 @@ msgstr "Mukautettu tilaväri"
 #. settings-schema.json->stateColor->tooltip
 msgid "State color of the preset panel when State color is Custom."
 msgstr "Esiasetuspaneelin tilaväri, kun Tilaväri on ”Mukautettu”."
+
+#: .yesmem/tmp/makepot-stage/greenTile@carsteneu/lib/runtime/exclusions.js:201
+#| msgid "windows"
+msgid "Window floats"
+msgstr "Ikkuna kelluu"
+
+#: .yesmem/tmp/makepot-stage/greenTile@carsteneu/lib/runtime/exclusions.js:201
+msgid "Window tiles again"
+msgstr "Ikkuna laatoitetaan taas"

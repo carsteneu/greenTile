@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: greenTile 1.2.0\n"
 "Report-Msgid-Bugs-To: https://github.com/carsteneu\n"
-"POT-Creation-Date: 2026-10-01 15:08+0200\n"
+"POT-Creation-Date: 2026-10-01 15:46+0200\n"
 "PO-Revision-Date: 2024-07-25 17:53+0200\n"
 "Last-Translator: Odyssey <odysseyhyd@gmail.com>\n"
 "Language-Team: Catalan\n"
@@ -163,8 +163,8 @@ msgid ""
 "Column tiling with per-workspace presets, auto mode and snap-on-release. "
 "Fork of gTile by shuairan."
 msgstr ""
-"Mosaic en columnes amb predefinicions per espai de treball, mode automàtic i "
-"ajust en deixar anar. Bifurcació del gTile de shuairan."
+"Mosaic en columnes amb predefinicions per espai de treball, mode automàtic i"
+" ajust en deixar anar. Bifurcació del gTile de shuairan."
 
 #. settings-schema.json->settings-tab->title
 msgid "Settings"
@@ -374,8 +374,8 @@ msgstr "Color d'èmfasi"
 
 #. settings-schema.json->accentMode->tooltip
 msgid ""
-"Follow theme tracks the accent color of the Cinnamon theme live. Custom uses "
-"the color below."
+"Follow theme tracks the accent color of the Cinnamon theme live. Custom uses"
+" the color below."
 msgstr ""
 "Segueix el tema adopta en directe el color d'èmfasi del tema de Cinnamon. "
 "Personalitzat utilitza el color de sota."
@@ -427,3 +427,12 @@ msgid "State color of the preset panel when State color is Custom."
 msgstr ""
 "Color d'estat del tauler de predefinicions quan Color d'estat és "
 "Personalitzat."
+
+#: .yesmem/tmp/makepot-stage/greenTile@carsteneu/lib/runtime/exclusions.js:201
+#| msgid "windows"
+msgid "Window floats"
+msgstr "La finestra flota"
+
+#: .yesmem/tmp/makepot-stage/greenTile@carsteneu/lib/runtime/exclusions.js:201
+msgid "Window tiles again"
+msgstr "La finestra torna al mosaic"

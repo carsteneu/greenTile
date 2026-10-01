@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: greenTile 1.2.0\n"
 "Report-Msgid-Bugs-To: https://github.com/carsteneu\n"
-"POT-Creation-Date: 2026-10-01 15:08+0200\n"
+"POT-Creation-Date: 2026-10-01 15:46+0200\n"
 "PO-Revision-Date: 2023-01-09 21:16+0100\n"
 "Last-Translator: Kálmán „KAMI” Szalai <kami911@gmail.com>\n"
 "Language-Team: Hungarian\n"
@@ -152,7 +152,8 @@ msgstr "Új előbeállítás"
 #: lib/ui/panel.js:377
 msgid "Click a row to apply it to this workspace and tile right away"
 msgstr ""
-"Kattints egy sorra, hogy alkalmazd erre a munkaterületre, és azonnal csempézz"
+"Kattints egy sorra, hogy alkalmazd erre a munkaterületre, és azonnal "
+"csempézz"
 
 #. metadata.json->name
 msgid "greenTile"
@@ -163,8 +164,8 @@ msgid ""
 "Column tiling with per-workspace presets, auto mode and snap-on-release. "
 "Fork of gTile by shuairan."
 msgstr ""
-"Oszlopos csempézés munkaterületenkénti előbeállításokkal, automatikus móddal "
-"és elengedéskori illesztéssel. A shuairan által készített gTile forkja."
+"Oszlopos csempézés munkaterületenkénti előbeállításokkal, automatikus móddal"
+" és elengedéskori illesztéssel. A shuairan által készített gTile forkja."
 
 #. settings-schema.json->settings-tab->title
 msgid "Settings"
@@ -253,11 +254,13 @@ msgstr "A fókuszált csempézett ablak felcserélése a jobb oldali szomszédj�
 
 #. settings-schema.json->swapUpHotkey->description
 msgid "Swap the focused tiled window with its neighbor above"
-msgstr "A fókuszált csempézett ablak felcserélése a felette lévő szomszédjával"
+msgstr ""
+"A fókuszált csempézett ablak felcserélése a felette lévő szomszédjával"
 
 #. settings-schema.json->swapDownHotkey->description
 msgid "Swap the focused tiled window with its neighbor below"
-msgstr "A fókuszált csempézett ablak felcserélése az alatta lévő szomszédjával"
+msgstr ""
+"A fókuszált csempézett ablak felcserélése az alatta lévő szomszédjával"
 
 #. settings-schema.json->presets->description
 msgid "Preset definitions (JSON)"
@@ -328,8 +331,8 @@ msgid ""
 "After a Super+Arrow focus move, mark the newly focused window with a thin "
 "border in the state color for three seconds."
 msgstr ""
-"Super+Nyíl fókuszváltás után három másodpercig vékony, állapotszínű kerettel "
-"jelöli az újonnan fókuszba került ablakot."
+"Super+Nyíl fókuszváltás után három másodpercig vékony, állapotszínű kerettel"
+" jelöli az újonnan fókuszba került ablakot."
 
 #. settings-schema.json->fillSingleWindow->description
 msgid "Fill the monitor with a single window"
@@ -352,8 +355,8 @@ msgid ""
 "Follow system tracks the desktop color scheme live; Light and Dark override "
 "it."
 msgstr ""
-"A „Rendszer követése” valós időben követi az asztal színsémáját; a „Világos” "
-"és a „Sötét” felülbírálja."
+"A „Rendszer követése” valós időben követi az asztal színsémáját; a „Világos”"
+" és a „Sötét” felülbírálja."
 
 #. settings-schema.json->panelTheme->options
 msgid "Follow system"
@@ -373,8 +376,8 @@ msgstr "Kiemelőszín"
 
 #. settings-schema.json->accentMode->tooltip
 msgid ""
-"Follow theme tracks the accent color of the Cinnamon theme live. Custom uses "
-"the color below."
+"Follow theme tracks the accent color of the Cinnamon theme live. Custom uses"
+" the color below."
 msgstr ""
 "A „Téma követése” valós időben átveszi a Cinnamon-téma kiemelőszínét. Az "
 "„Egyéni” az alábbi színt használja."
@@ -423,4 +426,14 @@ msgstr "Egyéni állapotszín"
 
 #. settings-schema.json->stateColor->tooltip
 msgid "State color of the preset panel when State color is Custom."
-msgstr "Az előbeállítás-panel állapotszíne, ha az Állapotszín értéke „Egyéni”."
+msgstr ""
+"Az előbeállítás-panel állapotszíne, ha az Állapotszín értéke „Egyéni”."
+
+#: .yesmem/tmp/makepot-stage/greenTile@carsteneu/lib/runtime/exclusions.js:201
+#| msgid "windows"
+msgid "Window floats"
+msgstr "Az ablak lebeg"
+
+#: .yesmem/tmp/makepot-stage/greenTile@carsteneu/lib/runtime/exclusions.js:201
+msgid "Window tiles again"
+msgstr "Az ablak ismét csempézve"

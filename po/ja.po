@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: greenTile 1.2.0\n"
 "Report-Msgid-Bugs-To: https://github.com/carsteneu\n"
-"POT-Creation-Date: 2026-10-01 15:08+0200\n"
+"POT-Creation-Date: 2026-10-01 15:46+0200\n"
 "PO-Revision-Date: 2022-12-15 23:42+0900\n"
 "Last-Translator: \n"
 "Language-Team: Japanese\n"
@@ -55,9 +55,7 @@ msgstr "レイアウト描画"
 msgid ""
 "Click or drag: the row sets how many windows the column holds. Right-click "
 "removes a column."
-msgstr ""
-"クリックまたはドラッグ: 行で列に収めるウィンドウ数を指定します。右クリックで"
-"列を削除します。"
+msgstr "クリックまたはドラッグ: 行で列に収めるウィンドウ数を指定します。右クリックで列を削除します。"
 
 #: lib/ui/editor.js:311
 msgid "Name"
@@ -161,8 +159,7 @@ msgid ""
 "Column tiling with per-workspace presets, auto mode and snap-on-release. "
 "Fork of gTile by shuairan."
 msgstr ""
-"ワークスペースごとのプリセット、自動モード、ドロップ時のスナップに対応した列"
-"タイル配置。shuairan 氏の gTile のフォークです。"
+"ワークスペースごとのプリセット、自動モード、ドロップ時のスナップに対応した列タイル配置。shuairan 氏の gTile のフォークです。"
 
 #. settings-schema.json->settings-tab->title
 msgid "Settings"
@@ -223,8 +220,7 @@ msgstr "プリセットパネルを開く"
 
 #. settings-schema.json->resizeWiderHotkey->description
 msgid "Make the focused tiled window wider (tap = 1 px, hold to speed up)"
-msgstr ""
-"フォーカスされたタイルウィンドウの幅を広げる (1 回押す = 1 px、長押しで加速)"
+msgstr "フォーカスされたタイルウィンドウの幅を広げる (1 回押す = 1 px、長押しで加速)"
 
 #. settings-schema.json->resizeNarrowerHotkey->description
 msgid "Make the focused tiled window narrower"
@@ -270,9 +266,7 @@ msgstr "インストール済みのアプリケーションを追加"
 msgid ""
 "Pick an application and it is added to the list below. The combobox resets "
 "after each pick."
-msgstr ""
-"アプリケーションを選ぶと下のリストに追加されます。コンボボックスは選択するた"
-"びにリセットされます。"
+msgstr "アプリケーションを選ぶと下のリストに追加されます。コンボボックスは選択するたびにリセットされます。"
 
 #. settings-schema.json->excludeAppPicker->options
 msgid "Add application …"
@@ -282,9 +276,7 @@ msgstr "アプリケーションを追加…"
 msgid ""
 "Windows matching one of these rows are never tiled; they float freely "
 "wherever you put them"
-msgstr ""
-"これらの行のいずれかに一致するウィンドウはタイル配置されず、置いた場所で自由"
-"にフローティングします"
+msgstr "これらの行のいずれかに一致するウィンドウはタイル配置されず、置いた場所で自由にフローティングします"
 
 #. settings-schema.json->exclusions->columns->title
 msgid "Match"
@@ -298,9 +290,7 @@ msgstr "テキスト"
 msgid ""
 "Gap between tiled windows (set with − / + in the preset panel; not shown in "
 "this dialog)"
-msgstr ""
-"タイル配置したウィンドウ間の間隔 (プリセットパネルの − / + で設定。このダイア"
-"ログには表示されません)"
+msgstr "タイル配置したウィンドウ間の間隔 (プリセットパネルの − / + で設定。このダイアログには表示されません)"
 
 #. settings-schema.json->windowGap->units
 msgid "px"
@@ -312,9 +302,7 @@ msgstr "タイル配置をアニメーション表示"
 
 #. settings-schema.json->tileAnimation->tooltip
 msgid "Windows glide into their new place. Off: they jump there at once."
-msgstr ""
-"ウィンドウが新しい位置へ滑らかに移動します。オフ: すぐにその位置へ移動しま"
-"す。"
+msgstr "ウィンドウが新しい位置へ滑らかに移動します。オフ: すぐにその位置へ移動します。"
 
 #. settings-schema.json->focusBorder->description
 msgid "Border around the focused window"
@@ -324,9 +312,7 @@ msgstr "フォーカスされたウィンドウの周りの境界線"
 msgid ""
 "After a Super+Arrow focus move, mark the newly focused window with a thin "
 "border in the state color for three seconds."
-msgstr ""
-"Super+矢印キーでフォーカスを移動すると、新しくフォーカスされたウィンドウを状"
-"態色の細い境界線で3秒間表示します。"
+msgstr "Super+矢印キーでフォーカスを移動すると、新しくフォーカスされたウィンドウを状態色の細い境界線で3秒間表示します。"
 
 #. settings-schema.json->fillSingleWindow->description
 msgid "Fill the monitor with a single window"
@@ -336,9 +322,7 @@ msgstr "単一ウィンドウでモニターを埋める"
 msgid ""
 "With automatic tiling or a preset on, a single tiled window fills the whole "
 "usable area instead of being left untouched."
-msgstr ""
-"自動タイル配置やプリセットが有効な場合、タイル配置された1枚のウィンドウがその"
-"まま置かれる代わりに、使用可能な領域全体を埋めます。"
+msgstr "自動タイル配置やプリセットが有効な場合、タイル配置された1枚のウィンドウがそのまま置かれる代わりに、使用可能な領域全体を埋めます。"
 
 #. settings-schema.json->panelTheme->description
 msgid "Theme of the preset panel"
@@ -348,9 +332,7 @@ msgstr "プリセットパネルのテーマ"
 msgid ""
 "Follow system tracks the desktop color scheme live; Light and Dark override "
 "it."
-msgstr ""
-"「システムに従う」はデスクトップの配色にリアルタイムで追従します。「ライト」"
-"と「ダーク」はそれを上書きします。"
+msgstr "「システムに従う」はデスクトップの配色にリアルタイムで追従します。「ライト」と「ダーク」はそれを上書きします。"
 
 #. settings-schema.json->panelTheme->options
 msgid "Follow system"
@@ -370,11 +352,9 @@ msgstr "アクセントカラー"
 
 #. settings-schema.json->accentMode->tooltip
 msgid ""
-"Follow theme tracks the accent color of the Cinnamon theme live. Custom uses "
-"the color below."
-msgstr ""
-"「テーマに従う」は Cinnamon テーマのアクセントカラーにリアルタイムで追従しま"
-"す。「カスタム」は下で指定した色を使用します。"
+"Follow theme tracks the accent color of the Cinnamon theme live. Custom uses"
+" the color below."
+msgstr "「テーマに従う」は Cinnamon テーマのアクセントカラーにリアルタイムで追従します。「カスタム」は下で指定した色を使用します。"
 
 #. settings-schema.json->accentMode->options
 #. settings-schema.json->stateMode->options
@@ -392,9 +372,7 @@ msgstr "カスタムアクセントカラー"
 
 #. settings-schema.json->accentColor->tooltip
 msgid "Accent of the preset panel and editor when Accent color is Custom."
-msgstr ""
-"「アクセントカラー」が「カスタム」のときのプリセットパネルとエディターのアク"
-"セントカラー。"
+msgstr "「アクセントカラー」が「カスタム」のときのプリセットパネルとエディターのアクセントカラー。"
 
 #. settings-schema.json->stateMode->description
 msgid "State color"
@@ -406,9 +384,8 @@ msgid ""
 "look. Follow theme tracks the accent color of the Cinnamon theme live. "
 "Custom uses the color below."
 msgstr ""
-"「自動: オン」の表示と割り当て済みの行の色。「緑」は現在の見た目を維持しま"
-"す。「テーマに従う」は Cinnamon テーマのアクセントカラーにリアルタイムで追従"
-"します。「カスタム」は下で指定した色を使用します。"
+"「自動: オン」の表示と割り当て済みの行の色。「緑」は現在の見た目を維持します。「テーマに従う」は Cinnamon "
+"テーマのアクセントカラーにリアルタイムで追従します。「カスタム」は下で指定した色を使用します。"
 
 #. settings-schema.json->stateMode->options
 msgid "Green"
@@ -421,3 +398,12 @@ msgstr "カスタム状態色"
 #. settings-schema.json->stateColor->tooltip
 msgid "State color of the preset panel when State color is Custom."
 msgstr "「状態色」が「カスタム」のときのプリセットパネルの状態色。"
+
+#: .yesmem/tmp/makepot-stage/greenTile@carsteneu/lib/runtime/exclusions.js:201
+#| msgid "windows"
+msgid "Window floats"
+msgstr "ウィンドウはフローティング"
+
+#: .yesmem/tmp/makepot-stage/greenTile@carsteneu/lib/runtime/exclusions.js:201
+msgid "Window tiles again"
+msgstr "ウィンドウを再びタイル配置"
