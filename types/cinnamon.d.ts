@@ -30,19 +30,58 @@ declare const GLibNS: {
     SOURCE_REMOVE: boolean;
 };
 
+/**
+ * Muffin Meta surface greenTile calls (Meta-0.typelib, muffin 6.6) — narrow
+ * on purpose so name typos like Meta.MaximizeFlags.HORIZONTL fail tsc
+ * (todo_fixes issue 12). Widen only with a typelib/runtime check.
+ */
+declare const MetaNS: {
+    MaximizeFlags: { HORIZONTAL: number; VERTICAL: number };
+    WindowType: { NORMAL: number };
+    MotionDirection: { UP: number; DOWN: number; LEFT: number; RIGHT: number };
+    /** GrabOp values are compared by identity via Object.keys lookup (lib/tiling/grab.js). */
+    GrabOp: AnyRecord;
+    Display: AnyRecord;
+    WorkspaceManager: AnyRecord;
+    MonitorManager: { get(): AnyRecord };
+    keybindings_set_custom_handler(name: string, callback: (...args: any[]) => void): void;
+};
+
+/**
+ * imports.ui.main surface greenTile calls (Cinnamon main.js) — narrow on
+ * purpose so layoutManager.monitorz-style typos fail tsc (issue 12).
+ */
+declare const MainNS: {
+    layoutManager: {
+        monitors: CinnamonMonitor[];
+        primaryIndex: number;
+        addChrome(actor: AnyRecord): void;
+        removeChrome(actor: AnyRecord): void;
+    };
+    keybindingManager: {
+        addHotKey(name: string, binding: unknown, callback: (...args: any[]) => void, data?: unknown): void;
+        removeHotKey(name: string): void;
+    };
+    getTabList(): CinnamonWindow[];
+    panelManager: { getPanelsInMonitor(monitorIndex: number): Array<AnyRecord> };
+    /** Modal record on success, false when the shell refused (panel.js checks truthiness). */
+    pushModal(actor: AnyRecord): AnyRecord | boolean;
+    popModal(actor: AnyRecord): void;
+};
+
 declare const imports: {
     gi: {
         St: any;
         Clutter: any;
         Gio: AnyRecord;
         GObject: AnyRecord;
-        Meta: AnyRecord;
+        Meta: typeof MetaNS;
         Pango: AnyRecord;
         Cinnamon: AnyRecord;
         GLib: typeof GLibNS;
     };
     ui: {
-        main: AnyRecord;
+        main: typeof MainNS;
         panel: AnyRecord;
         settings: AnyRecord;
         tooltips: AnyRecord;
