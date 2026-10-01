@@ -461,6 +461,117 @@ test('a paused focused monitor does not block the save on other active monitor-w
     assert.deepEqual(w3.rect, [2000, 0, 333, 1100], 'monitor 1 adopted the new rule');
 });
 
+// ---------------- fixes: minimum size on the final frame incl. gap (issue 8) ----------------
+
+const pressResize = (env, action, times) => {
+    const cb = env.keybindingManager.hotkeys.get('greenTile-resize-' + action).cb;
+    for (let i = 0; i < times; i++) {
+        cb();
+    }
+};
+
+test('keyboard resize clamps the border so the final frames stay at the minimum (gap 48)', () => {
+    const tweener = makeTweenerRecorder();
+    const { env, ext } = makeEnv(tweener, { windowGap: 48 });
+    enableOnMonitor(env, ext);
+    makeWorkspace(env);
+    env.activeWorkspace = { index: () => 0 };
+    const w1 = makeWindow(env, 61, [10, 10, 400, 300]);
+    const w2 = makeWindow(env, 62, [500, 0, 400, 300]);
+    env.tabList.push(w1, w2);
+    env.display.focus_window = w1;
+    const app = ext.session.app;
+    const ref = app.split.ref(app, 0, 0, 2);
+    const layouts = { [ref.mkey]: { [ref.wskey]: { auto: true } } };
+    settingsInstance(env).setValue('layouts', JSON.stringify(layouts));
+    app.ops.retileMonitor(app, 0);
+    assert.deepEqual(w1.rect, [0, 0, 976, 1100]);
+    // narrow w1 down to the clamp: the border stops where the FINAL frame (cell minus
+    // gap share) still keeps the promised 120 px — cell >= 120 + 48
+    pressResize(env, 'narrower', 100);
+    assert.ok(w1.rect[2] >= 120, 'left window final width ' + w1.rect[2] + ' below the minimum');
+    assert.ok(w2.rect[2] >= 120, 'right window final width ' + w2.rect[2] + ' below the minimum');
+    assert.equal(w1.rect[2], 144, 'the clamp sits exactly one gap share above 120');
+    assert.equal(w1.rect[0], 0, 'the screen edge stays flush');
+});
+
+test('vertical keyboard resize clamps the final frame between two borders (inner cell, gap 48)', () => {
+    const tweener = makeTweenerRecorder();
+    const { env, ext } = makeEnv(tweener, { windowGap: 48 });
+    enableOnMonitor(env, ext);
+    makeWorkspace(env);
+    env.activeWorkspace = { index: () => 0 };
+    const wins = [61, 62, 63, 64, 65, 66].map((seq, i) => makeWindow(env, seq, [i * 500 + 10, 10, 400, 300]));
+    env.tabList.push(...wins);
+    env.display.focus_window = wins[1];
+    const app = ext.session.app;
+    app.ops.presetsWrite(app, [{ id: 'p23', name: 'Stacks', rules: [{ min: 6, stacks: [2, 3] }] }]);
+    app.ops.layoutSet(app, 0, 0, { preset: 'p23' });
+    app.ops.retileMonitor(app, 0);
+    assert.ok(wins[0].rect[0] === 0 && wins[0].rect[2] === 976, 'two full-height columns, gap applied');
+    // narrow the middle cell of the 3-stack: it borders above and below, so the
+    // clamp must keep its FINAL height (cell minus a full gap) at 120 px
+    pressResize(env, 'shorter', 100);
+    for (const w of wins) {
+        assert.ok(w.rect[3] >= 120, 'window final height ' + w.rect[3] + ' below the minimum');
+    }
+});
+
+test('mouse resize clamps the stored border so both final frames stay at the minimum (gap 48)', () => {
+    const tweener = makeTweenerRecorder();
+    const { env, ext } = makeEnv(tweener, { windowGap: 48 });
+    enableOnMonitor(env, ext);
+    makeWorkspace(env);
+    env.activeWorkspace = { index: () => 0 };
+    const w1 = makeWindow(env, 61, [10, 10, 400, 300]);
+    const w2 = makeWindow(env, 62, [500, 0, 400, 300]);
+    env.tabList.push(w1, w2);
+    env.display.focus_window = w1;
+    const app = ext.session.app;
+    const ref = app.split.ref(app, 0, 0, 2);
+    const layouts = { [ref.mkey]: { [ref.wskey]: { auto: true } } };
+    settingsInstance(env).setValue('layouts', JSON.stringify(layouts));
+    app.ops.retileMonitor(app, 0);
+    // drag w1's right edge far left of the minimum and release
+    env.display.emit('grab-op-begin', env.display, env.display, w1, env.gi.Meta.GrabOp.RESIZING_E);
+    w1.rect = [0, 0, 50, 1100];
+    env.display.emit('grab-op-end', env.display, env.display, w1, env.gi.Meta.GrabOp.RESIZING_E);
+    const timer = [...env.timers.entries()].map(([, t]) => t).find((t) => t.ms === 250);
+    assert.ok(timer, 'the resize end armed the retile');
+    timer.cb();
+    assert.ok(w1.rect[2] >= 120, 'left window final width ' + w1.rect[2] + ' below the minimum');
+    assert.ok(w2.rect[2] >= 120, 'right window final width ' + w2.rect[2] + ' below the minimum');
+    assert.equal(w1.rect[2], 144, 'the stored border sits exactly one gap share above 120');
+});
+
+test('infeasible space: a resize just stops instead of storing an undersized arrangement', () => {
+    const tweener = makeTweenerRecorder();
+    const { env, ext } = makeEnv(tweener, { windowGap: 48 });
+    const mon2 = { x: 2000, y: 0, width: 300, height: 1100 };
+    enableOnMonitors(env, ext, [MONITOR, mon2]);
+    makeWorkspace(env);
+    env.activeWorkspace = { index: () => 0 };
+    const w1 = makeWindow(env, 61, [10, 10, 400, 300], 0);
+    const w2 = makeWindow(env, 62, [2000 + 10, 10, 100, 300], 1);
+    const w3 = makeWindow(env, 63, [2000 + 150, 0, 100, 300], 1);
+    env.tabList.push(w1, w2, w3);
+    env.display.focus_window = w2;
+    const app = ext.session.app;
+    const ref = app.split.ref(app, 1, 0, 2);
+    const layouts = { [ref.mkey]: { [ref.wskey]: { auto: true } } };
+    settingsInstance(env).setValue('layouts', JSON.stringify(layouts));
+    app.ops.retileMonitor(app, 0);
+    app.ops.retileMonitor(app, 1);
+    const before = w2.rect.slice();
+    // 300 px cannot host two cells of 120 + 48: the splitMove returns null and the
+    // hotkey must leave the layout alone (no split write, no flush timer)
+    pressResize(env, 'narrower', 3);
+    assert.equal(app.split.for(app, 1, 0, 2, { kind: 'rows', shape: [2] }), null, 'no split stored for the infeasible space');
+    assert.equal(env.liveTimers().filter((t) => t.ms === 500).length, 0, 'no flush timer armed');
+    assert.deepEqual(w2.rect, before, 'no retile fired');
+    assert.deepEqual(env.logErrors, [], 'no errors');
+});
+
 // ---------------- presets + layouts through the ops facade ----------------
 
 test('preset writing, layout assignment and monitor retile round-trip through the ops facade', () => {
