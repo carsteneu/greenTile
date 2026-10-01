@@ -504,10 +504,21 @@ test('theme/border settings bindings firing mid-Config and after disable stay gu
     const fire = (key) => inst.bindings.find((b) => b.key === key).cb();
     // the settings dialog path (remoteUpdate) can deliver a changed:: at any
     // moment — including inside the Config construction window, where the
-    // components still answer config/app-less with their guard no-ops
+    // components still answer unchanged with their guard no-ops. The window's
+    // exact state (config/app not yet assigned) is poked directly here; the
+    // fields are the guards theme.changed()/border.update() read.
+    const app = greenTile.session.app;
+    const savedConfig = app.theme._config;
+    app.theme._config = null;
     assert.doesNotThrow(() => ['panelTheme', 'accentMode', 'accentColor', 'stateMode', 'stateColor'].forEach(fire),
-        'the theme bindings resolved through the app do not throw');
-    assert.doesNotThrow(() => fire('focusBorder'), 'the border binding resolved through the app does not throw');
+        'the theme bindings with no config set do not throw');
+    const savedApp = app.border._app;
+    app.border._app = null;
+    assert.doesNotThrow(() => fire('focusBorder'), 'the border binding with no app set does not throw');
+    app.theme._config = savedConfig;
+    app.border._app = savedApp;
+    assert.doesNotThrow(() => fire('panelTheme'), 'the resolved path does not throw either');
+    assert.doesNotThrow(() => fire('focusBorder'));
     greenTile.disable();
     assert.doesNotThrow(() => fire('panelTheme'), 'a theme binding after disable stays silent');
     assert.doesNotThrow(() => fire('focusBorder'), 'a border binding after disable stays silent');

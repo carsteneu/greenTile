@@ -1871,6 +1871,7 @@ class App {
             main: utils_Main,
             global: cinnamon.global,
             glib: GLib,
+            session: session,
             nextAccentGen: () => session.nextAccentGen(),
             panelOpen: () => tile_panel.actor,
             panelRebuild: (a) => tile_panel_rebuild(a),
