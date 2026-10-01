@@ -169,12 +169,14 @@ const createCinnamonEnv = (options) => {
     env.uiGroup = {
         children: env.uiGroupChildren,
         add_child(a) {
+            a._fakeParent = this;
             this.children.push(a);
         },
         remove_child(a) {
             const at = this.children.indexOf(a);
             if (at !== -1)
                 {this.children.splice(at, 1);}
+            a._fakeParent = null;
         },
     };
     const mainBranch = {
@@ -472,6 +474,7 @@ const createCinnamonEnv = (options) => {
             this.children = [];
             this._handlers = [];
             this._nextHandlerId = 1;
+            this._fakeParent = null;
         }
         connect(sigName, cb) {
             const id = this._nextHandlerId++;
@@ -495,6 +498,7 @@ const createCinnamonEnv = (options) => {
         add(child) {
             if (!this.children.includes(child))
                 {this.children.push(child);}
+            child._fakeParent = this;
         }
         add_actor(child) {
             this.add(child);
@@ -503,8 +507,12 @@ const createCinnamonEnv = (options) => {
             const at = this.children.indexOf(child);
             if (at !== -1)
                 {this.children.splice(at, 1);}
+            child._fakeParent = null;
         }
         destroy_all_children() {
+            for (const child of this.children) {
+                child._fakeParent = null;
+            }
             this.children = [];
         }
         set_child(child) {
@@ -513,6 +521,8 @@ const createCinnamonEnv = (options) => {
         hide() {}
         show() {}
         set_style() {}
+        add_style_pseudo_class() {}
+        remove_style_pseudo_class() {}
         raise_top() {}
         set_position(x, y) {
             this.px = x;
@@ -546,6 +556,11 @@ const createCinnamonEnv = (options) => {
                 {return;}
             this.destroyed = true;
             this._handlers.length = 0;
+            // Cinnamon removes an actor from its parent on destroy
+            if (this._fakeParent) {
+                this._fakeParent.remove_child(this);
+                this._fakeParent = null;
+            }
         }
     }
     const st = {
@@ -555,9 +570,19 @@ const createCinnamonEnv = (options) => {
         Widget: class extends FakeActor {},
         BoxLayout: class extends FakeActor {},
         Button: class extends FakeActor {},
-        Label: class extends FakeActor {},
+        Label: class extends FakeActor {
+            constructor(...args) {
+                super(...args);
+                this.clutter_text = new FakeActor();
+            }
+        },
         ScrollView: class extends FakeActor {},
-        Entry: class extends FakeActor {},
+        Entry: class extends FakeActor {
+            constructor(...args) {
+                super(...args);
+                this.clutter_text = new FakeActor();
+            }
+        },
         DrawingArea: class extends FakeActor {},
         ThemeContext: { get_for_stage: () => ({ get_theme: () => env.stTheme }) },
     };
