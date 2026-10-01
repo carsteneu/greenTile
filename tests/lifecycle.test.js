@@ -110,3 +110,29 @@ test('a late DisplayConfig reply for a destroyed App touches nothing (epoch guar
     assert.equal(env.totalHandlers(), handlers, 'no observers connected by the stale reply');
     assert.equal(env.liveTimers().length, timers, 'no timer scheduled by the stale reply');
 });
+
+test('disable takes the monitors-changed handler down first: a monitor change cannot resurrect an App', () => {
+    const { env, greenTile } = loadGreenTile();
+    greenTile.enable();
+    env.flushDisplayConfigNoReply();
+    greenTile.disable();
+    const handlers = env.totalHandlers();
+    env.layoutManager.emit('monitors-changed');
+    assert.equal(env.totalHandlers(), handlers, 'nothing reconnected by the emission');
+    assert.deepEqual(env.greenTileHotkeys(), [], 'no hotkeys came back');
+    env.flushDisplayConfigNoReply();
+    assert.equal(env.queuedDBus.length, 0, 'no App was recreated: no new DisplayConfig refresh');
+    assert.equal(env.liveTimers().length, 0, 'no settle timer scheduled');
+});
+
+test('disable/enable on the same loaded module yields exactly one live session set', () => {
+    const { env, greenTile } = loadGreenTile();
+    greenTile.enable();
+    greenTile.disable();
+    greenTile.enable();
+    env.flushDisplayConfigNoReply();
+    assert.equal(env.layoutManager.count('monitors-changed'), 1, 'one session handler, not two');
+    assert.deepEqual(env.greenTileHotkeys(), HOTKEY_NAMES, 'exactly the 14 hotkeys, once');
+    assert.equal(env.display.count('grab-op-begin'), 1);
+    assert.equal(env.liveTimers().length, 0, 'no leftover settle timer across the cycle');
+});

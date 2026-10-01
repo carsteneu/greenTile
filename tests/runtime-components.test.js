@@ -387,7 +387,7 @@ test('monitors-changed flags pending without consuming it (settle rides the recr
     assert.equal(session.settle.pending, true);
 });
 
-test('session destroy stops the app, the settle wait and the handler in that order', () => {
+test('session destroy stops the app, resets the settle wait and releases the handler', () => {
     const { layoutManager, created, destroyed, session } = makeSession();
     session.start();
     layoutManager.emit('monitors-changed');
@@ -406,4 +406,40 @@ test('session destroy is safe on a never-started session', () => {
     const { session } = makeSession();
     session.destroy();
     assert.equal(session.app, null);
+});
+
+test('session destroy releases the handler before the app dies: a throwing app.destroy cannot resurrect', () => {
+    const layoutManager = fakeLayoutHub();
+    const events = [];
+    let appDestroyed = null;
+    const session = new Session({
+        signalManager: fakeSignalManager(),
+        layoutManager,
+        mainloop: fakeMainloop(),
+        now: () => 0,
+        log: () => {},
+        onSettled: () => {},
+        createApp: (s) => {
+            const app = {
+                session: s,
+                destroy() {
+                    events.push('app.destroy with ' + layoutManager.handlers.length + ' handlers left');
+                    appDestroyed = true;
+                    throw new Error('boom during teardown');
+                },
+            };
+            return app;
+        },
+    });
+    session.start();
+    assert.throws(() => session.destroy(), /boom during teardown/, 'the throw surfaces');
+    assert.equal(appDestroyed, true, 'app.destroy ran');
+    assert.deepEqual(events, ['app.destroy with 0 handlers left'],
+        'the monitors-changed handler was released before the app died');
+    assert.deepEqual(layoutManager.handlers, [], 'no handler survives a throwing teardown');
+    assert.equal(session.app, null, 'cleared in the finally');
+    assert.equal(session.settle.pending, false, 'settle state reset in the finally');
+    layoutManager.emit('monitors-changed');
+    session.destroy();
+    assert.equal(session.settle.pending, false, 'second destroy is a no-op');
 });

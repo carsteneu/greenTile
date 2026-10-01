@@ -38,11 +38,9 @@
 // Pure model blocks, extracted to lib/model/. Paths are root-relative on purpose:
 // Cinnamon resolves every nested require against the xlet root (fileUtils.js).
 const { tile_excl_rows_normalize, tile_excl_match, tile_excl_rows_append, tile_excl_app_options, tile_excl_toggle_set } = require('./lib/model/exclude');
-const { tile_monitor_fallback_key, tile_monitor_states, tile_monitor_ws_key, tile_monitor_labels } = require('./lib/model/monitor');
 const { TILE_GAP_MAX, TILE_GAP_STEP, tile_gap_value, tile_gap_cell } = require('./lib/model/gap');
 const { tile_single_fill, tile_single_layout } = require('./lib/model/single');
 const { tile_disconnect_each } = require('./lib/model/teardown');
-const { tile_pending_registry } = require('./lib/model/lifecycle');
 const { tile_fill_stacks, tile_auto_rows, tile_auto_narrow_stacks } = require('./lib/model/fill');
 const { TILE_SPLIT_MIN_PX, tile_split_valid, tile_split_rects, tile_split_cell_at, tile_split_border_pos, tile_split_move, tile_split_key_target, tile_split_accel, tile_split_op_edges, tile_split_frame_edges, tile_sort_order } = require('./lib/model/split');
 const { tile_drop_zone, tile_drop_layout, tile_drop_fits } = require('./lib/model/drop');
@@ -54,12 +52,15 @@ const { TILE_PANEL_MIN, tile_panel_size_parse, tile_panel_size_set, tile_panel_s
 const { tile_accent_default, tile_accent_parse, tile_accent_is_own, tile_accent_from_probed, tile_accent_probe_first, tile_accent_tones, tile_accent_css } = require('./lib/model/accent');
 const { tile_state_default, tile_state_mode, tile_state_tones, tile_state_css } = require('./lib/model/state');
 const { tile_theme_resolve, tile_theme_toggle_target } = require('./lib/model/theme');
+const { Session } = require('./lib/runtime/session');
+const { Monitors } = require('./lib/runtime/monitors');
 
 ;// CONCATENATED MODULE: ../base/config.ts
 
 const Settings = imports.ui.settings;
 const Main = imports.ui.main;
 const Tooltips = imports.ui.tooltips;
+const tile_SignalManager = imports.misc.signalManager.SignalManager;
 class Config {
     constructor(app) {
         this.EnableHotkey = () => {
@@ -103,8 +104,11 @@ class Config {
             }
             // resize hotkey steps not yet written (500 ms debounce) must not get lost
             tile_split_flush(this.app);
-            tile_monitors_shutdown();
+            this.app.monitors.destroy();
             tile_auto_disconnect_all();
+            // The settle wait lives on the session, not on this App: its timer dies
+            // with the App, its start time survives while a change is pending.
+            this.app.session.settle.teardown();
             tile_panel_close();
             tile_theme_shutdown();
             tile_focus_disconnect();
@@ -157,13 +161,10 @@ class Config {
         tile_theme_init(this);
         tile_focus_connect(this.app);
         tile_border_init(this.app);
-        tile_monitors_refresh(app, () => {
+        app.monitors.refresh(() => {
             tile_layouts_migrate_once(app);
             tile_auto_connect_all(app);
-            if (tile_settle_pending) {
-                tile_settle_pending = false;
-                tile_settle_start(app);
-            }
+            app.session.settle.consumePending(app);
         });
     }
 }
@@ -478,15 +479,15 @@ const tile_auto_shape = (monitor, n) => (monitor.width < 2100 && n > 3)
 const tile_split_pending = new Map();
 const tile_split_flush_timer = { id: 0 };
 const TILE_SPLIT_FLUSH_MS = 500;
-const tile_split_ref = (monitorIndex, wsIndex, n) => {
-    const mkey = tile_monitors.keys[monitorIndex];
+const tile_split_ref = (app, monitorIndex, wsIndex, n) => {
+    const mkey = app.monitors.keys[monitorIndex];
     if (!mkey)
         return null;
-    const wskey = tile_layout_ws_key(monitorIndex, wsIndex);
+    const wskey = app.monitors.wsKey(monitorIndex, wsIndex);
     return { key: mkey + '\n' + wskey + '\n' + n, mkey: mkey, wskey: wskey, n: String(n) };
 };
 const tile_split_for = (app, monitorIndex, wsIndex, n, layout) => {
-    const ref = tile_split_ref(monitorIndex, wsIndex, n);
+    const ref = tile_split_ref(app, monitorIndex, wsIndex, n);
     if (!ref)
         return null;
     const pending = tile_split_pending.get(ref.key);
@@ -535,7 +536,7 @@ const tile_split_remember = (app, ref, split, flushNow) => {
 // true when the monitor + workspace has stored (or pending) splits or dragged shapes —
 // shows the reset button
 const tile_split_any = (app, monitorIndex, wsIndex) => {
-    const ref = tile_split_ref(monitorIndex, wsIndex, 0);
+    const ref = tile_split_ref(app, monitorIndex, wsIndex, 0);
     if (!ref)
         return false;
     const prefix = ref.mkey + '\n' + ref.wskey + '\n';
@@ -548,7 +549,7 @@ const tile_split_any = (app, monitorIndex, wsIndex) => {
         || Object.keys(tile_layouts_shapes(layouts, ref.mkey, ref.wskey)).length > 0;
 };
 const tile_split_reset = (app, monitorIndex, wsIndex) => {
-    const ref = tile_split_ref(monitorIndex, wsIndex, 0);
+    const ref = tile_split_ref(app, monitorIndex, wsIndex, 0);
     if (!ref)
         return;
     const prefix = ref.mkey + '\n' + ref.wskey + '\n';
@@ -651,7 +652,7 @@ const tile_auto_schedule_monitor = (app, monitorIndex, ms) => {
         tile_auto.timers.delete(monitorIndex);
         // The App is recreated when monitors change, so indexes never survive a change;
         // a timer for a monitor that is gone (or no longer ready) must do nothing.
-        if (!tile_monitors.ready || !utils_Main.layoutManager.monitors[monitorIndex])
+        if (!app.monitors.ready || !utils_Main.layoutManager.monitors[monitorIndex])
             return false;
         if (tile_layout_for(app, monitorIndex, global.workspace_manager.get_active_workspace().index()).auto)
             tile_retile_monitor(app, monitorIndex, null);
@@ -769,7 +770,7 @@ const tile_split_on_resize_end = (app, w, op) => {
         return;
     const n = windows.length;
     const layout = tile_layout_shape(app, monitorIndex, n);
-    const ref = tile_split_ref(monitorIndex, wsIndex, n);
+    const ref = tile_split_ref(app, monitorIndex, wsIndex, n);
     if (!layout || !ref)
         return;
     // The retile sorts the dragged window by its frame at grab start, so a moved left or
@@ -837,7 +838,7 @@ const tile_split_hotkey = (app, action) => {
         return;
     const n = windows.length;
     const layout = tile_layout_shape(app, monitorIndex, n);
-    const ref = tile_split_ref(monitorIndex, wsIndex, n);
+    const ref = tile_split_ref(app, monitorIndex, wsIndex, n);
     if (!layout || !ref)
         return;
     const area = getUsableScreenArea(monitor);
@@ -945,8 +946,8 @@ const tile_auto_on_entered_monitor = (app, monitorIndex, w) => {
         return;
     tile_auto.lastMonitor.set(w.get_stable_sequence(), monitorIndex);
     // Muffin moving windows across monitors restarts the settle wait while it runs.
-    if (tile_settle_started)
-        tile_settle_start(app);
+    if (app.session.settle.started)
+        app.session.settle.start(app);
 };
 const tile_auto_connect_all = (app) => {
     const n = global.screen.get_n_workspaces();
@@ -1014,39 +1015,8 @@ const tile_auto_disconnect_all = () => {
     tile_auto.signals = [];
     for (const [w] of tile_auto.tracked.slice())
         tile_auto_untrack(w);
-    if (tile_settle_timer) {
-        tile_Mainloop.source_remove(tile_settle_timer);
-        tile_settle_timer = 0;
-    }
-    // A monitor change destroys the App while the settle wait may be running; keep its
-    // start time then, so the 15 s limit counts from the first change, not the last.
-    if (!tile_settle_pending)
-        tile_settle_started = 0;
 };
 
-// Settle wait after a monitor change: Muffin can take several seconds to move windows
-// to their new monitors. The retile runs once, 2 s after the last monitor change or
-// window-entered-monitor event, at the latest 15 s after the first change. The flag
-// routes the wait through the App recreation (monitors-changed destroys the App).
-let tile_settle_pending = false;
-let tile_settle_timer = 0;
-let tile_settle_started = 0;
-const tile_settle_start = (app) => {
-    const now = Date.now();
-    if (!tile_settle_started)
-        tile_settle_started = now;
-    const delay = Math.max(Math.min(2000, 15000 - (now - tile_settle_started)), 1);
-    if (tile_settle_timer)
-        tile_Mainloop.source_remove(tile_settle_timer);
-    tile_settle_timer = tile_Mainloop.timeout_add(delay, () => {
-        tile_settle_timer = 0;
-        const elapsed = Date.now() - tile_settle_started;
-        tile_settle_started = 0;
-        tile_auto_schedule_all(app, 0);
-        global.log('greenTile monitors settled after ' + elapsed + ' ms');
-        return false;
-    });
-};
 // Per-workspace preset tiling: rules by window count, stored in extension settings
 // (survives spice reinstalls — settings live in ~/.config/cinnamon/spices).
 // Preset = {"id","name","rules":[{"min":2,"stacks":[1,1]},...]}; assignment map
@@ -1060,88 +1030,22 @@ const tile_presets_read = (app) => {
         return [];
     }
 };
-// Monitor registry: stable per-monitor keys and display labels, rebuilt at start and
-// after every monitor change (enable() recreates the App then, so this module state is
-// effectively per App). Keys come from the DisplayConfig tuples via the monitor-model
-// block; a monitor that stays unknown (DBus failure) keeps a fallback key, logged once.
+// Monitor registry: stable per-monitor keys and display labels — per-App
+// component in lib/runtime/monitors.js, owned by the App (monitors-changed
+// destroys the App), riding the DisplayConfig DBus call with the epoch guard and
+// a cancellable. The fallback-logged flag rides the extension session.
 const tile_Gio = imports.gi.Gio;
-const tile_monitors = { keys: [], labels: [], ready: false };
-let tile_monitors_fallback_logged = false;
-let tile_muffin_settings = null;
-const tile_monitors_pending = tile_pending_registry();
-const tile_monitors_refresh = (app, onReady) => {
-    // Monitor changes destroy and recreate the App; a late reply for a refresh that
-    // belongs to a destroyed App must not connect observers or write registry state.
-    const epoch = tile_monitors_pending.begin();
-    tile_monitors.ready = false;
-    tile_monitors.keys = [];
-    tile_monitors.labels = [];
-    tile_Gio.DBus.session.call('org.cinnamon.Muffin.DisplayConfig', '/org/cinnamon/Muffin/DisplayConfig',
-        'org.cinnamon.Muffin.DisplayConfig', 'GetCurrentState', null, null,
-        tile_Gio.DBusCallFlags.NONE, 3000, null, (source, result) => {
-            if (!tile_monitors_pending.is_current(epoch))
-                return;
-            let states = [];
-            try {
-                const reply = source.call_finish(result);
-                const unpacked = reply.deep_unpack();
-                states = tile_monitor_states(Array.isArray(unpacked) ? unpacked[1] : null);
-            }
-            catch (e) {
-                global.log('greenTile DisplayConfig.GetCurrentState failed: ' + e);
-            }
-            const monitors = utils_Main.layoutManager.monitors;
-            const keys = monitors.map(() => '');
-            const connectors = monitors.map(() => '');
-            for (const state of states) {
-                const index = Meta.MonitorManager.get().get_monitor_for_connector(state.connector);
-                if (index < 0 || index >= keys.length)
-                    continue;
-                keys[index] = state.key;
-                connectors[index] = state.connector;
-            }
-            const names = monitors.map((m, i) => global.display.get_monitor_name(i));
-            for (let i = 0; i < keys.length; i++) {
-                if (!keys[i] && monitors[i]) {
-                    keys[i] = tile_monitor_fallback_key(names[i], monitors[i].width, monitors[i].height);
-                    if (!tile_monitors_fallback_logged) {
-                        tile_monitors_fallback_logged = true;
-                        global.log('greenTile monitor key fallback for ' + names[i] + ' (' + keys[i] + ')');
-                    }
-                }
-            }
-            tile_monitors.keys = keys;
-            tile_monitors.labels = tile_monitor_labels(names, connectors);
-            tile_monitors.ready = true;
-            global.log('greenTile monitors: ' + keys.map((k, i) => i + '=' + k).join(', '));
-            onReady();
-        });
-};
-// Teardown: a reply still in flight must not connect observers to a destroyed App.
-const tile_monitors_shutdown = () => {
-    tile_monitors_pending.invalidate();
-};
 const tile_monitor_index_of = (metaWindow) => metaWindow.get_monitor();
 const tile_focus_monitor_index = () => {
     const focusWindow = tile_focus_window();
     return focusWindow ? focusWindow.get_monitor() : utils_Main.layoutManager.primaryIndex;
 };
-const tile_layout_only_primary = () => {
-    if (!tile_muffin_settings)
-        tile_muffin_settings = new tile_Gio.Settings({ schema_id: 'org.cinnamon.muffin' });
-    return tile_muffin_settings.get_boolean('workspaces-only-on-primary');
-};
-// Workspace key for a layout lookup: numbered on the primary monitor (and always when
-// workspaces-only-on-primary is off), '*' for every other monitor when the setting is on.
-const tile_layout_ws_key = (monitorIndex, wsIndex) => {
-    return tile_monitor_ws_key(wsIndex, monitorIndex === utils_Main.layoutManager.primaryIndex, tile_layout_only_primary());
-};
 const tile_layout_for = (app, monitorIndex, wsIndex) => {
-    if (!tile_monitors.ready || !tile_monitors.keys[monitorIndex])
+    if (!app.monitors.ready || !app.monitors.keys[monitorIndex])
         return { preset: null, auto: false };
     const presets = tile_presets_read(app);
     const layouts = tile_layouts_parse(app.config.settings.getValue('layouts') || '');
-    const entry = tile_layouts_entry(layouts, tile_monitors.keys[monitorIndex], tile_layout_ws_key(monitorIndex, wsIndex), presets.map((p) => p.id));
+    const entry = tile_layouts_entry(layouts, app.monitors.keys[monitorIndex], app.monitors.wsKey(monitorIndex, wsIndex), presets.map((p) => p.id));
     return {
         preset: entry.preset ? presets.find((p) => p.id === entry.preset) || null : null,
         auto: entry.auto,
@@ -1149,7 +1053,7 @@ const tile_layout_for = (app, monitorIndex, wsIndex) => {
 };
 let tile_layouts_write_guard_logged = false;
 const tile_layout_set = (app, monitorIndex, wsIndex, patch) => {
-    if (!tile_monitors.ready || !tile_monitors.keys[monitorIndex])
+    if (!app.monitors.ready || !app.monitors.keys[monitorIndex])
         return;
     const layouts = tile_layouts_parse(app.config.settings.getValue('layouts') || '');
     // Corrupt layouts are treated as empty on read; nothing is written (and the
@@ -1161,7 +1065,7 @@ const tile_layout_set = (app, monitorIndex, wsIndex, patch) => {
         }
         return;
     }
-    const next = tile_layouts_set(layouts, tile_monitors.keys[monitorIndex], tile_layout_ws_key(monitorIndex, wsIndex), patch);
+    const next = tile_layouts_set(layouts, app.monitors.keys[monitorIndex], app.monitors.wsKey(monitorIndex, wsIndex), patch);
     app.config.settings.setValue('layouts', JSON.stringify(next));
 };
 // Once: convert the old per-workspace keys into layouts entries of the monitor that is
@@ -1182,7 +1086,7 @@ const tile_layouts_migrate_once = (app) => {
     const layouts = tile_layouts_parse(app.config.settings.getValue('layouts') || '');
     if (layouts && Object.keys(layouts).length === 0 && hasOld) {
         const primaryIndex = utils_Main.layoutManager.primaryIndex;
-        const mkey = tile_monitors.keys[primaryIndex] || '';
+        const mkey = app.monitors.keys[primaryIndex] || '';
         if (mkey) {
             const migrated = tile_layouts_migrate(wsPresets, autoList, mkey);
             if (Object.keys(migrated).length > 0) {
@@ -1363,7 +1267,7 @@ const tile_drop_end = (app, w, op) => {
     if (layouts === null)
         return false;
     const n = hit.next.order.length;
-    const ref = tile_split_ref(hit.monitorIndex, wsIndex, n);
+    const ref = tile_split_ref(app, hit.monitorIndex, wsIndex, n);
     if (!ref)
         return false;
     tile_split_pending.delete(ref.key);
@@ -1405,7 +1309,7 @@ const tile_layout_shape_ws = (app, monitorIndex, wsIndex, n) => {
         return null;
     // A dragged shape for this monitor + workspace + window count wins over the
     // preset rule / auto grid; corrupt layouts read as empty ({}), so nothing stored.
-    const ref = tile_split_ref(monitorIndex, wsIndex, n);
+    const ref = tile_split_ref(app, monitorIndex, wsIndex, n);
     if (!ref)
         return base;
     const layouts = tile_layouts_parse(app.config.settings.getValue('layouts') || '');
@@ -1435,13 +1339,13 @@ const tile_preset_retile = (app, monitorIndex, focusWindow, animate = true, wsIn
     const split = tile_split_for(app, monitorIndex, ws, n, layout);
     tile_place_rects(app, ordered, layout, split, area, animate);
     if (animate)
-        global.log('greenTile preset "' + preset.name + '" applied ws' + (ws + 1) + ' mon=' + (tile_monitors.keys[monitorIndex] || '?') + ' n=' + n + ' stacks=[' + (layout.rule ? layout.rule.stacks.join(',') : '1') + ']' + (split ? ' split' : ''));
+        global.log('greenTile preset "' + preset.name + '" applied ws' + (ws + 1) + ' mon=' + (app.monitors.keys[monitorIndex] || '?') + ' n=' + n + ' stacks=[' + (layout.rule ? layout.rule.stacks.join(',') : '1') + ']' + (split ? ' split' : ''));
 };
 // Retiles exactly one monitor: preset layout when (monitor, workspace) has one, else
 // the auto grid when automatic tiling is on. Monitors whose entry has automatic tiling
 // off are left alone — hotkeys retile directly and do not come through here.
 const tile_retile_monitor = (app, monitorIndex, focusWindow, animate = true, wsIndex = null) => {
-    if (!tile_monitors.ready || !utils_Main.layoutManager.monitors[monitorIndex])
+    if (!app.monitors.ready || !utils_Main.layoutManager.monitors[monitorIndex])
         return;
     const ws = wsIndex != null ? wsIndex : global.workspace_manager.get_active_workspace().index();
     const layout = tile_layout_for(app, monitorIndex, ws);
@@ -1464,7 +1368,7 @@ const tile_swap_hotkey = (app, dir) => {
         return;
     const monitorIndex = focusWindow.get_monitor();
     const monitor = utils_Main.layoutManager.monitors[monitorIndex];
-    if (!monitor || !tile_monitors.ready)
+    if (!monitor || !app.monitors.ready)
         return;
     const wsIndex = global.workspace_manager.get_active_workspace().index();
     const area = getUsableScreenArea(monitor);
@@ -1488,7 +1392,7 @@ const tile_swap_hotkey = (app, dir) => {
             tile_swap_override(focusWindow, cells[nb]);
             tile_swap_override(ordered[nb], cells[selfIdx]);
             tile_retile_monitor(app, monitorIndex, focusWindow);
-            global.log('greenTile swap ' + dir + ' ws' + (wsIndex + 1) + ' mon=' + (tile_monitors.keys[monitorIndex] || '?') + ' n=' + n);
+            global.log('greenTile swap ' + dir + ' ws' + (wsIndex + 1) + ' mon=' + (app.monitors.keys[monitorIndex] || '?') + ' n=' + n);
             return;
         }
     }
@@ -1498,7 +1402,7 @@ const tile_swap_hotkey = (app, dir) => {
         dir: dir,
         monitorIndex: monitorIndex,
         primaryIndex: utils_Main.layoutManager.primaryIndex,
-        onlyPrimary: tile_layout_only_primary(),
+        onlyPrimary: app.monitors.onlyPrimary(),
         monitors: utils_Main.layoutManager.monitors.map((m, i) => ({ index: i, x: m.x, width: m.width })),
         workspaces: global.screen.get_n_workspaces(),
         wsIndex: wsIndex,
@@ -1523,7 +1427,7 @@ const tile_swap_hotkey = (app, dir) => {
         focusWindow.move_to_monitor(step.monitor);
         tile_retile_monitor(app, step.monitor, focusWindow);
         tile_retile_monitor(app, monitorIndex, null, true, wsIndex);
-        global.log('greenTile swap pushed mon=' + (tile_monitors.keys[monitorIndex] || '?') + ' -> mon=' + (tile_monitors.keys[step.monitor] || '?') + ' ws' + (wsIndex + 1));
+        global.log('greenTile swap pushed mon=' + (app.monitors.keys[monitorIndex] || '?') + ' -> mon=' + (app.monitors.keys[step.monitor] || '?') + ' ws' + (wsIndex + 1));
         return;
     }
     // Workspace landing: the count of the other windows is read before the switch, the
@@ -1548,7 +1452,7 @@ const tile_swap_hotkey = (app, dir) => {
     }
     tile_retile_monitor(app, step.monitor, focusWindow, true, targetWsIndex);
     tile_retile_monitor(app, monitorIndex, null, true, wsIndex);
-    global.log('greenTile swap pushed mon=' + (tile_monitors.keys[monitorIndex] || '?') + ' -> ws' + (targetWsIndex + 1) + ' mon=' + (tile_monitors.keys[step.monitor] || '?'));
+    global.log('greenTile swap pushed mon=' + (app.monitors.keys[monitorIndex] || '?') + ' -> ws' + (targetWsIndex + 1) + ' mon=' + (app.monitors.keys[step.monitor] || '?'));
 };
 // >>> focus-runtime
 // Super+Arrow moves the keyboard focus on monitor+workspaces where automatic tiling is
@@ -1579,7 +1483,7 @@ const tile_focus_hotkey = (app, dir) => (display, window) => {
     const monitorIndex = window.get_monitor();
     const monitor = utils_Main.layoutManager.monitors[monitorIndex];
     const wsIndex = global.workspace_manager.get_active_workspace().index();
-    if (!monitor || !tile_monitors.ready || !tile_layout_for(app, monitorIndex, wsIndex).auto) {
+    if (!monitor || !app.monitors.ready || !tile_layout_for(app, monitorIndex, wsIndex).auto) {
         tile_focus_push_native(window, dir);
         return;
     }
@@ -2326,7 +2230,7 @@ const tile_border_frame = (app, win) => {
         return null;
     const monitorIndex = win.get_monitor();
     const monitor = utils_Main.layoutManager.monitors[monitorIndex];
-    if (!monitor || !tile_monitors.ready)
+    if (!monitor || !app.monitors.ready)
         return null;
     const wsIndex = global.workspace_manager.get_active_workspace().index();
     if (!tile_layout_for(app, monitorIndex, wsIndex).auto)
@@ -2468,7 +2372,7 @@ const tile_panel_open = (app) => {
     const draft = tile_panel.view === 'editor' ? tile_panel.draft : null;
     const panel = new tile_St.BoxLayout({ vertical: true, style_class: tile_theme_panel_class(), reactive: true, can_focus: true });
     const header = new tile_St.BoxLayout({ style_class: 'gk-panel-header', reactive: true });
-    let titleText = _("Presets — workspace %d · %s").format(wsIndex + 1, tile_monitors.labels[monitorIndex] || '');
+    let titleText = _("Presets — workspace %d · %s").format(wsIndex + 1, app.monitors.labels[monitorIndex] || '');
     if (draft)
         titleText = draft.isNew ? _("Create preset") : _("Edit %s").format(draft.name);
     const title = new tile_St.Label({ text: titleText, style_class: 'gk-title' });
@@ -2917,8 +2821,16 @@ const getFocusApp = () => {
 };
 ;// CONCATENATED MODULE: ../base/app.ts
 class App {
-    constructor(platform) {
+    constructor(platform, session, cinnamon) {
         this.platform = platform;
+        this.session = session;
+        this.monitors = new Monitors({
+            main: cinnamon.main,
+            gio: cinnamon.gio,
+            meta: cinnamon.meta,
+            global: cinnamon.global,
+            session: session,
+        });
         this.config = new Config(this);
     }
     destroy() {
@@ -2942,31 +2854,44 @@ const move_resize_window = (metaWindow, x, y, width, height) => {
 
 ;// CONCATENATED MODULE: ./extension.ts
 
-    let monitorChangedSignal = null;
-let app;
 const platform = {
     move_resize_window: move_resize_window,
     reset_window: reset_window,
 };
 const init = () => {};
-const enable = () => {
-    app = new App(platform);
-        monitorChangedSignal = Main.layoutManager.connect('monitors-changed', () => {
-            tile_settle_pending = true;
-            app.destroy();
-            app = new App(platform);
-        });
+const enable = function () {
+    // One extension session per enable(): it outlives every App recreation and
+    // carries the state that must survive them (settle wait, fallback-logged
+    // flag, the monitors-changed handler on its own scope). Cinnamon calls
+    // enable()/disable() as methods on the exports object (extension.js), so
+    // the session rides `this` — no module-level state remains.
+    this.session = new Session({
+        signalManager: new tile_SignalManager(),
+        layoutManager: Main.layoutManager,
+        mainloop: tile_Mainloop,
+        now: Date.now,
+        log: (msg) => global.log(msg),
+        onSettled: (app) => tile_auto_schedule_all(app, 0),
+        createApp: (session) => new App(platform, session, {
+            main: utils_Main,
+            gio: tile_Gio,
+            meta: utils_Meta,
+            global: global,
+        }),
+    });
+    this.session.start();
 };
-const disable = () => {
+const disable = function () {
         // greenTile fix: gTile 2.2.1 left this disconnect commented out. Every
         // disable/enable cycle then kept a handler bound to the OLD module, and each
         // monitor change resurrected a complete old App (hotkeys and tiling
         // observers included) per stale handler: duplicate retiles, zombie bindings.
-        if (monitorChangedSignal) {
-            Main.layoutManager.disconnect(monitorChangedSignal);
-            monitorChangedSignal = null;
-        }
-    app.destroy();
+        // The release now rides the session scope: the session goes down after
+        // the App, taking the monitors-changed handler with it.
+    if (this.session) {
+        this.session.destroy();
+        this.session = null;
+    }
 };
 
 module.exports = { init, enable, disable };

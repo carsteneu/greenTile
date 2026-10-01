@@ -31,6 +31,33 @@ const proxyStub = (branch) => new Proxy(function () {}, {
     construct: () => makeStub(),
 });
 
+// Fake SignalManager mirroring /usr/share/cinnamon/js/misc/signalManager.js:
+// storage entries [sigName, obj, callback, id], identical connects dedupe (a
+// second connect on (sigName, obj, callback) is a no-op), getSignals drives the
+// runtime Scope release path (obj.disconnect per entry by the scope itself) and
+// disconnectAllSignals only resets the storage afterwards.
+class FakeSignalManager {
+    constructor() {
+        this._storage = [];
+        this._nextId = 1;
+    }
+    connect(obj, sigName, callback, bind, force) {
+        if (!force
+            && this._storage.some(([s, o, c]) => s === sigName && o === obj && c === callback))
+            return;
+        const id = this._nextId++;
+        this._storage.push([sigName, obj, callback, id]);
+        obj.connect(sigName, callback);
+        return id;
+    }
+    getSignals() {
+        return this._storage.slice();
+    }
+    disconnectAllSignals() {
+        this._storage.length = 0;
+    }
+}
+
 const signalHub = (name) => {
     const handlers = [];
     let nextId = 1;
@@ -102,6 +129,7 @@ const createCinnamonEnv = (options) => {
         workspaces: [],
         customBindings: new Map(),
         timers: new Map(),
+        cancellables: [],
     };
 
     // --- Main.* objects
@@ -276,6 +304,18 @@ const createCinnamonEnv = (options) => {
     // --- gi branches (unknown namespaces fall into deep stubs)
     const gio = {
         DBusCallFlags: { NONE: 'none' },
+        Cancellable: class {
+            constructor() {
+                this.cancelled = false;
+                env.cancellables.push(this);
+            }
+            cancel() {
+                this.cancelled = true;
+            }
+            is_cancelled() {
+                return this.cancelled;
+            }
+        },
         DBus: {
             session: {
                 call(bus, path, iface, method, ...rest) {
@@ -331,6 +371,8 @@ const createCinnamonEnv = (options) => {
                 return env.gi;
             if (p === 'mainloop')
                 return env.mainloop;
+            if (p === 'misc')
+                return proxyStub({ signalManager: { SignalManager: FakeSignalManager } });
             return makeStub();
         },
         apply: () => makeStub(),

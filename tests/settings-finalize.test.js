@@ -23,7 +23,7 @@ if (destroyStart === -1)
     throw new Error('destroy not found in Config');
 const destroyBody = config.slice(destroyStart, config.indexOf('this.app = app;'));
 
-const enableStart = src.indexOf('const enable = () => {');
+const enableStart = src.indexOf('const enable = function () {');
 const enableBody = src.slice(enableStart);
 
 test('Config.destroy finalizes the settings object', () => {
@@ -38,14 +38,19 @@ test('finalize runs last, after every teardown step that still needs settings', 
 });
 
 test('monitors-changed and disable destroy the app before the next registration', () => {
-    const changedStart = enableBody.indexOf("Main.layoutManager.connect('monitors-changed'");
-    const changedBody = enableBody.slice(changedStart);
-    assert.ok(changedBody.indexOf('app.destroy()') > -1);
-    assert.ok(changedBody.indexOf('app.destroy()') < changedBody.indexOf('app = new App(platform)'));
-    const disableStart = enableBody.indexOf('const disable = () => {');
+    // The monitors-changed handler lives in the extension session now; it destroys
+    // the old App before creating the next one, and disable() tears the session —
+    // whose scope releases the handler first, BEFORE the App dies — down.
+    const sessionSrc = fs.readFileSync(path.join(__dirname, '..', 'lib', 'runtime', 'session.js'), 'utf8');
+    const changedStart = sessionSrc.indexOf("'monitors-changed'");
+    const changedBody = sessionSrc.slice(changedStart);
+    assert.ok(changedBody.indexOf('this.app.destroy();') > -1, 'the handler destroys the old app');
+    assert.ok(changedBody.indexOf('this.app.destroy();') < changedBody.indexOf('this._deps.createApp'),
+        'destroy happens before the next registration');
+    const disableStart = enableBody.indexOf('const disable = function () {');
     const disableBody = enableBody.slice(disableStart, enableBody.indexOf('\n};', disableStart));
-    assert.match(disableBody, /Main\.layoutManager\.disconnect\(monitorChangedSignal\)/);
-    assert.match(disableBody, /app\.destroy\(\)/);
+    assert.match(disableBody, /this\.session\.destroy\(\)/);
+    assert.match(enableBody, /this\.session\.start\(\)/, 'enable creates and starts the session');
 });
 
 // The contract, modeled on /usr/share/cinnamon/js/ui/settings.js and cinnamonDBus.js:
