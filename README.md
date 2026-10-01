@@ -166,7 +166,7 @@ Plain CommonJS modules, loaded by Cinnamon's xlet `require`, in five layers. A m
 | `lib/ui/` | preset panel, editor, Cairo drawing, gettext binding |
 | `lib/app/` | composition root: `App` builds the components, `Config` binds the settings and the hotkeys |
 
-`extension.js` starts the session in `enable()` and destroys it in `disable()`; a monitor change replaces the App inside the session. Requires are root-relative — `require('./lib/model/gap')` works from every file, because Cinnamon resolves against the extension directory — and never use `../`. The guards in `tests/architecture/` enforce the layer table, the acyclic graph, zero module-level state, model purity, the settings key list and the shipped file list. `tests/` is organised like `lib/` (`model/`, `tiling/`, `runtime/`, `app/`) plus `architecture/`, `i18n/` and `helpers/`.
+`extension.js` starts the session in `enable()` and destroys it in `disable()`; a monitor change replaces the App inside the session. Modules load through the native GJS importer: every file resolves its own tree via `imports.extensions['greenTile@carsteneu'].lib.…` (loaded through the xlet directory importer on both Cinnamon 6.6 and 6.8), and only top-level `var`/function declarations are visible across modules. The guards in `tests/architecture/` enforce the layer table, the acyclic graph, zero module-level state, model purity, the settings key list and the shipped file list. `tests/` is organised like `lib/` (`model/`, `tiling/`, `runtime/`, `app/`) plus `architecture/`, `i18n/` and `helpers/`.
 
 ## Origin
 

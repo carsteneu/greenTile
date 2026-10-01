@@ -31,11 +31,13 @@ const { Session } = XLET.lib.runtime.session;
 // extension.module.enable() native), yet the session does not ride `this`: the
 // extensibility of a natively imported namespace is not a contract we rely on.
 // The module-private holder below owns the session instead — the one allowed
-// top-level mutable binding (see zero-module-state.test.js). Its lifetime is
-// identical across both generations: the module object is cached for the
-// installed extension lifetime, and an xlet reload clears that cache and
-// re-evaluates this file with a fresh holder.
-/** @type {{ session: { destroy(): void } | null }} */
+// top-level mutable binding (see zero-module-state.test.js). Reload semantics
+// differ per generation and are safe here only because nothing else lives at
+// module level: 6.6 forgetExtension deletes the whole entry subtree (this file
+// re-evaluates with a fresh holder), while upstream clearXletImportCache
+// clears only extension.imports and the shared imports.extensions tree —
+// cached lib modules there survive a reload. With top-level state reduced to
+// this holder, that asymmetry cannot leak between sessions.
 const lifecycle = { session: null };
 
 /**
