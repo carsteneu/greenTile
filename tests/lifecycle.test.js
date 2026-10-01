@@ -180,6 +180,7 @@ const makeWindow = (seq) => {
         get_wm_class: () => 'FakeWindow',
         get_monitor: () => 0,
         get_workspace: () => null, // === activeWorkspace (null) in the default env
+        is_on_all_workspaces: () => false,
     };
     return windowHub;
 };
@@ -549,4 +550,144 @@ test('theme/border settings bindings firing mid-Config and after disable stay gu
     greenTile.disable();
     assert.doesNotThrow(() => fire('panelTheme'), 'a theme binding after disable stays silent');
     assert.doesNotThrow(() => fire('focusBorder'), 'a border binding after disable stays silent');
+});
+
+// Panel state runtime (lib/runtime/panel-state.js): opening the list binds the
+// Escape hotkey and connects workspace/stage/display handlers; close() and the
+// destroy slot in Config.destroy release exactly those again.
+test('panel: opening the list binds Escape and connects its handlers; disable closes and destroys the panel', () => {
+    const { env, greenTile } = loadGreenTile();
+    enableWithMonitor(env, greenTile);
+    env.activeWorkspace = { index: () => 0 };
+    const displaysBefore = env.display.count('notify::focus-window');
+    const workspaceSwitchedBefore = env.workspaceManager.count('workspace-switched');
+    env.keybindingManager.hotkeys.get('greenTile-preset').cb();
+    assert.equal(env.chromeChildren.length, 1, 'the panel actor is in the chrome');
+    const panelActor = env.chromeChildren[0];
+    assert.equal(env.keybindingManager.hotkeys.get('greenTile-panel-esc') !== undefined, true,
+        'Escape is bound while the list is open');
+    assert.equal(env.workspaceManager.count('workspace-switched'), workspaceSwitchedBefore + 1,
+        'panel re-renders on workspace switches');
+    assert.equal(env.display.count('notify::focus-window'), displaysBefore + 1, 'outside-click/focus close handler connected');
+    greenTile.disable();
+    assert.deepEqual(env.greenTileHotkeys(), [], 'the Escape hotkey is released with everything else');
+    assert.equal(env.workspaceManager.count('workspace-switched'), 0, 'panel sig handlers released');
+    assert.equal(env.display.count('notify::focus-window'), 0, 'no display handler left');
+    assert.equal(env.chromeChildren.length, 0, 'the panel actor left the chrome');
+    assert.equal(panelActor.destroyed, true, 'the panel actor was destroyed');
+    assert.equal(greenTile.session, null, 'the session is gone');
+});
+
+test('panel: hotkey re-registration while the list is open keeps the Escape binding intact', () => {
+    const { env, greenTile } = loadGreenTile();
+    enableWithMonitor(env, greenTile);
+    env.activeWorkspace = { index: () => 0 };
+    env.keybindingManager.hotkeys.get('greenTile-preset').cb();
+    assert.ok(env.keybindingManager.hotkeys.get('greenTile-panel-esc'), 'Escape bound while the list is open');
+    // the settings dialog path: any hotkey setting change re-runs EnableHotkey
+    settingsInstance(env).bindings.find((b) => b.key === 'presetHotkey').cb();
+    assert.ok(env.keybindingManager.hotkeys.get('greenTile-panel-esc'),
+        'EnableHotkey must not drop the Escape binding (panel owner binds/unbinds it per open/close)');
+    assert.deepEqual(env.greenTileHotkeys().filter((n) => n !== 'greenTile-panel-esc').sort(), HOTKEY_NAMES,
+        'the 14 static hotkeys are re-registered exactly once');
+    // Escape still closes the panel
+    env.keybindingManager.hotkeys.get('greenTile-panel-esc').cb();
+    assert.equal(env.chromeChildren.length, 0, 'the panel closed through Escape');
+    assert.equal(greenTile.session.app.panel.actor, null, 'panel state actor reset');
+    greenTile.disable();
+    assert.deepEqual(env.greenTileHotkeys(), []);
+});
+
+// Exclusions runtime (lib/runtime/exclusions.js): the toggles are per App — an
+// exclusion set for a window must not leak into a recreated App or a re-enabled
+// extension, while the rows stay re-derived from the (unchanged) settings.
+test('exclusion toggle on a window is gone after monitors-changed and after disable/enable', () => {
+    const { env, greenTile } = loadGreenTile();
+    enableWithMonitor(env, greenTile);
+    env.activeWorkspace = { index: () => 0 };
+    const w = makeWindow(31);
+    env.display.focus_window = w;
+    env.tabList.push(w);
+    env.keybindingManager.hotkeys.get('greenTile-exclude').cb();
+    let app = greenTile.session.app;
+    assert.equal(app.excl.isExcluded(w), true, 'the focused window is excluded');
+    assert.equal(env.logs.filter((l) => l.startsWith('greenTile never tile on:')).length, 1, 'toggle logged');
+    env.layoutManager.emit('monitors-changed');
+    env.flushDisplayConfigNoReply();
+    app = greenTile.session.app;
+    assert.notEqual(app, null);
+    assert.equal(app.excl.isExcluded(w), false, 'a fresh App has no per-window toggles');
+    greenTile.disable();
+    greenTile.enable();
+    env.flushDisplayConfigNoReply();
+    assert.equal(greenTile.session.app.excl.isExcluded(makeWindow(31)), false,
+        'a re-enabled extension has no per-window toggles either');
+    greenTile.disable();
+    assert.equal(env.totalHandlers(), 0, 'the exclusions installed-changed handler is released');
+});
+
+// Session write-guard flag: the "layouts corrupt" log-once pair shares one
+// session flag — once per session across App recreations, again after re-enable.
+// Session write-guard flag: the "layouts corrupt" log-once pair shares one
+// session flag — once per session across App recreations, again after re-enable.
+// Each App recreation builds a fresh Config/ExtensionSettings, so the corrupt
+// value (still in the settings file in reality) is re-applied per instance.
+test('the layouts write-guard logs once per session across an App recreation and again after a new enable', () => {
+    const { env, greenTile } = loadGreenTile();
+    enableWithMonitor(env, greenTile);
+    env.activeWorkspace = { index: () => 0 };
+    const corruptLines = () => env.logs.filter((l) => l === 'greenTile layouts setting is corrupt, not writing it').length;
+    const corruptValue = '{"mkey": broken';
+    env.settingsInstances.at(-1).setValue('layouts', corruptValue);
+    let app = greenTile.session.app;
+    app.auto.activate(app);
+    assert.equal(corruptLines(), 1, 'logged once for the first corrupt write');
+    env.layoutManager.emit('monitors-changed');
+    env.flushDisplayConfigNoReply();
+    env.settingsInstances.at(-1).setValue('layouts', corruptValue);
+    app = greenTile.session.app;
+    app.auto.activate(app);
+    assert.equal(corruptLines(), 1, 'still once across the App recreation (session flag)');
+    greenTile.disable();
+    greenTile.enable();
+    env.flushDisplayConfigNoReply();
+    env.settingsInstances.at(-1).setValue('layouts', corruptValue);
+    app = greenTile.session.app;
+    app.auto.activate(app);
+    assert.equal(corruptLines(), 2, 'a new session starts with a fresh flag');
+    greenTile.disable();
+});
+
+// Step-3 isolation: two enable/disable cycles on the SAME loaded module share no
+// state — per-App components (exclusion toggles, panel state) reset, and the
+// write-guard flag rides the new session.
+test('two enable/disable cycles on the same loaded module share no state', () => {
+    const { env, greenTile } = loadGreenTile();
+    enableWithMonitor(env, greenTile);
+    env.activeWorkspace = { index: () => 0 };
+    const w = makeWindow(41);
+    env.display.focus_window = w;
+    env.tabList.push(w);
+    env.keybindingManager.hotkeys.get('greenTile-preset').cb();
+    env.keybindingManager.hotkeys.get('greenTile-exclude').cb();
+    const firstApp = greenTile.session.app;
+    assert.equal(firstApp.excl.isExcluded(w), true, 'cycle 1 excluded the window');
+    assert.ok(firstApp.panel.actor, 'cycle 1 has an open panel');
+    firstApp.panel.guard();
+    greenTile.disable();
+    assert.equal(firstApp.panel.actor, null, 'disable closed the panel');
+    assert.deepEqual(firstApp.excl.toggled.size, 0, 'disable cleared the toggles');
+    assert.deepEqual(env.greenTileHotkeys(), [], 'no hotkeys after disable');
+
+    greenTile.enable();
+    env.flushDisplayConfigNoReply();
+    const secondApp = greenTile.session.app;
+    assert.notEqual(secondApp, firstApp, 'a new App was created');
+    assert.equal(secondApp.panel.actor, null, 'cycle 2 starts with a closed panel');
+    assert.equal(secondApp.panel.guardUntil, 0, 'cycle 2 starts with a clean guard');
+    assert.equal(secondApp.excl.toggled.size, 0, 'cycle 2 starts without toggles');
+    assert.equal(secondApp.excl.isExcluded(makeWindow(41)), false, 'the exclusion did not leak into cycle 2');
+    greenTile.disable();
+    assert.equal(env.totalHandlers(), 0);
+    assert.equal(env.liveTimers().length, 0);
 });
