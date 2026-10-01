@@ -5,13 +5,70 @@
  * shapes the models parse and produce (see the per-file comments in lib/model).
  */
 
-/** Meta.Window as far as greenTile touches it — a GI struct, deliberately open. */
-type CinnamonWindow = AnyRecord;
-/** A Cinnamon monitor / layout actor object ( layoutManager.monitors[i] ). */
-type CinnamonMonitor = AnyRecord;
-
 /** Screen rectangle [x, y, w, h] in px (also window frames and cells). */
 type Rect = [number, number, number, number];
+
+/** Muffin rectangle object as returned by Meta.Window.get_frame_rect(). */
+type CinnamonRectangle = { x: number; y: number; width: number; height: number };
+
+/** Meta.Workspace as far as greenTile touches it (identity, index, window list). */
+type CinnamonWorkspace = {
+    index(): number;
+    list_windows(): CinnamonWindow[];
+};
+
+/**
+ * Meta.Window as far as greenTile touches it — narrowed to the members the
+ * runtime paths actually call, so method-name and argument typos fail tsc.
+ * Every member is verified against the installed muffin 6.6 gi (Meta-0.typelib:
+ * move_resize_frame, move_frame, unmaximize, activate, get_monitor,
+ * get_workspace, get_frame_rect, get_compositor_private, get_maximized,
+ * is_fullscreen, get_wm_class, get_wm_class_instance, get_window_type,
+ * is_on_all_workspaces, get_stable_sequence, GObject signal connect/disconnect.
+ * Deliberately open: window properties beyond this
+ * surface (x/y/rect,WM props), authorizations and hints — add members here
+ * only with a runtime-API check against the muffin typelib.
+ */
+interface CinnamonWindow {
+    minimized: boolean;
+    get_wm_class(): string | null;
+    get_window_type(): number;
+    get_monitor(): number;
+    get_title(): string;
+    get_workspace(): CinnamonWorkspace;
+    is_on_all_workspaces(): boolean;
+    get_maximized(): boolean | number;
+    is_fullscreen(): boolean;
+    unmaximize(flags: number): void;
+    /** Meta.Window.move_resize_frame(user_op, x, y, width, height) */
+    move_resize_frame(userOp: boolean, x: number, y: number, width: number, height: number): void;
+    /** Meta.Window.move_frame(user_op, x, y) */
+    move_frame(userOp: boolean, x: number, y: number): void;
+    get_frame_rect(): CinnamonRectangle;
+    /** Clutter actor of the window window (translation/scale for animation). */
+    get_compositor_private(): {
+        translation_x: number;
+        translation_y: number;
+        scale_x: number;
+        scale_y: number;
+    } | null;
+    activate(time: number): void;
+    /** Stable seq across App recreations (Meta.Window.get_stable_sequence). */
+    get_stable_sequence(): number;
+    get_wm_class_instance(): string | null;
+    /** GObject signal id — lib/runtime (auto, exclusions, border) keeps it for disconnect. */
+    connect(signal: string, callback: (...args: any[]) => void): number;
+    disconnect(id: number): void;
+}
+
+/** Meta.MonitorBox shaped: a Cinnamon monitor (layoutManager.monitors[i]). */
+type CinnamonMonitor = {
+    index: number;
+    x: number;
+    y: number;
+    width: number;
+    height: number;
+};
 
 /** Setting "layouts" key of a monitor: vendor|product|serial (+|connector on zero serial). */
 type MonitorKey = string;
@@ -188,6 +245,26 @@ type ExclFacade = {
     toggleFocused(app: AppFacade): void;
 };
 
+/** Per-App preset panel state as built by lib/runtime/panel-state.js (app.panel.).
+ * Narrow on purpose: app.panel.rebuld()-style typos must fail tsc (issue 12). */
+type PanelStateFacade = {
+    actor: AnyRecord | null;
+    positioned: boolean;
+    sig: Array<{ obj: AnyRecord; id: number }>;
+    dragging: boolean;
+    view: 'list' | 'editor';
+    draft: AnyRecord | null;
+    guardUntil: number;
+    escBound: boolean;
+    guard(): void;
+    close(): void;
+};
+
+// theme/border/drop/focus stay deliberately open (AnyRecord): their surfaces
+// are only touched by their own lib/runtime modules, which hold the concrete
+// class instance — widening them would re-describe whole runtime classes for
+// no check value. panel/panel-state is spelled out because lib/tiling and
+// lib/ui call into app.panel across module borders.
 /** App facade: the wired component set every function under lib/ receives. */
 type AppFacade = {
     config: ConfigFacade;
@@ -197,7 +274,7 @@ type AppFacade = {
     monitors: MonitorsFacade;
     excl: ExclFacade;
     ops: OpsFacade;
-    panel: AnyRecord;
+    panel: PanelStateFacade;
     /** Theme runtime (lib/runtime/theme.js). */
     theme: AnyRecord;
     /** Focus-border runtime (lib/runtime/border.js). */
