@@ -19,7 +19,7 @@ const path = require('node:path');
 const { ROOT } = require('./cinnamon-loader');
 
 const FILES = ['extension.js'].concat(
-    ['app', 'runtime', 'ui', 'tiling'].flatMap((sub) => fs.readdirSync(path.join(ROOT, 'lib', sub))
+    ['app', 'model', 'runtime', 'ui', 'tiling'].flatMap((sub) => fs.readdirSync(path.join(ROOT, 'lib', sub))
         .filter((f) => f.endsWith('.js'))
         .map((f) => path.join('lib', sub, f)))
         .sort()
@@ -79,7 +79,7 @@ test('guard flags mutable top-level state and accepts the allowed forms', () => 
     assert.equal(findViolations('    let x = 0;', 'f.js').length, 0, 'only column 0 is module level');
 });
 
-test('extension.js, lib/app/**, lib/runtime/**, lib/ui/** and lib/tiling/** carry no mutable module-level state', () => {
+test('extension.js, lib/app/**, lib/model/**, lib/runtime/**, lib/ui/** and lib/tiling/** carry no mutable module-level state', () => {
     const seen = [];
     for (const file of FILES) {
         const violations = findViolations(fs.readFileSync(path.join(ROOT, file), 'utf8'), file);
@@ -89,7 +89,7 @@ test('extension.js, lib/app/**, lib/runtime/**, lib/ui/** and lib/tiling/** carr
     assert.ok(seen.includes('extension.js'), 'extension.js covered');
     assert.ok(seen.includes(path.join('lib/app', 'app.js')), 'lib/app/app.js covered');
     assert.ok(seen.includes(path.join('lib/app', 'config.js')), 'lib/app/config.js covered');
-    assert.ok(seen.includes(path.join('lib/app', 'settings-keys.js')), 'lib/app/settings-keys.js covered');
+    assert.ok(seen.includes(path.join('lib/model', 'settings-keys.js')), 'lib/model/settings-keys.js covered');
     assert.ok(seen.includes(path.join('lib/runtime', 'hotkeys.js')), 'lib/runtime/hotkeys.js covered');
     assert.ok(seen.includes(path.join('lib/runtime', 'exclusions.js')), 'lib/runtime/exclusions.js covered');
     assert.ok(seen.includes(path.join('lib/runtime', 'panel-state.js')), 'lib/runtime/panel-state.js covered');

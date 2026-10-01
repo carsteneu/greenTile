@@ -12,7 +12,7 @@ const path = require('node:path');
 
 const LIB_DIR = path.join(__dirname, '..', 'lib', 'model');
 const files = fs.readdirSync(LIB_DIR).filter((f) => f.endsWith('.js')).sort();
-assert.equal(files.length, 17, 'expected the 17 extracted model modules');
+assert.equal(files.length, 18, 'expected the 18 extracted model modules');
 
 const purityRe = /imports\.|\bSt\.|\bClutter\.|global\.|\bMain\.|Meta\./;
 const importRequireRe = /\brequire\(\s*['"](?:gi|ui|misc|perf)\./;

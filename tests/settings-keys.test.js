@@ -1,5 +1,5 @@
 'use strict';
-// Settings-key single source: lib/app/settings-keys.js carries the ONLY raw
+// Settings-key single source: lib/model/settings-keys.js carries the ONLY raw
 // settings key strings. The dialog msgids are extracted from
 // settings-schema.json and are translatable — a renamed key would lose the
 // user's stored value (Cinnamon settings.js _doUpgrade keeps values only for
@@ -29,7 +29,7 @@ const collectJs = (function collect(dir, prefix) {
 })(path.join(ROOT, 'lib'), 'lib');
 
 test('settings-keys.js is frozen and covers every persisted schema key exactly', () => {
-    const keys = load('./lib/app/settings-keys.js').SETTINGS_KEYS;
+    const keys = load('./lib/model/settings-keys.js').SETTINGS_KEYS;
     assert.equal(Object.isFrozen(keys), true, 'the constants object must be frozen');
     assert.deepEqual(Object.keys(keys).sort(), SCHEMA_KEYS, 'one constant per schema key, no extras');
     for (const key of SCHEMA_KEYS)
@@ -50,8 +50,8 @@ test('the renamed hotkey keys and the legacy drops leave exactly this schema key
     ].sort());
 });
 
-test('no raw settings key string outside lib/app/settings-keys.js', () => {
-    const files = collectJs.filter((f) => f !== 'lib/app/settings-keys.js').concat(['extension.js']);
+test('no raw settings key string outside lib/model/settings-keys.js', () => {
+    const files = collectJs.filter((f) => f !== 'lib/model/settings-keys.js').concat(['extension.js']);
     const violations = [];
     for (const file of files) {
         const src = fs.readFileSync(path.join(ROOT, file), 'utf8');
