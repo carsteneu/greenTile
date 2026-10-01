@@ -16,6 +16,9 @@ fi
 
 mkdir -p "$DEST"
 cp "$SRC"/*.js "$SRC"/*.json "$SRC"/*.css "$SRC"/icon.png "$DEST/"
+# a greenTile.js left over from an older install is dead code under the new
+# build (Cinnamon loads extension.js only) — remove it for hygiene
+rm -f "$DEST/greenTile.js"
 # lib/ is a tree of module files; replace it wholesale, so an install over an
 # older version cannot mix new modules with stale ones the new code does not require.
 rm -rf "$DEST/lib"

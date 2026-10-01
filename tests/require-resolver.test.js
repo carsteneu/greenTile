@@ -22,7 +22,7 @@ const shippedJs = (function collect(dir, prefix) {
             out.push(rel);
     }
     return out;
-})(path.join(ROOT, 'lib'), 'lib').concat(['greenTile.js', 'extension.js']);
+})(path.join(ROOT, 'lib'), 'lib').concat(['extension.js']);
 
 const requireRe = /\brequire\(\s*(['"])([^'"\n]+)\1\s*\)/g;
 

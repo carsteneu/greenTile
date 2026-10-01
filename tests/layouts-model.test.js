@@ -1,7 +1,6 @@
 'use strict';
 // Tests the pure layouts model (lib/model/layouts.js), loaded through the shared
-// Cinnamon-mimicking loader. lib/model/layouts.js itself requires lib/model/auto.js
-// for tile_auto_list_map (Cinnamon-style root-relative path).
+// Cinnamon-mimicking loader.
 // Storage format: the
 // string setting "layouts", JSON shaped
 // { "<monitor key>": { "<workspace number from 1 | *>": { preset?, auto? } } }.
@@ -9,7 +8,7 @@ const test = require('node:test');
 const assert = require('node:assert/strict');
 
 const load = require('./cinnamon-loader').load;
-const m = { ...load('./lib/model/auto.js'), ...load('./lib/model/layouts.js') };
+const m = load('./lib/model/layouts.js');
 
 test('parse accepts JSON objects, returns {} for empty and null for garbage', () => {
     assert.deepEqual(m.tile_layouts_parse('{"a":{}}'), { a: {} });
@@ -68,32 +67,6 @@ test('the * workspace key works like any other key', () => {
     const layouts = m.tile_layouts_set({}, 'M', '*', { preset: 'p1' });
     assert.deepEqual(layouts, { M: { '*': { preset: 'p1' } } });
     assert.deepEqual(m.tile_layouts_entry(layouts, 'M', '*', ['p1']), { preset: 'p1', auto: true });
-});
-
-test('migrate converts wsPresets and autoWorkspaces into one monitor key', () => {
-    assert.deepEqual(
-        m.tile_layouts_migrate({ '0': 'p1', '4': 'p2' }, [{ workspace: 5, auto: true }], 'M'),
-        { M: { '1': { preset: 'p1' }, '5': { preset: 'p2', auto: true } } },
-    );
-});
-
-test('migrate returns {} when both keys are empty and drops empty states', () => {
-    assert.deepEqual(m.tile_layouts_migrate({}, [], 'M'), {});
-    assert.deepEqual(m.tile_layouts_migrate({}, [{ workspace: 3, auto: false }], 'M'), {});
-});
-
-test('migrate keeps auto off next to a preset', () => {
-    assert.deepEqual(
-        m.tile_layouts_migrate({ '0': 'p1' }, [{ workspace: 1, auto: false }], 'M'),
-        { M: { '1': { preset: 'p1', auto: false } } },
-    );
-});
-
-test('migrate ignores invalid rows, as tile_auto_list_map does', () => {
-    assert.deepEqual(
-        m.tile_layouts_migrate({ '0': 'p1' }, [{ workspace: 2, auto: true }, { workspace: 'x', auto: true }, null, { workspace: 2.5, auto: true }], 'M'),
-        { M: { '1': { preset: 'p1' }, '2': { auto: true } } },
-    );
 });
 
 const sp3 = { kind: 'cols', shape: [1, 2], major: [0.6, 0.4], minor: [[1], [0.3, 0.7]] };

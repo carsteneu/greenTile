@@ -128,8 +128,8 @@ Deploy from a checkout and reload without restarting Cinnamon:
 ```bash
 D=~/.local/share/cinnamon/extensions/greenTile@carsteneu
 mkdir -p "$D"
-node --check greenTile.js
-cp extension.js greenTile.js metadata.json settings-schema.json stylesheet.css icon.png LICENSE "$D"/
+node --check extension.js
+cp extension.js metadata.json settings-schema.json stylesheet.css icon.png LICENSE "$D"/
 rm -rf "$D/lib"
 cp -R lib "$D/lib"
 for po in po/*.po; do
@@ -141,8 +141,10 @@ dbus-send --session --print-reply --dest=org.Cinnamon /org/Cinnamon org.Cinnamon
   string:"imports.ui.extensionSystem.disableExtension('greenTile@carsteneu'); imports.ui.extensionSystem.enableExtension('greenTile@carsteneu'); 'reloaded'"
 ```
 
-greenTile.js requires the model modules from `lib/model/` — always deploy `lib/`
-alongside it. Copying greenTile.js alone fails at load time.
+extension.js is the single entry and requires the modules from `lib/` — always
+deploy `lib/` alongside it. Copying extension.js alone fails at load time. A
+`greenTile.js` left over from an older install is dead code under the new build
+(Cinnamon loads extension.js only) — delete it for hygiene.
 
 - **Tests:** `node --test tests/*.test.js` (Node 18 or newer).
 - **Releases:** pushing a `v*` tag builds the zip and attaches it to the release (`.github/workflows/release.yml`).

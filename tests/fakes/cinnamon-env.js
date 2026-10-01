@@ -1,5 +1,5 @@
 'use strict';
-// Fake Cinnamon runtime for lifecycle tests against the REAL greenTile.js.
+// Fake Cinnamon runtime for lifecycle tests against the REAL extension.js.
 // Behavioral fakes cover the paths greenTile touches on enable()/disable() and
 // the monitors-changed recreation: signal hubs on Main/global objects, the
 // keybinding manager, Meta custom keybindings, one shared GLib source-id space,
@@ -91,10 +91,10 @@ const signalHub = (name) => {
 // default, a missing one throws with a precise message instead of passing
 // undefined into the code under test.
 const SETTINGS_DEFAULTS = {
-    autotile6hotkey: '<Super>6',
-    autotile3hotkey: '<Super>3',
-    autotileautohotkey: '<Super>a',
-    autotileoffhotkey: '<Super>o',
+    columns6Hotkey: '<Super>6',
+    columns3Hotkey: '<Super>3',
+    autoOnHotkey: '<Super>a',
+    autoOffHotkey: '<Super>o',
     presetHotkey: '<Super>p',
     excludeHotkey: '<Super>x',
     resizeWiderHotkey: '<Super>w',
@@ -107,9 +107,6 @@ const SETTINGS_DEFAULTS = {
     swapDownHotkey: '<Super>Down',
     exclusions: [],
     excludeAppPicker: 'picker',
-    layoutsMigrated: false,
-    wsPresets: '{}',
-    autoWorkspaces: [],
     layouts: '',
     presets: '[]',
     panelTheme: false,
@@ -194,7 +191,7 @@ const createCinnamonEnv = (options) => {
             BindingDirection: { IN: 'in' },
             ExtensionSettings: class {
                 constructor(owner, uuid) {
-                    return makeSettings(uuid);
+                    return makeSettings(uuid, owner);
                 }
             },
         },
@@ -314,7 +311,7 @@ const createCinnamonEnv = (options) => {
     // --- settings: Cinnamon slot model, one object per uuid
     env.settingsSlots = new Map();
     env.settingsInstances = [];
-    const makeSettings = (uuid) => {
+    const makeSettings = (uuid, owner) => {
         const values = new Map(Object.entries(settingsDefaults));
         const instance = {
             uuid,
@@ -322,11 +319,19 @@ const createCinnamonEnv = (options) => {
             finalized: false,
             callLog: [],
             bind(key, prop, cb, data) {
-                // divergence from real Cinnamon: bindWithObject defines the bound
-                // property on the bind object; greenTile.js only reads via
-                // getValue/setValue and bound callbacks — keep the fakes frozen
-                // so the lifecycle baseline numbers stay comparable
-                this.bindings.push({ key, prop, cb, data });
+                // mirrors /usr/share/cinnamon/js/ui/settings.js bindWithObject:
+                // the bound property is a live getter/setter on the bind object
+                // (the owner passed to the ExtensionSettings constructor), and
+                // the callback fires bound to that object
+                if (owner) {
+                    Object.defineProperty(owner, prop, {
+                        enumerable: true,
+                        configurable: true,
+                        get: () => (values.has(key) ? values.get(key) : undefined),
+                        set: (v) => instance.setValue(key, v),
+                    });
+                }
+                this.bindings.push({ key, prop, cb: cb ? () => cb.call(owner) : undefined, data });
             },
             bindProperty(direction, key, prop, cb, data) {
                 return this.bind(key, prop, cb, data);

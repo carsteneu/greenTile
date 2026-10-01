@@ -10,7 +10,7 @@ STAGE="dist/greenTile-$VER"
 
 rm -rf "$STAGE" "dist/greenTile-$VER.zip"
 mkdir -p "$STAGE/$UUID/po"
-cp greenTile.js extension.js metadata.json settings-schema.json stylesheet.css icon.png "$STAGE/$UUID/"
+cp extension.js metadata.json settings-schema.json stylesheet.css icon.png "$STAGE/$UUID/"
 cp -R lib "$STAGE/$UUID/lib"
 cp po/*.po "$STAGE/$UUID/po/"
 cp install.sh update.sh "$STAGE/"

@@ -17,22 +17,22 @@
       "hotkeys-tab": {
          "type": "page",
          "title": "Hotkeys",
-          "sections": [
-              "autotile-hotkey-section",
-              "preset-section",
-              "resize-section",
-              "swap-section",
-              "exclusion-hotkey-section"
-           ]
+      "sections": [
+         "columns-hotkey-section",
+         "preset-section",
+         "resize-section",
+         "swap-section",
+         "exclusion-hotkey-section"
+      ]
       },
-      "autotile-hotkey-section": {
+      "columns-hotkey-section": {
          "type": "section",
          "title": "Auto-Tile Hotkeys",
          "keys": [
-            "autotile6hotkey",
-            "autotile3hotkey",
-            "autotileautohotkey",
-            "autotileoffhotkey"
+            "columns6Hotkey",
+            "columns3Hotkey",
+            "autoOnHotkey",
+            "autoOffHotkey"
          ]
       },
       "preset-section": {
@@ -99,22 +99,22 @@
          ]
       }
    },
-   "autotile6hotkey": {
+   "columns6Hotkey": {
       "type": "keybinding",
       "default": "<Super><Ctrl>6",
       "description": "Tile all windows into 6 columns"
    },
-   "autotile3hotkey": {
+   "columns3Hotkey": {
       "type": "keybinding",
       "default": "<Super><Ctrl>3",
       "description": "Tile all windows into 3 columns"
    },
-   "autotileautohotkey": {
+   "autoOnHotkey": {
       "type": "keybinding",
       "default": "<Super><Ctrl>a",
       "description": "Turn automatic tiling on for this workspace and tile now"
    },
-   "autotileoffhotkey": {
+   "autoOffHotkey": {
       "type": "keybinding",
       "default": "<Super><Ctrl>d",
       "description": "Turn automatic tiling off for this workspace"
@@ -192,27 +192,9 @@
       ],
       "default": []
    },
-   "wsPresets": {
-      "type": "string",
-      "default": "{}",
-      "description": "Workspace to preset assignments (JSON)"
-   },
-   "autoWorkspaces": {
-      "type": "list",
-      "description": "Automatic tiling per workspace (set with Super+Ctrl+A / Super+Ctrl+D or in the preset panel; not shown in this dialog)",
-      "columns": [
-         {"id": "workspace", "title": "Workspace", "type": "integer", "min": 1, "max": 36, "step": 1},
-         {"id": "auto", "title": "Tile automatically", "type": "boolean"}
-      ],
-      "default": []
-   },
    "layouts": {
       "type": "generic",
       "default": ""
-   },
-   "layoutsMigrated": {
-      "type": "generic",
-      "default": false
    },
    "panelSize": {
       "type": "generic",
