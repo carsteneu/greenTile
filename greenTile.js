@@ -1842,8 +1842,9 @@ const enable = function () {
     // carries the state that must survive them (settle wait, fallback-logged
     // flag, the monitors-changed handler on its own scope). Cinnamon calls
     // extension.js's exports member-style (extensionSystem.js) and extension.js
-    // forwards as gtile.enable()/gtile.disable() member calls — so `this` is
-    // the exports object and the session rides it, no module-level state left.
+    // forwards as greenTile.enable()/greenTile.disable() member calls — so
+    // `this` is the exports object and the session rides it, no module-level
+    // state left.
     this.session = new Session({
         signalManager: new tile_SignalManager(),
         layoutManager: Main.layoutManager,

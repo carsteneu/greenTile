@@ -30,11 +30,11 @@ test('greenTile.js exports exactly init/enable/disable via explicit module.expor
     const src = fs.readFileSync(greenTilePath, 'utf8');
     assert.match(src, /^module\.exports(\.[a-zA-Z0-9_$]+)?\s*=/m,
         'explicit module.exports required — without it Cinnamon auto-exports every top-level name');
-    const gtile = cinnamonLoad(src, load, 'greenTile.js');
-    assert.deepEqual(Object.keys(gtile).sort(), ['disable', 'enable', 'init']);
-    assert.equal(typeof gtile.init, 'function');
-    assert.equal(typeof gtile.enable, 'function');
-    assert.equal(typeof gtile.disable, 'function');
+    const greenTileModule = cinnamonLoad(src, load, 'greenTile.js');
+    assert.deepEqual(Object.keys(greenTileModule).sort(), ['disable', 'enable', 'init']);
+    assert.equal(typeof greenTileModule.init, 'function');
+    assert.equal(typeof greenTileModule.enable, 'function');
+    assert.equal(typeof greenTileModule.disable, 'function');
 });
 
 test('extension.js reaches init/enable/disable through require("./greenTile")', () => {
@@ -54,11 +54,11 @@ test('extension.js reaches init/enable/disable through require("./greenTile")', 
 
 test('extension.js forwards init/enable/disable as member calls (this-session coupling)', () => {
     const extSrc = fs.readFileSync(extensionPath, 'utf8');
-    assert.match(extSrc, /gtile\.init\(/, 'member-style init call');
-    assert.match(extSrc, /gtile\.enable\(\)/,
+    assert.match(extSrc, /greenTile\.init\(/, 'member-style init call');
+    assert.match(extSrc, /greenTile\.enable\(\)/,
         'member-style enable call — the extension session rides `this` on greenTile\'s module.exports, '
         + 'a destructured/unbound call would leave `this` undefined');
-    assert.match(extSrc, /gtile\.disable\(\)/, 'member-style disable call');
+    assert.match(extSrc, /greenTile\.disable\(\)/, 'member-style disable call');
     assert.ok(!/const\s*\{\s*(?:init|enable|disable)[\s,}]/.test(extSrc),
         'no destructured forwarding of the lifecycle entry points');
 });
