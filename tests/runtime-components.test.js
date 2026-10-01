@@ -443,3 +443,133 @@ test('session destroy releases the handler before the app dies: a throwing app.d
     session.destroy();
     assert.equal(session.settle.pending, false, 'second destroy is a no-op');
 });
+
+// Auto -------------------------------------------------------------------------
+
+const { Auto } = load('./lib/runtime/auto');
+
+// Minimal per-App shape: only the surfaces the Auto component reads through the
+// app parameter (monitors readiness, settle liveness).
+const makeApp = (overrides = {}) => ({
+    monitors: { ready: true },
+    session: { settle: { started: 0, start() {} } },
+    ...overrides,
+});
+
+const makeAuto = (opts = {}) => {
+    const ml = fakeMainloop();
+    const logs = [];
+    const calls = { layoutSet: [], retileMonitor: [], borderUpdate: 0 };
+    const monitorCount = 'monitorCount' in opts ? opts.monitorCount : 2;
+    const activeWorkspace = { index: () => 3 };
+    const deps = {
+        mainloop: ml,
+        meta: { WindowType: { NORMAL: 6 }, GrabOp: { MOVING: 16, KEYBOARD_MOVING: 17 } },
+        main: { layoutManager: { monitors: Array.from({ length: monitorCount }, (_, i) => ({ index: i })), primaryIndex: 0 } },
+        global: {
+            workspace_manager: { get_active_workspace: () => activeWorkspace },
+            log: (msg) => logs.push(msg),
+        },
+        signalManager: fakeSignalManager(),
+        layoutFor: () => ({ preset: null, auto: 'auto' in opts ? opts.auto : true }),
+        layoutSet: (app, monitorIndex, wsIndex, patch) => calls.layoutSet.push({ monitorIndex, wsIndex, patch }),
+        retileMonitor: (app, monitorIndex, focusWindow) => calls.retileMonitor.push({ monitorIndex, focusWindow }),
+        borderUpdate: () => { calls.borderUpdate += 1; },
+        focusWindow: () => (opts.focus ? opts.focus : null),
+        focusMonitorIndex: () => 1,
+        grabIsResize: () => (opts.grabIsResize ? opts.grabIsResize() : false),
+        dropBegin: () => {}, dropEnd: () => false, dropStop: () => {},
+        resizeEnd: () => {}, exclToggleDelete: () => {}, exclToggleClear: () => {},
+    };
+    return { ml, logs, calls, auto: new Auto(deps), activeWorkspace };
+};
+
+const makeTrackedWindow = (seq, overrides = {}) => ({
+    minimized: false,
+    get_stable_sequence: () => seq,
+    get_window_type: () => 6,
+    get_wm_class: () => 'FakeWindow',
+    get_monitor: () => 0,
+    get_frame_rect: () => ({ x: 0, y: 0, width: 1, height: 1 }),
+    ...overrides,
+});
+
+test('auto bridges: sortTake consumes once, honours the 2000 ms expiry, sortPoll prunes, sortClear removes only the target', () => {
+    const { auto } = makeAuto();
+    auto.sortOverride(5, [1, 2, 3, 4], 1000);
+    assert.deepEqual(auto.sortTake(5, 1500), [1, 2, 3, 4], 'fresh override handed out');
+    assert.equal(auto.sortTake(5, 1500), null, 'consumed on first read');
+    auto.sortOverride(6, [9, 9, 9, 9], 1000);
+    assert.deepEqual(auto.sortTake(6, 3000), [9, 9, 9, 9], 'exactly 2000 ms is still fresh');
+    auto.sortOverride(7, [8, 8, 8, 8], 1000);
+    assert.equal(auto.sortTake(7, 3001), null, 'beyond 2000 ms the entry is ignored');
+    const { auto: auto2 } = makeAuto();
+    auto2.sortOverride(1, [1, 1, 1, 1], 1000);
+    auto2.sortOverride(2, [2, 2, 2, 2], 1501);
+    auto2.sortPoll(3001);
+    assert.equal(auto2.sortTake(1, 3001), null, 'sortPoll pruned the expired entry');
+    assert.deepEqual(auto2.sortTake(2, 3001), [2, 2, 2, 2], 'sortPoll keeps the fresh entry');
+    const { auto: auto3 } = makeAuto();
+    auto3.sortOverride(7, [7, 7, 7, 7], 0);
+    auto3.sortOverride(8, [8, 8, 8, 8], 0);
+    auto3.sortClear(7);
+    assert.equal(auto3.sortTake(7, 0), null, 'sortClear removed the target');
+    assert.deepEqual(auto3.sortTake(8, 0), [8, 8, 8, 8], 'sortClear left the other entry');
+});
+
+test('auto bridges: pendingTake resets per monitor, resizeStartTake consumes once', () => {
+    const { auto, activeWorkspace } = makeAuto();
+    const app = makeApp();
+    const added = makeTrackedWindow(11);
+    auto.onWindowAdded(app, activeWorkspace, added);
+    const pending = auto.pendingTake(0);
+    assert.equal(pending.has(11), true, 'fresh window sequence pending');
+    assert.equal(auto.pendingTake(0).size, 0, 'the reset cleared the set for the next tiling');
+    const resizer = makeAuto({ grabIsResize: () => true });
+    const w = makeTrackedWindow(9, { get_monitor: () => 1 });
+    resizer.auto.onGrabBegin(makeApp(), w, 99);
+    const start = resizer.auto.resizeStartTake(9);
+    assert.deepEqual(start, { rect: [0, 0, 1, 1], monitor: 1 }, 'resize start frame recorded');
+    assert.ok(resizer.auto.resizeStartTake(9) === undefined, 'resize start consumed on first read');
+});
+
+test('auto activate/deactivate: layout stored when off, retile follows, border refreshes, logs unchanged', () => {
+    const { logs, calls, auto } = makeAuto({ focus: { get_monitor: () => 1 }, auto: false });
+    auto.activate('app');
+    assert.deepEqual(calls.layoutSet, [{ monitorIndex: 1, wsIndex: 3, patch: { auto: true } }],
+        'activating a paused monitor stores auto on for the monitor+workspace');
+    assert.deepEqual(logs, ['greenTile auto tiling on for ws3']);
+    const focus = { get_monitor: () => 1 };
+    const { logs: logs2, calls: calls2, auto: auto2 } = makeAuto({ focus: null, auto: true });
+    auto2.activate('app');
+    assert.deepEqual(calls2.layoutSet, [], 'already-on monitor: no settings write');
+    assert.deepEqual(logs2, [], 'already-on monitor: no repeat log');
+    assert.equal(calls2.retileMonitor.length, 1, 'pressing it again just tiles again');
+    auto2.deactivate('app');
+    assert.deepEqual(calls2.layoutSet, [{ monitorIndex: 1, wsIndex: 3, patch: { auto: false } }],
+        'deactivation stores auto off for the focus monitor');
+    assert.deepEqual(logs2, ['greenTile auto tiling off for ws3']);
+    assert.equal(calls2.borderUpdate, 1, 'auto off refreshes the border (no geometry event follows)');
+    assert.equal(calls2.retileMonitor.length, 1, 'no retile follows auto off');
+});
+
+test('auto scheduleMonitor: per-monitor timers replaced and guarded at fire time', () => {
+    const { ml, calls, auto } = makeAuto({ auto: false });
+    const app = makeApp();
+    auto.scheduleMonitor(app, 0, 300);
+    auto.scheduleMonitor(app, 0, 250);
+    assert.deepEqual(ml.pendingMs(), [250], 'rescheduling replaced the monitor timer, one timer per monitor');
+    ml.fire(ml.live.keys().next().value);
+    assert.equal(calls.retileMonitor.length, 0, 'no retile: not automatic on this workspace');
+    const withAuto = makeAuto({ auto: true });
+    const app2 = makeApp();
+    withAuto.auto.scheduleMonitor(app2, 0, 250);
+    withAuto.ml.fire(withAuto.ml.live.keys().next().value);
+    assert.deepEqual(withAuto.calls.retileMonitor, [{ monitorIndex: 0, focusWindow: null }],
+        'automatic workspace retiles with the standard focus');
+    const stale = makeAuto({ auto: true });
+    const deadApp = makeApp({ monitors: { ready: false } });
+    stale.auto.scheduleMonitor(deadApp, 0, 250);
+    stale.ml.fire(stale.ml.live.keys().next().value);
+    assert.equal(stale.calls.retileMonitor.length, 0, 'a monitor that lost readiness never retiles');
+});
