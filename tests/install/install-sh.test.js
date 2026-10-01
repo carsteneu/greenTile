@@ -7,7 +7,7 @@ const test = require('node:test');
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const path = require('node:path');
-const { UUID, EXT, LATEST, TMP, runScript, copyScript, mkdir, write } = require('../helpers/release-env');
+const { UUID, EXT, LATEST, TMP, runScript, mkdir, write } = require('../helpers/release-env');
 const { ROOT } = require('../helpers/cinnamon-loader');
 
 const cleanups = [];
@@ -70,18 +70,18 @@ function makeInstallEnv(name, { msgfmt = 'real', failSwap = false } = {}) {
         // the non-atomic swap without production-side test hooks.
         write(path.join(x.bin, 'mv'), `#!/usr/bin/env bash
 log="\${GT_MVLOG:?}"
-n=\$(cat "\$log" 2>/dev/null || echo 0)
+n=$(cat "$log" 2>/dev/null || echo 0)
 if [ -n "\${GT_FAIL_MV_MARK:-}" ]; then
     case "\${@: -1}" in
         *"\${GT_FAIL_MV_MARK}")
-            if [ "\$n" = 0 ]; then
-                echo 1 > "\$log"
+            if [ "$n" = 0 ]; then
+                echo 1 > "$log"
                 exit 7
             fi
             ;;
     esac
 fi
-exec "\${GT_REAL_MV:?}" "\$@"
+exec "\${GT_REAL_MV:?}" "$@"
 `);
         fs.chmodSync(path.join(x.bin, 'mv'), 0o755);
         x.mvlog = path.join(x.dir, 'mv.log');
