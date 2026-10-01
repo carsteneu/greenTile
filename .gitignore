@@ -1,6 +1,7 @@
 *.bak
 *.orig
 *.mo
+node_modules/
 
 # internal working documents, kept local
 docs/todo.md
