@@ -63,8 +63,10 @@ test('no windows: the painted rule is returned as it is', () => {
 });
 
 test('non-finite stack values cannot hang the fill', () => {
-    assert.deepEqual(m.fillStacks([1e309], 3), [3]);
-    assert.deepEqual(m.fillStacks([1e309, 1e309], 5), [1, 4]);
+    // What a corrupt settings file parses back as Infinity (JSON "1e999").
+    const infinite = Number.MAX_VALUE * 2;
+    assert.deepEqual(m.fillStacks([infinite], 3), [3]);
+    assert.deepEqual(m.fillStacks([infinite, infinite], 5), [1, 4]);
     assert.deepEqual(m.fillStacks([NaN], 3), [3]);
     assert.deepEqual(m.fillStacks([Infinity, Infinity, Infinity], 4), [1, 1, 2]);
 });

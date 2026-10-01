@@ -68,8 +68,10 @@ test('thresholds clamp into the editor range, missing thresholds drop', () => {
 });
 
 test('stack values clamp into the editor grid, corrupt stacks read as empty', () => {
+    // JSON "1e999" (parses back as Infinity) persists on stringify as null.
+    const infinite = Number.MAX_VALUE * 2;
     const rules = [
-        { min: 2, stacks: [1e309, 2.9, 0, -3, '3', 'x', null] },
+        { min: 2, stacks: [infinite, 2.9, 0, -3, '3', 'x', null] },
         { min: 3, stacks: 'no' },
         { min: 4, stacks: [] },
         { min: 5, stacks: [1, 1, 1, 1, 1, 1, 1] },
