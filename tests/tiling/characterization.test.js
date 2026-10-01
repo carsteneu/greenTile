@@ -666,7 +666,7 @@ test('a focused fresh window appends last too (panel preset row click, swap)', (
     assert.equal(app.auto.pendingTake(0).size, 0, 'pending consumed');
 });
 
-test('PINNED GAP (todo_fixes follow-up): a legacy narrow stored split + later gap increase still renders final frames below the minimum', () => {
+test('PINNED FIXED (todo_fixes issue 8): a legacy narrow stored split + later gap increase still renders the promised minimum', () => {
     const tweener = makeTweenerRecorder();
     const { env, ext } = makeEnv(tweener, { windowGap: 0 });
     enableOnMonitor(env, ext);
@@ -684,14 +684,23 @@ test('PINNED GAP (todo_fixes follow-up): a legacy narrow stored split + later ga
     // narrow the border to the gap-0 clamp: the stored cell is 120 px
     pressResize(env, 'narrower', 200);
     assert.equal(w1.rect[2], 120, 'the border sits at the gap-0 clamp');
-    // the user raises the gap afterwards: borders are stored at the OLD semantics
-    // (cell 120 incl. gap), so placement now yields frames below the promised
-    // minimum. Not fixed in this round — the bounded correction is a read-time
-    // border clamp in split.for (see the review report), which needs area context
-    // threaded through the split facade and a decision on infeasible spans.
+    // the user raises the gap afterwards: the stored fractions keep their value, the
+    // read-time correction lifts the final frame back to the promised minimum and the
+    // neighbour funds it. Lowering the gap to 0 again restores the original placement,
+    // because only the read path is corrected.
+    const storedLayouts = settingsInstance(env).getValue('layouts');
     settingsInstance(env).setValue('windowGap', 48);
     app.ops.retileMonitor(app, 0);
-    assert.equal(w1.rect[2], 96, 'pinned: the edge frame keeps only half a gap share, 96 px not 120');
+    assert.equal(w1.rect[2], 120, 'the edge frame keeps the promised minimum');
+    assert.equal(w2.rect[2], 1832, 'the neighbour funds the raise');
+    app.ops.retileMonitor(app, 0);
+    // the auto grid for 2 windows on the wide monitor is kind "rows", shape [2]:
+    // both cells side by side along x, the split lives in minor[0]
+    assert.equal(app.split.for(app, 0, 0, 2, { kind: 'rows', shape: [2] }).minor[0][0], 144 / 2000, 'the read view is corrected, not the storage');
+    assert.equal(settingsInstance(env).getValue('layouts'), storedLayouts, 'retiles never write the layouts setting');
+    settingsInstance(env).setValue('windowGap', 0);
+    app.ops.retileMonitor(app, 0);
+    assert.equal(w1.rect[2], 120, 'gap back to 0: the original placement is still there, no drift');
 });
 
 // ---------------- fixes: pause blocks every retile action (issue 4) ----------------
