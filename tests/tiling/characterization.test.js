@@ -213,6 +213,154 @@ test('automatic tiling places focus plus collected windows into the uniform grid
     assert.deepEqual(w2.rect, [1004, 0, 996, 1100]);
 });
 
+// ---------------- fixes: fresh windows append at the end (issue 6) ----------------
+
+// enable with the given monitor rects (indexes in push order)
+const enableOnMonitors = (env, ext, monitors) => {
+    for (const m of monitors) {
+        env.layoutManager.monitors.push(m);
+    }
+    ext.enable();
+    env.flushDisplayConfigNoReply();
+};
+
+// drive a fresh window through the real observer path: window-added -> pending -> 300 ms debounce
+const addWindow = (env, app, w) => {
+    app.auto.onWindowAdded(app, env.activeWorkspace, w);
+    const timer = [...env.timers.entries()].map(([, t]) => t).find((t) => t.ms === 300);
+    assert.ok(timer, 'the auto observer armed the 300 ms debounce');
+    timer.cb();
+};
+
+test('preset retile appends a new window at the end regardless of its start position and consumes the pending record', () => {
+    const tweener = makeTweenerRecorder();
+    const { env, ext } = makeEnv(tweener, { windowGap: 0 });
+    enableOnMonitor(env, ext);
+    makeWorkspace(env);
+    env.activeWorkspace = { index: () => 0 };
+    const w1 = makeWindow(env, 21, [10, 10, 400, 300]);
+    const w2 = makeWindow(env, 22, [500, 0, 400, 300]);
+    env.tabList.push(w1, w2);
+    env.display.focus_window = w1;
+    const app = ext.session.app;
+    app.ops.presetsWrite(app, [{ id: 'p1', name: 'Halves', rules: [{ min: 2, stacks: [1, 1] }] }]);
+    app.ops.layoutSet(app, 0, 0, { preset: 'p1' });
+    app.ops.retileMonitor(app, 0);
+    assert.deepEqual(w1.rect, [0, 0, 1000, 1100]);
+    assert.deepEqual(w2.rect, [1000, 0, 1000, 1100]);
+    // the new window spawns inside w1's cell (top-left) — it must land at the END.
+    // fillStacks([1,1], 3) extends the last column: shape [1,2].
+    const w3 = makeWindow(env, 23, [10, 10, 400, 300]);
+    env.tabList.push(w3);
+    addWindow(env, app, w3);
+    assert.deepEqual(w1.rect, [0, 0, 1000, 1100], 'w1 keeps the first cell');
+    assert.deepEqual(w2.rect, [1000, 0, 1000, 550], 'w2 keeps its relative order');
+    assert.deepEqual(w3.rect, [1000, 550, 1000, 550], 'w3 appended at the end');
+    assert.equal(app.auto.pendingTake(0).size, 0, 'the consumed pending record is gone');
+});
+
+test('preset retile appends several new windows in opening order, whatever their spawn positions', () => {
+    const tweener = makeTweenerRecorder();
+    const { env, ext } = makeEnv(tweener, { windowGap: 0 });
+    enableOnMonitor(env, ext);
+    makeWorkspace(env);
+    env.activeWorkspace = { index: () => 0 };
+    const w1 = makeWindow(env, 21, [10, 10, 400, 300]);
+    const w2 = makeWindow(env, 22, [500, 0, 400, 300]);
+    env.tabList.push(w1, w2);
+    env.display.focus_window = w1;
+    const app = ext.session.app;
+    app.ops.presetsWrite(app, [{ id: 'p4', name: 'Quarters', rules: [{ min: 2, stacks: [1, 1, 1, 1] }] }]);
+    app.ops.layoutSet(app, 0, 0, { preset: 'p4' });
+    app.ops.retileMonitor(app, 0);
+    // below 4 windows the painted [1,1,1,1] drops columns from the right: [1,1]
+    assert.deepEqual(w1.rect, [0, 0, 1000, 1100]);
+    assert.deepEqual(w2.rect, [1000, 0, 1000, 1100]);
+    // opened in this order: first the right-spawned, then the left-spawned window
+    const w3 = makeWindow(env, 23, [1700, 10, 300, 200]);
+    const w4 = makeWindow(env, 24, [10, 10, 300, 200]);
+    env.tabList.push(w3, w4);
+    addWindow(env, app, w3);
+    addWindow(env, app, w4);
+    assert.deepEqual(w1.rect, [0, 0, 500, 1100], 'w1 keeps the first cell');
+    assert.deepEqual(w2.rect, [500, 0, 500, 1100], 'w2 keeps its relative order');
+    assert.deepEqual(w3.rect, [1000, 0, 500, 1100], 'the first-opened fresh window is third');
+    assert.deepEqual(w4.rect, [1500, 0, 500, 1100], 'the second-opened fresh window is last');
+    assert.equal(app.auto.pendingTake(0).size, 0, 'no pending record stranded');
+});
+
+test('automatic grid appends fresh windows in opening order too and keeps the settled order', () => {
+    const tweener = makeTweenerRecorder();
+    const { env, ext } = makeEnv(tweener, { windowGap: 0 });
+    enableOnMonitor(env, ext);
+    makeWorkspace(env);
+    env.activeWorkspace = { index: () => 0 };
+    const w1 = makeWindow(env, 31, [10, 10, 400, 300]);
+    const w2 = makeWindow(env, 32, [500, 0, 400, 300]);
+    env.tabList.push(w1, w2);
+    env.display.focus_window = w1;
+    const app = ext.session.app;
+    const ref = app.split.ref(app, 0, 0, 2);
+    const layouts = { [ref.mkey]: { [ref.wskey]: { auto: true } } };
+    settingsInstance(env).setValue('layouts', JSON.stringify(layouts));
+    app.ops.retileMonitor(app, 0);
+    assert.deepEqual(w1.rect, [0, 0, 1000, 1100]);
+    assert.deepEqual(w2.rect, [1000, 0, 1000, 1100]);
+    // opened right first, left second: the opening order wins over the positions.
+    // Both additions ride ONE debounce: the retile sees both fresh windows together.
+    const w3 = makeWindow(env, 33, [1700, 10, 300, 200]);
+    const w4 = makeWindow(env, 34, [10, 10, 300, 200]);
+    env.tabList.push(w3, w4);
+    app.auto.onWindowAdded(app, env.activeWorkspace, w3);
+    app.auto.onWindowAdded(app, env.activeWorkspace, w4);
+    const timer = [...env.timers.entries()].map(([, t]) => t).find((t) => t.ms === 300);
+    assert.ok(timer, 'the auto observer armed the 300 ms debounce');
+    timer.cb();
+    // the narrow auto grid for 4 windows is [1,1,2] (two full-height columns left)
+    assert.deepEqual(w1.rect, [0, 0, 667, 1100], 'settled windows fill the first column');
+    assert.deepEqual(w2.rect, [667, 0, 666, 1100], 'settled relative order kept');
+    assert.deepEqual(w3.rect, [1333, 0, 667, 550], 'first-opened fresh window next');
+    assert.deepEqual(w4.rect, [1333, 550, 667, 550], 'last-opened fresh window last');
+    assert.equal(app.auto.pendingTake(0).size, 0, 'no pending record stranded');
+});
+
+test('a fresh window on another monitor appends at that monitor\'s end without touching the first', () => {
+    const tweener = makeTweenerRecorder();
+    const { env, ext } = makeEnv(tweener, { windowGap: 0 });
+    const mon2 = { x: 2000, y: 0, width: 1000, height: 1100 };
+    enableOnMonitors(env, ext, [MONITOR, mon2]);
+    makeWorkspace(env);
+    env.activeWorkspace = { index: () => 0 };
+    const w1 = makeWindow(env, 41, [10, 10, 400, 300], 0);
+    const w2 = makeWindow(env, 42, [1000, 0, 400, 300], 0);
+    const w3 = makeWindow(env, 43, [2000 + 10, 10, 400, 300], 1);
+    const w4 = makeWindow(env, 44, [2000 + 500, 0, 400, 300], 1);
+    env.tabList.push(w1, w2, w3, w4);
+    env.display.focus_window = w1;
+    const app = ext.session.app;
+    app.ops.presetsWrite(app, [{ id: 'p1', name: 'Halves', rules: [{ min: 2, stacks: [1, 1] }] }]);
+    app.ops.layoutSet(app, 0, 0, { preset: 'p1' });
+    app.ops.layoutSet(app, 1, 0, { preset: 'p1' });
+    app.ops.retileMonitor(app, 0);
+    app.ops.retileMonitor(app, 1);
+    assert.deepEqual(w1.rect, [0, 0, 1000, 1100]);
+    assert.deepEqual(w2.rect, [1000, 0, 1000, 1100]);
+    assert.deepEqual(w3.rect, [2000, 0, 500, 1100]);
+    assert.deepEqual(w4.rect, [2500, 0, 500, 1100]);
+    // new window spawns on monitor 1 inside w3's half
+    const w5 = makeWindow(env, 45, [2000 + 10, 10, 300, 200], 1);
+    env.tabList.push(w5);
+    addWindow(env, app, w5);
+    assert.deepEqual(w1.rect, [0, 0, 1000, 1100], 'monitor 0 untouched');
+    assert.deepEqual(w2.rect, [1000, 0, 1000, 1100], 'monitor 0 keeps its split');
+    // fillStacks([1,1], 3) extends the last column: [1,2] on monitor 1
+    assert.deepEqual(w3.rect, [2000, 0, 500, 1100], 'w3 keeps the first cell of monitor 1');
+    assert.deepEqual(w4.rect, [2500, 0, 500, 550], 'w4 keeps its relative order');
+    assert.deepEqual(w5.rect, [2500, 550, 500, 550], 'w5 appended at the end of monitor 1');
+    assert.equal(app.auto.pendingTake(0).size, 0, 'monitor 0 pending untouched');
+    assert.equal(app.auto.pendingTake(1).size, 0, 'monitor 1 pending consumed');
+});
+
 // ---------------- presets + layouts through the ops facade ----------------
 
 test('preset writing, layout assignment and monitor retile round-trip through the ops facade', () => {
