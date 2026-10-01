@@ -131,6 +131,9 @@ const createCinnamonEnv = (options) => {
         customBindings: new Map(),
         timers: new Map(),
         cancellables: [],
+        tabList: [],
+        uiGroupChildren: [],
+        gioSettings: [],
     };
 
     // --- Main.* objects
@@ -150,14 +153,25 @@ const createCinnamonEnv = (options) => {
             this.hotkeys.delete(name);
         },
     };
+    env.uiGroup = {
+        children: env.uiGroupChildren,
+        add_child(a) {
+            this.children.push(a);
+        },
+        remove_child(a) {
+            const at = this.children.indexOf(a);
+            if (at !== -1)
+                this.children.splice(at, 1);
+        },
+    };
     const mainBranch = {
         layoutManager: env.layoutManager,
         keybindingManager: env.keybindingManager,
         themeManager: env.themeManager,
         pushModal: () => 0,
         popModal() {},
-        uiGroup: { add_child() {}, remove_child() {} },
-        getTabList: () => null,
+        uiGroup: env.uiGroup,
+        getTabList: () => env.tabList,
     };
     env.ui = proxyStub({
         settings: {
@@ -277,6 +291,7 @@ const createCinnamonEnv = (options) => {
             uuid,
             bindings: [],
             finalized: false,
+            callLog: [],
             bind(key, prop, cb, data) {
                 // divergence from real Cinnamon: bindWithObject defines the bound
                 // property on the bind object; greenTile.js only reads via
@@ -294,10 +309,12 @@ const createCinnamonEnv = (options) => {
                 return values.get(key);
             },
             setValue(key, v) {
+                this.callLog.push({ op: 'setValue', key, value: v, finalized: this.finalized });
                 values.set(key, v);
             },
             finalize() {
                 this.finalized = true;
+                this.callLog.push({ op: 'finalize' });
                 env.settingsSlots.set(uuid, null);
             },
         };
@@ -334,6 +351,17 @@ const createCinnamonEnv = (options) => {
         SettingsSchemaSource: {
             get_default: () => null,
         },
+        Settings: class {
+            constructor(opts) {
+                env.gioSettings.push(opts && opts.schema_id);
+            }
+            get_uint() {
+                return 500;
+            }
+            get_boolean() {
+                return false;
+            }
+        },
     };
     const meta = {
         keybindings_set_custom_handler(name, fn) {
@@ -347,13 +375,14 @@ const createCinnamonEnv = (options) => {
         // identity comparison with greenTile's own Meta.WindowType.NORMAL read
         // matters, which is the same fake object
         WindowType: { NORMAL: 6, DIALOG: 3 },
+        GrabOp: { NONE: 0, MOVING: 'moving', KEYBOARD_MOVING: 'keyboard-moving', RESIZING_E: 'resizing-e' },
         MonitorManager: {
             get: () => ({ get_monitor_for_connector: () => -1 }),
         },
     };
     const cinnamon = {
         AppSystem: { get_default: () => env.appSystem },
-        WindowTracker: { get_default: () => null },
+        WindowTracker: { get_default: () => ({ get_window_app: () => ({}) }) },
         Cursor: { RESIZE_BOTTOM_RIGHT: 0 },
     };
     const st = {
@@ -367,6 +396,25 @@ const createCinnamonEnv = (options) => {
             destroy() {}
         },
         ThemeContext: { get_for_stage: () => makeStub() },
+        // drop preview actor: records its lifetime for the drag assertions
+        Widget: class {
+            constructor(opts) {
+                Object.assign(this, opts);
+                this.destroyed = false;
+                this.shown = false;
+            }
+            hide() {
+                this.shown = false;
+            }
+            show() {
+                this.shown = true;
+            }
+            set_position() {}
+            set_size() {}
+            destroy() {
+                this.destroyed = true;
+            }
+        },
     };
     env.gi = proxyStub({ GLib: env.glib, Gio: gio, Meta: meta, Cinnamon: cinnamon, St: st });
 
