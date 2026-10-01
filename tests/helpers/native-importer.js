@@ -83,6 +83,10 @@ const createXletImporter = (options) => {
         evaluating.push(absRel);
         try {
             const src = read(absPath);
+            // a column-0 var inside a string/comment would yield a null
+            // property here (typeof-guard), unlike real GJS — the shipped
+            // files keep top-level statements on column 0 legitimately, so
+            // this only matters for hand-written fixture probes
             const exports = publicNames(src)
                 .map((n) => `\nns.${n} = typeof ${n} !== 'undefined' ? ${n} : null;`).join('');
             const body = `'use strict';${src};${exports};\nreturn ns;`;

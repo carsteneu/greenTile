@@ -690,7 +690,8 @@ const createCinnamonEnv = (options) => {
     // the xlet dir importer as both module generations expose it on the
     // imports root (main.js _addXletDirectoriesToSearchPath); per-env factory
     // so each test's env gets its own module cache (no stale bindings)
-    env.extensions = { [XLET_UUID]: createXletImporter({ root: REPO_ROOT }) };    env.gettext = {
+    env.extensions = { [XLET_UUID]: createXletImporter({ root: REPO_ROOT }) };
+    env.gettext = {
         bindtextdomain() {},
         dgettext: (_domain, str) => str,
         gettext: (str) => str,

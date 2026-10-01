@@ -111,10 +111,8 @@ declare const imports: {
 /**
  * The shipped module tree as both Cinnamon generations expose it on the
  * imports root (6.6 main.js _addXletDirectoriesToSearchPath, upstream
- * installXletImporter): imports.extensions['greenTile@carsteneu'].lib.... —
- * typed through typeof import so cross-module references keep full tsc
- * checking (each lib file is a module under moduleDetection force). Other
- * xlets resolve to unknown.
+ * installXletImporter): imports.extensions['greenTile@carsteneu'] — see
+ * XletTree for what the surface type covers.
  */
 type ImportsExtensions = {
     extensions: {
