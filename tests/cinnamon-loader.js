@@ -47,13 +47,13 @@ const load = (spec) => {
             + ' — fileUtils createExports caches only after evaluation finished, a cycle re-evaluates forever');
     evaluating.push(rel);
     try {
-        const exports = cinnamonLoad(fs.readFileSync(abs, 'utf8'), load, rel);
-        cache.set(abs, exports);
+        const loaded = cinnamonLoad(fs.readFileSync(abs, 'utf8'), load, rel);
+        cache.set(abs, loaded);
+        return loaded;
     }
     finally {
         evaluating.pop();
     }
-    return exports;
 };
 
 module.exports = { load, cinnamonLoad, ROOT };
