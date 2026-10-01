@@ -37,7 +37,6 @@
 
 // Pure model blocks, extracted to lib/model/. Paths are root-relative on purpose:
 // Cinnamon resolves every nested require against the xlet root (fileUtils.js).
-const { tile_excl_rows_normalize, tile_excl_match, tile_excl_rows_append, tile_excl_app_options, tile_excl_toggle_set } = require('./lib/model/exclude');
 const { TILE_GAP_MAX, TILE_GAP_STEP, tile_gap_value, tile_gap_cell } = require('./lib/model/gap');
 const { tile_single_fill, tile_single_layout } = require('./lib/model/single');
 const { tile_disconnect_each } = require('./lib/model/teardown');
@@ -59,6 +58,7 @@ const { Session } = require('./lib/runtime/session');
 const { Monitors } = require('./lib/runtime/monitors');
 const { Auto } = require('./lib/runtime/auto');
 const { Hotkeys } = require('./lib/runtime/hotkeys');
+const { Exclusions } = require('./lib/runtime/exclusions');
 
 ;// CONCATENATED MODULE: ../base/config.ts
 
@@ -77,7 +77,7 @@ class Config {
                 { name: 'greenTile-autoN', bindings: this.autotileAutoHotkey, callback: () => this.app.auto.activate(this.app) },
                 { name: 'greenTile-autoOff', bindings: this.autotileOffHotkey, callback: () => this.app.auto.deactivate(this.app) },
                 { name: 'greenTile-preset', bindings: this.presetHotkey, callback: () => tile_panel_toggle(this.app) },
-                { name: 'greenTile-exclude', bindings: this.excludeHotkey, callback: () => tile_excl_toggle_focused(this.app) },
+                { name: 'greenTile-exclude', bindings: this.excludeHotkey, callback: () => this.app.excl.toggleFocused(this.app) },
                 { name: 'greenTile-resize-wider', bindings: this.resizeWiderHotkey, callback: () => this.app.split.hotkey(this.app, 'wider') },
                 { name: 'greenTile-resize-narrower', bindings: this.resizeNarrowerHotkey, callback: () => this.app.split.hotkey(this.app, 'narrower') },
                 { name: 'greenTile-resize-taller', bindings: this.resizeTallerHotkey, callback: () => this.app.split.hotkey(this.app, 'taller') },
@@ -93,10 +93,7 @@ class Config {
         };
         this.destroy = () => {
             this.DisableHotkey();
-            if (this.excludeAppSignal) {
-                imports.gi.Cinnamon.AppSystem.get_default().disconnect(this.excludeAppSignal);
-                this.excludeAppSignal = null;
-            }
+            this.app.excl.destroy();
             // resize hotkey steps not yet written (500 ms debounce) must not get lost
             this.app.split.flush(this.app);
             this.app.monitors.destroy();
@@ -126,11 +123,11 @@ class Config {
         this.settings.bind('presetHotkey', 'presetHotkey', this.EnableHotkey, null);
         this.settings.bind('excludeHotkey', 'excludeHotkey', this.EnableHotkey, null);
         this.settings.bind('exclusions', 'exclusions', () => {
-            tile_excl_apply(this.settings);
+            this.app.excl.apply(this.settings);
             tile_excl_retile(this.app);
         }, null);
         this.settings.bind('excludeAppPicker', 'excludeAppPickerValue', () => {
-            tile_excl_app_picked(this.settings, this.app, this.settings.getValue('excludeAppPicker'));
+            this.app.excl.picked(this.settings, this.app, this.settings.getValue('excludeAppPicker'));
         }, null);
         this.settings.bind('resizeWiderHotkey', 'resizeWiderHotkey', this.EnableHotkey, null);
         this.settings.bind('resizeNarrowerHotkey', 'resizeNarrowerHotkey', this.EnableHotkey, null);
@@ -150,12 +147,7 @@ class Config {
             if (this.settings.getValue('fillSingleWindow') === true)
                 tile_single_retile(this.app);
         }, null);
-        tile_excl_apply(this.settings);
-        tile_excl_app_populate(this.settings);
-        this.excludeAppSignal = imports.gi.Cinnamon.AppSystem.get_default().connect('installed-changed', () => {
-            tile_excl_apply(this.settings);
-            tile_excl_app_populate(this.settings);
-        });
+        this.app.excl.start(this.settings);
         this.EnableHotkey();
         this.app.theme.init(this);
         this.app.focus.connect(this.app);
@@ -216,7 +208,7 @@ const getUsableScreenArea = (monitor) => {
 };
 // Diagnostics: the reason list mirrors the tile_collect_windows filters by design —
 // 'UNKNOWN' means the two have drifted apart (canary, should never appear).
-const tile_debug_count = (monitor, focusWindow, collected) => {
+const tile_debug_count = (app, monitor, focusWindow, collected) => {
     try {
         let all = global.workspace_manager.get_active_workspace().list_windows();
         let missing = [];
@@ -229,7 +221,7 @@ const tile_debug_count = (monitor, focusWindow, collected) => {
                 reasons.push('minimized');
             if (w.get_wm_class() == null)
                 reasons.push('wm_class');
-            if (tile_excl_is_excluded(w))
+            if (app.excl.isExcluded(w))
                 reasons.push('excluded');
             if (utils_Main.getTabList().indexOf(w) === -1)
                 reasons.push('not-in-tablist');
@@ -261,38 +253,6 @@ const tile_focus_window = () => {
     let tabList = utils_Main.getTabList();
     return tabList.length > 0 ? tabList[0] : null;
 };
-const tile_excl = { toggled: new Map(), rows: [], classes: Object.create(null) };
-const tile_excl_is_excluded = (w) => {
-    if (w == null)
-        return false;
-    if (tile_excl.toggled.get(w.get_stable_sequence()))
-        return true;
-    if (tile_excl.rows.length === 0)
-        return false;
-    const app = imports.gi.Cinnamon.WindowTracker.get_default().get_window_app(w);
-    return tile_excl_match(w.get_wm_class(), w.get_wm_class_instance(), w.get_title(), tile_excl.rows, app ? app.get_id() : null, tile_excl.classes);
-};
-// StartupWMClass per app row, resolved once per apply (not per window per retile); the
-// value is null when AppSystem cannot resolve the rule text or the app declares no
-// StartupWMClass — those rows fall back to the id compare. Rebuilt with the rows
-// themselves on installed-changed. Null-prototype object, rule texts must not collide
-// with Object.prototype keys (see tile_excl_app_options).
-const tile_excl_app_classes = (rows) => {
-    const appSystem = imports.gi.Cinnamon.AppSystem.get_default();
-    const result = Object.create(null);
-    for (let i = 0; i < rows.length; i++) {
-        if (rows[i].match !== 'app' || result[rows[i].text] !== undefined)
-            continue;
-        const app = appSystem.lookup_app(rows[i].text);
-        const info = app ? app.get_app_info() : null;
-        result[rows[i].text] = info ? info.get_startup_wm_class() : null;
-    }
-    return result;
-};
-const tile_excl_apply = (settings) => {
-    tile_excl.rows = tile_excl_rows_normalize(settings.getValue('exclusions'));
-    tile_excl.classes = tile_excl_app_classes(tile_excl.rows);
-};
 // Retile every monitor whose layout can place windows: preset layouts directly, auto
 // grids debounced (consistent with other debounced retiles).
 const tile_excl_retile = (app) => {
@@ -305,51 +265,11 @@ const tile_excl_retile = (app) => {
             app.auto.scheduleMonitor(app, i, 150);
     }
 };
-// The app picker combobox ("excludeAppPicker"): the dialog collects its options from
-// the settings file when it opens, so the extension writes them via the official
-// setOptions API at enable time and on AppSystem's installed-changed. Picking an app
-// appends the exclusion row and resets the combobox; setValue alone would not fire
-// the exclusions binding, so apply + retile run explicitly.
-const tile_excl_app_populate = (settings) => {
-    const apps = imports.gi.Cinnamon.AppSystem.get_default().get_all();
-    const list = [];
-    for (let i = 0; i < apps.length; i++) {
-        const info = apps[i].get_app_info();
-        if (!info || !info.should_show())
-            continue;
-        list.push({ id: apps[i].get_id(), name: apps[i].get_name() });
-    }
-    settings.setOptions('excludeAppPicker', tile_excl_app_options(list, _("Add application …")));
-};
-const tile_excl_app_picked = (settings, app, value) => {
-    if (typeof value !== 'string' || value === 'picker')
-        return;
-    settings.setValue('exclusions', tile_excl_rows_append(settings.getValue('exclusions'), value));
-    tile_excl_apply(settings);
-    tile_excl_retile(app);
-    settings.setValue('excludeAppPicker', 'picker');
-};
-const tile_excl_toggle_focused = (app) => {
-    const w = tile_focus_window();
-    if (!w)
-        return;
-    const excluded = !tile_excl_is_excluded(w);
-    tile_excl_toggle_set(tile_excl.toggled, w.get_stable_sequence(), excluded);
-    global.log('greenTile ' + (excluded ? 'never tile on: ' : 'tiling again: ') + String(w.get_wm_class()).replace(/\s+/g, ' ') + ' seq=' + w.get_stable_sequence());
-    try {
-        Main.osdWindowManager.show(w.get_monitor(), tile_Gio.ThemedIcon.new('window-restore-symbolic'),
-            excluded ? _("Window floats") : _("Window tiles again"), null);
-    }
-    catch (e) {
-        // OSD is feedback only — a failing show must not block the retile
-    }
-    tile_retile_monitor(app, w.get_monitor(), null);
-};
 // Own collector instead of gTile's GetNotFocusedWindowsOfMonitor: that one excludes
 // app.focusMetaWindow, which goes stale because gTile tracks focus via the app-level
 // 'notify::focus-app' signal (silent on same-app window switches) — visible windows
 // get dropped. RULE: active workspace only, never pull windows across workspaces.
-const tile_collect_windows = (monitor, focusWindow, wsIndex = null) => {
+const tile_collect_windows = (app, monitor, focusWindow, wsIndex = null) => {
     const tracker = imports.gi.Cinnamon.WindowTracker.get_default();
     let result = [];
     let tabList = wsIndex == null ? utils_Main.getTabList()
@@ -360,7 +280,7 @@ const tile_collect_windows = (monitor, focusWindow, wsIndex = null) => {
             continue;
         if (w.get_window_type() !== Meta.WindowType.NORMAL)
             continue;
-        if (tile_excl_is_excluded(w))
+        if (app.excl.isExcluded(w))
             continue;
         if (utils_Main.layoutManager.monitors[w.get_monitor()] !== monitor)
             continue;
@@ -423,13 +343,13 @@ const tile_app_columns = (app, cols) => {
         return;
     let monitor = utils_Main.layoutManager.monitors[focusWindow.get_monitor()];
     let [screenX, screenY, screenWidth, screenHeight] = getUsableScreenArea(monitor);
-    let windows = tile_collect_windows(monitor, focusWindow);
-    tile_debug_count(monitor, focusWindow, windows);
+    let windows = tile_collect_windows(app, monitor, focusWindow);
+    tile_debug_count(app, monitor, focusWindow, windows);
     if (windows.length === 0)
         return;
     let colWidth = screenWidth / cols;
     // An excluded focused window is not tiled, the others still fill the columns.
-    let ordered = tile_sort_reading_order(app, (tile_excl_is_excluded(focusWindow) ? windows : [focusWindow].concat(windows)), false).slice(0, cols);
+    let ordered = tile_sort_reading_order(app, (app.excl.isExcluded(focusWindow) ? windows : [focusWindow].concat(windows)), false).slice(0, cols);
     for (let index = 0; index < ordered.length; index++) {
         tile_place_cell(app, ordered[index], screenX + index * colWidth, screenY, colWidth, screenHeight, [screenX, screenY, screenWidth, screenHeight]);
     }
@@ -489,10 +409,10 @@ const tile_app_auto = (app, monitorIndex, focusWindow, animate = true, wsIndex =
         return;
     const ws = wsIndex != null ? wsIndex : global.workspace_manager.get_active_workspace().index();
     const area = getUsableScreenArea(monitor);
-    let windows = tile_collect_windows(monitor, focusWindow, ws);
-    tile_debug_count(monitor, focusWindow, windows);
+    let windows = tile_collect_windows(app, monitor, focusWindow, ws);
+    tile_debug_count(app, monitor, focusWindow, windows);
     const focused = focusWindow && !focusWindow.minimized && focusWindow.get_monitor() === monitorIndex
-        && !tile_excl_is_excluded(focusWindow);
+        && !app.excl.isExcluded(focusWindow);
     let n = windows.length + (focused ? 1 : 0);
     if (n < 2 && !tile_single_fill(app.config.settings.getValue('fillSingleWindow'), n))
         return;
@@ -659,9 +579,9 @@ const tile_preset_retile = (app, monitorIndex, focusWindow, animate = true, wsIn
     if (!preset)
         return;
     const area = getUsableScreenArea(monitor);
-    const windows = tile_collect_windows(monitor, focusWindow, ws);
+    const windows = tile_collect_windows(app, monitor, focusWindow, ws);
     const focused = focusWindow && !focusWindow.minimized && focusWindow.get_monitor() === monitorIndex
-        && !tile_excl_is_excluded(focusWindow);
+        && !app.excl.isExcluded(focusWindow);
     const n = windows.length + (focused ? 1 : 0);
     // the layout belongs to the workspace the windows were collected from, not the
     // active one (explicit wsIndex callers retile workspaces that are not active)
@@ -697,7 +617,7 @@ const tile_swap_override = (app, metaWindow, rect) => {
 };
 const tile_swap_hotkey = (app, dir) => {
     const focusWindow = tile_focus_window();
-    if (!focusWindow || focusWindow.minimized || focusWindow.is_on_all_workspaces() || tile_excl_is_excluded(focusWindow))
+    if (!focusWindow || focusWindow.minimized || focusWindow.is_on_all_workspaces() || app.excl.isExcluded(focusWindow))
         return;
     const monitorIndex = focusWindow.get_monitor();
     const monitor = utils_Main.layoutManager.monitors[monitorIndex];
@@ -707,7 +627,7 @@ const tile_swap_hotkey = (app, dir) => {
     const area = getUsableScreenArea(monitor);
     const frame = focusWindow.get_frame_rect();
     const frameRect = [frame.x, frame.y, frame.width, frame.height];
-    const windows = tile_collect_windows(monitor, focusWindow);
+    const windows = tile_collect_windows(app, monitor, focusWindow);
     const n = windows.length + 1;
     const layout = tile_layout_shape(app, monitorIndex, n);
     let cells = null;
@@ -748,7 +668,7 @@ const tile_swap_hotkey = (app, dir) => {
     // On a target monitor without active tiling the window lands untiled (move only,
     // size kept): no slot is computed and no retile is triggered on the target.
     if (step.kind === 'monitor') {
-        const nTarget = tile_collect_windows(targetMonitor, null).length + 1;
+        const nTarget = tile_collect_windows(app, targetMonitor, null).length + 1;
         const targetLayout = tile_layout_shape(app, step.monitor, nTarget);
         if (targetLayout) {
             const targetSplit = app.split.for(app, step.monitor, wsIndex, nTarget, targetLayout);
@@ -769,7 +689,7 @@ const tile_swap_hotkey = (app, dir) => {
     // it on the source monitor. The source workspace retiles with one window less even
     // though it is no longer active.
     const targetWsIndex = wsIndex + step.delta;
-    const nTarget = tile_collect_windows(targetMonitor, null, targetWsIndex).length + 1;
+    const nTarget = tile_collect_windows(app, targetMonitor, null, targetWsIndex).length + 1;
     // Muffin's signature is (index, append); Cinnamon's main.js passes a third time
     // argument that GJS drops with a "Too many arguments" warning.
     focusWindow.change_workspace_by_index(targetWsIndex, false);
@@ -809,7 +729,7 @@ const tile_focus_push_native = (window, dir) => {
 const tile_focus_hotkey = (app, dir) => (display, window) => {
     if (!window)
         return; // native has no window to push either
-    if (window.minimized || window.is_on_all_workspaces() || tile_excl_is_excluded(window)) {
+    if (window.minimized || window.is_on_all_workspaces() || app.excl.isExcluded(window)) {
         tile_focus_push_native(window, dir);
         return;
     }
@@ -822,7 +742,7 @@ const tile_focus_hotkey = (app, dir) => (display, window) => {
     }
     // The focus window sits in the cell the current layout gives it; the neighbour is
     // whatever the tiling would place next to it in that direction.
-    const windows = tile_collect_windows(monitor, null, wsIndex);
+    const windows = tile_collect_windows(app, monitor, null, wsIndex);
     let cells = null;
     let ordered = null;
     const n = windows.length;
@@ -854,7 +774,7 @@ const tile_focus_hotkey = (app, dir) => (display, window) => {
         });
         if (step != null) {
             const frame = window.get_frame_rect();
-            const cands = tile_collect_windows(utils_Main.layoutManager.monitors[step], null, wsIndex).map((w, i) => {
+            const cands = tile_collect_windows(app, utils_Main.layoutManager.monitors[step], null, wsIndex).map((w, i) => {
                 const r = w.get_frame_rect();
                 return { index: i, x: r.x, y: r.y, width: r.width, height: r.height, w: w };
             });
@@ -955,12 +875,12 @@ const tile_panel_thumb = (app, stacks, opts = {}) => {
 const tile_panel_middle = () => ({ x_fill: false, y_fill: false, y_align: tile_St.Align.MIDDLE });
 // Thumbnail = the rule a click would apply right now (current window count);
 // fallback: the smallest rule, so an empty workspace still shows the base layout.
-const tile_panel_window_count = () => {
+const tile_panel_window_count = (app) => {
     const focusWindow = tile_focus_window();
     if (!focusWindow)
         return 0;
     const monitor = utils_Main.layoutManager.monitors[focusWindow.get_monitor()];
-    return tile_collect_windows(monitor, focusWindow).length + (tile_excl_is_excluded(focusWindow) ? 0 : 1);
+    return tile_collect_windows(app, monitor, focusWindow).length + (app.excl.isExcluded(focusWindow) ? 0 : 1);
 };
 const tile_panel_row = (app, preset, n) => {
     const wsIndex = global.workspace_manager.get_active_workspace().index();
@@ -1023,7 +943,7 @@ const tile_editor_open = (app, preset) => {
     if (rules.length === 0)
         rules.push({ min: tile_editor_min_floor, stacks: [1, 1] });
     // Start on the rule a click in view 1 would apply right now
-    const pick = tile_rules_pick(rules, tile_panel_window_count());
+    const pick = tile_rules_pick(rules, tile_panel_window_count(app));
     tile_panel.draft = { id: preset.id, name: preset.name || '', rules, index: Math.max(rules.indexOf(pick), 0), isNew: !!preset.isNew };
     tile_panel.view = 'editor';
     tile_panel_guard();
@@ -1533,7 +1453,7 @@ const tile_panel_open = (app) => {
     }
     else {
         const presets = tile_presets_read(app);
-        const n = tile_panel_window_count();
+        const n = tile_panel_window_count(app);
         rowsBox = new tile_St.BoxLayout({ vertical: true, style_class: 'gk-rows' });
         if (presets.length === 0)
             rowsBox.add(new tile_St.Label({ text: _("No presets yet."), style_class: 'gk-muted' }));
@@ -1832,6 +1752,17 @@ class App {
     constructor(platform, session, cinnamon) {
         this.platform = platform;
         this.session = session;
+        this.excl = new Exclusions({
+            appSystem: cinnamon.cinnamonNs.AppSystem,
+            windowTracker: cinnamon.cinnamonNs.WindowTracker,
+            gio: cinnamon.gio,
+            main: cinnamon.main,
+            global: cinnamon.global,
+            focusWindow: tile_focus_window,
+            retileMonitor: tile_retile_monitor,
+            retile: tile_excl_retile,
+            translate: _,
+        });
         this.hotkeys = new Hotkeys({ keybindingManager: cinnamon.main.keybindingManager });
         this.monitors = new Monitors({
             main: cinnamon.main,
@@ -1850,7 +1781,7 @@ class App {
             layoutFor: tile_layout_for,
             layoutShape: tile_layout_shape,
             layoutSet: tile_layout_set,
-            collectWindows: tile_collect_windows,
+            collectWindows: (monitor, focus, ws) => tile_collect_windows(this, monitor, focus, ws),
             usableArea: getUsableScreenArea,
             gap: tile_gap,
             retileMonitor: tile_retile_monitor,
@@ -1874,9 +1805,9 @@ class App {
             main: utils_Main,
             global: cinnamon.global,
             stateRgb: () => this.theme.stateRgb,
-            exclCheck: tile_excl_is_excluded,
+            exclCheck: (w) => this.excl.isExcluded(w),
             layoutFor: tile_layout_for,
-            collectWindows: tile_collect_windows,
+            collectWindows: (monitor, focus, ws) => tile_collect_windows(this, monitor, focus, ws),
         });
         this.focus = new Focus({
             meta: cinnamon.meta,
@@ -1888,8 +1819,8 @@ class App {
             global: cinnamon.global,
             mainloop: tile_Mainloop,
             st: tile_St,
-            collectWindows: tile_collect_windows,
-            excludeCheck: tile_excl_is_excluded,
+            collectWindows: (monitor, focus, ws) => tile_collect_windows(this, monitor, focus, ws),
+            excludeCheck: (w) => this.excl.isExcluded(w),
             layoutShape: tile_layout_shape,
             layoutSet: tile_layout_set,
             usableArea: getUsableScreenArea,
@@ -1915,8 +1846,8 @@ class App {
             dropEnd: (grabApp, w, op) => grabApp.drop.end(grabApp, w, op),
             dropStop: () => this.drop.stop(),
             resizeEnd: (grabApp, w, op) => grabApp.split.onResizeEnd(grabApp, w, op),
-            exclToggleDelete: (seq) => tile_excl.toggled.delete(seq),
-            exclToggleClear: () => tile_excl.toggled.clear(),
+            exclToggleDelete: (seq) => this.excl.removeToggle(seq),
+            exclToggleClear: () => this.excl.clearToggles(),
         });
         this.config = new Config(this);
     }
@@ -1967,6 +1898,7 @@ const enable = function () {
             meta: utils_Meta,
             global: global,
             gobject: imports.gi.GObject,
+            cinnamonNs: imports.gi.Cinnamon,
         }),
     });
     this.session.start();
