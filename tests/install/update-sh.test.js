@@ -35,6 +35,8 @@ test('no installation present: installs and reaches the Installing message', () 
     assert.ok(r.stdout.includes(`Installing greenTile ${LATEST} …`), `stdout: ${r.stdout}`);
     assert.equal(installedVersion(x.home), LATEST);
     assert.equal(downloadedVersion(x.stublog), LATEST);
+    assert.ok(fs.readFileSync(path.join(x.home, EXT, 'LICENSE'), 'utf8')
+        .trim().startsWith('GNU GENERAL PUBLIC LICENSE'), 'the installed update carries the license');
 });
 
 test('no installation present: --force installs too', () => {

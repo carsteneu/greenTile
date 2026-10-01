@@ -27,7 +27,7 @@ NEW="$STAGE/$UUID"
 # installation untouched. Translations are compiled here too, so a broken
 # .po file aborts before the extension is replaced.
 mkdir "$NEW"
-cp "$SRC"/*.js "$SRC"/*.json "$SRC"/*.css "$SRC"/icon.png "$NEW/"
+cp "$SRC"/*.js "$SRC"/*.json "$SRC"/*.css "$SRC"/icon.png "$SRC"/LICENSE "$NEW/"
 cp -R "$SRC/lib" "$NEW/lib"
 if command -v msgfmt >/dev/null; then
     for po in "$SRC"/po/*.po; do

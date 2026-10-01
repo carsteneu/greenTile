@@ -71,6 +71,8 @@ function makeFixtureZip(dir, version) {
     write(path.join(ext, 'icon.png'), 'png\n');
     write(path.join(ext, 'lib', 'core.js'), 'var core = 1;\n');
     write(path.join(ext, 'lib', 'util.js'), 'var util = 1;\n');
+    // the release zip ships the license inside the extension folder (issue 11)
+    fs.copyFileSync(path.join(ROOT, 'LICENSE'), path.join(ext, 'LICENSE'));
     const po = (id) => `msgid ""\nmsgstr ""\n"Content-Type: text/plain; charset=UTF-8\\n"\n\nmsgid "a"\nmsgstr "${id}"\n`;
     write(path.join(ext, 'po', 'de.po'), po('de'));
     write(path.join(ext, 'po', 'it.po'), po('it'));

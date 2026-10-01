@@ -17,7 +17,7 @@ test('build-release.sh copies exactly the known root files onto the zip', () => 
     const rootCp = cpLines.find((l) => l.trim().startsWith('cp extension.js'));
     assert.ok(rootCp, 'the root-file cp line is missing');
     const entries = rootCp.trim().replace(/^cp\s+/, '').split(/\s+/).filter((e) => !e.includes('$STAGE'));
-    assert.deepEqual(entries, ['extension.js', 'metadata.json', 'settings-schema.json', 'stylesheet.css', 'icon.png'],
+    assert.deepEqual(entries, ['extension.js', 'metadata.json', 'settings-schema.json', 'stylesheet.css', 'icon.png', 'LICENSE'],
         'the shipped root file set changed — keep the release list identical');
 });
 
@@ -40,6 +40,7 @@ test('the set of cp source paths is exactly the known release list', () => {
         .filter((e) => !e.includes('$STAGE'))
         .sort();
     assert.deepEqual(sources, [
+        'LICENSE',
         'extension.js',
         'icon.png',
         'install.sh',
@@ -73,6 +74,13 @@ test('lib/ ships .js files only — the build copies it wholesale', () => {
         assert.ok(file.endsWith('.js'), `${file} would ship in the zip but is not a .js file`);
         assert.ok(!file.includes('test'), `${file} must not carry test material`);
     }
+});
+
+test('LICENSE exists as GPL-3 text and is shipped by a cp line', () => {
+    const license = fs.readFileSync(path.join(ROOT, 'LICENSE'), 'utf8');
+    assert.ok(license.trim().startsWith('GNU GENERAL PUBLIC LICENSE'), 'LICENSE is not the GPL text');
+    assert.ok(license.includes('Version 3'), 'LICENSE is not GPL version 3');
+    assert.ok(cpLines.some((l) => /\bcp\b.*\bLICENSE\b/.test(l)), 'LICENSE is not copied into the package');
 });
 
 test('po/ ships only .po files, scripts stay explicit', () => {

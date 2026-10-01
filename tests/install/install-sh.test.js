@@ -45,6 +45,8 @@ function makeSource(x, { onePo = false } = {}) {
     write(path.join(src, 'icon.png'), 'png\n');
     write(path.join(src, 'lib', 'core.js'), 'var core = 1;\n');
     write(path.join(src, 'lib', 'util.js'), 'var util = 1;\n');
+    // the release zip ships the license inside the extension folder (issue 11)
+    fs.copyFileSync(path.join(ROOT, 'LICENSE'), path.join(src, 'LICENSE'));
     const po = (id) => `msgid ""\nmsgstr ""\n"Content-Type: text/plain; charset=UTF-8\\n"\n\nmsgid "a"\nmsgstr "${id}"\n`;
     write(path.join(src, 'po', 'de.po'), po('de'));
     if (!onePo) {
@@ -116,7 +118,7 @@ const oldInstallIntact = (x) => {
     assert.equal(readMetaVersion(x), '1.2.0');
     assert.equal(fs.readFileSync(path.join(extDir(x), 'extension.js'), 'utf8').trim(), '// OLD extension');
     assert.ok(fs.existsSync(path.join(extDir(x), 'lib', 'old.js')), 'old lib module lost');
-    assert.ok(fs.existsSync(path.join(extDir(x), 'LICENSE')), 'pre-existing LICENSE lost');
+    assert.equal(fs.readFileSync(path.join(extDir(x), 'LICENSE'), 'utf8'), 'OLD LICENSE\n', 'pre-existing LICENSE lost or changed');
     assert.ok(!fs.existsSync(moPath(x.home, 'de')), 'no .mo must be installed on a failed run');
     assert.equal(noStagingLeftovers(x).length, 0);
 };
@@ -130,6 +132,7 @@ test('fresh install: everything lands, no staging leftovers', () => {
     assert.equal(readMetaVersion(x), LATEST);
     assert.ok(fs.existsSync(path.join(extDir(x), 'lib', 'core.js')));
     assert.ok(fs.existsSync(path.join(extDir(x), 'icon.png')));
+    assert.ok(fs.readFileSync(path.join(extDir(x), 'LICENSE'), 'utf8').trim().startsWith('GNU GENERAL PUBLIC LICENSE'), 'LICENSE must be carried into the installed extension');
     assert.ok(fs.existsSync(moPath(x.home, 'de')), 'de .mo compiled');
     assert.ok(fs.existsSync(moPath(x.home, 'it')), 'it .mo compiled');
     assert.equal(noStagingLeftovers(x).length, 0);
@@ -146,9 +149,9 @@ test('update over stale install: wholesale replacement removes stale modules', (
     assert.ok(!fs.existsSync(path.join(extDir(x), 'po')), 'stale po/ dir left behind');
     assert.ok(!fs.existsSync(path.join(extDir(x), 'lib', 'old.js')), 'stale module left behind');
     assert.ok(fs.existsSync(path.join(extDir(x), 'lib', 'core.js')));
-    // the fixture source carries no LICENSE yet (issue 11 ships it); the
-    // wholesale replacement keeps whatever the new package truly contains
-    assert.ok(!fs.existsSync(path.join(extDir(x), 'LICENSE')), 'stale LICENSE must not survive a replacement');
+    // the wholesale replacement also refreshes the stale LICENSE with the
+    // license text the new package ships
+    assert.ok(fs.readFileSync(path.join(extDir(x), 'LICENSE'), 'utf8').trim().startsWith('GNU GENERAL PUBLIC LICENSE'), 'stale LICENSE was not replaced by the package license');
     assert.equal(noStagingLeftovers(x).length, 0);
 });
 
