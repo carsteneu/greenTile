@@ -131,6 +131,8 @@ type SessionFacade = {
     accentGenSeq: number;
     accentCss: string;
     panelSaved: any;
+    exclToggles: Map<number, boolean>;
+    exclWatches: Map<number, { disconnect: () => void }>;
     nextAccentGen(): string;
     destroy(): void;
 };
@@ -179,7 +181,6 @@ type MonitorsFacade = {
 type ExclFacade = {
     isExcluded(win: CinnamonWindow): boolean;
     removeToggle(seq: number): void;
-    clearToggles(): void;
     apply(settings: SettingsFacade): void;
     start(settings: SettingsFacade): void;
     destroy(): void;

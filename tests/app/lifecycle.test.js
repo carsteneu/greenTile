@@ -622,10 +622,13 @@ test('panel: the saved position rides the session across an App recreation and r
     ext.disable();
 });
 
-// Exclusions runtime (lib/runtime/exclusions.js): the toggles are per App — an
-// exclusion set for a window must not leak into a recreated App or a re-enabled
-// extension, while the rows stay re-derived from the (unchanged) settings.
-test('exclusion toggle on a window is gone after monitors-changed and after disable/enable', () => {
+// Exclusions runtime (lib/runtime/exclusions.js): the ad-hoc Super+G toggles
+// live on the extension session (todo_fixes.md #5, GATE2 decision: the
+// documented lifetime is preserved) — they survive an App recreation and end
+// when the user toggles again or the window closes. A disable starts a fresh
+// session without them (no disk persistence), while the exclusion ROWS stay
+// re-derived from the (unchanged) settings.
+test('an ad-hoc exclusion survives monitors-changed (session lifetime) and resets on disable/enable', () => {
     const { env, ext } = loadExtension();
     enableWithMonitor(env, ext);
     env.activeWorkspace = { index: () => 0 };
@@ -640,14 +643,53 @@ test('exclusion toggle on a window is gone after monitors-changed and after disa
     env.flushDisplayConfigNoReply();
     app = ext.session.app;
     assert.notEqual(app, null);
-    assert.equal(app.excl.isExcluded(w), false, 'a fresh App has no per-window toggles');
+    assert.equal(app.excl.isExcluded(w), true, 'the exclusion rides the App recreation (session state)');
     ext.disable();
     ext.enable();
     env.flushDisplayConfigNoReply();
     assert.equal(ext.session.app.excl.isExcluded(makeWindow(31)), false,
-        'a re-enabled extension has no per-window toggles either');
+        'a re-enabled extension starts without per-window toggles (fresh session)');
     ext.disable();
     assert.equal(env.totalHandlers(), 0, 'the exclusions installed-changed handler is released');
+});
+
+test('a Super+G exclusion is cleaned up when the window closes, even without the auto path tracking it', () => {
+    const { env, ext } = loadExtension();
+    enableWithMonitor(env, ext);
+    env.activeWorkspace = { index: () => 0 };
+    const w = makeWindow(33);
+    env.display.focus_window = w;
+    env.tabList.push(w);
+    const hotkey = () => env.keybindingManager.hotkeys.get('greenTile-exclude').cb();
+    hotkey();
+    const app = ext.session.app;
+    assert.equal(app.excl.isExcluded(w), true, 'excluded by the first toggle');
+    assert.equal(ext.session.exclWatches.size, 1, 'the close watch is connected while the exclusion is set');
+    env.keybindingManager.hotkeys.get('greenTile-exclude').cb();
+    assert.equal(app.excl.isExcluded(w), false, 'the second toggle un-excludes the window');
+    assert.equal(ext.session.exclWatches.size, 0, 'the close watch was disconnected on toggle-off');
+    w.emit('unmanaged');
+    assert.equal(app.excl.isExcluded(w), false, 'a closed window leaves no exclusion');
+    assert.equal(ext.session.exclWatches.size, 0, 'the close watch never leaks');
+    ext.disable();
+    assert.equal(env.totalHandlers(), 0, 'disable stays clean');
+});
+
+test('a window excluded on a paused, never-auto-tracked workspace is released when it closes', () => {
+    const { env, ext } = loadExtension();
+    enableWithMonitor(env, ext);
+    env.activeWorkspace = { index: () => 0 };
+    const w = makeWindow(53);
+    env.display.focus_window = w;
+    env.tabList.push(w);
+    env.keybindingManager.hotkeys.get('greenTile-exclude').cb();
+    const app = ext.session.app;
+    assert.equal(app.excl.isExcluded(w), true, 'excluded without any preset or auto state');
+    w.emit('unmanaged');
+    assert.equal(app.excl.isExcluded(w), false, 'the close released the exclusion beyond the auto-tracked set');
+    assert.equal(ext.session.exclToggles.size, 0, 'no exclusion leaked for later windows');
+    ext.disable();
+    assert.equal(env.totalHandlers(), 0);
 });
 
 // Session write-guard flag: the "layouts corrupt" log-once pair shares one
