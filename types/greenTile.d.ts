@@ -150,3 +150,33 @@ type AppFacade = {
 
 /** gettext binding, lib/ui/i18n.js */
 type TranslateFn = (msgid: string) => string;
+
+/** RGB color triplet [r, g, b], each 0–255 (accent, state and theme models). */
+type Rgb = [number, number, number];
+
+/** HSL color triplet [h (0–360), s (0–1), l (0–1)] as produced by accentHsl. */
+type Hsl = [number, number, number];
+
+/** State color tone table as produced by stateTones (lib/model/state.js). */
+type StateTones = {
+    text: Rgb;
+    tint: Rgb;
+    lightText: Rgb;
+    lightTint: Rgb;
+};
+
+/** Accent color tone table as produced by accentTones (lib/model/accent.js). */
+type AccentTones = {
+    base: Rgb;
+    hover: Rgb;
+    saveHover: Rgb;
+    lightBase: Rgb;
+    lightHover: Rgb;
+    textOn: Rgb;
+};
+
+/** One exclusions row as stored: match by class/title/app with the text to match. */
+type ExclRow = {
+    match: 'class' | 'title' | 'app';
+    text: string;
+};
