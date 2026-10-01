@@ -66,8 +66,13 @@ test('extension.js forwards init/enable/disable as member calls (this-session co
 test('no webpack leftovers, gTile provenance markers preserved, header intact', () => {
     const src = fs.readFileSync(greenTilePath, 'utf8');
     assert.ok(!src.includes('__webpack'), 'webpack runtime identifiers must be gone');
-    assert.equal(src.split(';// CONCATENATED MODULE: ').length - 1, 5,
-        'gTile origin sections must stay traceable');
+    assert.deepEqual(src.match(/^\/\/ ---- [A-Za-z]+ \(derived from gTile src\/[A-Za-z0-9/._-]+\.ts\) ----$/gm) || [], [
+        '// ---- Config (derived from gTile src/base/config.ts) ----',
+        '// ---- Utils (derived from gTile src/base/utils.ts) ----',
+        '// ---- App (derived from gTile src/base/app.ts) ----',
+        '// ---- Utils (derived from gTile src/utils.ts) ----',
+        '// ---- Extension (derived from gTile src/extension.ts) ----',
+    ], 'gTile origin sections must stay traceable');
     assert.ok(src.startsWith('/*\n * greenTile'), 'licence/attribution header must stay at the top');
     assert.ok(src.includes('SPDX-License-Identifier: GPL-3.0-only'));
 });

@@ -60,11 +60,18 @@ const { PanelState } = require('./lib/runtime/panel-state');
 const { tile_panel_toggle, tile_panel_rebuild, tile_panel_window_count } = require('./lib/ui/panel');
 const { _ } = require('./lib/ui/i18n');
 
-;// CONCATENATED MODULE: ../base/config.ts
-
 const Settings = imports.ui.settings;
 const Main = imports.ui.main;
-const tile_SignalManager = imports.misc.signalManager.SignalManager;
+const SignalManager = imports.misc.signalManager.SignalManager;
+const GLib = imports.gi.GLib;
+const Meta = imports.gi.Meta;
+const Panel = imports.ui.panel;
+const St = imports.gi.St;
+const Tweener = imports.ui.tweener;
+const Mainloop = imports.mainloop;
+const Gio = imports.gi.Gio;
+
+// ---- Config (derived from gTile src/base/config.ts) ----
 class Config {
     constructor(app) {
         // The hotkeys component carries the fixed greenTile binding names: register
@@ -159,12 +166,7 @@ class Config {
     }
 }
 
-;// CONCATENATED MODULE: ../base/utils.ts
-const GLib = imports.gi.GLib;
-const Meta = imports.gi.Meta;
-const Panel = imports.ui.panel;
-const utils_Main = imports.ui.main;
-const tile_St = imports.gi.St;
+// ---- Utils (derived from gTile src/base/utils.ts) ----
 const getPanelHeight = (panel) => {
     return panel.height
         || panel.actor.get_height();
@@ -174,7 +176,7 @@ const getUsableScreenArea = (monitor) => {
     let bottom = monitor.y + monitor.height;
     let left = monitor.x;
     let right = monitor.x + monitor.width;
-    for (let panel of utils_Main.panelManager.getPanelsInMonitor(monitor.index)) {
+    for (let panel of Main.panelManager.getPanelsInMonitor(monitor.index)) {
         if (!panel.isHideable()) {
             switch (panel.panelPosition) {
                 case Panel.PanelLoc.top:
@@ -213,11 +215,11 @@ const tile_debug_count = (app, monitor, focusWindow, collected) => {
                 reasons.push('wm_class');
             if (app.excl.isExcluded(w))
                 reasons.push('excluded');
-            if (utils_Main.getTabList().indexOf(w) === -1)
+            if (Main.getTabList().indexOf(w) === -1)
                 reasons.push('not-in-tablist');
             if (imports.gi.Cinnamon.WindowTracker.get_default().get_window_app(w) == null)
                 reasons.push('no-app');
-            if (utils_Main.layoutManager.monitors[w.get_monitor()] !== monitor)
+            if (Main.layoutManager.monitors[w.get_monitor()] !== monitor)
                 reasons.push('monitor');
             if (w.get_window_type() !== Meta.WindowType.NORMAL)
                 reasons.push('type=' + w.get_window_type());
@@ -240,14 +242,14 @@ const tile_focus_window = () => {
     if (focus && !focus.minimized && focus.get_window_type() === Meta.WindowType.NORMAL
         && (focus.get_workspace() === active || focus.is_on_all_workspaces()))
         return focus;
-    let tabList = utils_Main.getTabList();
+    let tabList = Main.getTabList();
     return tabList.length > 0 ? tabList[0] : null;
 };
 // Retile every monitor whose layout can place windows: preset layouts directly, auto
 // grids debounced (consistent with other debounced retiles).
 const tile_excl_retile = (app) => {
     const wsIndex = global.workspace_manager.get_active_workspace().index();
-    for (let i = 0; i < utils_Main.layoutManager.monitors.length; i++) {
+    for (let i = 0; i < Main.layoutManager.monitors.length; i++) {
         const layout = tile_layout_for(app, i, wsIndex);
         if (layout.preset)
             tile_retile_monitor(app, i, null);
@@ -262,7 +264,7 @@ const tile_excl_retile = (app) => {
 const tile_collect_windows = (app, monitor, focusWindow, wsIndex = null) => {
     const tracker = imports.gi.Cinnamon.WindowTracker.get_default();
     let result = [];
-    let tabList = wsIndex == null ? utils_Main.getTabList()
+    let tabList = wsIndex == null ? Main.getTabList()
         : global.workspace_manager.get_workspace_by_index(wsIndex).list_windows();
     for (let i = 0; i < tabList.length; i++) {
         let w = tabList[i];
@@ -272,7 +274,7 @@ const tile_collect_windows = (app, monitor, focusWindow, wsIndex = null) => {
             continue;
         if (app.excl.isExcluded(w))
             continue;
-        if (utils_Main.layoutManager.monitors[w.get_monitor()] !== monitor)
+        if (Main.layoutManager.monitors[w.get_monitor()] !== monitor)
             continue;
         if (tracker.get_window_app(w) == null)
             continue;
@@ -285,7 +287,6 @@ const tile_collect_windows = (app, monitor, focusWindow, wsIndex = null) => {
 // is parked at the old rect via translation/scale and eased back to identity.
 // Offsets are set BEFORE the move so no intermediate frame shows the final position.
 const TILE_ANIMATE_MS = 250;
-const Tweener = imports.ui.tweener;
 // animate = false: the window jumps (resize hotkeys held down retile ~33 times per second;
 // overlapping tweens would make the windows swim). With the setting tileAnimation off
 // every placement jumps; read at each placement, so a change applies from the next tiling.
@@ -331,7 +332,7 @@ const tile_app_columns = (app, cols) => {
     const focusWindow = tile_focus_window();
     if (!focusWindow)
         return;
-    let monitor = utils_Main.layoutManager.monitors[focusWindow.get_monitor()];
+    let monitor = Main.layoutManager.monitors[focusWindow.get_monitor()];
     let [screenX, screenY, screenWidth, screenHeight] = getUsableScreenArea(monitor);
     let windows = tile_collect_windows(app, monitor, focusWindow);
     tile_debug_count(app, monitor, focusWindow, windows);
@@ -383,7 +384,7 @@ const tile_place_rects = (app, ordered, layout, split, area, animate) => {
 // monitor and workspace where greenTile tiles (preset or auto), so lone windows fill
 // at once. Switching it off just stops greenTile from touching lone windows again.
 const tile_single_retile = (app) => {
-    const monitors = utils_Main.layoutManager.monitors.length;
+    const monitors = Main.layoutManager.monitors.length;
     const workspaces = global.workspace_manager.get_n_workspaces();
     for (let i = 0; i < monitors; i++) {
         for (let ws = 0; ws < workspaces; ws++) {
@@ -394,7 +395,7 @@ const tile_single_retile = (app) => {
     }
 };
 const tile_app_auto = (app, monitorIndex, focusWindow, animate = true, wsIndex = null) => {
-    const monitor = utils_Main.layoutManager.monitors[monitorIndex];
+    const monitor = Main.layoutManager.monitors[monitorIndex];
     if (!monitor)
         return;
     const ws = wsIndex != null ? wsIndex : global.workspace_manager.get_active_workspace().index();
@@ -432,7 +433,6 @@ const tile_app_auto = (app, monitorIndex, focusWindow, animate = true, wsIndex =
 // into the grid slot nearest its drop position, manual arranging stays possible.
 // Dialogs/popups never trigger (NORMAL type + wm_class checks, collector
 // re-validates at run time). State is global across workspaces by design.
-const tile_Mainloop = imports.mainloop;
 // Muffin grab op number -> name (RESIZING_E, KEYBOARD_RESIZING_UNKNOWN, ...).
 const tile_grab_op_name = (op) => Object.keys(Meta.GrabOp).find((k) => Meta.GrabOp[k] === op) || '';
 const tile_grab_is_resize = (op) => /RESIZING/.test(tile_grab_op_name(op));
@@ -454,11 +454,10 @@ const tile_presets_read = (app) => {
 // component in lib/runtime/monitors.js, owned by the App (monitors-changed
 // destroys the App), riding the DisplayConfig DBus call with the epoch guard and
 // a cancellable. The fallback-logged flag rides the extension session.
-const tile_Gio = imports.gi.Gio;
 const tile_monitor_index_of = (metaWindow) => metaWindow.get_monitor();
 const tile_focus_monitor_index = () => {
     const focusWindow = tile_focus_window();
-    return focusWindow ? focusWindow.get_monitor() : utils_Main.layoutManager.primaryIndex;
+    return focusWindow ? focusWindow.get_monitor() : Main.layoutManager.primaryIndex;
 };
 const tile_layout_for = (app, monitorIndex, wsIndex) => {
     if (!app.monitors.ready || !app.monitors.keys[monitorIndex])
@@ -504,7 +503,7 @@ const tile_layouts_migrate_once = (app) => {
     const hasOld = Object.keys(wsPresets).length > 0 || (Array.isArray(autoList) && autoList.length > 0);
     const layouts = tile_layouts_parse(app.config.settings.getValue('layouts') || '');
     if (layouts && Object.keys(layouts).length === 0 && hasOld) {
-        const primaryIndex = utils_Main.layoutManager.primaryIndex;
+        const primaryIndex = Main.layoutManager.primaryIndex;
         const mkey = app.monitors.keys[primaryIndex] || '';
         if (mkey) {
             const migrated = tile_layouts_migrate(wsPresets, autoList, mkey);
@@ -531,7 +530,7 @@ const tile_rules_pick = (rules, n) => {
 // preset rule filled to n (tile_fill_stacks), or the automatic grid — with a stored
 // dragged shape (lib/model/drop.js) winning over both. null when nothing is tiled.
 const tile_layout_shape_ws = (app, monitorIndex, wsIndex, n) => {
-    const monitor = utils_Main.layoutManager.monitors[monitorIndex];
+    const monitor = Main.layoutManager.monitors[monitorIndex];
     const single = tile_single_fill(app.config.settings.getValue('fillSingleWindow'), n);
     if (!monitor || (n < 2 && !single))
         return null;
@@ -561,7 +560,7 @@ const tile_layout_shape_ws = (app, monitorIndex, wsIndex, n) => {
 // Layout for the active workspace.
 const tile_layout_shape = (app, monitorIndex, n) => tile_layout_shape_ws(app, monitorIndex, global.workspace_manager.get_active_workspace().index(), n);
 const tile_preset_retile = (app, monitorIndex, focusWindow, animate = true, wsIndex = null) => {
-    const monitor = utils_Main.layoutManager.monitors[monitorIndex];
+    const monitor = Main.layoutManager.monitors[monitorIndex];
     if (!monitor)
         return;
     const ws = wsIndex != null ? wsIndex : global.workspace_manager.get_active_workspace().index();
@@ -588,7 +587,7 @@ const tile_preset_retile = (app, monitorIndex, focusWindow, animate = true, wsIn
 // the auto grid when automatic tiling is on. Monitors whose entry has automatic tiling
 // off are left alone — hotkeys retile directly and do not come through here.
 const tile_retile_monitor = (app, monitorIndex, focusWindow, animate = true, wsIndex = null) => {
-    if (!app.monitors.ready || !utils_Main.layoutManager.monitors[monitorIndex])
+    if (!app.monitors.ready || !Main.layoutManager.monitors[monitorIndex])
         return;
     const ws = wsIndex != null ? wsIndex : global.workspace_manager.get_active_workspace().index();
     const layout = tile_layout_for(app, monitorIndex, ws);
@@ -610,7 +609,7 @@ const tile_swap_hotkey = (app, dir) => {
     if (!focusWindow || focusWindow.minimized || focusWindow.is_on_all_workspaces() || app.excl.isExcluded(focusWindow))
         return;
     const monitorIndex = focusWindow.get_monitor();
-    const monitor = utils_Main.layoutManager.monitors[monitorIndex];
+    const monitor = Main.layoutManager.monitors[monitorIndex];
     if (!monitor || !app.monitors.ready)
         return;
     const wsIndex = global.workspace_manager.get_active_workspace().index();
@@ -644,15 +643,15 @@ const tile_swap_hotkey = (app, dir) => {
     const step = tile_swap_chain_step({
         dir: dir,
         monitorIndex: monitorIndex,
-        primaryIndex: utils_Main.layoutManager.primaryIndex,
+        primaryIndex: Main.layoutManager.primaryIndex,
         onlyPrimary: app.monitors.onlyPrimary(),
-        monitors: utils_Main.layoutManager.monitors.map((m, i) => ({ index: i, x: m.x, width: m.width })),
+        monitors: Main.layoutManager.monitors.map((m, i) => ({ index: i, x: m.x, width: m.width })),
         workspaces: global.screen.get_n_workspaces(),
         wsIndex: wsIndex,
     });
     if (!step)
         return;
-    const targetMonitor = utils_Main.layoutManager.monitors[step.monitor];
+    const targetMonitor = Main.layoutManager.monitors[step.monitor];
     if (!targetMonitor)
         return;
     // On a target monitor without active tiling the window lands untiled (move only,
@@ -697,7 +696,6 @@ const tile_swap_hotkey = (app, dir) => {
     tile_retile_monitor(app, monitorIndex, null, true, wsIndex);
     global.log('greenTile swap pushed mon=' + (app.monitors.keys[monitorIndex] || '?') + ' -> ws' + (targetWsIndex + 1) + ' mon=' + (app.monitors.keys[step.monitor] || '?'));
 };
-// >>> focus-runtime
 // Super+Arrow moves the keyboard focus on monitor+workspaces where automatic tiling is
 // on: the neighbouring tiled window in that direction is activated, nothing is moved or
 // retiled. Cinnamon's own push-tile keybindings are taken over wholesale (the gsettings
@@ -724,7 +722,7 @@ const tile_focus_hotkey = (app, dir) => (display, window) => {
         return;
     }
     const monitorIndex = window.get_monitor();
-    const monitor = utils_Main.layoutManager.monitors[monitorIndex];
+    const monitor = Main.layoutManager.monitors[monitorIndex];
     const wsIndex = global.workspace_manager.get_active_workspace().index();
     if (!monitor || !app.monitors.ready || !tile_layout_for(app, monitorIndex, wsIndex).auto) {
         tile_focus_push_native(window, dir);
@@ -760,11 +758,11 @@ const tile_focus_hotkey = (app, dir) => (display, window) => {
         const step = tile_focus_monitor_step({
             dir: dir,
             monitorIndex: monitorIndex,
-            monitors: utils_Main.layoutManager.monitors.map((m, i) => ({ index: i, x: m.x })),
+            monitors: Main.layoutManager.monitors.map((m, i) => ({ index: i, x: m.x })),
         });
         if (step != null) {
             const frame = window.get_frame_rect();
-            const cands = tile_collect_windows(app, utils_Main.layoutManager.monitors[step], null, wsIndex).map((w, i) => {
+            const cands = tile_collect_windows(app, Main.layoutManager.monitors[step], null, wsIndex).map((w, i) => {
                 const r = w.get_frame_rect();
                 return { index: i, x: r.x, y: r.y, width: r.width, height: r.height, w: w };
             });
@@ -777,11 +775,10 @@ const tile_focus_hotkey = (app, dir) => (display, window) => {
         }
     }
 };
-// <<< focus-runtime
 const getFocusApp = () => {
     return global.display.focus_window;
 };
-;// CONCATENATED MODULE: ../base/app.ts
+// ---- App (derived from gTile src/base/app.ts) ----
 class App {
     constructor(platform, session, cinnamon) {
         this.platform = platform;
@@ -811,9 +808,9 @@ class App {
             session: session,
         });
         this.split = new Split({
-            mainloop: tile_Mainloop,
+            mainloop: Mainloop,
             glib: GLib,
-            gio: tile_Gio,
+            gio: Gio,
             global: cinnamon.global,
             main: cinnamon.main,
             focusWindow: tile_focus_window,
@@ -827,9 +824,9 @@ class App {
             grabOpName: tile_grab_op_name,
         });
         this.theme = new Theme({
-            st: tile_St,
-            gio: tile_Gio,
-            main: utils_Main,
+            st: St,
+            gio: Gio,
+            main: Main,
             global: cinnamon.global,
             glib: GLib,
             session: session,
@@ -838,10 +835,10 @@ class App {
             panelRebuild: (a) => tile_panel_rebuild(a),
         });
         this.border = new Border({
-            st: tile_St,
+            st: St,
             glib: GLib,
             meta: cinnamon.meta,
-            main: utils_Main,
+            main: Main,
             global: cinnamon.global,
             stateRgb: () => this.theme.stateRgb,
             exclCheck: (w) => this.excl.isExcluded(w),
@@ -856,8 +853,8 @@ class App {
             meta: cinnamon.meta,
             main: cinnamon.main,
             global: cinnamon.global,
-            mainloop: tile_Mainloop,
-            st: tile_St,
+            mainloop: Mainloop,
+            st: St,
             collectWindows: (monitor, focus, ws) => tile_collect_windows(this, monitor, focus, ws),
             excludeCheck: (w) => this.excl.isExcluded(w),
             layoutShape: tile_layout_shape,
@@ -868,11 +865,11 @@ class App {
             accentRgb: () => this.theme.rgb,
         });
         this.auto = new Auto({
-            mainloop: tile_Mainloop,
+            mainloop: Mainloop,
             meta: cinnamon.meta,
             main: cinnamon.main,
             global: cinnamon.global,
-            signalManager: new tile_SignalManager(),
+            signalManager: new SignalManager(),
             gobject: cinnamon.gobject,
             focusWindow: tile_focus_window,
             focusMonitorIndex: tile_focus_monitor_index,
@@ -912,26 +909,24 @@ class App {
         this.config.destroy();
     }
 }
-;// CONCATENATED MODULE: ./utils.ts
-const utils_Meta = imports.gi.Meta;
-const utils_Main_0 = imports.ui.main;
-const reset_window = (metaWindow) => {
-    metaWindow === null || metaWindow === void 0 ? void 0 : metaWindow.unmaximize(utils_Meta.MaximizeFlags.HORIZONTAL);
-    metaWindow === null || metaWindow === void 0 ? void 0 : metaWindow.unmaximize(utils_Meta.MaximizeFlags.VERTICAL);
-    metaWindow === null || metaWindow === void 0 ? void 0 : metaWindow.unmaximize(utils_Meta.MaximizeFlags.HORIZONTAL | utils_Meta.MaximizeFlags.VERTICAL);
+// ---- Utils (derived from gTile src/utils.ts) ----
+const tile_window_reset = (metaWindow) => {
+    metaWindow?.unmaximize(Meta.MaximizeFlags.HORIZONTAL);
+    metaWindow?.unmaximize(Meta.MaximizeFlags.VERTICAL);
+    metaWindow?.unmaximize(Meta.MaximizeFlags.HORIZONTAL | Meta.MaximizeFlags.VERTICAL);
 };
-const move_resize_window = (metaWindow, x, y, width, height) => {
+const tile_window_move_resize = (metaWindow, x, y, width, height) => {
     if (!metaWindow)
         return;
     metaWindow.move_resize_frame(true, x, y, width, height);
     metaWindow.move_frame(true, x, y);
 };
 
-;// CONCATENATED MODULE: ./extension.ts
+// ---- Extension (derived from gTile src/extension.ts) ----
 
-const platform = Object.freeze({
-    move_resize_window: move_resize_window,
-    reset_window: reset_window,
+const tile_platform = Object.freeze({
+    move_resize_window: tile_window_move_resize,
+    reset_window: tile_window_reset,
 });
 const init = () => {};
 const enable = function () {
@@ -943,17 +938,17 @@ const enable = function () {
     // `this` is the exports object and the session rides it, no module-level
     // state left.
     this.session = new Session({
-        signalManager: new tile_SignalManager(),
+        signalManager: new SignalManager(),
         layoutManager: Main.layoutManager,
-        mainloop: tile_Mainloop,
+        mainloop: Mainloop,
         gobject: imports.gi.GObject,
         now: Date.now,
         log: (msg) => global.log(msg),
         onSettled: (app) => app.auto.scheduleAll(app, 0),
-        createApp: (session) => new App(platform, session, {
-            main: utils_Main,
-            gio: tile_Gio,
-            meta: utils_Meta,
+        createApp: (session) => new App(tile_platform, session, {
+            main: Main,
+            gio: Gio,
+            meta: Meta,
             global: global,
             gobject: imports.gi.GObject,
             cinnamonNs: imports.gi.Cinnamon,
