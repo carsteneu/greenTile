@@ -9,9 +9,14 @@ REPO=carsteneu/greenTile
 UUID=greenTile@carsteneu
 DEST="$HOME/.local/share/cinnamon/extensions/$UUID"
 
-if [ "${1:-}" != "--force" ] && [ -n "${1:-}" ]; then
-    echo "usage: $0 [--force]" >&2
-    exit 1
+if [ "${1:-}" != "--force" ]; then
+    FORCE=0
+    if [ -n "${1:-}" ]; then
+        echo "usage: $0 [--force]" >&2
+        exit 1
+    fi
+else
+    FORCE=1
 fi
 
 url_get() {  # url -> stdout
@@ -40,9 +45,17 @@ latest() {
     printf '%s' "$tag"
 }
 
-installed() {
-    [ -f "$DEST/metadata.json" ] &&
-        grep -o '"version": *"[^"]*"' "$DEST/metadata.json" | head -1 | cut -d'"' -f4
+installed_version() {  # -> version (status 0), 1 = no installation, 2 = unreadable
+    if [ ! -f "$DEST/metadata.json" ]; then
+        return 1
+    fi
+    local v
+    v=$(grep -o '"version": *"[^"]*"' "$DEST/metadata.json" 2>/dev/null | head -1 | cut -d'"' -f4)
+    if [ -z "$v" ]; then
+        echo "update.sh: found an installation at $DEST, but its version cannot be read (broken metadata.json). Remove the folder or run '$0 --force' to reinstall." >&2
+        return 2
+    fi
+    printf '%s' "$v"
 }
 
 command -v unzip >/dev/null || {
@@ -53,8 +66,22 @@ command -v unzip >/dev/null || {
 VER=$(latest)
 [ -n "$VER" ] || { echo "update.sh: could not determine the latest release." >&2; exit 1; }
 
-CUR=$(installed)
-if [ "$CUR" = "$VER" ] && [ "${1:-}" != "--force" ]; then
+# A missing installation is the normal first-install case (st=1); only a
+# broken existing one is an error (st=2) — abbreviating that to "installing"
+# would hide a real problem. --force overrides it: the install replaces the
+# broken metadata anyway.
+CUR=""
+st=0
+CUR=$(installed_version) || st=$?
+if [ "$st" = 2 ]; then
+    if [ "$FORCE" != 1 ]; then
+        exit 2
+    fi
+    echo "update.sh: continuing despite the unreadable installed version (--force)." >&2
+    CUR=""
+fi
+
+if [ "$CUR" = "$VER" ] && [ "$FORCE" != 1 ]; then
     echo "greenTile $VER is already installed. Run '$0 --force' to reinstall."
     exit 0
 fi
