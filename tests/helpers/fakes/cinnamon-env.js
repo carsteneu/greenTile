@@ -6,8 +6,12 @@
 // the ExtensionSettings slot model (register on construct, finalize nulls the
 // slot; setValue alone does not fire IN bindings — cinnamonDBus remoteUpdate
 // does, learning #95107) and a queued Gio.DBus DisplayConfig reply the test
-// drives explicitly. Everything else falls into a deep stub so a load-time
-// binding (imports.ui.tooltips, gettext, ...) never throws.
+// drives explicitly. The runtime-critical Cinnamon namespaces (global
+// subobjects, imports.ui.main, tooltips, panel, tweener, the imports.gi
+// namespace list, imports.misc) are strict: unknown member access throws
+// (issue 13), so a typo'd runtime access fails the test. Remaining loose ends
+// (top-level fallbacks like imports.gettext) fall into a deep stub so a
+// load-time binding never throws.
 const makeStub = () => new Proxy(function () {}, {
     apply: () => makeStub(),
     construct: () => makeStub(),
@@ -19,16 +23,24 @@ const makeStub = () => new Proxy(function () {}, {
     set: () => true,
 });
 
-const proxyStub = (branch) => new Proxy(function () {}, {
+// Strict namespace (todo_fixes issue 13): known members pass through by
+// reference, unknown ones THROW — a typo'd runtime access fails the running
+// test instead of silently stubbing along. Branch contents stay behavior-
+// identical to the former silent stubs.
+const strictNs = (name, branch) => new Proxy(function () {}, {
     get: (t, p) => {
         if (p === Symbol.toPrimitive)
             {return () => '';}
-        if (p in branch)
+        if (Object.prototype.hasOwnProperty.call(branch, p))
             {return branch[p];}
-        return makeStub();
+        throw new Error('fake ' + name + ': unknown member "' + String(p) + '"');
     },
-    apply: () => makeStub(),
-    construct: () => makeStub(),
+    apply: () => {
+        throw new Error('fake ' + name + ': namespaces are not callable');
+    },
+    construct: () => {
+        throw new Error('fake ' + name + ': namespaces are not constructible');
+    },
 });
 
 // Fake SignalManager mirroring /usr/share/cinnamon/js/misc/signalManager.js:
@@ -187,8 +199,14 @@ const createCinnamonEnv = (options) => {
         popModal() {},
         uiGroup: env.uiGroup,
         getTabList: () => env.tabList,
+        // usableArea (lib/tiling/screen.js) iterates this to subtract the
+        // surrounding panels' insets — the fake keeps it empty like the old
+        // silent stub did
+        panelManager: {
+            getPanelsInMonitor: () => [],
+        },
     };
-    env.ui = proxyStub({
+    env.ui = strictNs('imports.ui', {
         settings: {
             BindingDirection: { IN: 'in' },
             ExtensionSettings: class {
@@ -197,7 +215,22 @@ const createCinnamonEnv = (options) => {
                 }
             },
         },
-        main: mainBranch,
+        main: strictNs('imports.ui.main', mainBranch),
+        tooltips: strictNs('imports.ui.tooltips', {
+            // result is discarded by the only call site (lib/ui/panel.js theme button)
+            Tooltip: class {
+                constructor(_item, _title) {}
+            },
+        }),
+        tweener: strictNs('imports.ui.tweener', {
+            // no-op like the former silent stub: lib/tiling/place.js fire-and-forget tweens
+            addTween: () => {},
+            removeTweens: () => {},
+        }),
+        panel: strictNs('imports.ui.panel', {
+            // identity-only switch values in lib/tiling/screen.js usableArea
+            PanelLoc: { top: 'top', bottom: 'bottom', left: 'left', right: 'right' },
+        }),
     });
 
     // --- global.* objects
@@ -268,7 +301,7 @@ const createCinnamonEnv = (options) => {
                 {return () => [0, 0];}
             if (p === 'set_cursor' || p === 'unset_cursor')
                 {return () => {};}
-            return makeStub();
+            throw new Error('fake global: unknown property "' + String(p) + '"');
         },
         apply: () => makeStub(),
         construct: () => makeStub(),
@@ -586,7 +619,31 @@ const createCinnamonEnv = (options) => {
         DrawingArea: class extends FakeActor {},
         ThemeContext: { get_for_stage: () => ({ get_theme: () => env.stTheme }) },
     };
-    env.gi = proxyStub({ GLib: env.glib, Gio: gio, Meta: meta, Cinnamon: cinnamon, St: st });
+    // --- gi branches: namespace list is strict (GObject access throws — greenTile
+    // never touches it at runtime); the branches themselves are concrete.
+    env.gi = strictNs('imports.gi', {
+        GLib: env.glib,
+        Gio: gio,
+        Meta: meta,
+        Cinnamon: cinnamon,
+        St: st,
+        // extension.js wires this per App; only the scope vendor guard reads it
+        // (lib/runtime/scope.js — sniffs GObjects via is_finalized, which the
+        // fake signal hubs never implement, so the handler below stays inert
+        // and behavior matches the former silent stub)
+        GObject: {
+            signal_handler_is_connected: () => true,
+        },
+        // constants lib/tiling + lib/ui compare only by identity; EVENT_PROPAGATE/
+        // EVENT_STOP mirror the real boolean values, the rest are identity stubs
+        Clutter: {
+            EVENT_PROPAGATE: false,
+            EVENT_STOP: true,
+            EventType: { BUTTON_PRESS: 'button-press', BUTTON_RELEASE: 'button-release' },
+            KEY_Escape: 'Escape',
+        },
+        Pango: { EllipsizeMode: { NONE: 'none' } },
+    });
 
     env.imports = new Proxy(function () {}, {
         get: (t, p) => {
@@ -599,7 +656,13 @@ const createCinnamonEnv = (options) => {
             if (p === 'mainloop')
                 {return env.mainloop;}
             if (p === 'misc')
-                {return proxyStub({ signalManager: { SignalManager: FakeSignalManager } });}
+                {return strictNs('imports.misc', {
+                    signalManager: { SignalManager: FakeSignalManager },
+                    util: {
+                        // lib/ui/panel.js settings entry, result unused
+                        spawn: () => {},
+                    },
+                });}
             return makeStub();
         },
         apply: () => makeStub(),
