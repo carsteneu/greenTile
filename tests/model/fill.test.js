@@ -62,6 +62,25 @@ test('no windows: the painted rule is returned as it is', () => {
     assert.deepEqual(m.fillStacks([2, 2], 0), [2, 2]);
 });
 
+test('non-finite stack values cannot hang the fill', () => {
+    // What a corrupt settings file parses back as Infinity (JSON "1e999").
+    const infinite = Number.MAX_VALUE * 2;
+    assert.deepEqual(m.fillStacks([infinite], 3), [3]);
+    assert.deepEqual(m.fillStacks([infinite, infinite], 5), [1, 4]);
+    assert.deepEqual(m.fillStacks([NaN], 3), [3]);
+    assert.deepEqual(m.fillStacks([Infinity, Infinity, Infinity], 4), [1, 1, 2]);
+});
+
+test('extreme finite stack values clamp to the editor grid, the fill stays fast', () => {
+    assert.deepEqual(m.fillStacks([1e9, 1e9], 5), [3, 2]);
+    assert.deepEqual(m.fillStacks([1e7, 1], 3), [2, 1]);
+});
+
+test('more columns than the editor grid: truncated to six, fill stays exact', () => {
+    assert.deepEqual(m.fillStacks([1, 1, 1, 1, 1, 1, 1], 10), [1, 1, 1, 1, 1, 5]);
+    assert.deepEqual(m.fillStacks([1, 1, 1, 1, 1, 1, 1], 3), [1, 1, 1]);
+});
+
 test('narrow auto grid: 3 columns with balanced stacks, singles left', () => {
     assert.deepEqual(m.autoNarrowStacks(4), [1, 1, 2]);
     assert.deepEqual(m.autoNarrowStacks(5), [1, 2, 2]);
