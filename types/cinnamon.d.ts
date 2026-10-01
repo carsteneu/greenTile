@@ -27,6 +27,7 @@ declare class SignalManager {
 declare const GLibNS: {
     get_monotonic_time(): number;
     get_home_dir(): string;
+    get_user_data_dir(): string;
     SOURCE_REMOVE: boolean;
 };
 
@@ -105,7 +106,33 @@ declare const imports: {
         dgettext(domain: string, msgid: string): string;
         gettext(msgid: string): string;
     };
+} & ImportsExtensions;
+
+/**
+ * The shipped module tree as both Cinnamon generations expose it on the
+ * imports root (6.6 main.js _addXletDirectoriesToSearchPath, upstream
+ * installXletImporter): imports.extensions['greenTile@carsteneu'].lib.... —
+ * typed through typeof import so cross-module references keep full tsc
+ * checking (each lib file is a module under moduleDetection force). Other
+ * xlets resolve to unknown.
+ */
+type ImportsExtensions = {
+    extensions: {
+        'greenTile@carsteneu': XletTree;
+    } & Record<string, unknown>;
 };
+
+/**
+ * The shipped module tree as both Cinnamon generations expose it on the
+ * imports root (6.6 main.js _addXletDirectoriesToSearchPath, upstream
+ * installXletImporter): imports.extensions['greenTile@carsteneu'].lib...*.
+ * Value type is any per module: the natively imported namespace carries only
+ * runtime-level (not type-level) exports, so tsc checks each module
+ * internally while the public name surface is pinned by
+ * tests/architecture/native-resolver.test.js against the real loader.
+ * @type {Record<string, Record<string, any>>}
+ */
+type XletTree = Record<string, Record<string, any>>;
 
 /** Cinnamon global object (`global` in the shell). */
 declare const global: {

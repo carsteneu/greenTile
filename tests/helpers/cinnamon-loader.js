@@ -1,23 +1,24 @@
 'use strict';
-// Shared loader: evaluates shipped extension files the way Cinnamon's
-// fileUtils.js createExports does — the body is wrapped as 'use strict';<src>;
-// inside a Function(require, exports, module, ...) and, without an explicit
-// module.exports line, every top-level name is appended to exports (deliberate
-// superset: the importNames/giImportNames suppression lists are ignored).
-// require() resolves like fileUtils.js requireModule: gi./ui./misc. prefixes
-// would reach into the imports global (not available in tests — every shipped
-// module keeps its Cinnamon imports out of the models), everything else is
-// ROOT-relative against the xlet root (the repo root here), './' stripped,
-// '.js' appended, '../' rejected because fileUtils mangles it into '.<name>'.
-const fs = require('node:fs');
+// Shared loader for shipped extension files across both Cinnamon module
+// generations.
+//
+// load() (default): native importer semantics, as the shipped code is loaded
+// through imports.extensions['greenTile@carsteneu'] on both generations since
+// the native-imports migration — only top-level `var` and function
+// declarations are visible on a module namespace, const/let/class stay
+// private, modules are cached per path and re-evaluated after clearCache (see
+// native-importer.js for the pinned contract).
+//
+// cinnamonLoad(): the legacy entry generation — evaluates the entry the way
+// Cinnamon 6.6 fileUtils.js createExports does: body wrapped as
+// 'use strict';<src>; inside a Function(require, exports, module, ...), and
+// without an explicit module.exports line every top-level name is auto-
+// exported (deliberate superset). Used for extension.js entry-contract tests.
 const path = require('node:path');
+const { createXletImporter } = require('./native-importer');
 
 const ROOT = path.join(__dirname, '..', '..');
-const cache = new Map();
-// Modules currently being evaluated (Cinnamon fileUtils mirrors LoadedModules
-// entries whose `module` stays null until evaluation returned — the cache is
-// only consulted then, so a re-entrant require re-evaluates forever).
-const evaluating = [];
+const UUID = 'greenTile@carsteneu';
 
 const cinnamonLoad = (src, requireStub, filename) => {
     const module = { exports: {} };
@@ -33,27 +34,41 @@ const cinnamonLoad = (src, requireStub, filename) => {
     return fn.call(module.exports, requireStub, module.exports, module, null, '.', filename);
 };
 
-const load = (spec) => {
-    if (!spec.startsWith('./'))
-        {throw new Error(`unsupported require '${spec}' — tests resolve root-relative './' paths only`);}
-    if (spec.includes('..'))
-        {throw new Error(`'../' paths are mangled by Cinnamon's fileUtils and unsupported: '${spec}'`);}
-    const rel = spec.replace(/\.\//g, '').endsWith('.js') ? spec.replace(/\.\//g, '') : spec.replace(/\.\//g, '') + '.js';
-    const abs = path.join(ROOT, rel);
-    if (cache.has(abs))
-        {return cache.get(abs);}
-    if (evaluating.includes(rel))
-        {throw new Error('circular require: ' + evaluating.concat(rel).join(' -> ')
-            + ' — fileUtils createExports caches only after evaluation finished, a cycle re-evaluates forever');}
-    evaluating.push(rel);
-    try {
-        const loaded = cinnamonLoad(fs.readFileSync(abs, 'utf8'), load, rel);
-        cache.set(abs, loaded);
-        return loaded;
+let cachedImporter = null;
+
+/** The xlet importer over the repo root; one instance per process. */
+const xletImporter = () => {
+    if (!cachedImporter) {
+        cachedImporter = createXletImporter({ root: ROOT });
     }
-    finally {
-        evaluating.pop();
-    }
+    return cachedImporter;
 };
 
-module.exports = { load, cinnamonLoad, ROOT };
+/**
+ * Loads a shipped module namespace through the importer, path form
+ * './lib/<dir>/<file>'; './extension' resolves the entry.
+ */
+const load = (spec) => {
+    if (spec !== './extension' && !spec.startsWith('./lib/')) {
+        throw new Error(`unsupported load '${spec}' — shipped modules resolve through the xlet importer ('./lib/…' or './extension')`);
+    }
+    if (spec.includes('..')) {
+        throw new Error(`'../' paths are unsupported: '${spec}'`);
+    }
+    let node = xletImporter();
+    for (const part of spec.replace(/^\.\//, '').replace(/\.js$/, '').split('/')) {
+        node = node[part];
+        if (node === undefined) {
+            throw new Error(`native import: '${spec}' does not resolve inside the shipped set`);
+        }
+    }
+    return node;
+};
+
+/**
+ * The extensions subtree as Cinnamon exposes it on the imports root
+ * (6.6 main.js _addXletDirectoriesToSearchPath): one object keyed by the UUID.
+ */
+const extensionsRoot = () => ({ [UUID]: xletImporter() });
+
+module.exports = { load, cinnamonLoad, ROOT, UUID, extensionsRoot };

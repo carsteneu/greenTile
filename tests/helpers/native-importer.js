@@ -47,6 +47,7 @@ const publicNames = (src) => [...scanNames(src, VAR_NAME_RE), ...scanNames(src, 
 /**
  * @typedef {Object} ImporterOptions
  * @property {string} root absolute path of the xlet directory to import through
+ * @property {string} [uuid] xlet uuid for the fallback imports root (default greenTile@carsteneu)
  * @property {(file: string) => string} [read] (absPath) => source text; default fs.readFileSync
  * @property {(dir: string) => Array<{name: string, isDirectory: () => boolean, isFile: () => boolean}>} [listDir]
  */
@@ -61,6 +62,7 @@ const publicNames = (src) => [...scanNames(src, VAR_NAME_RE), ...scanNames(src, 
  */
 const createXletImporter = (options) => {
     const { root } = options;
+    const uuid = options.uuid || 'greenTile@carsteneu';
     const read = options.read || ((file) => fs.readFileSync(file, 'utf8'));
     const listDir = options.listDir
         || ((dir) => fs.readdirSync(dir, { withFileTypes: true }));
@@ -68,6 +70,8 @@ const createXletImporter = (options) => {
 
     const moduleCache = new Map();
     const evaluating = [];
+    // filled with the minimal imports view once the root importer exists
+    const selfImports = { extensions: null };
 
     const evalModule = (absRel, absPath) => {
         if (moduleCache.has(absRel)) {
@@ -83,7 +87,13 @@ const createXletImporter = (options) => {
                 .map((n) => `\nns.${n} = typeof ${n} !== 'undefined' ? ${n} : null;`).join('');
             const body = `'use strict';${src};${exports};\nreturn ns;`;
             const ns = Object.create(null);
-            new Function('imports', 'global', 'ns', body).call(ns, globalThis.imports, globalThis.global, ns);
+            // GJS truth: `imports` is a true global. Tests that load pure
+            // subtrees (models, tiling) run without a fake environment, so
+            // when no global imports exists the importer provides the minimal
+            // system view both Cinnamon generations guarantee:
+            // imports.extensions['<uuid>'] resolving back to this tree.
+            new Function('imports', 'global', 'ns', body)
+                .call(ns, globalThis.imports || selfImports, globalThis.global, ns);
             moduleCache.set(absRel, ns);
             return ns;
         }
@@ -144,7 +154,9 @@ const createXletImporter = (options) => {
         return importer;
     };
 
-    return makeDirImporter('', root);
+    const importer = makeDirImporter('', root);
+    selfImports.extensions = { [uuid]: importer };
+    return importer;
 };
 
 module.exports = { createXletImporter, publicNames };

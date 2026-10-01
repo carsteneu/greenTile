@@ -181,7 +181,7 @@ for (const c of cases) {
 
 // Case snippets reference only case-local bindings, so each compiles in one
 // program per case (mutations must not mask each other).
-const results = snippetFiles.map(([name, expect, file]) => {
+for (const [name, expect, file] of snippetFiles) {
     const { errors, output } = compile([file]);
     const ok = expect === 'fail' ? errors !== 0 : errors === 0;
     console.log((ok ? 'PASS' : 'FAIL') + '  expect-tsc-' + expect + '  ' + name);
@@ -195,8 +195,7 @@ const results = snippetFiles.map(([name, expect, file]) => {
             console.log(output.trim().split('\n').slice(0, 5).map((l) => '      ' + l).join('\n'));
         }
     }
-    return { name, expect, ok };
-});
+}
 
 console.log('');
 if (failures === 0) {

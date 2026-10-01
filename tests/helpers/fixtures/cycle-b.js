@@ -1,3 +1,2 @@
 // Architecture-test fixture: the other half of the loader self-test cycle.
-const { cycle_a } = require('./tests/helpers/fixtures/cycle-a');
-module.exports = { cycle_a };
+var cycle_a = imports['cycle-a'];

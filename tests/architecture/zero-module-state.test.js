@@ -1,12 +1,17 @@
 'use strict';
 // Static step-3 guard: extension.js, lib/app/** and lib/runtime/** must not
-// declare mutable module-level state — no top-level let/var and no top-level
-// mutable const (object/array literal, new Map/Set/WeakMap, Object.create)
-// unless wrapped in Object.freeze. The extension session rides the exports
-// object (Cinnamon calls enable()/disable() member-style), never a module
-// variable. Functions, classes, require results (including the Cinnamon
-// root-relative destructuring) and primitives are fine: they are immutable
-// bindings or per-load values, not shared mutable state.
+// declare mutable module-level state — no top-level let, no reassignment of
+// exported bindings and no top-level mutable const (object/array literal, new
+// Map/Set/WeakMap, Object.create) unless wrapped in Object.freeze. Top-level
+// `var` is the native exporter's public-export mechanism (CJS exposes only
+// var/function declarations), so a var is accepted when its value is a
+// function/arrow/class expression, a primitive or an Object.freeze — and only
+// while the binding is never reassigned. The single documented exception is
+// extension.js's module-private lifecycle holder (const lifecycle =
+// { session: null }): the session can no longer ride `this`, because the
+// extensibility of a natively imported namespace is not a contract to rely
+// on; the holder is owned by exactly this one module and re-created by an
+// xlet reload (module-cache clear).
 //
 // The check is line-shaped (column 0 = top level in this codebase) on purpose:
 // without a new dependency there is no full JS parse, and the shipped files keep
@@ -26,14 +31,34 @@ const FILES = ['extension.js'].concat(
 );
 
 const MUTABLE_RHS = /^(\{|\[|new Map\(|new Set\(|new WeakMap\(|Object\.create\s*\()/;
+const LIFECYCLE_HOLDER = /^const lifecycle = \{ session: null \};$/;
+const VAR_RE = /^var\s+([A-Za-z$_][\w$]*)\s*=\s*(.*)$/;
 
 const findViolations = (src, file) => {
     const problems = [];
     const lines = src.split('\n');
+    const varDecls = new Map();
     for (let i = 0; i < lines.length; i++) {
         const line = lines[i];
-        if (/^(let|var) /.test(line)) {
+        if (LIFECYCLE_HOLDER.test(line)) {
+            continue;
+        }
+        const letMatch = /^let\s/.test(line) ? line : null;
+        if (letMatch !== null) {
             problems.push(file + ':' + (i + 1) + ' top-level ' + line.slice(0, 60));
+            continue;
+        }
+        const varMatch = VAR_RE.exec(line);
+        if (varMatch) {
+            const [, name, rhs] = varMatch;
+            const isMutable = MUTABLE_RHS.test(rhs.trim())
+                && !/^(?:\(|function\b|class\b|Object\.freeze\b)/.test(rhs.trim());
+            if (isMutable) {
+                problems.push(file + ':' + (i + 1) + ' mutable top-level var ' + name + ' = ' + rhs.slice(0, 40));
+            }
+            // exported bindings are tracked for reassignment regardless: the
+            // native exporter makes reassigning a var a public-surface change
+            varDecls.set(name, i);
             continue;
         }
         const m = /^const ([A-Za-z$_][\w$]*)\s*=\s*(.*)$/.exec(line);
@@ -52,12 +77,25 @@ const findViolations = (src, file) => {
         if (MUTABLE_RHS.test(rhs))
             {problems.push(file + ':' + (i + 1) + ' mutable top-level const ' + m[1] + ' = ' + rhs.slice(0, 40));}
     }
+    for (const [name, declLine] of varDecls) {
+        const reassign = new RegExp('^\\s*' + name + '\\s*=(?!=)');
+        for (let i = 0; i < lines.length; i++) {
+            if (i !== declLine && reassign.test(lines[i])) {
+                problems.push(file + ':' + (i + 1) + ' exported binding reassigned: ' + name);
+            }
+        }
+    }
     return problems;
 };
 
 test('guard flags mutable top-level state and accepts the allowed forms', () => {
     assert.equal(findViolations('let x = 0;', 'f.js').length, 1);
-    assert.equal(findViolations('var x = 1;', 'f.js').length, 1);
+    assert.equal(findViolations('var x = 1;', 'f.js').length, 0, 'var export with primitive value is the native export mechanism');
+    assert.equal(findViolations('var x = () => {};', 'f.js').length, 0, 'var export with arrow value allowed');
+    assert.equal(findViolations('var x = class {};', 'f.js').length, 0, 'var-bound class expression allowed');
+    assert.equal(findViolations('var x = Object.freeze({});', 'f.js').length, 0);
+    assert.equal(findViolations('var x = {};', 'f.js').length, 1, 'var export of a mutable literal flagged');
+    assert.equal(findViolations('var x = {}\nvar y = 1;\nx = y;', 'f.js').length, 2, 'reassignment of an exported binding flagged');
     assert.equal(findViolations('const x = {};', 'f.js').length, 1);
     assert.equal(findViolations('const x = [];', 'f.js').length, 1);
     assert.equal(findViolations('const x = new Map();', 'f.js').length, 1);
@@ -70,8 +108,10 @@ test('guard flags mutable top-level state and accepts the allowed forms', () => 
     assert.equal(findViolations('const f = () => {};', 'f.js').length, 0, 'functions allowed');
     assert.equal(findViolations('const f = function () {};', 'f.js').length, 0, 'functions allowed');
     assert.equal(findViolations('const f = (a) => ({ ...a });', 'f.js').length, 0, 'arrow params are not an object literal');
-    assert.equal(findViolations('class C {}', 'f.js').length, 0, 'classes allowed');
-    assert.equal(findViolations('const { a, b } = require("./x");', 'f.js').length, 0, 'require destructuring allowed');
+    assert.equal(findViolations('class C {}', 'f.js').length, 0, 'classes allowed (private in the native namespace)');
+    assert.equal(findViolations('const lifecycle = { session: null };', 'f.js').length, 0, 'the extension.js lifecycle holder is the documented exception');
+    assert.equal(findViolations('const other = { session: null };', 'f.js').length, 1, 'only the lifecycle holder pattern is exempt');
+    assert.equal(findViolations('const { a, b } = XLET.lib.model.split;', 'f.js').length, 0, 'importer destructuring allowed');
     assert.equal(findViolations('const Main = imports.ui.main;', 'f.js').length, 0, 'imports allowed');
     assert.equal(findViolations('const N = 400 * 1000;', 'f.js').length, 0, 'primitives allowed');
     assert.equal(findViolations('const s = "text";', 'f.js').length, 0, 'primitives allowed');

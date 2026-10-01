@@ -272,7 +272,7 @@ const settingsInstance = (env) => env.settingsInstances.find((s) => s.uuid === '
 test('split: a pending hotkey-step split leaves the 500 ms flush timer; disable flushes it into the settings before finalize', () => {
     const { env, ext } = loadExtension();
     enableWithMonitor(env, ext);
-    const app = ext.session.app;
+    const app = ext.currentSession().app;
     const ref = app.split.ref(app, 0, 0, 2);
     assert.ok(ref, 'monitor key resolved from the fake DisplayConfig reply');
     // split values are { <border index>: fraction } objects (splitMove output)
@@ -292,12 +292,12 @@ test('split: a pending hotkey-step split leaves the 500 ms flush timer; disable 
 test('split: monitors-changed flushes a pending split into the OLD App settings; the new App starts with an empty pending map', () => {
     const { env, ext } = loadExtension();
     enableWithMonitor(env, ext);
-    const app = ext.session.app;
+    const app = ext.currentSession().app;
     const ref = app.split.ref(app, 0, 0, 2);
     app.split.remember(app, ref, { 0: 0.5, 1: 1 }, false);
     env.layoutManager.emit('monitors-changed');
     env.flushDisplayConfigNoReply();
-    const app2 = ext.session.app;
+    const app2 = ext.currentSession().app;
     assert.notEqual(app2, app, 'the App was recreated');
     const writes = settingsInstance(env).callLog.filter((c) => c.op === 'setValue' && c.key === 'layouts');
     assert.equal(writes.length, 1, 'the pending split reached the settings during the recreation');
@@ -310,7 +310,7 @@ test('split: monitors-changed flushes a pending split into the OLD App settings;
 test('split: a corrupt layouts setting logs the corrupt line once across an App recreation', () => {
     const { env, ext } = loadExtension();
     enableWithMonitor(env, ext);
-    const app = ext.session.app;
+    const app = ext.currentSession().app;
     const ref = app.split.ref(app, 0, 0, 2);
     const corruptLines = () => env.logs.filter((l) => l === 'greenTile layouts setting is corrupt, splits not written').length;
     settingsInstance(env).setValue('layouts', '{"mkey": broken');
@@ -322,7 +322,7 @@ test('split: a corrupt layouts setting logs the corrupt line once across an App 
     assert.equal(corruptLines(), 1, 'still once inside the same App');
     env.layoutManager.emit('monitors-changed');
     env.flushDisplayConfigNoReply();
-    const app2 = ext.session.app;
+    const app2 = ext.currentSession().app;
     const ref2 = app2.split.ref(app2, 0, 0, 2);
     app2.split.remember(app2, ref2, [0.7], false);
     app2.split.flush(app2);
@@ -332,7 +332,7 @@ test('split: a corrupt layouts setting logs the corrupt line once across an App 
 test('split: a pending split that a drop replaces expires from the pending map (forget)', () => {
     const { env, ext } = loadExtension();
     enableWithMonitor(env, ext);
-    const app = ext.session.app;
+    const app = ext.currentSession().app;
     const ref = app.split.ref(app, 0, 0, 2);
     app.split.remember(app, ref, { 0: 0.4, 1: 1 }, false);
     assert.equal(env.liveTimers().filter((t) => t.ms === 500).length, 1, 'flush timer pending');
@@ -346,7 +346,7 @@ test('split: a pending split that a drop replaces expires from the pending map (
 test('drop: disable during an active drag destroys the preview actor and removes the 50 ms tick timer', () => {
     const { env, ext } = loadExtension();
     enableWithMonitor(env, ext);
-    const app = ext.session.app;
+    const app = ext.currentSession().app;
     // automatic tiling on, keyed exactly the way the extension itself writes it
     const ref0 = app.split.ref(app, 0, 0, 2);
     const layouts = {};
@@ -389,7 +389,7 @@ const enableWithLayouts = (env, ext) => {
     env.flushDisplayConfigNoReply();
     // automatic tiling on for monitor 0 / active workspace 0, keyed exactly the
     // way the extension itself writes it
-    const app = ext.session.app;
+    const app = ext.currentSession().app;
     const ref0 = app.split.ref(app, 0, 0, 2);
     const layouts = {};
     layouts[ref0.mkey] = {};
@@ -400,7 +400,7 @@ const enableWithLayouts = (env, ext) => {
 test('disable unloads the accent stylesheet, releases the theme sources and destroys the border actor', () => {
     const { env, ext } = loadExtension();
     enableWithMonitor(env, ext);
-    const app = ext.session.app;
+    const app = ext.currentSession().app;
     assert.match(app.theme.gen, /^gk-acc\d+$/, 'enable loaded the accent sheet with a generation class');
     assert.equal(env.stTheme.loads.length, 1, 'one generated stylesheet loaded on the live theme');
     ext.disable();
@@ -461,7 +461,7 @@ test('a focus flash binds exactly two handlers on the flashed window, a second f
     env.activeWorkspace = { index: () => 0 };
     enableWithLayouts(env, ext);
     settingsInstance(env).setValue('focusBorder', true); // setValue alone fires no binding
-    const app = ext.session.app;
+    const app = ext.currentSession().app;
     env.display.focus_window = w1;
     app.border.flash(w1);
     assert.equal(w1.count('position-changed'), 1, 'first flash binds position-changed');
@@ -489,10 +489,10 @@ test('monitors-changed: the recreated App loads the accent sheet with a strictly
     const { env, ext } = loadExtension();
     ext.enable();
     env.flushDisplayConfigNoReply();
-    const gen1 = ext.session.app.theme.gen;
+    const gen1 = ext.currentSession().app.theme.gen;
     env.layoutManager.emit('monitors-changed');
     env.flushDisplayConfigNoReply();
-    const gen2 = ext.session.app.theme.gen;
+    const gen2 = ext.currentSession().app.theme.gen;
     const n1 = Number(gen1.slice('gk-acc'.length));
     const n2 = Number(gen2.slice('gk-acc'.length));
     assert.ok(Number.isFinite(n1) && Number.isFinite(n2), 'both generations are gk-acc<n> classes');
@@ -509,14 +509,14 @@ test('re-enable seeds the accent sequence from the clock: the new session never 
     try {
         ext.enable();
         env.flushDisplayConfigNoReply();
-        const first = ext.session.app.theme.gen;
+        const first = ext.currentSession().app.theme.gen;
         ext.disable();
         const nFirst = Number(first.slice('gk-acc'.length));
         assert.ok(Number.isFinite(nFirst) && nFirst > fakeClock, 'the first session seeded from the clock (one load: clock+1)');
         fakeClock = 5000000;
         ext.enable();
         env.flushDisplayConfigNoReply();
-        const second = ext.session.app.theme.gen;
+        const second = ext.currentSession().app.theme.gen;
         const nSecond = Number(second.slice('gk-acc'.length));
         assert.ok(Number.isFinite(nSecond), 'the second session took a gk-acc<n> class');
         assert.ok(nSecond > nFirst, 'the new session\'s first generation differs from and is greater than every class of the earlier session (clock seed, no interned-node clash)');
@@ -537,7 +537,7 @@ test('theme/border settings bindings firing mid-Config and after disable stay gu
     // components still answer unchanged with their guard no-ops. The window's
     // exact state (config/app not yet assigned) is poked directly here; the
     // fields are the guards theme.changed()/border.update() read.
-    const app = ext.session.app;
+    const app = ext.currentSession().app;
     const savedConfig = app.theme._config;
     app.theme._config = null;
     assert.doesNotThrow(() => ['panelTheme', 'accentMode', 'accentColor', 'stateMode', 'stateColor'].forEach(fire),
@@ -577,7 +577,7 @@ test('panel: opening the list binds Escape and connects its handlers; disable cl
     assert.equal(env.display.count('notify::focus-window'), 0, 'no display handler left');
     assert.equal(env.chromeChildren.length, 0, 'the panel actor left the chrome');
     assert.equal(panelActor.destroyed, true, 'the panel actor was destroyed');
-    assert.equal(ext.session, null, 'the session is gone');
+    assert.equal(ext.currentSession(), null, 'the session is gone');
 });
 
 test('panel: hotkey re-registration while the list is open keeps the Escape binding intact', () => {
@@ -595,7 +595,7 @@ test('panel: hotkey re-registration while the list is open keeps the Escape bind
     // Escape still closes the panel
     env.keybindingManager.hotkeys.get('greenTile-panel-esc').cb();
     assert.equal(env.chromeChildren.length, 0, 'the panel closed through Escape');
-    assert.equal(ext.session.app.panel.actor, null, 'panel state actor reset');
+    assert.equal(ext.currentSession().app.panel.actor, null, 'panel state actor reset');
     ext.disable();
     assert.deepEqual(env.greenTileHotkeys(), []);
 });
@@ -607,7 +607,7 @@ test('panel: the saved position rides the session across an App recreation and r
     env.keybindingManager.hotkeys.get('greenTile-preset').cb();
     let panelActor = env.chromeChildren[0];
     panelActor.emit('notify::allocation'); // first allocation centres the panel and saves the position
-    const saved = ext.session.panelSaved;
+    const saved = ext.currentSession().panelSaved;
     assert.ok(saved && saved.x === 700 && saved.y === 280, 'the centred position is saved on the session');
     env.layoutManager.emit('monitors-changed');
     env.flushDisplayConfigNoReply();
@@ -620,7 +620,7 @@ test('panel: the saved position rides the session across an App recreation and r
     assert.equal(env.chromeChildren.length, 0, 'the panel was closed by disable');
     ext.enable();
     env.flushDisplayConfigNoReply();
-    assert.equal(ext.session.panelSaved, null, 'a new enable starts without a saved position');
+    assert.equal(ext.currentSession().panelSaved, null, 'a new enable starts without a saved position');
     ext.disable();
 });
 
@@ -638,18 +638,18 @@ test('an ad-hoc exclusion survives monitors-changed (session lifetime) and reset
     env.display.focus_window = w;
     env.tabList.push(w);
     env.keybindingManager.hotkeys.get('greenTile-exclude').cb();
-    let app = ext.session.app;
+    let app = ext.currentSession().app;
     assert.equal(app.excl.isExcluded(w), true, 'the focused window is excluded');
     assert.equal(env.logs.filter((l) => l.startsWith('greenTile never tile on:')).length, 1, 'toggle logged');
     env.layoutManager.emit('monitors-changed');
     env.flushDisplayConfigNoReply();
-    app = ext.session.app;
+    app = ext.currentSession().app;
     assert.notEqual(app, null);
     assert.equal(app.excl.isExcluded(w), true, 'the exclusion rides the App recreation (session state)');
     ext.disable();
     ext.enable();
     env.flushDisplayConfigNoReply();
-    assert.equal(ext.session.app.excl.isExcluded(makeWindow(31)), false,
+    assert.equal(ext.currentSession().app.excl.isExcluded(makeWindow(31)), false,
         'a re-enabled extension starts without per-window toggles (fresh session)');
     ext.disable();
     assert.equal(env.totalHandlers(), 0, 'the exclusions installed-changed handler is released');
@@ -664,15 +664,15 @@ test('a Super+G exclusion is cleaned up when the window closes, even without the
     env.tabList.push(w);
     const hotkey = () => env.keybindingManager.hotkeys.get('greenTile-exclude').cb();
     hotkey();
-    const app = ext.session.app;
+    const app = ext.currentSession().app;
     assert.equal(app.excl.isExcluded(w), true, 'excluded by the first toggle');
-    assert.equal(ext.session.exclWatches.size, 1, 'the close watch is connected while the exclusion is set');
+    assert.equal(ext.currentSession().exclWatches.size, 1, 'the close watch is connected while the exclusion is set');
     env.keybindingManager.hotkeys.get('greenTile-exclude').cb();
     assert.equal(app.excl.isExcluded(w), false, 'the second toggle un-excludes the window');
-    assert.equal(ext.session.exclWatches.size, 0, 'the close watch was disconnected on toggle-off');
+    assert.equal(ext.currentSession().exclWatches.size, 0, 'the close watch was disconnected on toggle-off');
     w.emit('unmanaged');
     assert.equal(app.excl.isExcluded(w), false, 'a closed window leaves no exclusion');
-    assert.equal(ext.session.exclWatches.size, 0, 'the close watch never leaks');
+    assert.equal(ext.currentSession().exclWatches.size, 0, 'the close watch never leaks');
     ext.disable();
     assert.equal(env.totalHandlers(), 0, 'disable stays clean');
 });
@@ -685,11 +685,11 @@ test('a window excluded on a paused, never-auto-tracked workspace is released wh
     env.display.focus_window = w;
     env.tabList.push(w);
     env.keybindingManager.hotkeys.get('greenTile-exclude').cb();
-    const app = ext.session.app;
+    const app = ext.currentSession().app;
     assert.equal(app.excl.isExcluded(w), true, 'excluded without any preset or auto state');
     w.emit('unmanaged');
     assert.equal(app.excl.isExcluded(w), false, 'the close released the exclusion beyond the auto-tracked set');
-    assert.equal(ext.session.exclToggles.size, 0, 'no exclusion leaked for later windows');
+    assert.equal(ext.currentSession().exclToggles.size, 0, 'no exclusion leaked for later windows');
     ext.disable();
     assert.equal(env.totalHandlers(), 0);
 });
@@ -705,20 +705,20 @@ test('the layouts write-guard logs once per session across an App recreation and
     const corruptLines = () => env.logs.filter((l) => l === 'greenTile layouts setting is corrupt, not writing it').length;
     const corruptValue = '{"mkey": broken';
     env.settingsInstances.at(-1).setValue('layouts', corruptValue);
-    let app = ext.session.app;
+    let app = ext.currentSession().app;
     app.auto.activate(app);
     assert.equal(corruptLines(), 1, 'logged once for the first corrupt write');
     env.layoutManager.emit('monitors-changed');
     env.flushDisplayConfigNoReply();
     env.settingsInstances.at(-1).setValue('layouts', corruptValue);
-    app = ext.session.app;
+    app = ext.currentSession().app;
     app.auto.activate(app);
     assert.equal(corruptLines(), 1, 'still once across the App recreation (session flag)');
     ext.disable();
     ext.enable();
     env.flushDisplayConfigNoReply();
     env.settingsInstances.at(-1).setValue('layouts', corruptValue);
-    app = ext.session.app;
+    app = ext.currentSession().app;
     app.auto.activate(app);
     assert.equal(corruptLines(), 2, 'a new session starts with a fresh flag');
     ext.disable();
@@ -736,7 +736,7 @@ test('two enable/disable cycles on the same loaded module share no state', () =>
     env.tabList.push(w);
     env.keybindingManager.hotkeys.get('greenTile-preset').cb();
     env.keybindingManager.hotkeys.get('greenTile-exclude').cb();
-    const firstApp = ext.session.app;
+    const firstApp = ext.currentSession().app;
     assert.equal(firstApp.excl.isExcluded(w), true, 'cycle 1 excluded the window');
     assert.ok(firstApp.panel.actor, 'cycle 1 has an open panel');
     firstApp.panel.guard();
@@ -747,7 +747,7 @@ test('two enable/disable cycles on the same loaded module share no state', () =>
 
     ext.enable();
     env.flushDisplayConfigNoReply();
-    const secondApp = ext.session.app;
+    const secondApp = ext.currentSession().app;
     assert.notEqual(secondApp, firstApp, 'a new App was created');
     assert.equal(secondApp.panel.actor, null, 'cycle 2 starts with a closed panel');
     assert.equal(secondApp.panel.guardUntil, 0, 'cycle 2 starts with a clean guard');
@@ -767,7 +767,7 @@ test('a throwing split.flush does not skip the remaining cleanup: handlers, acto
     const { env, ext } = loadExtension();
     ext.enable();
     env.flushDisplayConfigNoReply();
-    ext.session.app.split.flush = () => { throw new Error('injected flush failure'); };
+    ext.currentSession().app.split.flush = () => { throw new Error('injected flush failure'); };
     assert.doesNotThrow(() => ext.disable(), 'disable must not abort on a failing step');
     assert.deepEqual(env.greenTileHotkeys(), [], 'no hotkey left');
     assert.deepEqual([...env.customBindings.keys()], [], 'Meta custom bindings reset');
@@ -785,7 +785,7 @@ test('a throwing split.flush does not skip the remaining cleanup: handlers, acto
 test('a throwing panel.close skips only its own step: theme, focus, border and finalize still complete', () => {
     const { env, ext } = loadExtension();
     enableWithMonitor(env, ext);
-    ext.session.app.panel.close = () => { throw new Error('injected panel failure'); };
+    ext.currentSession().app.panel.close = () => { throw new Error('injected panel failure'); };
     ext.disable();
     assert.equal(env.stTheme.loads.length, 0, 'accent stylesheet unloaded by the later theme step');
     assert.deepEqual([...env.customBindings.keys()], [], 'Meta custom bindings reset by the later focus step');
@@ -797,7 +797,7 @@ test('a throwing panel.close skips only its own step: theme, focus, border and f
 test('a throwing theme.destroy releases focus, border and settings regardless', () => {
     const { env, ext } = loadExtension();
     enableWithMonitor(env, ext);
-    ext.session.app.theme.destroy = () => { throw new Error('injected theme failure'); };
+    ext.currentSession().app.theme.destroy = () => { throw new Error('injected theme failure'); };
     ext.disable();
     assert.deepEqual([...env.customBindings.keys(), ...env.customBindings.values()], [], 'focus overrides reset');
     assert.equal(env.overlayChildren.every((a) => a.destroyed), true, 'border actor destroyed');
@@ -808,7 +808,7 @@ test('a throwing theme.destroy releases focus, border and settings regardless', 
 test('a throwing border.destroy still finalizes the settings and reports', () => {
     const { env, ext } = loadExtension();
     enableWithMonitor(env, ext);
-    ext.session.app.border.destroy = () => { throw new Error('injected border failure'); };
+    ext.currentSession().app.border.destroy = () => { throw new Error('injected border failure'); };
     ext.disable();
     assert.equal(env.settingsSlots.get('greenTile@carsteneu'), null, 'settings finalized after the failing border step');
     assert.equal(reportContains(env, 'injected border failure'), true, 'the collected failure is reported');
@@ -831,11 +831,11 @@ test('a throwing settings.finalize is reported and does not rerun on a second di
 test('a throwing flush during monitors-changed does not abort the recreation: the new App takes over exactly once', () => {
     const { env, ext } = loadExtension();
     enableWithMonitor(env, ext);
-    const oldApp = ext.session.app;
+    const oldApp = ext.currentSession().app;
     oldApp.split.flush = () => { throw new Error('injected flush failure'); };
     env.layoutManager.emit('monitors-changed');
     env.flushDisplayConfigNoReply();
-    const app2 = ext.session.app;
+    const app2 = ext.currentSession().app;
     assert.notEqual(app2, oldApp, 'the recreation still happened');
     assert.notEqual(app2, null, 'the session no longer points at the half-destroyed App');
     assert.deepEqual(env.greenTileHotkeys(), HOTKEY_NAMES, 'exactly the 14 hotkeys, once');
@@ -853,7 +853,7 @@ test('multiple failing steps produce exactly one aggregated report', () => {
     const { env, ext } = loadExtension();
     ext.enable();
     env.flushDisplayConfigNoReply();
-    ext.session.app.split.flush = () => { throw new Error('injected flush failure'); };
+    ext.currentSession().app.split.flush = () => { throw new Error('injected flush failure'); };
     settingsInstance(env).finalize = () => { throw new Error('injected finalize failure'); };
     assert.doesNotThrow(() => ext.disable());
     const reports = env.logErrors.filter((l) => l.indexOf('greenTile cleanup') === 0);
@@ -868,7 +868,7 @@ test('a settings slot construction failure before any acquisition is tolerated b
         constructor() { throw new Error('injected settings failure'); }
     };
     assert.throws(() => ext.enable(), /injected settings failure/, 'the enable fails at the settings slot');
-    assert.equal(ext.session.app, null, 'no App was assigned');
+    assert.equal(ext.currentSession().app, null, 'no App was assigned');
     assert.deepEqual(env.greenTileHotkeys(), [], 'no hotkeys were registered');
     assert.equal(env.totalHandlers(), 0, 'nothing stays connected');
     assert.doesNotThrow(() => ext.disable(), 'disable survives the never-created App');
@@ -943,7 +943,7 @@ test('a failed App recreation leaves no App and no resources; the next monitor c
     const restore = failAddHotKey(env, 'greenTile-auto3');
     assert.throws(() => env.layoutManager.emit('monitors-changed'), /injected hotkey failure/, 'the recreation fails at the injected hotkey');
     restore();
-    assert.equal(ext.session.app, null, 'the session keeps no half-destroyed App');
+    assert.equal(ext.currentSession().app, null, 'the session keeps no half-destroyed App');
     assert.deepEqual(env.greenTileHotkeys(), [], 'no hotkeys left');
     assert.equal(env.appSystem.count('installed-changed'), 0, 'the recreation rolled back its handler');
     assert.equal(env.layoutManager.count('monitors-changed'), 1,
@@ -952,7 +952,7 @@ test('a failed App recreation leaves no App and no resources; the next monitor c
     assert.equal(firstSettings.finalized, true, 'the old settings are finalized');
     env.layoutManager.emit('monitors-changed');
     env.flushDisplayConfigNoReply();
-    assert.equal(ext.session.app !== null, true, 'the next monitor change recreates the App');
+    assert.equal(ext.currentSession().app !== null, true, 'the next monitor change recreates the App');
     assert.deepEqual(env.greenTileHotkeys(), HOTKEY_NAMES, 'exactly the 14 hotkeys, once');
     assert.equal(env.appSystem.count('installed-changed'), 1, 'exactly one installed-changed, not two');
     ext.disable();

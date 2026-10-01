@@ -51,8 +51,15 @@ test('monitors-changed and disable destroy the app before the next registration'
     const enableBody = extensionSrc.slice(enableStart);
     const disableStart = enableBody.indexOf('function disable() {');
     const disableBody = enableBody.slice(disableStart, enableBody.indexOf('\n}\n', disableStart));
-    assert.match(disableBody, /this\.session\.destroy\(\)/);
-    assert.match(enableBody, /this\.session\.start\(\)/, 'enable creates and starts the session');
+    assert.match(disableBody, /lifecycle\.session\.destroy\(\)/,
+        'disable destroys the session owned by the module-private lifecycle holder');
+    assert.match(disableBody, /lifecycle\.session = null/,
+        'and clears the holder afterwards');
+    assert.match(enableBody, /lifecycle\.session = session;/,
+        'enable owns the session in the module-private lifecycle holder before start()');
+    assert.match(enableBody, /lifecycle\.session = session;[\s\S]*?session\.start\(\);/,
+        'ownership is taken before start() so a mid-start rollback stays cleanable');
+    assert.match(enableBody, /session\.start\(\)/, 'enable starts the session');
 });
 
 // The contract, modeled on /usr/share/cinnamon/js/ui/settings.js and cinnamonDBus.js:

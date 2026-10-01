@@ -196,7 +196,7 @@ test('automatic tiling places focus plus collected windows into the uniform grid
     enableOnMonitor(env, ext);
     makeWorkspace(env);
     env.activeWorkspace = { index: () => 0 };
-    const app = ext.session.app;
+    const app = ext.currentSession().app;
     const ref = app.split.ref(app, 0, 0, 2);
     const layouts = { [ref.mkey]: { [ref.wskey]: { auto: true } } };
     settingsInstance(env).setValue('layouts', JSON.stringify(layouts));
@@ -242,7 +242,7 @@ test('preset retile appends a new window at the end regardless of its start posi
     const w2 = makeWindow(env, 22, [500, 0, 400, 300]);
     env.tabList.push(w1, w2);
     env.display.focus_window = w1;
-    const app = ext.session.app;
+    const app = ext.currentSession().app;
     app.ops.presetsWrite(app, [{ id: 'p1', name: 'Halves', rules: [{ min: 2, stacks: [1, 1] }] }]);
     app.ops.layoutSet(app, 0, 0, { preset: 'p1' });
     app.ops.retileMonitor(app, 0);
@@ -269,7 +269,7 @@ test('preset retile appends several new windows in opening order, whatever their
     const w2 = makeWindow(env, 22, [500, 0, 400, 300]);
     env.tabList.push(w1, w2);
     env.display.focus_window = w1;
-    const app = ext.session.app;
+    const app = ext.currentSession().app;
     app.ops.presetsWrite(app, [{ id: 'p4', name: 'Quarters', rules: [{ min: 2, stacks: [1, 1, 1, 1] }] }]);
     app.ops.layoutSet(app, 0, 0, { preset: 'p4' });
     app.ops.retileMonitor(app, 0);
@@ -299,7 +299,7 @@ test('automatic grid appends fresh windows in opening order too and keeps the se
     const w2 = makeWindow(env, 32, [500, 0, 400, 300]);
     env.tabList.push(w1, w2);
     env.display.focus_window = w1;
-    const app = ext.session.app;
+    const app = ext.currentSession().app;
     const ref = app.split.ref(app, 0, 0, 2);
     const layouts = { [ref.mkey]: { [ref.wskey]: { auto: true } } };
     settingsInstance(env).setValue('layouts', JSON.stringify(layouts));
@@ -337,7 +337,7 @@ test('a fresh window on another monitor appends at that monitor\'s end without t
     const w4 = makeWindow(env, 44, [2000 + 500, 0, 400, 300], 1);
     env.tabList.push(w1, w2, w3, w4);
     env.display.focus_window = w1;
-    const app = ext.session.app;
+    const app = ext.currentSession().app;
     app.ops.presetsWrite(app, [{ id: 'p1', name: 'Halves', rules: [{ min: 2, stacks: [1, 1] }] }]);
     app.ops.layoutSet(app, 0, 0, { preset: 'p1' });
     app.ops.layoutSet(app, 1, 0, { preset: 'p1' });
@@ -366,7 +366,7 @@ test('a fresh window on another monitor appends at that monitor\'s end without t
 // drive the real editor: open the draft, apply the changed rules, click Save
 const savePresetWithRules = (ext, presetId, rules) => {
     const { editorOpen, editorBody } = load('./lib/ui/editor.js');
-    const app = ext.session.app;
+    const app = ext.currentSession().app;
     editorOpen(app, app.ops.presetsRead(app).find((p) => p.id === presetId));
     app.panel.draft.rules = rules;
     const body = editorBody(app);
@@ -403,7 +403,7 @@ test('saving a shared preset retiles every monitor-workspace where it is active,
     const w5 = makeWindow(env, 55, [2000 + 670, 0, 300, 300], 1);
     env.tabList.push(w1, w2, w3, w4, w5);
     env.display.focus_window = w1;
-    const app = ext.session.app;
+    const app = ext.currentSession().app;
     app.ops.presetsWrite(app, [{ id: 'p1', name: 'Halves', rules: [{ min: 2, stacks: [1, 1] }] }]);
     app.ops.layoutSet(app, 0, 0, { preset: 'p1' });
     app.ops.layoutSet(app, 1, 0, { preset: 'p1' });
@@ -441,7 +441,7 @@ test('a paused focused monitor does not block the save on other active monitor-w
     const w5 = makeWindow(env, 55, [2000 + 670, 0, 300, 300], 1);
     env.tabList.push(w1, w2, w3, w4, w5);
     env.display.focus_window = w1;
-    const app = ext.session.app;
+    const app = ext.currentSession().app;
     app.ops.presetsWrite(app, [{ id: 'p1', name: 'Halves', rules: [{ min: 2, stacks: [1, 1] }] }]);
     app.ops.layoutSet(app, 0, 0, { preset: 'p1' });
     app.ops.layoutSet(app, 1, 0, { preset: 'p1' });
@@ -480,7 +480,7 @@ test('keyboard resize clamps the border so the final frames stay at the minimum 
     const w2 = makeWindow(env, 62, [500, 0, 400, 300]);
     env.tabList.push(w1, w2);
     env.display.focus_window = w1;
-    const app = ext.session.app;
+    const app = ext.currentSession().app;
     const ref = app.split.ref(app, 0, 0, 2);
     const layouts = { [ref.mkey]: { [ref.wskey]: { auto: true } } };
     settingsInstance(env).setValue('layouts', JSON.stringify(layouts));
@@ -504,7 +504,7 @@ test('vertical keyboard resize clamps the final frame between two borders (inner
     const wins = [61, 62, 63, 64, 65, 66].map((seq, i) => makeWindow(env, seq, [i * 500 + 10, 10, 400, 300]));
     env.tabList.push(...wins);
     env.display.focus_window = wins[1];
-    const app = ext.session.app;
+    const app = ext.currentSession().app;
     app.ops.presetsWrite(app, [{ id: 'p23', name: 'Stacks', rules: [{ min: 6, stacks: [2, 3] }] }]);
     app.ops.layoutSet(app, 0, 0, { preset: 'p23' });
     app.ops.retileMonitor(app, 0);
@@ -527,7 +527,7 @@ test('mouse resize clamps the stored border so both final frames stay at the min
     const w2 = makeWindow(env, 62, [500, 0, 400, 300]);
     env.tabList.push(w1, w2);
     env.display.focus_window = w1;
-    const app = ext.session.app;
+    const app = ext.currentSession().app;
     const ref = app.split.ref(app, 0, 0, 2);
     const layouts = { [ref.mkey]: { [ref.wskey]: { auto: true } } };
     settingsInstance(env).setValue('layouts', JSON.stringify(layouts));
@@ -556,7 +556,7 @@ test('infeasible space: a resize just stops instead of storing an undersized arr
     const w3 = makeWindow(env, 63, [2000 + 150, 0, 100, 300], 1);
     env.tabList.push(w1, w2, w3);
     env.display.focus_window = w2;
-    const app = ext.session.app;
+    const app = ext.currentSession().app;
     const ref = app.split.ref(app, 1, 0, 2);
     const layouts = { [ref.mkey]: { [ref.wskey]: { auto: true } } };
     settingsInstance(env).setValue('layouts', JSON.stringify(layouts));
@@ -584,7 +584,7 @@ test('saving a shared preset retiles each monitor\'s ACTIVE workspace only; inac
     const w2 = makeWindow(env, 52, [500, 0, 400, 300], 0);
     env.tabList.push(w1, w2);
     env.display.focus_window = w1;
-    const app = ext.session.app;
+    const app = ext.currentSession().app;
     app.ops.presetsWrite(app, [{ id: 'p1', name: 'Halves', rules: [{ min: 2, stacks: [1, 1] }] }]);
     app.ops.layoutSet(app, 0, 0, { preset: 'p1' });
     app.ops.layoutSet(app, 0, 1, { preset: 'p1' });
@@ -621,7 +621,7 @@ test('retiles of inactive workspaces leave the pending records for the active wo
     const w2 = makeWindow(env, 72, [500, 0, 400, 300], 0);
     env.tabList.push(w1, w2);
     env.display.focus_window = w1;
-    const app = ext.session.app;
+    const app = ext.currentSession().app;
     app.ops.presetsWrite(app, [{ id: 'p1', name: 'Halves', rules: [{ min: 2, stacks: [1, 1] }] }]);
     app.ops.layoutSet(app, 0, 0, { preset: 'p1' });
     app.ops.layoutSet(app, 0, 1, { preset: 'p1' });
@@ -648,7 +648,7 @@ test('a focused fresh window appends last too (panel preset row click, swap)', (
     const w2 = makeWindow(env, 82, [500, 0, 400, 300]);
     env.tabList.push(w1, w2);
     env.display.focus_window = w1;
-    const app = ext.session.app;
+    const app = ext.currentSession().app;
     app.ops.presetsWrite(app, [{ id: 'p1', name: 'Halves', rules: [{ min: 2, stacks: [1, 1] }] }]);
     app.ops.layoutSet(app, 0, 0, { preset: 'p1' });
     app.ops.retileMonitor(app, 0);
@@ -676,7 +676,7 @@ test('PINNED FIXED (todo_fixes issue 8): a legacy narrow stored split + later ga
     const w2 = makeWindow(env, 92, [500, 0, 400, 300]);
     env.tabList.push(w1, w2);
     env.display.focus_window = w1;
-    const app = ext.session.app;
+    const app = ext.currentSession().app;
     const ref = app.split.ref(app, 0, 0, 2);
     const layouts = { [ref.mkey]: { [ref.wskey]: { auto: true } } };
     settingsInstance(env).setValue('layouts', JSON.stringify(layouts));
@@ -714,7 +714,7 @@ const enableTiledPaused = (env, ext) => {
     const w2 = makeWindow(env, 102, [500, 0, 400, 300], 0);
     env.tabList.push(w1, w2);
     env.display.focus_window = w1;
-    const app = ext.session.app;
+    const app = ext.currentSession().app;
     app.ops.presetsWrite(app, [{ id: 'p1', name: 'Halves', rules: [{ min: 2, stacks: [1, 1] }] }]);
     app.ops.layoutSet(app, 0, 0, { preset: 'p1' });
     app.ops.retileMonitor(app, 0);
@@ -774,7 +774,7 @@ test('a paused auto-grid surface behaves like a paused preset surface (no previe
     const w2 = makeWindow(env, 112, [500, 0, 400, 300], 0);
     env.tabList.push(w1, w2);
     env.display.focus_window = w1;
-    const app = ext.session.app;
+    const app = ext.currentSession().app;
     const ref = app.split.ref(app, 0, 0, 2);
     settingsInstance(env).setValue('layouts', JSON.stringify({ [ref.mkey]: { [ref.wskey]: { auto: true } } }));
     app.ops.retileMonitor(app, 0);
@@ -817,7 +817,7 @@ test('preset writing, layout assignment and monitor retile round-trip through th
     const w2 = makeWindow(env, 22, [500, 0, 400, 300]);
     env.tabList.push(w1, w2);
     env.display.focus_window = w1;
-    const app = ext.session.app;
+    const app = ext.currentSession().app;
     app.ops.presetsWrite(app, [{ id: 'p1', name: 'Halves', rules: [{ min: 2, stacks: [1, 1] }] }]);
     assert.equal(settingsInstance(env).callLog.filter((c) => c.op === 'setValue' && c.key === 'presets').length, 1,
         'the preset list is written into the settings');
@@ -845,7 +845,7 @@ test('swap-right exchanges the cells of the two tiled windows and keeps the log 
     const w2 = makeWindow(env, 32, [500, 0, 400, 300]);
     env.tabList.push(w1, w2);
     env.display.focus_window = w1;
-    const app = ext.session.app;
+    const app = ext.currentSession().app;
     app.ops.presetsWrite(app, [{ id: 'p1', name: 'Halves', rules: [{ min: 2, stacks: [1, 1] }] }]);
     app.ops.layoutSet(app, 0, 0, { preset: 'p1' });
     app.ops.retileMonitor(app, 0);
@@ -883,7 +883,7 @@ test('push-tile inside the active layout activates the neighbour cell and never 
     const w1 = makeWindow(env, 51, [10, 10, 400, 300]);
     const w2 = makeWindow(env, 52, [500, 0, 400, 300]);
     env.tabList.push(w1, w2);
-    const app = ext.session.app;
+    const app = ext.currentSession().app;
     app.ops.presetsWrite(app, [{ id: 'p1', name: 'Halves', rules: [{ min: 2, stacks: [1, 1] }] }]);
     app.ops.layoutSet(app, 0, 0, { preset: 'p1' });
     env.display.focus_window = w1;
