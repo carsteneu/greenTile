@@ -14,7 +14,7 @@ const { createCinnamonEnv } = require('./fakes/cinnamon-env');
 
 const MONITOR = { x: 0, y: 0, width: 2000, height: 1100 };
 
-// Recording fake Tweener: pins the animated placement (TILE_ANIMATE_MS and the
+// Recording fake Tweener: pins the animated placement (ANIMATE_MS and the
 // offset parking) without touching the frozen fake env.
 const makeTweenerRecorder = () => {
     const tweens = [];
@@ -44,7 +44,7 @@ const makeEnv = (tweener, extraSettings = {}) => {
                     if (p === 'tweener')
                         return tweener;
                     if (p === 'main') {
-                        // no panels on the monitor: getUsableScreenArea sees the
+                        // no panels on the monitor: usableArea sees the
                         // full monitor rect
                         const main = u[p];
                         return new Proxy(main, {
@@ -139,7 +139,7 @@ const enableOnMonitor = (env, ext) => {
     env.flushDisplayConfigNoReply();
 };
 
-// ---------------- columns hotkey (tile_app_columns) ----------------
+// ---------------- columns hotkey (appColumns) ----------------
 
 test('auto-columns divides the usable area into 6 columns, reading order kept, gap flush at screen edges', () => {
     const tweener = makeTweenerRecorder();
@@ -173,7 +173,7 @@ test('animated placement parks the compositor actor at the old rect with the old
     env.keybindingManager.hotkeys.get('greenTile-auto6').cb();
     assert.deepEqual(w1.moves[0], ['resize', 0, 0, 329, 1100]);
     // the offsets park the ACTOR at the old rect before the move; the tween
-    // runs back to identity — its duration pins TILE_ANIMATE_MS
+    // runs back to identity — its duration pins ANIMATE_MS
     assert.equal(actor.translation_x, 10 - 0);
     assert.equal(actor.translation_y, 10 - 0);
     assert.equal(actor.scale_x, 400 / 329);
@@ -188,7 +188,7 @@ test('animated placement parks the compositor actor at the old rect with the old
     }]);
 });
 
-// ---------------- automatic tiling (tile_app_auto) ----------------
+// ---------------- automatic tiling (appAuto) ----------------
 
 test('automatic tiling places focus plus collected windows into the uniform grid of the monitor', () => {
     const tweener = makeTweenerRecorder();
