@@ -139,4 +139,3 @@ test('delete_preset drops only the preset with that id, without mutating', () =>
     assert.deepEqual(m.editorDeletePreset(presets, 'gone').map((p) => p.id), ['p1', 'p2', 'p3']);
     assert.deepEqual(m.editorDeletePreset([], 'p1'), []);
 });
-

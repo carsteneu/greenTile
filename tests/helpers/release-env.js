@@ -10,6 +10,7 @@ const { ROOT } = require('./cinnamon-loader');
 
 const UUID = 'greenTile@carsteneu';
 const TMP = path.join(ROOT, '.yesmem', 'tmp');
+fs.mkdirSync(TMP, { recursive: true });
 
 // fail fast with a clear message instead of confusing per-test failures
 // when the host lacks the system tools the scripts and fixtures rely on

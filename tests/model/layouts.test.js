@@ -195,4 +195,3 @@ test('remove_preset leaves everything unchanged for an unknown id', () => {
     assert.deepEqual(m.layoutsRemovePreset({}, 'p1'), {});
     assert.deepEqual(m.layoutsRemovePreset(null, 'p1'), {});
 });
-
