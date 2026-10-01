@@ -162,6 +162,7 @@ type MonitorsFacade = {
     keys: MonitorKey[];
     labels: string[];
     wsKey(monitorIndex: number, wsIndex: number): WsKey;
+    onlyPrimary(): boolean;
 };
 
 /** Exclusion facade (lib/runtime/exclusions.js). */

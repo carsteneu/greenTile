@@ -48,6 +48,7 @@ declare const imports: {
         Meta: AnyRecord;
         Pango: AnyRecord;
         Cinnamon: AnyRecord;
+        GLib: typeof GLibNS;
     };
     ui: {
         main: AnyRecord;
