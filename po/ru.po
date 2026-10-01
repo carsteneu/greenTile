@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: greenTile 1.2.0\n"
 "Report-Msgid-Bugs-To: https://github.com/carsteneu\n"
-"POT-Creation-Date: 2026-09-30 22:29+0200\n"
+"POT-Creation-Date: 2026-10-01 15:08+0200\n"
 "PO-Revision-Date: \n"
 "Last-Translator: blogdron\n"
 "Language-Team: Russian\n"
@@ -18,58 +18,40 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "X-Generator: Poedit 3.4\n"
 
-#. settings-schema.json->excludeAppPicker->options
-#: greenTile.js:439
-msgid "Add application …"
-msgstr "Добавить приложение …"
-
-#: greenTile.js:458
-msgid "Window floats"
-msgstr "Окно свободно"
-
-#: greenTile.js:458
-msgid "Window tiles again"
-msgstr "Окно снова в разбиении"
-
-#: greenTile.js:2771
-#, javascript-format
-msgid "assigned — workspace %d"
-msgstr "назначено — рабочая область %d"
-
-#: greenTile.js:2832
+#: lib/ui/editor.js:66
 msgid "Please enter a name."
 msgstr "Введите название."
 
-#: greenTile.js:2874
+#: lib/ui/editor.js:122
 #, javascript-format
 msgid "from %d"
 msgstr "от %d"
 
-#: greenTile.js:2991
+#: lib/ui/editor.js:267
 msgid "Rules (by window count)"
 msgstr "Правила (по числу окон)"
 
-#: greenTile.js:2995
+#: lib/ui/editor.js:271
 msgid "Rule"
 msgstr "Правило"
 
-#: greenTile.js:2996
+#: lib/ui/editor.js:272
 msgid "Delete rule"
 msgstr "Удалить правило"
 
-#: greenTile.js:3004
+#: lib/ui/editor.js:280
 msgid "Rule applies from"
 msgstr "Правило действует от"
 
-#: greenTile.js:3011
+#: lib/ui/editor.js:287
 msgid "windows"
 msgstr "окон"
 
-#: greenTile.js:3013
+#: lib/ui/editor.js:289
 msgid "Painter"
 msgstr "Область рисования"
 
-#: greenTile.js:3028
+#: lib/ui/editor.js:306
 msgid ""
 "Click or drag: the row sets how many windows the column holds. Right-click "
 "removes a column."
@@ -77,91 +59,96 @@ msgstr ""
 "Щелчок или перетаскивание: строка задаёт, сколько окон вмещает столбец. "
 "Щелчок правой кнопкой удаляет столбец."
 
-#: greenTile.js:3033
+#: lib/ui/editor.js:311
 msgid "Name"
 msgstr "Название"
 
-#: greenTile.js:3034
+#: lib/ui/editor.js:312
 msgid "Preset name"
 msgstr "Название преднастройки"
 
-#: greenTile.js:3039
+#: lib/ui/editor.js:317
 msgid "Delete preset"
 msgstr "Удалить преднастройку"
 
-#: greenTile.js:3042
+#: lib/ui/editor.js:320
 msgid "Really delete?"
 msgstr "Действительно удалить?"
 
-#: greenTile.js:3043
+#: lib/ui/editor.js:321
 msgid "Delete"
 msgstr "Удалить"
 
-#: greenTile.js:3047
+#: lib/ui/editor.js:325
 msgid "Save"
 msgstr "Сохранить"
 
-#: greenTile.js:3072
+#: lib/ui/editor.js:350
 #, javascript-format
 msgid "Result: %s"
 msgstr "Результат: %s"
 
-#: greenTile.js:3692
+#: lib/ui/panel.js:77
+#, javascript-format
+msgid "assigned — workspace %d"
+msgstr "назначено — рабочая область %d"
+
+#: lib/ui/panel.js:117
 msgid "Gap between windows"
 msgstr "Отступ между окнами"
 
-#: greenTile.js:3697
+#: lib/ui/panel.js:123
 #, javascript-format
 msgid "%d px"
 msgstr "%d px"
 
-#: greenTile.js:3716
+#: lib/ui/panel.js:143
 msgid "Reset sizes"
 msgstr "Сбросить размеры"
 
-#: greenTile.js:3747
+#: lib/ui/panel.js:186
 #, javascript-format
 msgid "Presets — workspace %d · %s"
 msgstr "Преднастройки — рабочая область %d · %s"
 
-#: greenTile.js:3749
+#: lib/ui/panel.js:188
 msgid "Create preset"
 msgstr "Создать преднастройку"
 
-#: greenTile.js:3749
+#: lib/ui/panel.js:188
 #, javascript-format
 msgid "Edit %s"
 msgstr "Изменить %s"
 
-#: greenTile.js:3753
+#: lib/ui/panel.js:193
 msgid "Back"
 msgstr "Назад"
 
-#: greenTile.js:3762
+#: lib/ui/panel.js:202
 msgid "Auto: on"
 msgstr "Авто: вкл."
 
-#: greenTile.js:3762
+#: lib/ui/panel.js:202
 msgid "Auto: off"
 msgstr "Авто: выкл."
 
-#: greenTile.js:3783
+#: lib/ui/panel.js:225
 msgid "Dark theme"
 msgstr "Тёмная тема"
 
-#: greenTile.js:3783
+#: lib/ui/panel.js:225
 msgid "Light theme"
 msgstr "Светлая тема"
 
-#: greenTile.js:3903
+#: lib/ui/panel.js:357
 msgid "No presets yet."
 msgstr "Преднастроек пока нет."
 
-#: greenTile.js:3918
+#: lib/ui/panel.js:374
 msgid "New preset"
 msgstr "Новая преднастройка"
 
-#: greenTile.js:3921
+#: lib/ui/panel.js:377
 msgid "Click a row to apply it to this workspace and tile right away"
 msgstr ""
 "Щёлкните строку, чтобы применить её к этой рабочей области и сразу разбить "
@@ -187,7 +174,7 @@ msgstr "Настройки"
 msgid "Hotkeys"
 msgstr "Клавиатурные сочетания"
 
-#. settings-schema.json->autotile-hotkey-section->title
+#. settings-schema.json->columns-hotkey-section->title
 msgid "Auto-Tile Hotkeys"
 msgstr "Клавиатурные сочетания автоматического разбиения"
 
@@ -216,21 +203,21 @@ msgstr "Без разбиения"
 msgid "Preset panel"
 msgstr "Панель преднастроек"
 
-#. settings-schema.json->autotile6hotkey->description
+#. settings-schema.json->columns6Hotkey->description
 msgid "Tile all windows into 6 columns"
 msgstr "Разбить все окна на 6 столбцов"
 
-#. settings-schema.json->autotile3hotkey->description
+#. settings-schema.json->columns3Hotkey->description
 msgid "Tile all windows into 3 columns"
 msgstr "Разбить все окна на 3 столбца"
 
-#. settings-schema.json->autotileautohotkey->description
+#. settings-schema.json->autoOnHotkey->description
 msgid "Turn automatic tiling on for this workspace and tile now"
 msgstr ""
 "Включить автоматическое разбиение для этой рабочей области и сразу разбить "
 "окна"
 
-#. settings-schema.json->autotileoffhotkey->description
+#. settings-schema.json->autoOffHotkey->description
 msgid "Turn automatic tiling off for this workspace"
 msgstr "Выключить автоматическое разбиение для этой рабочей области"
 
@@ -291,6 +278,10 @@ msgstr ""
 "Выбранное приложение добавляется в список ниже. После каждого выбора "
 "раскрывающийся список сбрасывается."
 
+#. settings-schema.json->excludeAppPicker->options
+msgid "Add application …"
+msgstr "Добавить приложение …"
+
 #. settings-schema.json->exclusions->description
 msgid ""
 "Windows matching one of these rows are never tiled; they float freely "
@@ -306,27 +297,6 @@ msgstr "Сопоставление"
 #. settings-schema.json->exclusions->columns->title
 msgid "Text"
 msgstr "Текст"
-
-#. settings-schema.json->wsPresets->description
-msgid "Workspace to preset assignments (JSON)"
-msgstr "Назначение преднастроек рабочим областям (JSON)"
-
-#. settings-schema.json->autoWorkspaces->description
-msgid ""
-"Automatic tiling per workspace (set with Super+Ctrl+A / Super+Ctrl+D or in "
-"the preset panel; not shown in this dialog)"
-msgstr ""
-"Автоматическое разбиение для каждой рабочей области (включается сочетаниями "
-"Super+Ctrl+A / Super+Ctrl+D или на панели преднастроек; в этом диалоге не "
-"показывается)"
-
-#. settings-schema.json->autoWorkspaces->columns->title
-msgid "Workspace"
-msgstr "Рабочая область"
-
-#. settings-schema.json->autoWorkspaces->columns->title
-msgid "Tile automatically"
-msgstr "Разбивать автоматически"
 
 #. settings-schema.json->windowGap->description
 msgid ""
@@ -404,8 +374,8 @@ msgstr "Акцентный цвет"
 
 #. settings-schema.json->accentMode->tooltip
 msgid ""
-"Follow theme tracks the accent color of the Cinnamon theme live. Custom uses"
-" the color below."
+"Follow theme tracks the accent color of the Cinnamon theme live. Custom uses "
+"the color below."
 msgstr ""
 "«Как в теме» в реальном времени берёт акцентный цвет темы Cinnamon. «Свой» "
 "использует цвет, выбранный ниже."
@@ -427,8 +397,8 @@ msgstr "Свой акцентный цвет"
 #. settings-schema.json->accentColor->tooltip
 msgid "Accent of the preset panel and editor when Accent color is Custom."
 msgstr ""
-"Акцент панели преднастроек и редактора, когда для параметра «Акцентный цвет»"
-" выбрано «Свой»."
+"Акцент панели преднастроек и редактора, когда для параметра «Акцентный цвет» "
+"выбрано «Свой»."
 
 #. settings-schema.json->stateMode->description
 msgid "State color"
@@ -457,10 +427,3 @@ msgid "State color of the preset panel when State color is Custom."
 msgstr ""
 "Цвет состояния панели преднастроек, когда для параметра «Цвет состояния» "
 "выбрано «Свой»."
-
-#~ msgid ""
-#~ "Draw a thin border in the state color around the focused window while "
-#~ "automatic tiling is on."
-#~ msgstr ""
-#~ "Рисует тонкую рамку цветом состояния вокруг активного окна, пока включено "
-#~ "автоматическое разбиение."

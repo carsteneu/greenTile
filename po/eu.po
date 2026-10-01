@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: greenTile 1.2.0\n"
 "Report-Msgid-Bugs-To: https://github.com/carsteneu\n"
-"POT-Creation-Date: 2026-09-30 22:29+0200\n"
+"POT-Creation-Date: 2026-10-01 15:08+0200\n"
 "PO-Revision-Date: 2024-05-30 9:50+1\n"
 "Last-Translator: Muxutruk <muxutruk2@users.noreply.github.com>\n"
 "Language-Team: Basque <muxutruk2@users.noreply.github.com>\n"
@@ -17,58 +17,40 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#. settings-schema.json->excludeAppPicker->options
-#: greenTile.js:439
-msgid "Add application …"
-msgstr "Gehitu aplikazioa …"
-
-#: greenTile.js:458
-msgid "Window floats"
-msgstr "Leihoa flotatzen dago"
-
-#: greenTile.js:458
-msgid "Window tiles again"
-msgstr "Leihoa mosaikoan dago berriro"
-
-#: greenTile.js:2771
-#, javascript-format
-msgid "assigned — workspace %d"
-msgstr "esleituta — %d. laneko area"
-
-#: greenTile.js:2832
+#: lib/ui/editor.js:66
 msgid "Please enter a name."
 msgstr "Idatzi izen bat."
 
-#: greenTile.js:2874
+#: lib/ui/editor.js:122
 #, javascript-format
 msgid "from %d"
 msgstr "gutxienez %d"
 
-#: greenTile.js:2991
+#: lib/ui/editor.js:267
 msgid "Rules (by window count)"
 msgstr "Arauak (leiho kopuruaren arabera)"
 
-#: greenTile.js:2995
+#: lib/ui/editor.js:271
 msgid "Rule"
 msgstr "Araua"
 
-#: greenTile.js:2996
+#: lib/ui/editor.js:272
 msgid "Delete rule"
 msgstr "Ezabatu araua"
 
-#: greenTile.js:3004
+#: lib/ui/editor.js:280
 msgid "Rule applies from"
 msgstr "Araua aplikatzen da gutxienez"
 
-#: greenTile.js:3011
+#: lib/ui/editor.js:287
 msgid "windows"
 msgstr "leihorekin"
 
-#: greenTile.js:3013
+#: lib/ui/editor.js:289
 msgid "Painter"
 msgstr "Marrazketa-eremua"
 
-#: greenTile.js:3028
+#: lib/ui/editor.js:306
 msgid ""
 "Click or drag: the row sets how many windows the column holds. Right-click "
 "removes a column."
@@ -76,95 +58,100 @@ msgstr ""
 "Egin klik edo arrastatu: errenkadak zehazten du zutabeak zenbat leiho "
 "hartzen dituen. Eskuineko klikak zutabe bat kentzen du."
 
-#: greenTile.js:3033
+#: lib/ui/editor.js:311
 msgid "Name"
 msgstr "Izena"
 
-#: greenTile.js:3034
+#: lib/ui/editor.js:312
 msgid "Preset name"
 msgstr "Aurrezarpenaren izena"
 
-#: greenTile.js:3039
+#: lib/ui/editor.js:317
 msgid "Delete preset"
 msgstr "Ezabatu aurrezarpena"
 
-#: greenTile.js:3042
+#: lib/ui/editor.js:320
 msgid "Really delete?"
 msgstr "Benetan ezabatu?"
 
-#: greenTile.js:3043
+#: lib/ui/editor.js:321
 msgid "Delete"
 msgstr "Ezabatu"
 
-#: greenTile.js:3047
+#: lib/ui/editor.js:325
 msgid "Save"
 msgstr "Gorde"
 
-#: greenTile.js:3072
+#: lib/ui/editor.js:350
 #, javascript-format
 msgid "Result: %s"
 msgstr "Emaitza: %s"
 
-#: greenTile.js:3692
+#: lib/ui/panel.js:77
+#, javascript-format
+msgid "assigned — workspace %d"
+msgstr "esleituta — %d. laneko area"
+
+#: lib/ui/panel.js:117
 msgid "Gap between windows"
 msgstr "Leihoen arteko tartea"
 
-#: greenTile.js:3697
+#: lib/ui/panel.js:123
 #, javascript-format
 msgid "%d px"
 msgstr "%d px"
 
-#: greenTile.js:3716
+#: lib/ui/panel.js:143
 msgid "Reset sizes"
 msgstr "Berrezarri tamainak"
 
-#: greenTile.js:3747
+#: lib/ui/panel.js:186
 #, javascript-format
 msgid "Presets — workspace %d · %s"
 msgstr "Aurrezarpenak — %d. laneko area · %s"
 
-#: greenTile.js:3749
+#: lib/ui/panel.js:188
 msgid "Create preset"
 msgstr "Sortu aurrezarpena"
 
-#: greenTile.js:3749
+#: lib/ui/panel.js:188
 #, javascript-format
 msgid "Edit %s"
 msgstr "Editatu %s"
 
-#: greenTile.js:3753
+#: lib/ui/panel.js:193
 msgid "Back"
 msgstr "Atzera"
 
-#: greenTile.js:3762
+#: lib/ui/panel.js:202
 msgid "Auto: on"
 msgstr "Auto: aktibatuta"
 
-#: greenTile.js:3762
+#: lib/ui/panel.js:202
 msgid "Auto: off"
 msgstr "Auto: desaktibatuta"
 
-#: greenTile.js:3783
+#: lib/ui/panel.js:225
 msgid "Dark theme"
 msgstr "Gai iluna"
 
-#: greenTile.js:3783
+#: lib/ui/panel.js:225
 msgid "Light theme"
 msgstr "Gai argia"
 
-#: greenTile.js:3903
+#: lib/ui/panel.js:357
 msgid "No presets yet."
 msgstr "Oraindik ez dago aurrezarpenik."
 
-#: greenTile.js:3918
+#: lib/ui/panel.js:374
 msgid "New preset"
 msgstr "Aurrezarpen berria"
 
-#: greenTile.js:3921
+#: lib/ui/panel.js:377
 msgid "Click a row to apply it to this workspace and tile right away"
 msgstr ""
-"Egin klik errenkada batean laneko area honi aplikatzeko eta leihoak berehala"
-" mosaikoan antolatzeko"
+"Egin klik errenkada batean laneko area honi aplikatzeko eta leihoak berehala "
+"mosaikoan antolatzeko"
 
 #. metadata.json->name
 msgid "greenTile"
@@ -187,7 +174,7 @@ msgstr "Ezarpenak"
 msgid "Hotkeys"
 msgstr "Lasterbideak"
 
-#. settings-schema.json->autotile-hotkey-section->title
+#. settings-schema.json->columns-hotkey-section->title
 msgid "Auto-Tile Hotkeys"
 msgstr "Mosaiko automatikoaren lasterbideak"
 
@@ -216,20 +203,20 @@ msgstr "Ez antolatu inoiz mosaikoan"
 msgid "Preset panel"
 msgstr "Aurrezarpenen panela"
 
-#. settings-schema.json->autotile6hotkey->description
+#. settings-schema.json->columns6Hotkey->description
 msgid "Tile all windows into 6 columns"
 msgstr "Antolatu leiho guztiak mosaikoan 6 zutabetan"
 
-#. settings-schema.json->autotile3hotkey->description
+#. settings-schema.json->columns3Hotkey->description
 msgid "Tile all windows into 3 columns"
 msgstr "Antolatu leiho guztiak mosaikoan 3 zutabetan"
 
-#. settings-schema.json->autotileautohotkey->description
+#. settings-schema.json->autoOnHotkey->description
 msgid "Turn automatic tiling on for this workspace and tile now"
 msgstr ""
 "Aktibatu mosaiko automatikoa laneko area honetan eta antolatu leihoak orain"
 
-#. settings-schema.json->autotileoffhotkey->description
+#. settings-schema.json->autoOffHotkey->description
 msgid "Turn automatic tiling off for this workspace"
 msgstr "Desaktibatu mosaiko automatikoa laneko area honetan"
 
@@ -288,8 +275,12 @@ msgid ""
 "Pick an application and it is added to the list below. The combobox resets "
 "after each pick."
 msgstr ""
-"Aukeratu aplikazio bat eta beheko zerrendara gehituko da. Konbinazio-koadroa"
-" berrezarri egiten da aukeraketa bakoitzaren ondoren."
+"Aukeratu aplikazio bat eta beheko zerrendara gehituko da. Konbinazio-koadroa "
+"berrezarri egiten da aukeraketa bakoitzaren ondoren."
+
+#. settings-schema.json->excludeAppPicker->options
+msgid "Add application …"
+msgstr "Gehitu aplikazioa …"
 
 #. settings-schema.json->exclusions->description
 msgid ""
@@ -306,27 +297,6 @@ msgstr "Parekatzea"
 #. settings-schema.json->exclusions->columns->title
 msgid "Text"
 msgstr "Testua"
-
-#. settings-schema.json->wsPresets->description
-msgid "Workspace to preset assignments (JSON)"
-msgstr "Laneko areen eta aurrezarpenen esleipenak (JSON)"
-
-#. settings-schema.json->autoWorkspaces->description
-msgid ""
-"Automatic tiling per workspace (set with Super+Ctrl+A / Super+Ctrl+D or in "
-"the preset panel; not shown in this dialog)"
-msgstr ""
-"Mosaiko automatikoa laneko area bakoitzeko (Super+Ctrl+A / Super+Ctrl+D "
-"bidez edo aurrezarpenen panelean ezartzen da; ez da elkarrizketa-koadro "
-"honetan erakusten)"
-
-#. settings-schema.json->autoWorkspaces->columns->title
-msgid "Workspace"
-msgstr "Laneko area"
-
-#. settings-schema.json->autoWorkspaces->columns->title
-msgid "Tile automatically"
-msgstr "Mosaiko automatikoa"
 
 #. settings-schema.json->windowGap->description
 msgid ""
@@ -405,8 +375,8 @@ msgstr "Nabarmentze-kolorea"
 
 #. settings-schema.json->accentMode->tooltip
 msgid ""
-"Follow theme tracks the accent color of the Cinnamon theme live. Custom uses"
-" the color below."
+"Follow theme tracks the accent color of the Cinnamon theme live. Custom uses "
+"the color below."
 msgstr ""
 "Jarraitu gaiari aukerak Cinnamon gaiaren nabarmentze-kolorea jarraitzen du "
 "zuzenean. Pertsonalizatua aukerak beheko kolorea erabiltzen du."
@@ -459,10 +429,3 @@ msgid "State color of the preset panel when State color is Custom."
 msgstr ""
 "Aurrezarpenen panelaren egoera kolorea, Egoera kolorea Pertsonalizatua "
 "denean."
-
-#~ msgid ""
-#~ "Draw a thin border in the state color around the focused window while "
-#~ "automatic tiling is on."
-#~ msgstr ""
-#~ "Mosaiko automatikoa aktibatuta dagoen bitartean, ertza marrazten du fokuako "
-#~ "leihoaren inguruan egoera kolorez."

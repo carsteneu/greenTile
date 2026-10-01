@@ -10,7 +10,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: greenTile 1.2.0\n"
 "Report-Msgid-Bugs-To: https://github.com/carsteneu\n"
-"POT-Creation-Date: 2026-09-30 22:29+0200\n"
+"POT-Creation-Date: 2026-10-01 15:08+0200\n"
 "PO-Revision-Date: 2025-03-05 17:30+0300\n"
 "Last-Translator: Erdem Uygun <uygun.erdem@gmail.com>\n"
 "Language-Team: Turkish <dev@pardus.org.tr>\n"
@@ -21,153 +21,139 @@ msgstr ""
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 "X-Generator: Gtranslator 42.0\n"
 
-#. settings-schema.json->excludeAppPicker->options
-#: greenTile.js:439
-msgid "Add application …"
-msgstr "Uygulama ekle …"
-
-#: greenTile.js:458
-msgid "Window floats"
-msgstr "Pencere serbest"
-
-#: greenTile.js:458
-msgid "Window tiles again"
-msgstr "Pencere yeniden döşeniyor"
-
-#: greenTile.js:2771
-#, javascript-format
-msgid "assigned — workspace %d"
-msgstr "atandı — çalışma alanı %d"
-
-#: greenTile.js:2832
+#: lib/ui/editor.js:66
 msgid "Please enter a name."
 msgstr "Lütfen bir ad girin."
 
-#: greenTile.js:2874
+#: lib/ui/editor.js:122
 #, javascript-format
 msgid "from %d"
 msgstr "%d ve üzeri"
 
-#: greenTile.js:2991
+#: lib/ui/editor.js:267
 msgid "Rules (by window count)"
 msgstr "Kurallar (pencere sayısına göre)"
 
-#: greenTile.js:2995
+#: lib/ui/editor.js:271
 msgid "Rule"
 msgstr "Kural"
 
-#: greenTile.js:2996
+#: lib/ui/editor.js:272
 msgid "Delete rule"
 msgstr "Kuralı sil"
 
-#: greenTile.js:3004
+#: lib/ui/editor.js:280
 msgid "Rule applies from"
 msgstr "Kural geçerli:"
 
-#: greenTile.js:3011
+#: lib/ui/editor.js:287
 msgid "windows"
 msgstr "pencereden itibaren"
 
-#: greenTile.js:3013
+#: lib/ui/editor.js:289
 msgid "Painter"
 msgstr "Çizim alanı"
 
-#: greenTile.js:3028
+#: lib/ui/editor.js:306
 msgid ""
 "Click or drag: the row sets how many windows the column holds. Right-click "
 "removes a column."
 msgstr ""
-"Tıklayın veya sürükleyin: satır, sütunun kaç pencere alacağını belirler. Sağ"
-" tıklama bir sütunu kaldırır."
+"Tıklayın veya sürükleyin: satır, sütunun kaç pencere alacağını belirler. Sağ "
+"tıklama bir sütunu kaldırır."
 
-#: greenTile.js:3033
+#: lib/ui/editor.js:311
 msgid "Name"
 msgstr "Ad"
 
-#: greenTile.js:3034
+#: lib/ui/editor.js:312
 msgid "Preset name"
 msgstr "Ön ayar adı"
 
-#: greenTile.js:3039
+#: lib/ui/editor.js:317
 msgid "Delete preset"
 msgstr "Ön ayarı sil"
 
-#: greenTile.js:3042
+#: lib/ui/editor.js:320
 msgid "Really delete?"
 msgstr "Gerçekten silinsin mi?"
 
-#: greenTile.js:3043
+#: lib/ui/editor.js:321
 msgid "Delete"
 msgstr "Sil"
 
-#: greenTile.js:3047
+#: lib/ui/editor.js:325
 msgid "Save"
 msgstr "Kaydet"
 
-#: greenTile.js:3072
+#: lib/ui/editor.js:350
 #, javascript-format
 msgid "Result: %s"
 msgstr "Sonuç: %s"
 
-#: greenTile.js:3692
+#: lib/ui/panel.js:77
+#, javascript-format
+msgid "assigned — workspace %d"
+msgstr "atandı — çalışma alanı %d"
+
+#: lib/ui/panel.js:117
 msgid "Gap between windows"
 msgstr "Pencereler arası boşluk"
 
-#: greenTile.js:3697
+#: lib/ui/panel.js:123
 #, javascript-format
 msgid "%d px"
 msgstr "%d px"
 
-#: greenTile.js:3716
+#: lib/ui/panel.js:143
 msgid "Reset sizes"
 msgstr "Boyutları sıfırla"
 
-#: greenTile.js:3747
+#: lib/ui/panel.js:186
 #, javascript-format
 msgid "Presets — workspace %d · %s"
 msgstr "Ön ayarlar — çalışma alanı %d · %s"
 
-#: greenTile.js:3749
+#: lib/ui/panel.js:188
 msgid "Create preset"
 msgstr "Ön ayar oluştur"
 
-#: greenTile.js:3749
+#: lib/ui/panel.js:188
 #, javascript-format
 msgid "Edit %s"
 msgstr "Düzenle: %s"
 
-#: greenTile.js:3753
+#: lib/ui/panel.js:193
 msgid "Back"
 msgstr "Geri"
 
-#: greenTile.js:3762
+#: lib/ui/panel.js:202
 msgid "Auto: on"
 msgstr "Otomatik: açık"
 
-#: greenTile.js:3762
+#: lib/ui/panel.js:202
 msgid "Auto: off"
 msgstr "Otomatik: kapalı"
 
-#: greenTile.js:3783
+#: lib/ui/panel.js:225
 msgid "Dark theme"
 msgstr "Koyu tema"
 
-#: greenTile.js:3783
+#: lib/ui/panel.js:225
 msgid "Light theme"
 msgstr "Açık tema"
 
-#: greenTile.js:3903
+#: lib/ui/panel.js:357
 msgid "No presets yet."
 msgstr "Henüz ön ayar yok."
 
-#: greenTile.js:3918
+#: lib/ui/panel.js:374
 msgid "New preset"
 msgstr "Yeni ön ayar"
 
-#: greenTile.js:3921
+#: lib/ui/panel.js:377
 msgid "Click a row to apply it to this workspace and tile right away"
-msgstr ""
-"Bu çalışma alanına uygulamak ve hemen döşemek için bir satıra tıklayın"
+msgstr "Bu çalışma alanına uygulamak ve hemen döşemek için bir satıra tıklayın"
 
 #. metadata.json->name
 msgid "greenTile"
@@ -189,7 +175,7 @@ msgstr "Ayarlar"
 msgid "Hotkeys"
 msgstr "Kısayol tuşları"
 
-#. settings-schema.json->autotile-hotkey-section->title
+#. settings-schema.json->columns-hotkey-section->title
 msgid "Auto-Tile Hotkeys"
 msgstr "Otomatik döşeme kısayol tuşları"
 
@@ -218,19 +204,19 @@ msgstr "Asla döşeme"
 msgid "Preset panel"
 msgstr "Ön ayar paneli"
 
-#. settings-schema.json->autotile6hotkey->description
+#. settings-schema.json->columns6Hotkey->description
 msgid "Tile all windows into 6 columns"
 msgstr "Tüm pencereleri 6 sütuna döşe"
 
-#. settings-schema.json->autotile3hotkey->description
+#. settings-schema.json->columns3Hotkey->description
 msgid "Tile all windows into 3 columns"
 msgstr "Tüm pencereleri 3 sütuna döşe"
 
-#. settings-schema.json->autotileautohotkey->description
+#. settings-schema.json->autoOnHotkey->description
 msgid "Turn automatic tiling on for this workspace and tile now"
 msgstr "Bu çalışma alanı için otomatik döşemeyi aç ve hemen döşe"
 
-#. settings-schema.json->autotileoffhotkey->description
+#. settings-schema.json->autoOffHotkey->description
 msgid "Turn automatic tiling off for this workspace"
 msgstr "Bu çalışma alanı için otomatik döşemeyi kapat"
 
@@ -292,6 +278,10 @@ msgstr ""
 "Seçtiğiniz uygulama aşağıdaki listeye eklenir. Açılır kutu her seçimden "
 "sonra sıfırlanır."
 
+#. settings-schema.json->excludeAppPicker->options
+msgid "Add application …"
+msgstr "Uygulama ekle …"
+
 #. settings-schema.json->exclusions->description
 msgid ""
 "Windows matching one of these rows are never tiled; they float freely "
@@ -307,26 +297,6 @@ msgstr "Eşleşme"
 #. settings-schema.json->exclusions->columns->title
 msgid "Text"
 msgstr "Metin"
-
-#. settings-schema.json->wsPresets->description
-msgid "Workspace to preset assignments (JSON)"
-msgstr "Çalışma alanlarına ön ayar atamaları (JSON)"
-
-#. settings-schema.json->autoWorkspaces->description
-msgid ""
-"Automatic tiling per workspace (set with Super+Ctrl+A / Super+Ctrl+D or in "
-"the preset panel; not shown in this dialog)"
-msgstr ""
-"Çalışma alanı başına otomatik döşeme (Super+Ctrl+A / Super+Ctrl+D ile veya "
-"ön ayar panelinden ayarlanır; bu iletişim kutusunda gösterilmez)"
-
-#. settings-schema.json->autoWorkspaces->columns->title
-msgid "Workspace"
-msgstr "Çalışma alanı"
-
-#. settings-schema.json->autoWorkspaces->columns->title
-msgid "Tile automatically"
-msgstr "Otomatik döşe"
 
 #. settings-schema.json->windowGap->description
 msgid ""
@@ -346,8 +316,7 @@ msgstr "Döşemeyi canlandır"
 
 #. settings-schema.json->tileAnimation->tooltip
 msgid "Windows glide into their new place. Off: they jump there at once."
-msgstr ""
-"Pencereler yeni yerlerine kayarak geçer. Kapalı: hemen oraya atlarlar."
+msgstr "Pencereler yeni yerlerine kayarak geçer. Kapalı: hemen oraya atlarlar."
 
 #. settings-schema.json->focusBorder->description
 msgid "Border around the focused window"
@@ -403,8 +372,8 @@ msgstr "Vurgu rengi"
 
 #. settings-schema.json->accentMode->tooltip
 msgid ""
-"Follow theme tracks the accent color of the Cinnamon theme live. Custom uses"
-" the color below."
+"Follow theme tracks the accent color of the Cinnamon theme live. Custom uses "
+"the color below."
 msgstr ""
 "“Temayı izle” Cinnamon temasının vurgu rengini canlı olarak takip eder. "
 "“Özel” aşağıdaki rengi kullanır."
@@ -455,10 +424,3 @@ msgstr "Özel durum rengi"
 msgid "State color of the preset panel when State color is Custom."
 msgstr ""
 "“Durum rengi” “Özel” olarak ayarlandığında ön ayar panelinin durum rengi."
-
-#~ msgid ""
-#~ "Draw a thin border in the state color around the focused window while "
-#~ "automatic tiling is on."
-#~ msgstr ""
-#~ "Otomatik döşeme açıkken odaklanmış pencerenin etrafına durum renginde ince "
-#~ "bir çerçeve çizer."

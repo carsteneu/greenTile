@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: greenTile 1.2.0\n"
 "Report-Msgid-Bugs-To: https://github.com/carsteneu\n"
-"POT-Creation-Date: 2026-09-30 22:29+0200\n"
+"POT-Creation-Date: 2026-10-01 15:08+0200\n"
 "PO-Revision-Date: 2023-01-09 21:16+0100\n"
 "Last-Translator: Kálmán „KAMI” Szalai <kami911@gmail.com>\n"
 "Language-Team: Hungarian\n"
@@ -19,58 +19,40 @@ msgstr ""
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 "X-Generator: Poedit 3.0.1\n"
 
-#. settings-schema.json->excludeAppPicker->options
-#: greenTile.js:439
-msgid "Add application …"
-msgstr "Alkalmazás hozzáadása …"
-
-#: greenTile.js:458
-msgid "Window floats"
-msgstr "Az ablak lebeg"
-
-#: greenTile.js:458
-msgid "Window tiles again"
-msgstr "Az ablak ismét csempézve"
-
-#: greenTile.js:2771
-#, javascript-format
-msgid "assigned — workspace %d"
-msgstr "hozzárendelve — %d. munkaterület"
-
-#: greenTile.js:2832
+#: lib/ui/editor.js:66
 msgid "Please enter a name."
 msgstr "Adj meg egy nevet."
 
-#: greenTile.js:2874
+#: lib/ui/editor.js:122
 #, javascript-format
 msgid "from %d"
 msgstr "legalább %d"
 
-#: greenTile.js:2991
+#: lib/ui/editor.js:267
 msgid "Rules (by window count)"
 msgstr "Szabályok (ablakszám szerint)"
 
-#: greenTile.js:2995
+#: lib/ui/editor.js:271
 msgid "Rule"
 msgstr "Szabály"
 
-#: greenTile.js:2996
+#: lib/ui/editor.js:272
 msgid "Delete rule"
 msgstr "Szabály törlése"
 
-#: greenTile.js:3004
+#: lib/ui/editor.js:280
 msgid "Rule applies from"
 msgstr "A szabály érvényes legalább"
 
-#: greenTile.js:3011
+#: lib/ui/editor.js:287
 msgid "windows"
 msgstr "ablak esetén"
 
-#: greenTile.js:3013
+#: lib/ui/editor.js:289
 msgid "Painter"
 msgstr "Rajzterület"
 
-#: greenTile.js:3028
+#: lib/ui/editor.js:306
 msgid ""
 "Click or drag: the row sets how many windows the column holds. Right-click "
 "removes a column."
@@ -78,95 +60,99 @@ msgstr ""
 "Kattints vagy húzd: a sor határozza meg, hány ablak fér az oszlopba. A jobb "
 "kattintás eltávolít egy oszlopot."
 
-#: greenTile.js:3033
+#: lib/ui/editor.js:311
 msgid "Name"
 msgstr "Név"
 
-#: greenTile.js:3034
+#: lib/ui/editor.js:312
 msgid "Preset name"
 msgstr "Előbeállítás neve"
 
-#: greenTile.js:3039
+#: lib/ui/editor.js:317
 msgid "Delete preset"
 msgstr "Előbeállítás törlése"
 
-#: greenTile.js:3042
+#: lib/ui/editor.js:320
 msgid "Really delete?"
 msgstr "Biztosan törlöd?"
 
-#: greenTile.js:3043
+#: lib/ui/editor.js:321
 msgid "Delete"
 msgstr "Törlés"
 
-#: greenTile.js:3047
+#: lib/ui/editor.js:325
 msgid "Save"
 msgstr "Mentés"
 
-#: greenTile.js:3072
+#: lib/ui/editor.js:350
 #, javascript-format
 msgid "Result: %s"
 msgstr "Eredmény: %s"
 
-#: greenTile.js:3692
+#: lib/ui/panel.js:77
+#, javascript-format
+msgid "assigned — workspace %d"
+msgstr "hozzárendelve — %d. munkaterület"
+
+#: lib/ui/panel.js:117
 msgid "Gap between windows"
 msgstr "Ablakok közötti távolság"
 
-#: greenTile.js:3697
+#: lib/ui/panel.js:123
 #, javascript-format
 msgid "%d px"
 msgstr "%d px"
 
-#: greenTile.js:3716
+#: lib/ui/panel.js:143
 msgid "Reset sizes"
 msgstr "Méretek visszaállítása"
 
-#: greenTile.js:3747
+#: lib/ui/panel.js:186
 #, javascript-format
 msgid "Presets — workspace %d · %s"
 msgstr "Előbeállítások — %d. munkaterület · %s"
 
-#: greenTile.js:3749
+#: lib/ui/panel.js:188
 msgid "Create preset"
 msgstr "Előbeállítás létrehozása"
 
-#: greenTile.js:3749
+#: lib/ui/panel.js:188
 #, javascript-format
 msgid "Edit %s"
 msgstr "%s szerkesztése"
 
-#: greenTile.js:3753
+#: lib/ui/panel.js:193
 msgid "Back"
 msgstr "Vissza"
 
-#: greenTile.js:3762
+#: lib/ui/panel.js:202
 msgid "Auto: on"
 msgstr "Auto: be"
 
-#: greenTile.js:3762
+#: lib/ui/panel.js:202
 msgid "Auto: off"
 msgstr "Auto: ki"
 
-#: greenTile.js:3783
+#: lib/ui/panel.js:225
 msgid "Dark theme"
 msgstr "Sötét téma"
 
-#: greenTile.js:3783
+#: lib/ui/panel.js:225
 msgid "Light theme"
 msgstr "Világos téma"
 
-#: greenTile.js:3903
+#: lib/ui/panel.js:357
 msgid "No presets yet."
 msgstr "Még nincsenek előbeállítások."
 
-#: greenTile.js:3918
+#: lib/ui/panel.js:374
 msgid "New preset"
 msgstr "Új előbeállítás"
 
-#: greenTile.js:3921
+#: lib/ui/panel.js:377
 msgid "Click a row to apply it to this workspace and tile right away"
 msgstr ""
-"Kattints egy sorra, hogy alkalmazd erre a munkaterületre, és azonnal "
-"csempézz"
+"Kattints egy sorra, hogy alkalmazd erre a munkaterületre, és azonnal csempézz"
 
 #. metadata.json->name
 msgid "greenTile"
@@ -177,8 +163,8 @@ msgid ""
 "Column tiling with per-workspace presets, auto mode and snap-on-release. "
 "Fork of gTile by shuairan."
 msgstr ""
-"Oszlopos csempézés munkaterületenkénti előbeállításokkal, automatikus móddal"
-" és elengedéskori illesztéssel. A shuairan által készített gTile forkja."
+"Oszlopos csempézés munkaterületenkénti előbeállításokkal, automatikus móddal "
+"és elengedéskori illesztéssel. A shuairan által készített gTile forkja."
 
 #. settings-schema.json->settings-tab->title
 msgid "Settings"
@@ -188,7 +174,7 @@ msgstr "Beállítások"
 msgid "Hotkeys"
 msgstr "Gyorsbillentyűk"
 
-#. settings-schema.json->autotile-hotkey-section->title
+#. settings-schema.json->columns-hotkey-section->title
 msgid "Auto-Tile Hotkeys"
 msgstr "Automatikus csempézés gyorsbillentyűi"
 
@@ -217,21 +203,21 @@ msgstr "Soha ne csempézzen"
 msgid "Preset panel"
 msgstr "Előbeállítás-panel"
 
-#. settings-schema.json->autotile6hotkey->description
+#. settings-schema.json->columns6Hotkey->description
 msgid "Tile all windows into 6 columns"
 msgstr "Az összes ablak csempézése 6 oszlopba"
 
-#. settings-schema.json->autotile3hotkey->description
+#. settings-schema.json->columns3Hotkey->description
 msgid "Tile all windows into 3 columns"
 msgstr "Az összes ablak csempézése 3 oszlopba"
 
-#. settings-schema.json->autotileautohotkey->description
+#. settings-schema.json->autoOnHotkey->description
 msgid "Turn automatic tiling on for this workspace and tile now"
 msgstr ""
 "Automatikus csempézés bekapcsolása ezen a munkaterületen, és azonnali "
 "csempézés"
 
-#. settings-schema.json->autotileoffhotkey->description
+#. settings-schema.json->autoOffHotkey->description
 msgid "Turn automatic tiling off for this workspace"
 msgstr "Automatikus csempézés kikapcsolása ezen a munkaterületen"
 
@@ -267,13 +253,11 @@ msgstr "A fókuszált csempézett ablak felcserélése a jobb oldali szomszédj�
 
 #. settings-schema.json->swapUpHotkey->description
 msgid "Swap the focused tiled window with its neighbor above"
-msgstr ""
-"A fókuszált csempézett ablak felcserélése a felette lévő szomszédjával"
+msgstr "A fókuszált csempézett ablak felcserélése a felette lévő szomszédjával"
 
 #. settings-schema.json->swapDownHotkey->description
 msgid "Swap the focused tiled window with its neighbor below"
-msgstr ""
-"A fókuszált csempézett ablak felcserélése az alatta lévő szomszédjával"
+msgstr "A fókuszált csempézett ablak felcserélése az alatta lévő szomszédjával"
 
 #. settings-schema.json->presets->description
 msgid "Preset definitions (JSON)"
@@ -295,6 +279,10 @@ msgstr ""
 "Válassz egy alkalmazást, és az bekerül az alábbi listába. A legördülő lista "
 "minden választás után visszaáll."
 
+#. settings-schema.json->excludeAppPicker->options
+msgid "Add application …"
+msgstr "Alkalmazás hozzáadása …"
+
 #. settings-schema.json->exclusions->description
 msgid ""
 "Windows matching one of these rows are never tiled; they float freely "
@@ -310,27 +298,6 @@ msgstr "Egyezés"
 #. settings-schema.json->exclusions->columns->title
 msgid "Text"
 msgstr "Szöveg"
-
-#. settings-schema.json->wsPresets->description
-msgid "Workspace to preset assignments (JSON)"
-msgstr "Munkaterületek előbeállítás-hozzárendelései (JSON)"
-
-#. settings-schema.json->autoWorkspaces->description
-msgid ""
-"Automatic tiling per workspace (set with Super+Ctrl+A / Super+Ctrl+D or in "
-"the preset panel; not shown in this dialog)"
-msgstr ""
-"Automatikus csempézés munkaterületenként (beállítás: Super+Ctrl+A / "
-"Super+Ctrl+D vagy az előbeállítás-panelen; ebben a párbeszédablakban nem "
-"jelenik meg)"
-
-#. settings-schema.json->autoWorkspaces->columns->title
-msgid "Workspace"
-msgstr "Munkaterület"
-
-#. settings-schema.json->autoWorkspaces->columns->title
-msgid "Tile automatically"
-msgstr "Automatikus csempézés"
 
 #. settings-schema.json->windowGap->description
 msgid ""
@@ -361,8 +328,8 @@ msgid ""
 "After a Super+Arrow focus move, mark the newly focused window with a thin "
 "border in the state color for three seconds."
 msgstr ""
-"Super+Nyíl fókuszváltás után három másodpercig vékony, állapotszínű kerettel"
-" jelöli az újonnan fókuszba került ablakot."
+"Super+Nyíl fókuszváltás után három másodpercig vékony, állapotszínű kerettel "
+"jelöli az újonnan fókuszba került ablakot."
 
 #. settings-schema.json->fillSingleWindow->description
 msgid "Fill the monitor with a single window"
@@ -385,8 +352,8 @@ msgid ""
 "Follow system tracks the desktop color scheme live; Light and Dark override "
 "it."
 msgstr ""
-"A „Rendszer követése” valós időben követi az asztal színsémáját; a „Világos”"
-" és a „Sötét” felülbírálja."
+"A „Rendszer követése” valós időben követi az asztal színsémáját; a „Világos” "
+"és a „Sötét” felülbírálja."
 
 #. settings-schema.json->panelTheme->options
 msgid "Follow system"
@@ -406,8 +373,8 @@ msgstr "Kiemelőszín"
 
 #. settings-schema.json->accentMode->tooltip
 msgid ""
-"Follow theme tracks the accent color of the Cinnamon theme live. Custom uses"
-" the color below."
+"Follow theme tracks the accent color of the Cinnamon theme live. Custom uses "
+"the color below."
 msgstr ""
 "A „Téma követése” valós időben átveszi a Cinnamon-téma kiemelőszínét. Az "
 "„Egyéni” az alábbi színt használja."
@@ -456,12 +423,4 @@ msgstr "Egyéni állapotszín"
 
 #. settings-schema.json->stateColor->tooltip
 msgid "State color of the preset panel when State color is Custom."
-msgstr ""
-"Az előbeállítás-panel állapotszíne, ha az Állapotszín értéke „Egyéni”."
-
-#~ msgid ""
-#~ "Draw a thin border in the state color around the focused window while "
-#~ "automatic tiling is on."
-#~ msgstr ""
-#~ "Vékony keretet rajzol az állapotszínben a fókuszált ablak körül, amíg az "
-#~ "automatikus csempézés be van kapcsolva."
+msgstr "Az előbeállítás-panel állapotszíne, ha az Állapotszín értéke „Egyéni”."

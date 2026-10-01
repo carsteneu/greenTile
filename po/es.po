@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: greenTile 1.2.0\n"
 "Report-Msgid-Bugs-To: https://github.com/carsteneu\n"
-"POT-Creation-Date: 2026-09-30 22:29+0200\n"
+"POT-Creation-Date: 2026-10-01 15:08+0200\n"
 "PO-Revision-Date: 2023-11-02 11:34-0300\n"
 "Last-Translator: \n"
 "Language-Team: Spanish\n"
@@ -17,58 +17,40 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "X-Generator: Poedit 3.4\n"
 
-#. settings-schema.json->excludeAppPicker->options
-#: greenTile.js:439
-msgid "Add application …"
-msgstr "Añadir aplicación …"
-
-#: greenTile.js:458
-msgid "Window floats"
-msgstr "Ventana flotante"
-
-#: greenTile.js:458
-msgid "Window tiles again"
-msgstr "Ventana de nuevo en mosaico"
-
-#: greenTile.js:2771
-#, javascript-format
-msgid "assigned — workspace %d"
-msgstr "asignado — área de trabajo %d"
-
-#: greenTile.js:2832
+#: lib/ui/editor.js:66
 msgid "Please enter a name."
 msgstr "Introduzca un nombre."
 
-#: greenTile.js:2874
+#: lib/ui/editor.js:122
 #, javascript-format
 msgid "from %d"
 msgstr "desde %d"
 
-#: greenTile.js:2991
+#: lib/ui/editor.js:267
 msgid "Rules (by window count)"
 msgstr "Reglas (según el número de ventanas)"
 
-#: greenTile.js:2995
+#: lib/ui/editor.js:271
 msgid "Rule"
 msgstr "Regla"
 
-#: greenTile.js:2996
+#: lib/ui/editor.js:272
 msgid "Delete rule"
 msgstr "Eliminar regla"
 
-#: greenTile.js:3004
+#: lib/ui/editor.js:280
 msgid "Rule applies from"
 msgstr "La regla se aplica a partir de"
 
-#: greenTile.js:3011
+#: lib/ui/editor.js:287
 msgid "windows"
 msgstr "ventanas"
 
-#: greenTile.js:3013
+#: lib/ui/editor.js:289
 msgid "Painter"
 msgstr "Área de dibujo"
 
-#: greenTile.js:3028
+#: lib/ui/editor.js:306
 msgid ""
 "Click or drag: the row sets how many windows the column holds. Right-click "
 "removes a column."
@@ -76,91 +58,96 @@ msgstr ""
 "Haga clic o arrastre: la fila determina cuántas ventanas contiene la "
 "columna. Con el clic derecho se elimina una columna."
 
-#: greenTile.js:3033
+#: lib/ui/editor.js:311
 msgid "Name"
 msgstr "Nombre"
 
-#: greenTile.js:3034
+#: lib/ui/editor.js:312
 msgid "Preset name"
 msgstr "Nombre del preajuste"
 
-#: greenTile.js:3039
+#: lib/ui/editor.js:317
 msgid "Delete preset"
 msgstr "Eliminar preajuste"
 
-#: greenTile.js:3042
+#: lib/ui/editor.js:320
 msgid "Really delete?"
 msgstr "¿Eliminar de verdad?"
 
-#: greenTile.js:3043
+#: lib/ui/editor.js:321
 msgid "Delete"
 msgstr "Eliminar"
 
-#: greenTile.js:3047
+#: lib/ui/editor.js:325
 msgid "Save"
 msgstr "Guardar"
 
-#: greenTile.js:3072
+#: lib/ui/editor.js:350
 #, javascript-format
 msgid "Result: %s"
 msgstr "Resultado: %s"
 
-#: greenTile.js:3692
+#: lib/ui/panel.js:77
+#, javascript-format
+msgid "assigned — workspace %d"
+msgstr "asignado — área de trabajo %d"
+
+#: lib/ui/panel.js:117
 msgid "Gap between windows"
 msgstr "Separación entre ventanas"
 
-#: greenTile.js:3697
+#: lib/ui/panel.js:123
 #, javascript-format
 msgid "%d px"
 msgstr "%d px"
 
-#: greenTile.js:3716
+#: lib/ui/panel.js:143
 msgid "Reset sizes"
 msgstr "Restablecer tamaños"
 
-#: greenTile.js:3747
+#: lib/ui/panel.js:186
 #, javascript-format
 msgid "Presets — workspace %d · %s"
 msgstr "Preajustes — área de trabajo %d · %s"
 
-#: greenTile.js:3749
+#: lib/ui/panel.js:188
 msgid "Create preset"
 msgstr "Crear preajuste"
 
-#: greenTile.js:3749
+#: lib/ui/panel.js:188
 #, javascript-format
 msgid "Edit %s"
 msgstr "Editar %s"
 
-#: greenTile.js:3753
+#: lib/ui/panel.js:193
 msgid "Back"
 msgstr "Atrás"
 
-#: greenTile.js:3762
+#: lib/ui/panel.js:202
 msgid "Auto: on"
 msgstr "Auto: activado"
 
-#: greenTile.js:3762
+#: lib/ui/panel.js:202
 msgid "Auto: off"
 msgstr "Auto: desactivado"
 
-#: greenTile.js:3783
+#: lib/ui/panel.js:225
 msgid "Dark theme"
 msgstr "Tema oscuro"
 
-#: greenTile.js:3783
+#: lib/ui/panel.js:225
 msgid "Light theme"
 msgstr "Tema claro"
 
-#: greenTile.js:3903
+#: lib/ui/panel.js:357
 msgid "No presets yet."
 msgstr "Aún no hay preajustes."
 
-#: greenTile.js:3918
+#: lib/ui/panel.js:374
 msgid "New preset"
 msgstr "Nuevo preajuste"
 
-#: greenTile.js:3921
+#: lib/ui/panel.js:377
 msgid "Click a row to apply it to this workspace and tile right away"
 msgstr ""
 "Haga clic en una fila para aplicarla a esta área de trabajo y organizar en "
@@ -186,7 +173,7 @@ msgstr "Configuración"
 msgid "Hotkeys"
 msgstr "Atajos de teclado"
 
-#. settings-schema.json->autotile-hotkey-section->title
+#. settings-schema.json->columns-hotkey-section->title
 msgid "Auto-Tile Hotkeys"
 msgstr "Atajos de teclado del mosaico automático"
 
@@ -215,21 +202,21 @@ msgstr "Nunca en mosaico"
 msgid "Preset panel"
 msgstr "Panel de preajustes"
 
-#. settings-schema.json->autotile6hotkey->description
+#. settings-schema.json->columns6Hotkey->description
 msgid "Tile all windows into 6 columns"
 msgstr "Organizar todas las ventanas en mosaico de 6 columnas"
 
-#. settings-schema.json->autotile3hotkey->description
+#. settings-schema.json->columns3Hotkey->description
 msgid "Tile all windows into 3 columns"
 msgstr "Organizar todas las ventanas en mosaico de 3 columnas"
 
-#. settings-schema.json->autotileautohotkey->description
+#. settings-schema.json->autoOnHotkey->description
 msgid "Turn automatic tiling on for this workspace and tile now"
 msgstr ""
 "Activar el mosaico automático para esta área de trabajo y organizar en "
 "mosaico ahora"
 
-#. settings-schema.json->autotileoffhotkey->description
+#. settings-schema.json->autoOffHotkey->description
 msgid "Turn automatic tiling off for this workspace"
 msgstr "Desactivar el mosaico automático para esta área de trabajo"
 
@@ -293,6 +280,10 @@ msgstr ""
 "Elija una aplicación y se añadirá a la lista de abajo. La lista desplegable "
 "se restablece después de cada selección."
 
+#. settings-schema.json->excludeAppPicker->options
+msgid "Add application …"
+msgstr "Añadir aplicación …"
+
 #. settings-schema.json->exclusions->description
 msgid ""
 "Windows matching one of these rows are never tiled; they float freely "
@@ -308,26 +299,6 @@ msgstr "Coincidencia"
 #. settings-schema.json->exclusions->columns->title
 msgid "Text"
 msgstr "Texto"
-
-#. settings-schema.json->wsPresets->description
-msgid "Workspace to preset assignments (JSON)"
-msgstr "Asignación de preajustes a áreas de trabajo (JSON)"
-
-#. settings-schema.json->autoWorkspaces->description
-msgid ""
-"Automatic tiling per workspace (set with Super+Ctrl+A / Super+Ctrl+D or in "
-"the preset panel; not shown in this dialog)"
-msgstr ""
-"Mosaico automático por área de trabajo (se ajusta con Super+Ctrl+A / "
-"Super+Ctrl+D o en el panel de preajustes; no se muestra en este diálogo)"
-
-#. settings-schema.json->autoWorkspaces->columns->title
-msgid "Workspace"
-msgstr "Área de trabajo"
-
-#. settings-schema.json->autoWorkspaces->columns->title
-msgid "Tile automatically"
-msgstr "Mosaico automático"
 
 #. settings-schema.json->windowGap->description
 msgid ""
@@ -360,8 +331,8 @@ msgid ""
 "After a Super+Arrow focus move, mark the newly focused window with a thin "
 "border in the state color for three seconds."
 msgstr ""
-"Tras mover el foco con Super+Flecha, marca la ventana que recibe el foco con"
-" un borde fino del color de estado durante tres segundos."
+"Tras mover el foco con Super+Flecha, marca la ventana que recibe el foco con "
+"un borde fino del color de estado durante tres segundos."
 
 #. settings-schema.json->fillSingleWindow->description
 msgid "Fill the monitor with a single window"
@@ -405,8 +376,8 @@ msgstr "Color de acento"
 
 #. settings-schema.json->accentMode->tooltip
 msgid ""
-"Follow theme tracks the accent color of the Cinnamon theme live. Custom uses"
-" the color below."
+"Follow theme tracks the accent color of the Cinnamon theme live. Custom uses "
+"the color below."
 msgstr ""
 "«Seguir el tema» adopta en vivo el color de acento del tema de Cinnamon. "
 "«Personalizado» usa el color de abajo."
@@ -428,8 +399,8 @@ msgstr "Color de acento personalizado"
 #. settings-schema.json->accentColor->tooltip
 msgid "Accent of the preset panel and editor when Accent color is Custom."
 msgstr ""
-"Acento del panel de preajustes y del editor cuando «Color de acento» está en"
-" «Personalizado»."
+"Acento del panel de preajustes y del editor cuando «Color de acento» está en "
+"«Personalizado»."
 
 #. settings-schema.json->stateMode->description
 msgid "State color"
@@ -458,10 +429,3 @@ msgid "State color of the preset panel when State color is Custom."
 msgstr ""
 "Color de estado del panel de preajustes cuando «Color de estado» está en "
 "«Personalizado»."
-
-#~ msgid ""
-#~ "Draw a thin border in the state color around the focused window while "
-#~ "automatic tiling is on."
-#~ msgstr ""
-#~ "Dibuja un borde fino del color de estado alrededor de la ventana enfocada "
-#~ "mientras el mosaico automático esté activo."

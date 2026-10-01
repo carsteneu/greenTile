@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: greenTile 1.2.0\n"
 "Report-Msgid-Bugs-To: https://github.com/carsteneu\n"
-"POT-Creation-Date: 2026-09-30 22:29+0200\n"
+"POT-Creation-Date: 2026-10-01 15:08+0200\n"
 "PO-Revision-Date: 2024-07-25 20:23+0300\n"
 "Last-Translator: Kimmo Kujansuu <mrkujansuu@gmail.com>\n"
 "Language-Team: Finnish\n"
@@ -19,58 +19,40 @@ msgstr ""
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 "X-Generator: Poedit 2.3\n"
 
-#. settings-schema.json->excludeAppPicker->options
-#: greenTile.js:439
-msgid "Add application …"
-msgstr "Lisää sovellus …"
-
-#: greenTile.js:458
-msgid "Window floats"
-msgstr "Ikkuna kelluu"
-
-#: greenTile.js:458
-msgid "Window tiles again"
-msgstr "Ikkuna laatoitetaan taas"
-
-#: greenTile.js:2771
-#, javascript-format
-msgid "assigned — workspace %d"
-msgstr "määritetty — työtila %d"
-
-#: greenTile.js:2832
+#: lib/ui/editor.js:66
 msgid "Please enter a name."
 msgstr "Anna nimi."
 
-#: greenTile.js:2874
+#: lib/ui/editor.js:122
 #, javascript-format
 msgid "from %d"
 msgstr "%d alkaen"
 
-#: greenTile.js:2991
+#: lib/ui/editor.js:267
 msgid "Rules (by window count)"
 msgstr "Säännöt (ikkunamäärän mukaan)"
 
-#: greenTile.js:2995
+#: lib/ui/editor.js:271
 msgid "Rule"
 msgstr "Sääntö"
 
-#: greenTile.js:2996
+#: lib/ui/editor.js:272
 msgid "Delete rule"
 msgstr "Poista sääntö"
 
-#: greenTile.js:3004
+#: lib/ui/editor.js:280
 msgid "Rule applies from"
 msgstr "Sääntö koskee vähintään"
 
-#: greenTile.js:3011
+#: lib/ui/editor.js:287
 msgid "windows"
 msgstr "ikkunaa"
 
-#: greenTile.js:3013
+#: lib/ui/editor.js:289
 msgid "Painter"
 msgstr "Piirtoalue"
 
-#: greenTile.js:3028
+#: lib/ui/editor.js:306
 msgid ""
 "Click or drag: the row sets how many windows the column holds. Right-click "
 "removes a column."
@@ -78,91 +60,96 @@ msgstr ""
 "Napsauta tai vedä: rivi määrää, montako ikkunaa sarakkeeseen mahtuu. Oikea "
 "napsautus poistaa sarakkeen."
 
-#: greenTile.js:3033
+#: lib/ui/editor.js:311
 msgid "Name"
 msgstr "Nimi"
 
-#: greenTile.js:3034
+#: lib/ui/editor.js:312
 msgid "Preset name"
 msgstr "Esiasetuksen nimi"
 
-#: greenTile.js:3039
+#: lib/ui/editor.js:317
 msgid "Delete preset"
 msgstr "Poista esiasetus"
 
-#: greenTile.js:3042
+#: lib/ui/editor.js:320
 msgid "Really delete?"
 msgstr "Poistetaanko varmasti?"
 
-#: greenTile.js:3043
+#: lib/ui/editor.js:321
 msgid "Delete"
 msgstr "Poista"
 
-#: greenTile.js:3047
+#: lib/ui/editor.js:325
 msgid "Save"
 msgstr "Tallenna"
 
-#: greenTile.js:3072
+#: lib/ui/editor.js:350
 #, javascript-format
 msgid "Result: %s"
 msgstr "Tulos: %s"
 
-#: greenTile.js:3692
+#: lib/ui/panel.js:77
+#, javascript-format
+msgid "assigned — workspace %d"
+msgstr "määritetty — työtila %d"
+
+#: lib/ui/panel.js:117
 msgid "Gap between windows"
 msgstr "Ikkunoiden väli"
 
-#: greenTile.js:3697
+#: lib/ui/panel.js:123
 #, javascript-format
 msgid "%d px"
 msgstr "%d px"
 
-#: greenTile.js:3716
+#: lib/ui/panel.js:143
 msgid "Reset sizes"
 msgstr "Palauta koot"
 
-#: greenTile.js:3747
+#: lib/ui/panel.js:186
 #, javascript-format
 msgid "Presets — workspace %d · %s"
 msgstr "Esiasetukset — työtila %d · %s"
 
-#: greenTile.js:3749
+#: lib/ui/panel.js:188
 msgid "Create preset"
 msgstr "Luo esiasetus"
 
-#: greenTile.js:3749
+#: lib/ui/panel.js:188
 #, javascript-format
 msgid "Edit %s"
 msgstr "Muokkaa: %s"
 
-#: greenTile.js:3753
+#: lib/ui/panel.js:193
 msgid "Back"
 msgstr "Takaisin"
 
-#: greenTile.js:3762
+#: lib/ui/panel.js:202
 msgid "Auto: on"
 msgstr "Auto: päällä"
 
-#: greenTile.js:3762
+#: lib/ui/panel.js:202
 msgid "Auto: off"
 msgstr "Auto: pois"
 
-#: greenTile.js:3783
+#: lib/ui/panel.js:225
 msgid "Dark theme"
 msgstr "Tumma teema"
 
-#: greenTile.js:3783
+#: lib/ui/panel.js:225
 msgid "Light theme"
 msgstr "Vaalea teema"
 
-#: greenTile.js:3903
+#: lib/ui/panel.js:357
 msgid "No presets yet."
 msgstr "Ei vielä esiasetuksia."
 
-#: greenTile.js:3918
+#: lib/ui/panel.js:374
 msgid "New preset"
 msgstr "Uusi esiasetus"
 
-#: greenTile.js:3921
+#: lib/ui/panel.js:377
 msgid "Click a row to apply it to this workspace and tile right away"
 msgstr ""
 "Napsauta riviä ottaaksesi sen käyttöön tässä työtilassa ja laatoittaaksesi "
@@ -189,7 +176,7 @@ msgstr "Asetukset"
 msgid "Hotkeys"
 msgstr "Pikanäppäimet"
 
-#. settings-schema.json->autotile-hotkey-section->title
+#. settings-schema.json->columns-hotkey-section->title
 msgid "Auto-Tile Hotkeys"
 msgstr "Automaattisen laatoituksen pikanäppäimet"
 
@@ -218,20 +205,19 @@ msgstr "Älä koskaan laatoita"
 msgid "Preset panel"
 msgstr "Esiasetuspaneeli"
 
-#. settings-schema.json->autotile6hotkey->description
+#. settings-schema.json->columns6Hotkey->description
 msgid "Tile all windows into 6 columns"
 msgstr "Laatoita kaikki ikkunat 6 sarakkeeseen"
 
-#. settings-schema.json->autotile3hotkey->description
+#. settings-schema.json->columns3Hotkey->description
 msgid "Tile all windows into 3 columns"
 msgstr "Laatoita kaikki ikkunat 3 sarakkeeseen"
 
-#. settings-schema.json->autotileautohotkey->description
+#. settings-schema.json->autoOnHotkey->description
 msgid "Turn automatic tiling on for this workspace and tile now"
-msgstr ""
-"Ota automaattinen laatoitus käyttöön tässä työtilassa ja laatoita heti"
+msgstr "Ota automaattinen laatoitus käyttöön tässä työtilassa ja laatoita heti"
 
-#. settings-schema.json->autotileoffhotkey->description
+#. settings-schema.json->autoOffHotkey->description
 msgid "Turn automatic tiling off for this workspace"
 msgstr "Poista automaattinen laatoitus käytöstä tässä työtilassa"
 
@@ -296,6 +282,10 @@ msgstr ""
 "Valitse sovellus, niin se lisätään alla olevaan luetteloon. Valintaluettelo "
 "palautuu jokaisen valinnan jälkeen."
 
+#. settings-schema.json->excludeAppPicker->options
+msgid "Add application …"
+msgstr "Lisää sovellus …"
+
 #. settings-schema.json->exclusions->description
 msgid ""
 "Windows matching one of these rows are never tiled; they float freely "
@@ -311,26 +301,6 @@ msgstr "Täsmäys"
 #. settings-schema.json->exclusions->columns->title
 msgid "Text"
 msgstr "Teksti"
-
-#. settings-schema.json->wsPresets->description
-msgid "Workspace to preset assignments (JSON)"
-msgstr "Työtilojen ja esiasetusten liitokset (JSON)"
-
-#. settings-schema.json->autoWorkspaces->description
-msgid ""
-"Automatic tiling per workspace (set with Super+Ctrl+A / Super+Ctrl+D or in "
-"the preset panel; not shown in this dialog)"
-msgstr ""
-"Automaattinen laatoitus työtilakohtaisesti (asetetaan näppäimillä "
-"Super+Ctrl+A / Super+Ctrl+D tai esiasetuspaneelissa; ei näy tässä ikkunassa)"
-
-#. settings-schema.json->autoWorkspaces->columns->title
-msgid "Workspace"
-msgstr "Työtila"
-
-#. settings-schema.json->autoWorkspaces->columns->title
-msgid "Tile automatically"
-msgstr "Laatoita automaattisesti"
 
 #. settings-schema.json->windowGap->description
 msgid ""
@@ -408,8 +378,8 @@ msgstr "Korostusväri"
 
 #. settings-schema.json->accentMode->tooltip
 msgid ""
-"Follow theme tracks the accent color of the Cinnamon theme live. Custom uses"
-" the color below."
+"Follow theme tracks the accent color of the Cinnamon theme live. Custom uses "
+"the color below."
 msgstr ""
 "”Seuraa teemaa” käyttää Cinnamon-teeman korostusväriä reaaliajassa. "
 "”Mukautettu” käyttää alla olevaa väriä."
@@ -459,10 +429,3 @@ msgstr "Mukautettu tilaväri"
 #. settings-schema.json->stateColor->tooltip
 msgid "State color of the preset panel when State color is Custom."
 msgstr "Esiasetuspaneelin tilaväri, kun Tilaväri on ”Mukautettu”."
-
-#~ msgid ""
-#~ "Draw a thin border in the state color around the focused window while "
-#~ "automatic tiling is on."
-#~ msgstr ""
-#~ "Piirtää ohuen reunan tilaväriin kohdistetun ikkunan ympärille, kun "
-#~ "automaattinen laatoitus on päällä."

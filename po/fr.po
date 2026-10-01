@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: greenTile 1.2.0\n"
 "Report-Msgid-Bugs-To: https://github.com/carsteneu\n"
-"POT-Creation-Date: 2026-09-30 22:29+0200\n"
+"POT-Creation-Date: 2026-10-01 15:08+0200\n"
 "PO-Revision-Date: 2025-02-05 18:38+0100\n"
 "Last-Translator: claudiux\n"
 "Language-Team: French\n"
@@ -18,58 +18,40 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "X-Generator: Poedit 3.4.2\n"
 
-#. settings-schema.json->excludeAppPicker->options
-#: greenTile.js:439
-msgid "Add application …"
-msgstr "Ajouter une application …"
-
-#: greenTile.js:458
-msgid "Window floats"
-msgstr "Fenêtre flottante"
-
-#: greenTile.js:458
-msgid "Window tiles again"
-msgstr "Fenêtre de nouveau tuilée"
-
-#: greenTile.js:2771
-#, javascript-format
-msgid "assigned — workspace %d"
-msgstr "attribué — espace de travail %d"
-
-#: greenTile.js:2832
+#: lib/ui/editor.js:66
 msgid "Please enter a name."
 msgstr "Veuillez saisir un nom."
 
-#: greenTile.js:2874
+#: lib/ui/editor.js:122
 #, javascript-format
 msgid "from %d"
 msgstr "dès %d"
 
-#: greenTile.js:2991
+#: lib/ui/editor.js:267
 msgid "Rules (by window count)"
 msgstr "Règles (selon le nombre de fenêtres)"
 
-#: greenTile.js:2995
+#: lib/ui/editor.js:271
 msgid "Rule"
 msgstr "Règle"
 
-#: greenTile.js:2996
+#: lib/ui/editor.js:272
 msgid "Delete rule"
 msgstr "Supprimer la règle"
 
-#: greenTile.js:3004
+#: lib/ui/editor.js:280
 msgid "Rule applies from"
 msgstr "La règle s'applique à partir de"
 
-#: greenTile.js:3011
+#: lib/ui/editor.js:287
 msgid "windows"
 msgstr "fenêtres"
 
-#: greenTile.js:3013
+#: lib/ui/editor.js:289
 msgid "Painter"
 msgstr "Zone de dessin"
 
-#: greenTile.js:3028
+#: lib/ui/editor.js:306
 msgid ""
 "Click or drag: the row sets how many windows the column holds. Right-click "
 "removes a column."
@@ -77,91 +59,96 @@ msgstr ""
 "Cliquez ou faites glisser : la ligne définit le nombre de fenêtres que "
 "contient la colonne. Un clic droit supprime une colonne."
 
-#: greenTile.js:3033
+#: lib/ui/editor.js:311
 msgid "Name"
 msgstr "Nom"
 
-#: greenTile.js:3034
+#: lib/ui/editor.js:312
 msgid "Preset name"
 msgstr "Nom du préréglage"
 
-#: greenTile.js:3039
+#: lib/ui/editor.js:317
 msgid "Delete preset"
 msgstr "Supprimer le préréglage"
 
-#: greenTile.js:3042
+#: lib/ui/editor.js:320
 msgid "Really delete?"
 msgstr "Vraiment supprimer ?"
 
-#: greenTile.js:3043
+#: lib/ui/editor.js:321
 msgid "Delete"
 msgstr "Supprimer"
 
-#: greenTile.js:3047
+#: lib/ui/editor.js:325
 msgid "Save"
 msgstr "Enregistrer"
 
-#: greenTile.js:3072
+#: lib/ui/editor.js:350
 #, javascript-format
 msgid "Result: %s"
 msgstr "Résultat : %s"
 
-#: greenTile.js:3692
+#: lib/ui/panel.js:77
+#, javascript-format
+msgid "assigned — workspace %d"
+msgstr "attribué — espace de travail %d"
+
+#: lib/ui/panel.js:117
 msgid "Gap between windows"
 msgstr "Espacement entre les fenêtres"
 
-#: greenTile.js:3697
+#: lib/ui/panel.js:123
 #, javascript-format
 msgid "%d px"
 msgstr "%d px"
 
-#: greenTile.js:3716
+#: lib/ui/panel.js:143
 msgid "Reset sizes"
 msgstr "Réinitialiser les tailles"
 
-#: greenTile.js:3747
+#: lib/ui/panel.js:186
 #, javascript-format
 msgid "Presets — workspace %d · %s"
 msgstr "Préréglages — espace de travail %d · %s"
 
-#: greenTile.js:3749
+#: lib/ui/panel.js:188
 msgid "Create preset"
 msgstr "Créer un préréglage"
 
-#: greenTile.js:3749
+#: lib/ui/panel.js:188
 #, javascript-format
 msgid "Edit %s"
 msgstr "Modifier %s"
 
-#: greenTile.js:3753
+#: lib/ui/panel.js:193
 msgid "Back"
 msgstr "Retour"
 
-#: greenTile.js:3762
+#: lib/ui/panel.js:202
 msgid "Auto: on"
 msgstr "Auto : activé"
 
-#: greenTile.js:3762
+#: lib/ui/panel.js:202
 msgid "Auto: off"
 msgstr "Auto : désactivé"
 
-#: greenTile.js:3783
+#: lib/ui/panel.js:225
 msgid "Dark theme"
 msgstr "Thème sombre"
 
-#: greenTile.js:3783
+#: lib/ui/panel.js:225
 msgid "Light theme"
 msgstr "Thème clair"
 
-#: greenTile.js:3903
+#: lib/ui/panel.js:357
 msgid "No presets yet."
 msgstr "Aucun préréglage pour l'instant."
 
-#: greenTile.js:3918
+#: lib/ui/panel.js:374
 msgid "New preset"
 msgstr "Nouveau préréglage"
 
-#: greenTile.js:3921
+#: lib/ui/panel.js:377
 msgid "Click a row to apply it to this workspace and tile right away"
 msgstr ""
 "Cliquez sur une ligne pour l'appliquer à cet espace de travail et tuiler "
@@ -176,8 +163,8 @@ msgid ""
 "Column tiling with per-workspace presets, auto mode and snap-on-release. "
 "Fork of gTile by shuairan."
 msgstr ""
-"Tuilage en colonnes avec préréglages par espace de travail, mode automatique"
-" et ancrage au relâchement. Dérivé de gTile par shuairan."
+"Tuilage en colonnes avec préréglages par espace de travail, mode automatique "
+"et ancrage au relâchement. Dérivé de gTile par shuairan."
 
 #. settings-schema.json->settings-tab->title
 msgid "Settings"
@@ -187,7 +174,7 @@ msgstr "Paramètres"
 msgid "Hotkeys"
 msgstr "Raccourcis clavier"
 
-#. settings-schema.json->autotile-hotkey-section->title
+#. settings-schema.json->columns-hotkey-section->title
 msgid "Auto-Tile Hotkeys"
 msgstr "Raccourcis clavier du tuilage automatique"
 
@@ -216,21 +203,21 @@ msgstr "Ne jamais tuiler"
 msgid "Preset panel"
 msgstr "Panneau des préréglages"
 
-#. settings-schema.json->autotile6hotkey->description
+#. settings-schema.json->columns6Hotkey->description
 msgid "Tile all windows into 6 columns"
 msgstr "Tuiler toutes les fenêtres en 6 colonnes"
 
-#. settings-schema.json->autotile3hotkey->description
+#. settings-schema.json->columns3Hotkey->description
 msgid "Tile all windows into 3 columns"
 msgstr "Tuiler toutes les fenêtres en 3 colonnes"
 
-#. settings-schema.json->autotileautohotkey->description
+#. settings-schema.json->autoOnHotkey->description
 msgid "Turn automatic tiling on for this workspace and tile now"
 msgstr ""
 "Activer le tuilage automatique pour cet espace de travail et tuiler "
 "maintenant"
 
-#. settings-schema.json->autotileoffhotkey->description
+#. settings-schema.json->autoOffHotkey->description
 msgid "Turn automatic tiling off for this workspace"
 msgstr "Désactiver le tuilage automatique pour cet espace de travail"
 
@@ -292,6 +279,10 @@ msgstr ""
 "Choisissez une application : elle est ajoutée à la liste ci-dessous. La "
 "liste déroulante se réinitialise après chaque choix."
 
+#. settings-schema.json->excludeAppPicker->options
+msgid "Add application …"
+msgstr "Ajouter une application …"
+
 #. settings-schema.json->exclusions->description
 msgid ""
 "Windows matching one of these rows are never tiled; they float freely "
@@ -307,27 +298,6 @@ msgstr "Correspondance"
 #. settings-schema.json->exclusions->columns->title
 msgid "Text"
 msgstr "Texte"
-
-#. settings-schema.json->wsPresets->description
-msgid "Workspace to preset assignments (JSON)"
-msgstr "Attribution des préréglages aux espaces de travail (JSON)"
-
-#. settings-schema.json->autoWorkspaces->description
-msgid ""
-"Automatic tiling per workspace (set with Super+Ctrl+A / Super+Ctrl+D or in "
-"the preset panel; not shown in this dialog)"
-msgstr ""
-"Tuilage automatique par espace de travail (réglé avec Super+Ctrl+A / "
-"Super+Ctrl+D ou dans le panneau des préréglages ; non affiché dans cette "
-"boîte de dialogue)"
-
-#. settings-schema.json->autoWorkspaces->columns->title
-msgid "Workspace"
-msgstr "Espace de travail"
-
-#. settings-schema.json->autoWorkspaces->columns->title
-msgid "Tile automatically"
-msgstr "Tuiler automatiquement"
 
 #. settings-schema.json->windowGap->description
 msgid ""
@@ -405,8 +375,8 @@ msgstr "Couleur d'accentuation"
 
 #. settings-schema.json->accentMode->tooltip
 msgid ""
-"Follow theme tracks the accent color of the Cinnamon theme live. Custom uses"
-" the color below."
+"Follow theme tracks the accent color of the Cinnamon theme live. Custom uses "
+"the color below."
 msgstr ""
 "« Suivre le thème » reprend en direct la couleur d'accentuation du thème "
 "Cinnamon. « Personnalisée » utilise la couleur ci-dessous."
@@ -457,12 +427,5 @@ msgstr "Couleur d'état personnalisée"
 #. settings-schema.json->stateColor->tooltip
 msgid "State color of the preset panel when State color is Custom."
 msgstr ""
-"Couleur d'état du panneau des préréglages lorsque « Couleur d'état » est sur"
-" « Personnalisée »."
-
-#~ msgid ""
-#~ "Draw a thin border in the state color around the focused window while "
-#~ "automatic tiling is on."
-#~ msgstr ""
-#~ "Trace une fine bordure de la couleur d'état autour de la fenêtre active "
-#~ "lorsque le tuilage automatique est actif."
+"Couleur d'état du panneau des préréglages lorsque « Couleur d'état » est sur "
+"« Personnalisée »."
