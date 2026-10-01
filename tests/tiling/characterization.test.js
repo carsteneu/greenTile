@@ -666,6 +666,34 @@ test('a focused fresh window appends last too (panel preset row click, swap)', (
     assert.equal(app.auto.pendingTake(0).size, 0, 'pending consumed');
 });
 
+test('PINNED GAP (todo_fixes follow-up): a legacy narrow stored split + later gap increase still renders final frames below the minimum', () => {
+    const tweener = makeTweenerRecorder();
+    const { env, ext } = makeEnv(tweener, { windowGap: 0 });
+    enableOnMonitor(env, ext);
+    makeWorkspace(env);
+    env.activeWorkspace = { index: () => 0 };
+    const w1 = makeWindow(env, 91, [10, 10, 400, 300]);
+    const w2 = makeWindow(env, 92, [500, 0, 400, 300]);
+    env.tabList.push(w1, w2);
+    env.display.focus_window = w1;
+    const app = ext.session.app;
+    const ref = app.split.ref(app, 0, 0, 2);
+    const layouts = { [ref.mkey]: { [ref.wskey]: { auto: true } } };
+    settingsInstance(env).setValue('layouts', JSON.stringify(layouts));
+    app.ops.retileMonitor(app, 0);
+    // narrow the border to the gap-0 clamp: the stored cell is 120 px
+    pressResize(env, 'narrower', 200);
+    assert.equal(w1.rect[2], 120, 'the border sits at the gap-0 clamp');
+    // the user raises the gap afterwards: borders are stored at the OLD semantics
+    // (cell 120 incl. gap), so placement now yields frames below the promised
+    // minimum. Not fixed in this round — the bounded correction is a read-time
+    // border clamp in split.for (see the review report), which needs area context
+    // threaded through the split facade and a decision on infeasible spans.
+    settingsInstance(env).setValue('windowGap', 48);
+    app.ops.retileMonitor(app, 0);
+    assert.equal(w1.rect[2], 72, 'pinned: the final frame is 72 px, not 120');
+});
+
 // ---------------- presets + layouts through the ops facade ----------------
 
 test('preset writing, layout assignment and monitor retile round-trip through the ops facade', () => {
