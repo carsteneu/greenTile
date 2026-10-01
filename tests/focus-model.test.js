@@ -1,24 +1,11 @@
 'use strict';
-// Tests the pure focus model of greenTile.js (marked block "focus-model"), extracted and
-// evaluated without Cinnamon, like swap-model. The block covers the monitor-edge rules of
+// Tests the pure focus model (lib/model/focus.js). It covers the monitor-edge rules of
 // Super+Arrow focus movement: which monitor borders in the direction (no wrap), and which
 // window on it is nearest.
 const test = require('node:test');
 const assert = require('node:assert/strict');
-const fs = require('node:fs');
-const path = require('node:path');
 
-const src = fs.readFileSync(path.join(__dirname, '..', 'greenTile.js'), 'utf8');
-const match = src.match(/\/\/ >>> focus-model[^\n]*\n([\s\S]*?)\/\/ <<< focus-model/);
-if (!match)
-    throw new Error('focus-model block not found in greenTile.js');
-const block = match[1];
-const names = ['tile_focus_monitor_step', 'tile_focus_monitor_pick'];
-const m = new Function(block + '\nreturn {' + names.join(',') + '};')();
-
-test('block is self-contained', () => {
-    assert.doesNotMatch(block, /imports\.|tile_St|tile_Clutter|global\.|utils_Main|Meta\./);
-});
+const m = require('./cinnamon-loader').load('./lib/model/focus.js');
 
 // laptop + 5K side by side, ordered by geometry x.
 const monitors = [

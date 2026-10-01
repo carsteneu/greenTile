@@ -130,6 +130,8 @@ D=~/.local/share/cinnamon/extensions/greenTile@carsteneu
 mkdir -p "$D"
 node --check greenTile.js
 cp extension.js greenTile.js metadata.json settings-schema.json stylesheet.css icon.png LICENSE "$D"/
+rm -rf "$D/lib"
+cp -R lib "$D/lib"
 for po in po/*.po; do
   lang=$(basename "$po" .po)
   mkdir -p ~/.local/share/locale/"$lang"/LC_MESSAGES
@@ -138,6 +140,9 @@ done
 dbus-send --session --print-reply --dest=org.Cinnamon /org/Cinnamon org.Cinnamon.Eval \
   string:"imports.ui.extensionSystem.disableExtension('greenTile@carsteneu'); imports.ui.extensionSystem.enableExtension('greenTile@carsteneu'); 'reloaded'"
 ```
+
+greenTile.js requires the model modules from `lib/model/` — always deploy `lib/`
+alongside it. Copying greenTile.js alone fails at load time.
 
 - **Tests:** `node --test tests/*.test.js` (Node 18 or newer).
 - **Releases:** pushing a `v*` tag builds the zip and attaches it to the release (`.github/workflows/release.yml`).

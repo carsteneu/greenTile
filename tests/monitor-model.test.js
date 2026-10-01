@@ -1,24 +1,11 @@
 'use strict';
-// Tests the pure monitor identity model of greenTile.js (marked block
-// "monitor-model"), extracted and evaluated without Cinnamon, like auto-model.
+// Tests the pure monitor identity model (lib/model/monitor.js).
 // Key source: DBus org.cinnamon.Muffin.DisplayConfig GetCurrentState, per monitor
 // the tuple (connector, vendor, product, serial).
 const test = require('node:test');
 const assert = require('node:assert/strict');
-const fs = require('node:fs');
-const path = require('node:path');
 
-const src = fs.readFileSync(path.join(__dirname, '..', 'greenTile.js'), 'utf8');
-const match = src.match(/\/\/ >>> monitor-model[^\n]*\n([\s\S]*?)\/\/ <<< monitor-model/);
-if (!match)
-    throw new Error('monitor-model block not found in greenTile.js');
-const block = match[1];
-const names = ['tile_monitor_key', 'tile_monitor_fallback_key', 'tile_monitor_states', 'tile_monitor_ws_key', 'tile_monitor_labels'];
-const m = new Function(block + '\nreturn {' + names.join(',') + '};')();
-
-test('block is self-contained', () => {
-    assert.doesNotMatch(block, /imports\.|tile_St|tile_Clutter|global\.|utils_Main/);
-});
+const m = require('./cinnamon-loader').load('./lib/model/monitor.js');
 
 test('key is vendor|product|serial', () => {
     assert.equal(m.tile_monitor_key('DisplayPort-1', 'AOC', 'AG493UG7R4', '0x000002ee'), 'AOC|AG493UG7R4|0x000002ee');

@@ -16,6 +16,10 @@ fi
 
 mkdir -p "$DEST"
 cp "$SRC"/*.js "$SRC"/*.json "$SRC"/*.css "$SRC"/icon.png "$DEST/"
+# lib/ is a tree of module files; replace it wholesale, so an install over an
+# older version cannot mix new modules with stale ones the new code does not require.
+rm -rf "$DEST/lib"
+cp -R "$SRC/lib" "$DEST/lib"
 
 # Translations need gettext's msgfmt; without it the extension still works (English).
 if command -v msgfmt >/dev/null; then

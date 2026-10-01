@@ -1,26 +1,11 @@
 'use strict';
-// Tests the pure drop model of greenTile.js (marked block "drop-model"): zone
+// Tests the pure drop model (lib/model/drop.js): zone
 // detection on a drop target's cell, the new layout after a drag split, and the
-// minimum-size check. Extraction pattern like tests/layouts-model.test.js.
+// minimum-size check.
 const test = require('node:test');
 const assert = require('node:assert/strict');
-const fs = require('node:fs');
-const path = require('node:path');
 
-const src = fs.readFileSync(path.join(__dirname, '..', 'greenTile.js'), 'utf8');
-const extract = (name) => {
-    const match = src.match(new RegExp('// >>> ' + name + '[^\\n]*\\n([\\s\\S]*?)// <<< ' + name));
-    if (!match)
-        throw new Error(name + ' block not found in greenTile.js');
-    return match[1];
-};
-const dropBlock = extract('drop-model');
-const names = ['TILE_DROP_EDGE', 'tile_drop_zone', 'tile_drop_layout', 'tile_drop_fits'];
-const m = new Function(dropBlock + '\nreturn {' + names.join(',') + '};')();
-
-test('block is self-contained', () => {
-    assert.doesNotMatch(dropBlock, /imports\.|tile_St|tile_Clutter|global\.|utils_Main/);
-});
+const m = require('./cinnamon-loader').load('./lib/model/drop.js');
 
 test('zone: centre, four bands, corner by smaller relative distance, outside', () => {
     const c = [0, 0, 400, 200];

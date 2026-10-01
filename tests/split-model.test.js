@@ -1,24 +1,12 @@
 'use strict';
-// Tests the pure split model of greenTile.js (marked block "split-model"), extracted and
-// evaluated without Cinnamon, like fill-model and gap-model. A split stores the borders
+// Tests the pure split model (lib/model/split.js). A split stores the borders
 // of a filled layout as fractions: major = columns (kind "cols") or rows (kind "rows"),
 // minor = per column/row the cells inside it. Moving a border changes only the two
 // neighbouring parts; every part keeps a minimum size in pixels.
 const test = require('node:test');
 const assert = require('node:assert/strict');
-const fs = require('node:fs');
-const path = require('node:path');
 
-const src = fs.readFileSync(path.join(__dirname, '..', 'greenTile.js'), 'utf8');
-const match = src.match(/\/\/ >>> split-model[^\n]*\n([\s\S]*?)\/\/ <<< split-model/);
-if (!match)
-    throw new Error('split-model block not found in greenTile.js');
-const block = match[1];
-const names = ['tile_split_equal', 'tile_split_valid', 'tile_split_rects', 'tile_split_cell_at',
-    'tile_split_has_edge', 'tile_split_border_pos', 'tile_split_move', 'tile_split_key_target',
-    'tile_split_accel', 'tile_split_op_edges', 'tile_split_frame_edges', 'tile_sort_order',
-    'TILE_SPLIT_MIN_PX', 'TILE_SPLIT_STEP_MAX'];
-const m = new Function(block + '\nreturn {' + names.join(',') + '};')();
+const m = require('./cinnamon-loader').load('./lib/model/split.js');
 
 const area = [0, 0, 1000, 600];
 const near = (a, b, eps = 1e-9) => Math.abs(a - b) < eps;
@@ -26,10 +14,6 @@ const rectsNear = (actual, expected) => {
     assert.equal(actual.length, expected.length);
     actual.forEach((r, i) => r.forEach((v, k) => assert.ok(near(v, expected[i][k], 1e-6), `rect ${i}[${k}] ${v} != ${expected[i][k]}`)));
 };
-
-test('block is self-contained', () => {
-    assert.doesNotMatch(block, /imports\.|tile_St|tile_Clutter|global\.|utils_Main|Meta\./);
-});
 
 test('constants', () => {
     assert.equal(m.TILE_SPLIT_MIN_PX, 120);

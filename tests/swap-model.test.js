@@ -1,23 +1,10 @@
 'use strict';
-// Tests the pure swap model of greenTile.js (marked block "swap-model"), extracted and
-// evaluated without Cinnamon, like split-model and fill-model. Cells are rects
+// Tests the pure swap model (lib/model/swap.js). Cells are rects
 // [x, y, width, height] in placement order; dir is 'left'|'right'|'up'|'down'.
 const test = require('node:test');
 const assert = require('node:assert/strict');
-const fs = require('node:fs');
-const path = require('node:path');
 
-const src = fs.readFileSync(path.join(__dirname, '..', 'greenTile.js'), 'utf8');
-const match = src.match(/\/\/ >>> swap-model[^\n]*\n([\s\S]*?)\/\/ <<< swap-model/);
-if (!match)
-    throw new Error('swap-model block not found in greenTile.js');
-const block = match[1];
-const names = ['tile_swap_neighbor', 'tile_swap_landing_cell', 'tile_swap_chain_step'];
-const m = new Function(block + '\nreturn {' + names.join(',') + '};')();
-
-test('block is self-contained', () => {
-    assert.doesNotMatch(block, /imports\.|tile_St|tile_Clutter|global\.|utils_Main|Meta\./);
-});
+const m = require('./cinnamon-loader').load('./lib/model/swap.js');
 
 // Equal 2x2 grid on 1000x600 (placement order: row by row).
 const grid22 = [

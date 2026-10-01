@@ -10,9 +10,10 @@ const test = require('node:test');
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const path = require('node:path');
+const { load, cinnamonLoad, ROOT } = require('./cinnamon-loader');
 
-const greenTilePath = path.join(__dirname, '..', 'greenTile.js');
-const extensionPath = path.join(__dirname, '..', 'extension.js');
+const greenTilePath = path.join(ROOT, 'greenTile.js');
+const extensionPath = path.join(ROOT, 'extension.js');
 
 const stub = () => new Proxy(function () {}, {
     get: (t, p) => {
@@ -25,29 +26,11 @@ const stub = () => new Proxy(function () {}, {
 // In GJS 'imports' is a true global; greenTile.js binds names from it at load time.
 globalThis.imports = stub();
 
-const cinnamonLoad = (src, requireStub, filename) => {
-    const module = { exports: {} };
-    let body = `'use strict';${src};`;
-    // Deliberate superset simplification vs fileUtils.js: the auto-export scan
-    // ignores the importNames/giImportNames suppression lists. greenTile.js
-    // takes this path never (explicit module.exports below), extension.js only
-    // for harmless extra keys.
-    if (!/^module\.exports(\.[a-zA-Z0-9_$]+)?\s*=/m.test(body)) {
-        const varRegex = /^(?:'use strict';){0,}(const|var|let|function|class)\s+([a-zA-Z0-9_$]+)/gm;
-        let match;
-        while ((match = varRegex.exec(body)) != null)
-            body += `exports.${match[2]} = typeof ${match[2]} !== 'undefined' ? ${match[2]} : null;`;
-    }
-    body += `return module.exports;`;
-    const fn = new Function('require', 'exports', 'module', '__meta', '__dirname', '__filename', body);
-    return fn.call(module.exports, requireStub, module.exports, module, null, '.', filename);
-};
-
 test('greenTile.js exports exactly init/enable/disable via explicit module.exports', () => {
     const src = fs.readFileSync(greenTilePath, 'utf8');
     assert.match(src, /^module\.exports(\.[a-zA-Z0-9_$]+)?\s*=/m,
         'explicit module.exports required — without it Cinnamon auto-exports every top-level name');
-    const gtile = cinnamonLoad(src, () => { throw new Error('unexpected require'); }, 'greenTile.js');
+    const gtile = cinnamonLoad(src, load, 'greenTile.js');
     assert.deepEqual(Object.keys(gtile).sort(), ['disable', 'enable', 'init']);
     assert.equal(typeof gtile.init, 'function');
     assert.equal(typeof gtile.enable, 'function');
@@ -55,8 +38,7 @@ test('greenTile.js exports exactly init/enable/disable via explicit module.expor
 });
 
 test('extension.js reaches init/enable/disable through require("./greenTile")', () => {
-    const greenTile = cinnamonLoad(fs.readFileSync(greenTilePath, 'utf8'),
-        () => { throw new Error('unexpected require'); }, 'greenTile.js');
+    const greenTile = cinnamonLoad(fs.readFileSync(greenTilePath, 'utf8'), load, 'greenTile.js');
     const extSrc = fs.readFileSync(extensionPath, 'utf8');
     const ext = cinnamonLoad(extSrc, (p) => {
         assert.equal(p, './greenTile');

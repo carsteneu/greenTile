@@ -1,6 +1,6 @@
 'use strict';
-// Tests the pure accent model of greenTile.js (marked block "accent-model"),
-// extracted and evaluated without Cinnamon, like the other model blocks. It
+// Tests the pure accent model (lib/model/accent.js), loaded through the shared
+// Cinnamon-mimicking loader. It
 // parses the colorchooser value, decides whether a probed Cinnamon theme
 // accent is usable, derives all tones from one base and generates the accent
 // stylesheet. The default orange must survive the round trip unchanged.
@@ -9,23 +9,11 @@ const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const path = require('node:path');
 
-const src = fs.readFileSync(path.join(__dirname, '..', 'greenTile.js'), 'utf8');
-const match = src.match(/\/\/ >>> accent-model[^\n]*\n([\s\S]*?)\/\/ <<< accent-model/);
-if (!match)
-    throw new Error('accent-model block not found in greenTile.js');
-const block = match[1];
-const stateMatch = src.match(/\/\/ >>> state-model[^\n]*\n([\s\S]*?)\/\/ <<< state-model/);
-if (!stateMatch)
-    throw new Error('state-model block not found in greenTile.js');
-const stateBlock = stateMatch[1];
-const names = ['tile_accent_default', 'tile_accent_parse', 'tile_accent_from_probed', 'tile_accent_tones', 'tile_accent_css', 'tile_accent_is_own', 'tile_accent_probes', 'tile_accent_probe_first'];
-const stateNames = ['tile_state_default', 'tile_state_mode', 'tile_state_tones', 'tile_state_css'];
-// the state block builds on the accent block's HSL helpers, so both evaluate together
-const m = new Function(block + '\n' + stateBlock + '\nreturn {' + names.concat(stateNames).join(',') + '};')();
-
-test('blocks are self-contained', () => {
-    assert.doesNotMatch(block + stateBlock, /imports\.|tile_St|tile_Clutter|global\.|utils_Main/);
-});
+// the state model builds on the accent model's HSL helpers, so both load together
+const m = {
+    ...require('./cinnamon-loader').load('./lib/model/accent.js'),
+    ...require('./cinnamon-loader').load('./lib/model/state.js'),
+};
 
 test('default accent is today\'s orange', () => {
     assert.deepEqual(m.tile_accent_default, [255, 150, 64]);

@@ -1,24 +1,12 @@
 'use strict';
-// Tests the pure exclusion model of greenTile.js (marked block "exclude-model"),
-// extracted and evaluated without Cinnamon, like auto-model. Storage format: the
+// Tests the pure exclusion model (lib/model/exclude.js), loaded through the shared
+// Cinnamon-mimicking loader. Storage format: the
 // list setting "exclusions" of the settings dialog, rows
 // { match: "class" | "title" | "app", text: <non-empty string> }.
 const test = require('node:test');
 const assert = require('node:assert/strict');
-const fs = require('node:fs');
-const path = require('node:path');
 
-const src = fs.readFileSync(path.join(__dirname, '..', 'greenTile.js'), 'utf8');
-const match = src.match(/\/\/ >>> exclude-model[^\n]*\n([\s\S]*?)\/\/ <<< exclude-model/);
-if (!match)
-    throw new Error('exclude-model block not found in greenTile.js');
-const block = match[1];
-const names = ['tile_excl_rows_normalize', 'tile_excl_match', 'tile_excl_toggle_set', 'tile_excl_rows_append', 'tile_excl_app_options'];
-const m = new Function(block + '\nreturn {' + names.join(',') + '};')();
-
-test('block is self-contained', () => {
-    assert.doesNotMatch(block, /imports\.|tile_St|tile_Clutter|global\.|utils_Main/);
-});
+const m = require('./cinnamon-loader').load('./lib/model/exclude.js');
 
 test('rows_normalize tolerates anything that is not a list of valid rows', () => {
     assert.deepEqual(m.tile_excl_rows_normalize(undefined), []);

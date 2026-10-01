@@ -1,22 +1,10 @@
 'use strict';
-// Tests the pure signal-teardown helper of greenTile.js (marked block "teardown-model"),
-// extracted and evaluated without Cinnamon, like monitor-model. Fake targets stand in
+// Tests the pure signal-teardown helper (lib/model/teardown.js). Fake targets stand in
 // for workspace/screen objects; a throwing disconnect must not stop the loop.
 const test = require('node:test');
 const assert = require('node:assert/strict');
-const fs = require('node:fs');
-const path = require('node:path');
 
-const src = fs.readFileSync(path.join(__dirname, '..', 'greenTile.js'), 'utf8');
-const match = src.match(/\/\/ >>> teardown-model[^\n]*\n([\s\S]*?)\/\/ <<< teardown-model/);
-if (!match)
-    throw new Error('teardown-model block not found in greenTile.js');
-const block = match[1];
-const m = new Function(block + '\nreturn {tile_disconnect_each};')();
-
-test('block is self-contained', () => {
-    assert.doesNotMatch(block, /imports\.|tile_St|tile_Clutter|global\.|utils_Main/);
-});
+const m = require('./cinnamon-loader').load('./lib/model/teardown.js');
 
 test('disconnects every id of every entry', () => {
     const attempts = [];

@@ -1,29 +1,15 @@
 'use strict';
-// Tests the pure layouts model of greenTile.js (marked block "layouts-model"),
-// extracted and evaluated without Cinnamon, like auto-model. The block may use
-// tile_auto_list_map, so both blocks are evaluated together. Storage format: the
+// Tests the pure layouts model (lib/model/layouts.js), loaded through the shared
+// Cinnamon-mimicking loader. lib/model/layouts.js itself requires lib/model/auto.js
+// for tile_auto_list_map (Cinnamon-style root-relative path).
+// Storage format: the
 // string setting "layouts", JSON shaped
 // { "<monitor key>": { "<workspace number from 1 | *>": { preset?, auto? } } }.
 const test = require('node:test');
 const assert = require('node:assert/strict');
-const fs = require('node:fs');
-const path = require('node:path');
 
-const src = fs.readFileSync(path.join(__dirname, '..', 'greenTile.js'), 'utf8');
-const extract = (name) => {
-    const match = src.match(new RegExp('// >>> ' + name + '[^\\n]*\\n([\\s\\S]*?)// <<< ' + name));
-    if (!match)
-        throw new Error(name + ' block not found in greenTile.js');
-    return match[1];
-};
-const layoutsBlock = extract('layouts-model');
-const code = extract('auto-model') + '\n' + layoutsBlock;
-const names = ['tile_auto_list_map', 'tile_layouts_parse', 'tile_layouts_entry', 'tile_layouts_set', 'tile_layouts_migrate', 'tile_layouts_splits', 'tile_shape_valid', 'tile_layouts_shapes', 'tile_layout_resolve', 'tile_layouts_remove_preset'];
-const m = new Function(code + '\nreturn {' + names.join(',') + '};')();
-
-test('block is self-contained', () => {
-    assert.doesNotMatch(layoutsBlock, /imports\.|tile_St|tile_Clutter|global\.|utils_Main/);
-});
+const load = require('./cinnamon-loader').load;
+const m = { ...load('./lib/model/auto.js'), ...load('./lib/model/layouts.js') };
 
 test('parse accepts JSON objects, returns {} for empty and null for garbage', () => {
     assert.deepEqual(m.tile_layouts_parse('{"a":{}}'), { a: {} });
