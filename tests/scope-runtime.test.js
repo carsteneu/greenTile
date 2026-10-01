@@ -8,9 +8,14 @@ const test = require('node:test');
 const assert = require('node:assert/strict');
 const { Scope, createScope } = require('../lib/runtime/scope');
 
+// Fake SignalManager mirroring /usr/share/cinnamon/js/misc/signalManager.js:
+// storage entries [sigName, obj, callback, id], disconnect/disconnectAllSignals
+// release through obj.disconnect(id) in ONE throw-propagating loop and update
+// the storage only afterwards — exactly the behaviour destroy() must tolerate.
 const fakeSignalManager = () => {
     const storage = [];
     let nextId = 1;
+    const isConnected = (obj, id) => !obj.signalHandlerIsConnected || obj.signalHandlerIsConnected(id);
     return {
         storage,
         connectCalls: [],
@@ -21,8 +26,26 @@ const fakeSignalManager = () => {
             storage.push([sigName, obj, callback, id]);
             return id;
         },
+        getSignals(sigName, obj, callback) {
+            return storage.filter((x) => (!sigName || x[0] === sigName)
+                && (!obj || x[1] === obj)
+                && (!callback || x[2] === callback));
+        },
+        disconnect(sigName, obj, callback) {
+            const doomed = this.getSignals(sigName, obj, callback).filter(([, o, , id]) => isConnected(o, id));
+            for (const [, o, , id] of doomed)
+                o.disconnect(id);
+            for (const entry of doomed) {
+                const at = storage.indexOf(entry);
+                if (at !== -1)
+                    storage.splice(at, 1);
+            }
+        },
         disconnectAllSignals() {
             this.disconnectAllCalls += 1;
+            const doomed = storage.filter(([, o, , id]) => isConnected(o, id));
+            for (const [, o, , id] of doomed)
+                o.disconnect(id);
             storage.length = 0;
         },
     };
@@ -193,6 +216,36 @@ test('destroy works on an empty scope', () => {
     const { scope } = makeScope();
     scope.destroy();
     scope.destroy();
+});
+
+test('one throwing signal disconnect must not skip the remaining signals (tile_disconnect_each semantics)', () => {
+    const sm = fakeSignalManager();
+    const scope = new Scope({ signalManager: sm, mainloop: fakeMainloop(), glib: makeGlib() });
+    const released = [];
+    const healthy = (name) => ({
+        signalHandlerIsConnected: () => true,
+        disconnect(id) { released.push(name + ':' + id); },
+    });
+    const broken = {
+        signalHandlerIsConnected: () => true,
+        disconnect() { throw new Error('handler already gone'); },
+    };
+    scope.connect(healthy('first'), 'a', () => {});
+    scope.connect(broken, 'b', () => {});
+    scope.connect(healthy('third'), 'c', () => {});
+    scope.destroy();
+    assert.equal(released.length, 2, 'both healthy signals released');
+    assert.deepEqual(sm.storage.map(([, o]) => o), [broken], 'only the broken entry stays stored');
+});
+
+test('a throwing timer callback untracks the source and rethrows', () => {
+    const { scope, mainloop } = makeScope();
+    const id = scope.timeout(10, () => {
+        throw new Error('callback blew up');
+    });
+    assert.throws(() => mainloop.fire(id), /callback blew up/);
+    scope.destroy();
+    assert.equal(mainloop.removed.includes(id), false, 'dead source must not be removed again');
 });
 
 test('createScope returns a Scope with the same behaviour', () => {
