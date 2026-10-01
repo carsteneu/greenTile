@@ -351,6 +351,27 @@ test('minimal: fractional area, final sizes are integers, no overlap, minimum ke
     assert.ok(fr[0][1] + fr[0][3] <= fr[1][1], 'stacked cells do not overlap');
 });
 
+test('minimal: fractional-area bounds terminate, stay positive and deterministic', () => {
+    // usable areas are integer rects in production; this probe exercises the fp
+    // edge of the budget arithmetic that once starved the financing loop
+    const a = [10.6, 0, 1920.6, 600];
+    const s = { kind: 'cols', shape: [1, 1, 1, 1], major: [0.01, 0.4, 0.29, 0.3], minor: [[1], [1], [1], [1]] };
+    const out = m.splitMinimal('cols', [1, 1, 1, 1], s, a, 48, m.SPLIT_MIN_PX);
+    assert.ok(out, 'a correction is produced');
+    const fr = finals('cols', [1, 1, 1, 1], out, a, 48);
+    fr.forEach((r, i) => assert.ok(r[2] >= 119, `cell ${i} keeps the minimum up to the pre-existing fractional-area rounding: ${r[2]}`));
+    assert.deepEqual(m.splitMinimal('cols', [1, 1, 1, 1], s, a, 48, m.SPLIT_MIN_PX), out, 'deterministic repeat');
+});
+
+test('minimal: a degenerate span (loss exceeds the axis) never yields negative parts', () => {
+    const a = [0, 0, 100, 600];
+    const shape = [1, 1, 1, 1, 1, 1, 1, 1, 1, 1];
+    const out = m.splitMinimal('cols', shape, null, a, 48, m.SPLIT_MIN_PX);
+    assert.ok(out, 'still tiles in some form');
+    const fr = finals('cols', shape, out, a, 48);
+    fr.forEach((r, i) => assert.ok(r[2] >= 1, `cell ${i} keeps at least 1 px: ${r[2]}`));
+});
+
 test('minimal: surfacing the corrected split stays valid and preserves kind/shape', () => {
     const s = { kind: 'cols', shape: [1, 1], major: [120 / 2000, 1880 / 2000], minor: [[1], [1]] };
     const a = [0, 0, 2000, 600];
