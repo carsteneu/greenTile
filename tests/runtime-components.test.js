@@ -5,8 +5,7 @@
 // wait (pending/timer/started) that outlives every App recreation. Monitors is
 // the per-App DisplayConfig registry: epoch guard first, Gio.Cancellable as
 // the second line of teardown. Cinnamon surface rides on injected fakes; log
-// texts and timings stay byte-identical with the module code they replaced
-// (greenTile.js tile_settle_*/tile_monitors_*).
+// texts and timings are pinned by these tests.
 const test = require('node:test');
 const assert = require('node:assert/strict');
 // Components are loaded through the shared loader: their internal requires are
