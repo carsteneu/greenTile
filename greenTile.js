@@ -38,21 +38,20 @@
 // Pure model blocks, extracted to lib/model/. Paths are root-relative on purpose:
 // Cinnamon resolves every nested require against the xlet root (fileUtils.js).
 const { tile_excl_rows_normalize, tile_excl_match, tile_excl_rows_append, tile_excl_app_options, tile_excl_toggle_set } = require('./lib/model/exclude');
-const { tile_monitor_key, tile_monitor_fallback_key, tile_monitor_states, tile_monitor_ws_key, tile_monitor_labels } = require('./lib/model/monitor');
+const { tile_monitor_fallback_key, tile_monitor_states, tile_monitor_ws_key, tile_monitor_labels } = require('./lib/model/monitor');
 const { TILE_GAP_MAX, TILE_GAP_STEP, tile_gap_value, tile_gap_cell } = require('./lib/model/gap');
 const { tile_single_fill, tile_single_layout } = require('./lib/model/single');
 const { tile_disconnect_each } = require('./lib/model/teardown');
 const { tile_pending_registry } = require('./lib/model/lifecycle');
-const { tile_fill_stacks, TILE_AUTO_ROW_MAX, tile_auto_rows, tile_auto_narrow_stacks } = require('./lib/model/fill');
-const { TILE_SPLIT_MIN_PX, TILE_SPLIT_STEP_MAX, tile_split_equal, tile_split_norm, tile_split_valid, tile_split_parts, tile_split_rects, tile_split_cell_at, tile_split_edge_ref, tile_split_has_edge, tile_split_axis, tile_split_border_pos, tile_split_move, tile_split_key_target, tile_split_accel, tile_split_op_edges, tile_split_frame_edges, tile_sort_order } = require('./lib/model/split');
-const { TILE_DROP_EDGE, tile_drop_zone, tile_drop_layout, tile_drop_fits } = require('./lib/model/drop');
-const { tile_auto_row_ok, tile_auto_list_map, tile_auto_ws_active, tile_auto_list_set } = require('./lib/model/auto');
-const { tile_layouts_parse, tile_layouts_entry, tile_layouts_splits, tile_layouts_shapes, tile_layouts_set, tile_layouts_remove_preset, tile_layouts_migrate, tile_shape_valid, tile_layout_resolve } = require('./lib/model/layouts');
-const { tile_swap_dir_ok, tile_swap_axis, tile_swap_sign, tile_swap_overlap, tile_swap_center, tile_swap_neighbor, tile_swap_landing_cell, tile_swap_chain_step } = require('./lib/model/swap');
+const { tile_fill_stacks, tile_auto_rows, tile_auto_narrow_stacks } = require('./lib/model/fill');
+const { TILE_SPLIT_MIN_PX, tile_split_valid, tile_split_rects, tile_split_cell_at, tile_split_border_pos, tile_split_move, tile_split_key_target, tile_split_accel, tile_split_op_edges, tile_split_frame_edges, tile_sort_order } = require('./lib/model/split');
+const { tile_drop_zone, tile_drop_layout, tile_drop_fits } = require('./lib/model/drop');
+const { tile_layouts_parse, tile_layouts_entry, tile_layouts_splits, tile_layouts_shapes, tile_layouts_set, tile_layouts_remove_preset, tile_layouts_migrate, tile_layout_resolve } = require('./lib/model/layouts');
+const { tile_swap_neighbor, tile_swap_landing_cell, tile_swap_chain_step } = require('./lib/model/swap');
 const { tile_focus_monitor_step, tile_focus_monitor_pick } = require('./lib/model/focus');
-const { tile_editor_cols, tile_editor_rows, tile_editor_min_floor, tile_editor_min_ceiling, tile_editor_clamp_int, tile_editor_clamp, tile_editor_paint, tile_editor_paint_range, tile_editor_remove, tile_editor_sort, tile_editor_add_rule, tile_editor_delete_rule, tile_editor_step_min, tile_editor_validate, tile_editor_new_id, tile_editor_commit, tile_editor_delete_preset } = require('./lib/model/editor');
-const { TILE_PANEL_MIN, tile_panel_size_ok, tile_panel_size_obj, tile_panel_size_parse, tile_panel_size_set, tile_panel_size_clamp } = require('./lib/model/panel-size');
-const { tile_accent_default, tile_accent_parse, tile_accent_is_own, tile_accent_from_probed, tile_accent_probes, tile_accent_probe_first, tile_accent_hsl, tile_accent_rgb, tile_accent_text_on, tile_accent_tones, tile_accent_css } = require('./lib/model/accent');
+const { tile_editor_cols, tile_editor_rows, tile_editor_min_floor, tile_editor_clamp, tile_editor_paint, tile_editor_paint_range, tile_editor_remove, tile_editor_sort, tile_editor_add_rule, tile_editor_delete_rule, tile_editor_step_min, tile_editor_validate, tile_editor_new_id, tile_editor_commit, tile_editor_delete_preset } = require('./lib/model/editor');
+const { TILE_PANEL_MIN, tile_panel_size_parse, tile_panel_size_set, tile_panel_size_clamp } = require('./lib/model/panel-size');
+const { tile_accent_default, tile_accent_parse, tile_accent_is_own, tile_accent_from_probed, tile_accent_probe_first, tile_accent_tones, tile_accent_css } = require('./lib/model/accent');
 const { tile_state_default, tile_state_mode, tile_state_tones, tile_state_css } = require('./lib/model/state');
 const { tile_theme_resolve, tile_theme_toggle_target } = require('./lib/model/theme');
 
