@@ -1,0 +1,152 @@
+/*
+ * Shared data shapes of greenTile for checkJs — ambient typedefs (this file is
+ * NOT a module, so the types are global and usable from JSDoc without import()).
+ * Dev-only: never part of the release zip. Everything here mirrors the runtime
+ * shapes the models parse and produce (see the per-file comments in lib/model).
+ */
+
+/** Meta.Window as far as greenTile touches it — a GI struct, deliberately open. */
+type CinnamonWindow = AnyRecord;
+/** A Cinnamon monitor / layout actor object ( layoutManager.monitors[i] ). */
+type CinnamonMonitor = AnyRecord;
+
+/** Screen rectangle [x, y, w, h] in px (also window frames and cells). */
+type Rect = [number, number, number, number];
+
+/** Setting "layouts" key of a monitor: vendor|product|serial (+|connector on zero serial). */
+type MonitorKey = string;
+/** Workspace key inside a monitor entry of "layouts": the ws number from 1 or '*'. */
+type WsKey = string;
+
+/** Movable-border model of a filled layout; fractions sum to 1 per axis. */
+type Split = {
+    kind: 'cols' | 'rows';
+    shape: number[];
+    major: number[];
+    minor: number[][];
+};
+
+/** Dragged-shape override as stored in "layouts": { kind, shape }. */
+type DragLayout = {
+    kind: 'cols' | 'rows';
+    shape: number[];
+};
+
+/** A preset rule: applies from `min` windows on, `stacks` = windows per column. */
+type Rule = {
+    min: number;
+    stacks: number[];
+};
+
+/** A preset as stored in the "presets" setting. */
+type Preset = {
+    id: string;
+    name: string;
+    rules: Rule[];
+    isNew?: boolean;
+};
+
+/** A resolved tiling layout: base grid + optional preset rule metadata (retile logs). */
+type Layout = DragLayout & {
+    rule?: Rule;
+};
+
+/** border-frame reference of a cell edge as produced by splitEdgeRef. */
+type EdgeRef = {
+    list: 'major' | 'minor';
+    i: number;
+    b: number;
+};
+
+/** Resize-hotkey repeat state (lib/model/split.js splitAccel). */
+type AccelState = {
+    action: string;
+    last: number;
+    step: number;
+};
+
+/** Per-layout assignment entry of one (monitor, workspace) in "layouts". */
+type LayoutsEntry = {
+    preset?: string;
+    auto?: boolean;
+    splits?: Record<string, Split>;
+    shapes?: Record<string, DragLayout>;
+};
+
+/** The whole "layouts" setting object: monitor key -> ws key -> entry. */
+type LayoutsMap = Record<MonitorKey, Record<WsKey, LayoutsEntry>>;
+
+/** Reading-order item of lib/model/split.js sortOrder (rect + index + centre). */
+type SortItem = { i: number; r: Rect; c: number };
+
+/** Settings access as greenTile uses it (values are JSON data / strings). */
+type SettingsFacade = {
+    getValue(key: string): any;
+    setValue(key: string, value: any): void;
+    bind(key: string, prop: string, cb: () => void, data?: any): void;
+    setOptions(options: {}, profile?: any): void;
+    finalize(): void;
+};
+
+/** The settings Config wiring (lib/app/config.js) — surface used across lib/. */
+type ConfigFacade = {
+    settings: SettingsFacade;
+};
+
+/** Ops facade the preset panel and editor (lib/ui) work through (app.ops). */
+type OpsFacade = {
+    focusWindow(): CinnamonWindow | null;
+    focusMonitorIndex(): number;
+    collectWindows(monitor: CinnamonMonitor, focus: CinnamonWindow | null, ws?: number): CinnamonWindow[];
+    layoutFor(app: AppFacade, monitorIndex: number, wsIndex: number): { preset: Preset | null; auto: boolean };
+    layoutSet(app: AppFacade, monitorIndex: number, wsIndex: number, patch: {}): void;
+    retileMonitor(app: AppFacade, monitorIndex: number, focused: CinnamonWindow | null, animate?: boolean, wsIndex?: number | null): void;
+    presetsRead(app: AppFacade): Preset[];
+    presetsWrite(app: AppFacade, presets: Preset[]): void;
+    gap(app: AppFacade): number;
+    rulesPick(rules: Rule[], count: number): Rule | null;
+    windowCount(app: AppFacade): number;
+    rebuild(app: AppFacade | null): void;
+};
+
+/** Auto-tiling facade (lib/runtime/auto.js). */
+type AutoFacade = {
+    scheduleAll(app: AppFacade, delayMs: number): void;
+    scheduleMonitor(app: AppFacade, monitorIndex: number, delayMs: number): void;
+    pendingTake(monitorIndex: number): Set<number>;
+};
+
+/** Split-runtime facade (lib/runtime/split.js). */
+type SplitFacade = {
+    for(app: AppFacade, monitorIndex: number, wsIndex: number, windowCount: number, layout: Layout): Split | null;
+    onResizeEnd(app: AppFacade, win: CinnamonWindow, op: string): void;
+};
+
+/** Monitor registry facade (lib/runtime/monitors.js). */
+type MonitorsFacade = {
+    ready: boolean;
+    keys: MonitorKey[];
+    labels: string[];
+    wsKey(monitorIndex: number, wsIndex: number): WsKey;
+};
+
+/** Exclusion facade (lib/runtime/exclusions.js). */
+type ExclFacade = {
+    isExcluded(win: CinnamonWindow): boolean;
+    removeToggle(seq: number): void;
+    clearToggles(): void;
+};
+
+/** App facade: the wired component set every function under lib/ receives. */
+type AppFacade = {
+    config: ConfigFacade;
+    auto: AutoFacade;
+    split: SplitFacade;
+    monitors: MonitorsFacade;
+    excl: ExclFacade;
+    ops: OpsFacade;
+    panel: AnyRecord;
+};
+
+/** gettext binding, lib/ui/i18n.js */
+type TranslateFn = (msgid: string) => string;
