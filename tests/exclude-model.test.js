@@ -9,14 +9,14 @@ const assert = require('node:assert/strict');
 const m = require('./cinnamon-loader').load('./lib/model/exclude.js');
 
 test('rows_normalize tolerates anything that is not a list of valid rows', () => {
-    assert.deepEqual(m.tile_excl_rows_normalize(undefined), []);
-    assert.deepEqual(m.tile_excl_rows_normalize(null), []);
-    assert.deepEqual(m.tile_excl_rows_normalize('[]'), []);
-    assert.deepEqual(m.tile_excl_rows_normalize({ match: 'class', text: 'x' }), []);
+    assert.deepEqual(m.exclRowsNormalize(undefined), []);
+    assert.deepEqual(m.exclRowsNormalize(null), []);
+    assert.deepEqual(m.exclRowsNormalize('[]'), []);
+    assert.deepEqual(m.exclRowsNormalize({ match: 'class', text: 'x' }), []);
 });
 
 test('rows_normalize drops invalid, empty and unknown-match rows', () => {
-    assert.deepEqual(m.tile_excl_rows_normalize([
+    assert.deepEqual(m.exclRowsNormalize([
         null,
         ' nonsense',
         { match: 'class', text: '' },
@@ -29,14 +29,14 @@ test('rows_normalize drops invalid, empty and unknown-match rows', () => {
 });
 
 test('rows_normalize trims the text and keeps class and title rows', () => {
-    assert.deepEqual(m.tile_excl_rows_normalize([
+    assert.deepEqual(m.exclRowsNormalize([
         { match: 'class', text: ' Firefox ' },
         { match: 'title', text: 'x' },
     ]), [{ match: 'class', text: 'Firefox' }, { match: 'title', text: 'x' }]);
 });
 
 test('rows_normalize keeps app rows', () => {
-    assert.deepEqual(m.tile_excl_rows_normalize([
+    assert.deepEqual(m.exclRowsNormalize([
         { match: 'app', text: ' org.gimp.GIMP.desktop:flatpak ' },
         { match: 'app', text: '' },
         { match: 'app' },
@@ -45,83 +45,83 @@ test('rows_normalize keeps app rows', () => {
 
 test('match: class equals the wm class or the instance, case-insensitive', () => {
     const rows = [{ match: 'class', text: 'Firefox' }];
-    assert.equal(m.tile_excl_match('firefox', 'firefox', 'Any title', rows), true);
-    assert.equal(m.tile_excl_match('FIREFOX', 'FIREFOX', 'Any title', rows), true);
-    assert.equal(m.tile_excl_match('firefox-developer', 'firefox', 'Any title', rows), true);
-    assert.equal(m.tile_excl_match('Firefox Developer', 'Firefox Developer', 'Any', rows), false);
-    assert.equal(m.tile_excl_match('terminal', 'xterm', 'Any', rows), false);
+    assert.equal(m.exclMatch('firefox', 'firefox', 'Any title', rows), true);
+    assert.equal(m.exclMatch('FIREFOX', 'FIREFOX', 'Any title', rows), true);
+    assert.equal(m.exclMatch('firefox-developer', 'firefox', 'Any title', rows), true);
+    assert.equal(m.exclMatch('Firefox Developer', 'Firefox Developer', 'Any', rows), false);
+    assert.equal(m.exclMatch('terminal', 'xterm', 'Any', rows), false);
 });
 
 test('match: title contains the text, case-insensitive', () => {
     const rows = [{ match: 'title', text: 'vim - ~/FILE' }];
-    assert.equal(m.tile_excl_match('gvim', 'gvim', 'vim - ~/file.txt', rows), true);
-    assert.equal(m.tile_excl_match('gvim', 'gvim', 'Vim - other', rows), false);
-    assert.equal(m.tile_excl_match('gvim', 'gvim', null, rows), false);
+    assert.equal(m.exclMatch('gvim', 'gvim', 'vim - ~/file.txt', rows), true);
+    assert.equal(m.exclMatch('gvim', 'gvim', 'Vim - other', rows), false);
+    assert.equal(m.exclMatch('gvim', 'gvim', null, rows), false);
 });
 
 test('match: app equals the app id, case-insensitive; null never matches', () => {
     const rows = [{ match: 'app', text: 'org.gimp.GIMP.desktop:flatpak' }];
-    assert.equal(m.tile_excl_match('Gimp', 'gimp', 'Any title', rows, 'org.gimp.GIMP.desktop:flatpak'), true);
-    assert.equal(m.tile_excl_match('Gimp', 'gimp', 'Any title', rows, 'ORG.GIMP.GIMP.DESKTOP:FLATPAK'), true);
-    assert.equal(m.tile_excl_match('Gimp', 'gimp', 'Any title', rows, 'org.gimp.GIMP.desktop'), false);
-    assert.equal(m.tile_excl_match('Gimp', 'gimp', 'Any title', rows, null), false);
-    assert.equal(m.tile_excl_match('Gimp', 'gimp', 'Any title', rows, 42), false);
-    assert.equal(m.tile_excl_match('gimp', 'gimp', 'x', rows, 'org.gimp.GIMP.desktop:flatpak'), true);
-    assert.equal(m.tile_excl_match('Gimp', 'gimp', 'Any title', rows, 'random.desktop'), false);
+    assert.equal(m.exclMatch('Gimp', 'gimp', 'Any title', rows, 'org.gimp.GIMP.desktop:flatpak'), true);
+    assert.equal(m.exclMatch('Gimp', 'gimp', 'Any title', rows, 'ORG.GIMP.GIMP.DESKTOP:FLATPAK'), true);
+    assert.equal(m.exclMatch('Gimp', 'gimp', 'Any title', rows, 'org.gimp.GIMP.desktop'), false);
+    assert.equal(m.exclMatch('Gimp', 'gimp', 'Any title', rows, null), false);
+    assert.equal(m.exclMatch('Gimp', 'gimp', 'Any title', rows, 42), false);
+    assert.equal(m.exclMatch('gimp', 'gimp', 'x', rows, 'org.gimp.GIMP.desktop:flatpak'), true);
+    assert.equal(m.exclMatch('Gimp', 'gimp', 'Any title', rows, 'random.desktop'), false);
 });
 
 test('match: app also matches the rule app StartupWMClass against the window class, case-insensitive', () => {
     const rows = [{ match: 'app', text: 'anytype.desktop' }];
     const classes = { 'anytype.desktop': 'anytype' };
     // WindowTracker may map the window to a NoDisplay sibling desktop of the same program
-    assert.equal(m.tile_excl_match('anytype', 'anytype', 'Anytype', rows, 'anytype-xwayland.desktop', classes), true);
+    assert.equal(m.exclMatch('anytype', 'anytype', 'Anytype', rows, 'anytype-xwayland.desktop', classes), true);
     const brave = [{ match: 'app', text: 'com.brave.Browser.desktop' }];
     const braveClasses = { 'com.brave.Browser.desktop': 'brave-browser' };
-    assert.equal(m.tile_excl_match('Brave-browser', 'Brave-browser', 'Brave', brave, 'com.brave.Browser.desktop', braveClasses), true);
-    assert.equal(m.tile_excl_match('BRAVE-BROWSER', null, null, brave, null, braveClasses), true);
+    assert.equal(m.exclMatch('Brave-browser', 'Brave-browser', 'Brave', brave, 'com.brave.Browser.desktop', braveClasses), true);
+    assert.equal(m.exclMatch('BRAVE-BROWSER', null, null, brave, null, braveClasses), true);
 });
 
 test('match: app StartupWMClass compares the window instance too', () => {
     const rows = [{ match: 'app', text: 'foo.desktop' }];
     const classes = { 'foo.desktop': 'Foo' };
-    assert.equal(m.tile_excl_match(null, 'foo', 'x', rows, 'other.desktop', classes), true);
-    assert.equal(m.tile_excl_match(null, 'other-instance', 'x', rows, 'other.desktop', classes), false);
+    assert.equal(m.exclMatch(null, 'foo', 'x', rows, 'other.desktop', classes), true);
+    assert.equal(m.exclMatch(null, 'other-instance', 'x', rows, 'other.desktop', classes), false);
 });
 
 test('match: app StartupWMClass mismatch with a different app id does not match', () => {
     const rows = [{ match: 'app', text: 'anytype.desktop' }];
     const classes = { 'anytype.desktop': 'anytype' };
-    assert.equal(m.tile_excl_match('other-class', 'other-class', 'x', rows, 'elsewhere.desktop', classes), false);
+    assert.equal(m.exclMatch('other-class', 'other-class', 'x', rows, 'elsewhere.desktop', classes), false);
 });
 
 test('match: app row with null StartupWMClass falls back to id compare only', () => {
     const rows = [{ match: 'app', text: 'SciTE.desktop' }];
     const classes = { 'SciTE.desktop': null };
-    assert.equal(m.tile_excl_match('SciTE', 'SciTE', 'x', rows, 'other.desktop', classes), false);
-    assert.equal(m.tile_excl_match('SciTE', 'SciTE', 'x', rows, 'SciTE.desktop', classes), true);
+    assert.equal(m.exclMatch('SciTE', 'SciTE', 'x', rows, 'other.desktop', classes), false);
+    assert.equal(m.exclMatch('SciTE', 'SciTE', 'x', rows, 'SciTE.desktop', classes), true);
 });
 
 test('match: app row tolerates a missing or empty appClasses map (id only)', () => {
     const rows = [{ match: 'app', text: 'org.gimp.GIMP.desktop:flatpak' }];
-    assert.equal(m.tile_excl_match('gimp', 'gimp', 'x', rows, 'org.gimp.GIMP.desktop:flatpak'), true);
-    assert.equal(m.tile_excl_match('gimp', 'gimp', 'x', rows, 'org.gimp.GIMP.desktop:flatpak', undefined), true);
-    assert.equal(m.tile_excl_match('Gimp', 'gimp', 'x', rows, null, {}), false);
+    assert.equal(m.exclMatch('gimp', 'gimp', 'x', rows, 'org.gimp.GIMP.desktop:flatpak'), true);
+    assert.equal(m.exclMatch('gimp', 'gimp', 'x', rows, 'org.gimp.GIMP.desktop:flatpak', undefined), true);
+    assert.equal(m.exclMatch('Gimp', 'gimp', 'x', rows, null, {}), false);
 });
 
 test('rows_append appends a normalized app row only once', () => {
     assert.deepEqual(
-        m.tile_excl_rows_append([{ match: 'class', text: 'Firefox' }], 'org.gimp.GIMP.desktop:flatpak'),
+        m.exclRowsAppend([{ match: 'class', text: 'Firefox' }], 'org.gimp.GIMP.desktop:flatpak'),
         [{ match: 'class', text: 'Firefox' }, { match: 'app', text: 'org.gimp.GIMP.desktop:flatpak' }]);
-    const once = m.tile_excl_rows_append(undefined, 'org.gimp.GIMP.desktop:flatpak');
-    assert.deepEqual(m.tile_excl_rows_append(once, 'org.gimp.GIMP.desktop:flatpak'), once);
-    assert.deepEqual(m.tile_excl_rows_append([{ match: 'class', text: 'org.gimp.GIMP.desktop:flatpak' }], 'org.gimp.GIMP.desktop:flatpak').length, 2);
-    assert.deepEqual(m.tile_excl_rows_append([{ match: 'app', text: 'other.desktop' }], 'org.gimp.GIMP.desktop:flatpak').length, 2);
-    assert.deepEqual(m.tile_excl_rows_append([], '  org.gimp.GIMP.desktop:flatpak  '),
+    const once = m.exclRowsAppend(undefined, 'org.gimp.GIMP.desktop:flatpak');
+    assert.deepEqual(m.exclRowsAppend(once, 'org.gimp.GIMP.desktop:flatpak'), once);
+    assert.deepEqual(m.exclRowsAppend([{ match: 'class', text: 'org.gimp.GIMP.desktop:flatpak' }], 'org.gimp.GIMP.desktop:flatpak').length, 2);
+    assert.deepEqual(m.exclRowsAppend([{ match: 'app', text: 'other.desktop' }], 'org.gimp.GIMP.desktop:flatpak').length, 2);
+    assert.deepEqual(m.exclRowsAppend([], '  org.gimp.GIMP.desktop:flatpak  '),
         [{ match: 'app', text: 'org.gimp.GIMP.desktop:flatpak' }]);
 });
 
 test('app_options: placeholder first, then label to id sorted by name', () => {
-    const options = m.tile_excl_app_options([
+    const options = m.exclAppOptions([
         { id: 'b.desktop', name: 'Brave' },
         null,
         { id: '', name: 'No id' },
@@ -134,10 +134,10 @@ test('app_options: placeholder first, then label to id sorted by name', () => {
     assert.equal(options['Add application …'], 'picker');
     assert.equal(options['Brave'], 'b.desktop');
     assert.equal(options['Terminal'], 'z.desktop');
-    const empty = m.tile_excl_app_options([], 'Add application …');
+    const empty = m.exclAppOptions([], 'Add application …');
     assert.deepEqual(Object.keys(empty), ['Add application …']);
     assert.equal(empty['Add application …'], 'picker');
-    const hostile = m.tile_excl_app_options([{ id: 'p.desktop', name: '__proto__' }, { id: 'c.desktop', name: 'constructor' }], 'Add application …');
+    const hostile = m.exclAppOptions([{ id: 'p.desktop', name: '__proto__' }, { id: 'c.desktop', name: 'constructor' }], 'Add application …');
     assert.equal(hostile.__proto__, 'p.desktop');
     assert.equal(hostile.constructor, 'c.desktop');
     assert.deepEqual(Object.keys(hostile), ['Add application …', '__proto__', 'constructor']);
@@ -145,18 +145,18 @@ test('app_options: placeholder first, then label to id sorted by name', () => {
 
 test('match: any row wins, null fields never match', () => {
     const rows = [{ match: 'class', text: 'Firefox' }, { match: 'title', text: 'vim' }];
-    assert.equal(m.tile_excl_match('gvim', 'gvim', 'vim - x', rows), true);
-    assert.equal(m.tile_excl_match('firefox', 'firefox', null, rows), true);
-    assert.equal(m.tile_excl_match(null, null, null, rows), false);
-    assert.equal(m.tile_excl_match('gvim', 'gvim', 'hello', rows), false);
+    assert.equal(m.exclMatch('gvim', 'gvim', 'vim - x', rows), true);
+    assert.equal(m.exclMatch('firefox', 'firefox', null, rows), true);
+    assert.equal(m.exclMatch(null, null, null, rows), false);
+    assert.equal(m.exclMatch('gvim', 'gvim', 'hello', rows), false);
 });
 
 test('toggle_set adds, removes and tolerates unknown states', () => {
     const map = new Map();
-    m.tile_excl_toggle_set(map, 7, true);
+    m.exclToggleSet(map, 7, true);
     assert.equal(map.get(7), true);
-    m.tile_excl_toggle_set(map, 7, false);
+    m.exclToggleSet(map, 7, false);
     assert.equal(map.has(7), false);
-    m.tile_excl_toggle_set(map, 8, false);
+    m.exclToggleSet(map, 8, false);
     assert.equal(map.has(8), false);
 });

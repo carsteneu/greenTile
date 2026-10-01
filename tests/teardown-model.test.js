@@ -9,7 +9,7 @@ const m = require('./cinnamon-loader').load('./lib/model/teardown.js');
 test('disconnects every id of every entry', () => {
     const attempts = [];
     const fake = () => ({ disconnect: (id) => attempts.push(id) });
-    m.tile_disconnect_each([
+    m.disconnectEach([
         [fake(), 11, 12],
         [fake(), 21],
     ]);
@@ -24,7 +24,7 @@ test('a throwing disconnect does not stop the loop', () => {
         if (gone.has(id))
             throw new Error('signal was already gone');
     } });
-    m.tile_disconnect_each([
+    m.disconnectEach([
         [fake(), 11, 12, 13],
         [fake(), 21],
     ]);

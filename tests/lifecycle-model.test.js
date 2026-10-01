@@ -10,12 +10,12 @@ const path = require('node:path');
 const m = require('./cinnamon-loader').load('./lib/model/lifecycle.js');
 
 test('a fresh token is current', () => {
-    const pending = m.tile_pending_registry();
+    const pending = m.pendingRegistry();
     assert.equal(pending.is_current(pending.begin()), true);
 });
 
 test('a newer begin supersedes an older token', () => {
-    const pending = m.tile_pending_registry();
+    const pending = m.pendingRegistry();
     const first = pending.begin();
     const second = pending.begin();
     assert.equal(pending.is_current(first), false);
@@ -23,14 +23,14 @@ test('a newer begin supersedes an older token', () => {
 });
 
 test('invalidate drops the pending token (teardown)', () => {
-    const pending = m.tile_pending_registry();
+    const pending = m.pendingRegistry();
     const token = pending.begin();
     pending.invalidate();
     assert.equal(pending.is_current(token), false);
 });
 
 test('invalidate drops even the newest token after repeated begins', () => {
-    const pending = m.tile_pending_registry();
+    const pending = m.pendingRegistry();
     pending.begin();
     const last = pending.begin();
     pending.invalidate();
@@ -38,14 +38,14 @@ test('invalidate drops even the newest token after repeated begins', () => {
 });
 
 test('after invalidate a new begin is current again (disable -> enable)', () => {
-    const pending = m.tile_pending_registry();
+    const pending = m.pendingRegistry();
     pending.begin();
     pending.invalidate();
     assert.equal(pending.is_current(pending.begin()), true);
 });
 
 test('repeated invalidate stays invalidated', () => {
-    const pending = m.tile_pending_registry();
+    const pending = m.pendingRegistry();
     const token = pending.begin();
     pending.invalidate();
     pending.invalidate();

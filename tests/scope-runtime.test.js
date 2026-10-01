@@ -3,7 +3,7 @@
 // injected SignalManager-compatible object, tracks mainloop and GLib timers
 // plus extra cleanup callbacks, and releases everything in destroy() —
 // idempotent and per-entry fault tolerant (a throwing entry must not skip
-// the rest, mirroring tile_disconnect_each semantics).
+// the rest, mirroring disconnectEach semantics).
 const test = require('node:test');
 const assert = require('node:assert/strict');
 const { Scope, createScope } = require('../lib/runtime/scope');
@@ -220,7 +220,7 @@ test('destroy works on an empty scope', () => {
     scope.destroy();
 });
 
-test('one throwing signal disconnect must not skip the remaining signals (tile_disconnect_each semantics)', () => {
+test('one throwing signal disconnect must not skip the remaining signals (disconnectEach semantics)', () => {
     const sm = fakeSignalManager();
     const scope = new Scope({ signalManager: sm, mainloop: fakeMainloop(), glib: makeGlib() });
     const released = [];

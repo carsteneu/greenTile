@@ -13,15 +13,15 @@ const grid22 = [
 ];
 
 test('neighbor: 2x2 grid in all directions', () => {
-    assert.equal(m.tile_swap_neighbor(grid22, 0, 'right'), 1);
-    assert.equal(m.tile_swap_neighbor(grid22, 1, 'left'), 0);
-    assert.equal(m.tile_swap_neighbor(grid22, 0, 'down'), 2);
-    assert.equal(m.tile_swap_neighbor(grid22, 2, 'up'), 0);
-    assert.equal(m.tile_swap_neighbor(grid22, 0, 'up'), null);
-    assert.equal(m.tile_swap_neighbor(grid22, 0, 'left'), null);
-    assert.equal(m.tile_swap_neighbor(grid22, 3, 'down'), null);
-    assert.equal(m.tile_swap_neighbor(grid22, 3, 'right'), null);
-    assert.equal(m.tile_swap_neighbor([grid22[0]], 0, 'right'), null);
+    assert.equal(m.swapNeighbor(grid22, 0, 'right'), 1);
+    assert.equal(m.swapNeighbor(grid22, 1, 'left'), 0);
+    assert.equal(m.swapNeighbor(grid22, 0, 'down'), 2);
+    assert.equal(m.swapNeighbor(grid22, 2, 'up'), 0);
+    assert.equal(m.swapNeighbor(grid22, 0, 'up'), null);
+    assert.equal(m.swapNeighbor(grid22, 0, 'left'), null);
+    assert.equal(m.swapNeighbor(grid22, 3, 'down'), null);
+    assert.equal(m.swapNeighbor(grid22, 3, 'right'), null);
+    assert.equal(m.swapNeighbor([grid22[0]], 0, 'right'), null);
 });
 
 // cols [2,3]: two windows on the left, three on the right (unequal heights).
@@ -32,14 +32,14 @@ const cols23 = [
 
 test('neighbor: best perpendicular overlap wins at equal distance', () => {
     // right from the top-left cell: both right cells overlap, the top one more
-    assert.equal(m.tile_swap_neighbor(cols23, 0, 'right'), 2);
+    assert.equal(m.swapNeighbor(cols23, 0, 'right'), 2);
     // right from the bottom-left cell: the bottom-right cell overlaps most
-    assert.equal(m.tile_swap_neighbor(cols23, 1, 'right'), 4);
+    assert.equal(m.swapNeighbor(cols23, 1, 'right'), 4);
     // up/down inside a column
-    assert.equal(m.tile_swap_neighbor(cols23, 0, 'down'), 1);
-    assert.equal(m.tile_swap_neighbor(cols23, 1, 'up'), 0);
-    assert.equal(m.tile_swap_neighbor(cols23, 2, 'down'), 3);
-    assert.equal(m.tile_swap_neighbor(cols23, 4, 'up'), 3);
+    assert.equal(m.swapNeighbor(cols23, 0, 'down'), 1);
+    assert.equal(m.swapNeighbor(cols23, 1, 'up'), 0);
+    assert.equal(m.swapNeighbor(cols23, 2, 'down'), 3);
+    assert.equal(m.swapNeighbor(cols23, 4, 'up'), 3);
 });
 
 test('neighbor: no perpendicular overlap falls back to the nearest in direction', () => {
@@ -47,9 +47,9 @@ test('neighbor: no perpendicular overlap falls back to the nearest in direction'
         [0, 0, 500, 300],      // self
         [500, 700, 500, 300],  // only cell to the right, no vertical overlap at all
     ];
-    assert.equal(m.tile_swap_neighbor(cells, 0, 'right'), 1);
+    assert.equal(m.swapNeighbor(cells, 0, 'right'), 1);
     // left from top-left cell of cols23: no column to the left
-    assert.equal(m.tile_swap_neighbor(cols23, 0, 'left'), null);
+    assert.equal(m.swapNeighbor(cols23, 0, 'left'), null);
 });
 
 // rows [1,2]: one full-width row, then two half-width windows.
@@ -59,27 +59,27 @@ const rows12 = [
 ];
 
 test('neighbor: rows layout left/right and up', () => {
-    assert.equal(m.tile_swap_neighbor(rows12, 1, 'right'), 2);
-    assert.equal(m.tile_swap_neighbor(rows12, 2, 'left'), 1);
-    assert.equal(m.tile_swap_neighbor(rows12, 0, 'down'), 1);
+    assert.equal(m.swapNeighbor(rows12, 1, 'right'), 2);
+    assert.equal(m.swapNeighbor(rows12, 2, 'left'), 1);
+    assert.equal(m.swapNeighbor(rows12, 0, 'down'), 1);
 });
 
 test('neighbor: invalid dir and out-of-range self', () => {
-    assert.equal(m.tile_swap_neighbor(grid22, 0, 'sideways'), null);
-    assert.equal(m.tile_swap_neighbor(grid22, 99, 'right'), null);
+    assert.equal(m.swapNeighbor(grid22, 0, 'sideways'), null);
+    assert.equal(m.swapNeighbor(grid22, 99, 'right'), null);
 });
 
 test('landing: edge column, then best vertical overlap with the window frame', () => {
     // right lands in the leftmost column: frame overlapping the bottom cell picks it
-    assert.equal(m.tile_swap_landing_cell(cols23, [600, 500, 200, 100], 'right'), 1);
-    assert.equal(m.tile_swap_landing_cell(cols23, [600, 0, 200, 200], 'right'), 0);
+    assert.equal(m.swapLandingCell(cols23, [600, 500, 200, 100], 'right'), 1);
+    assert.equal(m.swapLandingCell(cols23, [600, 0, 200, 200], 'right'), 0);
     // no overlap at all: top cell wins
-    assert.equal(m.tile_swap_landing_cell(cols23, [600, 1200, 100, 100], 'right'), 0);
+    assert.equal(m.swapLandingCell(cols23, [600, 1200, 100, 100], 'right'), 0);
     // left lands in the rightmost column: three cells stacked
-    assert.equal(m.tile_swap_landing_cell(cols23, [100, 500, 100, 100], 'left'), 4);
-    assert.equal(m.tile_swap_landing_cell(cols23, [100, 100, 100, 100], 'left'), 2);
-    assert.equal(m.tile_swap_landing_cell(cols23, [0, 900, 100, 100], 'left'), 2);
-    assert.equal(m.tile_swap_landing_cell([], [0, 0, 1, 1], 'right'), null);
+    assert.equal(m.swapLandingCell(cols23, [100, 500, 100, 100], 'left'), 4);
+    assert.equal(m.swapLandingCell(cols23, [100, 100, 100, 100], 'left'), 2);
+    assert.equal(m.swapLandingCell(cols23, [0, 900, 100, 100], 'left'), 2);
+    assert.equal(m.swapLandingCell([], [0, 0, 1, 1], 'right'), null);
 });
 
 const monitors3 = [
@@ -88,7 +88,7 @@ const monitors3 = [
     { index: 1, x: 3840, width: 1920 },
 ];
 
-const chain = (dir, monitorIndex, extra) => m.tile_swap_chain_step(Object.assign({
+const chain = (dir, monitorIndex, extra) => m.swapChainStep(Object.assign({
     dir: dir, monitorIndex: monitorIndex, primaryIndex: 0, onlyPrimary: false,
     monitors: monitors3, workspaces: 13, wsIndex: 4,
 }, extra || {}));

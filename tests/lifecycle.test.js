@@ -275,7 +275,7 @@ test('split: a pending hotkey-step split leaves the 500 ms flush timer; disable 
     const app = ext.session.app;
     const ref = app.split.ref(app, 0, 0, 2);
     assert.ok(ref, 'monitor key resolved from the fake DisplayConfig reply');
-    // split values are { <border index>: fraction } objects (tile_split_move output)
+    // split values are { <border index>: fraction } objects (splitMove output)
     app.split.remember(app, ref, { 0: 0.5, 1: 1 }, false);
     assert.equal(env.liveTimers().filter((t) => t.ms === 500).length, 1, 'the 500 ms flush timer is pending');
     ext.disable();
