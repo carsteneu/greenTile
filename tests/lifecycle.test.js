@@ -496,6 +496,33 @@ test('monitors-changed: the recreated App loads the accent sheet with a strictly
     assert.ok(n2 > n1, 'the new App must take a greater generation than the old one (session-seeded sequence)');
 });
 
+test('re-enable seeds the accent sequence from the clock: the new session never reuses the previous session classes', () => {
+    const { env, greenTile } = loadGreenTile();
+    // enable passes Date.now into the session; stub the global around the cycle
+    // (restored in finally) so the seed can be advanced deterministically
+    const realNow = Date.now;
+    let fakeClock = 1000000;
+    Date.now = () => fakeClock;
+    try {
+        greenTile.enable();
+        env.flushDisplayConfigNoReply();
+        const first = greenTile.session.app.theme.gen;
+        greenTile.disable();
+        const nFirst = Number(first.slice('gk-acc'.length));
+        assert.ok(Number.isFinite(nFirst) && nFirst > fakeClock, 'the first session seeded from the clock (one load: clock+1)');
+        fakeClock = 5000000;
+        greenTile.enable();
+        env.flushDisplayConfigNoReply();
+        const second = greenTile.session.app.theme.gen;
+        const nSecond = Number(second.slice('gk-acc'.length));
+        assert.ok(Number.isFinite(nSecond), 'the second session took a gk-acc<n> class');
+        assert.ok(nSecond > nFirst, 'the new session\'s first generation differs from and is greater than every class of the earlier session (clock seed, no interned-node clash)');
+    }
+    finally {
+        Date.now = realNow;
+    }
+});
+
 test('theme/border settings bindings firing mid-Config and after disable stay guarded no-ops', () => {
     const { env, greenTile } = loadGreenTile();
     greenTile.enable();
