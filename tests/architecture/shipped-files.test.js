@@ -33,6 +33,25 @@ test('no dev-only path reaches the release script', () => {
     }
 });
 
+test('the set of cp source paths is exactly the known release list', () => {
+    const sources = cpLines
+        .map((l) => l.trim().replace(/^cp\s+(?:-R\s+)?/, '').replace(/"/g, '').split(/\s+/))
+        .flat()
+        .filter((e) => !e.includes('$STAGE'))
+        .sort();
+    assert.deepEqual(sources, [
+        'extension.js',
+        'icon.png',
+        'install.sh',
+        'lib',
+        'metadata.json',
+        'po/*.po',
+        'settings-schema.json',
+        'stylesheet.css',
+        'update.sh',
+    ], 'the cp source set changed — keep the release list identical');
+});
+
 test('lib/ ships .js files only — the build copies it wholesale', () => {
     assert.ok(cpLines.some((l) => /cp\s+-R\s+lib\s+/.test(l)), 'lib/ must be copied recursively');
     const collect = (dir, prefix) => {
