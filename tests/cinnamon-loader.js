@@ -14,6 +14,10 @@ const path = require('node:path');
 
 const ROOT = path.join(__dirname, '..');
 const cache = new Map();
+// Modules currently being evaluated (Cinnamon fileUtils mirrors LoadedModules
+// entries whose `module` stays null until evaluation returned — the cache is
+// only consulted then, so a re-entrant require re-evaluates forever).
+const evaluating = [];
 
 const cinnamonLoad = (src, requireStub, filename) => {
     const module = { exports: {} };
@@ -38,8 +42,17 @@ const load = (spec) => {
     const abs = path.join(ROOT, rel);
     if (cache.has(abs))
         return cache.get(abs);
-    const exports = cinnamonLoad(fs.readFileSync(abs, 'utf8'), load, rel);
-    cache.set(abs, exports);
+    if (evaluating.includes(rel))
+        throw new Error('circular require: ' + evaluating.concat(rel).join(' -> ')
+            + ' — fileUtils createExports caches only after evaluation finished, a cycle re-evaluates forever');
+    evaluating.push(rel);
+    try {
+        const exports = cinnamonLoad(fs.readFileSync(abs, 'utf8'), load, rel);
+        cache.set(abs, exports);
+    }
+    finally {
+        evaluating.pop();
+    }
     return exports;
 };
 
