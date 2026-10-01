@@ -694,6 +694,108 @@ test('PINNED GAP (todo_fixes follow-up): a legacy narrow stored split + later ga
     assert.equal(w1.rect[2], 96, 'pinned: the edge frame keeps only half a gap share, 96 px not 120');
 });
 
+// ---------------- fixes: pause blocks every retile action (issue 4) ----------------
+
+// enable + 2 windows + preset p1 tiled + paused with Super+Ctrl+D
+const enableTiledPaused = (env, ext) => {
+    enableOnMonitor(env, ext);
+    makeWorkspace(env);
+    env.activeWorkspace = { index: () => 0 };
+    const w1 = makeWindow(env, 101, [10, 10, 400, 300], 0);
+    const w2 = makeWindow(env, 102, [500, 0, 400, 300], 0);
+    env.tabList.push(w1, w2);
+    env.display.focus_window = w1;
+    const app = ext.session.app;
+    app.ops.presetsWrite(app, [{ id: 'p1', name: 'Halves', rules: [{ min: 2, stacks: [1, 1] }] }]);
+    app.ops.layoutSet(app, 0, 0, { preset: 'p1' });
+    app.ops.retileMonitor(app, 0);
+    app.ops.layoutSet(app, 0, 0, { auto: false });
+    return { app, w1, w2 };
+};
+
+test('a paused monitor-workspace accepts no retile until reactivation', () => {
+    const tweener = makeTweenerRecorder();
+    const { env, ext } = makeEnv(tweener, { windowGap: 0 });
+    const { app, w1, w2 } = enableTiledPaused(env, ext);
+    const before = appliedLogs(env, 'Halves').length;
+    assert.deepEqual([w1.rect, w2.rect], [[0, 0, 1000, 1100], [1000, 0, 1000, 1100]]);
+    // debounced window-added retiles, manual retileMonitor calls, exclRetile: all skip
+    app.ops.retileMonitor(app, 0);
+    assert.equal(appliedLogs(env, 'Halves').length, before, 'no retile while paused');
+    assert.deepEqual(w1.rect, [0, 0, 1000, 1100], 'paused windows stay put');
+});
+
+test('a paused surface: Super+G persists the exclusion flag without rearranging', () => {
+    const tweener = makeTweenerRecorder();
+    const { env, ext } = makeEnv(tweener, { windowGap: 0 });
+    const { app, w2 } = enableTiledPaused(env, ext);
+    env.display.focus_window = w2;
+    const before = appliedLogs(env, 'Halves').length;
+    app.excl.toggleFocused(app);
+    assert.equal(app.excl.isExcluded(w2), true, 'the exclusion flag state stays correct');
+    assert.equal(appliedLogs(env, 'Halves').length, before, 'no rearrangement while paused');
+});
+
+test('a paused surface: swap hotkey must not rearrange and dnd must not snap', () => {
+    const tweener = makeTweenerRecorder();
+    const { env, ext } = makeEnv(tweener, { windowGap: 0 });
+    const { app, w1, w2 } = enableTiledPaused(env, ext);
+    const rects = [w1.rect.slice(), w2.rect.slice()];
+    env.display.focus_window = w1;
+    env.keybindingManager.hotkeys.get('greenTile-swap-right').cb();
+    assert.deepEqual([w1.rect, w2.rect], rects, 'swap did not exchange the cells');
+    assert.equal(env.logs.some((l) => l.indexOf('greenTile swap right ws1') === 0), false, 'no swap log');
+    // dnd: no preview while paused, and the free drag position survives the drop
+    env.display.focus_window = w1;
+    app.drop.begin(app, w2, env.gi.Meta.GrabOp.MOVING);
+    assert.equal(env.uiGroupChildren.length, 0, 'no drop preview on a paused surface');
+    w2.rect = [300, 300, 400, 300];
+    app.drop.end(app, w2, env.gi.Meta.GrabOp.MOVING);
+    assert.deepEqual(w2.rect, [300, 300, 400, 300], 'the drop left the window at the free position');
+    assert.deepEqual(w1.rect, rects[0], 'the paused tiling is untouched by the drop');
+});
+
+test('a paused auto-grid surface behaves like a paused preset surface (no preview, no snap)', () => {
+    const tweener = makeTweenerRecorder();
+    const { env, ext } = makeEnv(tweener, { windowGap: 0 });
+    enableOnMonitor(env, ext);
+    makeWorkspace(env);
+    env.activeWorkspace = { index: () => 0 };
+    const w1 = makeWindow(env, 111, [10, 10, 400, 300], 0);
+    const w2 = makeWindow(env, 112, [500, 0, 400, 300], 0);
+    env.tabList.push(w1, w2);
+    env.display.focus_window = w1;
+    const app = ext.session.app;
+    const ref = app.split.ref(app, 0, 0, 2);
+    settingsInstance(env).setValue('layouts', JSON.stringify({ [ref.mkey]: { [ref.wskey]: { auto: true } } }));
+    app.ops.retileMonitor(app, 0);
+    app.ops.layoutSet(app, 0, 0, { auto: false });
+    env.display.focus_window = w1;
+    app.drop.begin(app, w2, env.gi.Meta.GrabOp.MOVING);
+    assert.equal(env.uiGroupChildren.length, 0, 'no drop preview on a paused auto grid');
+    w2.rect = [300, 300, 400, 300];
+    app.drop.end(app, w2, env.gi.Meta.GrabOp.MOVING);
+    assert.deepEqual(w2.rect, [300, 300, 400, 300], 'the drop left the window at the free position');
+});
+
+test('explicit reactivation retiles again (Super+Ctrl+A first, then the retile)', () => {
+    const tweener = makeTweenerRecorder();
+    const { env, ext } = makeEnv(tweener, { windowGap: 0 });
+    const { app, w1, w2 } = enableTiledPaused(env, ext);
+    const before = appliedLogs(env, 'Halves').length;
+    env.display.focus_window = w1;
+    app.auto.activate(app);
+    assert.equal(app.ops.layoutFor(app, 0, 0).auto, true, 'activation switched auto back on');
+    assert.equal(appliedLogs(env, 'Halves').length, before + 1, 'the reactivated surface retiled');
+    assert.deepEqual(w1.rect, [0, 0, 1000, 1100], 'the preset tiles again');
+    assert.deepEqual(w2.rect, [1000, 0, 1000, 1100]);
+    // the panel preset row click path (assign + auto on + retile) also still retiles
+    app.ops.layoutSet(app, 0, 0, { auto: false });
+    app.ops.layoutSet(app, 0, 0, { preset: 'p1', auto: true });
+    app.ops.retileMonitor(app, 0);
+    assert.equal(appliedLogs(env, 'Halves').length, before + 2, 'assigning a preset retiles again');
+});
+
 // ---------------- presets + layouts through the ops facade ----------------
 
 test('preset writing, layout assignment and monitor retile round-trip through the ops facade', () => {
