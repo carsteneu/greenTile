@@ -21,6 +21,8 @@ Window tiling for Cinnamon: presets per monitor and workspace, an auto mode, sna
 
 To update an installed greenTile, run `./update.sh` from the unpacked zip instead: it downloads the latest release from GitHub and installs it (needs `unzip` and `curl` or `wget`). Re-running it does nothing when the newest version is already installed; `--force` reinstalls.
 
+**Updating from 1.2.0 or older:** the settings of four hotkeys have new internal names — *Tile all windows into 3 columns*, *Tile all windows into 6 columns* and turning automatic tiling on and off. On the first start Cinnamon resets these four to their defaults (`Super+Ctrl+3`, `Super+Ctrl+6`, `Super+Ctrl+A`, `Super+Ctrl+D`). If you had changed them, set them again on the **Hotkeys** page. All other settings, presets and layouts are kept.
+
 ## Hotkeys
 
 | Key | Action |
@@ -142,9 +144,7 @@ dbus-send --session --print-reply --dest=org.Cinnamon /org/Cinnamon org.Cinnamon
 ```
 
 extension.js is the single entry and requires the modules from `lib/` — always
-deploy `lib/` alongside it. Copying extension.js alone fails at load time. A
-`greenTile.js` left over from an older install is dead code under the new build
-(Cinnamon loads extension.js only) — delete it for hygiene.
+deploy `lib/` alongside it. Copying extension.js alone fails at load time.
 
 - **Tests:** `node --test tests/` — recursive, one command for the whole tree, every file exactly once (Node 18 or newer).
 - **Tooling:** `npm ci` once, then `npm run check` — tests, typecheck and lint in one run. Types are JSDoc checked with `tsc --checkJs` (`npm run typecheck`); there are no TypeScript sources and no build step, everything ships as plain JavaScript.
@@ -153,6 +153,20 @@ deploy `lib/` alongside it. Copying extension.js alone fails at load time. A
 - **Releases:** pushing a `v*` tag builds the zip and attaches it to the release (`.github/workflows/release.yml`).
 - **Diagnostics:** `~/.xsession-errors` shows `JS ERROR` lines and `greenTile skipped …` lines explaining why a window was not tiled.
 - **Translations:** the domain is `greenTile@carsteneu`, template `po/greenTile@carsteneu.pot`. After changing strings, run `./makepot.sh` (needs gettext and cinnamon-xlet-makepot; the script scans a staging copy of the shipped files only, never tests or dev tooling — point `MAKEPOT_PYTHON` at an interpreter with `polib`/`pytz` if they are not installed system-wide). New or changed `.mo` files only take effect after a Cinnamon restart.
+
+### Architecture
+
+Plain CommonJS modules, loaded by Cinnamon's xlet `require`, in five layers. A module may only require modules of its own or a lower layer, and the require graph is strictly acyclic (Cinnamon's loader recurses forever on a cycle):
+
+| Layer | Concern |
+|---|---|
+| `lib/model/` | pure logic without any Cinnamon access: layouts, splits, presets and rules, drop zones, swap steps, colors, settings keys. Runs in plain Node. |
+| `lib/tiling/` | tiling services on top of Cinnamon: work area, collecting windows, placing and animating, reading order, retiling, swapping, focus navigation |
+| `lib/runtime/` | components owned by one App, each with its own signals, timers and `destroy()` (auto tiling observer, focus border, drop preview, splits, theme and accent, hotkeys, monitors, exclusions, panel state), plus the session that lives from `enable()` to `disable()` |
+| `lib/ui/` | preset panel, editor, Cairo drawing, gettext binding |
+| `lib/app/` | composition root: `App` builds the components, `Config` binds the settings and the hotkeys |
+
+`extension.js` starts the session in `enable()` and destroys it in `disable()`; a monitor change replaces the App inside the session. Requires are root-relative — `require('./lib/model/gap')` works from every file, because Cinnamon resolves against the extension directory — and never use `../`. The guards in `tests/architecture/` enforce the layer table, the acyclic graph, zero module-level state, model purity, the settings key list and the shipped file list. `tests/` is organised like `lib/` (`model/`, `tiling/`, `runtime/`, `app/`) plus `architecture/`, `i18n/` and `helpers/`.
 
 ## Origin
 

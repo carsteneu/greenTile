@@ -72,7 +72,6 @@ Every feature in one line or two. Details and screenshots are in the [README](RE
 - **Stable monitor keys**: monitors are recognised by vendor, product and serial (plus connector for identical panels), so replugging or rearranging keeps assignments.
 - **Settle after hotplug**: after a monitor change greenTile waits until windows have moved and then retiles once.
 - **Workspaces only on primary**: with this Muffin setting, secondary monitors use one layout for all workspaces. Read live.
-- **Automatic migration**: old per-workspace settings are converted once into per-monitor entries.
 
 ## Appearance
 
@@ -84,6 +83,6 @@ Every feature in one line or two. Details and screenshots are in the [README](RE
 
 - **Configurable hotkeys**: every key can be changed on the **Hotkeys** settings page.
 - **Live settings**: changes to hotkeys, the never tile list and colors apply without reloading.
-- **Translations**: all strings go through gettext; German is complete.
-- **Release zip with installer**: `install.sh` installs the extension and compiles the translations.
+- **Translations**: all strings go through gettext; 19 languages, all complete.
+- **Release zip with installer**: `install.sh` installs the extension and compiles the translations; `update.sh` fetches and installs the latest release.
 - **Diagnostics**: `~/.xsession-errors` logs which windows were skipped and why (minimized, excluded, other monitor, no app, window type).
