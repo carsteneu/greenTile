@@ -691,7 +691,7 @@ test('PINNED GAP (todo_fixes follow-up): a legacy narrow stored split + later ga
     // threaded through the split facade and a decision on infeasible spans.
     settingsInstance(env).setValue('windowGap', 48);
     app.ops.retileMonitor(app, 0);
-    assert.equal(w1.rect[2], 72, 'pinned: the final frame is 72 px, not 120');
+    assert.equal(w1.rect[2], 96, 'pinned: the edge frame keeps only half a gap share, 96 px not 120');
 });
 
 // ---------------- presets + layouts through the ops facade ----------------
