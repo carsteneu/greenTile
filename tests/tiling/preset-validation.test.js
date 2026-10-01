@@ -1,8 +1,8 @@
 'use strict';
 // Robustness of the persisted preset data (todo_fixes issue 1): presetsRead
 // validates structure, types and ranges at read time — a corrupt settings
-// file (external edit, backup restore) can throwing no exceptions, hanging no
-// loop and must be left unmodified on disk.
+// file (external edit, backup restore) can no longer throw an exception,
+// hang a loop or get rewritten on disk by a pure read.
 const test = require('node:test');
 const assert = require('node:assert/strict');
 
@@ -87,6 +87,14 @@ test('stack values clamp into the editor grid, corrupt stacks read as empty', ()
             { min: 5, stacks: [1, 1, 1, 1, 1, 1] },
         ],
     }]);
+});
+
+test('extreme finite stack values clamp into the editor grid', () => {
+    const out = readRaw(JSON.stringify([{ id: 'p1', name: 'A', rules: [{ min: 2, stacks: [1e9, 1e7] }, { min: 3, stacks: [1e9, 1e9, 1e9, 1e9, 1e9, 1e9, 1e9] }] }]));
+    assert.deepEqual(out, [{ id: 'p1', name: 'A', rules: [
+        { min: 2, stacks: [4, 4] },
+        { min: 3, stacks: [4, 4, 4, 4, 4, 4] },
+    ] }]);
 });
 
 test('a non-string name reads as an empty name', () => {

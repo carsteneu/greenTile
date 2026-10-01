@@ -46,3 +46,18 @@ test('panelThumb paints the real cells for valid stack data', () => {
     assert.equal(cr.arcs(), 20);
     cr.$dispose();
 });
+
+test('panelThumb keeps painting legitimately filled surplus cells unclamped', () => {
+    // fillStacks spreads n - total surplus into the last column, so valid data
+    // renders stacks above the editor's 4-row ceiling — only corrupt values
+    // (non-finite, non-coercible) normalize down to one cell.
+    const env = createCinnamonEnv();
+    globalThis.imports = env.imports;
+    const { panelThumb } = load('./lib/ui/draw.js');
+    const area = panelThumb({}, [1, 6], { color: [1, 2, 3] });
+    const handler = area._handlers.find((h) => h.sigName === 'repaint');
+    const cr = makeCr();
+    handler.cb({ get_context: () => cr, get_surface_size: () => [54, 34] });
+    assert.equal(cr.arcs(), 28);
+    cr.$dispose();
+});
