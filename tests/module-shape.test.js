@@ -28,6 +28,10 @@ globalThis.imports = stub();
 const cinnamonLoad = (src, requireStub, filename) => {
     const module = { exports: {} };
     let body = `'use strict';${src};`;
+    // Deliberate superset simplification vs fileUtils.js: the auto-export scan
+    // ignores the importNames/giImportNames suppression lists. greenTile.js
+    // takes this path never (explicit module.exports below), extension.js only
+    // for harmless extra keys.
     if (!/^module\.exports(\.[a-zA-Z0-9_$]+)?\s*=/m.test(body)) {
         const varRegex = /^(?:'use strict';){0,}(const|var|let|function|class)\s+([a-zA-Z0-9_$]+)/gm;
         let match;
