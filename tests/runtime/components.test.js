@@ -531,7 +531,7 @@ test('auto bridges: pendingTake resets per monitor, resizeStartTake consumes onc
     assert.ok(resizer.auto.resizeStartTake(9) === undefined, 'resize start consumed on first read');
 });
 
-test('auto activate/deactivate: layout stored when off, retile follows, border refreshes, logs unchanged', () => {
+test('auto activate/deactivate: layout stored when off, retile follows, border refreshes, one log line per switch', () => {
     const { logs, calls, auto } = makeAuto({ focus: { get_monitor: () => 1 }, auto: false });
     auto.activate('app');
     assert.deepEqual(calls.layoutSet, [{ monitorIndex: 1, wsIndex: 3, patch: { auto: true } }],

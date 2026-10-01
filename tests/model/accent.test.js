@@ -15,7 +15,7 @@ const m = {
     ...require('../helpers/cinnamon-loader').load('./lib/model/state.js'),
 };
 
-test('default accent is today\'s orange', () => {
+test('default accent is the orange [255, 150, 64]', () => {
     assert.deepEqual(m.accentDefault, [255, 150, 64]);
 });
 
@@ -94,7 +94,7 @@ test('probe chain keeps the default when no stage qualifies', () => {
     assert.deepEqual(m.accentProbeFirst(greyTheme), [112, 115, 122]);
 });
 
-test('tones for the default orange are the historical values, exactly', () => {
+test('tones for the default orange are the fixed table values, exactly', () => {
     assert.deepEqual(m.accentTones([255, 150, 64]), {
         base: [255, 150, 64],
         hover: [255, 176, 112],
@@ -190,11 +190,11 @@ test('state mode resolution keeps the legacy "custom" working', () => {
     assert.deepEqual(m.stateMode(undefined), 'green');
 });
 
-test('default state is today\'s green', () => {
+test('default state is the green [156, 224, 114]', () => {
     assert.deepEqual(m.stateDefault, [156, 224, 114]);
 });
 
-test('state tones for the default green are the historical values, exactly', () => {
+test('state tones for the default green are the fixed table values, exactly', () => {
     assert.deepEqual(m.stateTones([156, 224, 114]), {
         text: [156, 224, 114],
         tint: [156, 224, 114],

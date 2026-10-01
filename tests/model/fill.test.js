@@ -15,7 +15,7 @@ test('exact fit keeps the painted rule', () => {
     assert.deepEqual(m.fillStacks([2, 2, 2], 6), [2, 2, 2]);
 });
 
-test('surplus windows extend the last column (unchanged behaviour)', () => {
+test('surplus windows extend the last column', () => {
     assert.deepEqual(m.fillStacks([1, 1], 4), [1, 3]);
     assert.deepEqual(m.fillStacks([2, 3], 7), [2, 5]);
 });
