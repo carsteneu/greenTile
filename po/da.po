@@ -6,9 +6,9 @@
 # Alan Mortensen <alanmortensen.am@gmail.com>, 2023.
 msgid ""
 msgstr ""
-"Project-Id-Version: greenTile 1.2.0\n"
+"Project-Id-Version: greenTile 1.3.0\n"
 "Report-Msgid-Bugs-To: https://github.com/carsteneu\n"
-"POT-Creation-Date: 2026-10-01 15:46+0200\n"
+"POT-Creation-Date: 2026-10-01 17:54+0200\n"
 "PO-Revision-Date: 2023-12-07 15:21+0100\n"
 "Last-Translator: Alan Mortensen <alanmortensen.am@gmail.com>\n"
 "Language-Team: Danish\n"
@@ -227,8 +227,8 @@ msgstr "Åbn forudindstillingspanelet"
 #. settings-schema.json->resizeWiderHotkey->description
 msgid "Make the focused tiled window wider (tap = 1 px, hold to speed up)"
 msgstr ""
-"Gør det fokuserede flisede vindue bredere (tryk = 1 px, hold nede for at øge"
-" farten)"
+"Gør det fokuserede flisede vindue bredere (tryk = 1 px, hold nede for at øge "
+"farten)"
 
 #. settings-schema.json->resizeNarrowerHotkey->description
 msgid "Make the focused tiled window narrower"
@@ -340,8 +340,8 @@ msgid ""
 "With automatic tiling or a preset on, a single tiled window fills the whole "
 "usable area instead of being left untouched."
 msgstr ""
-"Med automatisk flisning eller en forudindstilling aktiveret fylder et enkelt"
-" fliset vindue hele det anvendelige område i stedet for at blive urørt."
+"Med automatisk flisning eller en forudindstilling aktiveret fylder et enkelt "
+"fliset vindue hele det anvendelige område i stedet for at blive urørt."
 
 #. settings-schema.json->panelTheme->description
 msgid "Theme of the preset panel"
@@ -373,8 +373,8 @@ msgstr "Accentfarve"
 
 #. settings-schema.json->accentMode->tooltip
 msgid ""
-"Follow theme tracks the accent color of the Cinnamon theme live. Custom uses"
-" the color below."
+"Follow theme tracks the accent color of the Cinnamon theme live. Custom uses "
+"the color below."
 msgstr ""
 "Følg tema følger Cinnamon-temaets accentfarve live. Tilpasset bruger farven "
 "nedenfor."
@@ -428,7 +428,6 @@ msgstr ""
 "Tilpasset."
 
 #: .yesmem/tmp/makepot-stage/greenTile@carsteneu/lib/runtime/exclusions.js:201
-#| msgid "windows"
 msgid "Window floats"
 msgstr "Vinduet svæver"
 

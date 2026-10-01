@@ -5,9 +5,9 @@
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: greenTile 1.2.0\n"
+"Project-Id-Version: greenTile 1.3.0\n"
 "Report-Msgid-Bugs-To: https://github.com/carsteneu\n"
-"POT-Creation-Date: 2026-10-01 15:46+0200\n"
+"POT-Creation-Date: 2026-10-01 17:54+0200\n"
 "PO-Revision-Date: 2022-08-06 01:55+0200\n"
 "Last-Translator: \n"
 "Language-Team: Romanian\n"
@@ -15,7 +15,8 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Plural-Forms: nplurals=3; plural=(n==1 ? 0 : n==0 || (n!=1 && n%100>=1 && n%100<=19) ? 1 : 2);\n"
+"Plural-Forms: nplurals=3; plural=(n==1 ? 0 : n==0 || (n!=1 && n%100>=1 && "
+"n%100<=19) ? 1 : 2);\n"
 "X-Generator: Poedit 3.0.1\n"
 
 #: lib/ui/editor.js:66
@@ -372,8 +373,8 @@ msgstr "Culoare de accent"
 
 #. settings-schema.json->accentMode->tooltip
 msgid ""
-"Follow theme tracks the accent color of the Cinnamon theme live. Custom uses"
-" the color below."
+"Follow theme tracks the accent color of the Cinnamon theme live. Custom uses "
+"the color below."
 msgstr ""
 "„Urmează tema” preia în timp real culoarea de accent a temei Cinnamon. "
 "„Personalizat” folosește culoarea de mai jos."
@@ -427,7 +428,6 @@ msgstr ""
 "„Personalizat”."
 
 #: .yesmem/tmp/makepot-stage/greenTile@carsteneu/lib/runtime/exclusions.js:201
-#| msgid "windows"
 msgid "Window floats"
 msgstr "Fereastra plutește"
 

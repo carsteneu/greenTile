@@ -6,9 +6,9 @@
 # Dragone2 <dragone2@risposteinformatiche.it>, 2023.
 msgid ""
 msgstr ""
-"Project-Id-Version: greenTile 1.2.0\n"
+"Project-Id-Version: greenTile 1.3.0\n"
 "Report-Msgid-Bugs-To: https://github.com/carsteneu\n"
-"POT-Creation-Date: 2026-10-01 15:46+0200\n"
+"POT-Creation-Date: 2026-10-01 17:54+0200\n"
 "PO-Revision-Date: 2023-03-31 10:43+0200\n"
 "Last-Translator: Dragone2 <dragone2@risposteinformatiche.it>\n"
 "Language-Team: Italian\n"
@@ -215,8 +215,7 @@ msgstr "Affianca tutte le finestre in 3 colonne"
 #. settings-schema.json->autoOnHotkey->description
 msgid "Turn automatic tiling on for this workspace and tile now"
 msgstr ""
-"Attiva l'affiancamento automatico per questa area di lavoro e affianca "
-"subito"
+"Attiva l'affiancamento automatico per questa area di lavoro e affianca subito"
 
 #. settings-schema.json->autoOffHotkey->description
 msgid "Turn automatic tiling off for this workspace"
@@ -376,8 +375,8 @@ msgstr "Colore di accento"
 
 #. settings-schema.json->accentMode->tooltip
 msgid ""
-"Follow theme tracks the accent color of the Cinnamon theme live. Custom uses"
-" the color below."
+"Follow theme tracks the accent color of the Cinnamon theme live. Custom uses "
+"the color below."
 msgstr ""
 "«Segui il tema» adotta in tempo reale il colore di accento del tema "
 "Cinnamon. «Personalizzato» usa il colore qui sotto."
@@ -431,7 +430,6 @@ msgstr ""
 "è impostato su «Personalizzato»."
 
 #: .yesmem/tmp/makepot-stage/greenTile@carsteneu/lib/runtime/exclusions.js:201
-#| msgid "windows"
 msgid "Window floats"
 msgstr "Finestra flottante"
 

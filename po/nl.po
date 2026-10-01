@@ -6,9 +6,9 @@
 # qadzek, 2024.
 msgid ""
 msgstr ""
-"Project-Id-Version: greenTile 1.2.0\n"
+"Project-Id-Version: greenTile 1.3.0\n"
 "Report-Msgid-Bugs-To: https://github.com/carsteneu\n"
-"POT-Creation-Date: 2026-10-01 15:46+0200\n"
+"POT-Creation-Date: 2026-10-01 17:54+0200\n"
 "PO-Revision-Date: 2024-04-17 10:36+0200\n"
 "Last-Translator: qadzek\n"
 "Language-Team: Dutch\n"
@@ -161,8 +161,8 @@ msgid ""
 "Column tiling with per-workspace presets, auto mode and snap-on-release. "
 "Fork of gTile by shuairan."
 msgstr ""
-"Tegelen in kolommen met voorinstellingen per werkblad, automatische modus en"
-" uitlijnen bij loslaten. Fork van gTile door shuairan."
+"Tegelen in kolommen met voorinstellingen per werkblad, automatische modus en "
+"uitlijnen bij loslaten. Fork van gTile door shuairan."
 
 #. settings-schema.json->settings-tab->title
 msgid "Settings"
@@ -245,8 +245,7 @@ msgstr "Het gefocuste getegelde venster verwisselen met het buurvenster links"
 
 #. settings-schema.json->swapRightHotkey->description
 msgid "Swap the focused tiled window with its neighbor to the right"
-msgstr ""
-"Het gefocuste getegelde venster verwisselen met het buurvenster rechts"
+msgstr "Het gefocuste getegelde venster verwisselen met het buurvenster rechts"
 
 #. settings-schema.json->swapUpHotkey->description
 msgid "Swap the focused tiled window with its neighbor above"
@@ -373,8 +372,8 @@ msgstr "Accentkleur"
 
 #. settings-schema.json->accentMode->tooltip
 msgid ""
-"Follow theme tracks the accent color of the Cinnamon theme live. Custom uses"
-" the color below."
+"Follow theme tracks the accent color of the Cinnamon theme live. Custom uses "
+"the color below."
 msgstr ""
 "Thema volgen neemt live de accentkleur van het Cinnamon-thema over. "
 "Aangepast gebruikt de kleur hieronder."
@@ -428,7 +427,6 @@ msgstr ""
 "staat."
 
 #: .yesmem/tmp/makepot-stage/greenTile@carsteneu/lib/runtime/exclusions.js:201
-#| msgid "windows"
 msgid "Window floats"
 msgstr "Venster zweeft"
 
