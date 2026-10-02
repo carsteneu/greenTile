@@ -29,8 +29,8 @@ test('_() binds the domain to the XDG data dir on every call and honors the live
     globalThis.imports = env.imports;
     globalThis.global = env.global;
     try {
-        // fresh namespace per env: clear the importer's cache entry
-        env.extensions['greenTile@carsteneu'].clearCache('ui');
+        // every env builds its own importer instance (cinnamon-env.js), so
+        // the namespace is fresh per env — no cache clearing needed
         const { _ } = env.extensions['greenTile@carsteneu'].lib.ui.i18n;
         assert.equal(_('Grid'), 'default:Grid', 'custom miss falls back to the default domain');
         assert.deepEqual(bindCalls, [['greenTile@carsteneu', '/home/fake/.local/share/locale']],

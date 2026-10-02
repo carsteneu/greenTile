@@ -46,8 +46,8 @@ interface CinnamonWindow {
     move_frame(userOp: boolean, x: number, y: number): void;
     get_frame_rect(): CinnamonRectangle;
     /** Clutter actor of the window window (translation/scale for animation,
-     * the platform ease() from Cinnamon environment.js, and greenTile's
-     * own-ease marker place.js maintains). */
+     * the platform ease() and remove_transition from Cinnamon
+     * environment.js, and greenTile's own-ease ownership record). */
     get_compositor_private(): {
         translation_x: number;
         translation_y: number;
@@ -55,8 +55,11 @@ interface CinnamonWindow {
         scale_y: number;
         /** Cinnamon Clutter.Actor.prototype.ease (environment.js _easeActor). */
         ease(props: Record<string, any>): void;
-        /** own-transition marker written only by lib/tiling/place.js */
-        __greenTile_easing?: boolean;
+        /** Clutter.Actor.remove_transition — stops exactly the named transition. */
+        remove_transition(name: string): void;
+        /** own-ease ownership record written only by lib/tiling/place.js:
+         * {gen, props} while one of our eases is live, null after. */
+        __greenTile_easeOwn?: { gen: number; props: readonly string[] } | null;
     } | null;
     activate(time: number): void;
     /** Stable seq across App recreations (Meta.Window.get_stable_sequence). */

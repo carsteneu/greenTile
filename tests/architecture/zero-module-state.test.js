@@ -30,7 +30,7 @@ const FILES = ['extension.js'].concat(
         .sort()
 );
 
-const MUTABLE_RHS = /^(\{|\[|new Map\(|new Set\(|new WeakMap\(|Object\.create\s*\()/;
+const MUTABLE_RHS = /^(\{|\[|new Map\(|new Set\(|new WeakMap\(|new WeakSet\(|new Array\(|Object\.create\s*\()/;
 const LIFECYCLE_HOLDER = /^const lifecycle = \{ session: null \};$/;
 const VAR_RE = /^var\s+([A-Za-z$_][\w$]*)\s*=\s*(.*)$/;
 
@@ -82,7 +82,8 @@ const findViolations = (src, file, opts = {}) => {
     }
     for (const [name, declLine] of varDecls) {
         const reassign = new RegExp('^\\s*' + name + '\\s*=(?!=)');
-        const incDec = new RegExp('^\\s*' + name + '\\s*(\\+\\+|--);');
+        // postfix/prefix ++/-- with or without semicolon, compound assigns
+        const incDec = new RegExp('^(?:\\s*' + name + '\\s*(\\+\\+|--)|\\s*(\\+\\+|--)\\s*' + name + ')\\s*;?\\s*$');
         const compound = new RegExp('^\\s*' + name + '\\s*(\\+=|-=|\\*=|/=|%=|\\*\\*=|\\?\\?=|\\|\\|=)');
         for (let i = 0; i < lines.length; i++) {
             if (i !== declLine && (reassign.test(lines[i]) || incDec.test(lines[i]) || compound.test(lines[i]))) {
@@ -108,6 +109,8 @@ test('guard flags mutable top-level state and accepts the allowed forms', () => 
     assert.equal(findViolations('const x = new Map();', 'f.js').length, 1);
     assert.equal(findViolations('const x = new Set();', 'f.js').length, 1);
     assert.equal(findViolations('const x = new WeakMap();', 'f.js').length, 1);
+    assert.equal(findViolations('var x = new WeakSet();', 'f.js').length, 1, 'WeakSet is the same mutable class (reviewer mutation)');
+    assert.equal(findViolations('var x = new Array();', 'f.js').length, 1);
     assert.equal(findViolations('const x = Object.create(null);', 'f.js').length, 1);
     assert.equal(findViolations('const x =\n{};', 'f.js').length, 1, 'value on the next line is checked too');
     assert.equal(findViolations('const x = Object.freeze({});', 'f.js').length, 0);
