@@ -62,6 +62,16 @@ export const Focus: {
          */
         _ownerState(registration: FocusRegistration): "ours" | "prior" | "empty" | "foreign";
         /**
+         * Reads back the manager entry a just-issued call produced, so its identity
+         * can serve as the ownership token. Best effort: a throwing manager read
+         * must not mask the failure that got us here, and an entry that does not
+         * carry the expected callback is not ours to claim.
+         * @param {number} actionId
+         * @param {unknown} callback
+         * @returns {AnyRecord | undefined}
+         */
+        _captureEntry(actionId: number, callback: unknown): AnyRecord | undefined;
+        /**
          * Restores one acquired binding to its pre-connect owner.
          * @param {FocusRegistration} registration
          */

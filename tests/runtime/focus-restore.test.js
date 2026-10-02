@@ -414,6 +414,28 @@ test('DEFECT 4: an old retry does not overwrite a newer owner that reused the ca
     assert.deepEqual(delivered, [], 'the overview-only newer owner does not fire in NORMAL mode');
 });
 
+test('DEFECT 4: a newer owner that mutated our entry in place is still not overwritten', () => {
+    // Defensive: the pinned upstream (2803c67d :464) creates a fresh entry object
+    // per setBuiltinHandler call, which is what makes object identity the
+    // ownership token. This pins the guard for a manager that mutates instead.
+    const { meta, manager, state, focus, app } = harness({ generation: 'upstream' });
+    /** @type {any[]} */
+    const delivered = [];
+    const prior = { name: 'push-tile-left', bindings: [], allowedModes: 7, callback: (d, w) => delivered.push(w) };
+    manager.bindings.set(71, prior);
+    focus.connect(app);
+    const ours = manager.bindings.get(71);
+    const foreign = () => delivered.push('foreign');
+    ours.callback = foreign;
+    ours.allowedModes = 2;
+    assert.doesNotThrow(() => focus.destroy(), 'the slot no longer carries our dispatcher');
+    assert.equal(manager.bindings.get(71).callback, foreign, 'the in-place newer owner is not overwritten');
+    assert.equal(manager.bindings.get(71).allowedModes, 2, 'its allowedModes survive');
+    state.actionMode = 2; // OVERVIEW
+    deliver(meta, 'push-tile-left', { id: 'overview' });
+    assert.deepEqual(delivered, ['foreign'], 'the in-place owner still answers in its own mode');
+});
+
 test('manager route: a failure inside the recovery path does not strand the remaining names', () => {
     const { meta, manager, focus, app } = harness({ generation: 'upstream' });
     /** @type {any[]} */
