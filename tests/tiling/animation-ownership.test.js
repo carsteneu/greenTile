@@ -247,8 +247,12 @@ test('the shell mass-cancelling our transitions leaves no live transition behind
     columnsHotkey(env, 'greenTile-auto6');
     const app = ext.currentSession().app;
     assert.equal(app.placement.has(w1), true, 'the ease is owned');
+    let actorSignals = 0;
+    actor.connect('transition-stopped', () => { actorSignals += 1; });
     actor.removeAllTransitions();
     assert.equal(actor.transitions.size, 0, 'no live transition remains');
+    assert.equal(actorSignals, 0,
+        'a mass cancel emits no actor-level ::transition-stopped (bare g_hash_table_remove_all)');
     assert.equal(actor.translation_x, 10, 'the parked offset is still applied to the actor');
     assert.equal(app.placement.has(w1), true, 'the record survives a global cancel');
     env.settingsInstances.at(-1).setValue('tileAnimation', false);

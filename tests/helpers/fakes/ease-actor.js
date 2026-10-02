@@ -134,24 +134,33 @@ const makeEaseActor = () => {
         },
         remove_transition(name) {
             actor.assertAlive();
+            actor.removeTransitionInternal(name, true);
+        },
+        removeTransitionInternal(name, emit) {
             const t = actor.transitions.get(name);
             if (!t)
                 {return;}
             // clutter_actor_remove_transition: the hash removal frees the
             // closure (which disconnects the actor's completion handler and
             // stops the timeline, firing the transition's own stopped), then
-            // the actor's ::transition-stopped is emitted with FALSE.
+            // the actor's ::transition-stopped is emitted with FALSE — but only
+            // on this path, and only if the transition was playing.
             actor.transitions.delete(name);
             actor.removedTransitions.push(name);
             t._stop(false);
-            actor.emitTransitionStopped(name, false);
+            if (emit)
+                {actor.emitTransitionStopped(name, false);}
         },
         // Cinnamon's own window effects cancel with this call
         // (windowManager.js: _sizeChangeWindowDone, the workspace-switch
-        // cleanup, minimize/unminimize/map)
+        // cleanup, minimize/unminimize/map). Muffin's
+        // clutter_actor_remove_all_transitions (clutter-actor.c 19781-19793) is
+        // a bare g_hash_table_remove_all: each closure is freed (so every
+        // transition reports its own stopped) but NO actor-level
+        // ::transition-stopped is emitted.
         removeAllTransitions() {
             for (const name of [...actor.transitions.keys()]) {
-                actor.remove_transition(name);
+                actor.removeTransitionInternal(name, false);
             }
         },
         // the actor's Clutter wrapper being disposed: every method call on it
