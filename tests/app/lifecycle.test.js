@@ -56,7 +56,7 @@ test('enable connects the documented handler set exactly once', () => {
     assert.equal(env.display.count('grab-op-end'), 1);
     assert.equal(env.display.count('window-entered-monitor'), 1);
     assert.equal(env.display.count('window-created'), 1);
-    assert.equal(env.screen.count('notify::n-workspaces'), 1);
+    assert.equal(env.workspaceManager.count('notify::n-workspaces'), 1);
     assert.equal(env.workspaceManager.count('workspace-switched'), 1);
     assert.equal(env.windowManager.count('switch-workspace'), 1);
     assert.equal(env.liveTimers().length, 0, 'no timer without a pending settle');
@@ -232,10 +232,10 @@ test('auto observer: notify::n-workspaces reconnect leaves exactly one window-ad
     assert.equal(pairCount(ws0), 2, 'initial connect: one added/removed pair');
     const ws1 = makeWorkspace();
     env.workspaces.push(ws1);
-    env.screen.emit('notify::n-workspaces');
+    env.workspaceManager.emit('notify::n-workspaces');
     assert.equal(pairCount(ws0), 2, 'old workspace dropped and reconnected, not stacked');
     assert.equal(pairCount(ws1), 2, 'new workspace connected exactly once');
-    assert.equal(env.screen.count('notify::n-workspaces'), 1, 'the global reconnect handler stays single');
+    assert.equal(env.workspaceManager.count('notify::n-workspaces'), 1, 'the global reconnect handler stays single');
     ext.disable();
     assert.equal(pairCount(ws0), 0, 'workspace handlers released on disable');
     assert.equal(pairCount(ws1), 0, 'workspace handlers released on disable');

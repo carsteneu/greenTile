@@ -7,7 +7,7 @@
 // slot; setValue alone does not fire IN bindings — cinnamonDBus remoteUpdate
 // does, learning #95107) and a queued Gio.DBus DisplayConfig reply the test
 // drives explicitly. The runtime-critical Cinnamon namespaces (global
-// subobjects, imports.ui.main, tooltips, panel, tweener, the imports.gi
+// subobjects, imports.ui.main, tooltips, panel, the imports.gi
 // namespace list, imports.misc) are strict: unknown member access throws
 // (issue 13), so a typo'd runtime access fails the test. Remaining loose ends
 // (top-level fallbacks like imports.gettext) fall into a deep stub so a
@@ -261,11 +261,6 @@ const createCinnamonEnv = (options) => {
                 constructor(_item, _title) {}
             },
         }),
-        tweener: strictNs('imports.ui.tweener', {
-            // no-op like the former silent stub: lib/tiling/place.js fire-and-forget tweens
-            addTween: () => {},
-            removeTweens: () => {},
-        }),
         panel: strictNs('imports.ui.panel', {
             // identity-only switch values in lib/tiling/screen.js usableArea
             PanelLoc: { top: 'top', bottom: 'bottom', left: 'left', right: 'right' },
@@ -288,6 +283,9 @@ const createCinnamonEnv = (options) => {
         },
     });
     env.workspaceManager = Object.assign(signalHub('workspaceManager'), {
+        get_n_workspaces() {
+            return env.workspaces.length;
+        },
         get_workspace_by_index(i) {
             return env.workspaces[i];
         },
@@ -683,6 +681,7 @@ const createCinnamonEnv = (options) => {
             EVENT_STOP: true,
             EventType: { BUTTON_PRESS: 'button-press', BUTTON_RELEASE: 'button-release' },
             KEY_Escape: 'Escape',
+            AnimationMode: { EASE_OUT_QUAD: 'ease-out-quad' },
         },
         Pango: { EllipsizeMode: { NONE: 'none' } },
     });

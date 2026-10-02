@@ -88,7 +88,6 @@ declare const imports: {
         panel: AnyRecord;
         settings: AnyRecord;
         tooltips: AnyRecord;
-        tweener: AnyRecord;
     };
     misc: {
         signalManager: {
@@ -137,10 +136,9 @@ declare const global: {
     log(msg: string): void;
     logError(err: unknown): void;
     display: AnyRecord;
-    screen: AnyRecord;
+    workspace_manager: AnyRecord;
     stage: AnyRecord;
     window_manager: AnyRecord;
-    workspace_manager: AnyRecord;
     overlay_group: AnyRecord;
     get_current_time(): number;
     get_pointer(): [number, number];
