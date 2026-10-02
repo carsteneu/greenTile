@@ -14,7 +14,6 @@ const {
 const WIDE = { x: 0, y: 0, width: 2400, height: 1100 };
 const LEFT = { x: 0, y: 0, width: 2000, height: 1100 };
 const RIGHT = { x: 2000, y: 0, width: 2000, height: 1100 };
-const DIALOG = 2; // Meta.WindowType.DIALOG in the fake Meta
 
 const leftToRight = (wins) => wins.slice().sort((a, b) => a.rect[0] - b.rect[0]).map((w) => w.seq);
 
@@ -124,7 +123,8 @@ test('issue 9: the read-only peek neither consumes nor keeps expired entries', (
     assert.equal(app.auto.sortPeek(6, 3001), null, 'beyond 2000 ms the peek ignores the entry');
     app.auto.sortOverride(7, [7, 7, 7, 7], 1000);
     app.auto.sortPoll(3001);
-    assert.equal(app.auto.sortPeek(7, 3001), null, 'sortPoll bounds the peek path as well');
+    assert.equal(app.auto.sortPeek(7, 1500), null,
+        'sortPoll pruned what a fresh-looking peek would still have seen');
 });
 
 // ---------------- issue 10: a successful drop wins over the fresh-pending list ----------------
@@ -224,8 +224,13 @@ test('issue 10: a cross-monitor drop clears the record on the spawn monitor', ()
     assert.equal(app.drop.end(app, w7, env.gi.Meta.GrabOp.MOVING), true, 'the cross-monitor drop applied');
     app.ops.retileMonitor(app, 0, null, false);
     assert.deepEqual(leftToRight([w1, w2, w7]), [7, 1, 2], 'the drop placement survived on the target monitor');
-    assert.equal(app.auto.pendingTake(1).has(7), false,
-        'the fresh record was cleared on the monitor the window opened on');
+    // back on its spawn monitor without another drop: a stale record would re-append
+    // the window last, the cleared one lets the position order decide
+    w7.move_to_monitor(1);
+    w7.rect = [2400, 0, 300, 1100];
+    app.ops.retileMonitor(app, 1, null, false);
+    assert.deepEqual(leftToRight([w5, w6, w7]), [5, 7, 6],
+        'the spawn monitor sorted by position instead of re-appending the dropped window');
 });
 
 // ---------------- issue 11: focus fallback and collector share the eligibility ----------------
@@ -234,7 +239,7 @@ test('issue 11: a dialog focus never claims a cell and does not break the normal
     const { env, ext } = makeEnv({ windowGap: 0 });
     enableOnMonitor(env, ext);
     activeWorkspace(env);
-    const dialog = makeWindow(env, 1, [0, 0, 300, 300], 0, null, { windowType: DIALOG });
+    const dialog = makeWindow(env, 1, [0, 0, 300, 300], 0, null, { windowType: env.gi.Meta.WindowType.DIALOG });
     const w1 = makeWindow(env, 2, [400, 0, 400, 300], 0);
     const w2 = makeWindow(env, 3, [900, 0, 400, 300], 0);
     env.tabList.push(dialog, w1, w2);
@@ -252,7 +257,7 @@ test('issue 11: the focus fallback never resolves a minimized tab-list entry', (
     const { env, ext } = makeEnv({ windowGap: 0 });
     enableOnMonitors(env, ext, [LEFT, RIGHT]);
     activeWorkspace(env);
-    const dialog = makeWindow(env, 1, [0, 0, 300, 300], 0, null, { windowType: DIALOG });
+    const dialog = makeWindow(env, 1, [0, 0, 300, 300], 0, null, { windowType: env.gi.Meta.WindowType.DIALOG });
     const minimized = makeWindow(env, 4, [2000, 0, 400, 300], 1);
     minimized.minimized = true;
     const w1 = makeWindow(env, 2, [400, 0, 400, 300], 0);
@@ -327,7 +332,7 @@ test('issue 11 regression: the exclude hotkey follows the real focus, not the re
     const { env, ext } = makeEnv({ windowGap: 0 });
     enableOnMonitors(env, ext, [LEFT, RIGHT]);
     activeWorkspace(env);
-    const dialog = makeWindow(env, 1, [0, 0, 300, 300], 0, null, { windowType: DIALOG });
+    const dialog = makeWindow(env, 1, [0, 0, 300, 300], 0, null, { windowType: env.gi.Meta.WindowType.DIALOG });
     const bystander = makeWindow(env, 2, [2000, 0, 400, 300], 1);
     env.tabList.push(dialog, bystander);
     env.display.focus_window = dialog;
@@ -336,4 +341,32 @@ test('issue 11 regression: the exclude hotkey follows the real focus, not the re
     assert.equal(app.excl.isExcluded(dialog), true, 'the focused window itself was toggled');
     assert.equal(app.excl.isExcluded(bystander), false,
         'no unrelated window was excluded in place of the focus');
+});
+
+test('issue 11 regression: the exclude hotkey does nothing without focus', () => {
+    const { env, ext } = makeEnv({ windowGap: 0 });
+    enableOnMonitor(env, ext);
+    activeWorkspace(env);
+    const w1 = makeWindow(env, 1, [0, 0, 1000, 1100], 0);
+    env.tabList.push(w1);
+    env.display.focus_window = null;
+    const app = ext.currentSession().app;
+    app.excl.toggleFocused(app);
+    assert.equal(app.excl.isExcluded(w1), false,
+        'a table-top focus must not exclude the first tileable window');
+});
+
+test('issue 11: the columns hotkey gives a focused app-less window no column', () => {
+    const { env, ext } = makeEnv({ windowGap: 0 });
+    enableOnMonitor(env, ext);
+    activeWorkspace(env);
+    const orphan = makeWindow(env, 1, [0, 0, 300, 300], 0, null, { noApp: true });
+    const w1 = makeWindow(env, 2, [400, 0, 400, 300], 0);
+    const w2 = makeWindow(env, 3, [900, 0, 400, 300], 0);
+    env.tabList.push(orphan, w1, w2);
+    env.display.focus_window = orphan;
+    env.keybindingManager.hotkeys.get('greenTile-auto3').cb();
+    assert.equal(orphan.moves.length, 0, 'the app-less focused window claimed no column');
+    assert.equal(w1.rect[0], 0, 'the first admissible window starts at column 0');
+    assert.ok(w2.rect[0] > w1.rect[0], 'the second admissible window sits to its right');
 });
