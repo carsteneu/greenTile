@@ -360,6 +360,44 @@ test('DEFECT 3: a same-instance retry after a newer connect does not override it
     assert.deepEqual(foreign, ['foreign'], 'the newer owner was not clobbered by the retry');
 });
 
+test('manager route: a failure inside the recovery path does not strand the remaining names', () => {
+    const { meta, manager, focus, app } = harness({ generation: 'upstream' });
+    /** @type {any[]} */
+    const delivered = [];
+    const priors = seedPriors(manager, delivered);
+    focus.connect(app);
+    // The ownership probe itself throws for ONE name: first during _restore,
+    // then again inside _recover. The per-registration isolation must cover the
+    // recovery path too — otherwise the throw escapes the loop and the three
+    // remaining names are never released.
+    const realGet = manager.bindings.get.bind(manager.bindings);
+    let armed = 2;
+    // @ts-ignore test-only override of the fake map's probe
+    manager.bindings.get = (key) => {
+        if (armed > 0 && key === 71) {
+            armed -= 1;
+            throw new Error('bindings probe exploded');
+        }
+        return realGet(key);
+    };
+    assert.throws(() => focus.destroy(), (e) => {
+        assert.match(e.message, /push-tile-left/);
+        return true;
+    }, 'the ownership-probe failure is reported');
+    for (const name of ['push-tile-right', 'push-tile-up', 'push-tile-down']) {
+        assert.equal(manager.bindings.get(ACTION_IDS[name]).callback, priors[name].callback,
+            name + ' is still released despite the earlier failure');
+        deliver(meta, name, { id: name });
+        assert.deepEqual(delivered.at(-1), [name, { id: name }], name + ' is reachable again');
+    }
+    assert.doesNotThrow(() => focus.destroy(), 'the failed registration stayed retryable');
+    assert.equal(manager.bindings.get(71).callback, priors['push-tile-left'].callback,
+        'the retry completed the last name');
+    deliver(meta, 'push-tile-left', { id: 'restored' });
+    assert.deepEqual(delivered.at(-1), ['push-tile-left', { id: 'restored' }],
+        'the original prior answers again after the retry');
+});
+
 test('6.6 direct route: a throwing Meta reset still resets the rest and stays retryable', () => {
     const { meta, metaControl, focus, calls, app } = harness({ generation: 'legacy' });
     focus.connect(app);
