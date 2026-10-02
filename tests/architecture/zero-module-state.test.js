@@ -37,7 +37,8 @@ const VAR_RE = /^var\s+([A-Za-z$_][\w$]*)\s*=\s*(.*)$/;
 const findViolations = (src, file, opts = {}) => {
     const isEntry = opts.isEntry === true || file === 'extension.js';
     const problems = [];
-    const lines = src.split('\n');
+    // comments cannot carry reassignments — strip them like the resolver guard
+    const lines = src.replace(/\/\/[^\n]*/g, '').replace(/\/\*[\s\S]*?\*\//g, '').split('\n');
     const varDecls = new Map();
     for (let i = 0; i < lines.length; i++) {
         const line = lines[i];
@@ -102,7 +103,10 @@ test('guard flags mutable top-level state and accepts the allowed forms', () => 
     assert.equal(findViolations('var x = Object.freeze({});', 'f.js').length, 0);
     assert.equal(findViolations('var x = {};', 'f.js').length, 1, 'var export of a mutable literal flagged');
     assert.equal(findViolations('var x = {}\nvar y = 1;\nx = y;', 'f.js').length, 2, 'reassignment of an exported binding flagged');
-    assert.equal(findViolations('var counter = 0;\ncounter++;', 'f.js').length, 1, 'increment of an exported binding flagged');
+    assert.equal(findViolations('var counter = 0;\ncounter++;', 'f.js').length, 1, 'postfix increment flagged');
+    assert.equal(findViolations('var counter = 0;\ncounter++', 'f.js').length, 1, 'postfix without semicolon flagged');
+    assert.equal(findViolations('var counter = 0;\n++counter;', 'f.js').length, 1, 'prefix form pinned');
+    assert.equal(findViolations('var counter = 0;\ncounter++; // tick', 'f.js').length, 1, 'a trailing comment does not hide the reassignment');
     assert.equal(findViolations('var counter = 0;\ncounter += 1;', 'f.js').length, 1, 'compound assignment to an exported binding flagged');
     assert.equal(findViolations('var x = {};', 'f.js').length, 1);
     assert.equal(findViolations('const x = [];', 'f.js').length, 1);
