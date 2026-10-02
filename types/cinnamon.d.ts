@@ -169,6 +169,7 @@ type XletTree = {
             hotkeys: typeof import('./xlet/runtime/hotkeys');
             monitors: typeof import('./xlet/runtime/monitors');
             'panel-state': typeof import('./xlet/runtime/panel-state');
+            placement: typeof import('./xlet/runtime/placement');
             scope: typeof import('./xlet/runtime/scope');
             session: typeof import('./xlet/runtime/session');
             split: typeof import('./xlet/runtime/split');

@@ -25,7 +25,7 @@ const settingsInstance = (env) => env.settingsInstances.find((s) => s.uuid === '
 // Source-sliced order pins (same test style as settings-finalize): the App
 // construction order and the BINDINGS declaration order are the invariants the
 // 4c-B move promised to keep — regressions that reorder them must fail here.
-const constructorOrder = ['excl', 'hotkeys', 'panel', 'monitors', 'split', 'theme', 'border', 'focus', 'drop', 'auto', 'ops', 'config'];
+const constructorOrder = ['placement', 'excl', 'hotkeys', 'panel', 'monitors', 'split', 'theme', 'border', 'focus', 'drop', 'auto', 'ops', 'config'];
 
 test('App constructs every per-App component in the documented order, Config last', () => {
     const src = fs.readFileSync(path.join(ROOT, 'lib', 'app', 'app.js'), 'utf8');

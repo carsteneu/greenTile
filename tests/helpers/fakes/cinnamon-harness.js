@@ -1,0 +1,135 @@
+'use strict';
+// Shared harness for the extension-level tests: the REAL extension.js loaded
+// on the fake Cinnamon runtime, plus the fake MetaWindow and the monitor enable
+// helpers. Extracted from tests/tiling/characterization.test.js so the
+// animation-ownership tests drive exactly the same entry and the same fake
+// window surface.
+const fs = require('node:fs');
+const path = require('node:path');
+const { cinnamonLoad, load, ROOT } = require('../cinnamon-loader');
+const { createCinnamonEnv } = require('./cinnamon-env');
+
+const MONITOR = { x: 0, y: 0, width: 2000, height: 1100 };
+
+const makeEnv = (extraSettings = {}) => {
+    const env = createCinnamonEnv({ settingsDefaults: Object.assign({ tileAnimation: true }, extraSettings) });
+    // test-local instance augmentations: push_tile (native push is not part of
+    // the shared fake) and the MotionDirection names push-tile reads
+    const pushes = [];
+    env.display.push_tile = (window, dir) => pushes.push([window, dir]);
+    env.gi.Meta.MotionDirection = { LEFT: 1, RIGHT: 2, UP: 3, DOWN: 4 };
+    const imports = new Proxy(env.imports, {
+        get(target, prop) {
+            if (prop !== 'ui')
+                {return target[prop];}
+            const ui = target[prop];
+            return new Proxy(ui, {
+                get(u, p) {
+                    if (p === 'main') {
+                        // no panels on the monitor: usableArea sees the
+                        // full monitor rect
+                        const main = u[p];
+                        return new Proxy(main, {
+                            get(m, mp) {
+                                if (mp === 'panelManager')
+                                    {return { getPanelsInMonitor: () => [] };}
+                                return m[mp];
+                            },
+                        });
+                    }
+                    return u[p];
+                },
+            });
+        },
+    });
+    globalThis.imports = imports;
+    globalThis.global = env.global;
+    const src = fs.readFileSync(path.join(ROOT, 'extension.js'), 'utf8');
+    const ext = cinnamonLoad(src, load, 'extension.js');
+    ext.init({ uuid: 'greenTile@carsteneu' });
+    return { env, ext, pushes };
+};
+
+// Fake MetaWindow recording move_resize_frame / move_frame with enough signal
+// hub surface for the auto/border observers that ride along.
+const makeWindow = (env, seq, rect, monitor = 0, withActor = null) => {
+    const handlers = [];
+    let nextId = 1;
+    const window = {
+        seq,
+        minimized: false,
+        moves: [],
+        rect: rect.slice(),
+        connect(sig, cb) {
+            const id = nextId++;
+            handlers.push({ sig, cb, id });
+            return id;
+        },
+        disconnect(id) {
+            const at = handlers.findIndex((h) => h.id === id);
+            if (at === -1)
+                {throw new Error('window: no such handler ' + id);}
+            handlers.splice(at, 1);
+        },
+        count(sig) {
+            return handlers.filter((h) => !sig || h.sig === sig).length;
+        },
+        emit(sig, ...args) {
+            for (const h of handlers.slice())
+                {if (h.sig === sig)
+                    {h.cb(...args);}}
+        },
+        get_stable_sequence: () => seq,
+        get_window_type: () => 6,
+        get_wm_class: () => 'FakeWindow',
+        get_title: () => 'FakeWindow' + seq,
+        get_monitor: () => monitor,
+        get_workspace: () => env.activeWorkspace,
+        is_on_all_workspaces: () => false,
+        get_frame_rect: () => ({ x: window.rect[0], y: window.rect[1], width: window.rect[2], height: window.rect[3] }),
+        get_compositor_private: () => withActor,
+        move_resize_frame(anim, x, y, w, h) {
+            window.moves.push(['resize', x, y, w, h]);
+            window.rect = [x, y, w, h];
+        },
+        move_frame(anim, x, y) {
+            window.moves.push(['move', x, y]);
+            window.rect = [x, y, window.rect[2], window.rect[3]];
+        },
+        unmaximize() {},
+        activate() {
+            env.display.focus_window = window;
+        },
+        change_workspace_by_index() {},
+        move_to_monitor() {},
+    };
+    return window;
+};
+
+const makeWorkspace = (env) => {
+    const ws = { list_windows: () => env.tabList };
+    env.workspaces.push(ws);
+    return ws;
+};
+
+const settingsInstance = (env) => env.settingsInstances.at(-1);
+
+// enable + one DisplayConfig flush; monitor 0 is the 2000x1100 work area.
+const enableOnMonitor = (env, ext) => {
+    env.layoutManager.monitors.push(MONITOR);
+    ext.enable();
+    env.flushDisplayConfigNoReply();
+};
+
+// enable with the given monitor rects (indexes in push order)
+const enableOnMonitors = (env, ext, monitors) => {
+    for (const m of monitors) {
+        env.layoutManager.monitors.push(m);
+    }
+    ext.enable();
+    env.flushDisplayConfigNoReply();
+};
+
+module.exports = {
+    MONITOR, makeEnv, makeWindow, makeWorkspace, settingsInstance, enableOnMonitor, enableOnMonitors,
+};

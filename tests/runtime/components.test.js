@@ -447,10 +447,12 @@ test('session destroy releases the handler before the app dies: a throwing app.d
 const { Auto } = load('./lib/runtime/auto');
 
 // Minimal per-App shape: only the surfaces the Auto component reads through the
-// app parameter (monitors readiness, settle liveness).
+// app parameter (monitors readiness, settle liveness, the placement owner the
+// unmanaged handler releases through).
 const makeApp = (overrides = {}) => ({
     monitors: { ready: true },
     session: { settle: { started: 0, start() {} } },
+    placement: { release() {} },
     ...overrides,
 });
 

@@ -18,6 +18,29 @@ type CinnamonWorkspace = {
 };
 
 /**
+ * Clutter actor of a window frame (Meta.Window.get_compositor_private) as far
+ * as greenTile touches it: translation/scale for the animated placement plus
+ * the platform transition API of Cinnamon's environment.js (_easeActor/
+ * _easeActorProperty) — ease(), get_transition() as the identity handle of a
+ * single running transition, remove_transition() to stop exactly that one.
+ * The Clutter property accessors are plain fields here.
+ */
+type CinnamonActor = {
+    translation_x: number;
+    translation_y: number;
+    scale_x: number;
+    scale_y: number;
+    /** Cinnamon Clutter.Actor.prototype.ease (environment.js _easeActor). */
+    ease(props: Record<string, any>): void;
+    /** Clutter.Actor.get_transition(propName) — the running transition of that
+     * (dashed) property or null. lib/runtime/placement.js compares this object
+     * identity to tell an own transition from a foreign one. */
+    get_transition(name: string): AnyRecord | null;
+    /** Clutter.Actor.remove_transition — stops exactly the named transition. */
+    remove_transition(name: string): void;
+};
+
+/**
  * Meta.Window as far as greenTile touches it — narrowed to the members the
  * runtime paths actually call, so method-name and argument typos fail tsc.
  * Every member is verified against the installed muffin 6.6 gi (Meta-0.typelib:
@@ -45,22 +68,8 @@ interface CinnamonWindow {
     /** Meta.Window.move_frame(user_op, x, y) */
     move_frame(userOp: boolean, x: number, y: number): void;
     get_frame_rect(): CinnamonRectangle;
-    /** Clutter actor of the window window (translation/scale for animation,
-     * the platform ease() and remove_transition from Cinnamon
-     * environment.js, and greenTile's own-ease ownership record). */
-    get_compositor_private(): {
-        translation_x: number;
-        translation_y: number;
-        scale_x: number;
-        scale_y: number;
-        /** Cinnamon Clutter.Actor.prototype.ease (environment.js _easeActor). */
-        ease(props: Record<string, any>): void;
-        /** Clutter.Actor.remove_transition — stops exactly the named transition. */
-        remove_transition(name: string): void;
-        /** own-ease ownership record written only by lib/tiling/place.js:
-         * {gen, props} while one of our eases is live, null after. */
-        __greenTile_easeOwn?: { gen: number; props: readonly string[] } | null;
-    } | null;
+    /** The window frame's Clutter actor (null once the window is destroyed). */
+    get_compositor_private(): CinnamonActor | null;
     activate(time: number): void;
     /** Stable seq across App recreations (Meta.Window.get_stable_sequence). */
     get_stable_sequence(): number;
@@ -204,8 +213,19 @@ type SessionFacade = {
     destroy(): void;
 };
 
+/** Animated-placement owner facade (lib/runtime/placement.js): the per-App
+ * records of the actor transitions greenTile started (lib/tiling/place.js). */
+type PlacementFacade = {
+    has(metaWindow: CinnamonWindow): boolean;
+    acquired(metaWindow: CinnamonWindow, token: object, actor: CinnamonActor, props: ReadonlyArray<{ prop: string; field: string; identity: number }>): void;
+    settled(metaWindow: CinnamonWindow, token: object, finished: boolean): void;
+    release(metaWindow: CinnamonWindow): void;
+    destroy(): void;
+};
+
 /** Auto-tiling facade (lib/runtime/auto.js). */
 type AutoFacade = {
+
     scheduleAll(app: AppFacade, delayMs: number): void;
     scheduleMonitor(app: AppFacade, monitorIndex: number, delayMs: number): void;
     pendingTake(monitorIndex: number): Set<number>;
@@ -298,6 +318,7 @@ type AppFacade = {
     config: ConfigFacade;
     session: SessionFacade;
     auto: AutoFacade;
+    placement: PlacementFacade;
     split: SplitFacade;
     monitors: MonitorsFacade;
     excl: ExclFacade;

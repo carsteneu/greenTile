@@ -12,6 +12,7 @@
 export const App: {
     new (session: SessionFacade, cinnamon: AppCinnamon): {
         session: SessionFacade;
+        placement: any;
         excl: any;
         hotkeys: any;
         panel: any;
