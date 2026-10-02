@@ -117,6 +117,11 @@ const makeEaseActor = () => {
                 {throw new Error('actor: handler not connected');}
             list.splice(at, 1);
         },
+        // test introspection, not a Clutter API: how many handlers are attached
+        // to one of the actor's signals (g_signal_handlers_* equivalent)
+        listenerCount(signal) {
+            return (signalHandlers[signal] || []).length;
+        },
         // g_signal_emit(actor, ::transition-stopped, quark, name, is_finished)
         emitTransitionStopped(name, finished) {
             for (const id of signalHandlers['transition-stopped'].slice()) {

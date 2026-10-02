@@ -81,6 +81,8 @@ export const Placement: {
         destroy(): void;
         /** @param {PlacementRecord} record */
         _detach(record: PlacementRecord): void;
+        /** @param {CinnamonWindow} metaWindow */
+        _detachIfPresent(metaWindow: CinnamonWindow): void;
         /** @param {string[]} failures */
         _report(failures: string[]): void;
         /**

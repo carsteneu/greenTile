@@ -405,3 +405,27 @@ test('a replacement animation chained from our own transition-stopped signal is 
     assert.equal(actor.get_transition('translation-x'), replacement,
         'the replacement transition is still the current one');
 });
+
+test('a re-place and a completed ease leave no actor observer behind', () => {
+    // Every record subscribes to the actor's ::transition-stopped. A superseded
+    // record (a second placement of the same window) and a record that resolved
+    // itself must both drop that subscription, or every placement in a session
+    // leaves another handler on a live actor.
+    const { env, ext } = makeEnv();
+    enableOnMonitor(env, ext);
+    const actor = makeEaseActor();
+    const w1 = makeWindow(env, 1, [10, 10, 400, 300], 0, actor);
+    const w2 = makeWindow(env, 2, [500, 0, 400, 300]);
+    env.tabList.push(w1, w2);
+    env.display.focus_window = w1;
+    env.activeWorkspace = { index: () => 0 };
+    columnsHotkey(env, 'greenTile-auto6');
+    assert.equal(actor.listenerCount('transition-stopped'), 1, 'one observer for the in-flight placement');
+    columnsHotkey(env, 'greenTile-auto6');
+    assert.equal(actor.listenerCount('transition-stopped'), 1, 'the superseded record stopped observing');
+    actor.finishAll();
+    assert.equal(ext.currentSession().app.placement.has(w1), false, 'the completed ease resolved the record');
+    assert.equal(actor.listenerCount('transition-stopped'), 0, 'a resolved record stopped observing');
+    ext.disable();
+    assert.equal(actor.listenerCount('transition-stopped'), 0, 'teardown left no observer behind');
+});
