@@ -104,25 +104,66 @@ test('the entry wires only through the importer, not require()', () => {
         'the entry resolves its modules through the xlet importer');
 });
 
-test('XLET appears only as the declaration or a XLET.lib chain — no dynamic access or aliasing', () => {
-    // the resolver/layer/cycle guards scan static `XLET.lib…` chains; any
-    // other use of XLET (indexing it, aliasing it into a variable, passing
-    // it around) would route module access around those guards
+// XLET must appear only as the canonical declaration or as the head of a
+// XLET.lib member chain, and imports.extensions only inside that declaration —
+// a second occurrence is a direct-route import that bypasses every chain
+// guard. Returns violation strings for the given (fileName, source) pairs.
+const xletShapeViolations = (file, rawSrc) => {
     const declRe = /^const XLET = imports\.extensions\['greenTile@carsteneu'\];$/;
+    const noComments = rawSrc.replace(/\/\/[^\n]*/g, '').replace(/\/\*[\s\S]*?\*\//g, '');
     const violations = [];
-    for (const file of shippedJs) {
-        const raw = fs.readFileSync(path.join(ROOT, file), 'utf8');
-        const noComments = raw.replace(/\/\/[^\n]*/g, '').replace(/\/\*[\s\S]*?\*\//g, '');
-        const lines = noComments.split('\n').filter((l) => !declRe.test(l));
-        for (const line of lines) {
-            let at = line.indexOf('XLET');
-            while (at !== -1) {
-                const after = line.slice(at + 'XLET'.length);
-                if (!after.startsWith('.lib'))
-                    {violations.push(file + ': ' + line.trim().slice(0, 70));}
-                at = line.indexOf('XLET', at + 1);
-            }
+    for (const line of noComments.split('\n')) {
+        if (declRe.test(line)) {
+            continue;
+        }
+        if (/imports\.extensions/.test(line)) {
+            violations.push(file + ' uses imports.extensions outside the XLET declaration: ' + line.trim().slice(0, 70));
+        }
+        // aliasing a bare XLET.lib chain into a local binding routes module
+        // access around the static chain scan — destructuring from a chain
+        // stays canonical
+        if (/(?:const|let|var)\s+[A-Za-z_$][\w$]*\s*=\s*XLET\.lib[\w$'\]\[./-]*\s*;?\s*$/.test(line)) {
+            violations.push(file + ' aliases the module tree: ' + line.trim().slice(0, 70));
+        }
+        let at = line.indexOf('XLET');
+        while (at !== -1) {
+            const after = line.slice(at + 'XLET'.length);
+            if (!after.startsWith('.lib'))
+                {violations.push(file + ': ' + line.trim().slice(0, 70));}
+            at = line.indexOf('XLET', at + 1);
         }
     }
+    return violations;
+};
+
+test('XLET appears only as the declaration or a XLET.lib chain — no dynamic access, aliasing or direct routes', () => {
+    // the resolver/layer/cycle guards scan static `XLET.lib…` chains; any
+    // other use of XLET (indexing it, aliasing it into a variable, passing
+    // it around) or of imports.extensions (direct route) would route module
+    // access around those guards
+    const violations = [];
+    for (const file of shippedJs) {
+        violations.push(...xletShapeViolations(file, fs.readFileSync(path.join(ROOT, file), 'utf8')));
+    }
     assert.deepEqual(violations, [], 'XLET used outside the declaration/member-chain form');
+});
+
+test('xletShapeViolations catches the reviewer bypass mutations', () => {
+    // direct route: imports.extensions chain straight to a lib module
+    assert.equal(xletShapeViolations('f.js', "const { App } = imports.extensions['greenTile@carsteneu'].lib.app.app;").length, 1,
+        'a direct imports.extensions route is flagged');
+    // hidden alias: XLET.lib bound to a local name, chains continue elsewhere
+    const aliased = [
+        "const XLET = imports.extensions['greenTile@carsteneu'];",
+        'const hiddenLib = XLET.lib;',
+        'const { App } = hiddenLib.app.app;',
+    ].join('\n');
+    assert.equal(xletShapeViolations('f.js', aliased).length, 1, 'XLET.lib aliasing is flagged');
+    // the canonical form stays clean
+    const canonical = [
+        "const XLET = imports.extensions['greenTile@carsteneu'];",
+        "const { Split } = XLET.lib.runtime.split;",
+        "const { SETTINGS_KEYS } = XLET.lib.model['settings-keys'];",
+    ].join('\n');
+    assert.deepEqual(xletShapeViolations('f.js', canonical), [], 'the canonical wiring passes');
 });

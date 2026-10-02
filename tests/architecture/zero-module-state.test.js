@@ -34,13 +34,16 @@ const MUTABLE_RHS = /^(\{|\[|new Map\(|new Set\(|new WeakMap\(|Object\.create\s*
 const LIFECYCLE_HOLDER = /^const lifecycle = \{ session: null \};$/;
 const VAR_RE = /^var\s+([A-Za-z$_][\w$]*)\s*=\s*(.*)$/;
 
-const findViolations = (src, file) => {
+const findViolations = (src, file, opts = {}) => {
+    const isEntry = opts.isEntry === true || file === 'extension.js';
     const problems = [];
     const lines = src.split('\n');
     const varDecls = new Map();
     for (let i = 0; i < lines.length; i++) {
         const line = lines[i];
-        if (LIFECYCLE_HOLDER.test(line)) {
+        // the lifecycle holder is the ONE allowed exception and only in the
+        // entry — anywhere else the pattern is smuggled module state
+        if (LIFECYCLE_HOLDER.test(line) && isEntry) {
             continue;
         }
         const letMatch = /^let\s/.test(line) ? line : null;
@@ -79,8 +82,10 @@ const findViolations = (src, file) => {
     }
     for (const [name, declLine] of varDecls) {
         const reassign = new RegExp('^\\s*' + name + '\\s*=(?!=)');
+        const incDec = new RegExp('^\\s*' + name + '\\s*(\\+\\+|--);');
+        const compound = new RegExp('^\\s*' + name + '\\s*(\\+=|-=|\\*=|/=|%=|\\*\\*=|\\?\\?=|\\|\\|=)');
         for (let i = 0; i < lines.length; i++) {
-            if (i !== declLine && reassign.test(lines[i])) {
+            if (i !== declLine && (reassign.test(lines[i]) || incDec.test(lines[i]) || compound.test(lines[i]))) {
                 problems.push(file + ':' + (i + 1) + ' exported binding reassigned: ' + name);
             }
         }
@@ -96,7 +101,9 @@ test('guard flags mutable top-level state and accepts the allowed forms', () => 
     assert.equal(findViolations('var x = Object.freeze({});', 'f.js').length, 0);
     assert.equal(findViolations('var x = {};', 'f.js').length, 1, 'var export of a mutable literal flagged');
     assert.equal(findViolations('var x = {}\nvar y = 1;\nx = y;', 'f.js').length, 2, 'reassignment of an exported binding flagged');
-    assert.equal(findViolations('const x = {};', 'f.js').length, 1);
+    assert.equal(findViolations('var counter = 0;\ncounter++;', 'f.js').length, 1, 'increment of an exported binding flagged');
+    assert.equal(findViolations('var counter = 0;\ncounter += 1;', 'f.js').length, 1, 'compound assignment to an exported binding flagged');
+    assert.equal(findViolations('var x = {};', 'f.js').length, 1);
     assert.equal(findViolations('const x = [];', 'f.js').length, 1);
     assert.equal(findViolations('const x = new Map();', 'f.js').length, 1);
     assert.equal(findViolations('const x = new Set();', 'f.js').length, 1);
@@ -109,7 +116,9 @@ test('guard flags mutable top-level state and accepts the allowed forms', () => 
     assert.equal(findViolations('const f = function () {};', 'f.js').length, 0, 'functions allowed');
     assert.equal(findViolations('const f = (a) => ({ ...a });', 'f.js').length, 0, 'arrow params are not an object literal');
     assert.equal(findViolations('class C {}', 'f.js').length, 0, 'classes allowed (private in the native namespace)');
-    assert.equal(findViolations('const lifecycle = { session: null };', 'f.js').length, 0, 'the extension.js lifecycle holder is the documented exception');
+    // the lifecycle holder is the documented exception — but ONLY in the entry
+    assert.equal(findViolations('const lifecycle = { session: null };', 'extension.js').length, 0, 'the extension.js lifecycle holder is the documented exception');
+    assert.equal(findViolations('const lifecycle = { session: null };', 'f.js').length, 1, 'the holder pattern outside the entry is smuggled module state (reviewer mutation)');
     assert.equal(findViolations('const other = { session: null };', 'f.js').length, 1, 'only the lifecycle holder pattern is exempt');
     assert.equal(findViolations('const { a, b } = XLET.lib.model.split;', 'f.js').length, 0, 'importer destructuring allowed');
     assert.equal(findViolations('const Main = imports.ui.main;', 'f.js').length, 0, 'imports allowed');

@@ -215,4 +215,3 @@ declare const global: {
 interface String {
     format(...args: unknown[]): string;
 }
-

@@ -51,3 +51,19 @@ test('the ambient consumer tree wires the mirror, not raw lib paths', () => {
     assert.ok(src.includes("typeof import('./xlet/app/app')"), 'XletTree resolves through the generated mirror');
     assert.doesNotMatch(src, /typeof import\('\.\.\/lib\//, 'no direct lib .js typing — the mirror is the contract');
 });
+
+test('no shipped or type file ends in extra blank lines (git diff --check stays clean)', () => {
+    const { execSync } = require('node:child_process');
+    const files = execSync('git ls-files "lib/**" "types/**" extension.js', { cwd: ROOT })
+        .toString().trim().split('\n')
+        .filter((f) => /\.(js|d\.ts)$/.test(f));
+    const offenders = [];
+    for (const rel of files) {
+        const raw = fs.readFileSync(path.join(ROOT, rel), 'utf8');
+        if (/\n{2,}$/.test(raw) || (raw.length > 0 && !raw.endsWith('\n')))
+            {offenders.push(rel);}
+    }
+    assert.deepEqual(offenders, [], 'files ending with extra blank lines (or none at all)');
+    const check = execSync('git diff --check', { cwd: ROOT });
+    assert.equal(check.toString(), '', 'git diff --check is clean');
+});
