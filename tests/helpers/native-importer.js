@@ -2,8 +2,12 @@
 // Simulation of the GJS native importer for the shipped xlet tree. Both loader
 // generations resolve `imports.extensions['greenTile@carsteneu']`: Cinnamon 6.6
 // main.js caches the xlet directories on the imports root
-// (_addXletDirectoriesToSearchPath); upstream installXletImporter reuses the
-// same directory importer for extension.imports.
+// (_addXletDirectoriesToSearchPath); upstream keeps that same call (6.7.8
+// main.js:248) even though installXletImporter hands the xlet a SEPARATE
+// importer object for extension.imports, resolved as `imports[uuid]` under a
+// temporarily narrowed searchPath. installXletImporter itself is upstream-only;
+// what the installed engine shows is that such a narrowed-searchPath importer is
+// a distinct object from the cached imports.extensions[uuid] one.
 //
 // Native module semantics (upstream js/ui/extension.js documents them in the
 // _requireLocal fallback: "let/const/class values are inaccessible via the
