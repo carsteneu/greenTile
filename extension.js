@@ -33,11 +33,18 @@ const { Session } = XLET.lib.runtime.session;
 // The module-private holder below owns the session instead — the one allowed
 // top-level mutable binding (see zero-module-state.test.js). Reload semantics
 // differ per generation and are safe here only because nothing else lives at
-// module level: 6.6 forgetExtension deletes the whole entry subtree (this file
-// re-evaluates with a fresh holder), while upstream clearXletImportCache
-// clears only extension.imports and the shared imports.extensions tree —
-// cached lib modules there survive a reload. With top-level state reduced to
-// this holder, that asymmetry cannot leak between sessions.
+// module level: on 6.6 forgetExtension re-evaluates this ENTRY (fileUtils
+// unloadModule is dir-wide for the entry directory, then
+// delete imports.extensions[uuid] FAILS — the native dir-importer property is
+// permanent, configurable:false), while the lib modules resolved through that
+// tree stay cached for the process lifetime (installed cjs 115 exposes no
+// clearCache). The pinned upstream clearXletImportCache clears only its
+// PRIVATE per-extension importer (extension.imports); the shared
+// imports.extensions tree the XLET chains address is left alone, so those lib
+// modules also survive a reload. On neither generation does a reload refresh
+// edited lib byte contents in place (younger upstream can via a private
+// importer the entry would have to route its chains through). With top-level
+// state reduced to this holder, that asymmetry cannot leak between sessions.
 /** @type {{ session: { destroy(): void } | null }} */
 const lifecycle = { session: null };
 
