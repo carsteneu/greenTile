@@ -52,7 +52,8 @@ const makeEnv = (extraSettings = {}) => {
 
 // Fake MetaWindow recording move_resize_frame / move_frame with enough signal
 // hub surface for the auto/border observers that ride along. `options` is
-// additive: windowType feeds the type filters (dialogs), and move_to_monitor
+// additive: windowType/wmClass feed the eligibility filters (dialogs, app-less
+// windows), noApp marks a window whose tracker lookup fails, and move_to_monitor
 // keeps get_monitor() live like Meta does on a real cross-monitor move.
 const makeWindow = (env, seq, rect, monitor = 0, withActor = null, options = {}) => {
     const handlers = [];
@@ -61,6 +62,8 @@ const makeWindow = (env, seq, rect, monitor = 0, withActor = null, options = {})
     const window = {
         seq,
         minimized: false,
+        /** @type {boolean} marked windows have no owning app (app-less window) */
+        __noApp: options.noApp === true,
         moves: [],
         rect: rect.slice(),
         connect(sig, cb) {
@@ -83,8 +86,8 @@ const makeWindow = (env, seq, rect, monitor = 0, withActor = null, options = {})
                     {h.cb(...args);}}
         },
         get_stable_sequence: () => seq,
-        get_window_type: () => options.windowType || 6,
-        get_wm_class: () => 'FakeWindow',
+        get_window_type: () => (options.windowType !== undefined ? options.windowType : 6),
+        get_wm_class: () => (options.wmClass !== undefined ? options.wmClass : 'FakeWindow'),
         get_title: () => 'FakeWindow' + seq,
         get_monitor: () => mon,
         get_workspace: () => env.activeWorkspace,

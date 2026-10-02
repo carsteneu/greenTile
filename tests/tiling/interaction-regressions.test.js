@@ -12,17 +12,27 @@ const {
 // Wide enough for the row grids the drop tests key on (>= 2100 px keeps autoRows
 // for 4+ windows instead of autoNarrowStacks).
 const WIDE = { x: 0, y: 0, width: 2400, height: 1100 };
+const LEFT = { x: 0, y: 0, width: 2000, height: 1100 };
+const RIGHT = { x: 2000, y: 0, width: 2000, height: 1100 };
+const DIALOG = 2; // Meta.WindowType.DIALOG in the fake Meta
 
 const leftToRight = (wins) => wins.slice().sort((a, b) => a.rect[0] - b.rect[0]).map((w) => w.seq);
 
+// A real active workspace (makeWorkspace carries list_windows): the collector reads
+// it by index, the focus resolution and the debug canary compare against it.
+const activeWorkspace = (env) => {
+    const ws = makeWorkspace(env);
+    ws.index = () => 0;
+    env.activeWorkspace = ws;
+    return ws;
+};
+
 // ---------------- issue 8: pause beats the swap chain ----------------
 
-test('issue 8: a paused source is never pushed onto the adjacent monitor by the swap hotkey', () => {
-    const mon2 = { x: 2000, y: 0, width: 2000, height: 1100 };
+test('issue 8: no swap direction moves a paused source onto another monitor or chain', () => {
     const { env, ext } = makeEnv({ windowGap: 0 });
-    enableOnMonitors(env, ext, [{ x: 0, y: 0, width: 2000, height: 1100 }, mon2]);
-    makeWorkspace(env);
-    env.activeWorkspace = { index: () => 0 };
+    enableOnMonitors(env, ext, [LEFT, RIGHT]);
+    activeWorkspace(env);
     const w1 = makeWindow(env, 1, [0, 0, 1000, 1100], 0);
     const w2 = makeWindow(env, 2, [1000, 0, 1000, 1100], 0);
     const w3 = makeWindow(env, 3, [2000, 0, 1000, 1100], 1);
@@ -32,21 +42,20 @@ test('issue 8: a paused source is never pushed onto the adjacent monitor by the 
     // monitor 1 tiles, monitor 0 stays paused (default auto:false)
     app.ops.layoutSet(app, 1, 0, { auto: true });
     env.display.focus_window = w1;
-    const before = [w1.rect.slice(), w2.rect.slice()];
-    env.keybindingManager.hotkeys.get('greenTile-swap-right').cb();
-    assert.equal(w1.get_monitor(), 0, 'the paused source window stayed on its monitor');
-    assert.deepEqual(w1.rect, before[0], 'the paused source window was not re-placed');
-    assert.deepEqual(w2.rect, before[1], 'the paused neighbour stayed put');
-    assert.equal(env.logs.some((l) => l.indexOf('greenTile swap pushed') === 0), false,
-        'the paused swap never entered the chain push');
+    const before = [w1, w2, w3, w4].map((w) => ({ rect: w.rect.slice(), monitor: w.get_monitor() }));
+    for (const dir of ['left', 'right', 'up', 'down']) {
+        env.keybindingManager.hotkeys.get('greenTile-swap-' + dir).cb();
+    }
+    assert.deepEqual([w1, w2, w3, w4].map((w) => ({ rect: w.rect, monitor: w.get_monitor() })), before,
+        'all four swap directions left the paused monitor untouched');
+    assert.deepEqual(env.logs.filter((l) => l.indexOf('greenTile swap') === 0), [],
+        'the paused swaps never entered the local exchange or the chain push');
 });
 
 test('issue 8 regression: an active source still pushes along the monitor chain', () => {
-    const mon2 = { x: 2000, y: 0, width: 2000, height: 1100 };
     const { env, ext } = makeEnv({ windowGap: 0 });
-    enableOnMonitors(env, ext, [{ x: 0, y: 0, width: 2000, height: 1100 }, mon2]);
-    makeWorkspace(env);
-    env.activeWorkspace = { index: () => 0 };
+    enableOnMonitors(env, ext, [LEFT, RIGHT]);
+    activeWorkspace(env);
     const w1 = makeWindow(env, 1, [0, 0, 1000, 1100], 0);
     const w3 = makeWindow(env, 3, [2000, 0, 1000, 1100], 1);
     env.tabList.push(w1, w3);
@@ -63,8 +72,7 @@ test('issue 8 regression: an active source still pushes along the monitor chain'
 test('issue 9: focus navigation leaves the resize sort override for the retile', () => {
     const { env, ext } = makeEnv({ windowGap: 0 });
     enableOnMonitor(env, ext);
-    makeWorkspace(env);
-    env.activeWorkspace = { index: () => 0 };
+    activeWorkspace(env);
     const w1 = makeWindow(env, 1, [0, 0, 1000, 1100], 0);
     const w2 = makeWindow(env, 2, [1000, 0, 1000, 1100], 0);
     env.tabList.push(w1, w2);
@@ -86,8 +94,7 @@ test('issue 9: focus navigation leaves the resize sort override for the retile',
 test('issue 9 regression: the actual retile still consumes the sort override', () => {
     const { env, ext } = makeEnv({ windowGap: 0 });
     enableOnMonitor(env, ext);
-    makeWorkspace(env);
-    env.activeWorkspace = { index: () => 0 };
+    activeWorkspace(env);
     const w1 = makeWindow(env, 1, [0, 0, 1000, 1100], 0);
     const w2 = makeWindow(env, 2, [1000, 0, 1000, 1100], 0);
     env.tabList.push(w1, w2);
@@ -105,13 +112,27 @@ test('issue 9 regression: the actual retile still consumes the sort override', (
     assert.deepEqual(leftToRight([w1, w2]), [1, 2]);
 });
 
+test('issue 9: the read-only peek neither consumes nor keeps expired entries', () => {
+    const { env, ext } = makeEnv({ windowGap: 0 });
+    enableOnMonitor(env, ext);
+    const app = ext.currentSession().app;
+    app.auto.sortOverride(5, [1, 2, 3, 4], 1000);
+    assert.deepEqual(app.auto.sortPeek(5, 1500), [1, 2, 3, 4], 'a fresh override is readable');
+    assert.deepEqual(app.auto.sortPeek(5, 1500), [1, 2, 3, 4], 'reading it again does not consume it');
+    assert.deepEqual(app.auto.sortTake(5, 1500), [1, 2, 3, 4], 'the later placement still gets it');
+    app.auto.sortOverride(6, [9, 9, 9, 9], 1000);
+    assert.equal(app.auto.sortPeek(6, 3001), null, 'beyond 2000 ms the peek ignores the entry');
+    app.auto.sortOverride(7, [7, 7, 7, 7], 1000);
+    app.auto.sortPoll(3001);
+    assert.equal(app.auto.sortPeek(7, 3001), null, 'sortPoll bounds the peek path as well');
+});
+
 // ---------------- issue 10: a successful drop wins over the fresh-pending list ----------------
 
 test('issue 10: a successful drop survives the debounced retile', () => {
     const { env, ext } = makeEnv({ windowGap: 0 });
     enableOnMonitors(env, ext, [WIDE]);
-    makeWorkspace(env);
-    env.activeWorkspace = { index: () => 0 };
+    activeWorkspace(env);
     const w1 = makeWindow(env, 1, [0, 0, 1000, 1100], 0);
     const w2 = makeWindow(env, 2, [1000, 0, 1000, 1100], 0);
     env.tabList.push(w1, w2);
@@ -135,8 +156,7 @@ test('issue 10: a successful drop survives the debounced retile', () => {
 test('issue 10: only the dropped window loses its fresh record', () => {
     const { env, ext } = makeEnv({ windowGap: 0 });
     enableOnMonitors(env, ext, [WIDE]);
-    makeWorkspace(env);
-    env.activeWorkspace = { index: () => 0 };
+    activeWorkspace(env);
     const w1 = makeWindow(env, 1, [0, 0, 1000, 1100], 0);
     const w2 = makeWindow(env, 2, [1000, 0, 1000, 1100], 0);
     env.tabList.push(w1, w2);
@@ -161,8 +181,7 @@ test('issue 10: only the dropped window loses its fresh record', () => {
 test('issue 10: an aborted drop leaves the fresh record alone', () => {
     const { env, ext } = makeEnv({ windowGap: 0 });
     enableOnMonitors(env, ext, [WIDE]);
-    makeWorkspace(env);
-    env.activeWorkspace = { index: () => 0 };
+    activeWorkspace(env);
     const w1 = makeWindow(env, 1, [0, 0, 1000, 1100], 0);
     const w2 = makeWindow(env, 2, [1000, 0, 1000, 1100], 0);
     env.tabList.push(w1, w2);
@@ -180,14 +199,42 @@ test('issue 10: an aborted drop leaves the fresh record alone', () => {
         'the fresh record survived the aborted drop and still appends last');
 });
 
+test('issue 10: a cross-monitor drop clears the record on the spawn monitor', () => {
+    const { env, ext } = makeEnv({ windowGap: 0 });
+    enableOnMonitors(env, ext, [LEFT, RIGHT]);
+    activeWorkspace(env);
+    const w1 = makeWindow(env, 1, [0, 0, 1000, 1100], 0);
+    const w2 = makeWindow(env, 2, [1000, 0, 1000, 1100], 0);
+    const w5 = makeWindow(env, 5, [2000, 0, 1000, 1100], 1);
+    const w6 = makeWindow(env, 6, [3000, 0, 1000, 1100], 1);
+    env.tabList.push(w1, w2, w5, w6);
+    const app = ext.currentSession().app;
+    app.ops.layoutSet(app, 0, 0, { auto: true });
+    app.ops.layoutSet(app, 1, 0, { auto: true });
+    app.ops.retileMonitor(app, 0);
+    app.ops.retileMonitor(app, 1);
+    // the window opens on monitor 1 (its fresh record lives there), the drag ends on monitor 0
+    const w7 = makeWindow(env, 7, [2400, 0, 300, 1100], 1);
+    env.tabList.push(w7);
+    app.auto.onWindowAdded(app, env.activeWorkspace, w7);
+    app.drop.begin(app, w7, env.gi.Meta.GrabOp.MOVING);
+    // muffin moves the frame to the monitor under the pointer during the drag
+    w7.move_to_monitor(0);
+    w7.rect = [0, 0, 400, 1100];
+    assert.equal(app.drop.end(app, w7, env.gi.Meta.GrabOp.MOVING), true, 'the cross-monitor drop applied');
+    app.ops.retileMonitor(app, 0, null, false);
+    assert.deepEqual(leftToRight([w1, w2, w7]), [7, 1, 2], 'the drop placement survived on the target monitor');
+    assert.equal(app.auto.pendingTake(1).has(7), false,
+        'the fresh record was cleared on the monitor the window opened on');
+});
+
 // ---------------- issue 11: focus fallback and collector share the eligibility ----------------
 
 test('issue 11: a dialog focus never claims a cell and does not break the normal windows', () => {
     const { env, ext } = makeEnv({ windowGap: 0 });
     enableOnMonitor(env, ext);
-    makeWorkspace(env);
-    env.activeWorkspace = { index: () => 0 };
-    const dialog = makeWindow(env, 1, [0, 0, 300, 300], 0, null, { windowType: env.gi.Meta.WindowType.DIALOG });
+    activeWorkspace(env);
+    const dialog = makeWindow(env, 1, [0, 0, 300, 300], 0, null, { windowType: DIALOG });
     const w1 = makeWindow(env, 2, [400, 0, 400, 300], 0);
     const w2 = makeWindow(env, 3, [900, 0, 400, 300], 0);
     env.tabList.push(dialog, w1, w2);
@@ -201,13 +248,11 @@ test('issue 11: a dialog focus never claims a cell and does not break the normal
     assert.deepEqual(w2.rect, [1000, 0, 1000, 1100], 'the normal window filled the second cell');
 });
 
-test('issue 11: the focus fallback skips a minimized first entry from another monitor', () => {
-    const mon2 = { x: 2000, y: 0, width: 2000, height: 1100 };
+test('issue 11: the focus fallback never resolves a minimized tab-list entry', () => {
     const { env, ext } = makeEnv({ windowGap: 0 });
-    enableOnMonitors(env, ext, [{ x: 0, y: 0, width: 2000, height: 1100 }, mon2]);
-    makeWorkspace(env);
-    env.activeWorkspace = { index: () => 0 };
-    const dialog = makeWindow(env, 1, [0, 0, 300, 300], 0, null, { windowType: env.gi.Meta.WindowType.DIALOG });
+    enableOnMonitors(env, ext, [LEFT, RIGHT]);
+    activeWorkspace(env);
+    const dialog = makeWindow(env, 1, [0, 0, 300, 300], 0, null, { windowType: DIALOG });
     const minimized = makeWindow(env, 4, [2000, 0, 400, 300], 1);
     minimized.minimized = true;
     const w1 = makeWindow(env, 2, [400, 0, 400, 300], 0);
@@ -223,11 +268,44 @@ test('issue 11: the focus fallback skips a minimized first entry from another mo
     assert.deepEqual(minimized.rect, [2000, 0, 400, 300], 'the minimized window stayed untouched');
 });
 
+test('issue 11: a focused window without a wm_class claims no cell', () => {
+    const { env, ext } = makeEnv({ windowGap: 0 });
+    enableOnMonitor(env, ext);
+    activeWorkspace(env);
+    const headless = makeWindow(env, 1, [0, 0, 300, 300], 0, null, { wmClass: null });
+    const w1 = makeWindow(env, 2, [400, 0, 400, 300], 0);
+    const w2 = makeWindow(env, 3, [900, 0, 400, 300], 0);
+    env.tabList.push(headless, w1, w2);
+    env.display.focus_window = headless;
+    const app = ext.currentSession().app;
+    app.ops.layoutSet(app, 0, 0, { auto: true });
+    app.auto.activate(app);
+    assert.deepEqual(headless.rect, [0, 0, 300, 300], 'the classless window kept its own geometry');
+    assert.deepEqual(w1.rect, [0, 0, 1000, 1100], 'the admissible windows still tiled');
+    assert.deepEqual(w2.rect, [1000, 0, 1000, 1100]);
+});
+
+test('issue 11: a focused window without an owning app claims no cell', () => {
+    const { env, ext } = makeEnv({ windowGap: 0 });
+    enableOnMonitor(env, ext);
+    activeWorkspace(env);
+    const orphan = makeWindow(env, 1, [0, 0, 300, 300], 0, null, { noApp: true });
+    const w1 = makeWindow(env, 2, [400, 0, 400, 300], 0);
+    const w2 = makeWindow(env, 3, [900, 0, 400, 300], 0);
+    env.tabList.push(orphan, w1, w2);
+    env.display.focus_window = orphan;
+    const app = ext.currentSession().app;
+    app.ops.layoutSet(app, 0, 0, { auto: true });
+    app.auto.activate(app);
+    assert.deepEqual(orphan.rect, [0, 0, 300, 300], 'the app-less window kept its own geometry');
+    assert.deepEqual(w1.rect, [0, 0, 1000, 1100], 'the admissible windows still tiled');
+    assert.deepEqual(w2.rect, [1000, 0, 1000, 1100]);
+});
+
 test('issue 11 regression: an excluded focused window is counted by nobody and the rest still tiles', () => {
     const { env, ext } = makeEnv({ windowGap: 0 });
     enableOnMonitor(env, ext);
-    makeWorkspace(env);
-    env.activeWorkspace = { index: () => 0 };
+    activeWorkspace(env);
     const w1 = makeWindow(env, 1, [0, 0, 400, 300], 0);
     const w2 = makeWindow(env, 2, [500, 0, 400, 300], 0);
     const w3 = makeWindow(env, 3, [1000, 0, 400, 300], 0);
@@ -243,4 +321,19 @@ test('issue 11 regression: an excluded focused window is counted by nobody and t
     assert.deepEqual(w3.rect, before, 'the excluded window was not placed');
     assert.deepEqual(w1.rect, [0, 0, 1000, 1100], 'the remaining normal windows still tile');
     assert.deepEqual(w2.rect, [1000, 0, 1000, 1100]);
+});
+
+test('issue 11 regression: the exclude hotkey follows the real focus, not the retile fallback', () => {
+    const { env, ext } = makeEnv({ windowGap: 0 });
+    enableOnMonitors(env, ext, [LEFT, RIGHT]);
+    activeWorkspace(env);
+    const dialog = makeWindow(env, 1, [0, 0, 300, 300], 0, null, { windowType: DIALOG });
+    const bystander = makeWindow(env, 2, [2000, 0, 400, 300], 1);
+    env.tabList.push(dialog, bystander);
+    env.display.focus_window = dialog;
+    const app = ext.currentSession().app;
+    app.excl.toggleFocused(app);
+    assert.equal(app.excl.isExcluded(dialog), true, 'the focused window itself was toggled');
+    assert.equal(app.excl.isExcluded(bystander), false,
+        'no unrelated window was excluded in place of the focus');
 });
