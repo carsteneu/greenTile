@@ -127,7 +127,10 @@ if (VARIANT === 'fresh') {
     P('DISK2', onDisk());
 
     // Cinnamon's reload: unloadExtension -> forgetExtension (unloadModule + the
-    // \`delete imports[folder][uuid]\` that fails) -> loadExtension
+    // \`delete imports[folder][uuid]\` that fails) -> loadExtension. It omits the
+    // Main._addXletDirectoriesToSearchPath() call in between, which only re-pins
+    // the xlet directories on the search path — something the fixture never
+    // disturbs.
     fileUtils.unloadModule(first.idx);
     let del;
     try { del = '' + (delete imports.extensions[U]); } catch (e) { del = 'throw'; }
@@ -162,7 +165,7 @@ const runVariant = (variant) => {
     return parse(run.stdout);
 };
 
-test('installed library files are not the code a running Cinnamon executes — only a fresh process picks them up',
+test('replaced library files are not the code a running Cinnamon executes — only a fresh process picks them up',
     { skip: !HOST_CJS && 'cjs binary not installed on this host' }, () => {
         try {
             const shipped = runVariant('shipped');

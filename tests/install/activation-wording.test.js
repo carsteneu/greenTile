@@ -25,10 +25,15 @@ const REQUIRED = [
     'Wayland has no such restart',
 ];
 
+// and the claim the message must NOT make: that installing or reloading already
+// activated the new library code
+const FORBIDDEN = /\b(now|already)\s+(live|active)\b|is now running/i;
+
 const assertActivationWording = (out) => {
     for (const phrase of REQUIRED) {
         assert.ok(out.includes(phrase), `installer output must state "${phrase}", got:\n${out}`);
     }
+    assert.doesNotMatch(out, FORBIDDEN, `installer output must not claim activation, got:\n${out}`);
 };
 
 test('install.sh: reports installed files and says that replaced library code needs a Cinnamon restart', () => {

@@ -104,8 +104,8 @@ for mofile in "$STAGE"/locale/*/LC_MESSAGES/*.mo; do
 done
 
 echo "greenTile $UUID installed to $DEST"
-echo "The files on disk are the new version now. A running Cinnamon keeps the code it loaded at"
-echo "startup: reloading or toggling the extension re-reads only extension.js, so replaced code"
+echo "The files on disk are the new version now. If greenTile was already loaded, Cinnamon keeps"
+echo "that code: reloading or toggling the extension re-reads only extension.js, so replaced code"
 echo "under lib/ becomes active after a Cinnamon restart, not by itself."
 echo "Restart Cinnamon: Ctrl+Alt+Esc, or Alt+F2 then r. Wayland has no such restart — log out"
 echo "and back in instead."
