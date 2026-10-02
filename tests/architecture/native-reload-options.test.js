@@ -29,9 +29,9 @@
 // Measured: fixed stays stale forever (LIB_EVALS=1 while the entry re-evaluates
 // 3x); gen alone is NOT enough (a cross-importing lib module still resolves the
 // cached canonical tree); rebind and chains deliver fresh library code on every
-// reload in-process; and a layout with a new name per install retains one fully
-// evaluated subtree per name for the life of the process (GROWTH_CACHED), since
-// nothing can evict it.
+// reload in-process; and a layout with a new name per install retains one
+// RESOLVED importer subtree per name for the life of the process (GROWTH_CACHED),
+// since nothing can evict it — the modules under it evaluate lazily, on reach.
 //
 // COST of every build-named option, none of which is implemented here:
 //  - the installer must place each build under a fresh name and prune old ones;
@@ -44,10 +44,10 @@
 //    the chain (94 XLET.lib references); leaf modules are reached through the
 //    freshened namespace and stay untouched
 //
-// This is evidence for a product decision that belongs to the user; the decision
-// text lives in the yesmem scratchpad (project greenTile, section
-// yesloop-r3-reload-r2). Skipped when `cjs` is not installed; the harness
-// simulation stays the always-on contract.
+// This is evidence for a product decision that belongs to the user and is still
+// pending: the option analysis it supports is recorded with the work in the yesmem
+// scratchpad (project greenTile, section yesloop-r3-reload-r2). Skipped when `cjs`
+// is not installed; the harness simulation stays the always-on contract.
 const test = require('node:test');
 const assert = require('node:assert/strict');
 const { spawnSync } = require('node:child_process');
@@ -75,6 +75,9 @@ const PROBE = `// PoC on the INSTALLED 6.6 engine (cjs 115.1) + the REAL Cinnamo
 // Two consecutive reloads per variant. The reload sequence mirrors Cinnamon's
 // Extension.reloadExtension: fileUtils.unloadModule (forgetExtension) + the
 // \`delete imports[folder][uuid]\` that fails on 6.6 + requireModule of the entry.
+// It omits the Main._addXletDirectoriesToSearchPath() call that real
+// reloadExtension makes between the two; that call only re-pins the xlet
+// directories on the search path, which the fixture never disturbs.
 // (In a real extension module the failing delete is strict and throws; Cinnamon
 // swallows it in forgetExtension's try/catch — same net effect.)
 //
@@ -308,7 +311,7 @@ test('installed cjs 6.6: reload refreshes the entry every time but only a build-
             assert.equal(growth.GROWTH_VALS, 'consumer:growth-0,consumer:growth-1,consumer:growth-2,consumer:growth-3,consumer:growth-4',
                 'five consecutive install/reload cycles each deliver their own code');
             assert.equal(growth.GROWTH_CACHED, '6', 'every build name stays resolved on the uuid importer (1 + 5) — the cost of the layout');
-            assert.equal(growth.GROWTH_FIRST_STILL, 'growth-0', 'a superseded generation keeps its evaluated subtree, nothing evicts it');
+            assert.equal(growth.GROWTH_FIRST_STILL, 'growth-0', 'a superseded generation keeps its own namespace and its already-evaluated module, nothing evicts it');
             assert.equal(growth.FRESH_EACH, 'true');
         } finally {
             fs.rmSync(TMP, { recursive: true, force: true });
