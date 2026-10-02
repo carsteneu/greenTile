@@ -341,10 +341,12 @@ test('a separately cancelled own property is repaired even after the first trans
     const parked = actor.scale_x;
     assert.notEqual(parked, 1, 'precondition: the property is parked');
     actor.remove_transition('scale-x'); // one own property is cancelled on its own
+    assert.equal(app.placement.has(w1), true, 'the record survives a single-property cancellation');
     actor.finishAll();                  // the FIRST transition completes normally
-    assert.equal(app.placement.has(w1), true, 'the repair record survives the first transition finishing');
+    assert.equal(actor.scale_x, 1, 'the cancelled own property is repaired once the ease has finished');
+    assert.equal(app.placement.has(w1), false, 'the repair resolves the record');
     ext.disable();
-    assert.equal(actor.scale_x, 1, 'the cancelled own property is snapped back to identity');
+    assert.equal(actor.scale_x, 1, 'still at identity at teardown');
     assert.equal(actor.translation_x, 0, 'the completed ones stay at identity');
 });
 

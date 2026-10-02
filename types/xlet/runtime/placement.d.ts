@@ -59,6 +59,8 @@ export const Placement: {
          * @param {boolean} finished
          */
         _onStopped(metaWindow: CinnamonWindow, token: object, prop: string, entry: OwnTransition, finished: boolean): void;
+        /** @param {PlacementRecord} record */
+        _sweep(record: PlacementRecord): void;
         /** @param {CinnamonWindow} metaWindow */
         release(metaWindow: CinnamonWindow): void;
         destroy(): void;
