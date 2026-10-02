@@ -138,6 +138,20 @@ test('fresh install: everything lands, no staging leftovers', () => {
     assert.equal(noStagingLeftovers(x).length, 0);
 });
 
+test('fresh install with XDG_DATA_HOME set: translations land in the XDG data dir, not ~/.local/share', () => {
+    // mirrors GLib.get_user_data_dir(): $XDG_DATA_HOME wins over the default
+    const x = makeInstallEnv('install-xdg');
+    makeSource(x);
+    const xdgData = path.join(x.home, 'xdg-data');
+    const r = runScript(path.join(x.dir, 'release', 'install.sh'), [],
+        Object.assign({}, x.env, { XDG_DATA_HOME: xdgData }));
+    assert.equal(r.status, 0, `stderr: ${r.stderr}`);
+    assert.ok(fs.existsSync(path.join(xdgData, 'locale', 'de', 'LC_MESSAGES', `${UUID}.mo`)),
+        'de .mo compiled into $XDG_DATA_HOME/locale');
+    assert.ok(!fs.existsSync(moPath(x.home, 'de')),
+        'the default ~/.local/share/locale is NOT written when XDG_DATA_HOME is set');
+});
+
 test('update over stale install: wholesale replacement removes stale modules', () => {
     const x = makeInstallEnv('install-stale');
     makeSource(x);

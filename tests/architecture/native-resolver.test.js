@@ -103,3 +103,26 @@ test('the entry wires only through the importer, not require()', () => {
     assert.match(src, /const XLET = imports\.extensions\['greenTile@carsteneu'\];/,
         'the entry resolves its modules through the xlet importer');
 });
+
+test('XLET appears only as the declaration or a XLET.lib chain — no dynamic access or aliasing', () => {
+    // the resolver/layer/cycle guards scan static `XLET.lib…` chains; any
+    // other use of XLET (indexing it, aliasing it into a variable, passing
+    // it around) would route module access around those guards
+    const declRe = /^const XLET = imports\.extensions\['greenTile@carsteneu'\];$/;
+    const violations = [];
+    for (const file of shippedJs) {
+        const raw = fs.readFileSync(path.join(ROOT, file), 'utf8');
+        const noComments = raw.replace(/\/\/[^\n]*/g, '').replace(/\/\*[\s\S]*?\*\//g, '');
+        const lines = noComments.split('\n').filter((l) => !declRe.test(l));
+        for (const line of lines) {
+            let at = line.indexOf('XLET');
+            while (at !== -1) {
+                const after = line.slice(at + 'XLET'.length);
+                if (!after.startsWith('.lib'))
+                    {violations.push(file + ': ' + line.trim().slice(0, 70));}
+                at = line.indexOf('XLET', at + 1);
+            }
+        }
+    }
+    assert.deepEqual(violations, [], 'XLET used outside the declaration/member-chain form');
+});

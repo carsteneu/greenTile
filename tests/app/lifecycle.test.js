@@ -88,6 +88,46 @@ test('6.8-style manager: push-tile registers through setBuiltinHandler and resto
     assert.deepEqual(builtinCalls.length, 4, 'no re-registration during destroy');
 });
 
+test('6.8-style manager: foreign entries under the push-tile action ids are restored, not deleted', () => {
+    const { env, ext } = loadExtension();
+    const foreign = { name: 'push-tile-left', callback: () => {}, allowedModes: 1 };
+    env.keybindingManager.bindings = new Map([[71, foreign], [72, foreign]]);
+    env.keybindingManager.setBuiltinHandler = (name, actionId, cb) => {
+        env.keybindingManager.bindings.set(actionId, { name, callback: cb });
+    };
+    ext.enable();
+    env.flushDisplayConfigNoReply();
+    assert.equal(env.keybindingManager.bindings.get(71).callback !== foreign.callback, true,
+        'connect replaced the foreign entry while active');
+    ext.disable();
+    assert.equal(env.keybindingManager.bindings.get(71), foreign,
+        'destroy restores the exact foreign entry object');
+    assert.equal(env.keybindingManager.bindings.get(72), foreign,
+        'restore covers every prepopulated action id');
+    assert.equal(env.keybindingManager.bindings.has(73), false,
+        'action ids without a prior are removed, not left behind');
+});
+
+test('focus destroy before any connect leaves the manager untouched', () => {
+    const { env, ext } = loadExtension();
+    const foreign = { name: 'push-tile-left', callback: () => {} };
+    env.keybindingManager.bindings = new Map([[71, foreign]]);
+    let reregistered = false;
+    env.keybindingManager.setBuiltinHandler = () => {
+        reregistered = true;
+    };
+    // enable fails at the settings slot: the Focus component never connects,
+    // and the later disable must not touch the prepopulated entries
+    env.imports.ui.settings.ExtensionSettings = class {
+        constructor() { throw new Error('injected settings failure'); }
+    };
+    assert.throws(() => ext.enable(), /injected settings failure/);
+    assert.doesNotThrow(() => ext.disable());
+    assert.equal(env.keybindingManager.bindings.get(71), foreign,
+        'foreign dispatcher entries survive a destroy that had no connect');
+    assert.equal(reregistered, false, 'setBuiltinHandler never called');
+});
+
 test('manager without the builtin enum members falls back to the direct Meta handler', () => {
     const { env, ext } = loadExtension();
     env.keybindingManager.setBuiltinHandler = (_name, _actionId, _cb) => {

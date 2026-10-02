@@ -39,8 +39,8 @@ export const App: {
             windowCount: any;
             rebuild: any;
         }>;
-        /** @type {any} */
-        config: any;
+        /** @type {ConfigFacade} */
+        config: ConfigFacade;
         destroy(): void;
     };
 };

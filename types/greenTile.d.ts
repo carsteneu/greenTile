@@ -157,6 +157,7 @@ type SettingsFacade = {
 /** The settings Config wiring (lib/app/config.js) — surface used across lib/. */
 type ConfigFacade = {
     settings: SettingsFacade;
+    destroy(): void;
 };
 
 /** Ops facade the preset panel and editor (lib/ui) work through (app.ops). */

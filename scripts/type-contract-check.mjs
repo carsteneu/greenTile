@@ -83,6 +83,14 @@ w.windowMoveRezise(null, 1, 2, 3, 4);
 `,
     },
     {
+        name: 'mutation-config-destroy-typo',
+        expect: 'fail',
+        code: `
+const app = null as unknown as AppFacade;
+app.config.destory();
+`,
+    },
+    {
         name: 'legit-xlet-windowmoveresize',
         expect: 'pass',
         code: `

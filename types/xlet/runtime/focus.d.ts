@@ -15,6 +15,8 @@ export const Focus: {
         _hotkey: (app: AppFacade, dir: "left" | "right" | "up" | "down") => (display: AnyRecord, win: CinnamonWindow) => void;
         /** @type {[number][]} */
         _managerActionIds: [number][];
+        /** @type {[number, any][]} */
+        _managerPriors: [number, any][];
         /**
          * Registers the push-tile handlers, one per binding name, through the
          * generation's builtin surface.
@@ -23,8 +25,9 @@ export const Focus: {
         connect(app: AppFacade): void;
         /**
          * Restores muffin's own handlers: Meta handler back to null (both
-         * generations) and, when the manager route was used, its dispatcher
-         * entry removed so no stale mode-filtered binding survives.
+         * generations); a manager dispatcher entry registered by us is removed —
+         * or replaced by the foreign entry that occupied the action id before
+         * our connect, if there was one.
          */
         destroy(): void;
     };

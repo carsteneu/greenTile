@@ -183,3 +183,48 @@ test('non-javascript entries are not exposed as modules', () => {
     assert.equal(xlet.lib.code.ok, true);
     assert.ok(!Object.prototype.hasOwnProperty.call(xlet.lib, 'data'));
 });
+
+test('6.6 reload identity: a fresh importer instance re-evaluates modules with fresh state', () => {
+    // 6.6 forgetExtension deletes the whole imports.extensions[uuid] subtree
+    // on unload; the next access builds a NEW directory importer. Module
+    // state (top-level let/var mutations) must NOT leak across generations.
+    globalThis.__importerEvals = 0;
+    const files = {
+        '/xlet/lib/state.js': [
+            'var loads = ++globalThis.__importerEvals;',
+            'var mutable = 1;',
+            'function bump() { mutable = 2; }',
+        ].join('\n'),
+    };
+    const first = makeImporter(files);
+    assert.equal(first.lib.state.loads, 1);
+    first.lib.state.bump();
+    assert.equal(first.lib.state.mutable, 2, 'state mutated inside the generation');
+
+    const second = makeImporter(files);
+    assert.notEqual(second.lib.state, first.lib.state, 'distinct namespace objects');
+    assert.equal(second.lib.state.loads, 2, 'module body re-evaluated for the new importer');
+    assert.equal(second.lib.state.mutable, 1, 'no module state leaked across the reload');
+    delete globalThis.__importerEvals;
+});
+
+test('the extensions-root reload contract: subtree delete + rebuild swaps the tree wholesale', () => {
+    globalThis.__importerEvals = 0;
+    const files = {
+        '/xlet/extension.js': 'var currentSession = () => null;',
+        '/xlet/lib/state.js': 'var loads = ++globalThis.__importerEvals;',
+    };
+    // main.js model: the imports root caches the xlet directories
+    const importsRoot = { extensions: { 'greenTile@carsteneu': makeImporter(files) } };
+    assert.equal(importsRoot.extensions['greenTile@carsteneu'].lib.state.loads, 1);
+    // forgetExtension: delete the subtree
+    delete importsRoot.extensions['greenTile@carsteneu'];
+    assert.equal(importsRoot.extensions['greenTile@carsteneu'], undefined, 'the old tree is gone');
+    // _addXletDirectoriesToSearchPath rebuilds a NEW importer on next access
+    importsRoot.extensions['greenTile@carsteneu'] = makeImporter(files);
+    const reloaded = importsRoot.extensions['greenTile@carsteneu'];
+    assert.equal(reloaded.lib.state.loads, 2, 'fresh evaluation after reload');
+    assert.equal(typeof reloaded.extension.currentSession, 'function', 'entry surface intact');
+    assert.equal(reloaded.extension.currentSession(), null, 'the fresh lifecycle holder starts empty');
+    delete globalThis.__importerEvals;
+});

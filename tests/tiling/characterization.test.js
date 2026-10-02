@@ -127,11 +127,14 @@ const enableOnMonitor = (env, ext) => {
 };
 
 // Fake Clutter.Actor carrying the platform ease() semantics place.js relies
-// on (Cinnamon environment.js _easeActor): a second ease on the same property
-// supersedes the first transition (stopped with finished=false), duration 0
-// applies the targets synchronously and fires onStopped(true), a normal ease
-// records pending per-property transitions the test completes through
-// finishEase(). Foreign transitions can be planted in .transitions directly.
+// on (Cinnamon environment.js _easeActor): transitions are named per
+// property with DASHES (animatedProps maps '_' -> '-'), a second ease on the
+// same property supersedes the first transition (stopped with finished=
+// false), duration 0 applies the targets synchronously and fires
+// onStopped(true), a normal ease records pending per-property transitions
+// the test completes through finishEase(). Foreign transitions are planted
+// in .transitions under the DASHED property name, like the shell's own
+// workspace-switch animation would.
 const makeEaseActor = () => {
     const actor = {
         translation_x: 0,
@@ -151,10 +154,12 @@ const makeEaseActor = () => {
                 if (onStopped)
                     {onStopped(finished);}
             };
+            // platform: remove_transition per animated prop (dashed name)
             for (const p of Object.keys(targets)) {
-                const prev = actor.transitions.get(p);
+                const dashed = p.replace(/_/g, '-');
+                const prev = actor.transitions.get(dashed);
                 if (prev) {
-                    actor.transitions.delete(p);
+                    actor.transitions.delete(dashed);
                     prev.stopped(false);
                 }
             }
@@ -164,11 +169,11 @@ const makeEaseActor = () => {
                 return;
             }
             for (const [p, v] of Object.entries(targets))
-                {actor.transitions.set(p, { target: v, stopped });}
+                {actor.transitions.set(p.replace(/_/g, '-'), { target: v, stopped });}
             actor.finishEase = () => {
                 for (const [p, v] of Object.entries(targets)) {
                     actor[p] = v;
-                    actor.transitions.delete(p);
+                    actor.transitions.delete(p.replace(/_/g, '-'));
                 }
                 stopped(true);
             };
@@ -238,7 +243,7 @@ test('non-animated placement never touches a foreign transition or the actor sta
     // foreign workspace-effect state: mid-animation visual offset + transition
     let foreignStopped = null;
     actor.translation_x = 256;
-    actor.transitions.set('translation_x', { target: 0, stopped: (fin) => { foreignStopped = fin; } });
+    actor.transitions.set('translation-x', { target: 0, stopped: (fin) => { foreignStopped = fin; } });
     const w1 = makeWindow(env, 1, [10, 10, 400, 300], 0, actor);
     const w2 = makeWindow(env, 2, [500, 0, 400, 300]);
     env.tabList.push(w1, w2);
@@ -298,6 +303,48 @@ test('same-geometry animated placement stays aligned', () => {
     actor.finishEase();
     assert.equal(actor.translation_x, 0);
     assert.equal(actor.scale_x, 1, 'still aligned after the ease completes');
+});
+
+test('animated placement over a foreign transition: smooth handoff, not a stomp', () => {
+    // ownership: the foreign workspace effect owns 'translation-x' until our
+    // ease supersedes exactly that property — foreign stopped with
+    // finished=false, our ease continues from the CURRENT value, and the
+    // end state is the identity target (no desync)
+    const { env, ext } = makeEnv();
+    enableOnMonitor(env, ext);
+    const actor = makeEaseActor();
+    let foreignStoppedWith = null;
+    actor.translation_x = 256; // foreign mid-flight visual offset
+    actor.transitions.set('translation-x', { target: 0, stopped: (fin) => { foreignStoppedWith = fin; } });
+    const w1 = makeWindow(env, 1, [10, 10, 400, 300], 0, actor);
+    const w2 = makeWindow(env, 2, [500, 0, 400, 300]);
+    env.tabList.push(w1, w2);
+    env.display.focus_window = w1;
+    env.activeWorkspace = { index: () => 0 };
+    env.keybindingManager.hotkeys.get('greenTile-auto6').cb();
+    assert.equal(foreignStoppedWith, false, 'the foreign transition is superseded through the platform per-property path');
+    assert.equal(actor.transitions.has('translation-x'), true, 'our own transition now owns the property');
+    actor.finishEase();
+    assert.equal(actor.translation_x, 0, 'end state is the identity target');
+    assert.equal(actor.scale_x, 1);
+});
+
+test('app teardown with an own ease in flight throws nothing', () => {
+    // disable during the 250 ms window: the actor may die before onStopped
+    // fires — the stale marker on a destroyed actor must be inert
+    const { env, ext } = makeEnv();
+    enableOnMonitor(env, ext);
+    const actor = makeEaseActor();
+    const w1 = makeWindow(env, 1, [10, 10, 400, 300], 0, actor);
+    const w2 = makeWindow(env, 2, [500, 0, 400, 300]);
+    env.tabList.push(w1, w2);
+    env.display.focus_window = w1;
+    env.activeWorkspace = { index: () => 0 };
+    env.keybindingManager.hotkeys.get('greenTile-auto6').cb();
+    assert.equal(actor.__greenTile_easing, true, 'ease in flight');
+    // the actor is destroyed mid-ease; finishEase/onStopped never runs
+    assert.doesNotThrow(() => ext.disable(), 'disable survives an ease that will never complete');
+    assert.equal(actor.__greenTile_easing, true, 'the stale marker stays inert on the dead actor');
 });
 
 // ---------------- automatic tiling (appAuto) ----------------

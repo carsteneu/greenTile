@@ -16,7 +16,6 @@
  *       1 — --check found drift (regenerate and commit)
  * lib/ stays pure JavaScript — nothing generated ships to the user.
  */
-import { spawnSync } from 'node:child_process';
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -28,7 +27,10 @@ const ts = require('typescript');
 const root = path.join(dirname(fileURLToPath(import.meta.url)), '..');
 const outDirArg = argValue('--out');
 const check = process.argv.includes('--check');
+// check mode NEVER writes the committed tree: generation always lands in a
+// temp dir and is compared against the existing OUT afterwards
 const OUT = path.resolve(root, outDirArg || path.join('types', 'xlet'));
+const EMIT_DIR = check ? path.join(root, '.yesmem', 'tmp', 'xlet-type-check') : OUT;
 const TMP = path.join(root, '.yesmem', 'tmp', 'xlet-type-src');
 
 function argValue(name) {
@@ -102,7 +104,7 @@ const result = program.emit(undefined, (filePath, data) => {
     const m = /lib\/(.*)\.d\.ts$/.exec(filePath.split('\\').join('/'));
     if (!m)
         {return;}
-    const target = path.join(OUT, m[1] + '.d.ts');
+    const target = path.join(EMIT_DIR, m[1] + '.d.ts');
     fs.mkdirSync(path.dirname(target), { recursive: true });
     fs.writeFileSync(target, BANNER + data);
     emitted.push(`lib/${m[1]}.d.ts`);
@@ -111,24 +113,32 @@ if (result.emitSkipped)
     {throw new Error('generate-xlet-types: declaration emit was skipped');}
 
 if (check) {
-    const drift = [];
-    for (const rel of libFiles) {
-        const mirror = path.join(OUT, rel.replace(/\.js$/, '.d.ts'));
-        if (!fs.existsSync(mirror)) {
-            drift.push(`missing mirror for lib/${rel}`);
-            continue;
+    try {
+        const drift = [];
+        for (const rel of libFiles) {
+            const mirrorRel = rel.replace(/^lib\//, '').replace(/\.js$/, '.d.ts');
+            const committed = path.join(OUT, mirrorRel);
+            const fresh = path.join(EMIT_DIR, mirrorRel);
+            if (!fs.existsSync(committed)) {
+                drift.push(`missing mirror for lib/${rel}`);
+                continue;
+            }
+            if (!fs.existsSync(fresh)) {
+                drift.push(`generator produced no mirror for lib/${rel}`);
+                continue;
+            }
+            if (fs.readFileSync(fresh, 'utf8') !== fs.readFileSync(committed, 'utf8'))
+                {drift.push(`stale mirror for lib/${rel}`);}
         }
-        const fresh = fs.readFileSync(path.join(OUT, rel.replace(/\.js$/, '.d.ts')), 'utf8');
-        // regenerate wrote over OUT above, so compare against git instead
-        const committed = spawnSync('git', ['-C', root, 'show', `HEAD:${path.relative(root, mirror).split(path.sep).join('/')}`], { encoding: 'utf8' });
-        if (committed.status !== 0 || committed.stdout !== fresh)
-            {drift.push(`stale mirror for lib/${rel}`);}
+        if (drift.length) {
+            console.error('generate-xlet-types --check: ' + drift.join('; '));
+            process.exit(1);
+        }
+        console.log(`generate-xlet-types --check: ${emitted.length} mirrors up to date`);
     }
-    if (drift.length) {
-        console.error('generate-xlet-types --check: ' + drift.join('; '));
-        process.exit(1);
+    finally {
+        fs.rmSync(EMIT_DIR, { recursive: true, force: true });
     }
-    console.log(`generate-xlet-types --check: ${emitted.length} mirrors up to date`);
 }
 else {
     console.log(`generate-xlet-types: wrote ${emitted.length} mirrors to ${path.relative(root, OUT)}`);

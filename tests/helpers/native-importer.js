@@ -83,12 +83,12 @@ const createXletImporter = (options) => {
         evaluating.push(absRel);
         try {
             const src = read(absPath);
-            // a column-0 var inside a string/comment would yield a null
-            // property here (typeof-guard), unlike real GJS — the shipped
-            // files keep top-level statements on column 0 legitimately, so
-            // this only matters for hand-written fixture probes
+            // live bindings: the real GJS importer exposes module-level
+            // declarations through the namespace so later mutations are
+            // visible (getters mirror that; writes stay module-local, which
+            // matches the shipped zero-module-state single-assignment rule)
             const exports = publicNames(src)
-                .map((n) => `\nns.${n} = typeof ${n} !== 'undefined' ? ${n} : null;`).join('');
+                .map((n) => `\nObject.defineProperty(ns, ${JSON.stringify(n)}, { enumerable: true, get: () => ${n} });`).join('');
             const body = `'use strict';${src};${exports};\nreturn ns;`;
             const ns = Object.create(null);
             // GJS truth: `imports` is a true global. Tests that load pure
