@@ -371,19 +371,18 @@ test('manager route: a failure inside the recovery path does not strand the rema
     // recovery path too — otherwise the throw escapes the loop and the three
     // remaining names are never released.
     const realGet = manager.bindings.get.bind(manager.bindings);
-    let armed = 2;
+    let boom = true;
     // @ts-ignore test-only override of the fake map's probe
     manager.bindings.get = (key) => {
-        if (armed > 0 && key === 71) {
-            armed -= 1;
-            throw new Error('bindings probe exploded');
-        }
+        if (boom && key === 71)
+            {throw new Error('bindings probe exploded');}
         return realGet(key);
     };
     assert.throws(() => focus.destroy(), (e) => {
         assert.match(e.message, /push-tile-left/);
         return true;
     }, 'the ownership-probe failure is reported');
+    boom = false;   // disarm before the retry so the retry is the clean path
     for (const name of ['push-tile-right', 'push-tile-up', 'push-tile-down']) {
         assert.equal(manager.bindings.get(ACTION_IDS[name]).callback, priors[name].callback,
             name + ' is still released despite the earlier failure');
