@@ -11,10 +11,16 @@
 //   - direct route (installed 6.6 /usr/share/cinnamon/js/ui/keybindings.js has
 //     no setBuiltinHandler): the handler itself is the Meta custom handler.
 //
-// The contract these tests pin is FAULT ISOLATION: one failing restore must not
-// strand the remaining names, must not leave a LIVE own callback (a stale App
-// closure) behind, must keep the failed ownership for a retry, and must be
-// reported instead of swallowed.
+// The contract is fault isolation WITHOUT collateral damage:
+//   - one failing restore must not strand the remaining names, and every
+//     failure must be reported;
+//   - a KNOWN prior must survive, including across App recreation — the
+//     keybinding manager is a singleton, so whatever this release leaves in its
+//     binding map is what the next App adopts as its rollback target;
+//   - Meta cleanup must happen even when the binding-map entry is already gone,
+//     otherwise our dispatcher keeps swallowing the key;
+//   - a newer owner that registered after us is never restored over, deleted or
+//     Meta-reset.
 const test = require('node:test');
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
@@ -40,30 +46,41 @@ const makeMeta = () => {
     return meta;
 };
 
-// Faithful KeybindingManager. `fail.before`/`fail.after` inject a throw at a
-// given setBuiltinHandler call index — before the effect and after it, because
-// the real one mutates the Meta dispatcher and the map before it can throw.
+// Faithful KeybindingManager. It installs the Meta dispatcher through the
+// public Meta setter exactly like upstream does — so a Meta-setter that throws
+// is observable here, which is how the "entry already gone, dispatcher still
+// swallowing the key" defect is reachable at all.
+//
+// fail.beforeName / fail.afterName hold a per-name remaining-throw count
+// (before and after the dispatcher+map effect), so an injected failure survives
+// retries only as long as the count says so.
 const makeUpstreamManager = (meta) => {
     const bindings = new Map();
     const installs = [];
-    const fail = { before: new Set(), after: new Set() };
+    const fail = { beforeName: new Map(), afterName: new Map() };
+    const countdown = (map, name) => {
+        const left = map.get(name) || 0;
+        if (left <= 0)
+            {return false;}
+        map.set(name, left - 1);
+        return true;
+    };
     return {
         bindings,
         installs,
         fail,
         setBuiltinHandler(name, actionId, callback, allowedModes = 1) {
-            const callIndex = installs.length;
             installs.push({ name, actionId, callback, allowedModes });
-            if (fail.before.has(callIndex))
-                {throw new Error('fake install failure #' + callIndex + ' (' + name + ')');}
-            meta.customHandlers.set(name, (display, win, binding) => {
+            if (countdown(fail.beforeName, name))
+                {throw new Error('fake install failure before effect (' + name + ')');}
+            meta.keybindings_set_custom_handler(name, (display, win, binding) => {
                 const entry = bindings.get(actionId);
                 if (entry && entry.callback)
                     {entry.callback(display, win, binding);}
             });
             bindings.set(actionId, { name, bindings: [], callback, allowedModes });
-            if (fail.after.has(callIndex))
-                {throw new Error('fake post-effect failure #' + callIndex + ' (' + name + ')');}
+            if (countdown(fail.afterName, name))
+                {throw new Error('fake install failure after effect (' + name + ')');}
         },
     };
 };
@@ -81,13 +98,21 @@ const harness = ({ generation = 'upstream' } = {}) => {
         {manager = makeUpstreamManager(meta);}
     if (generation === 'legacy')
         {manager = makeLegacyManager();}
-    const metaControl = { failSetAt: new Set() };
+    // Meta surface control: record every install/reset attempt and let a test
+    // make the null-reset throw for a name a given number of times.
+    const metaControl = { installs: [], resets: [], failResetName: new Map() };
     const rawSet = meta.keybindings_set_custom_handler.bind(meta);
-    let setCalls = 0;
     meta.keybindings_set_custom_handler = (name, fn) => {
-        const callIndex = setCalls++;
-        if (metaControl.failSetAt.has(callIndex))
-            {throw new Error('fake Meta setter failure #' + callIndex + ' (' + name + ')');}
+        if (fn === null) {
+            metaControl.resets.push(name);
+            const left = metaControl.failResetName.get(name) || 0;
+            if (left > 0) {
+                metaControl.failResetName.set(name, left - 1);
+                throw new Error('fake Meta reset failure (' + name + ')');
+            }
+        }
+        else
+            {metaControl.installs.push(name);}
         rawSet(name, fn);
     };
     const focus = new Focus({
@@ -125,53 +150,56 @@ const seedPriors = (manager, delivered) => {
 
 const deliver = (meta, name, win) => meta.customHandlers.get(name)({}, win, {});
 
-// Connection installs call indices 0..len-1, so a name's restore is at
-// len + its position — derived, not hard-coded against the binding count.
-const restoreCall = (name) => NAMES.indexOf(name) + NAMES.length;
-
 for (const [label, failedName] of [['FIRST', 'push-tile-left'], ['MIDDLE', 'push-tile-up'], ['LAST', 'push-tile-down']]) {
-    test('manager route: a throwing ' + label + ' restore still restores the remaining names', () => {
+    test('manager route: a throwing ' + label + ' restore still restores every name', () => {
         const { meta, manager, focus, app } = harness({ generation: 'upstream' });
         /** @type {any[]} */
         const delivered = [];
         const priors = seedPriors(manager, delivered);
         focus.connect(app);
-        manager.fail.before.add(restoreCall(failedName));
+        manager.fail.beforeName.set(failedName, 1);
         assert.throws(() => focus.destroy(), new RegExp(failedName),
             'the failure is reported, not swallowed');
         for (const name of NAMES) {
-            if (name === failedName)
-                {continue;}
             assert.equal(manager.bindings.get(ACTION_IDS[name]).callback, priors[name].callback,
-                name + ' prior callback restored despite the ' + label + ' failure');
+                name + ' reaches its prior despite the ' + label + ' failure');
             deliver(meta, name, { id: name });
             assert.deepEqual(delivered.at(-1), [name, { id: name }],
-                name + ' prior is REACHABLE through the dispatcher after the failure');
+                name + ' is REACHABLE through the dispatcher again');
         }
-        assert.equal(delivered.length, NAMES.length - 1, 'only the restored names answered');
+        assert.equal(delivered.length, NAMES.length, 'all four priors answer again');
     });
 }
 
-test('manager route: a failed restore leaves nothing reachable, never a live stale App callback', () => {
+test('manager route: a failed restore hands the KNOWN prior back, never a live stale App callback', () => {
     const { meta, manager, focus, calls, app } = harness({ generation: 'upstream' });
-    seedPriors(manager, []);
+    /** @type {any[]} */
+    const delivered = [];
+    const priors = seedPriors(manager, delivered);
     focus.connect(app);
-    manager.fail.before.add(restoreCall('push-tile-left'));
+    manager.fail.beforeName.set('push-tile-left', 1);
     assert.throws(() => focus.destroy());
-    assert.equal(meta.customHandlers.has('push-tile-left'), false,
-        'our dispatcher is gone — the binding falls back to muffin builtin');
-    assert.deepEqual(calls, [], 'no own callback ran');
+    deliver(meta, 'push-tile-left', { id: 'x' });
+    assert.deepEqual(calls, [], 'our handler never runs after destroy');
+    assert.deepEqual(delivered, [['push-tile-left', { id: 'x' }]],
+        'the KNOWN prior answers, not muffin builtin');
+    assert.equal(manager.bindings.get(71).callback, priors['push-tile-left'].callback,
+        'the manager slot holds the prior, not our dead entry');
 });
 
-test('manager route: a post-effect throw during restore still restores the remaining names', () => {
-    const { manager, focus, app } = harness({ generation: 'upstream' });
-    const priors = seedPriors(manager, []);
+test('manager route: a post-effect throw during restore still restores every name', () => {
+    const { meta, manager, focus, app } = harness({ generation: 'upstream' });
+    /** @type {any[]} */
+    const delivered = [];
+    const priors = seedPriors(manager, delivered);
     focus.connect(app);
-    manager.fail.after.add(restoreCall('push-tile-left'));
+    manager.fail.afterName.set('push-tile-left', 1);
     assert.throws(() => focus.destroy(), /push-tile-left/);
     for (const name of NAMES) {
         assert.equal(manager.bindings.get(ACTION_IDS[name]).callback, priors[name].callback,
-            name + ' restored');
+            name + ' reaches its prior');
+        deliver(meta, name, { id: name });
+        assert.deepEqual(delivered.at(-1), [name, { id: name }], name + ' is reachable');
     }
 });
 
@@ -179,8 +207,8 @@ test('manager route: destroy reports every unrestored binding in one combined er
     const { manager, focus, app } = harness({ generation: 'upstream' });
     seedPriors(manager, []);
     focus.connect(app);
-    manager.fail.before.add(restoreCall('push-tile-right'));
-    manager.fail.before.add(restoreCall('push-tile-down'));
+    manager.fail.beforeName.set('push-tile-right', 1);
+    manager.fail.beforeName.set('push-tile-down', 1);
     assert.throws(() => focus.destroy(), (e) => {
         assert.match(e.message, /restore failed for 2 binding\(s\)/);
         assert.match(e.message, /push-tile-right/);
@@ -189,51 +217,22 @@ test('manager route: destroy reports every unrestored binding in one combined er
     });
 });
 
-test('manager route: a failed restore does not poison the next App instance', () => {
-    // A restore that threw before taking effect leaves OUR inert dispatcher in
-    // the manager's binding map. Because the keybinding manager is a singleton
-    // across App recreation, the next App would otherwise adopt that leftover as
-    // its "prior" and never restore muffin's builtin — Super+Arrow would stay
-    // dead for the whole session, silently.
+test('manager route: a retry destroy completes a binding that stayed unrestored', () => {
     const { meta, manager, focus, app } = harness({ generation: 'upstream' });
-    const priors = seedPriors(manager, []);
+    /** @type {any[]} */
+    const delivered = [];
+    const priors = seedPriors(manager, delivered);
     focus.connect(app);
-    manager.fail.before.add(restoreCall('push-tile-left'));
+    // the restore AND its recovery retry fail: the registration must stay owned
+    manager.fail.beforeName.set('push-tile-left', 2);
     assert.throws(() => focus.destroy());
-    assert.equal(manager.bindings.has(71), false, 'our inert leftover is not left in the manager map');
-    assert.equal(meta.customHandlers.has('push-tile-left'), false, 'Meta handler reset to muffin builtin');
-
-    // monitors-changed recreates the App: a fresh Focus on the same singleton
-    const second = new Focus({
-        meta,
-        keybindingManager: manager,
-        hotkey: (_app, _dir) => () => {},
-    });
-    second.connect({ id: 'app2' });
-    assert.equal(meta.customHandlers.has('push-tile-left'), true, 'the second instance takes the binding over');
-    second.destroy();
-    assert.equal(meta.customHandlers.has('push-tile-left'), false, 'the second instance restores muffin builtin');
-    assert.equal(manager.bindings.has(71), false, 'no dispatcher entry left for the poisoned name');
-    for (const name of NAMES) {
-        if (name === 'push-tile-left')
-            {continue;}
-        assert.equal(manager.bindings.get(ACTION_IDS[name]).callback, priors[name].callback,
-            name + ' still ends at its real prior after the second cycle');
-    }
-});
-
-test('manager route: a retry destroy restores the previously failed binding', () => {
-    const { manager, focus, app } = harness({ generation: 'upstream' });
-    const priors = seedPriors(manager, []);
-    focus.connect(app);
-    const at = restoreCall('push-tile-left');
-    manager.fail.before.add(at);
-    assert.throws(() => focus.destroy());
-    manager.fail.before.delete(at);
+    manager.fail.beforeName.delete('push-tile-left');
     assert.doesNotThrow(() => focus.destroy(), 'the failed ownership was kept for the retry');
     for (const name of NAMES) {
         assert.equal(manager.bindings.get(ACTION_IDS[name]).callback, priors[name].callback,
             name + ' restored after retry');
+        deliver(meta, name, { id: name });
+        assert.deepEqual(delivered.at(-1), [name, { id: name }], name + ' is reachable after retry');
     }
 });
 
@@ -265,11 +264,107 @@ test('manager route: the restored prior callback is deliverable through the rein
     assert.deepEqual(delivered, [{ id: 'restored' }], 'prior callback reachable through the dispatcher again');
 });
 
-test('6.6 direct route: a throwing Meta reset still resets the rest, keeps the failure inert and retryable', () => {
+test('DEFECT 1: a failed prior restore preserves the KNOWN prior across App recreation', () => {
+    const { meta, manager, focus, app } = harness({ generation: 'upstream' });
+    /** @type {any[]} */
+    const delivered = [];
+    const priors = seedPriors(manager, delivered);
+    focus.connect(app);
+    // restore and its recovery retry both fail BEFORE the effect
+    manager.fail.beforeName.set('push-tile-left', 2);
+    assert.throws(() => focus.destroy(), /push-tile-left/);
+    assert.equal(manager.bindings.get(71).callback, priors['push-tile-left'].callback,
+        'the KNOWN prior is preserved in the manager slot, not replaced by our dead entry');
+
+    // monitors-changed recreates the App: a fresh instance on the same singleton
+    const second = new Focus({
+        meta,
+        keybindingManager: manager,
+        hotkey: (_app, _dir) => () => {},
+    });
+    second.connect({ id: 'app2' });
+    second.destroy();
+    assert.equal(manager.bindings.get(71).callback, priors['push-tile-left'].callback,
+        'the second cycle still ends at the real prior');
+    deliver(meta, 'push-tile-left', { id: 'restored' });
+    assert.deepEqual(delivered.at(-1), ['push-tile-left', { id: 'restored' }],
+        'the original prior is deliverable again after App recreation');
+});
+
+test('DEFECT 2: a failing Meta reset is retried independent of the binding-map entry', () => {
+    const { meta, manager, metaControl, focus, app } = harness({ generation: 'upstream' });
+    focus.connect(app);
+    metaControl.failResetName.set('push-tile-left', 1);
+    assert.throws(() => focus.destroy(), /push-tile-left/);
+    const resets = metaControl.resets.filter((n) => n === 'push-tile-left');
+    assert.equal(resets.length >= 2, true,
+        'Meta cleanup was attempted again even though the map entry was already removed');
+    assert.equal(meta.customHandlers.has('push-tile-left'), false,
+        'our dispatcher no longer swallows the key');
+    assert.equal(manager.bindings.has(71), false,
+        'no dead entry is left for the next App to adopt as prior');
+});
+
+test('DEFECT 2: a persistently failing Meta reset is reported and stays retryable', () => {
+    const { meta, manager, metaControl, focus, app } = harness({ generation: 'upstream' });
+    focus.connect(app);
+    metaControl.failResetName.set('push-tile-left', 2);
+    assert.throws(() => focus.destroy(), /push-tile-left/);
+    assert.equal(meta.customHandlers.has('push-tile-left'), true, 'dispatcher still ours: the reset kept failing');
+    metaControl.failResetName.delete('push-tile-left');
+    assert.doesNotThrow(() => focus.destroy(), 'the unrestored registration stayed retryable');
+    assert.equal(meta.customHandlers.has('push-tile-left'), false, 'retry completed the Meta cleanup');
+    assert.equal(manager.bindings.has(71), false, 'map left empty');
+});
+
+test('DEFECT 3: destroy never clobbers a newer foreign owner (prior captured)', () => {
+    const { meta, manager, focus, app } = harness({ generation: 'upstream' });
+    /** @type {any[]} */
+    const delivered = [];
+    const priors = seedPriors(manager, delivered);
+    const foreign = [];
+    focus.connect(app);
+    manager.setBuiltinHandler('push-tile-left', 71, () => foreign.push('foreign'));
+    assert.doesNotThrow(() => focus.destroy(), 'the slot belongs to the newer owner, so nothing is ours to restore');
+    assert.notEqual(manager.bindings.get(71).callback, priors['push-tile-left'].callback,
+        'our old prior was NOT restored over the newer owner');
+    deliver(meta, 'push-tile-left', { id: 'other' });
+    assert.deepEqual(foreign, ['foreign'], 'the newer owner still answers');
+    assert.deepEqual(delivered, [], 'our old prior does not answer');
+});
+
+test('DEFECT 3: destroy never clobbers a newer foreign owner (no prior captured)', () => {
+    const { meta, manager, focus, app } = harness({ generation: 'upstream' });
+    const foreign = [];
+    focus.connect(app);
+    manager.setBuiltinHandler('push-tile-left', 71, () => foreign.push('foreign'));
+    assert.doesNotThrow(() => focus.destroy());
+    assert.equal(manager.bindings.has(71), true, 'the newer owner entry was not deleted');
+    deliver(meta, 'push-tile-left', { id: 'other' });
+    assert.deepEqual(foreign, ['foreign'], 'the newer owner still answers');
+});
+
+test('DEFECT 3: a same-instance retry after a newer connect does not override it', () => {
+    const { meta, manager, focus, app } = harness({ generation: 'upstream' });
+    const priors = seedPriors(manager, []);
+    const foreign = [];
+    focus.connect(app);
+    manager.fail.beforeName.set('push-tile-left', 1);
+    assert.throws(() => focus.destroy());
+    assert.equal(manager.bindings.get(71).callback, priors['push-tile-left'].callback,
+        'the prior was preserved for the retry');
+    // a newer owner takes the binding before our retry
+    manager.setBuiltinHandler('push-tile-left', 71, () => foreign.push('foreign'));
+    assert.doesNotThrow(() => focus.destroy(), 'the retry sees the newer owner and stands down');
+    deliver(meta, 'push-tile-left', { id: 'other' });
+    assert.deepEqual(foreign, ['foreign'], 'the newer owner was not clobbered by the retry');
+});
+
+test('6.6 direct route: a throwing Meta reset still resets the rest and stays retryable', () => {
     const { meta, metaControl, focus, calls, app } = harness({ generation: 'legacy' });
     focus.connect(app);
     assert.deepEqual([...meta.customHandlers.keys()].sort(), [...NAMES].sort(), 'all four taken over');
-    metaControl.failSetAt.add(NAMES.length);
+    metaControl.failResetName.set('push-tile-left', 2);
     assert.throws(() => focus.destroy(), /push-tile-left/);
     for (const name of NAMES) {
         if (name === 'push-tile-left')
@@ -277,11 +372,11 @@ test('6.6 direct route: a throwing Meta reset still resets the rest, keeps the f
         assert.equal(meta.customHandlers.has(name), false,
             name + ' reset to muffin builtin despite the first failure');
     }
-    deliver(meta, 'push-tile-left', { id: 'stale' });
-    assert.deepEqual(calls, [], 'the unrestored direct-route binding is inert too');
-    metaControl.failSetAt.clear();
+    assert.equal(meta.customHandlers.has('push-tile-left'), true, 'the stubborn one is still ours');
+    metaControl.failResetName.delete('push-tile-left');
     assert.doesNotThrow(() => focus.destroy());
     assert.equal(meta.customHandlers.has('push-tile-left'), false, 'retry completed the reset');
+    assert.deepEqual(calls, [], 'no own callback ever ran');
 });
 
 test('destroy without connect is a no-op that never touches foreign state', () => {
@@ -308,8 +403,7 @@ test('integration: a throwing focus restore does not stop disable or settings fi
     ext.init({ uuid: 'greenTile@carsteneu' });
 
     // upstream manager surface with a foreign prior on every push-tile id, so
-    // destroy restores through setBuiltinHandler: installs 1..4 are connect,
-    // 5..8 are the four restores
+    // destroy restores through setBuiltinHandler
     const bindings = new Map();
     /** @type {Record<string, any>} */
     const priors = {};
@@ -317,12 +411,13 @@ test('integration: a throwing focus restore does not stop disable or settings fi
         priors[name] = priorFor(name);
         bindings.set(ACTION_IDS[name], priors[name]);
     }
-    const installs = [];
+    let failFirstRestore = true;
     env.keybindingManager.bindings = bindings;
     env.keybindingManager.setBuiltinHandler = (name, actionId, callback, allowedModes = 1) => {
-        installs.push(name);
-        if (installs.length === NAMES.length + 1)
-            {throw new Error('injected restore failure');}
+        if (name === 'push-tile-left' && failFirstRestore && bindings.get(71) !== priors[name]) {
+            failFirstRestore = false;
+            throw new Error('injected restore failure');
+        }
         bindings.set(actionId, { name, bindings: [], callback, allowedModes });
         env.customBindings.set(name, (display, win) => {
             const entry = bindings.get(actionId);
@@ -333,20 +428,14 @@ test('integration: a throwing focus restore does not stop disable or settings fi
 
     ext.enable();
     env.flushDisplayConfigNoReply();
-    assert.deepEqual(installs, NAMES, 'connect installed all four');
 
     assert.doesNotThrow(() => ext.disable(), 'Config.destroy isolates the focus failure');
-    // the component's own message, not Config's step label (which would appear
-    // here even without the fix): proves focus.js reported the unrestored name
     assert.equal(env.logErrors.some((m) => /push-tile restore failed for/.test(m) && m.indexOf('push-tile-left') !== -1), true,
         'the combined focus error is reported, not swallowed');
     assert.equal(env.settingsSlots.get('greenTile@carsteneu'), null, 'settings finalized despite the failure');
-    assert.deepEqual(installs.slice(NAMES.length), NAMES, 'destroy attempted ALL four restores');
     for (const name of NAMES) {
-        if (name === 'push-tile-left')
-            {continue;}
         assert.equal(bindings.get(ACTION_IDS[name]).callback, priors[name].callback,
-            name + ' released to its prior despite the first failure');
+            name + ' released to its prior despite the injected failure');
     }
 });
 
