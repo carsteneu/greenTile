@@ -114,15 +114,14 @@ const createXletImporter = (options) => {
         const importer = {
             __path__: dirRel,
             clearCache(name) {
-                const prefixRel = dirRel ? `${dirRel}/${name}` : name;
-                if (moduleCache.delete(prefixRel)) {
-                    return;
-                }
-                for (const key of [...moduleCache.keys()]) {
-                    if (key.startsWith(prefixRel + '/')) {
-                        moduleCache.delete(key);
-                    }
-                }
+                // GJS importer truth: clearing deletes the named MODULE
+                // cache entry; directory importers are permanent and keep
+                // their sub-module caches — clearing a directory name does
+                // NOT invalidate its children. Consequence for the shipped
+                // XLET tree: after an xlet reload the ENTRY re-evaluates
+                // (its module entry is cleared), the lib modules under the
+                // global tree stay cached until the process ends.
+                moduleCache.delete(dirRel ? `${dirRel}/${name}` : name);
             },
         };
         for (const entry of listDir(dirAbs)) {

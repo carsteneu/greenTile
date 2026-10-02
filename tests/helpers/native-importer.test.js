@@ -90,10 +90,11 @@ test('clearCache drops the module, the next access re-evaluates', () => {
     assert.equal(xlet.lib.m.value, 1);
     xlet.lib.clearCache('m');
     assert.equal(xlet.lib.m.value, 2);
-    // subtree form: clearing a directory drops everything under it
+    // directory importers are permanent: clearing the directory NAME does
+    // not invalidate the children (GJS importer truth, r3)
     xlet.clearCache('lib');
-    assert.equal(xlet.lib.m.value, 3);
-    assert.equal(globalThis.__evals, 3);
+    assert.equal(xlet.lib.m.value, 2);
+    assert.equal(globalThis.__evals, 2);
     delete globalThis.__evals;
 });
 
@@ -113,8 +114,8 @@ test('clearCache matches the upstream enumeration loop', () => {
         xlet.clearCache(prop);
     }
     assert.equal(xlet.one.a, 3); // direct module re-evaluated
-    assert.equal(xlet.lib.two.b, 4); // subtree under lib/ re-evaluated too
-    assert.equal(globalThis.__evals, 4);
+    assert.equal(xlet.lib.two.b, 2, 'the directory clear did not invalidate the child module'); // subtree under lib/ re-evaluated too
+    assert.equal(globalThis.__evals, 3);
     delete globalThis.__evals;
 });
 
@@ -184,47 +185,69 @@ test('non-javascript entries are not exposed as modules', () => {
     assert.ok(!Object.prototype.hasOwnProperty.call(xlet.lib, 'data'));
 });
 
-test('6.6 reload identity: a fresh importer instance re-evaluates modules with fresh state', () => {
-    // 6.6 forgetExtension deletes the whole imports.extensions[uuid] subtree
-    // on unload; the next access builds a NEW directory importer. Module
-    // state (top-level let/var mutations) must NOT leak across generations.
-    globalThis.__importerEvals = 0;
-    const files = {
-        '/xlet/lib/state.js': [
-            'var loads = ++globalThis.__importerEvals;',
-            'var mutable = 1;',
-            'function bump() { mutable = 2; }',
-        ].join('\n'),
-    };
-    const first = makeImporter(files);
-    assert.equal(first.lib.state.loads, 1);
-    first.lib.state.bump();
-    assert.equal(first.lib.state.mutable, 2, 'state mutated inside the generation');
+// ---------------- reload topology (r3: the REAL per-generation contract) ----------------
+// Reviewer's real-CJS probes of 6.6 fileUtils/forgetExtension/main and of
+// upstream installXletImporter established: (a) on 6.6 the entry re-evaluates
+// after a reload while the lib modules of the global imports.extensions tree
+// STAY CACHED — deleting the subtree property does not evict the native
+// module cache; (b) upstream builds a PRIVATE per-extension importer for the
+// entry that is a DIFFERENT importer from the global UUID tree the shipped
+// XLET chains resolve through. These tests pin exactly that topology.
 
-    const second = makeImporter(files);
-    assert.notEqual(second.lib.state, first.lib.state, 'distinct namespace objects');
-    assert.equal(second.lib.state.loads, 2, 'module body re-evaluated for the new importer');
-    assert.equal(second.lib.state.mutable, 1, 'no module state leaked across the reload');
-    delete globalThis.__importerEvals;
+test('6.6 reload: the entry re-evaluates with fresh state, the global lib tree stays cached', () => {
+    globalThis.__topoEvals = 0;
+    const files = {
+        '/xlet/extension.js': [
+            'var entryLoads = ++globalThis.__topoEvals;',
+            'var lifecycle = { session: null };',
+            'var currentSession = () => lifecycle.session;',
+        ].join('\n'),
+        '/xlet/lib/state.js': 'var libLoads = ++globalThis.__topoEvals;',
+    };
+    // the imports root caches the xlet directory at startup (main.js
+    // _addXletDirectoriesToSearchPath) — ONE importer for the process
+    const importsRoot = { extensions: { 'greenTile@carsteneu': makeImporter(files) } };
+    const tree = importsRoot.extensions['greenTile@carsteneu'];
+    assert.equal(tree.extension.entryLoads, 1);
+    assert.equal(tree.lib.state.libLoads, 2);
+
+    // reload: the subtree property is deleted and rebuilt, but the cached
+    // directory importer is re-used — only the ENTRY module entry is cleared
+    delete importsRoot.extensions['greenTile@carsteneu'];
+    importsRoot.extensions['greenTile@carsteneu'] = tree;
+    tree.clearCache('extension');
+    assert.equal(tree.extension.entryLoads, 3, 'the entry module re-evaluated');
+    assert.equal(tree.extension.currentSession(), null, 'the fresh lifecycle holder starts empty');
+    assert.equal(tree.lib.state.libLoads, 2, 'the lib module stayed cached across the reload');
+    assert.equal(globalThis.__topoEvals, 3);
+    delete globalThis.__topoEvals;
 });
 
-test('the extensions-root reload contract: subtree delete + rebuild swaps the tree wholesale', () => {
-    globalThis.__importerEvals = 0;
+test('clearing a directory name does not invalidate its children (GJS importer truth)', () => {
+    globalThis.__dirEvals = 0;
+    const xlet = makeImporter({
+        '/xlet/lib/mod.js': 'var loads = ++globalThis.__dirEvals;',
+    });
+    assert.equal(xlet.lib.mod.loads, 1);
+    xlet.clearCache('lib');
+    assert.equal(xlet.lib.mod.loads, 1, 'directory importers are permanent; the child module stayed cached');
+    delete globalThis.__dirEvals;
+});
+
+test('upstream topology: the private entry importer and the global UUID tree are distinct', () => {
+    globalThis.__twoTrees = 0;
     const files = {
-        '/xlet/extension.js': 'var currentSession = () => null;',
-        '/xlet/lib/state.js': 'var loads = ++globalThis.__importerEvals;',
+        '/xlet/extension.js': 'var loads = ++globalThis.__twoTrees;',
+        '/xlet/lib/state.js': 'var loads = ++globalThis.__twoTrees;',
     };
-    // main.js model: the imports root caches the xlet directories
-    const importsRoot = { extensions: { 'greenTile@carsteneu': makeImporter(files) } };
-    assert.equal(importsRoot.extensions['greenTile@carsteneu'].lib.state.loads, 1);
-    // forgetExtension: delete the subtree
-    delete importsRoot.extensions['greenTile@carsteneu'];
-    assert.equal(importsRoot.extensions['greenTile@carsteneu'], undefined, 'the old tree is gone');
-    // _addXletDirectoriesToSearchPath rebuilds a NEW importer on next access
-    importsRoot.extensions['greenTile@carsteneu'] = makeImporter(files);
-    const reloaded = importsRoot.extensions['greenTile@carsteneu'];
-    assert.equal(reloaded.lib.state.loads, 2, 'fresh evaluation after reload');
-    assert.equal(typeof reloaded.extension.currentSession, 'function', 'entry surface intact');
-    assert.equal(reloaded.extension.currentSession(), null, 'the fresh lifecycle holder starts empty');
-    delete globalThis.__importerEvals;
+    // upstream installXletImporter builds a fresh importer for the entry;
+    // the shipped XLET chains resolve through the global UUID tree instead
+    const globalTree = makeImporter(files);
+    const entryTree = makeImporter(files);
+    assert.notEqual(entryTree.lib.state, globalTree.lib.state,
+        'the two importers produce distinct module namespaces (verified in real cjs)');
+    assert.equal(entryTree.lib.state.loads + globalTree.lib.state.loads, 3,
+        'each namespace froze its own counter value (1 + 2)');
+    assert.equal(globalThis.__twoTrees, 2, 'exactly two module evaluations across both importers');
+    delete globalThis.__twoTrees;
 });
