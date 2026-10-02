@@ -12,7 +12,8 @@
         "lint": "eslint .",
         "typecheck": "tsc -p tsconfig.json",
         "check:types": "node scripts/type-contract-check.mjs",
-        "check": "npm run test && npm run typecheck && npm run lint && npm run check:types",
+        "check:catalogs": "./scripts/check-catalogs.sh",
+        "check": "npm run check:catalogs && npm run test && npm run typecheck && npm run lint && npm run check:types",
         "gen:types": "node scripts/generate-xlet-types.mjs"
     },
     "devDependencies": {
