@@ -16,10 +16,10 @@ Window tiling for Cinnamon: presets per monitor and workspace, an auto mode, sna
 
 1. Download `greenTile-<version>.zip` from [Releases](https://github.com/carsteneu/greenTile/releases) and unzip it.
 2. Run `./install.sh`. It copies the extension to `~/.local/share/cinnamon/extensions/greenTile@carsteneu/` and compiles the translations (needs `msgfmt` from gettext, otherwise the UI stays English).
-3. Restart Cinnamon (`Ctrl+Alt+Esc`, or `Alt+F2` → `r`).
+3. Restart Cinnamon (`Ctrl+Alt+Esc`, or `Alt+F2` → `r`). A running Cinnamon keeps the extension code it loaded at startup, so new files only take effect through this restart; on Wayland that restart does not exist, log out and back in instead.
 4. Enable greenTile in System Settings → Extensions.
 
-To update an installed greenTile, run `./update.sh` from the unpacked zip instead: it downloads the latest release from GitHub and installs it (needs `unzip` and `curl` or `wget`). Re-running it does nothing when the newest version is already installed; `--force` reinstalls.
+To update an installed greenTile, run `./update.sh` from the unpacked zip instead: it downloads the latest release from GitHub and installs it (needs `unzip` and `curl` or `wget`). Re-running it does nothing when the newest version is already installed; `--force` reinstalls. An update replaces the installed files, but the running Cinnamon keeps the library code it loaded at startup — enabling the extension again or reloading it re-reads only `extension.js`. Restart Cinnamon (X11) or log out and back in (Wayland) before judging the new version.
 
 **Updating from 1.2.0 or older:** the settings of four hotkeys have new internal names — *Tile all windows into 3 columns*, *Tile all windows into 6 columns* and turning automatic tiling on and off. On the first start Cinnamon resets these four to their defaults (`Super+Ctrl+3`, `Super+Ctrl+6`, `Super+Ctrl+A`, `Super+Ctrl+D`). If you had changed them, set them again on the **Hotkeys** page. All other settings, presets and layouts are kept.
 
@@ -125,7 +125,7 @@ Looking for a specific feature? [FEATURES.md](FEATURES.md) lists all of them.
 
 ## Development
 
-Deploy from a checkout and reload without restarting Cinnamon:
+Deploy from a checkout. The DBus reload at the end re-reads only `extension.js`; when `lib/` changed, restart Cinnamon (X11: `Alt+F2` then `r`; Wayland: log out and back in) — the running process keeps the library code it loaded at startup:
 
 ```bash
 D=~/.local/share/cinnamon/extensions/greenTile@carsteneu
@@ -143,8 +143,9 @@ dbus-send --session --print-reply --dest=org.Cinnamon /org/Cinnamon org.Cinnamon
   string:"imports.ui.extensionSystem.disableExtension('greenTile@carsteneu'); imports.ui.extensionSystem.enableExtension('greenTile@carsteneu'); 'reloaded'"
 ```
 
-extension.js is the single entry and requires the modules from `lib/` — always
-deploy `lib/` alongside it. Copying extension.js alone fails at load time.
+extension.js is the single entry and imports the modules from `lib/` — always
+deploy `lib/` alongside it. Copying extension.js alone fails at load time: the
+entry would resolve the old `lib/` still cached from the previous deploy.
 
 - **Tests:** `npm test` (or `node --test tests/*/*.test.js`) — every test file exactly once, on Node 18 or newer. Test files live one level below `tests/` (`tests/<area>/<name>.test.js`); `node --test tests/` would only work on Node 18/20.
 - **Tooling:** `npm ci` once, then `npm run check` — tests, typecheck and lint in one run. Types are JSDoc checked with `tsc --checkJs` (`npm run typecheck`); there are no TypeScript sources and no build step, everything ships as plain JavaScript.
