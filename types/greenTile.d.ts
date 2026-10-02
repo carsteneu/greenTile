@@ -45,12 +45,18 @@ interface CinnamonWindow {
     /** Meta.Window.move_frame(user_op, x, y) */
     move_frame(userOp: boolean, x: number, y: number): void;
     get_frame_rect(): CinnamonRectangle;
-    /** Clutter actor of the window window (translation/scale for animation). */
+    /** Clutter actor of the window window (translation/scale for animation,
+     * the platform ease() from Cinnamon environment.js, and greenTile's
+     * own-ease marker place.js maintains). */
     get_compositor_private(): {
         translation_x: number;
         translation_y: number;
         scale_x: number;
         scale_y: number;
+        /** Cinnamon Clutter.Actor.prototype.ease (environment.js _easeActor). */
+        ease(props: Record<string, any>): void;
+        /** own-transition marker written only by lib/tiling/place.js */
+        __greenTile_easing?: boolean;
     } | null;
     activate(time: number): void;
     /** Stable seq across App recreations (Meta.Window.get_stable_sequence). */
@@ -234,9 +240,27 @@ type MonitorsFacade = {
     destroy(): void;
 };
 
+/** Focus-border facade (lib/runtime/border.js). */
+type BorderFacade = {
+    init(app: AppFacade): void;
+    update(): void;
+    flash(win: CinnamonWindow): void;
+    restyle(): void;
+    destroy(): void;
+};
+
+/** Drop-preview facade (lib/runtime/drop.js). */
+type DropFacade = {
+    begin(app: AppFacade, w: CinnamonWindow, op: string): void;
+    target(app: AppFacade, w: CinnamonWindow, px: number, py: number, fromMonitor?: number | null, startFrame?: Rect | null): void;
+    tick(app: AppFacade): void;
+    end(app: AppFacade, w: CinnamonWindow, op: string): void;
+    stop(): void;
+    destroy(): void;
+};
+
 /** Exclusion facade (lib/runtime/exclusions.js). */
-type ExclFacade = {
-    isExcluded(win: CinnamonWindow): boolean;
+type ExclFacade = {    isExcluded(win: CinnamonWindow): boolean;
     removeToggle(seq: number): void;
     apply(settings: SettingsFacade): void;
     start(settings: SettingsFacade): void;

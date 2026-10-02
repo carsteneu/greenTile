@@ -38,6 +38,7 @@ const { Session } = XLET.lib.runtime.session;
 // clears only extension.imports and the shared imports.extensions tree —
 // cached lib modules there survive a reload. With top-level state reduced to
 // this holder, that asymmetry cannot leak between sessions.
+/** @type {{ session: { destroy(): void } | null }} */
 const lifecycle = { session: null };
 
 /**

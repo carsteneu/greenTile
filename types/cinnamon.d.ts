@@ -129,15 +129,71 @@ type ImportsExtensions = {
 
 /**
  * The shipped module tree as both Cinnamon generations expose it on the
- * imports root (6.6 main.js _addXletDirectoriesToSearchPath, upstream
- * installXletImporter): imports.extensions['greenTile@carsteneu'].lib...*.
- * Value type is any per module: the natively imported namespace carries only
- * runtime-level (not type-level) exports, so tsc checks each module
- * internally while the public name surface is pinned by
- * tests/architecture/native-resolver.test.js against the real loader.
- * @type {Record<string, Record<string, any>>}
+ * imports root. Typing flows through the GENERATED mirror in types/xlet/
+ * (npm run gen:types): real signatures from the shipped JSDoc — a wrong
+ * argument on a cross-module call fails tsc, and the drift guard test
+ * keeps the mirror in sync with lib/.
  */
-type XletTree = Record<string, Record<string, any>>;
+type XletTree = {
+    lib: {
+        app: {
+            app: typeof import('./xlet/app/app');
+            config: typeof import('./xlet/app/config');
+        };
+        model: {
+            accent: typeof import('./xlet/model/accent');
+            drop: typeof import('./xlet/model/drop');
+            editor: typeof import('./xlet/model/editor');
+            exclude: typeof import('./xlet/model/exclude');
+            fill: typeof import('./xlet/model/fill');
+            focus: typeof import('./xlet/model/focus');
+            gap: typeof import('./xlet/model/gap');
+            layouts: typeof import('./xlet/model/layouts');
+            lifecycle: typeof import('./xlet/model/lifecycle');
+            monitor: typeof import('./xlet/model/monitor');
+            'panel-size': typeof import('./xlet/model/panel-size');
+            'settings-keys': typeof import('./xlet/model/settings-keys');
+            single: typeof import('./xlet/model/single');
+            split: typeof import('./xlet/model/split');
+            state: typeof import('./xlet/model/state');
+            swap: typeof import('./xlet/model/swap');
+            teardown: typeof import('./xlet/model/teardown');
+            theme: typeof import('./xlet/model/theme');
+        };
+        runtime: {
+            auto: typeof import('./xlet/runtime/auto');
+            border: typeof import('./xlet/runtime/border');
+            drop: typeof import('./xlet/runtime/drop');
+            exclusions: typeof import('./xlet/runtime/exclusions');
+            focus: typeof import('./xlet/runtime/focus');
+            hotkeys: typeof import('./xlet/runtime/hotkeys');
+            monitors: typeof import('./xlet/runtime/monitors');
+            'panel-state': typeof import('./xlet/runtime/panel-state');
+            scope: typeof import('./xlet/runtime/scope');
+            session: typeof import('./xlet/runtime/session');
+            split: typeof import('./xlet/runtime/split');
+            theme: typeof import('./xlet/runtime/theme');
+        };
+        tiling: {
+            debug: typeof import('./xlet/tiling/debug');
+            'focus-nav': typeof import('./xlet/tiling/focus-nav');
+            grab: typeof import('./xlet/tiling/grab');
+            layout: typeof import('./xlet/tiling/layout');
+            order: typeof import('./xlet/tiling/order');
+            place: typeof import('./xlet/tiling/place');
+            retile: typeof import('./xlet/tiling/retile');
+            screen: typeof import('./xlet/tiling/screen');
+            swap: typeof import('./xlet/tiling/swap');
+            windows: typeof import('./xlet/tiling/windows');
+        };
+        ui: {
+            draw: typeof import('./xlet/ui/draw');
+            editor: typeof import('./xlet/ui/editor');
+            i18n: typeof import('./xlet/ui/i18n');
+            panel: typeof import('./xlet/ui/panel');
+        };
+    };
+};
 
 /** Cinnamon global object (`global` in the shell). */
 declare const global: {
@@ -159,3 +215,4 @@ declare const global: {
 interface String {
     format(...args: unknown[]): string;
 }
+

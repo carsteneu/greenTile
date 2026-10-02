@@ -90,7 +90,7 @@ test('6.8-style manager: push-tile registers through setBuiltinHandler and resto
 
 test('manager without the builtin enum members falls back to the direct Meta handler', () => {
     const { env, ext } = loadExtension();
-    env.keybindingManager.setBuiltinHandler = (name, actionId, cb) => {
+    env.keybindingManager.setBuiltinHandler = (_name, _actionId, _cb) => {
         throw new Error('must not be reached');
     };
     // muffin without PUSH_TILE_* action ids: the manager route is unusable

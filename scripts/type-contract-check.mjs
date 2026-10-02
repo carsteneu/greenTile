@@ -64,6 +64,35 @@ app.panel.rebuld();
 `,
     },
     {
+        // the verified acceptance-rejection mutation: a wrong argument on a
+        // REAL cross-module call through the native namespace must fail tsc
+        // (the generated mirror in types/xlet provides the signature)
+        name: 'mutation-xlet-windowmoveresize-arg',
+        expect: 'fail',
+        code: `
+const { windowMoveResize } = imports.extensions['greenTile@carsteneu'].lib.tiling.windows;
+windowMoveResize(null, 'WRONG-X', 2, 3, 4);
+`,
+    },
+    {
+        name: 'mutation-xlet-module-member-typo',
+        expect: 'fail',
+        code: `
+const w = imports.extensions['greenTile@carsteneu'].lib.tiling.windows;
+w.windowMoveRezise(null, 1, 2, 3, 4);
+`,
+    },
+    {
+        name: 'legit-xlet-windowmoveresize',
+        expect: 'pass',
+        code: `
+const { windowMoveResize } = imports.extensions['greenTile@carsteneu'].lib.tiling.windows;
+const win = null as unknown as CinnamonWindow;
+windowMoveResize(win, 1, 2, 3, 4);
+windowMoveResize(null, 1, 2, 3, 4);
+`,
+    },
+    {
         name: 'legit-window-api',
         expect: 'pass',
         code: `

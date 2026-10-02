@@ -15,17 +15,6 @@ const { createCinnamonEnv } = require('../helpers/fakes/cinnamon-env');
 const MONITOR = { x: 0, y: 0, width: 2000, height: 1100 };
 
 // Recording fake Tweener: pins the animated placement (ANIMATE_MS and the
-// offset parking) without touching the frozen fake env.
-const makeTweenerRecorder = () => {
-    const tweens = [];
-    return {
-        tweens,
-        removeTweens() {},
-        addTween(actor, params) {
-            tweens.push(params);
-        },
-    };
-};
 
 const makeEnv = (extraSettings = {}) => {
     const env = createCinnamonEnv({ settingsDefaults: Object.assign({ tileAnimation: true }, extraSettings) });
