@@ -521,6 +521,14 @@ const createCinnamonEnv = (options) => {
             else
                 {env.customBindings.set(name, fn);}
         },
+        // muffin builtin action ids: push-tile-* are wm builtins, resolved by
+        // name through Meta.KeyBindingAction (focus.js manager route)
+        KeyBindingAction: {
+            PUSH_TILE_LEFT: 71,
+            PUSH_TILE_RIGHT: 72,
+            PUSH_TILE_UP: 73,
+            PUSH_TILE_DOWN: 74,
+        },
         MaximizeFlags: { HORIZONTAL: 2, VERTICAL: 4 },
         // value 6 mirrors the real Meta.WindowType.NORMAL enum weight; only the
         // identity comparison with greenTile's own Meta.WindowType.NORMAL read

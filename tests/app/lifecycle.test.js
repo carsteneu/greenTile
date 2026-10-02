@@ -58,9 +58,49 @@ test('enable connects the documented handler set exactly once', () => {
     assert.equal(env.display.count('window-created'), 1);
     assert.equal(env.workspaceManager.count('notify::n-workspaces'), 1);
     assert.equal(env.workspaceManager.count('workspace-switched'), 1);
-    assert.equal(env.windowManager.count('switch-workspace'), 1);
-    assert.equal(env.liveTimers().length, 0, 'no timer without a pending settle');
+    assert.equal(env.windowManager.count('switch-workspace'), 1);    assert.equal(env.liveTimers().length, 0, 'no timer without a pending settle');
     assert.equal(env.settingsSlots.get('greenTile@carsteneu') === null, false);
+});
+
+test('6.8-style manager: push-tile registers through setBuiltinHandler and restores the dispatcher entry', () => {
+    const { env, ext } = loadExtension();
+    // 6.8 surface: the keybinding manager carries setBuiltinHandler and a
+    // bindings map (upstream js/ui/keybindings.js); 6.6 has neither
+    const builtinCalls = [];
+    env.keybindingManager.setBuiltinHandler = (name, actionId, cb) => {
+        builtinCalls.push([name, actionId]);
+        env.keybindingManager.bindings.set(actionId, { name, callback: cb });
+    };
+    env.keybindingManager.bindings = new Map();
+    ext.enable();
+    env.flushDisplayConfigNoReply();
+    assert.deepEqual(builtinCalls, [
+        ['push-tile-left', 71],
+        ['push-tile-right', 72],
+        ['push-tile-up', 73],
+        ['push-tile-down', 74],
+    ], 'all four builtins registered through the manager, action ids resolved from Meta.KeyBindingAction');
+    assert.deepEqual([...env.customBindings.keys()], [],
+        'the direct Meta route is not used when the manager route is available');
+    assert.equal(env.keybindingManager.bindings.size, 4, 'dispatcher entries tracked');
+    ext.disable();
+    assert.equal(env.keybindingManager.bindings.size, 0, 'destroy removes our dispatcher entries');
+    assert.deepEqual(builtinCalls.length, 4, 'no re-registration during destroy');
+});
+
+test('manager without the builtin enum members falls back to the direct Meta handler', () => {
+    const { env, ext } = loadExtension();
+    env.keybindingManager.setBuiltinHandler = (name, actionId, cb) => {
+        throw new Error('must not be reached');
+    };
+    // muffin without PUSH_TILE_* action ids: the manager route is unusable
+    env.gi.Meta.KeyBindingAction = {};
+    ext.enable();
+    env.flushDisplayConfigNoReply();
+    assert.deepEqual([...env.customBindings.keys()].sort(), FOCUS_BINDINGS,
+        'the direct Meta path registers all four bindings');
+    ext.disable();
+    assert.deepEqual([...env.customBindings.keys()], [], 'Meta custom bindings reset');
 });
 
 test('monitors-changed recreates the App without stacking duplicate registrations, settle timer runs', () => {

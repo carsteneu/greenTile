@@ -40,6 +40,14 @@ declare const MetaNS: {
     MaximizeFlags: { HORIZONTAL: number; VERTICAL: number };
     WindowType: { NORMAL: number };
     MotionDirection: { UP: number; DOWN: number; LEFT: number; RIGHT: number };
+    /** Builtin action ids, resolved by name at runtime (focus.js manager route);
+     * members absent on a generation fall back to the direct Meta handler. */
+    KeyBindingAction: {
+        PUSH_TILE_LEFT?: number;
+        PUSH_TILE_RIGHT?: number;
+        PUSH_TILE_UP?: number;
+        PUSH_TILE_DOWN?: number;
+    };
     /** GrabOp values are compared by identity via Object.keys lookup (lib/tiling/grab.js). */
     GrabOp: AnyRecord;
     Display: AnyRecord;
