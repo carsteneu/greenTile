@@ -2,52 +2,56 @@
 // regenerate with: npm run gen:types
 /**
  * Focus bindings owner: registers the push-tile builtin handlers with the App
- * and restores muffin's own on destroy.
+ * and restores the pre-connect owner on destroy.
  * @typedef {Object} FocusDeps
  * @property {AnyRecord} meta imports.gi.Meta
  * @property {AnyRecord} [keybindingManager] imports.ui.main.keybindingManager — absent on the 6.6 fake surface
  * @property {(app: AppFacade, dir: 'left' | 'right' | 'up' | 'down') => (display: AnyRecord, win: CinnamonWindow) => void} hotkey focusHotkey from lib/tiling/focus-nav.js; the names of FOCUS_BINDING_NAMES end in exactly these directions
+ */
+/**
+ * One acquired binding.
+ * @typedef {Object} FocusRegistration
+ * @property {string} name binding name ('push-tile-left')
+ * @property {number | undefined} actionId Meta.KeyBindingAction id; undefined on the direct Meta route
+ * @property {AnyRecord | undefined} prior manager entry that was in place before we took over
+ * @property {((display: AnyRecord, win: CinnamonWindow, binding?: AnyRecord) => void) | null} handler our live callback, dropped on destroy
+ * @property {boolean} active false once destroy made the callback inert
  */
 export const Focus: {
     new (deps: FocusDeps): {
         _meta: AnyRecord;
         _manager: any;
         _hotkey: (app: AppFacade, dir: "left" | "right" | "up" | "down") => (display: AnyRecord, win: CinnamonWindow) => void;
-        /** @type {{ name: string, actionId: number, prior: any }[]} */
-        _managerRegistrations: {
-            name: string;
-            actionId: number;
-            prior: any;
-        }[];
-        /** @type {string[]} names WE overrode through the direct Meta path */
-        _metaNames: string[];
+        /** @type {FocusRegistration[]} */
+        _registrations: FocusRegistration[];
         /**
          * Registers the push-tile handlers, one per binding name, through the
-         * generation's builtin surface.
+         * generation's builtin surface. Re-entrant: an existing ownership is
+         * released first, so a repeated connect never captures our own handler as
+         * the rollback target (a failing release surfaces here).
          * @param {AppFacade} app
          */
         connect(app: AppFacade): void;
         /**
-         * Restores what WE acquired, completely:
-         *  - manager route: a prior entry is re-entered through setBuiltinHandler
-         *    itself — that reinstalls the Meta dispatcher AND the map entry with
-         *    the prior callback and its action modes, so the prior binding stays
-         *    reachable through the normal delivery path. Without a prior, the
-         *    dispatcher we caused is cleared (Meta null) and our map entry
-         *    removed.
-         *  - direct Meta route (6.6 / enum-less muffin): only the names WE
-         *    overrode are reset. Meta.keybindings_set_custom_handler has no
-         *    getter counterpart, so a foreign direct handler that predated us
-         *    cannot be discovered — the reachable restore target is muffin's
-         *    builtin (documented platform limitation, not papered over).
-         * Names never acquired by this instance are never touched.
+         * Restores what WE acquired. Two stages, so a failure can never leave a
+         * live own callback behind:
+         *  1. make every own callback inert and drop its App closure — a binding
+         *     whose restore then fails still delivers nothing;
+         *  2. restore per registration, each in its own try, so one throwing
+         *     restore never strands the remaining names. A failed registration
+         *     stays owned (retryable) and every failure is reported together.
          */
         destroy(): void;
+        /**
+         * Restores one acquired binding to its pre-connect owner.
+         * @param {FocusRegistration} registration
+         */
+        _restore(registration: FocusRegistration): void;
     };
 };
 /**
  * Focus bindings owner: registers the push-tile builtin handlers with the App
- * and restores muffin's own on destroy.
+ * and restores the pre-connect owner on destroy.
  */
 export type FocusDeps = {
     /**
@@ -62,4 +66,29 @@ export type FocusDeps = {
      * focusHotkey from lib/tiling/focus-nav.js; the names of FOCUS_BINDING_NAMES end in exactly these directions
      */
     hotkey: (app: AppFacade, dir: "left" | "right" | "up" | "down") => (display: AnyRecord, win: CinnamonWindow) => void;
+};
+/**
+ * One acquired binding.
+ */
+export type FocusRegistration = {
+    /**
+     * binding name ('push-tile-left')
+     */
+    name: string;
+    /**
+     * Meta.KeyBindingAction id; undefined on the direct Meta route
+     */
+    actionId: number | undefined;
+    /**
+     * manager entry that was in place before we took over
+     */
+    prior: AnyRecord | undefined;
+    /**
+     * our live callback, dropped on destroy
+     */
+    handler: ((display: AnyRecord, win: CinnamonWindow, binding?: AnyRecord) => void) | null;
+    /**
+     * false once destroy made the callback inert
+     */
+    active: boolean;
 };

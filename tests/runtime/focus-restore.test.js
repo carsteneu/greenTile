@@ -16,7 +16,10 @@
 // reported instead of swallowed.
 const test = require('node:test');
 const assert = require('node:assert/strict');
-const { load } = require('../helpers/cinnamon-loader');
+const fs = require('node:fs');
+const path = require('node:path');
+const { load, cinnamonLoad, ROOT } = require('../helpers/cinnamon-loader');
+const { createCinnamonEnv } = require('../helpers/fakes/cinnamon-env');
 const { Focus } = load('./lib/runtime/focus');
 
 const ACTION_IDS = { 'push-tile-left': 71, 'push-tile-right': 72, 'push-tile-up': 73, 'push-tile-down': 74 };
@@ -230,6 +233,58 @@ test('destroy without connect is a no-op that never touches foreign state', () =
     assert.doesNotThrow(() => focus.destroy());
     assert.equal(manager.bindings.get(71), foreign, 'foreign dispatcher entry survives');
     assert.equal(meta.customHandlers.get('push-tile-left'), foreignMeta, 'foreign Meta handler survives');
+});
+
+// The caller probed the defect on the REAL extension entry (disable left four
+// stale handlers behind). This integration case pins the whole chain: a
+// throwing restore must not stop disable, must be reported, and the settings
+// slot must still be finalized last.
+test('integration: a throwing focus restore does not stop disable or settings finalize', () => {
+    const env = createCinnamonEnv();
+    globalThis.imports = env.imports;
+    globalThis.global = env.global;
+    const src = fs.readFileSync(path.join(ROOT, 'extension.js'), 'utf8');
+    const ext = cinnamonLoad(src, load, 'extension.js');
+    ext.init({ uuid: 'greenTile@carsteneu' });
+
+    // upstream manager surface with a foreign prior on every push-tile id, so
+    // destroy restores through setBuiltinHandler (calls 1-4 connect, 5-8 destroy)
+    const bindings = new Map();
+    /** @type {Record<string, any>} */
+    const priors = {};
+    for (const name of NAMES) {
+        priors[name] = priorFor(name);
+        bindings.set(ACTION_IDS[name], priors[name]);
+    }
+    const installs = [];
+    env.keybindingManager.bindings = bindings;
+    env.keybindingManager.setBuiltinHandler = (name, actionId, callback, allowedModes = 1) => {
+        installs.push(name);
+        if (installs.length === 5)
+            {throw new Error('injected restore failure');}
+        bindings.set(actionId, { name, bindings: [], callback, allowedModes });
+        env.customBindings.set(name, (display, win) => {
+            const entry = bindings.get(actionId);
+            if (entry && entry.callback)
+                {entry.callback(display, win);}
+        });
+    };
+
+    ext.enable();
+    env.flushDisplayConfigNoReply();
+    assert.deepEqual(installs, NAMES, 'connect installed all four');
+
+    assert.doesNotThrow(() => ext.disable(), 'Config.destroy isolates the focus failure');
+    assert.equal(env.logErrors.some((m) => m.indexOf('focus:') !== -1), true,
+        'the combined focus error is reported, not swallowed');
+    assert.equal(env.settingsSlots.get('greenTile@carsteneu'), null, 'settings finalized despite the failure');
+    assert.deepEqual(installs.slice(4), NAMES, 'destroy attempted ALL four restores');
+    for (const name of NAMES) {
+        if (name === 'push-tile-left')
+            {continue;}
+        assert.equal(bindings.get(ACTION_IDS[name]).callback, priors[name].callback,
+            name + ' released to its prior despite the first failure');
+    }
 });
 
 test('6.6 direct route platform limit: an unknown foreign Meta handler is not restorable', () => {
