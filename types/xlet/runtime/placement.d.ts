@@ -76,6 +76,12 @@ export const Placement: {
          * @returns {AnyRecord|null}
          */
         _transitionOf(actor: CinnamonActor, prop: string): AnyRecord | null;
+        /**
+         * @param {CinnamonActor} actor
+         * @param {string} field
+         * @returns {AnyRecord}
+         */
+        _fieldOf(actor: CinnamonActor, field: string): AnyRecord;
         /** @param {CinnamonWindow} metaWindow */
         release(metaWindow: CinnamonWindow): void;
         destroy(): void;

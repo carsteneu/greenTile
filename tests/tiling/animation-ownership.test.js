@@ -433,3 +433,36 @@ test('a re-place and a completed ease leave no actor observer behind', () => {
     ext.disable();
     assert.equal(actor.listenerCount('transition-stopped'), 0, 'teardown left no observer behind');
 });
+
+test('a zero-duration foreign animation chained during removal is never overwritten', () => {
+    // The synchronous twin of the chained-replacement case: the chained
+    // animation has duration 0, so it lands its value and leaves NO transition
+    // behind (environment.js _easeActorProperty: `if (duration === 0) obj[prop]
+    // = target`, and the assignment routes through the duration-0 skip branch
+    // instead of creating one). A transition re-check therefore cannot see it —
+    // only the field value itself tells that someone else wrote during the
+    // emission, which is why the identity write compares the value across the
+    // removal instead of trusting the absence of a transition.
+    const { env, ext } = makeEnv();
+    enableOnMonitor(env, ext);
+    const actor = makeEaseActor();
+    const w1 = makeWindow(env, 1, [10, 10, 400, 300], 0, actor);
+    const w2 = makeWindow(env, 2, [500, 0, 400, 300]);
+    env.tabList.push(w1, w2);
+    env.display.focus_window = w1;
+    env.activeWorkspace = { index: () => 0 };
+    columnsHotkey(env, 'greenTile-auto6');
+    let chained = false;
+    actor.connect('transition-stopped', (_a, name, finished) => {
+        if (name === 'translation-x' && finished === false && !chained) {
+            chained = true;
+            actor.translation_x = 256; // zero duration: lands, creates no transition
+        }
+    });
+    ext.disable();
+    assert.equal(actor.get_transition('translation-x'), null, 'the chained animation left no transition');
+    assert.equal(actor.translation_x, 256, 'the zero-duration foreign value is not overwritten');
+    assert.equal(actor.translation_y, 0, 'our own cleanup still runs for the untouched properties');
+    assert.equal(actor.scale_x, 1);
+    assert.equal(actor.scale_y, 1);
+});
