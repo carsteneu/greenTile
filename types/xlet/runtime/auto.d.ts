@@ -110,10 +110,9 @@ export const Auto: {
         /** @param {number} monitorIndex */
         pendingTake(monitorIndex: number): any;
         /**
-         * @param {number} monitorIndex
          * @param {number} seq
          */
-        pendingForget(monitorIndex: number, seq: number): void;
+        pendingForget(seq: number): void;
         /** @param {number} seq */
         resizeStartTake(seq: number): any;
         /**

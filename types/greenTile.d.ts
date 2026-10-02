@@ -248,7 +248,7 @@ type AutoFacade = {
     scheduleAll(app: AppFacade, delayMs: number): void;
     scheduleMonitor(app: AppFacade, monitorIndex: number, delayMs: number): void;
     pendingTake(monitorIndex: number): Set<number>;
-    pendingForget(monitorIndex: number, seq: number): void;
+    pendingForget(seq: number): void;
     activate(app: AppFacade): void;
     deactivate(app: AppFacade): void;
     connectAll(app: AppFacade): void;
