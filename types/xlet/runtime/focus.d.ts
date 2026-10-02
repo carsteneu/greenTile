@@ -16,6 +16,8 @@
  * @property {AnyRecord | undefined} prior manager entry that was in place before we took over
  * @property {((display: AnyRecord, win: CinnamonWindow, binding?: AnyRecord) => void) | null} handler our live callback, dropped on destroy
  * @property {((display: AnyRecord, win: CinnamonWindow, binding: AnyRecord) => void) | null} install the dispatcher we handed to the shell — kept so the manager-visible slot can be classified as ours
+ * @property {AnyRecord | undefined} installedEntry the manager entry object our install produced; the ownership token (undefined when the install threw before the effect)
+ * @property {AnyRecord | undefined} restoredEntry the manager entry object our own hand-back of the prior produced
  * @property {boolean} active false once destroy made the callback inert
  */
 export const Focus: {
@@ -48,8 +50,9 @@ export const Focus: {
          * Classifies the manager-visible slot for one registration. That slot is
          * what a later App captures as its prior, so it decides whether there is
          * anything of ours left to release:
-         *  - 'ours': still holds the dispatcher we installed
-         *  - 'prior': already holds the entry we recorded before taking over
+         *  - 'ours': still holds the entry object we installed
+         *  - 'prior': holds the entry we recorded before taking over, or the one our
+         *    own hand-back produced
          *  - 'empty': nobody's
          *  - 'foreign': a newer owner registered after us — untouchable
          * The direct route has no comparable slot, so it reports 'ours' to keep its
@@ -121,6 +124,14 @@ export type FocusRegistration = {
      * the dispatcher we handed to the shell — kept so the manager-visible slot can be classified as ours
      */
     install: ((display: AnyRecord, win: CinnamonWindow, binding: AnyRecord) => void) | null;
+    /**
+     * the manager entry object our install produced; the ownership token (undefined when the install threw before the effect)
+     */
+    installedEntry: AnyRecord | undefined;
+    /**
+     * the manager entry object our own hand-back of the prior produced
+     */
+    restoredEntry: AnyRecord | undefined;
     /**
      * false once destroy made the callback inert
      */

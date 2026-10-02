@@ -49,7 +49,8 @@ const makeMeta = () => {
 // Faithful KeybindingManager. It installs the Meta dispatcher through the
 // public Meta setter exactly like upstream does — so a Meta-setter that throws
 // is observable here, which is how the "entry already gone, dispatcher still
-// swallowing the key" defect is reachable at all.
+// swallowing the key" defect is reachable at all. The dispatcher applies Main's
+// real action-mode filter: `(entry.allowedModes & actionMode) !== 0`.
 //
 // fail.beforeName / fail.afterName hold a per-name remaining-throw count
 // (before and after the dispatcher+map effect), so an injected failure survives
@@ -58,6 +59,9 @@ const makeUpstreamManager = (meta) => {
     const bindings = new Map();
     const installs = [];
     const fail = { beforeName: new Map(), afterName: new Map() };
+    // the shell's current ActionMode (Main.actionMode); NORMAL by default,
+    // Cinnamon.ActionMode.NORMAL === 1, OVERVIEW === 2
+    const state = { actionMode: 1 };
     const countdown = (map, name) => {
         const left = map.get(name) || 0;
         if (left <= 0)
@@ -69,14 +73,21 @@ const makeUpstreamManager = (meta) => {
         bindings,
         installs,
         fail,
+        state,
         setBuiltinHandler(name, actionId, callback, allowedModes = 1) {
             installs.push({ name, actionId, callback, allowedModes });
             if (countdown(fail.beforeName, name))
                 {throw new Error('fake install failure before effect (' + name + ')');}
             meta.keybindings_set_custom_handler(name, (display, win, binding) => {
                 const entry = bindings.get(actionId);
-                if (entry && entry.callback)
-                    {entry.callback(display, win, binding);}
+                if (!entry || !entry.callback)
+                    {return;}
+                // Main._shouldFilterKeybinding: allowedModes is a bitmask over
+                // Cinnamon.ActionMode; the entry is filtered out unless the
+                // current mode is one it allows
+                if ((entry.allowedModes & state.actionMode) === 0)
+                    {return;}
+                entry.callback(display, win, binding);
             });
             bindings.set(actionId, { name, bindings: [], callback, allowedModes });
             if (countdown(fail.afterName, name))
@@ -120,7 +131,7 @@ const harness = ({ generation = 'upstream' } = {}) => {
         keybindingManager: manager || undefined,
         hotkey: (_app, dir) => () => calls.push(dir),
     });
-    return { meta, manager, metaControl, focus, calls, app };
+    return { meta, manager, metaControl, focus, calls, app, state: manager && manager.state ? manager.state : { actionMode: 1 } };
 };
 
 /** A foreign prior with no recording, for tests that only need identity. */
@@ -358,6 +369,49 @@ test('DEFECT 3: a same-instance retry after a newer connect does not override it
     assert.doesNotThrow(() => focus.destroy(), 'the retry sees the newer owner and stands down');
     deliver(meta, 'push-tile-left', { id: 'other' });
     assert.deepEqual(foreign, ['foreign'], 'the newer owner was not clobbered by the retry');
+});
+
+test('DEFECT 4: destroy never overwrites a newer owner that reused the callback with different modes', () => {
+    const { meta, manager, state, focus, app } = harness({ generation: 'upstream' });
+    /** @type {any[]} */
+    const delivered = [];
+    const prior = { name: 'push-tile-left', bindings: [], allowedModes: 7, callback: (d, w) => delivered.push(w) };
+    manager.bindings.set(71, prior);
+    focus.connect(app);
+    // a newer owner registers the SAME callback, but only for OVERVIEW (2)
+    manager.setBuiltinHandler('push-tile-left', 71, prior.callback, 2);
+    const newer = manager.bindings.get(71);
+    assert.notEqual(newer, prior, 'the manager handed out a fresh entry object');
+    assert.doesNotThrow(() => focus.destroy(), 'the slot belongs to the newer owner: nothing of ours to restore');
+    assert.equal(manager.bindings.get(71), newer, 'the newer owner entry object was not replaced');
+    assert.equal(manager.bindings.get(71).allowedModes, 2, 'the newer owner allowedModes were not overwritten');
+    state.actionMode = 1; // NORMAL
+    deliver(meta, 'push-tile-left', { id: 'normal' });
+    assert.deepEqual(delivered, [], 'an OVERVIEW-only binding does not fire in NORMAL mode');
+    state.actionMode = 2; // OVERVIEW
+    deliver(meta, 'push-tile-left', { id: 'overview' });
+    assert.deepEqual(delivered, [{ id: 'overview' }], 'it still fires in the mode it allows');
+});
+
+test('DEFECT 4: an old retry does not overwrite a newer owner that reused the callback with different modes', () => {
+    const { meta, manager, state, focus, app } = harness({ generation: 'upstream' });
+    /** @type {any[]} */
+    const delivered = [];
+    const prior = { name: 'push-tile-left', bindings: [], allowedModes: 7, callback: (d, w) => delivered.push(w) };
+    manager.bindings.set(71, prior);
+    focus.connect(app);
+    manager.fail.beforeName.set('push-tile-left', 2);          // restore and its recovery both fail
+    assert.throws(() => focus.destroy(), /push-tile-left/);
+    assert.equal(manager.bindings.get(71), prior, 'the KNOWN prior was written back for the retry');
+    // a newer owner takes the binding with the same callback, different modes
+    manager.setBuiltinHandler('push-tile-left', 71, prior.callback, 2);
+    const newer = manager.bindings.get(71);
+    assert.doesNotThrow(() => focus.destroy(), 'the retry sees the newer owner and stands down');
+    assert.equal(manager.bindings.get(71), newer, 'the retry did not replace the newer owner entry');
+    assert.equal(manager.bindings.get(71).allowedModes, 2, 'the retry did not overwrite its allowedModes');
+    state.actionMode = 1; // NORMAL
+    deliver(meta, 'push-tile-left', { id: 'normal' });
+    assert.deepEqual(delivered, [], 'the overview-only newer owner does not fire in NORMAL mode');
 });
 
 test('manager route: a failure inside the recovery path does not strand the remaining names', () => {
