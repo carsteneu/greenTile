@@ -299,3 +299,39 @@ test('the closing animation keeps the final frame geometry and the animation bud
         targets: { translation_x: 0, translation_y: 0, scale_x: 1, scale_y: 1 },
     }]);
 });
+
+test('a foreign transition that superseded ours and then settled is snapped back to identity', () => {
+    // Documented, inherent limitation (lib/runtime/placement.js _release): a
+    // third-party animation can supersede one of our transitions and then
+    // COMPLETE at a non-identity value. get_transition() is null by then, so
+    // teardown cannot tell "our ease was cancelled mid-flight" (must snap) from
+    // "a foreign ease settled here" — Clutter exposes no owner on a finished
+    // transition. The snap is the safe direction: it restores visual == buffer
+    // (a transient foreign scale of 0.5 is repaired, not preserved), which is
+    // also exactly what the shell's own size-change effect leaves behind
+    // (windowManager.js resets these four props to 1/0). greenTile's hard
+    // guarantee is narrower and pinned by the 'never removed or reset' case
+    // above: a foreign transition that is STILL RUNNING is never touched.
+    const { env, ext } = makeEnv();
+    enableOnMonitor(env, ext);
+    const actor = makeEaseActor();
+    const w1 = makeWindow(env, 1, [10, 10, 400, 300], 0, actor);
+    const w2 = makeWindow(env, 2, [500, 0, 400, 300]);
+    env.tabList.push(w1, w2);
+    env.display.focus_window = w1;
+    env.activeWorkspace = { index: () => 0 };
+    columnsHotkey(env, 'greenTile-auto6');
+    // a foreign animation replaces our scale-x and settles at a non-identity value
+    actor.foreignTransition('scale-x', 0.5, null);
+    actor.transitions.delete('scale-x');
+    assert.equal(actor.scale_x, 0.5, 'the foreign value is on the actor');
+    const removedBeforeTeardown = actor.removedTransitions.length;
+    ext.disable();
+    assert.equal(actor.scale_x, 1, 'the settled foreign value is repaired to visual == buffer');
+    assert.equal(actor.translation_x, 0);
+    assert.equal(actor.translation_y, 0);
+    assert.equal(actor.scale_y, 1);
+    assert.deepEqual(actor.removedTransitions.slice(removedBeforeTeardown).sort(),
+        ['scale-y', 'translation-x', 'translation-y'],
+        'our still-running transitions are the ones released');
+});
