@@ -91,6 +91,16 @@ app.config.destory();
 `,
     },
     {
+        name: 'legit-config-api',
+        expect: 'pass',
+        code: `
+const app = null as unknown as AppFacade;
+app.config.destroy();
+const v: string = app.config.settings.getValue('layouts');
+console.log(v);
+`,
+    },
+    {
         name: 'legit-xlet-windowmoveresize',
         expect: 'pass',
         code: `

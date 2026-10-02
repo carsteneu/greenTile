@@ -130,6 +130,23 @@ if (check) {
             if (fs.readFileSync(fresh, 'utf8') !== fs.readFileSync(committed, 'utf8'))
                 {drift.push(`stale mirror for lib/${rel}`);}
         }
+        // orphaned mirrors (lib file gone, mirror left behind) are drift too
+        const expected = new Set(libFiles.map((rel) => rel.replace(/^lib\//, '').replace(/\.js$/, '.d.ts')));
+        const committedFiles = (function walk(dir, prefix) {
+            const out = [];
+            for (const entry of fs.readdirSync(dir, { withFileTypes: true }).sort((a, b) => a.name.localeCompare(b.name))) {
+                const rel = prefix ? `${prefix}/${entry.name}` : entry.name;
+                if (entry.isDirectory())
+                    {out.push(...walk(path.join(dir, entry.name), rel));}
+                else if (entry.name.endsWith('.d.ts'))
+                    {out.push(rel);}
+            }
+            return out;
+        })(OUT, '');
+        for (const rel of committedFiles) {
+            if (!expected.has(rel))
+                {drift.push(`orphaned mirror ${rel} (no lib source)`);}
+        }
         if (drift.length) {
             console.error('generate-xlet-types --check: ' + drift.join('; '));
             process.exit(1);
