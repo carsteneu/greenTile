@@ -92,20 +92,76 @@ test('6.8-style manager: foreign entries under the push-tile action ids are rest
     const { env, ext } = loadExtension();
     const foreign = { name: 'push-tile-left', callback: () => {}, allowedModes: 1 };
     env.keybindingManager.bindings = new Map([[71, foreign], [72, foreign]]);
-    env.keybindingManager.setBuiltinHandler = (name, actionId, cb) => {
-        env.keybindingManager.bindings.set(actionId, { name, callback: cb });
+    env.keybindingManager.setBuiltinHandler = (name, actionId, cb, allowedModes) => {
+        env.keybindingManager.bindings.set(actionId, { name, callback: cb, allowedModes });
     };
     ext.enable();
     env.flushDisplayConfigNoReply();
     assert.equal(env.keybindingManager.bindings.get(71).callback !== foreign.callback, true,
         'connect replaced the foreign entry while active');
     ext.disable();
-    assert.equal(env.keybindingManager.bindings.get(71), foreign,
-        'destroy restores the exact foreign entry object');
-    assert.equal(env.keybindingManager.bindings.get(72), foreign,
+    assert.equal(env.keybindingManager.bindings.get(71).callback, foreign.callback,
+        'destroy restores the foreign callback (re-registered through setBuiltinHandler)');
+    assert.equal(env.keybindingManager.bindings.get(71).allowedModes, 1,
+        'the prior action modes survive the round trip');
+    assert.equal(env.keybindingManager.bindings.get(72).callback, foreign.callback,
         'restore covers every prepopulated action id');
     assert.equal(env.keybindingManager.bindings.has(73), false,
         'action ids without a prior are removed, not left behind');
+});
+
+test('r3: the restored prior callback is DELIVERABLE through the normal path after destroy', () => {
+    const { env, ext } = loadExtension();
+    // faithful manager: setBuiltinHandler installs the Meta dispatcher that
+    // routes keypresses through the bindings map (upstream
+    // _onBuiltinKeyPressed), so delivery reachability is testable end to end
+    const delivered = [];
+    const prior = { name: 'push-tile-left', callback: (display, win) => delivered.push(['prior', win]), allowedModes: 7 };
+    const bindings = new Map([[71, prior]]);
+    env.keybindingManager.bindings = bindings;
+    const installs = [];
+    env.keybindingManager.setBuiltinHandler = (name, actionId, callback, allowedModes) => {
+        installs.push([name, actionId, allowedModes]);
+        bindings.set(actionId, { name, callback, allowedModes });
+        env.customBindings.set(name, (display, win, binding) => {
+            const entry = bindings.get(actionId);
+            if (entry)
+                {entry.callback(display, win, binding);}
+        });
+    };
+    ext.enable();
+    env.flushDisplayConfigNoReply();
+    // while WE are registered, our handler answers; the prior stays silent.
+    // A real fake window: our active handler runs the push-tile logic on it.
+    env.gi.Meta.MotionDirection = { LEFT: 1, RIGHT: 2, UP: 3, DOWN: 4 };
+    env.activeWorkspace = { index: () => 0 };
+    env.display.push_tile = () => {}; // native fallback for the untiled monitor
+    const ourWin = makeWindow(61);
+    env.customBindings.get('push-tile-left')(env.display, ourWin);
+    assert.equal(delivered.length, 0, 'while we are registered, OUR handler answers, not the prior');
+    ext.disable();
+    assert.equal(bindings.get(71), prior, 'map entry restored by identity');
+    const restoredWin = { id: 'restored' };
+    env.customBindings.get('push-tile-left')(env.display, restoredWin);
+    assert.deepEqual(delivered, [['prior', restoredWin]],
+        'the prior callback is delivered through the reinstalled Meta dispatcher');
+    assert.equal(installs.at(-1)[0], 'push-tile-left', 'restore re-entered setBuiltinHandler');
+    assert.equal(installs.at(-1)[2], 7, 'restore passes the prior allowedModes (action-mode filter intact)');
+});
+
+test('r3: destroy before connect never clears a foreign Meta handler', () => {
+    const { env, ext } = loadExtension();
+    const foreignHandler = () => {};
+    env.customBindings.set('push-tile-left', foreignHandler);
+    env.keybindingManager.bindings = new Map();
+    env.keybindingManager.setBuiltinHandler = () => {};
+    env.imports.ui.settings.ExtensionSettings = class {
+        constructor() { throw new Error('injected settings failure'); }
+    };
+    assert.throws(() => ext.enable(), /injected settings failure/);
+    assert.doesNotThrow(() => ext.disable());
+    assert.equal(env.customBindings.get('push-tile-left'), foreignHandler,
+        'a Meta handler we never overrode survives our destroy');
 });
 
 test('focus destroy before any connect leaves the manager untouched', () => {

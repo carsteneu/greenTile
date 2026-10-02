@@ -13,10 +13,14 @@ export const Focus: {
         _meta: AnyRecord;
         _manager: any;
         _hotkey: (app: AppFacade, dir: "left" | "right" | "up" | "down") => (display: AnyRecord, win: CinnamonWindow) => void;
-        /** @type {[number][]} */
-        _managerActionIds: [number][];
-        /** @type {[number, any][]} */
-        _managerPriors: [number, any][];
+        /** @type {{ name: string, actionId: number, prior: any }[]} */
+        _managerRegistrations: {
+            name: string;
+            actionId: number;
+            prior: any;
+        }[];
+        /** @type {string[]} names WE overrode through the direct Meta path */
+        _metaNames: string[];
         /**
          * Registers the push-tile handlers, one per binding name, through the
          * generation's builtin surface.
@@ -24,10 +28,19 @@ export const Focus: {
          */
         connect(app: AppFacade): void;
         /**
-         * Restores muffin's own handlers: Meta handler back to null (both
-         * generations); a manager dispatcher entry registered by us is removed —
-         * or replaced by the foreign entry that occupied the action id before
-         * our connect, if there was one.
+         * Restores what WE acquired, completely:
+         *  - manager route: a prior entry is re-entered through setBuiltinHandler
+         *    itself — that reinstalls the Meta dispatcher AND the map entry with
+         *    the prior callback and its action modes, so the prior binding stays
+         *    reachable through the normal delivery path. Without a prior, the
+         *    dispatcher we caused is cleared (Meta null) and our map entry
+         *    removed.
+         *  - direct Meta route (6.6 / enum-less muffin): only the names WE
+         *    overrode are reset. Meta.keybindings_set_custom_handler has no
+         *    getter counterpart, so a foreign direct handler that predated us
+         *    cannot be discovered — the reachable restore target is muffin's
+         *    builtin (documented platform limitation, not papered over).
+         * Names never acquired by this instance are never touched.
          */
         destroy(): void;
     };
