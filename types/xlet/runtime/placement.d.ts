@@ -11,12 +11,15 @@
  * @property {number} identity the value that makes visual == buffer
  * @property {boolean} stopped whether that transition reported its stop
  * @property {number|undefined} frozen the field value at the stop
+ * @property {boolean} takenOver a different transition completed on this
+ * property after ours stopped — the value is no longer greenTile's to touch
  */
 /**
  * @typedef {Object} PlacementRecord
  * @property {object} token identifies the acquisition this record belongs to
  * @property {CinnamonActor} actor the actor read at acquisition time
  * @property {Map<string, OwnTransition>} transitions property -> own transition
+ * @property {unknown} actorHandler the actor's ::transition-stopped subscription
  *
  * Keyed by the MetaWindow, relying on GJS handing out one stable wrapper per
  * GObject instance: the window an 'unmanaged' signal delivers is the same
@@ -53,6 +56,12 @@ export const Placement: {
         }>): void;
         /**
          * @param {CinnamonWindow} metaWindow
+         * @param {string} name
+         * @param {boolean} finished
+         */
+        _onTransitionStopped(metaWindow: CinnamonWindow, name: string, finished: boolean): void;
+        /**
+         * @param {CinnamonWindow} metaWindow
          * @param {object} token
          * @param {string} prop
          * @param {OwnTransition} entry
@@ -61,9 +70,17 @@ export const Placement: {
         _onStopped(metaWindow: CinnamonWindow, token: object, prop: string, entry: OwnTransition, finished: boolean): void;
         /** @param {PlacementRecord} record */
         _sweep(record: PlacementRecord): void;
+        /**
+         * @param {CinnamonActor} actor
+         * @param {string} prop
+         * @returns {AnyRecord|null}
+         */
+        _transitionOf(actor: CinnamonActor, prop: string): AnyRecord | null;
         /** @param {CinnamonWindow} metaWindow */
         release(metaWindow: CinnamonWindow): void;
         destroy(): void;
+        /** @param {PlacementRecord} record */
+        _detach(record: PlacementRecord): void;
         /** @param {string[]} failures */
         _report(failures: string[]): void;
         /**
@@ -106,6 +123,11 @@ export type OwnTransition = {
      * the field value at the stop
      */
     frozen: number | undefined;
+    /**
+     * a different transition completed on this
+     * property after ours stopped — the value is no longer greenTile's to touch
+     */
+    takenOver: boolean;
 };
 export type PlacementRecord = {
     /**
@@ -118,6 +140,10 @@ export type PlacementRecord = {
     actor: CinnamonActor;
     /**
      * property -> own transition
+     */
+    transitions: Map<string, OwnTransition>;
+    /**
+     * the actor's ::transition-stopped subscription
      *
      * Keyed by the MetaWindow, relying on GJS handing out one stable wrapper per
      * GObject instance: the window an 'unmanaged' signal delivers is the same
@@ -125,5 +151,5 @@ export type PlacementRecord = {
      * transition — the record would simply be released at App teardown instead —
      * but it would delay the identity snap on close.
      */
-    transitions: Map<string, OwnTransition>;
+    actorHandler: unknown;
 };

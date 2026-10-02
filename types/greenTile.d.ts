@@ -22,7 +22,8 @@ type CinnamonWorkspace = {
  * as greenTile touches it: translation/scale for the animated placement plus
  * the platform transition API of Cinnamon's environment.js (_easeActor/
  * _easeActorProperty) — ease(), get_transition() as the identity handle of a
- * single running transition, remove_transition() to stop exactly that one.
+ * single running transition, remove_transition() to stop exactly that one, and
+ * the actor's own detailed ::transition-stopped(name, is_finished) signal.
  * The Clutter property accessors are plain fields here.
  */
 type CinnamonActor = {
@@ -38,6 +39,13 @@ type CinnamonActor = {
     get_transition(name: string): ClutterTransition | null;
     /** Clutter.Actor.remove_transition — stops exactly the named transition. */
     remove_transition(name: string): void;
+    /** Clutter.Actor::transition-stopped — (actor, name, is_finished), emitted
+     * after a transition left the actor's table: from on_transition_stopped on a
+     * natural completion (TRUE) and from remove_transition on a removal (FALSE,
+     * only if it was playing). lib/runtime/placement.js reads it to tell a
+     * takeover from its own cancellation. */
+    connect(signal: string, cb: (actor: CinnamonActor, name: string, finished: boolean) => void): any;
+    disconnect(id: any): void;
 };
 
 /**

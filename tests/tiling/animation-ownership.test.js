@@ -350,11 +350,12 @@ test('a separately cancelled own property is repaired even after the first trans
     assert.equal(actor.translation_x, 0, 'the completed ones stay at identity');
 });
 
-test('a foreign animation that settles on one of our properties is never overwritten', () => {
-    // A shell animation supersedes one of our transitions and then finishes on
-    // its OWN target. By then get_transition() is null again — a null transition
-    // is NOT permission to snap: the value is the foreign animation's, and
-    // teardown must leave it exactly as the shell left it.
+test('a foreign animation that settles on the value we froze is never overwritten', () => {
+    // The shell's animation supersedes one of ours and finishes on EXACTLY the
+    // value our own ease was cancelled at. Numeric equality is no proof of
+    // ownership: the actor reported a completed transition on that property
+    // after ours stopped, so the value on the actor belongs to that animation
+    // and teardown must leave it exactly as the shell left it.
     const { env, ext } = makeEnv();
     enableOnMonitor(env, ext);
     const actor = makeEaseActor();
@@ -364,11 +365,43 @@ test('a foreign animation that settles on one of our properties is never overwri
     env.display.focus_window = w1;
     env.activeWorkspace = { index: () => 0 };
     columnsHotkey(env, 'greenTile-auto6');
-    actor.foreignTransition('scale-x', 0.5, null); // the shell takes scale-x over
-    actor.transitions.delete('scale-x');           // ...and its ease completes
-    assert.equal(actor.scale_x, 0.5, 'precondition: the foreign value is on the actor');
+    const frozen = actor.scale_x;
+    assert.notEqual(frozen, 1, 'precondition: our own ease parked scale-x');
+    const foreign = actor.foreignTransition('scale-x', frozen, null); // the shell takes scale-x over
+    actor.finishTransition(foreign);                                  // ...and its ease completes
+    assert.equal(actor.get_transition('scale-x'), null, 'its transition is gone again');
+    assert.equal(actor.scale_x, frozen, 'precondition: the foreign value is on the actor');
     ext.disable();
-    assert.equal(actor.scale_x, 0.5, 'the settled foreign value is never overwritten');
+    assert.equal(actor.scale_x, frozen, 'a settled foreign value is never overwritten');
     assert.equal(actor.translation_x, 0, 'our own still-running properties are still snapped');
     assert.equal(actor.scale_y, 1);
+});
+
+test('a replacement animation chained from our own transition-stopped signal is never overwritten', () => {
+    // Clutter emits ::transition-stopped AFTER the transition left the actor's
+    // table, deliberately so a handler may chain a replacement
+    // (clutter-actor.c 19387-19391 and 19750-19758). A third party does exactly
+    // that while teardown removes our transition: the identity write must
+    // re-check the property after the emission — writing it would cancel the
+    // chained animation (the assignment routes through the duration-0 skip
+    // branch, which removes the transition on that property).
+    const { env, ext } = makeEnv();
+    enableOnMonitor(env, ext);
+    const actor = makeEaseActor();
+    const w1 = makeWindow(env, 1, [10, 10, 400, 300], 0, actor);
+    const w2 = makeWindow(env, 2, [500, 0, 400, 300]);
+    env.tabList.push(w1, w2);
+    env.display.focus_window = w1;
+    env.activeWorkspace = { index: () => 0 };
+    columnsHotkey(env, 'greenTile-auto6');
+    let replacement = null;
+    actor.connect('transition-stopped', (_a, name, finished) => {
+        if (name === 'translation-x' && finished === false && replacement === null) {
+            replacement = actor.foreignTransition('translation-x', 256, null);
+        }
+    });
+    ext.disable();
+    assert.equal(actor.translation_x, 256, 'the chained replacement value is not overwritten');
+    assert.equal(actor.get_transition('translation-x'), replacement,
+        'the replacement transition is still the current one');
 });

@@ -225,7 +225,13 @@ test('r3: teardown releases exactly the own transitions and snaps visual to buff
     env.activeWorkspace = { index: () => 0 };
     env.keybindingManager.hotkeys.get('greenTile-auto6').cb();
     assert.equal(ext.currentSession().app.placement.has(w1), true, 'own ease in flight');
-    actor.translation_x = -40; // mid-flight intermediate value
+    // the ease has not advanced yet, so the actor still carries the park.
+    // (A direct `actor.translation_x = v` write is NOT a way to model a
+    // mid-flight value: it routes through clutter_actor_set_translation_factor
+    // into _clutter_actor_create_transition, whose duration-0 skip branch
+    // REMOVES the transition on that property — clutter-actor.c 5420-5423 and
+    // 4819, skip branch 19433-19436.)
+    assert.notEqual(actor.translation_x, 0, 'precondition: the visual is parked away from the buffer');
     ext.disable();
     assert.equal(ext.currentSession(), null, 'the session went down with the App');
     assert.deepEqual(actor.removedTransitions.filter((n) => n !== 'opacity').sort(),
