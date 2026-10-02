@@ -1,31 +1,53 @@
 'use strict';
 // Option evidence for the reload question: can library code be refreshed in the
-// SAME process without a Cinnamon restart? The installed 6.6 engine (cjs 115.1)
-// cannot evict an already-resolved native module subtree, so this probe measures
-// what actually can. It runs the REAL legacy loader
-// (/usr/share/cinnamon/js/misc/fileUtils.js: requireModule/unloadModule, the exact
-// functions Cinnamon's Extension/forgetExtension call) against a fixture xlet and
-// performs two consecutive Cinnamon-style reloads per variant:
+// SAME process without a Cinnamon restart?
 //
-//   fixed  — the shipped shape today: entry and lib modules address the library
+// Platform truth this rests on (measured on the installed engine, cjs 115.1):
+// every property of the native importer tree is permanent + non-configurable at
+// every level, `delete` fails, and no clearCache API exists — so an already
+// resolved library subtree can never be evicted in-process. Cinnamon's reload
+// (Extension.reloadExtension, reached via DBus ReloadXlet / looking glass /
+// disable+enable) re-evaluates only the ENTRY through the legacy loader.
+// A directory name that was never resolved before IS read fresh, which is the
+// only in-process freshness the engine offers.
+//
+// This probe runs the REAL legacy loader (misc.fileUtils requireModule /
+// unloadModule — the functions Cinnamon's Extension and forgetExtension call)
+// against a fixture xlet and performs Cinnamon-style reloads, two per variant:
+//
+//   fixed  — the shape shipped today: entry and lib modules address the library
 //            through imports.extensions[UUID].lib...
 //   gen    — the entry finds a build-named subtree (imports.extensions[UUID][build]),
 //            lib modules keep the canonical chain
 //   rebind — same build-named subtree, but the entry rebinds the uuid importer's
 //            lib child before importing, so the unchanged canonical chains land
-//            in the fresh subtree
-//   chains — no importer mutation: every lib module resolves the build root itself
+//            in the fresh subtree (one entry line; mutates the importer object)
+//   chains — no importer mutation: each lib module resolves the build root itself
 //            from the uuid importer's own searchPath[0]
+//   growth — repeated installs with a new build name: what the process retains
 //
-// Measured outcome (asserted below): fixed stays stale forever (LIB_EVALS=1 while
-// the entry re-evaluates 3x); gen alone is not enough (a cross-importing lib
-// module still comes from the cached canonical tree); rebind and chains both
-// deliver fresh library code on every reload, in-process, on the installed engine.
+// Measured: fixed stays stale forever (LIB_EVALS=1 while the entry re-evaluates
+// 3x); gen alone is NOT enough (a cross-importing lib module still resolves the
+// cached canonical tree); rebind and chains deliver fresh library code on every
+// reload in-process; and a layout with a new name per install retains one fully
+// evaluated subtree per name for the life of the process (GROWTH_CACHED), since
+// nothing can evict it.
 //
-// This is platform-behaviour evidence for a decision that belongs to the user
-// (see the reload BLOCKED report) — it does not implement any of the options.
-// Skipped when `cjs` is not installed; the harness simulation stays the always-on
-// contract.
+// COST of every build-named option, none of which is implemented here:
+//  - the installer must place each build under a fresh name and prune old ones;
+//    the name must not look like a Cinnamon version directory
+//    (/usr/share/cinnamon/js/ui/extension.js:707 findExtensionSubdirectory)
+//  - rebind adds one entry line and mutates the uuid importer's lib child;
+//    tests/architecture/native-resolver.test.js pins XLET to declaration/chain
+//    use, so that invariant has to be extended for it deliberately
+//  - chains needs the build-root resolution in the 20 of 46 lib files that carry
+//    the chain (94 XLET.lib references); leaf modules are reached through the
+//    freshened namespace and stay untouched
+//
+// This is evidence for a product decision that belongs to the user; the decision
+// text lives in the yesmem scratchpad (project greenTile, section
+// yesloop-r3-reload-r2). Skipped when `cjs` is not installed; the harness
+// simulation stays the always-on contract.
 const test = require('node:test');
 const assert = require('node:assert/strict');
 const { spawnSync } = require('node:child_process');
@@ -38,16 +60,23 @@ const HOST_CJS = spawnSync('sh', ['-c', 'command -v cjs']).status === 0;
 
 const PROBE = `// PoC on the INSTALLED 6.6 engine (cjs 115.1) + the REAL Cinnamon legacy loader
 // (/usr/share/cinnamon/js/misc/fileUtils.js): does a same-process reload refresh
-// library code? Two consecutive reloads per variant.
+// library code?
 //
 // Fixture fidelity: lib modules cross-import each other through the CANONICAL
-// chain (const XLET = imports.extensions[UUID]), exactly like the 46 shipped files.
+// chain (const XLET = imports.extensions[UUID]) — the shape 20 of the 46 shipped
+// lib files use.
 //
 //   fixed  — shipped shape, canonical chain everywhere
 //   gen    — fresh build-named subtree found by the entry; lib files keep the canonical chain
 //   rebind — build-named subtree + entry rebinds uuidImporter.lib before importing lib
-//   chains — no importer mutation: every lib module resolves the build root itself
-//            from the uuid importer's searchPath[0]
+//   chains — build-named subtree + every lib module resolves the build root itself
+//   growth — repeated reloads with a new build name: what accumulates
+//
+// Two consecutive reloads per variant. The reload sequence mirrors Cinnamon's
+// Extension.reloadExtension: fileUtils.unloadModule (forgetExtension) + the
+// \`delete imports[folder][uuid]\` that fails on 6.6 + requireModule of the entry.
+// (In a real extension module the failing delete is strict and throws; Cinnamon
+// swallows it in forgetExtension's try/catch — same net effect.)
 //
 // Run: cjs reload-poc.js <FX> <variant>
 const Gio = imports.gi.Gio;
@@ -84,8 +113,8 @@ const CONSUMER = [
     'var value = \\'consumer:\\' + XLET.lib.model.state.value;',
 ].join('\\n');
 
-// a lib module that resolves the build root itself (no importer mutation):
-// the uuid importer exposes __modulePath__, so every file can find the marker
+// a lib module that resolves the build root itself (no importer mutation): the
+// uuid importer exposes its own directory in searchPath[0]
 const CONSUMER_CHAINS = [
     \`const U = '\${U}';\`,
     'const Gio = imports.gi.Gio;',
@@ -141,7 +170,7 @@ if (VARIANT === 'fixed') {
     write(extDir + '/build-a/lib/model/state.js', STATE('gen-a'));
     write(extDir + '/build-a/lib/model/consumer.js', VARIANT === 'chains' ? CONSUMER_CHAINS : CONSUMER);
     write(extDir + '/build-id', 'build-a');
-    write(extDir + '/extension.js', VARIANT === 'rebind' ? ENTRY_REBIND : ENTRY_GEN);
+    write(extDir + '/extension.js', VARIANT === 'rebind' || VARIANT === 'growth' ? ENTRY_REBIND : ENTRY_GEN);
 }
 
 const load = () => {
@@ -160,41 +189,62 @@ const reload = (prev) => {
 const first = load();
 P('L1', first.mod.value + ':' + first.mod.root);
 
-// --- install/update #1
-if (VARIANT === 'fixed') {
-    write(extDir + '/lib/model/state.js', STATE('canonical-v2'));
-    write(extDir + '/lib/model/consumer.js', CONSUMER);
+if (VARIANT === 'growth') {
+    // one new build name per install: what stays behind in the process?
+    const names = () => Object.getOwnPropertyNames(imports.extensions[U]).filter((n) => n.startsWith('build-'));
+    const vals = [];
+    let prev = first;
+    for (let i = 0; i < 5; i++) {
+        const name = 'build-g' + i;
+        write(extDir + '/' + name + '/lib/model/state.js', STATE('growth-' + i));
+        write(extDir + '/' + name + '/lib/model/consumer.js', CONSUMER);
+        write(extDir + '/build-id', name);
+        prev = reload(prev).next;
+        vals.push(prev.mod.value);
+    }
+    P('GROWTH_VALS', vals.join(','));
+    P('GROWTH_CACHED', names().length);
+    P('GROWTH_FIRST_STILL', imports.extensions[U]['build-g0'].lib.model.state.value);
+    P('GROWTH_RETAINED', names().join(','));
+    P('FRESH_EACH', vals[4] !== vals[0]);
+    P('DONE', '');
 } else {
-    write(extDir + '/build-b/lib/model/state.js', STATE('gen-b'));
-    write(extDir + '/build-b/lib/model/consumer.js', VARIANT === 'chains' ? CONSUMER_CHAINS : CONSUMER);
-    write(extDir + '/build-id', 'build-b');
-}
-const r1 = reload(first);
-P('DELETE_UUID', r1.del);
-P('L2', r1.next.mod.value + ':' + r1.next.mod.root);
+    // --- install/update #1
+    if (VARIANT === 'fixed') {
+        write(extDir + '/lib/model/state.js', STATE('canonical-v2'));
+        write(extDir + '/lib/model/consumer.js', CONSUMER);
+    } else {
+        write(extDir + '/build-b/lib/model/state.js', STATE('gen-b'));
+        write(extDir + '/build-b/lib/model/consumer.js', VARIANT === 'chains' ? CONSUMER_CHAINS : CONSUMER);
+        write(extDir + '/build-id', 'build-b');
+    }
+    const r1 = reload(first);
+    P('DELETE_UUID', r1.del);
+    P('L2', r1.next.mod.value + ':' + r1.next.mod.root);
 
-// --- install/update #2 (proves repeated freshness, not fresh-once)
-if (VARIANT === 'fixed') {
-    write(extDir + '/lib/model/state.js', STATE('canonical-v3'));
-    write(extDir + '/lib/model/consumer.js', CONSUMER);
-} else {
-    write(extDir + '/build-c/lib/model/state.js', STATE('gen-c'));
-    write(extDir + '/build-c/lib/model/consumer.js', VARIANT === 'chains' ? CONSUMER_CHAINS : CONSUMER);
-    write(extDir + '/build-id', 'build-c');
-}
-const r2 = reload(r1.next);
-P('L3', r2.next.mod.value + ':' + r2.next.mod.root);
+    // --- install/update #2 (proves repeated freshness, not fresh-once)
+    if (VARIANT === 'fixed') {
+        write(extDir + '/lib/model/state.js', STATE('canonical-v3'));
+        write(extDir + '/lib/model/consumer.js', CONSUMER);
+    } else {
+        write(extDir + '/build-c/lib/model/state.js', STATE('gen-c'));
+        write(extDir + '/build-c/lib/model/consumer.js', VARIANT === 'chains' ? CONSUMER_CHAINS : CONSUMER);
+        write(extDir + '/build-id', 'build-c');
+    }
+    const r2 = reload(r1.next);
+    P('L3', r2.next.mod.value + ':' + r2.next.mod.root);
 
-P('ENTRY_EVALS', globalThis.__entryEvals); // entry re-evaluated from disk each reload
-P('LIB_EVALS', globalThis.__libEvals);     // lib modules evaluated
-if (VARIANT !== 'fixed') {
-    const oldGen = imports.extensions[U]['build-a'];
-    P('OLD_GEN_STILL', oldGen ? oldGen.lib.model.state.value : 'absent');
+    P('ENTRY_EVALS', globalThis.__entryEvals); // entry re-evaluated from disk each reload
+    P('LIB_EVALS', globalThis.__libEvals);     // lib modules evaluated
+    if (VARIANT !== 'fixed') {
+        const oldGen = imports.extensions[U]['build-a'];
+        P('OLD_GEN_STILL', oldGen ? oldGen.lib.model.state.value : 'absent');
+    }
+    if (VARIANT === 'chains') P('ROOT_PATH', imports.extensions[U].searchPath[0]);
+    P('FRESH_1', r1.next.mod.value !== first.mod.value);
+    P('FRESH_2', r2.next.mod.value !== r1.next.mod.value);
+    P('DONE', '');
 }
-if (VARIANT === 'chains') P('ROOT_PATH', imports.extensions[U].searchPath[0]);
-P('FRESH_1', r1.next.mod.value !== first.mod.value);
-P('FRESH_2', r2.next.mod.value !== r1.next.mod.value);
-P('DONE', '');
 `;
 
 const parse = (out) => {
@@ -243,7 +293,6 @@ test('installed cjs 6.6: reload refreshes the entry every time but only a build-
             assert.equal(rebind.LIB_EVALS, '3', 'the library is re-evaluated on every reload');
             assert.equal(rebind.FRESH_1, 'true');
             assert.equal(rebind.FRESH_2, 'true');
-            assert.equal(rebind.OLD_GEN_STILL, 'gen-a', 'the superseded generation keeps its own namespace');
 
             const chains = runVariant('chains');
             assert.equal(chains.L1, 'consumer:gen-a:build-a', 'per-module build-root resolution finds the fresh subtree');
@@ -252,7 +301,15 @@ test('installed cjs 6.6: reload refreshes the entry every time but only a build-
             assert.equal(chains.LIB_EVALS, '3');
             assert.equal(chains.FRESH_1, 'true');
             assert.equal(chains.FRESH_2, 'true');
-            assert.ok(chains.ROOT_PATH && chains.ROOT_PATH.startsWith('/'), 'the uuid importer exposes its directory in searchPath[0]');
+            assert.equal(chains.ROOT_PATH, path.join(TMP, 'chains', 'extensions', 'greenTile@carsteneu'),
+                'the uuid importer exposes its own directory in searchPath[0] — the chains contract');
+
+            const growth = runVariant('growth');
+            assert.equal(growth.GROWTH_VALS, 'consumer:growth-0,consumer:growth-1,consumer:growth-2,consumer:growth-3,consumer:growth-4',
+                'five consecutive install/reload cycles each deliver their own code');
+            assert.equal(growth.GROWTH_CACHED, '6', 'every build name stays resolved on the uuid importer (1 + 5) — the cost of the layout');
+            assert.equal(growth.GROWTH_FIRST_STILL, 'growth-0', 'a superseded generation keeps its evaluated subtree, nothing evicts it');
+            assert.equal(growth.FRESH_EACH, 'true');
         } finally {
             fs.rmSync(TMP, { recursive: true, force: true });
         }
