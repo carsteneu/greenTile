@@ -15,6 +15,7 @@
  * @property {number | undefined} actionId Meta.KeyBindingAction id; undefined on the direct Meta route
  * @property {AnyRecord | undefined} prior manager entry that was in place before we took over
  * @property {((display: AnyRecord, win: CinnamonWindow, binding?: AnyRecord) => void) | null} handler our live callback, dropped on destroy
+ * @property {((display: AnyRecord, win: CinnamonWindow, binding: AnyRecord) => void) | null} install the dispatcher we handed to the shell — kept so a failed restore can tell our own leftover from a restored prior
  * @property {boolean} active false once destroy made the callback inert
  */
 export const Focus: {
@@ -39,7 +40,12 @@ export const Focus: {
          *     whose restore then fails still delivers nothing;
          *  2. restore per registration, each in its own try, so one throwing
          *     restore never strands the remaining names. A failed registration
-         *     stays owned (retryable) and every failure is reported together.
+         *     keeps its ownership for a later retry and every failure is reported
+         *     together.
+         * A restore that never took effect would leave our own dispatcher sitting
+         * in the manager's map, where the NEXT App's connect would adopt it as its
+         * rollback target and the binding would stay dead for the session — so a
+         * failed registration also drops that leftover (stage 3).
          */
         destroy(): void;
         /**
@@ -47,6 +53,16 @@ export const Focus: {
          * @param {FocusRegistration} registration
          */
         _restore(registration: FocusRegistration): void;
+        /**
+         * A failed manager-route restore may have thrown before it took effect,
+         * leaving OUR dispatcher (inert) in the manager's binding map. Remove it and
+         * reset the Meta handler, so the binding falls back to muffin's builtin
+         * instead of swallowing the key — and so a later App does not mistake our
+         * leftover for foreign prior state. Only touches the entry when it is still
+         * demonstrably ours; a restore that did mutate already holds the prior.
+         * @param {FocusRegistration} registration
+         */
+        _dropOwnLeftover(registration: FocusRegistration): void;
     };
 };
 /**
@@ -87,6 +103,10 @@ export type FocusRegistration = {
      * our live callback, dropped on destroy
      */
     handler: ((display: AnyRecord, win: CinnamonWindow, binding?: AnyRecord) => void) | null;
+    /**
+     * the dispatcher we handed to the shell — kept so a failed restore can tell our own leftover from a restored prior
+     */
+    install: ((display: AnyRecord, win: CinnamonWindow, binding: AnyRecord) => void) | null;
     /**
      * false once destroy made the callback inert
      */

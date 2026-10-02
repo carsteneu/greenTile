@@ -152,14 +152,15 @@ for (const [label, failedName] of [['FIRST', 'push-tile-left'], ['MIDDLE', 'push
     });
 }
 
-test('manager route: a failed restore leaves an INERT handler, never a live stale App callback', () => {
+test('manager route: a failed restore leaves nothing reachable, never a live stale App callback', () => {
     const { meta, manager, focus, calls, app } = harness({ generation: 'upstream' });
     seedPriors(manager, []);
     focus.connect(app);
     manager.fail.before.add(restoreCall('push-tile-left'));
     assert.throws(() => focus.destroy());
-    deliver(meta, 'push-tile-left', { id: 'stale' });
-    assert.deepEqual(calls, [], 'the unrestored binding no longer runs our handler');
+    assert.equal(meta.customHandlers.has('push-tile-left'), false,
+        'our dispatcher is gone — the binding falls back to muffin builtin');
+    assert.deepEqual(calls, [], 'no own callback ran');
 });
 
 test('manager route: a post-effect throw during restore still restores the remaining names', () => {
@@ -181,11 +182,44 @@ test('manager route: destroy reports every unrestored binding in one combined er
     manager.fail.before.add(restoreCall('push-tile-right'));
     manager.fail.before.add(restoreCall('push-tile-down'));
     assert.throws(() => focus.destroy(), (e) => {
-        assert.match(e.message, /2 push-tile binding\(s\) not restored/);
+        assert.match(e.message, /restore failed for 2 binding\(s\)/);
         assert.match(e.message, /push-tile-right/);
         assert.match(e.message, /push-tile-down/);
         return true;
     });
+});
+
+test('manager route: a failed restore does not poison the next App instance', () => {
+    // A restore that threw before taking effect leaves OUR inert dispatcher in
+    // the manager's binding map. Because the keybinding manager is a singleton
+    // across App recreation, the next App would otherwise adopt that leftover as
+    // its "prior" and never restore muffin's builtin — Super+Arrow would stay
+    // dead for the whole session, silently.
+    const { meta, manager, focus, app } = harness({ generation: 'upstream' });
+    const priors = seedPriors(manager, []);
+    focus.connect(app);
+    manager.fail.before.add(restoreCall('push-tile-left'));
+    assert.throws(() => focus.destroy());
+    assert.equal(manager.bindings.has(71), false, 'our inert leftover is not left in the manager map');
+    assert.equal(meta.customHandlers.has('push-tile-left'), false, 'Meta handler reset to muffin builtin');
+
+    // monitors-changed recreates the App: a fresh Focus on the same singleton
+    const second = new Focus({
+        meta,
+        keybindingManager: manager,
+        hotkey: (_app, _dir) => () => {},
+    });
+    second.connect({ id: 'app2' });
+    assert.equal(meta.customHandlers.has('push-tile-left'), true, 'the second instance takes the binding over');
+    second.destroy();
+    assert.equal(meta.customHandlers.has('push-tile-left'), false, 'the second instance restores muffin builtin');
+    assert.equal(manager.bindings.has(71), false, 'no dispatcher entry left for the poisoned name');
+    for (const name of NAMES) {
+        if (name === 'push-tile-left')
+            {continue;}
+        assert.equal(manager.bindings.get(ACTION_IDS[name]).callback, priors[name].callback,
+            name + ' still ends at its real prior after the second cycle');
+    }
 });
 
 test('manager route: a retry destroy restores the previously failed binding', () => {
@@ -304,7 +338,7 @@ test('integration: a throwing focus restore does not stop disable or settings fi
     assert.doesNotThrow(() => ext.disable(), 'Config.destroy isolates the focus failure');
     // the component's own message, not Config's step label (which would appear
     // here even without the fix): proves focus.js reported the unrestored name
-    assert.equal(env.logErrors.some((m) => /not restored/.test(m) && m.indexOf('push-tile-left') !== -1), true,
+    assert.equal(env.logErrors.some((m) => /push-tile restore failed for/.test(m) && m.indexOf('push-tile-left') !== -1), true,
         'the combined focus error is reported, not swallowed');
     assert.equal(env.settingsSlots.get('greenTile@carsteneu'), null, 'settings finalized despite the failure');
     assert.deepEqual(installs.slice(NAMES.length), NAMES, 'destroy attempted ALL four restores');
