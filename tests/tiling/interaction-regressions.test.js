@@ -328,13 +328,50 @@ test('issue 11 regression: an excluded focused window is counted by nobody and t
     assert.deepEqual(w2.rect, [1000, 0, 1000, 1100]);
 });
 
+test('issue 10: a closed window leaves no fresh record behind', () => {
+    const { env, ext } = makeEnv({ windowGap: 0 });
+    enableOnMonitor(env, ext);
+    const ws = activeWorkspace(env);
+    const app = ext.currentSession().app;
+    // monitor 0 stays paused, so no retile ever drains the pending sets here
+    const closed = makeWindow(env, 1, [0, 0, 300, 300], 0);
+    env.tabList.push(closed);
+    app.auto.onWindowAdded(app, ws, closed);
+    const kept = makeWindow(env, 2, [400, 0, 300, 300], 0);
+    env.tabList.push(kept);
+    app.auto.onWindowAdded(app, ws, kept);
+    app.auto.onWindowRemoved(app, ws, closed);
+    const pending = app.auto.pendingTake(0);
+    assert.equal(pending.has(2), true, 'the live fresh window keeps its record');
+    assert.equal(pending.has(1), false, 'the closed window left no record behind');
+});
+
+test('issue 11: the swap hotkey does not act on an inadmissible focus', () => {
+    const { env, ext } = makeEnv({ windowGap: 0 });
+    enableOnMonitors(env, ext, [LEFT, RIGHT]);
+    activeWorkspace(env);
+    const orphan = makeWindow(env, 1, [0, 0, 1000, 1100], 0, null, { noApp: true });
+    const w2 = makeWindow(env, 2, [1000, 0, 1000, 1100], 0);
+    const w3 = makeWindow(env, 3, [2000, 0, 1000, 1100], 1);
+    env.tabList.push(orphan, w2, w3);
+    const app = ext.currentSession().app;
+    app.ops.layoutSet(app, 0, 0, { auto: true });
+    app.ops.layoutSet(app, 1, 0, { auto: true });
+    env.display.focus_window = orphan;
+    const before = [orphan.rect.slice(), w2.rect.slice(), w3.rect.slice()];
+    env.keybindingManager.hotkeys.get('greenTile-swap-right').cb();
+    assert.deepEqual([orphan.rect, w2.rect, w3.rect], before, 'nothing moved for an inadmissible focus');
+    assert.deepEqual(env.logs.filter((l) => l.indexOf('greenTile swap') === 0), [], 'no swap ran');
+});
+
 test('issue 11 regression: the exclude hotkey follows the real focus, not the retile fallback', () => {
     const { env, ext } = makeEnv({ windowGap: 0 });
     enableOnMonitors(env, ext, [LEFT, RIGHT]);
     activeWorkspace(env);
     const dialog = makeWindow(env, 1, [0, 0, 300, 300], 0, null, { windowType: env.gi.Meta.WindowType.DIALOG });
     const bystander = makeWindow(env, 2, [2000, 0, 400, 300], 1);
-    env.tabList.push(dialog, bystander);
+    // the tileable window first: an unfiltered fallback would return it
+    env.tabList.push(bystander, dialog);
     env.display.focus_window = dialog;
     const app = ext.currentSession().app;
     app.excl.toggleFocused(app);
