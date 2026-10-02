@@ -35,9 +35,20 @@ type CinnamonActor = {
     /** Clutter.Actor.get_transition(propName) — the running transition of that
      * (dashed) property or null. lib/runtime/placement.js compares this object
      * identity to tell an own transition from a foreign one. */
-    get_transition(name: string): AnyRecord | null;
+    get_transition(name: string): ClutterTransition | null;
     /** Clutter.Actor.remove_transition — stops exactly the named transition. */
     remove_transition(name: string): void;
+};
+
+/**
+ * Clutter.Transition as greenTile uses it: the identity handle of one running
+ * mutation plus the platform signal surface environment.js connects to —
+ * 'stopped' reports (transition, finished), 'new-frame' (transition, timeIndex).
+ * lib/runtime/placement.js attaches its own per-transition 'stopped' handler so
+ * one cancelled property cannot drop the repair of its siblings.
+ */
+type ClutterTransition = {
+    connect(signal: string, cb: (transition: ClutterTransition, payload: any) => void): any;
 };
 
 /**
@@ -217,8 +228,8 @@ type SessionFacade = {
  * records of the actor transitions greenTile started (lib/tiling/place.js). */
 type PlacementFacade = {
     has(metaWindow: CinnamonWindow): boolean;
-    acquired(metaWindow: CinnamonWindow, token: object, actor: CinnamonActor, props: ReadonlyArray<{ prop: string; field: string; identity: number }>): void;
-    settled(metaWindow: CinnamonWindow, token: object, finished: boolean): void;
+    foreignActive(metaWindow: CinnamonWindow, actor: CinnamonActor, props: ReadonlyArray<{ prop: string }>): boolean;
+    acquired(metaWindow: CinnamonWindow, token: object, actor: CinnamonActor, props: ReadonlyArray<{ prop: string, field: string, identity: number }>): void;
     release(metaWindow: CinnamonWindow): void;
     destroy(): void;
 };

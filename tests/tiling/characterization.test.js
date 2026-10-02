@@ -139,28 +139,29 @@ test('same-geometry animated placement stays aligned', () => {
     assert.equal(actor.scale_x, 1, 'still aligned after the ease completes');
 });
 
-test('animated placement over a foreign transition: smooth handoff, not a stomp', () => {
-    // ownership: the foreign effect owns 'translation-x' until our
-    // ease supersedes exactly that property — foreign stopped with
-    // finished=false, our ease continues from the CURRENT value, and the
-    // end state is the identity target (no desync)
+test('animated placement over a foreign transition: the foreign animation is left running, not stomped', () => {
+    // contract: cancel ONLY the transitions greenTile owns. The platform
+    // cancels whatever sits on an eased property (environment.js _easeActor:
+    // `animatedProps.forEach(p => actor.remove_transition(p))`), so an animated
+    // placement must not ease a property a foreign animation already holds —
+    // it skips the animation, releases only its own in-flight transitions, and
+    // still moves the buffer to the requested geometry.
     const { env, ext } = makeEnv();
     enableOnMonitor(env, ext);
     const actor = makeEaseActor();
     let foreignStoppedWith = null;
     // foreign mid-flight visual offset, owned by the shell's own transition
-    actor.foreignTransition('translation-x', 256, (fin) => { foreignStoppedWith = fin; });
+    const foreign = actor.foreignTransition('translation-x', 256, (fin) => { foreignStoppedWith = fin; });
     const w1 = makeWindow(env, 1, [10, 10, 400, 300], 0, actor);
     const w2 = makeWindow(env, 2, [500, 0, 400, 300]);
     env.tabList.push(w1, w2);
     env.display.focus_window = w1;
     env.activeWorkspace = { index: () => 0 };
     env.keybindingManager.hotkeys.get('greenTile-auto6').cb();
-    assert.equal(foreignStoppedWith, false, 'the foreign transition is superseded through the platform per-property path');
-    assert.equal(actor.transitions.has('translation-x'), true, 'our own transition now owns the property');
-    actor.finishAll();
-    assert.equal(actor.translation_x, 0, 'end state is the identity target');
-    assert.equal(actor.scale_x, 1);
+    assert.equal(foreignStoppedWith, null, 'the foreign transition is never stopped');
+    assert.equal(actor.get_transition('translation-x'), foreign, 'the foreign transition keeps the property');
+    assert.equal(actor.translation_x, 256, 'the foreign value is not overwritten');
+    assert.deepEqual(w1.moves[0], ['resize', 0, 0, 329, 1100], 'the buffer still moves to the requested geometry');
 });
 
 // ---------------- r3 easing contracts (ownership, park math, teardown) ----------------

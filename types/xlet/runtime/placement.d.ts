@@ -9,6 +9,8 @@
  * @property {AnyRecord} transition the Clutter transition object we started
  * @property {string} field the actor field the transition animates
  * @property {number} identity the value that makes visual == buffer
+ * @property {boolean} stopped whether that transition reported its stop
+ * @property {number|undefined} frozen the field value at the stop
  */
 /**
  * @typedef {Object} PlacementRecord
@@ -31,6 +33,15 @@ export const Placement: {
         has(metaWindow: CinnamonWindow): boolean;
         /**
          * @param {CinnamonWindow} metaWindow
+         * @param {CinnamonActor} actor
+         * @param {ReadonlyArray<{ prop: string }>} props
+         * @returns {boolean}
+         */
+        foreignActive(metaWindow: CinnamonWindow, actor: CinnamonActor, props: ReadonlyArray<{
+            prop: string;
+        }>): boolean;
+        /**
+         * @param {CinnamonWindow} metaWindow
          * @param {object} token
          * @param {CinnamonActor} actor
          * @param {ReadonlyArray<{ prop: string, field: string, identity: number }>} props
@@ -43,14 +54,22 @@ export const Placement: {
         /**
          * @param {CinnamonWindow} metaWindow
          * @param {object} token
+         * @param {string} prop
+         * @param {OwnTransition} entry
          * @param {boolean} finished
          */
-        settled(metaWindow: CinnamonWindow, token: object, finished: boolean): void;
+        _onStopped(metaWindow: CinnamonWindow, token: object, prop: string, entry: OwnTransition, finished: boolean): void;
         /** @param {CinnamonWindow} metaWindow */
         release(metaWindow: CinnamonWindow): void;
         destroy(): void;
         /** @param {string[]} failures */
         _report(failures: string[]): void;
+        /**
+         * @param {CinnamonActor} actor
+         * @param {OwnTransition} entry
+         * @returns {boolean}
+         */
+        _repairable(actor: CinnamonActor, entry: OwnTransition): boolean;
         /**
          * @param {PlacementRecord} record
          * @param {string[] | null} failures
@@ -77,6 +96,14 @@ export type OwnTransition = {
      * the value that makes visual == buffer
      */
     identity: number;
+    /**
+     * whether that transition reported its stop
+     */
+    stopped: boolean;
+    /**
+     * the field value at the stop
+     */
+    frozen: number | undefined;
 };
 export type PlacementRecord = {
     /**
