@@ -1,6 +1,6 @@
 'use strict';
 // Fake-strictness contract (todo_fixes issue 13): the runtime-critical Cinnamon
-// namespaces (global subobjects, imports.ui.main, tooltips, panel, tweener,
+// namespaces (global subobjects, imports.ui.main, tooltips, panel,
 // imports.gi namespace list, imports.misc) reject unknown member access with a
 // throw, so a typo'd runtime access fails the running test instead of silently
 // stubbing along (learned from global.dispaly / Tooltip_typo / overlay_grup /
@@ -46,7 +46,6 @@ test('imports.ui lists exactly the namespaces greenTile uses', () => {
     assert.doesNotThrow(() => env.imports.ui.settings.BindingDirection);
     assert.doesNotThrow(() => new env.imports.ui.tooltips.Tooltip({}, 'x'));
     assert.throws(() => env.imports.ui.tooltips.Tooltip_typo, fakeError);
-    assert.doesNotThrow(() => env.imports.ui.tweener.removeTweens({}));
     assert.doesNotThrow(() => env.imports.ui.panel.PanelLoc.top);
 });
 

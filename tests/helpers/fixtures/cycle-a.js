@@ -1,4 +1,3 @@
-// Architecture-test fixture: requires cycle-b, which requires this file back.
+// Architecture-test fixture: imports cycle-b, which imports this file back.
 // Only ever loaded by the loader self-test in architecture.test.js — never shipped.
-const { cycle_b } = require('./tests/helpers/fixtures/cycle-b');
-module.exports = { cycle_b };
+var cycle_b = imports['cycle-b'];

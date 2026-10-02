@@ -7,11 +7,46 @@
 // slot; setValue alone does not fire IN bindings — cinnamonDBus remoteUpdate
 // does, learning #95107) and a queued Gio.DBus DisplayConfig reply the test
 // drives explicitly. The runtime-critical Cinnamon namespaces (global
-// subobjects, imports.ui.main, tooltips, panel, tweener, the imports.gi
+// subobjects, imports.ui.main, tooltips, panel, the imports.gi
 // namespace list, imports.misc) are strict: unknown member access throws
 // (issue 13), so a typo'd runtime access fails the test. Remaining loose ends
 // (top-level fallbacks like imports.gettext) fall into a deep stub so a
 // load-time binding never throws.
+const { createXletImporter } = require('../native-importer');
+const { UUID: XLET_UUID } = require('../cinnamon-loader');
+
+const REPO_ROOT = require('node:path').join(__dirname, '..', '..', '..');
+
+// GJS ships the String.prototype.format extension (SpiderMonkey %_ format,
+// used across the Cinnamon js tree); the fake gettext returns real strings,
+// so the shipped `_('…').format(x)` call sites need the same surface here.
+// Covers the dialect greenTile uses: %s, %d, %f, %x and a literal %%.
+if (!String.prototype.format) {
+    Object.defineProperty(String.prototype, 'format', {
+        value: function (...args) {
+            let i = 0;
+            return this.replace(/%([sdfx%])/g, (_, c) => {
+                if (c === '%') {
+                    return '%';
+                }
+                const v = args[i++];
+                if (c === 'd') {
+                    return String(Math.round(Number(v)));
+                }
+                if (c === 'f') {
+                    return String(Number(v));
+                }
+                if (c === 'x') {
+                    return Number(v).toString(16);
+                }
+                return String(v);
+            });
+        },
+        writable: true,
+        configurable: true,
+    });
+}
+
 const makeStub = () => new Proxy(function () {}, {
     apply: () => makeStub(),
     construct: () => makeStub(),
@@ -226,11 +261,6 @@ const createCinnamonEnv = (options) => {
                 constructor(_item, _title) {}
             },
         }),
-        tweener: strictNs('imports.ui.tweener', {
-            // no-op like the former silent stub: lib/tiling/place.js fire-and-forget tweens
-            addTween: () => {},
-            removeTweens: () => {},
-        }),
         panel: strictNs('imports.ui.panel', {
             // identity-only switch values in lib/tiling/screen.js usableArea
             PanelLoc: { top: 'top', bottom: 'bottom', left: 'left', right: 'right' },
@@ -253,6 +283,9 @@ const createCinnamonEnv = (options) => {
         },
     });
     env.workspaceManager = Object.assign(signalHub('workspaceManager'), {
+        get_n_workspaces() {
+            return env.workspaces.length;
+        },
         get_workspace_by_index(i) {
             return env.workspaces[i];
         },
@@ -341,6 +374,9 @@ const createCinnamonEnv = (options) => {
         get_monotonic_time: () => 0,
         get_home_dir: () => '/home/fake',
         get_user_cache_dir: () => '/home/fake/.cache',
+        // XDG data dir: gettext mo lookup root (lib/ui/i18n.js), mirrors the
+        // real GLib default under $XDG_DATA_HOME unset
+        get_user_data_dir: () => '/home/fake/.local/share',
         build_filenamev: (parts) => parts.join('/'),
         path_get_dirname: (p) => p.split('/').slice(0, -1).join('/') || '.',
         mkdir_with_parents: () => true,
@@ -484,6 +520,14 @@ const createCinnamonEnv = (options) => {
                 {env.customBindings.delete(name);}
             else
                 {env.customBindings.set(name, fn);}
+        },
+        // muffin builtin action ids: push-tile-* are wm builtins, resolved by
+        // name through Meta.KeyBindingAction (focus.js manager route)
+        KeyBindingAction: {
+            PUSH_TILE_LEFT: 71,
+            PUSH_TILE_RIGHT: 72,
+            PUSH_TILE_UP: 73,
+            PUSH_TILE_DOWN: 74,
         },
         MaximizeFlags: { HORIZONTAL: 2, VERTICAL: 4 },
         // value 6 mirrors the real Meta.WindowType.NORMAL enum weight; only the
@@ -645,10 +689,20 @@ const createCinnamonEnv = (options) => {
             EVENT_STOP: true,
             EventType: { BUTTON_PRESS: 'button-press', BUTTON_RELEASE: 'button-release' },
             KEY_Escape: 'Escape',
+            AnimationMode: { EASE_OUT_QUAD: 'ease-out-quad' },
         },
         Pango: { EllipsizeMode: { NONE: 'none' } },
     });
 
+    // the xlet dir importer as both module generations expose it on the
+    // imports root (main.js _addXletDirectoriesToSearchPath); per-env factory
+    // so each test's env gets its own module cache (no stale bindings)
+    env.extensions = { [XLET_UUID]: createXletImporter({ root: REPO_ROOT }) };
+    env.gettext = {
+        bindtextdomain() {},
+        dgettext: (_domain, str) => str,
+        gettext: (str) => str,
+    };
     env.imports = new Proxy(function () {}, {
         get: (t, p) => {
             if (p === Symbol.toPrimitive)
@@ -659,6 +713,10 @@ const createCinnamonEnv = (options) => {
                 {return env.gi;}
             if (p === 'mainloop')
                 {return env.mainloop;}
+            if (p === 'gettext')
+                {return env.gettext;}
+            if (p === 'extensions')
+                {return env.extensions;}
             if (p === 'misc')
                 {return strictNs('imports.misc', {
                     signalManager: { SignalManager: FakeSignalManager },

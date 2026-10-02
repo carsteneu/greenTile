@@ -1,12 +1,14 @@
 'use strict';
-// Loads extension.js (the single entry) the way Cinnamon does. The loader
-// mirrors fileUtils.js createExports (/usr/share/cinnamon/js/misc/fileUtils.js
-// ~L150-230): the body is wrapped as 'use strict';<src>; inside a
-// Function(require, exports, module, __meta, __dirname, __filename) that
-// returns module.exports, and without an explicit module.exports line every
-// top-level name is auto-exported. lib/app and lib/runtime/session load through
-// the shared root-relative loader; enable()/disable() are NOT called here (they
-// need the Cinnamon runtime — see lifecycle.test.js).
+// Entry contract: extension.js loads through BOTH Cinnamon module
+// generations. Legacy (6.6): fileUtils.js createExports wraps the body and,
+// without an explicit module.exports line, auto-exports every top-level name.
+// Native (upstream 2803c67): the importer exposes only top-level var and
+// function declarations as namespace properties — consts stay private. The
+// migration pins the same public surface (init/enable/disable) and the
+// session ownership in the module-private lifecycle holder (see
+// zero-module-state.test.js for the one allowed mutable binding).
+// enable()/disable() are NOT called here (they need the Cinnamon runtime —
+// see lifecycle.test.js).
 const test = require('node:test');
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
@@ -15,6 +17,8 @@ const { cinnamonLoad, load, ROOT } = require('../helpers/cinnamon-loader');
 
 const extensionPath = path.join(ROOT, 'extension.js');
 
+// In GJS 'imports' is a true global; the entry reads it only for the xlet
+// importer wiring, which the lifecycle tests provide against the fake env.
 const stub = () => new Proxy(function () {}, {
     get: (t, p) => {
         if (p === Symbol.toPrimitive) return () => '';
@@ -22,9 +26,6 @@ const stub = () => new Proxy(function () {}, {
     },
     apply: () => stub(),
 });
-
-// In GJS 'imports' is a true global; in the final shape no shipped module reads
-// it at load time, until then the stub keeps the indirection harmless.
 globalThis.imports = stub();
 
 // Files whose code derives from the gTile webpack bundle: provenance stays
@@ -50,31 +51,49 @@ const shippedJs = (function collect(dir, prefix) {
     return out;
 })(path.join(ROOT, 'lib'), 'lib').concat(['extension.js']);
 
-test('extension.js exports exactly init/enable/disable via explicit module.exports', () => {
-    const src = fs.readFileSync(extensionPath, 'utf8');
-    assert.match(src, /^module\.exports(\.[a-zA-Z0-9_$]+)?\s*=/m,
-        'explicit module.exports required — without it Cinnamon auto-exports every top-level name');
-    const ext = cinnamonLoad(src, load, 'extension.js');
-    assert.deepEqual(Object.keys(ext).sort(), ['disable', 'enable', 'init']);
-    assert.equal(typeof ext.init, 'function');
-    assert.equal(typeof ext.enable, 'function');
-    assert.equal(typeof ext.disable, 'function');
+test('the native module namespace exposes exactly init/enable/disable and the session reader', () => {
+    // fresh namespace through the importer sim over the repo root: extension
+    // (the entry) is a module like the lib files. The reader (currentSession)
+    // is the documented diagnostics bridge to the module-private holder.
+    const seen = load('./extension');
+    assert.deepEqual(Object.keys(seen).sort(), ['currentSession', 'disable', 'enable', 'init']);
+    assert.equal(typeof seen.init, 'function');
+    assert.equal(typeof seen.enable, 'function');
+    assert.equal(typeof seen.disable, 'function');
+    assert.equal(typeof seen.currentSession, 'function');
     // init is a no-op, callable without the Cinnamon runtime; enable()/disable()
     // construct the session and run against the fake env in lifecycle.test.js.
-    ext.init({ uuid: 'greenTile@carsteneu' });
+    seen.init({ uuid: 'greenTile@carsteneu' });
+    assert.equal(seen.currentSession(), null, 'no session before enable()');
 });
 
-test('the lifecycle entry points keep the member-call session coupling', () => {
+test('the 6.6 legacy generation auto-exports the same lifecycle surface', () => {
     const src = fs.readFileSync(extensionPath, 'utf8');
-    // Cinnamon calls extensionSystem.js getModuleByIndex(i).init/enable/disable
-    // member-style on the exports object, so `this` is the exports object and
-    // the session rides it — a destructured call or module-level let would
-    // break that contract.
-    assert.match(src, /\benable\s*=\s*function\b|\benable\s*\(/, 'enable defined');
-    assert.match(src, /this\.session\s*=/, 'enable stores the session on the exports object');
-    assert.match(src, /this\.session\.destroy\(\)/, 'disable destroys the session');
-    assert.doesNotMatch(src.replace(/\/\/[^\n]*/g, ''), /\blet\s+session\b/,
-        'no module-level session state — it rides `this`');
+    assert.doesNotMatch(src, /^module\.exports(\.[a-zA-Z0-9_$]+)?\s*=/m,
+        'module.exports breaks native loading (the module global does not exist there)');
+    const ext = cinnamonLoad(src, load, 'extension.js');
+    for (const fn of ['init', 'enable', 'disable']) {
+        assert.equal(typeof ext[fn], 'function', fn + ' exported by the legacy auto-export');
+    }
+    // a member call runs against the exports object — the documented receiver
+    const recv = { ext, called: false };
+    ext.init.call(recv, { uuid: 'greenTile@carsteneu' });
+    assert.equal(recv.called, false);
+});
+
+test('the session rides the module-private lifecycle holder, not `this`', () => {
+    const src = fs.readFileSync(extensionPath, 'utf8');
+    const commentsStripped = src.replace(/\/\/[^\n]*/g, '').replace(/\/\*[\s\S]*?\*\//g, '');
+    assert.doesNotMatch(commentsStripped, /\bthis\.session\b/,
+        'the natively imported namespace extensibility is not a contract to rely on');
+    assert.match(src, /^const lifecycle = \{ session: null \};$/m,
+        'one module-private holder owns the session across enable/disable');
+    assert.match(src, /^var currentSession = \(\) => lifecycle\.session;$/m,
+        'the reader exposes the session without handing out the holder');
+    assert.match(src, /^var init|^function init\b/m, 'init declared public (var/function)');
+    assert.match(src, /^var enable|^function enable\b/m, 'enable declared public');
+    assert.match(src, /^var disable|^function disable\b/m, 'disable declared public');
+    assert.doesNotMatch(src, /let\s+session\b/, 'no bare module-level session binding');
 });
 
 test('greenTile.js is gone and nothing requires it', () => {

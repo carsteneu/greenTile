@@ -87,19 +87,26 @@ if ! mv "$NEW" "$DEST"; then
     exit 1
 fi
 
+# The extension loads translations from GLib.get_user_data_dir()/locale (the
+# XDG data dir); mirror that here instead of hardcoding ~/.local/share.
+DATA_DIR="${XDG_DATA_HOME:-$HOME/.local/share}"
 for mofile in "$STAGE"/locale/*/LC_MESSAGES/*.mo; do
     [ -e "$mofile" ] || continue
     lang=$(basename "$(dirname "$(dirname "$mofile")")")
     # same failure class as the mv below: report, keep going
-    if ! mkdir -p "$HOME/.local/share/locale/$lang/LC_MESSAGES"; then
+    if ! mkdir -p "$DATA_DIR/locale/$lang/LC_MESSAGES"; then
         echo "Note: could not install the $lang translation — the extension works without it (English)." >&2
         continue
     fi
-    if ! mv "$mofile" "$HOME/.local/share/locale/$lang/LC_MESSAGES/$UUID.mo"; then
+    if ! mv "$mofile" "$DATA_DIR/locale/$lang/LC_MESSAGES/$UUID.mo"; then
         echo "Note: could not install the $lang translation — the extension works without it (English)." >&2
     fi
 done
 
 echo "greenTile $UUID installed to $DEST"
-echo "Restart Cinnamon (Ctrl+Alt+Esc, or Alt+F2 then r) or log out and back in, then enable it:"
-echo "System Settings → Extensions → greenTile → turn on."
+echo "The files on disk are the new version now. If greenTile was already loaded, Cinnamon keeps"
+echo "that code: reloading or toggling the extension re-reads only extension.js, so replaced code"
+echo "under lib/ becomes active after a Cinnamon restart, not by itself."
+echo "Restart Cinnamon: Ctrl+Alt+Esc, or Alt+F2 then r. Wayland has no such restart — log out"
+echo "and back in instead."
+echo "Then enable it: System Settings → Extensions → greenTile → turn on."

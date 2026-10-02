@@ -1,13 +1,14 @@
 'use strict';
-// Architecture guards on the shipped module graph: the require graph of every
-// shipped .js file (extension.js, lib/**/*.js) must stay acyclic — Cinnamon's
-// fileUtils.js createExports caches a module only after its evaluation
-// finished, so a module required while it is still evaluating would be
-// re-evaluated forever — and must obey the layer rules below, written as a data
-// table: lib/app is the composition root next to the entry, extension.js may
-// require only lib/app and the session runtime. The loader-side mirror of the
-// createExports cache semantics lives in cinnamon-loader.js and is self-tested
-// per fixture here.
+// Architecture guards on the shipped module graph: the native import graph of
+// every shipped .js file (extension.js, lib/**/*.js) must stay acyclic — a
+// re-entrant import during module evaluation reaches a partially initialized
+// namespace (or re-evaluates forever under the legacy CJS loader), and the
+// whole point of the layered design is a strictly one-directional flow — and
+// must obey the layer rules below, written as a data table: lib/app is the
+// composition root next to the entry, extension.js may import only lib/app and
+// the session runtime. The loader-side mirror of the importer cache semantics
+// lives in tests/helpers/native-importer.js and is self-tested per fixture at
+// the bottom.
 const test = require('node:test');
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
@@ -26,11 +27,15 @@ const shippedJs = (function collect(dir, prefix) {
     return out;
 })(path.join(ROOT, 'lib'), 'lib').concat(['extension.js']);
 
-const requireRe = /\brequire\(\s*(['"])([^'"\n]+)\1\s*\)/g;
+// XLET.<chain>: dotted segments are plain identifiers; hyphenated file names
+// (settings-keys, panel-size, focus-nav) must use the bracket form — a dotted
+// hyphen would parse as a subtraction and break at import time.
+const chainRe = /XLET\.lib((?:\.[A-Za-z_$][\w$]*|\['[^']+'\])+)/g;
+const segmentRe = /\.([A-Za-z_$][\w$]*)|\['([^']+)'\]/g;
 
-// Layer rules as data: a module may only require its own layer or lower ones.
-// The entry extension.js may require only the composition root (lib/app) and
-// the session runtime. lib/app is required by nothing but lib/app itself and
+// Layer rules as data: a module may only import its own layer or lower ones.
+// The entry extension.js may import only the composition root (lib/app) and
+// the session runtime. lib/app is imported by nothing but lib/app itself and
 // the entry — the composition root has no lower-layer dependents (the pure
 // settings-key constants live in the model layer for exactly that reason).
 const LAYER_RULES = [
@@ -44,26 +49,31 @@ const LAYER_RULES = [
 
 const layerOf = (file) => LAYER_RULES.find((l) => file === l.dir || file.startsWith(l.dir + '/')) || null;
 
+const chainToTarget = (chain) => {
+    const segments = [];
+    let m;
+    segmentRe.lastIndex = 0;
+    while ((m = segmentRe.exec(chain)) !== null) {
+        segments.push(m[1] || m[2]);
+    }
+    return ['lib', ...segments].join('/') + '.js';
+};
+
 const buildGraph = () => {
     const graph = new Map();
     for (const file of shippedJs) {
         const src = fs.readFileSync(path.join(ROOT, file), 'utf8');
         const targets = [];
-        for (const match of src.matchAll(requireRe)) {
-            // gi./ui./misc./perf. specifiers reach the Cinnamon imports global
-            // and never enter the file graph
-            if (/^(?:gi|ui|misc|perf)\./.test(match[2]))
-                {continue;}
-            const target = match[2].replace(/\.\//g, '');
-            targets.push(target.endsWith('.js') ? target : target + '.js');
+        for (const match of src.matchAll(chainRe)) {
+            targets.push(chainToTarget(match[1]));
         }
         graph.set(file, targets);
     }
     return graph;
 };
 
-// Depth-first cycle search over the static graph; every require target of a
-// shipped file itself ships (require-resolver.test.js), so an unknown node is
+// Depth-first cycle search over the static graph; every import target of a
+// shipped file itself ships (native-resolver.test.js), so an unknown node is
 // a real integrity break and is walked as a cycle end.
 const findCycle = (graph) => {
     const open = new Set();
@@ -96,14 +106,14 @@ const findCycle = (graph) => {
     return null;
 };
 
-test('the shipped require graph is strictly acyclic (cycle path reported)', () => {
+test('the shipped native import graph is strictly acyclic (cycle path reported)', () => {
     const graph = buildGraph();
     const cycle = findCycle(graph);
-    assert.equal(cycle, null, 'require cycle detected: ' + (cycle || []).join(' -> '));
+    assert.equal(cycle, null, 'import cycle detected: ' + (cycle || []).join(' -> '));
     assert.ok(graph.size > 20, 'the shipped set was actually scanned');
 });
 
-test('lib layers may only require their own or lower layers', () => {
+test('lib layers may only import their own or lower layers', () => {
     const graph = buildGraph();
     const violations = [];
     for (const [file, deps] of graph) {
@@ -123,7 +133,7 @@ test('lib layers may only require their own or lower layers', () => {
     assert.deepEqual(violations, [], 'layer violations');
 });
 
-test('nothing outside lib/app and extension.js requires the composition root', () => {
+test('nothing outside lib/app and extension.js imports the composition root', () => {
     const graph = buildGraph();
     const violations = [];
     for (const [file, deps] of graph) {
@@ -137,23 +147,29 @@ test('nothing outside lib/app and extension.js requires the composition root', (
     assert.deepEqual(violations, [], 'composition-root dependents');
 });
 
-test('every lib module declares an explicit column-0 module.exports', () => {
-    const missing = shippedJs.filter((f) => f.startsWith('lib/'))
-        .filter((f) => !/^module\.exports(\.[a-zA-Z0-9_$]+)?\s*=/m.test(fs.readFileSync(path.join(ROOT, f), 'utf8')));
-    assert.deepEqual(missing, [], 'lib files without explicit module.exports');
+test('every lib module declares at least one public native export', () => {
+    const empty = shippedJs.filter((f) => f.startsWith('lib/'))
+        .filter((f) => !/^var\s+[A-Za-z_$][\w$]*|^function\s+[A-Za-z_$][\w$]*/m.test(fs.readFileSync(path.join(ROOT, f), 'utf8')));
+    assert.deepEqual(empty, [], 'lib files without a public var/function export');
 });
 
-test('the loader mirrors createExports: a require cycle throws "circular require" naming the chain', () => {
-    const { load } = require('../helpers/cinnamon-loader');
+test('the importer mirrors the native cache: an import cycle throws naming the chain', () => {
+    const { createXletImporter } = require('../helpers/native-importer');
+    const fixtures = path.join(ROOT, 'tests', 'helpers', 'fixtures');
+    const imp = createXletImporter({ root: fixtures });
+    globalThis.imports = imp;
     let err = null;
     try {
-        load('./tests/helpers/fixtures/cycle-a.js');
+        void imp['cycle-a'];
     }
     catch (e) {
         err = e;
     }
+    finally {
+        delete globalThis.imports;
+    }
     assert.ok(err, 'the fixture cycle must throw');
-    assert.match(err.message, /circular require/);
-    assert.match(err.message, /cycle-a\.js -> .*cycle-b\.js -> .*cycle-a\.js/,
+    assert.match(err.message, /circular native import/);
+    assert.match(err.message, /cycle-a -> cycle-b -> cycle-a/,
         'the chain naming both fixtures must be in the message');
 });

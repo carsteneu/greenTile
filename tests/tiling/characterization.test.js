@@ -7,143 +7,16 @@
 // composition-root move and pins exactly what the move must not change.
 const test = require('node:test');
 const assert = require('node:assert/strict');
-const fs = require('node:fs');
-const path = require('node:path');
-const { cinnamonLoad, load, ROOT } = require('../helpers/cinnamon-loader');
-const { createCinnamonEnv } = require('../helpers/fakes/cinnamon-env');
-
-const MONITOR = { x: 0, y: 0, width: 2000, height: 1100 };
-
-// Recording fake Tweener: pins the animated placement (ANIMATE_MS and the
-// offset parking) without touching the frozen fake env.
-const makeTweenerRecorder = () => {
-    const tweens = [];
-    return {
-        tweens,
-        removeTweens() {},
-        addTween(actor, params) {
-            tweens.push(params);
-        },
-    };
-};
-
-const makeEnv = (tweener, extraSettings = {}) => {
-    const env = createCinnamonEnv({ settingsDefaults: Object.assign({ tileAnimation: true }, extraSettings) });
-    // test-local instance augmentations: push_tile (native push is not part of
-    // the shared fake) and the MotionDirection names push-tile reads
-    const pushes = [];
-    env.display.push_tile = (window, dir) => pushes.push([window, dir]);
-    env.gi.Meta.MotionDirection = { LEFT: 1, RIGHT: 2, UP: 3, DOWN: 4 };
-    const imports = new Proxy(env.imports, {
-        get(target, prop) {
-            if (prop !== 'ui')
-                {return target[prop];}
-            const ui = target[prop];
-            return new Proxy(ui, {
-                get(u, p) {
-                    if (p === 'tweener')
-                        {return tweener;}
-                    if (p === 'main') {
-                        // no panels on the monitor: usableArea sees the
-                        // full monitor rect
-                        const main = u[p];
-                        return new Proxy(main, {
-                            get(m, mp) {
-                                if (mp === 'panelManager')
-                                    {return { getPanelsInMonitor: () => [] };}
-                                return m[mp];
-                            },
-                        });
-                    }
-                    return u[p];
-                },
-            });
-        },
-    });
-    globalThis.imports = imports;
-    globalThis.global = env.global;
-    const src = fs.readFileSync(path.join(ROOT, 'extension.js'), 'utf8');
-    const ext = cinnamonLoad(src, load, 'extension.js');
-    ext.init({ uuid: 'greenTile@carsteneu' });
-    return { env, ext, pushes };
-};
-
-// Fake MetaWindow recording move_resize_frame / move_frame with enough signal
-// hub surface for the auto/border observers that ride along.
-const makeWindow = (env, seq, rect, monitor = 0, withActor = null) => {
-    const handlers = [];
-    let nextId = 1;
-    const window = {
-        seq,
-        minimized: false,
-        moves: [],
-        rect: rect.slice(),
-        connect(sig, cb) {
-            const id = nextId++;
-            handlers.push({ sig, cb, id });
-            return id;
-        },
-        disconnect(id) {
-            const at = handlers.findIndex((h) => h.id === id);
-            if (at === -1)
-                {throw new Error('window: no such handler ' + id);}
-            handlers.splice(at, 1);
-        },
-        count(sig) {
-            return handlers.filter((h) => !sig || h.sig === sig).length;
-        },
-        emit(sig, ...args) {
-            for (const h of handlers.slice())
-                {if (h.sig === sig)
-                    {h.cb(...args);}}
-        },
-        get_stable_sequence: () => seq,
-        get_window_type: () => 6,
-        get_wm_class: () => 'FakeWindow',
-        get_title: () => 'FakeWindow' + seq,
-        get_monitor: () => monitor,
-        get_workspace: () => env.activeWorkspace,
-        is_on_all_workspaces: () => false,
-        get_frame_rect: () => ({ x: window.rect[0], y: window.rect[1], width: window.rect[2], height: window.rect[3] }),
-        get_compositor_private: () => withActor,
-        move_resize_frame(anim, x, y, w, h) {
-            window.moves.push(['resize', x, y, w, h]);
-            window.rect = [x, y, w, h];
-        },
-        move_frame(anim, x, y) {
-            window.moves.push(['move', x, y]);
-            window.rect = [x, y, window.rect[2], window.rect[3]];
-        },
-        unmaximize() {},
-        activate() {
-            env.display.focus_window = window;
-        },
-        change_workspace_by_index() {},
-        move_to_monitor() {},
-    };
-    return window;
-};
-
-const makeWorkspace = (env) => {
-    const ws = { list_windows: () => env.tabList };
-    env.workspaces.push(ws);
-    return ws;
-};
-
-const settingsInstance = (env) => env.settingsInstances.at(-1);
-
-// enable + one DisplayConfig flush; monitor 0 is the 2000x1100 work area.
-const enableOnMonitor = (env, ext) => {
-    env.layoutManager.monitors.push(MONITOR);
-    ext.enable();
-    env.flushDisplayConfigNoReply();
-};
+const { load } = require('../helpers/cinnamon-loader');
+const { makeEaseActor } = require('../helpers/fakes/ease-actor');
+const {
+    MONITOR, makeEnv, makeWindow, makeWorkspace, settingsInstance, enableOnMonitor, enableOnMonitors,
+} = require('../helpers/fakes/cinnamon-harness');
 
 // ---------------- columns hotkey (appColumns) ----------------
 
 test('auto-columns divides the usable area into 6 columns, reading order kept, gap flush at screen edges', () => {
-    const tweener = makeTweenerRecorder();
-    const { env, ext } = makeEnv(tweener);
+    const { env, ext } = makeEnv();
     enableOnMonitor(env, ext);
     const w1 = makeWindow(env, 1, [10, 10, 400, 300]);
     const w2 = makeWindow(env, 2, [500, 0, 400, 300]);
@@ -160,11 +33,10 @@ test('auto-columns divides the usable area into 6 columns, reading order kept, g
         {assert.deepEqual(w.moves[1], ['move', w.moves[1][1], w.moves[1][2]], 'move_frame follows the resize at the final geometry');}
 });
 
-test('animated placement parks the compositor actor at the old rect with the old scale and tweens back over 250 ms', () => {
-    const tweener = makeTweenerRecorder();
-    const { env, ext } = makeEnv(tweener);
+test('animated placement parks the compositor actor at the old rect and eases back to identity over 250 ms', () => {
+    const { env, ext } = makeEnv();
     enableOnMonitor(env, ext);
-    const actor = { id: 'actor' };
+    const actor = makeEaseActor();
     const w1 = makeWindow(env, 1, [10, 10, 400, 300], 0, actor);
     const w2 = makeWindow(env, 2, [500, 0, 400, 300]);
     env.tabList.push(w1, w2);
@@ -172,31 +44,256 @@ test('animated placement parks the compositor actor at the old rect with the old
     env.activeWorkspace = { index: () => 0 };
     env.keybindingManager.hotkeys.get('greenTile-auto6').cb();
     assert.deepEqual(w1.moves[0], ['resize', 0, 0, 329, 1100]);
-    // the offsets park the ACTOR at the old rect before the move; the tween
+    // the offsets park the ACTOR at the old rect before the move; the ease
     // runs back to identity — its duration pins ANIMATE_MS
     assert.equal(actor.translation_x, 10 - 0);
     assert.equal(actor.translation_y, 10 - 0);
     assert.equal(actor.scale_x, 400 / 329);
     assert.equal(actor.scale_y, 300 / 1100);
-    assert.deepEqual(tweener.tweens, [{
-        translation_x: 0,
-        translation_y: 0,
-        scale_x: 1,
-        scale_y: 1,
-        time: 0.25,
-        transition: 'easeOutQuad',
+    assert.deepEqual(actor.eases, [{
+        duration: 250,
+        mode: 'ease-out-quad',
+        targets: { translation_x: 0, translation_y: 0, scale_x: 1, scale_y: 1 },
     }]);
+    assert.equal(ext.currentSession().app.placement.has(w1), true, 'the own ease is owned while it runs');
+    actor.finishAll();
+    assert.equal(actor.translation_x, 0, 'ease completion lands on identity');
+    assert.equal(actor.scale_x, 1, 'ease completion lands on identity');
+    assert.equal(ext.currentSession().app.placement.has(w1), false, 'a completed ease releases the ownership record');
+});
+
+test('non-animated placement never touches a foreign transition or the actor state (workspace-switch regression)', () => {
+    // live finding (2026-10-01, ws4): with the old Tweener code a non-animated
+    // place stomped translation/scale to identity while the shell's own
+    // workspace animation was mid-flight — Meta frame and visible actor
+    // desynced (translations 0, scale 1, buffer elsewhere). The ease
+    // migration must leave a foreign transition completely alone.
+    const { env, ext } = makeEnv({ tileAnimation: false });
+    enableOnMonitor(env, ext);
+    const actor = makeEaseActor();
+    // foreign effect state (the shell's size-change effect owns translation and
+    // scale): a mid-animation visual offset plus its transition
+    let foreignStopped = null;
+    actor.foreignTransition('translation-x', 256, (fin) => { foreignStopped = fin; });
+    const w1 = makeWindow(env, 1, [10, 10, 400, 300], 0, actor);
+    const w2 = makeWindow(env, 2, [500, 0, 400, 300]);
+    env.tabList.push(w1, w2);
+    env.display.focus_window = w1;
+    env.activeWorkspace = { index: () => 0 };
+    env.keybindingManager.hotkeys.get('greenTile-auto6').cb();
+    assert.deepEqual(w1.moves[0], ['resize', 0, 0, 329, 1100], 'the buffer moves to the target geometry');
+    assert.equal(actor.translation_x, 256, 'the foreign mid-animation offset is not stomped');
+    assert.equal(actor.scale_x, 1);
+    assert.equal(actor.eases.length, 0, 'no ease is started');
+    assert.equal(foreignStopped, null, 'the foreign transition is never stopped');
+    assert.equal(ext.currentSession().app.placement.has(w1), false, 'no own transitions are owned');
+});
+
+test('non-animated placement supersedes exactly an own in-flight ease', () => {
+    const { env, ext } = makeEnv();
+    enableOnMonitor(env, ext);
+    const actor = makeEaseActor();
+    const w1 = makeWindow(env, 1, [10, 10, 400, 300], 0, actor);
+    const w2 = makeWindow(env, 2, [500, 0, 400, 300]);
+    env.tabList.push(w1, w2);
+    env.display.focus_window = w1;
+    env.activeWorkspace = { index: () => 0 };
+    env.keybindingManager.hotkeys.get('greenTile-auto6').cb();
+    assert.equal(actor.eases.length, 1, 'animated first placement eased');
+    assert.equal(ext.currentSession().app.placement.has(w1), true, 'the own ease is owned');
+    // animations off mid-flight: the own transitions must be released synchronously
+    settingsInstance(env).setValue('tileAnimation', false);
+    env.keybindingManager.hotkeys.get('greenTile-auto6').cb();
+    assert.equal(actor.eases.length, 1, 'the supersede releases our transitions instead of easing again');
+    assert.deepEqual(actor.removedTransitions.slice().sort(),
+        ['scale-x', 'scale-y', 'translation-x', 'translation-y'], 'exactly the four own transitions were stopped');
+    assert.equal(actor.translation_x, 0, 'identity applied');
+    assert.equal(actor.translation_y, 0, 'identity applied');
+    assert.equal(actor.scale_x, 1, 'identity applied');
+    assert.equal(actor.scale_y, 1, 'identity applied');
+    assert.equal(ext.currentSession().app.placement.has(w1), false, 'ownership released');
+    // and after completion of nothing pending, further non-animated places stay silent
+    env.keybindingManager.hotkeys.get('greenTile-auto6').cb();
+    assert.equal(actor.eases.length, 1, 'no further ease without an own transition in flight');
+    assert.equal(actor.removedTransitions.length, 4, 'nothing further released');
+});
+
+test('same-geometry animated placement stays aligned', () => {
+    const { env, ext } = makeEnv();
+    enableOnMonitor(env, ext);
+    const actor = makeEaseActor();
+    const w1 = makeWindow(env, 1, [10, 10, 400, 300], 0, actor);
+    const w2 = makeWindow(env, 2, [500, 0, 400, 300]);
+    env.tabList.push(w1, w2);
+    env.display.focus_window = w1;
+    env.activeWorkspace = { index: () => 0 };
+    env.keybindingManager.hotkeys.get('greenTile-auto6').cb();
+    actor.finishAll();
+    // retile to the SAME geometry: pre-state delta is 0, ease targets identity
+    env.keybindingManager.hotkeys.get('greenTile-auto6').cb();
+    assert.equal(actor.translation_x, 0, 'no visual offset for identical geometry');
+    assert.equal(actor.scale_x, 1);
+    assert.deepEqual(actor.eases.at(-1).targets, { translation_x: 0, translation_y: 0, scale_x: 1, scale_y: 1 });
+    actor.finishAll();
+    assert.equal(actor.translation_x, 0);
+    assert.equal(actor.scale_x, 1, 'still aligned after the ease completes');
+});
+
+test('animated placement over a foreign transition: the foreign animation is left running, not stomped', () => {
+    // contract: cancel ONLY the transitions greenTile owns. The platform
+    // cancels whatever sits on an eased property (environment.js _easeActor:
+    // `animatedProps.forEach(p => actor.remove_transition(p))`), so an animated
+    // placement must not ease a property a foreign animation already holds —
+    // it skips the animation, releases only its own in-flight transitions, and
+    // still moves the buffer to the requested geometry.
+    const { env, ext } = makeEnv();
+    enableOnMonitor(env, ext);
+    const actor = makeEaseActor();
+    let foreignStoppedWith = null;
+    // foreign mid-flight visual offset, owned by the shell's own transition
+    const foreign = actor.foreignTransition('translation-x', 256, (fin) => { foreignStoppedWith = fin; });
+    const w1 = makeWindow(env, 1, [10, 10, 400, 300], 0, actor);
+    const w2 = makeWindow(env, 2, [500, 0, 400, 300]);
+    env.tabList.push(w1, w2);
+    env.display.focus_window = w1;
+    env.activeWorkspace = { index: () => 0 };
+    env.keybindingManager.hotkeys.get('greenTile-auto6').cb();
+    assert.equal(foreignStoppedWith, null, 'the foreign transition is never stopped');
+    assert.equal(actor.get_transition('translation-x'), foreign, 'the foreign transition keeps the property');
+    assert.equal(actor.translation_x, 256, 'the foreign value is not overwritten');
+    assert.equal(actor.eases.length, 0, 'no own animation is started over the foreign transition');
+    assert.deepEqual(w1.moves[0], ['resize', 0, 0, 329, 1100], 'the buffer still moves to the requested geometry');
+});
+
+// ---------------- r3 easing contracts (ownership, park math, teardown) ----------------
+
+test('r3: an animated re-place does not let the superseded ease steal ownership', () => {
+    const { env, ext } = makeEnv();
+    enableOnMonitor(env, ext);
+    const actor = makeEaseActor();
+    const w1 = makeWindow(env, 1, [10, 10, 400, 300], 0, actor);
+    const w2 = makeWindow(env, 2, [500, 0, 400, 300]);
+    env.tabList.push(w1, w2);
+    env.display.focus_window = w1;
+    env.activeWorkspace = { index: () => 0 };
+    env.keybindingManager.hotkeys.get('greenTile-auto6').cb();
+    // second animated placement (same set, the focused window re-places):
+    // the ease of run #1 is superseded and its onStopped(false) must NOT
+    // clear the ownership of the LIVE ease #2
+    env.keybindingManager.hotkeys.get('greenTile-auto6').cb();
+    assert.equal(actor.eases.length, 2, 'the second animated placement eased');
+    assert.equal(actor.transitions.size, 4, 'a full fresh ease is in flight');
+    assert.equal(ext.currentSession().app.placement.has(w1), true, 'the ownership belongs to the live ease');
+    // and a following non-animated place still recognizes ownership
+    settingsInstance(env).setValue('tileAnimation', false);
+    env.keybindingManager.hotkeys.get('greenTile-auto6').cb();
+    assert.equal(actor.translation_x, 0, 'the supersede path still applies: identity reached');
+    assert.equal(actor.scale_x, 1);
+});
+
+test('r3: parking accounts for a live translation — frame + translation, not frame alone', () => {
+    // the live optical bug: an actor mid a foreign animation carries
+    // translation -256; parking from the FRAME rect alone lands 256 px off
+    const { env, ext } = makeEnv();
+    enableOnMonitor(env, ext);
+    const actor = makeEaseActor();
+    actor.translation_x = -256;
+    actor.translation_y = -100;
+    const w1 = makeWindow(env, 1, [10, 10, 400, 300], 0, actor);
+    const w2 = makeWindow(env, 2, [500, 0, 400, 300]);
+    env.tabList.push(w1, w2);
+    env.display.focus_window = w1;
+    env.activeWorkspace = { index: () => 0 };
+    env.keybindingManager.hotkeys.get('greenTile-auto6').cb();
+    // visible x before the move: frame.x + translation = 10 + (-256) = -246;
+    // after the buffer moves to x=0 the park translation must be -246
+    assert.equal(actor.translation_x, 10 - 256 - 0, 'park = frame + live translation - new x');
+    assert.equal(actor.translation_y, 10 - 100 - 0, 'park = frame + live translation - new y');
+});
+
+test('r3: teardown releases exactly the own transitions and snaps visual to buffer', () => {
+    const { env, ext } = makeEnv();
+    enableOnMonitor(env, ext);
+    const actor = makeEaseActor();
+    // a FOREIGN transition on a property place.js never eases
+    let foreignStopped = null;
+    actor.foreignTransition('opacity', 128, (fin) => { foreignStopped = fin; });
+    const w1 = makeWindow(env, 1, [10, 10, 400, 300], 0, actor);
+    const w2 = makeWindow(env, 2, [500, 0, 400, 300]);
+    env.tabList.push(w1, w2);
+    env.display.focus_window = w1;
+    env.activeWorkspace = { index: () => 0 };
+    env.keybindingManager.hotkeys.get('greenTile-auto6').cb();
+    assert.equal(ext.currentSession().app.placement.has(w1), true, 'own ease in flight');
+    // the ease has not advanced yet, so the actor still carries the park.
+    // (A direct `actor.translation_x = v` write is NOT a way to model a
+    // mid-flight value: it routes through clutter_actor_set_translation_factor
+    // into _clutter_actor_create_transition, whose duration-0 skip branch
+    // REMOVES the transition on that property — clutter-actor.c 5420-5423 and
+    // 4819, skip branch 19433-19436.)
+    assert.notEqual(actor.translation_x, 0, 'precondition: the visual is parked away from the buffer');
+    ext.disable();
+    assert.equal(ext.currentSession(), null, 'the session went down with the App');
+    assert.deepEqual(actor.removedTransitions.filter((n) => n !== 'opacity').sort(),
+        ['scale-x', 'scale-y', 'translation-x', 'translation-y'],
+        'exactly the four own transitions were removed');
+    assert.equal(actor.translation_x, 0, 'own properties snapped to identity: visual == buffer');
+    assert.equal(actor.scale_x, 1);
+    assert.equal(foreignStopped, null, 'the foreign opacity transition was never touched');
+    assert.equal(actor.transitions.has('opacity'), true, 'foreign transition still pending');
+});
+
+test('r3: mixed foreign property — a parallel shell animation on another property survives', () => {
+    const { env, ext } = makeEnv();
+    enableOnMonitor(env, ext);
+    const actor = makeEaseActor();
+    let foreignStopped = null;
+    actor.foreignTransition('opacity', 128, (fin) => { foreignStopped = fin; });
+    const w1 = makeWindow(env, 1, [10, 10, 400, 300], 0, actor);
+    const w2 = makeWindow(env, 2, [500, 0, 400, 300]);
+    env.tabList.push(w1, w2);
+    env.display.focus_window = w1;
+    env.activeWorkspace = { index: () => 0 };
+    env.keybindingManager.hotkeys.get('greenTile-auto6').cb();
+    assert.equal(foreignStopped, null, 'our ease never stops a transition on a foreign property');
+    actor.finishAll();
+    assert.equal(actor.transitions.has('opacity'), true, 'foreign transition outlives our ease');
+});
+
+test('r3: outside cancellation of one own transition keeps the remaining three owned', () => {
+    // someone calls actor.remove_transition on our first transition: the
+    // platform stops exactly that one with finished=false. The ownership of
+    // the other three must survive — dropping the whole record here (and it
+    // is the record teardown releases from) leaks their transitions.
+    const { env, ext } = makeEnv();
+    enableOnMonitor(env, ext);
+    const actor = makeEaseActor();
+    const w1 = makeWindow(env, 1, [10, 10, 400, 300], 0, actor);
+    const w2 = makeWindow(env, 2, [500, 0, 400, 300]);
+    env.tabList.push(w1, w2);
+    env.display.focus_window = w1;
+    env.activeWorkspace = { index: () => 0 };
+    env.keybindingManager.hotkeys.get('greenTile-auto6').cb();
+    assert.equal(ext.currentSession().app.placement.has(w1), true);
+    actor.remove_transition('translation-x'); // first property carries the callback
+    assert.equal(actor.transitions.size, 3, 'the other own transitions are still live');
+    assert.equal(ext.currentSession().app.placement.has(w1), true,
+        'the ownership survives a single-property cancellation');
+    ext.disable();
+    assert.deepEqual(actor.removedTransitions.slice(1).sort(), ['scale-x', 'scale-y', 'translation-y'],
+        'the surviving own transitions are released at teardown');
+    assert.equal(actor.translation_x, 0, 'the cancelled property is snapped back to its buffer position');
+    assert.equal(actor.scale_x, 1);
 });
 
 // ---------------- automatic tiling (appAuto) ----------------
 
 test('automatic tiling places focus plus collected windows into the uniform grid of the monitor', () => {
-    const tweener = makeTweenerRecorder();
-    const { env, ext } = makeEnv(tweener);
+    const { env, ext } = makeEnv();
     enableOnMonitor(env, ext);
     makeWorkspace(env);
     env.activeWorkspace = { index: () => 0 };
-    const app = ext.session.app;
+    const app = ext.currentSession().app;
     const ref = app.split.ref(app, 0, 0, 2);
     const layouts = { [ref.mkey]: { [ref.wskey]: { auto: true } } };
     settingsInstance(env).setValue('layouts', JSON.stringify(layouts));
@@ -215,15 +312,6 @@ test('automatic tiling places focus plus collected windows into the uniform grid
 
 // ---------------- fixes: fresh windows append at the end (issue 6) ----------------
 
-// enable with the given monitor rects (indexes in push order)
-const enableOnMonitors = (env, ext, monitors) => {
-    for (const m of monitors) {
-        env.layoutManager.monitors.push(m);
-    }
-    ext.enable();
-    env.flushDisplayConfigNoReply();
-};
-
 // drive a fresh window through the real observer path: window-added -> pending -> 300 ms debounce
 const addWindow = (env, app, w) => {
     app.auto.onWindowAdded(app, env.activeWorkspace, w);
@@ -233,8 +321,7 @@ const addWindow = (env, app, w) => {
 };
 
 test('preset retile appends a new window at the end regardless of its start position and consumes the pending record', () => {
-    const tweener = makeTweenerRecorder();
-    const { env, ext } = makeEnv(tweener, { windowGap: 0 });
+    const { env, ext } = makeEnv({ windowGap: 0 });
     enableOnMonitor(env, ext);
     makeWorkspace(env);
     env.activeWorkspace = { index: () => 0 };
@@ -242,7 +329,7 @@ test('preset retile appends a new window at the end regardless of its start posi
     const w2 = makeWindow(env, 22, [500, 0, 400, 300]);
     env.tabList.push(w1, w2);
     env.display.focus_window = w1;
-    const app = ext.session.app;
+    const app = ext.currentSession().app;
     app.ops.presetsWrite(app, [{ id: 'p1', name: 'Halves', rules: [{ min: 2, stacks: [1, 1] }] }]);
     app.ops.layoutSet(app, 0, 0, { preset: 'p1' });
     app.ops.retileMonitor(app, 0);
@@ -260,8 +347,7 @@ test('preset retile appends a new window at the end regardless of its start posi
 });
 
 test('preset retile appends several new windows in opening order, whatever their spawn positions', () => {
-    const tweener = makeTweenerRecorder();
-    const { env, ext } = makeEnv(tweener, { windowGap: 0 });
+    const { env, ext } = makeEnv({ windowGap: 0 });
     enableOnMonitor(env, ext);
     makeWorkspace(env);
     env.activeWorkspace = { index: () => 0 };
@@ -269,7 +355,7 @@ test('preset retile appends several new windows in opening order, whatever their
     const w2 = makeWindow(env, 22, [500, 0, 400, 300]);
     env.tabList.push(w1, w2);
     env.display.focus_window = w1;
-    const app = ext.session.app;
+    const app = ext.currentSession().app;
     app.ops.presetsWrite(app, [{ id: 'p4', name: 'Quarters', rules: [{ min: 2, stacks: [1, 1, 1, 1] }] }]);
     app.ops.layoutSet(app, 0, 0, { preset: 'p4' });
     app.ops.retileMonitor(app, 0);
@@ -290,8 +376,7 @@ test('preset retile appends several new windows in opening order, whatever their
 });
 
 test('automatic grid appends fresh windows in opening order too and keeps the settled order', () => {
-    const tweener = makeTweenerRecorder();
-    const { env, ext } = makeEnv(tweener, { windowGap: 0 });
+    const { env, ext } = makeEnv({ windowGap: 0 });
     enableOnMonitor(env, ext);
     makeWorkspace(env);
     env.activeWorkspace = { index: () => 0 };
@@ -299,7 +384,7 @@ test('automatic grid appends fresh windows in opening order too and keeps the se
     const w2 = makeWindow(env, 32, [500, 0, 400, 300]);
     env.tabList.push(w1, w2);
     env.display.focus_window = w1;
-    const app = ext.session.app;
+    const app = ext.currentSession().app;
     const ref = app.split.ref(app, 0, 0, 2);
     const layouts = { [ref.mkey]: { [ref.wskey]: { auto: true } } };
     settingsInstance(env).setValue('layouts', JSON.stringify(layouts));
@@ -325,8 +410,7 @@ test('automatic grid appends fresh windows in opening order too and keeps the se
 });
 
 test('a fresh window on another monitor appends at that monitor\'s end without touching the first', () => {
-    const tweener = makeTweenerRecorder();
-    const { env, ext } = makeEnv(tweener, { windowGap: 0 });
+    const { env, ext } = makeEnv({ windowGap: 0 });
     const mon2 = { x: 2000, y: 0, width: 1000, height: 1100 };
     enableOnMonitors(env, ext, [MONITOR, mon2]);
     makeWorkspace(env);
@@ -337,7 +421,7 @@ test('a fresh window on another monitor appends at that monitor\'s end without t
     const w4 = makeWindow(env, 44, [2000 + 500, 0, 400, 300], 1);
     env.tabList.push(w1, w2, w3, w4);
     env.display.focus_window = w1;
-    const app = ext.session.app;
+    const app = ext.currentSession().app;
     app.ops.presetsWrite(app, [{ id: 'p1', name: 'Halves', rules: [{ min: 2, stacks: [1, 1] }] }]);
     app.ops.layoutSet(app, 0, 0, { preset: 'p1' });
     app.ops.layoutSet(app, 1, 0, { preset: 'p1' });
@@ -366,7 +450,7 @@ test('a fresh window on another monitor appends at that monitor\'s end without t
 // drive the real editor: open the draft, apply the changed rules, click Save
 const savePresetWithRules = (ext, presetId, rules) => {
     const { editorOpen, editorBody } = load('./lib/ui/editor.js');
-    const app = ext.session.app;
+    const app = ext.currentSession().app;
     editorOpen(app, app.ops.presetsRead(app).find((p) => p.id === presetId));
     app.panel.draft.rules = rules;
     const body = editorBody(app);
@@ -390,8 +474,7 @@ const savePresetWithRules = (ext, presetId, rules) => {
 const appliedLogs = (env, name) => env.logs.filter((l) => l.indexOf('greenTile preset "' + name + '" applied') === 0);
 
 test('saving a shared preset retiles every monitor-workspace where it is active, not just the focused one', () => {
-    const tweener = makeTweenerRecorder();
-    const { env, ext } = makeEnv(tweener, { windowGap: 0 });
+    const { env, ext } = makeEnv({ windowGap: 0 });
     const mon2 = { x: 2000, y: 0, width: 1000, height: 1100 };
     enableOnMonitors(env, ext, [MONITOR, mon2]);
     makeWorkspace(env);
@@ -403,7 +486,7 @@ test('saving a shared preset retiles every monitor-workspace where it is active,
     const w5 = makeWindow(env, 55, [2000 + 670, 0, 300, 300], 1);
     env.tabList.push(w1, w2, w3, w4, w5);
     env.display.focus_window = w1;
-    const app = ext.session.app;
+    const app = ext.currentSession().app;
     app.ops.presetsWrite(app, [{ id: 'p1', name: 'Halves', rules: [{ min: 2, stacks: [1, 1] }] }]);
     app.ops.layoutSet(app, 0, 0, { preset: 'p1' });
     app.ops.layoutSet(app, 1, 0, { preset: 'p1' });
@@ -428,8 +511,7 @@ test('saving a shared preset retiles every monitor-workspace where it is active,
 });
 
 test('a paused focused monitor does not block the save on other active monitor-workspaces', () => {
-    const tweener = makeTweenerRecorder();
-    const { env, ext } = makeEnv(tweener, { windowGap: 0 });
+    const { env, ext } = makeEnv({ windowGap: 0 });
     const mon2 = { x: 2000, y: 0, width: 1000, height: 1100 };
     enableOnMonitors(env, ext, [MONITOR, mon2]);
     makeWorkspace(env);
@@ -441,7 +523,7 @@ test('a paused focused monitor does not block the save on other active monitor-w
     const w5 = makeWindow(env, 55, [2000 + 670, 0, 300, 300], 1);
     env.tabList.push(w1, w2, w3, w4, w5);
     env.display.focus_window = w1;
-    const app = ext.session.app;
+    const app = ext.currentSession().app;
     app.ops.presetsWrite(app, [{ id: 'p1', name: 'Halves', rules: [{ min: 2, stacks: [1, 1] }] }]);
     app.ops.layoutSet(app, 0, 0, { preset: 'p1' });
     app.ops.layoutSet(app, 1, 0, { preset: 'p1' });
@@ -471,8 +553,7 @@ const pressResize = (env, action, times) => {
 };
 
 test('keyboard resize clamps the border so the final frames stay at the minimum (gap 48)', () => {
-    const tweener = makeTweenerRecorder();
-    const { env, ext } = makeEnv(tweener, { windowGap: 48 });
+    const { env, ext } = makeEnv({ windowGap: 48 });
     enableOnMonitor(env, ext);
     makeWorkspace(env);
     env.activeWorkspace = { index: () => 0 };
@@ -480,7 +561,7 @@ test('keyboard resize clamps the border so the final frames stay at the minimum 
     const w2 = makeWindow(env, 62, [500, 0, 400, 300]);
     env.tabList.push(w1, w2);
     env.display.focus_window = w1;
-    const app = ext.session.app;
+    const app = ext.currentSession().app;
     const ref = app.split.ref(app, 0, 0, 2);
     const layouts = { [ref.mkey]: { [ref.wskey]: { auto: true } } };
     settingsInstance(env).setValue('layouts', JSON.stringify(layouts));
@@ -496,15 +577,14 @@ test('keyboard resize clamps the border so the final frames stay at the minimum 
 });
 
 test('vertical keyboard resize clamps the final frame between two borders (inner cell, gap 48)', () => {
-    const tweener = makeTweenerRecorder();
-    const { env, ext } = makeEnv(tweener, { windowGap: 48 });
+    const { env, ext } = makeEnv({ windowGap: 48 });
     enableOnMonitor(env, ext);
     makeWorkspace(env);
     env.activeWorkspace = { index: () => 0 };
     const wins = [61, 62, 63, 64, 65, 66].map((seq, i) => makeWindow(env, seq, [i * 500 + 10, 10, 400, 300]));
     env.tabList.push(...wins);
     env.display.focus_window = wins[1];
-    const app = ext.session.app;
+    const app = ext.currentSession().app;
     app.ops.presetsWrite(app, [{ id: 'p23', name: 'Stacks', rules: [{ min: 6, stacks: [2, 3] }] }]);
     app.ops.layoutSet(app, 0, 0, { preset: 'p23' });
     app.ops.retileMonitor(app, 0);
@@ -518,8 +598,7 @@ test('vertical keyboard resize clamps the final frame between two borders (inner
 });
 
 test('mouse resize clamps the stored border so both final frames stay at the minimum (gap 48)', () => {
-    const tweener = makeTweenerRecorder();
-    const { env, ext } = makeEnv(tweener, { windowGap: 48 });
+    const { env, ext } = makeEnv({ windowGap: 48 });
     enableOnMonitor(env, ext);
     makeWorkspace(env);
     env.activeWorkspace = { index: () => 0 };
@@ -527,7 +606,7 @@ test('mouse resize clamps the stored border so both final frames stay at the min
     const w2 = makeWindow(env, 62, [500, 0, 400, 300]);
     env.tabList.push(w1, w2);
     env.display.focus_window = w1;
-    const app = ext.session.app;
+    const app = ext.currentSession().app;
     const ref = app.split.ref(app, 0, 0, 2);
     const layouts = { [ref.mkey]: { [ref.wskey]: { auto: true } } };
     settingsInstance(env).setValue('layouts', JSON.stringify(layouts));
@@ -545,8 +624,7 @@ test('mouse resize clamps the stored border so both final frames stay at the min
 });
 
 test('infeasible space: a resize just stops instead of storing an undersized arrangement', () => {
-    const tweener = makeTweenerRecorder();
-    const { env, ext } = makeEnv(tweener, { windowGap: 48 });
+    const { env, ext } = makeEnv({ windowGap: 48 });
     const mon2 = { x: 2000, y: 0, width: 300, height: 1100 };
     enableOnMonitors(env, ext, [MONITOR, mon2]);
     makeWorkspace(env);
@@ -556,7 +634,7 @@ test('infeasible space: a resize just stops instead of storing an undersized arr
     const w3 = makeWindow(env, 63, [2000 + 150, 0, 100, 300], 1);
     env.tabList.push(w1, w2, w3);
     env.display.focus_window = w2;
-    const app = ext.session.app;
+    const app = ext.currentSession().app;
     const ref = app.split.ref(app, 1, 0, 2);
     const layouts = { [ref.mkey]: { [ref.wskey]: { auto: true } } };
     settingsInstance(env).setValue('layouts', JSON.stringify(layouts));
@@ -573,8 +651,7 @@ test('infeasible space: a resize just stops instead of storing an undersized arr
 });
 
 test('saving a shared preset retiles each monitor\'s ACTIVE workspace only; inactive ones adopt on switch', () => {
-    const tweener = makeTweenerRecorder();
-    const { env, ext } = makeEnv(tweener, { windowGap: 0 });
+    const { env, ext } = makeEnv({ windowGap: 0 });
     enableOnMonitor(env, ext);
     makeWorkspace(env);
     const ws1wins = [];
@@ -584,7 +661,7 @@ test('saving a shared preset retiles each monitor\'s ACTIVE workspace only; inac
     const w2 = makeWindow(env, 52, [500, 0, 400, 300], 0);
     env.tabList.push(w1, w2);
     env.display.focus_window = w1;
-    const app = ext.session.app;
+    const app = ext.currentSession().app;
     app.ops.presetsWrite(app, [{ id: 'p1', name: 'Halves', rules: [{ min: 2, stacks: [1, 1] }] }]);
     app.ops.layoutSet(app, 0, 0, { preset: 'p1' });
     app.ops.layoutSet(app, 0, 1, { preset: 'p1' });
@@ -610,8 +687,7 @@ test('saving a shared preset retiles each monitor\'s ACTIVE workspace only; inac
 });
 
 test('retiles of inactive workspaces leave the pending records for the active workspace', () => {
-    const tweener = makeTweenerRecorder();
-    const { env, ext } = makeEnv(tweener, { windowGap: 0 });
+    const { env, ext } = makeEnv({ windowGap: 0 });
     enableOnMonitor(env, ext);
     makeWorkspace(env);
     const ws1wins = [];
@@ -621,7 +697,7 @@ test('retiles of inactive workspaces leave the pending records for the active wo
     const w2 = makeWindow(env, 72, [500, 0, 400, 300], 0);
     env.tabList.push(w1, w2);
     env.display.focus_window = w1;
-    const app = ext.session.app;
+    const app = ext.currentSession().app;
     app.ops.presetsWrite(app, [{ id: 'p1', name: 'Halves', rules: [{ min: 2, stacks: [1, 1] }] }]);
     app.ops.layoutSet(app, 0, 0, { preset: 'p1' });
     app.ops.layoutSet(app, 0, 1, { preset: 'p1' });
@@ -639,8 +715,7 @@ test('retiles of inactive workspaces leave the pending records for the active wo
 });
 
 test('a focused fresh window appends last too (panel preset row click, swap)', () => {
-    const tweener = makeTweenerRecorder();
-    const { env, ext } = makeEnv(tweener, { windowGap: 0 });
+    const { env, ext } = makeEnv({ windowGap: 0 });
     enableOnMonitor(env, ext);
     makeWorkspace(env);
     env.activeWorkspace = { index: () => 0 };
@@ -648,7 +723,7 @@ test('a focused fresh window appends last too (panel preset row click, swap)', (
     const w2 = makeWindow(env, 82, [500, 0, 400, 300]);
     env.tabList.push(w1, w2);
     env.display.focus_window = w1;
-    const app = ext.session.app;
+    const app = ext.currentSession().app;
     app.ops.presetsWrite(app, [{ id: 'p1', name: 'Halves', rules: [{ min: 2, stacks: [1, 1] }] }]);
     app.ops.layoutSet(app, 0, 0, { preset: 'p1' });
     app.ops.retileMonitor(app, 0);
@@ -667,8 +742,7 @@ test('a focused fresh window appends last too (panel preset row click, swap)', (
 });
 
 test('PINNED FIXED (todo_fixes issue 8): a legacy narrow stored split + later gap increase still renders the promised minimum', () => {
-    const tweener = makeTweenerRecorder();
-    const { env, ext } = makeEnv(tweener, { windowGap: 0 });
+    const { env, ext } = makeEnv({ windowGap: 0 });
     enableOnMonitor(env, ext);
     makeWorkspace(env);
     env.activeWorkspace = { index: () => 0 };
@@ -676,7 +750,7 @@ test('PINNED FIXED (todo_fixes issue 8): a legacy narrow stored split + later ga
     const w2 = makeWindow(env, 92, [500, 0, 400, 300]);
     env.tabList.push(w1, w2);
     env.display.focus_window = w1;
-    const app = ext.session.app;
+    const app = ext.currentSession().app;
     const ref = app.split.ref(app, 0, 0, 2);
     const layouts = { [ref.mkey]: { [ref.wskey]: { auto: true } } };
     settingsInstance(env).setValue('layouts', JSON.stringify(layouts));
@@ -714,7 +788,7 @@ const enableTiledPaused = (env, ext) => {
     const w2 = makeWindow(env, 102, [500, 0, 400, 300], 0);
     env.tabList.push(w1, w2);
     env.display.focus_window = w1;
-    const app = ext.session.app;
+    const app = ext.currentSession().app;
     app.ops.presetsWrite(app, [{ id: 'p1', name: 'Halves', rules: [{ min: 2, stacks: [1, 1] }] }]);
     app.ops.layoutSet(app, 0, 0, { preset: 'p1' });
     app.ops.retileMonitor(app, 0);
@@ -723,8 +797,7 @@ const enableTiledPaused = (env, ext) => {
 };
 
 test('a paused monitor-workspace accepts no retile until reactivation', () => {
-    const tweener = makeTweenerRecorder();
-    const { env, ext } = makeEnv(tweener, { windowGap: 0 });
+    const { env, ext } = makeEnv({ windowGap: 0 });
     const { app, w1, w2 } = enableTiledPaused(env, ext);
     const before = appliedLogs(env, 'Halves').length;
     assert.deepEqual([w1.rect, w2.rect], [[0, 0, 1000, 1100], [1000, 0, 1000, 1100]]);
@@ -735,8 +808,7 @@ test('a paused monitor-workspace accepts no retile until reactivation', () => {
 });
 
 test('a paused surface: Super+G persists the exclusion flag without rearranging', () => {
-    const tweener = makeTweenerRecorder();
-    const { env, ext } = makeEnv(tweener, { windowGap: 0 });
+    const { env, ext } = makeEnv({ windowGap: 0 });
     const { app, w2 } = enableTiledPaused(env, ext);
     env.display.focus_window = w2;
     const before = appliedLogs(env, 'Halves').length;
@@ -746,8 +818,7 @@ test('a paused surface: Super+G persists the exclusion flag without rearranging'
 });
 
 test('a paused surface: swap hotkey must not rearrange and dnd must not snap', () => {
-    const tweener = makeTweenerRecorder();
-    const { env, ext } = makeEnv(tweener, { windowGap: 0 });
+    const { env, ext } = makeEnv({ windowGap: 0 });
     const { app, w1, w2 } = enableTiledPaused(env, ext);
     const rects = [w1.rect.slice(), w2.rect.slice()];
     env.display.focus_window = w1;
@@ -765,8 +836,7 @@ test('a paused surface: swap hotkey must not rearrange and dnd must not snap', (
 });
 
 test('a paused auto-grid surface behaves like a paused preset surface (no preview, no snap)', () => {
-    const tweener = makeTweenerRecorder();
-    const { env, ext } = makeEnv(tweener, { windowGap: 0 });
+    const { env, ext } = makeEnv({ windowGap: 0 });
     enableOnMonitor(env, ext);
     makeWorkspace(env);
     env.activeWorkspace = { index: () => 0 };
@@ -774,7 +844,7 @@ test('a paused auto-grid surface behaves like a paused preset surface (no previe
     const w2 = makeWindow(env, 112, [500, 0, 400, 300], 0);
     env.tabList.push(w1, w2);
     env.display.focus_window = w1;
-    const app = ext.session.app;
+    const app = ext.currentSession().app;
     const ref = app.split.ref(app, 0, 0, 2);
     settingsInstance(env).setValue('layouts', JSON.stringify({ [ref.mkey]: { [ref.wskey]: { auto: true } } }));
     app.ops.retileMonitor(app, 0);
@@ -788,8 +858,7 @@ test('a paused auto-grid surface behaves like a paused preset surface (no previe
 });
 
 test('explicit reactivation retiles again (Super+Ctrl+A first, then the retile)', () => {
-    const tweener = makeTweenerRecorder();
-    const { env, ext } = makeEnv(tweener, { windowGap: 0 });
+    const { env, ext } = makeEnv({ windowGap: 0 });
     const { app, w1, w2 } = enableTiledPaused(env, ext);
     const before = appliedLogs(env, 'Halves').length;
     env.display.focus_window = w1;
@@ -808,8 +877,7 @@ test('explicit reactivation retiles again (Super+Ctrl+A first, then the retile)'
 // ---------------- presets + layouts through the ops facade ----------------
 
 test('preset writing, layout assignment and monitor retile round-trip through the ops facade', () => {
-    const tweener = makeTweenerRecorder();
-    const { env, ext } = makeEnv(tweener);
+    const { env, ext } = makeEnv();
     enableOnMonitor(env, ext);
     makeWorkspace(env);
     env.activeWorkspace = { index: () => 0 };
@@ -817,7 +885,7 @@ test('preset writing, layout assignment and monitor retile round-trip through th
     const w2 = makeWindow(env, 22, [500, 0, 400, 300]);
     env.tabList.push(w1, w2);
     env.display.focus_window = w1;
-    const app = ext.session.app;
+    const app = ext.currentSession().app;
     app.ops.presetsWrite(app, [{ id: 'p1', name: 'Halves', rules: [{ min: 2, stacks: [1, 1] }] }]);
     assert.equal(settingsInstance(env).callLog.filter((c) => c.op === 'setValue' && c.key === 'presets').length, 1,
         'the preset list is written into the settings');
@@ -836,8 +904,7 @@ test('preset writing, layout assignment and monitor retile round-trip through th
 // ---------------- swap hotkeys ----------------
 
 test('swap-right exchanges the cells of the two tiled windows and keeps the log line', () => {
-    const tweener = makeTweenerRecorder();
-    const { env, ext } = makeEnv(tweener);
+    const { env, ext } = makeEnv();
     enableOnMonitor(env, ext);
     makeWorkspace(env);
     env.activeWorkspace = { index: () => 0 };
@@ -845,7 +912,7 @@ test('swap-right exchanges the cells of the two tiled windows and keeps the log 
     const w2 = makeWindow(env, 32, [500, 0, 400, 300]);
     env.tabList.push(w1, w2);
     env.display.focus_window = w1;
-    const app = ext.session.app;
+    const app = ext.currentSession().app;
     app.ops.presetsWrite(app, [{ id: 'p1', name: 'Halves', rules: [{ min: 2, stacks: [1, 1] }] }]);
     app.ops.layoutSet(app, 0, 0, { preset: 'p1' });
     app.ops.retileMonitor(app, 0);
@@ -861,8 +928,7 @@ test('swap-right exchanges the cells of the two tiled windows and keeps the log 
 // ---------------- focus push (Super+Arrow) ----------------
 
 test('push-tile with no tiling on the monitor falls back to the native push_tile', () => {
-    const tweener = makeTweenerRecorder();
-    const { env, ext, pushes } = makeEnv(tweener);
+    const { env, ext, pushes } = makeEnv();
     enableOnMonitor(env, ext);
     makeWorkspace(env);
     env.activeWorkspace = { index: () => 0 };
@@ -875,15 +941,14 @@ test('push-tile with no tiling on the monitor falls back to the native push_tile
 });
 
 test('push-tile inside the active layout activates the neighbour cell and never reaches push_tile', () => {
-    const tweener = makeTweenerRecorder();
-    const { env, ext, pushes } = makeEnv(tweener);
+    const { env, ext, pushes } = makeEnv();
     enableOnMonitor(env, ext);
     makeWorkspace(env);
     env.activeWorkspace = { index: () => 0 };
     const w1 = makeWindow(env, 51, [10, 10, 400, 300]);
     const w2 = makeWindow(env, 52, [500, 0, 400, 300]);
     env.tabList.push(w1, w2);
-    const app = ext.session.app;
+    const app = ext.currentSession().app;
     app.ops.presetsWrite(app, [{ id: 'p1', name: 'Halves', rules: [{ min: 2, stacks: [1, 1] }] }]);
     app.ops.layoutSet(app, 0, 0, { preset: 'p1' });
     env.display.focus_window = w1;

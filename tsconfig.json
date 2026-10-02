@@ -4,6 +4,7 @@
         "lib": ["ES2022"],
         "module": "commonjs",
         "moduleResolution": "node",
+        "moduleDetection": "force",
         "allowJs": true,
         "checkJs": true,
         "noEmit": true,

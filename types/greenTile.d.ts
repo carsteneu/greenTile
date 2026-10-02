@@ -18,6 +18,48 @@ type CinnamonWorkspace = {
 };
 
 /**
+ * Clutter actor of a window frame (Meta.Window.get_compositor_private) as far
+ * as greenTile touches it: translation/scale for the animated placement plus
+ * the platform transition API of Cinnamon's environment.js (_easeActor/
+ * _easeActorProperty) — ease(), get_transition() as the identity handle of a
+ * single running transition, remove_transition() to stop exactly that one, and
+ * the actor's own detailed ::transition-stopped(name, is_finished) signal.
+ * The Clutter property accessors are plain fields here.
+ */
+type CinnamonActor = {
+    translation_x: number;
+    translation_y: number;
+    scale_x: number;
+    scale_y: number;
+    /** Cinnamon Clutter.Actor.prototype.ease (environment.js _easeActor). */
+    ease(props: Record<string, any>): void;
+    /** Clutter.Actor.get_transition(propName) — the running transition of that
+     * (dashed) property or null. lib/runtime/placement.js compares this object
+     * identity to tell an own transition from a foreign one. */
+    get_transition(name: string): ClutterTransition | null;
+    /** Clutter.Actor.remove_transition — stops exactly the named transition. */
+    remove_transition(name: string): void;
+    /** Clutter.Actor::transition-stopped — (actor, name, is_finished), emitted
+     * after a transition left the actor's table: from on_transition_stopped on a
+     * natural completion (TRUE) and from remove_transition on a removal (FALSE,
+     * only if it was playing). lib/runtime/placement.js reads it to tell a
+     * takeover from its own cancellation. */
+    connect(signal: string, cb: (actor: CinnamonActor, name: string, finished: boolean) => void): any;
+    disconnect(id: any): void;
+};
+
+/**
+ * Clutter.Transition as greenTile uses it: the identity handle of one running
+ * mutation plus the platform signal surface environment.js connects to —
+ * 'stopped' reports (transition, finished), 'new-frame' (transition, timeIndex).
+ * lib/runtime/placement.js attaches its own per-transition 'stopped' handler so
+ * one cancelled property cannot drop the repair of its siblings.
+ */
+type ClutterTransition = {
+    connect(signal: string, cb: (transition: ClutterTransition, payload: any) => void): any;
+};
+
+/**
  * Meta.Window as far as greenTile touches it — narrowed to the members the
  * runtime paths actually call, so method-name and argument typos fail tsc.
  * Every member is verified against the installed muffin 6.6 gi (Meta-0.typelib:
@@ -45,13 +87,8 @@ interface CinnamonWindow {
     /** Meta.Window.move_frame(user_op, x, y) */
     move_frame(userOp: boolean, x: number, y: number): void;
     get_frame_rect(): CinnamonRectangle;
-    /** Clutter actor of the window window (translation/scale for animation). */
-    get_compositor_private(): {
-        translation_x: number;
-        translation_y: number;
-        scale_x: number;
-        scale_y: number;
-    } | null;
+    /** The window frame's Clutter actor (null once the window is destroyed). */
+    get_compositor_private(): CinnamonActor | null;
     activate(time: number): void;
     /** Stable seq across App recreations (Meta.Window.get_stable_sequence). */
     get_stable_sequence(): number;
@@ -151,6 +188,7 @@ type SettingsFacade = {
 /** The settings Config wiring (lib/app/config.js) — surface used across lib/. */
 type ConfigFacade = {
     settings: SettingsFacade;
+    destroy(): void;
 };
 
 /** Ops facade the preset panel and editor (lib/ui) work through (app.ops). */
@@ -194,8 +232,19 @@ type SessionFacade = {
     destroy(): void;
 };
 
+/** Animated-placement owner facade (lib/runtime/placement.js): the per-App
+ * records of the actor transitions greenTile started (lib/tiling/place.js). */
+type PlacementFacade = {
+    has(metaWindow: CinnamonWindow): boolean;
+    foreignActive(metaWindow: CinnamonWindow, actor: CinnamonActor, props: ReadonlyArray<{ prop: string }>): boolean;
+    acquired(metaWindow: CinnamonWindow, token: object, actor: CinnamonActor, props: ReadonlyArray<{ prop: string, field: string, identity: number }>): void;
+    release(metaWindow: CinnamonWindow): void;
+    destroy(): void;
+};
+
 /** Auto-tiling facade (lib/runtime/auto.js). */
 type AutoFacade = {
+
     scheduleAll(app: AppFacade, delayMs: number): void;
     scheduleMonitor(app: AppFacade, monitorIndex: number, delayMs: number): void;
     pendingTake(monitorIndex: number): Set<number>;
@@ -234,9 +283,27 @@ type MonitorsFacade = {
     destroy(): void;
 };
 
+/** Focus-border facade (lib/runtime/border.js). */
+type BorderFacade = {
+    init(app: AppFacade): void;
+    update(): void;
+    flash(win: CinnamonWindow): void;
+    restyle(): void;
+    destroy(): void;
+};
+
+/** Drop-preview facade (lib/runtime/drop.js). */
+type DropFacade = {
+    begin(app: AppFacade, w: CinnamonWindow, op: string): void;
+    target(app: AppFacade, w: CinnamonWindow, px: number, py: number, fromMonitor?: number | null, startFrame?: Rect | null): void;
+    tick(app: AppFacade): void;
+    end(app: AppFacade, w: CinnamonWindow, op: string): void;
+    stop(): void;
+    destroy(): void;
+};
+
 /** Exclusion facade (lib/runtime/exclusions.js). */
-type ExclFacade = {
-    isExcluded(win: CinnamonWindow): boolean;
+type ExclFacade = {    isExcluded(win: CinnamonWindow): boolean;
     removeToggle(seq: number): void;
     apply(settings: SettingsFacade): void;
     start(settings: SettingsFacade): void;
@@ -270,6 +337,7 @@ type AppFacade = {
     config: ConfigFacade;
     session: SessionFacade;
     auto: AutoFacade;
+    placement: PlacementFacade;
     split: SplitFacade;
     monitors: MonitorsFacade;
     excl: ExclFacade;

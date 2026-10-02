@@ -6,7 +6,7 @@
 // the rest, mirroring disconnectEach semantics).
 const test = require('node:test');
 const assert = require('node:assert/strict');
-const { Scope, createScope } = require('../../lib/runtime/scope');
+const { Scope, createScope } = require('../helpers/cinnamon-loader').load('./lib/runtime/scope');
 
 // Fake SignalManager mirroring /usr/share/cinnamon/js/misc/signalManager.js:
 // storage entries [sigName, obj, callback, id], _signalIsConnected skips plain

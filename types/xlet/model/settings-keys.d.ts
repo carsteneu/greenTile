@@ -1,0 +1,32 @@
+// GENERATED from lib/ by scripts/generate-xlet-types.mjs — do not edit;
+// regenerate with: npm run gen:types
+export const SETTINGS_KEYS: Readonly<{
+    columns6Hotkey: "columns6Hotkey";
+    columns3Hotkey: "columns3Hotkey";
+    autoOnHotkey: "autoOnHotkey";
+    autoOffHotkey: "autoOffHotkey";
+    presetHotkey: "presetHotkey";
+    resizeWiderHotkey: "resizeWiderHotkey";
+    resizeNarrowerHotkey: "resizeNarrowerHotkey";
+    resizeTallerHotkey: "resizeTallerHotkey";
+    resizeShorterHotkey: "resizeShorterHotkey";
+    swapLeftHotkey: "swapLeftHotkey";
+    swapRightHotkey: "swapRightHotkey";
+    swapUpHotkey: "swapUpHotkey";
+    swapDownHotkey: "swapDownHotkey";
+    presets: "presets";
+    excludeHotkey: "excludeHotkey";
+    excludeAppPicker: "excludeAppPicker";
+    exclusions: "exclusions";
+    layouts: "layouts";
+    panelSize: "panelSize";
+    windowGap: "windowGap";
+    tileAnimation: "tileAnimation";
+    focusBorder: "focusBorder";
+    fillSingleWindow: "fillSingleWindow";
+    panelTheme: "panelTheme";
+    accentMode: "accentMode";
+    accentColor: "accentColor";
+    stateMode: "stateMode";
+    stateColor: "stateColor";
+}>;
