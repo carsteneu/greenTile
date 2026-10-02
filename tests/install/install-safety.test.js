@@ -31,6 +31,7 @@ for a in "$@"; do
     esac
 done
 competitor() {
+    [ -n "\${GT_DEST:-}" ] || { echo "mv stub: GT_DEST unset" >&2; exit 3; }
     mkdir -p "$GT_DEST"
     printf '{"version": "competitor"}\\\\n' > "$GT_DEST/metadata.json"
     printf 'competitor\\\\n' > "$GT_DEST/competitor-only"
@@ -73,6 +74,31 @@ case "\${GT_MODE:-none}" in
         "$GT_REAL_MV" "$@"
         if [ "$src" = "$GT_DEST" ]; then kill -INT "$PPID"; fi
         exit 0
+        ;;
+    interrupt-after-swap)
+        # the swap itself went through, the signal arrives right after it
+        case "$src" in
+            */.greenTile-install.*/${UUID}) "$GT_REAL_MV" "$@"; kill -TERM "$PPID"; exit 0 ;;
+        esac
+        ;;
+    no-target)
+        # an mv without coreutils -T: every -T call must fail, the installer has
+        # to abort with the previous installation untouched instead of nesting
+        for arg in "$@"; do
+            case "$arg" in -T) echo "mv: invalid option -- 'T'" >&2; exit 2 ;; esac
+        done
+        ;;
+    replaced)
+        # between the installer's check and its move, another install.sh
+        # publishes its own tree at DEST
+        case "$dst" in
+            */.greenTile-install.*/old)
+                "$GT_REAL_MV" -T "$GT_DEST" "$GT_DEST.previous" || exit 3
+                mkdir -p "$GT_DEST"
+                printf '{"version": "competitor"}\\\\n' > "$GT_DEST/metadata.json"
+                printf 'competitor\\\\n' > "$GT_DEST/competitor-only"
+                ;;
+        esac
         ;;
     killed)
         "$GT_REAL_MV" "$@"
@@ -158,6 +184,8 @@ const version = (dir) => {
 // inside a preserved stage
 const oldSurvives = (x) => fs.existsSync(path.join(destOf(x), 'old-only'))
     || stages(x).some((s) => fs.existsSync(path.join(s, 'old', 'old-only')));
+// ...and DEST must then hold that tree, not a half-removed one
+const oldIntactOrAbsent = (x) => !fs.existsSync(destOf(x)) || version(destOf(x)) === '1.2.0';
 const announced = (r) => /preserved at|back in place/.test(r.stderr);
 
 const run = (x) => spawnSync('bash', [path.join(x.here, 'install.sh')],
@@ -173,6 +201,7 @@ test('SIGTERM after the previous tree was moved aside: it survives and is announ
     assert.notEqual(version(destOf(x)), LATEST, 'an interrupted run must not publish the new tree');
     assert.ok(!fs.existsSync(path.join(destOf(x), UUID)), 'the new tree was nested inside DEST');
     assert.ok(oldSurvives(x), `the only copy of the previous installation was destroyed — stderr: ${r.stderr}`);
+    assert.ok(oldIntactOrAbsent(x), `DEST must hold the previous installation or nothing: ${version(destOf(x))}`);
     assert.ok(announced(r), `stderr must say where the previous installation went: ${r.stderr}`);
 });
 
@@ -185,7 +214,75 @@ test('SIGINT after the previous tree was moved aside: it survives and is announc
     assert.ok(r.status === 130 || r.signal === 'SIGINT', `expected an interrupted shell, got status=${r.status} signal=${r.signal}`);
     assert.notEqual(version(destOf(x)), LATEST, 'an interrupted run must not publish the new tree');
     assert.ok(oldSurvives(x), `the only copy of the previous installation was destroyed — stderr: ${r.stderr}`);
+    assert.ok(oldIntactOrAbsent(x), `DEST must hold the previous installation or nothing: ${version(destOf(x))}`);
     assert.ok(announced(r), `stderr must say where the previous installation went: ${r.stderr}`);
+});
+
+test('SIGTERM right after a successful swap: no advice that would undo it', () => {
+    const x = makeEnv('safety-sigterm-after-swap');
+    useStub(x, 'interrupt-after-swap');
+    seedOldInstall(x.home);
+    const r = run(x);
+    assert.notEqual(r.status, 0, 'the run was interrupted');
+    assert.equal(version(destOf(x)), LATEST, 'the swap had already replaced the previous installation');
+    assert.ok(fs.existsSync(path.join(destOf(x), 'lib', 'core.js')), 'the published tree is incomplete');
+    assert.ok(!fs.existsSync(path.join(destOf(x), 'old')), 'a backup was nested inside DEST');
+    assert.equal(stages(x).length, 0,
+        `the superseded previous installation must not keep the stage alive: ${stages(x).join(', ')}`);
+    assert.ok(!/preserved at/.test(r.stderr),
+        `a completed install must not tell the user to move the old tree back: ${r.stderr}`);
+});
+
+test('an mv without coreutils -T: abort with the previous installation untouched', () => {
+    const x = makeEnv('safety-no-target');
+    useStub(x, 'no-target');
+    seedOldInstall(x.home);
+    const r = run(x);
+    assert.notEqual(r.status, 0, 'without -T the swap must not run');
+    assert.equal(version(destOf(x)), '1.2.0', 'the previous installation must stay in place');
+    assert.ok(fs.existsSync(path.join(destOf(x), 'old-only')), 'the previous installation lost files');
+    assert.ok(!fs.existsSync(path.join(destOf(x), UUID)), 'the new tree was nested inside DEST');
+    assert.equal(stages(x).length, 0, `nothing was moved aside, so nothing may be kept: ${stages(x).join(', ')}`);
+    assert.ok(!/another install\.sh/.test(r.stderr), `the abort must not blame a competing installer: ${r.stderr}`);
+});
+
+test('a DEST another installer published while this one staged is not moved away', () => {
+    const x = makeEnv('safety-replaced-while-staging');
+    useStub(x, 'none');
+    seedOldInstall(x.home);
+    // the real msgfmt path runs during staging, i.e. between looking at what is
+    // at $DEST and the swap — exactly where a competing installer publishes
+    const realMsgfmt = spawnSync('which', ['msgfmt'], { encoding: 'utf8' }).stdout.trim();
+    write(path.join(x.bin, 'msgfmt'), `#!/usr/bin/env bash
+# a competing install.sh replaces the installation while we are still staging
+mv -T "$GT_DEST" "$GT_DEST.previous" || exit 3
+mkdir -p "$GT_DEST"
+printf '{"version": "competitor"}\\\\n' > "$GT_DEST/metadata.json"
+printf 'competitor\\\\n' > "$GT_DEST/competitor-only"
+exec ${realMsgfmt} "$@"
+`);
+    fs.chmodSync(path.join(x.bin, 'msgfmt'), 0o755);
+    const r = run(x);
+    assert.notEqual(r.status, 0, 'a replaced DEST must not be treated as the installation to update');
+    assert.equal(version(destOf(x)), 'competitor', 'the other installation was moved away or overwritten');
+    assert.ok(fs.existsSync(path.join(destOf(x), 'competitor-only')), 'the other installation lost files');
+    assert.ok(!fs.existsSync(path.join(destOf(x), UUID)), 'a tree was nested inside DEST');
+    assert.equal(version(destOf(x) + '.previous'), '1.2.0', 'the previous installation was destroyed');
+    assert.equal(stages(x).length, 0, `nothing of ours was moved aside: ${stages(x).join(', ')}`);
+});
+
+test('a tree published between the check and the move is given back, not updated away', () => {
+    const x = makeEnv('safety-published-during-move');
+    useStub(x, 'replaced');
+    seedOldInstall(x.home);
+    const r = run(x);
+    assert.notEqual(r.status, 0, 'the tree published in the meantime must not be swallowed');
+    assert.equal(version(destOf(x)), 'competitor', 'the other installation is not at DEST any more');
+    assert.ok(fs.existsSync(path.join(destOf(x), 'competitor-only')), 'the other installation lost files');
+    assert.ok(!fs.existsSync(path.join(destOf(x), UUID)), 'a tree was nested inside DEST');
+    assert.equal(version(destOf(x) + '.previous'), '1.2.0', 'the previous installation was destroyed');
+    assert.ok(!r.stdout.includes('installed to'), 'nothing was installed, so nothing may be announced');
+    assert.equal(stages(x).length, 0, `the given-back tree must not keep a stage: ${stages(x).join(', ')}`);
 });
 
 test('a competing installer publishes DEST before the swap: no nesting, no false success', () => {
@@ -255,21 +352,23 @@ const gateEnv = (x) => {
     mkdir(x.env.GT_ARRIVE_DIR);
 };
 
-test('two concurrent installers over an existing installation: one consistent runtime', { timeout: 30000 }, async () => {
+// both installers wait for each other in front of their first mv, so they really
+// run concurrently instead of one after the other
+test('two concurrent installers over an existing installation: exactly one publishes', { timeout: 30000 }, async () => {
     const x = makeEnv('safety-concurrent-update');
     useStub(x, 'none');
     gateEnv(x);
     seedOldInstall(x.home);
     const runs = await Promise.all([spawnInstall(x), spawnInstall(x)]);
-    assert.ok(runs.some((r) => r.status === 0), `no installer succeeded: ${JSON.stringify(runs)}`);
+    assert.deepEqual(runs.map((r) => r.status).sort(), [0, 1],
+        `exactly one installer may publish over the previous installation: ${JSON.stringify(runs)}`);
+    // one consistent runtime: never a tree nested inside another, never a mix
     const destVersion = version(destOf(x));
-    assert.ok(destVersion === LATEST || destVersion === '1.2.0',
-        `DEST is neither a complete new nor the previous installation: ${destVersion}`);
-    if (destVersion === LATEST) {
-        assert.ok(fs.existsSync(path.join(destOf(x), 'lib', 'core.js')), 'the published tree is incomplete');
-    }
+    assert.equal(destVersion, LATEST, `DEST is neither a complete new nor the previous installation: ${destVersion}`);
+    assert.ok(fs.existsSync(path.join(destOf(x), 'lib', 'core.js')), 'the published tree is incomplete');
     assert.ok(!fs.existsSync(path.join(destOf(x), UUID)), 'a tree was nested inside DEST');
     assert.ok(!fs.existsSync(path.join(destOf(x), 'old')), 'a backup was nested inside DEST');
+    // a stage only survives when it still holds the previous installation
     for (const stage of stages(x)) {
         assert.ok(fs.existsSync(path.join(stage, 'old')), `stale stage without a previous installation: ${stage}`);
     }
