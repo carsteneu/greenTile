@@ -140,7 +140,8 @@ test('r3: the restored prior callback is DELIVERABLE through the normal path aft
     env.customBindings.get('push-tile-left')(env.display, ourWin);
     assert.equal(delivered.length, 0, 'while we are registered, OUR handler answers, not the prior');
     ext.disable();
-    assert.equal(bindings.get(71), prior, 'map entry restored by identity');
+    assert.equal(bindings.get(71).callback, prior.callback, 'map entry restored with the prior callback');
+    assert.equal(bindings.get(71).allowedModes, 7, 'prior action modes restored');
     const restoredWin = { id: 'restored' };
     env.customBindings.get('push-tile-left')(env.display, restoredWin);
     assert.deepEqual(delivered, [['prior', restoredWin]],
