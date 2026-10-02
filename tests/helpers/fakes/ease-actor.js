@@ -4,9 +4,12 @@
 // /usr/share/cinnamon/js/ui/environment.js (_easeActor / _makeEaseCallback):
 //   - every eased property gets its own transition, named with DASHES
 //     ('translation-x'); get_transition(name) is the identity handle of a
-//     transition, remove_transition(name) stops exactly that one;
-//   - a property whose current value equals the target gets NO transition
-//     (nothing to animate);
+//     transition, remove_transition(name) stops exactly that one. A transition
+//     is created for every eased property, whether or not the value changes:
+//     Clutter 1.26.4 gates implicit transitions only on the easing duration,
+//     the allocation and the actor's mapped-ness (clutter-actor.c
+//     _clutter_actor_create_transition / should_skip_implicit_transition), not
+//     on value equality;
 //   - an ease first cancels the transitions it overwrites
 //     (animatedProps.forEach(p => actor.remove_transition(p)));
 //   - a transition is a GObject-like object with connect('stopped'/'new-frame'):
@@ -127,8 +130,6 @@ const makeEaseActor = () => {
             const created = [];
             for (const name of dashed) {
                 const field = name.replace(/-/g, '_');
-                if (actor[field] === targets[field])
-                    {continue;}
                 const t = makeTransition(name, field, targets[field]);
                 actor.transitions.set(name, t);
                 created.push(t);

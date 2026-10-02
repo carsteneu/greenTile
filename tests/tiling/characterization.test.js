@@ -161,6 +161,7 @@ test('animated placement over a foreign transition: the foreign animation is lef
     assert.equal(foreignStoppedWith, null, 'the foreign transition is never stopped');
     assert.equal(actor.get_transition('translation-x'), foreign, 'the foreign transition keeps the property');
     assert.equal(actor.translation_x, 256, 'the foreign value is not overwritten');
+    assert.equal(actor.eases.length, 0, 'no own animation is started over the foreign transition');
     assert.deepEqual(w1.moves[0], ['resize', 0, 0, 329, 1100], 'the buffer still moves to the requested geometry');
 });
 
