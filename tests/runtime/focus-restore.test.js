@@ -144,7 +144,7 @@ test('manager route: a failed restore leaves an INERT handler, never a live stal
 });
 
 test('manager route: a post-effect throw during restore still restores the remaining names', () => {
-    const { meta, manager, focus, app } = harness({ generation: 'upstream' });
+    const { manager, focus, app } = harness({ generation: 'upstream' });
     const priors = seedPriors(manager);
     focus.connect(app);
     manager.fail.after.add(RESTORE_CALL['push-tile-left']);
