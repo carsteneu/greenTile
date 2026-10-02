@@ -15,7 +15,7 @@
  * @property {number | undefined} actionId Meta.KeyBindingAction id; undefined on the direct Meta route
  * @property {AnyRecord | undefined} prior manager entry that was in place before we took over
  * @property {((display: AnyRecord, win: CinnamonWindow, binding?: AnyRecord) => void) | null} handler our live callback, dropped on destroy
- * @property {((display: AnyRecord, win: CinnamonWindow, binding: AnyRecord) => void) | null} install the dispatcher we handed to the shell — kept so a failed restore can tell our own leftover from a restored prior
+ * @property {((display: AnyRecord, win: CinnamonWindow, binding: AnyRecord) => void) | null} install the dispatcher we handed to the shell — kept so the manager-visible slot can be classified as ours
  * @property {boolean} active false once destroy made the callback inert
  */
 export const Focus: {
@@ -39,30 +39,44 @@ export const Focus: {
          *  1. make every own callback inert and drop its App closure — a binding
          *     whose restore then fails still delivers nothing;
          *  2. restore per registration, each in its own try, so one throwing
-         *     restore never strands the remaining names. A failed registration
-         *     keeps its ownership for a later retry and every failure is reported
-         *     together.
-         * A restore that never took effect would leave our own dispatcher sitting
-         * in the manager's map, where the NEXT App's connect would adopt it as its
-         * rollback target and the binding would stay dead for the session — so a
-         * failed registration also drops that leftover (stage 3).
+         *     restore never strands the remaining names.
+         * A registration that failed is recovered (see _recover) and kept for a
+         * retry, unless its slot went to a newer owner.
          */
         destroy(): void;
+        /**
+         * Classifies the manager-visible slot for one registration. That slot is
+         * what a later App captures as its prior, so it decides whether there is
+         * anything of ours left to release:
+         *  - 'ours': still holds the dispatcher we installed
+         *  - 'prior': already holds the entry we recorded before taking over
+         *  - 'empty': nobody's
+         *  - 'foreign': a newer owner registered after us — untouchable
+         * The direct route has no comparable slot, so it reports 'ours' to keep its
+         * own retry behaviour.
+         * @param {FocusRegistration} registration
+         * @returns {'ours' | 'prior' | 'empty' | 'foreign'}
+         */
+        _ownerState(registration: FocusRegistration): "ours" | "prior" | "empty" | "foreign";
         /**
          * Restores one acquired binding to its pre-connect owner.
          * @param {FocusRegistration} registration
          */
         _restore(registration: FocusRegistration): void;
         /**
-         * A failed manager-route restore may have thrown before it took effect,
-         * leaving OUR dispatcher (inert) in the manager's binding map. Remove it and
-         * reset the Meta handler, so the binding falls back to muffin's builtin
-         * instead of swallowing the key — and so a later App does not mistake our
-         * leftover for foreign prior state. Only touches the entry when it is still
-         * demonstrably ours; a restore that did mutate already holds the prior.
+         * Best-effort recovery after a restore threw, so the failure leaves as
+         * little damage as the platform allows. The collected error from destroy()
+         * already reports the throw; nothing here may replace it.
          * @param {FocusRegistration} registration
          */
-        _dropOwnLeftover(registration: FocusRegistration): void;
+        _recover(registration: FocusRegistration): void;
+        /**
+         * Attempts the Meta reset on its own, independent of any manager state, so
+         * a dispatcher of ours can never keep swallowing the key just because the
+         * binding-map entry is already gone.
+         * @param {FocusRegistration} registration
+         */
+        _retryMetaReset(registration: FocusRegistration): void;
     };
 };
 /**
@@ -104,7 +118,7 @@ export type FocusRegistration = {
      */
     handler: ((display: AnyRecord, win: CinnamonWindow, binding?: AnyRecord) => void) | null;
     /**
-     * the dispatcher we handed to the shell — kept so a failed restore can tell our own leftover from a restored prior
+     * the dispatcher we handed to the shell — kept so the manager-visible slot can be classified as ours
      */
     install: ((display: AnyRecord, win: CinnamonWindow, binding: AnyRecord) => void) | null;
     /**
