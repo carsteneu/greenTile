@@ -109,6 +109,11 @@ export const Auto: {
         connectAll(app: AppFacade): void;
         /** @param {number} monitorIndex */
         pendingTake(monitorIndex: number): any;
+        /**
+         * @param {number} monitorIndex
+         * @param {number} seq
+         */
+        pendingForget(monitorIndex: number, seq: number): void;
         /** @param {number} seq */
         resizeStartTake(seq: number): any;
         /**
@@ -122,6 +127,11 @@ export const Auto: {
          * @param {number} now
          */
         sortTake(seq: number, now: number): any;
+        /**
+         * @param {number} seq
+         * @param {number} now
+         */
+        sortPeek(seq: number, now: number): any;
         /** @param {number} seq */
         sortClear(seq: number): void;
         /** @param {number} now */
