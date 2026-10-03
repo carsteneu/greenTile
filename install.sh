@@ -50,12 +50,13 @@ cleanup() {
     fi
     # $BACKUP holds the previous installation from the moment it is moved aside.
     # It is the user's only copy only until this run has published: after a
-    # successful swap $DEST holds the new tree, so the previous one is superseded
-    # and the stage is dropped. Before that it is kept: it goes back if $DEST is
-    # free, otherwise the stage stays and its path is printed.
+    # successful rename NEW is gone, even if a signal preceded PUBLISHED=1 and a
+    # competitor now holds that published tree. An empty DEST alone is not proof
+    # of a failed publication. Before publication NEW still exists: the backup
+    # goes back if DEST is free, otherwise its path is printed and the stage kept.
     if [ "$PUBLISHED" = 0 ] &&
         { [ -e "$BACKUP" ] || [ -L "$BACKUP" ]; } &&
-        { [ -e "$NEW" ] || [ -L "$NEW" ] || { [ ! -e "$DEST" ] && [ ! -L "$DEST" ]; }; }; then
+        { [ -e "$NEW" ] || [ -L "$NEW" ]; }; then
         if [ ! -e "$DEST" ] && [ ! -L "$DEST" ] && mv -T "$BACKUP" "$DEST"; then
             echo "install.sh: the previous installation is back in place at $DEST." >&2
             rm -rf "$STAGE"

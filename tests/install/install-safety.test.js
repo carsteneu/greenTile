@@ -90,6 +90,25 @@ case "\${GT_MODE:-none}" in
             */.greenTile-install.*/${UUID}) "$GT_REAL_MV" "$@"; "$GT_REAL_MV" -T "$GT_DEST" "$GT_DEST.stolen"; exit 0 ;;
         esac
         ;;
+    stolen-interrupt-after-swap)
+        # publication finished but the shell has not yet recorded that fact;
+        # a competitor holds the new tree when the signal arrives
+        case "$src" in
+            */.greenTile-install.*/${UUID})
+                "$GT_REAL_MV" "$@" || exit 3
+                "$GT_REAL_MV" -T "$GT_DEST" "$GT_DEST.stolen" || exit 3
+                kill -"$GT_SIGNAL" "$PPID"
+                exit 0
+                ;;
+        esac
+        ;;
+    interrupt-failed-swap)
+        # failed publication leaves NEW in the stage: the old tree must still
+        # be restored even when the failure coincides with a catchable signal
+        case "$src" in
+            */.greenTile-install.*/${UUID}) kill -TERM "$PPID"; exit 7 ;;
+        esac
+        ;;
     no-target)
         # an mv without coreutils -T: every -T call must fail, the installer has
         # to abort with the previous installation untouched instead of nesting
@@ -316,6 +335,37 @@ test('a competing installer holding the just published tree does not bring the p
     fs.renameSync(destOf(x) + '.stolen', destOf(x));
     assert.equal(version(destOf(x)), LATEST);
     assert.ok(fs.existsSync(path.join(destOf(x), 'lib', 'core.js')));
+});
+
+for (const [signal, status] of [['TERM', 143], ['INT', 130]]) {
+    test(`SIG${signal} before the publication flag cannot restore over a competitor-held new tree`, () => {
+        const x = makeEnv('safety-stolen-signal-' + signal);
+        useStub(x, 'stolen-interrupt-after-swap');
+        x.env.GT_SIGNAL = signal;
+        seedOldInstall(x.home);
+        const r = run(x);
+        assert.equal(r.status, status, `the catchable signal must terminate the run: ${r.stderr}`);
+        assert.ok(!r.stdout.includes('installed to'), 'an interrupted run must not report success');
+        assert.equal(version(destOf(x) + '.stolen'), LATEST, 'the competitor must hold the complete new tree');
+        assert.ok(!fs.existsSync(destOf(x)), 'the superseded old tree blocked the competitor from returning the new one');
+        assert.doesNotMatch(r.stderr, /preserved at|back in place/, 'the superseded old installation must not be restored or recommended');
+        assert.equal(stages(x).length, 0, 'the successful publication superseded the previous installation');
+        fs.renameSync(destOf(x) + '.stolen', destOf(x));
+        assert.equal(version(destOf(x)), LATEST);
+        assert.ok(fs.existsSync(path.join(destOf(x), 'lib', 'core.js')));
+    });
+}
+
+test('a signal coinciding with a failed publication still restores the previous bytes', () => {
+    const x = makeEnv('safety-signal-failed-swap');
+    useStub(x, 'interrupt-failed-swap');
+    seedOldInstall(x.home);
+    const before = treeFingerprint(destOf(x));
+    const r = run(x);
+    assert.equal(r.status, 143, 'the catchable signal must terminate the run');
+    assert.ok(!r.stdout.includes('installed to'), 'a failed publication cannot report success');
+    assert.deepEqual(treeFingerprint(destOf(x)), before, 'a failed publication must restore every old byte');
+    assert.match(r.stderr, /back in place/);
 });
 
 test('an mv without coreutils -T: abort with the previous installation untouched', () => {
