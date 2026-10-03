@@ -28,6 +28,7 @@ export const Config: {
         _settingsMonitor: any;
         _settingsMonitorPath: any;
         _settingsObserverFailed: boolean | undefined;
+        _settingsObserverStopped: boolean | undefined;
         /** Cancels the file monitor: nothing observed until _resumeSettingsMonitor. */
         _pauseSettingsMonitor(): void;
         /** (Re)arms the file monitor on the settings file. */

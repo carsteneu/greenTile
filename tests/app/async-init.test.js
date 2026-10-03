@@ -167,20 +167,20 @@ test('item 4: auto-off before the monitor reply is applied at readiness, not dro
     ext.disable();
 });
 
-test('item 4: a queued on/off sequence keeps its order (last press wins)', () => {
+test('item 4: a queued on/off sequence resolves to the last command, one write', () => {
     const { env, ext } = makeEnv();
     bootBeforeReply(env, ext);
     autoOf(env, 'greenTile-autoN');
     autoOf(env, 'greenTile-autoOff');
+    autoOf(env, 'greenTile-autoN');
     env.flushDisplayConfigNoReply();
     const app = ext.currentSession().app;
     const ref = app.split.ref(app, 0, 0, 2);
     const writes = layoutsWrites(env);
-    assert.equal(JSON.parse(writes.at(-1).value)[ref.mkey][ref.wskey].auto, false,
-        'the last command (off) is the final state');
-    const on = env.logs.indexOf('greenTile auto tiling on for ws0');
-    const off = env.logs.indexOf('greenTile auto tiling off for ws0');
-    assert.ok(on !== -1 && off !== -1 && on < off, 'the commands were applied in the order they were pressed');
+    assert.equal(writes.length, 1, 'the queued intents collapse to one write per monitor+workspace');
+    assert.equal(JSON.parse(writes.at(-1).value)[ref.mkey][ref.wskey].auto, true,
+        'the last command (on) is the final state');
+    assert.equal(env.logs.includes('greenTile auto tiling on for ws0'), true, 'the surviving intent was applied');
     ext.disable();
 });
 

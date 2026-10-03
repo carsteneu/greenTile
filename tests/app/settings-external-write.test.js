@@ -167,6 +167,9 @@ test('item 5: the file observer is armed per App and released with it', () => {
     ext.disable();
     assert.equal(env.settingsFileMonitors.length, 0, 'disable releases the observer');
     assert.equal(settingsInstance(env).count('changed::layouts'), 0, 'finalize released the reload surface');
+    // a write arriving after destroy must not re-arm the observer
+    inst.setValue('panelTheme', true);
+    assert.equal(env.settingsFileMonitors.length, 0, 'no re-arm after destroy');
 });
 
 test('item 5: a monitor that cannot be re-armed does not disable split persistence', () => {
