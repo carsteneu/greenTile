@@ -85,6 +85,12 @@ export const Session: {
             destroy(): void;
         };
         monitorFallbackLogged: boolean;
+        /** @type {Array<{monitorIndex: number, wsIndex: number, auto: boolean}>} */
+        pendingAuto: {
+            monitorIndex: number;
+            wsIndex: number;
+            auto: boolean;
+        }[];
         splitCorruptLogged: boolean;
         layoutsWriteGuardLogged: boolean;
         accentGenSeq: number;
@@ -198,6 +204,12 @@ export type SessionDeps = {
             destroy(): void;
         };
         monitorFallbackLogged: boolean;
+        /** @type {Array<{monitorIndex: number, wsIndex: number, auto: boolean}>} */
+        pendingAuto: {
+            monitorIndex: number;
+            wsIndex: number;
+            auto: boolean;
+        }[];
         splitCorruptLogged: boolean;
         layoutsWriteGuardLogged: boolean;
         accentGenSeq: number;

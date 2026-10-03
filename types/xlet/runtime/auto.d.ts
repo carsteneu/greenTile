@@ -49,6 +49,27 @@ export const Auto: {
          * @param {number} ms
          */
         scheduleAll(app: AppFacade, ms: number): void;
+        /**
+         * @param {AppFacade} app
+         * @param {number} monitorIndex
+         * @returns {boolean}
+         */
+        _monitorWritable(app: AppFacade, monitorIndex: number): boolean;
+        /**
+         * @param {AppFacade} app
+         * @param {number} monitorIndex
+         * @param {number} wsIndex
+         * @param {boolean} auto
+         */
+        _deferAuto(app: AppFacade, monitorIndex: number, wsIndex: number, auto: boolean): void;
+        /**
+         * Applies the auto on/off commands queued before the registry was ready, in
+         * their original order — called by the monitor-ready callback after
+         * connectAll and before the settle retile, so no automatic tiling runs
+         * against a requested pause.
+         * @param {AppFacade} app
+         */
+        applyPending(app: AppFacade): void;
         /** @param {AppFacade} app */
         activate(app: AppFacade): void;
         /** @param {AppFacade} app */
@@ -107,6 +128,13 @@ export const Auto: {
         _connectWorkspace(app: AppFacade, ws: AnyRecord): void;
         /** @param {AppFacade} app */
         connectAll(app: AppFacade): void;
+        /** @param {AppFacade} app */
+        _connectAll(app: AppFacade): void;
+        /**
+         * Releases every acquisition connectAll made and rebuilds the scope, leaving
+         * the component exactly as it was before the attempt.
+         */
+        _rollbackConnectAll(): void;
         /** @param {number} monitorIndex */
         pendingTake(monitorIndex: number): any;
         /**
