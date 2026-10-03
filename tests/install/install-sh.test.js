@@ -317,24 +317,65 @@ test('a regular .mo file at the path is replaced with a valid compiled catalogue
     assert.ok(!buf.toString('latin1').includes('stale catalogue'), 'the stale content must be gone');
 });
 
-test('a directory that appears after the type check fails the swap instead of nesting', () => {
-    const x = makeInstallEnv('install-mo-race');
-    makeSource(x);
-    const target = moPath(x.home, 'de');
-    // wrap mv so that a concurrent actor creates the destination as a
-    // directory in the window between the check and the rename: mv -T must
-    // fail (reported) rather than move the catalogue inside it
+// an mv wrapper that lets a simulated concurrent actor change the .mo target
+// between the type check and the rename, then delegates to the real mv. The
+// marker file proves the real mv was actually reached (not just the wrapper's
+// own early exit), so the race tests cannot pass vacuously.
+function raceWrapper(x, target, action) {
     write(path.join(x.bin, 'mv'), `#!/usr/bin/env bash
 if [ "\${1:-}" = "-T" ] && [ "\${@: -1}" = "\${GT_RACE_MO:?}" ]; then
-    mkdir -p "\${GT_RACE_MO}"
+    ${action}
+    touch "\${GT_RACE_SEEN:?}"
 fi
 exec "\${GT_REAL_MV:?}" "$@"
 `);
     fs.chmodSync(path.join(x.bin, 'mv'), 0o755);
     x.env.GT_RACE_MO = target;
+    x.env.GT_RACE_SEEN = path.join(x.dir, 'race-seen');
+}
+const raceReached = (x) => fs.existsSync(x.env.GT_RACE_SEEN);
+
+test('a directory that appears after the type check fails the swap instead of nesting', () => {
+    const x = makeInstallEnv('install-mo-race-dir');
+    makeSource(x);
+    const target = moPath(x.home, 'de');
+    raceWrapper(x, target, 'mkdir -p "$GT_RACE_MO"');
     const r = runInstall(x);
     assert.equal(r.status, 0, `stderr: ${r.stderr}`);
+    assert.ok(raceReached(x), 'the simulated race must have fired');
     assert.ok(fs.statSync(target).isDirectory(), 'the racing directory must not be replaced');
     assert.deepEqual(fs.readdirSync(target), [], 'the catalogue must not be nested in the racing directory');
     assert.ok(r.stderr.includes('could not install the de translation'), `the failed swap must be reported: ${r.stderr}`);
+});
+
+test('a symlink to a directory appearing in the window is replaced in place, link target untouched', () => {
+    const x = makeInstallEnv('install-mo-race-link-dir');
+    makeSource(x);
+    const target = moPath(x.home, 'de');
+    const realDir = path.join(x.dir, 'race-target-dir');
+    mkdir(realDir);
+    raceWrapper(x, target, 'ln -s "$GT_RACE_LINK" "$GT_RACE_MO"');
+    x.env.GT_RACE_LINK = realDir;
+    const r = runInstall(x);
+    assert.equal(r.status, 0, `stderr: ${r.stderr}`);
+    assert.ok(raceReached(x), 'the simulated race must have fired');
+    assert.ok(!fs.lstatSync(target).isSymbolicLink(), 'the raced-in symlink is replaced by the plain file');
+    assert.equal(fs.readFileSync(target).readUInt32LE(0), GMO_MAGIC, 'the catalogue must land on the path the loader reads');
+    assert.deepEqual(fs.readdirSync(realDir), [], 'the link target must stay untouched');
+});
+
+test('a symlink to a file appearing in the window is replaced in place, link target untouched', () => {
+    const x = makeInstallEnv('install-mo-race-link-file');
+    makeSource(x);
+    const target = moPath(x.home, 'de');
+    const realFile = path.join(x.dir, 'race-target.mo');
+    write(realFile, 'user bytes\n');
+    raceWrapper(x, target, 'ln -s "$GT_RACE_LINK" "$GT_RACE_MO"');
+    x.env.GT_RACE_LINK = realFile;
+    const r = runInstall(x);
+    assert.equal(r.status, 0, `stderr: ${r.stderr}`);
+    assert.ok(raceReached(x), 'the simulated race must have fired');
+    assert.ok(!fs.lstatSync(target).isSymbolicLink(), 'the raced-in symlink is replaced by the plain file');
+    assert.equal(fs.readFileSync(target).readUInt32LE(0), GMO_MAGIC, 'the catalogue must land on the path the loader reads');
+    assert.equal(fs.readFileSync(realFile, 'utf8'), 'user bytes\n', 'the link target must stay untouched');
 });

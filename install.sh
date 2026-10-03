@@ -162,8 +162,8 @@ for mofile in "$STAGE"/locale/*/LC_MESSAGES/*.mo; do
     # symlink to one — would make a plain mv move the catalogue *inside* it
     # and still exit 0, leaving the path the loader reads as a directory: a
     # silent false success. Refuse every non-regular target here (a symlink
-    # to a plain file included) and never delete what the user put there;
-    # name the concrete path and keep the English fallback instead.
+    # to a plain file included) and never delete what the user put there at
+    # this check; name the concrete path and keep the English fallback.
     if { [ -e "$modest" ] || [ -L "$modest" ]; } &&
         { [ ! -f "$modest" ] || [ -L "$modest" ]; }; then
         echo "Note: $modest exists and is not a plain file — the $lang translation was not installed; the extension works without it (English)." >&2
