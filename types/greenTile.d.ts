@@ -182,6 +182,8 @@ type SettingsFacade = {
     setValue(key: string, value: any): void;
     bind(key: string, prop: string, cb: () => void, data?: any): void;
     setOptions(options: {}, profile?: any): void;
+    connect(sigName: string, cb: (...args: any[]) => void): number;
+    file?: { get_path(): string } | null;
     finalize(): void;
 };
 
@@ -228,6 +230,8 @@ type SessionFacade = {
     panelSaved: any;
     exclToggles: Map<number, boolean>;
     exclWatches: Map<number, { disconnect: () => void }>;
+    /** Auto on/off commands pressed before the monitor registry was ready. */
+    pendingAuto: Array<{ monitorIndex: number; wsIndex: number; auto: boolean }>;
     nextAccentGen(): string;
     destroy(): void;
 };
@@ -251,6 +255,7 @@ type AutoFacade = {
     pendingForget(seq: number): void;
     activate(app: AppFacade): void;
     deactivate(app: AppFacade): void;
+    applyPending(app: AppFacade): void;
     connectAll(app: AppFacade): void;
     resizeStartTake(seq: number): { rect: Rect; monitor: number } | undefined;
     sortOverride(seq: number, rect: Rect, now: number): void;
@@ -272,6 +277,7 @@ type SplitFacade = {
     destroy(): void;
     any(app: AppFacade, monitorIndex: number, wsIndex: number): boolean;
     reset(app: AppFacade, monitorIndex: number, wsIndex: number): void;
+    invalidate(): void;
 };
 
 /** Monitor registry facade (lib/runtime/monitors.js). */

@@ -386,13 +386,73 @@ const createCinnamonEnv = (options) => {
     // --- settings: Cinnamon slot model, one object per uuid
     env.settingsSlots = new Map();
     env.settingsInstances = [];
+    // The settings FILE the framework writes (settings.js _saveToFile) and the
+    // file monitors watching it. `settingsWriteFile` is the settings dialog's
+    // path: it rewrites the whole file and notifies Cinnamon only afterwards
+    // (JsonSettingsWidgets.save_settings -> notify_callback -> remoteUpdate);
+    // `remoteUpdate` is that later notification (_checkSettings).
+    env.settingsFiles = new Map();
+    env.settingsFileMonitors = [];
+    const settingsPath = (uuid) => '/home/fake/.config/cinnamon/spices/' + uuid + '/-1.json';
+    const writeSettingsFile = (uuid, valuesMap) => {
+        const data = {};
+        for (const [k, v] of valuesMap) {
+            data[k] = { value: v };
+        }
+        env.settingsFiles.set(uuid, JSON.stringify(data, null, 4));
+    };
+    const notifySettingsMonitors = (uuid) => {
+        const path = settingsPath(uuid);
+        for (const monitor of env.settingsFileMonitors.slice()) {
+            if (monitor.path === path) {
+                monitor.emit('changed', monitor.file, null, 0);
+            }
+        }
+    };
+    env.settingsWriteFile = (uuid, key, value) => {
+        let data = {};
+        try {
+            data = JSON.parse(env.settingsFiles.get(uuid) || '{}');
+        }
+        catch (_e) {
+            data = {};
+        }
+        data[key] = { value: value };
+        env.settingsFiles.set(uuid, JSON.stringify(data, null, 4));
+        notifySettingsMonitors(uuid);
+    };
     const makeSettings = (uuid, owner) => {
         const values = new Map(Object.entries(settingsDefaults));
+        const sigHandlers = [];
+        let nextSigId = 1;
         const instance = {
             uuid,
             bindings: [],
             finalized: false,
             callLog: [],
+            // the plain field settings.js _ensureSettingsFiles sets (Gio.File)
+            file: { get_path: () => settingsPath(uuid) },
+            connect(sigName, cb) {
+                const id = nextSigId++;
+                sigHandlers.push({ sigName, cb, id });
+                return id;
+            },
+            disconnect(id) {
+                const at = sigHandlers.findIndex((h) => h.id === id);
+                if (at !== -1) {
+                    sigHandlers.splice(at, 1);
+                }
+            },
+            count(sigName) {
+                return sigHandlers.filter((h) => !sigName || h.sigName === sigName).length;
+            },
+            emit(sigName, ...args) {
+                for (const h of sigHandlers.slice()) {
+                    if (h.sigName === sigName) {
+                        h.cb(...args);
+                    }
+                }
+            },
             bind(key, prop, cb, data) {
                 // mirrors /usr/share/cinnamon/js/ui/settings.js bindWithObject:
                 // the bound property is a live getter/setter on the bind object
@@ -419,16 +479,49 @@ const createCinnamonEnv = (options) => {
             },
             setValue(key, v) {
                 this.callLog.push({ op: 'setValue', key, value: v, finalized: this.finalized });
-                values.set(key, v);
+                // mirrors settings.js _setValue: an unchanged non-object value is
+                // not written to the file (and produces no file event)
+                if (values.get(key) !== v || typeof v === 'object') {
+                    values.set(key, v);
+                    writeSettingsFile(uuid, values);
+                    notifySettingsMonitors(uuid);
+                }
+            },
+            // cinnamonDBus.updateSetting -> settings.js remoteUpdate ->
+            // _checkSettings: reload the file, diff by VALUE, fire changed::<key>
+            // (and the bound callback) only for a key that really differs.
+            remoteUpdate() {
+                let data;
+                try {
+                    data = JSON.parse(env.settingsFiles.get(uuid) || '{}');
+                }
+                catch (_e) {
+                    return;
+                }
+                for (const key of Object.keys(data)) {
+                    const value = data[key].value;
+                    if (values.get(key) === value || typeof value === 'object' && JSON.stringify(values.get(key)) === JSON.stringify(value)) {
+                        continue;
+                    }
+                    values.set(key, value);
+                    for (const b of this.bindings) {
+                        if (b.key === key && b.cb) {
+                            b.cb();
+                        }
+                    }
+                    this.emit('changed::' + key);
+                }
             },
             finalize() {
                 this.finalized = true;
                 this.callLog.push({ op: 'finalize' });
+                sigHandlers.length = 0;
                 env.settingsSlots.set(uuid, null);
             },
         };
         env.settingsInstances.push(instance);
         env.settingsSlots.set(uuid, instance);
+        writeSettingsFile(uuid, values);
         return instance;
     };
 
@@ -454,6 +547,59 @@ const createCinnamonEnv = (options) => {
     };
     const gio = {
         DBusCallFlags: { NONE: 'none' },
+        FileMonitorFlags: { NONE: 0, WATCH_MOVES: 2 },
+        File: {
+            // the surfaces lib/app/config.js uses for the settings-file observer
+            new_for_path(path) {
+                return {
+                    get_path: () => path,
+                    monitor_file() {
+                        const monitor = {
+                            path,
+                            file: { get_path: () => path },
+                            connected: true,
+                            _handlers: [],
+                            _next: 1,
+                            connect(sigName, cb) {
+                                const id = this._next++;
+                                this._handlers.push({ sigName, cb, id });
+                                return id;
+                            },
+                            disconnect(id) {
+                                const at = this._handlers.findIndex((h) => h.id === id);
+                                if (at !== -1) {
+                                    this._handlers.splice(at, 1);
+                                }
+                            },
+                            // a cancelled monitor is dead: it is dropped from the
+                            // active set and delivers nothing (GLib semantics)
+                            cancel() {
+                                this.connected = false;
+                                const at = env.settingsFileMonitors.indexOf(this);
+                                if (at !== -1) {
+                                    env.settingsFileMonitors.splice(at, 1);
+                                }
+                            },
+                            emit(sigName, ...args) {
+                                if (!this.connected) {
+                                    return;
+                                }
+                                for (const h of this._handlers.slice()) {
+                                    if (h.sigName === sigName) {
+                                        h.cb(...args);
+                                    }
+                                }
+                            },
+                            count(sigName) {
+                                return this._handlers.filter((h) => !sigName || h.sigName === sigName).length;
+                            },
+                        };
+                        env.settingsFileMonitors.push(monitor);
+                        return monitor;
+                    },
+                };
+            },
+        },
         Cancellable: class {
             constructor() {
                 this.cancelled = false;
