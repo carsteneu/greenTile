@@ -80,6 +80,20 @@ for (const [label, mon] of [
     });
 }
 
+test('issue 12: a non-finite usable area is declined at the placement guard (zero side effects)', () => {
+    const { env, ext } = makeEnv({ windowGap: 48 });
+    enableOnMonitors(env, ext, [MONITOR]);
+    const place = require('../helpers/cinnamon-loader').load('./lib/tiling/place.js');
+    const app = ext.currentSession().app;
+    const actor = makeEaseActor();
+    const w = makeWindow(env, 1, [10, 10, 100, 100], 0, actor);
+    for (const area of [[NaN, 0, 10, 10], [0, NaN, 10, 10], [0, 0, NaN, 10], [0, 0, 10, NaN]]) {
+        place.placeCell(app, w, 0, 0, 5, 5, area, true);
+    }
+    assert.equal(w.moves.length, 0, 'no move on a non-finite area');
+    assert.equal(actor.eases.length, 0, 'no ease on a non-finite area');
+});
+
 test('issue 12: the extreme layouts leave the layouts setting untouched (no storage rewrite)', () => {
     const { env, ext } = makeEnv({ windowGap: 48 });
     enableOnMonitors(env, ext, [{ x: 0, y: 0, width: 10, height: 10 }]);
