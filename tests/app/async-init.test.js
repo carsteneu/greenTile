@@ -557,3 +557,136 @@ test('item 4/F3: a retained pause gates the automatic preset retile of an unrela
     assert.equal(app.session.pendingAuto.length, 1, 'and the pause is still retained for when it can be written');
     ext.disable();
 });
+
+// --- Item 4: the last three placement boundaries ------------------------------
+//
+// F1b: an On for an INACTIVE workspace must not tile the active one (a retile
+//      places in the active workspace, so an effect may only run for a command
+//      that addresses it).
+// F2b: two numbered workspaces of one shared slot can BOTH be retained (the
+//      queue is built before the registry can resolve the slot); the newest must
+//      be the one that survives and is applied — never the older.
+// F3b: an explicit panel preset-row click is a reactivation: it must supersede a
+//      retained pause for its target instead of being gated by it.
+
+test('item 4/F1b: an On for an inactive workspace does not tile the active one', () => {
+    const { env, ext } = makeEnv();
+    const ws0 = makeWorkspace(null, 1, 0);
+    const ws1 = makeWorkspace(null, 1, 1);
+    ws0.list_windows = () => env.tabList;
+    ws1.list_windows = () => env.tabList;
+    env.workspaces.push(ws0, ws1);
+    env.activeWorkspace = ws0;
+    const a = makeWindow(env, 601, [50, 70, 320, 200]);
+    const b = makeWindow(env, 602, [450, 70, 320, 200]);
+    env.tabList.push(a, b);
+    env.display.focus_window = a;
+    env.layoutManager.monitors.push(MONITOR);
+    ext.enable();
+    // the workspace the user will be looking at when the reply lands is already on
+    settingsInstance(env).setValue('layouts', JSON.stringify({ 'name:FakeMonitor-0|2000x1100': { '2': { auto: true } } }));
+    autoOf(env, 'greenTile-autoN');      // queued for ws0
+    env.activeWorkspace = ws1;           // switched before the reply
+    env.flushDisplayConfigNoReply();
+    const app = ext.currentSession().app;
+    assert.equal(app.ops.layoutFor(app, 0, 0).auto, true, 'the queued On was written for its own workspace');
+    assert.equal(a.moves.length + b.moves.length, 0, 'and it must not tile the workspace the user is looking at');
+    ext.disable();
+});
+
+for (const oldAuto of [false, true]) {
+    test('item 4/F2b: with both commands refused, the repair applies the newest (' + (oldAuto ? 'On' : 'Off') + ' last)', () => {
+        const { env, ext } = makeEnv({ layouts: '{invalid' });
+        env.gi.Gio.Settings.prototype.get_boolean = () => true;
+        const ws0 = makeWorkspace(null, 1, 0);
+        const ws1 = makeWorkspace(null, 1, 1);
+        ws0.list_windows = () => env.tabList;
+        ws1.list_windows = () => env.tabList;
+        env.workspaces.push(ws0, ws1);
+        env.activeWorkspace = ws0;
+        env.layoutManager.monitors.push(MONITOR, { x: 2000, y: 0, width: 1000, height: 1100 });
+        const w = makeWindow(env, 701, [2050, 70, 320, 200], 1);
+        env.tabList.push(w);
+        env.display.focus_window = w;
+        ext.enable();
+        // both commands are refused by the corrupt setting: two numbered workspaces,
+        // one shared slot
+        autoOf(env, oldAuto ? 'greenTile-autoN' : 'greenTile-autoOff');
+        env.activeWorkspace = ws1;
+        autoOf(env, oldAuto ? 'greenTile-autoOff' : 'greenTile-autoN');
+        env.flushDisplayConfigNoReply();
+        const app = ext.currentSession().app;
+        // the reply normalizes the two commands onto ONE slot and keeps the newest,
+        // which the corrupt setting then refuses: one intent survives, the newest
+        assert.equal(app.session.pendingAuto.length, 1, 'the older command did not survive the reply');
+        assert.equal(app.session.pendingAuto[0].auto, !oldAuto, 'and the survivor is the newest command');
+        // repair, then an automatic retile arrives: the NEWEST command must win
+        const ref = app.split.ref(app, 1, 0, 2);
+        env.settingsWriteFile('greenTile@carsteneu', 'layouts', JSON.stringify({ [ref.mkey]: { '*': { auto: true } } }));
+        settingsInstance(env).remoteUpdate();
+        env.windowManager.emit('switch-workspace');
+        const debounce = env.liveTimers().find((t) => t.ms === 300);
+        assert.ok(debounce, 'the automatic retile is armed');
+        const entry = [...env.timers.entries()].find(([id]) => id === debounce.id);
+        env.timers.delete(debounce.id);
+        entry[1].cb();
+        assert.equal(app.ops.layoutFor(app, 1, 1).auto, !oldAuto, 'the newest command is the applied one');
+        assert.equal(app.session.pendingAuto.length, 0, 'and the older one did not survive it');
+        if (oldAuto) {
+            assert.equal(w.moves.length, 0, 'a newest pause leaves the windows alone');
+        }
+        ext.disable();
+    });
+}
+
+test('item 4/F3b: an explicit preset-row click supersedes the retained pause for its target', () => {
+    const { env, ext } = makeEnv({ layouts: '{invalid', windowGap: 48 });
+    const ws0 = makeWorkspace(null, 1, 0);
+    ws0.list_windows = () => env.tabList;
+    env.workspaces.push(ws0);
+    env.activeWorkspace = ws0;
+    const a = makeWindow(env, 801, [50, 70, 320, 200]);
+    const b = makeWindow(env, 802, [450, 70, 320, 200]);
+    env.tabList.push(a, b);
+    env.display.focus_window = a;
+    env.layoutManager.monitors.push(MONITOR);
+    ext.enable();
+    autoOf(env, 'greenTile-autoOff');    // refused → retained
+    env.flushDisplayConfigNoReply();
+    const app = ext.currentSession().app;
+    app.ops.presetsWrite(app, [{ id: 'p', name: 'p', rules: [{ min: 2, stacks: [1, 1] }] }]);
+    const ref = app.split.ref(app, 0, 0, 2);
+    env.settingsWriteFile('greenTile@carsteneu', 'layouts', JSON.stringify({ [ref.mkey]: { [ref.wskey]: { auto: false, preset: 'p' } } }));
+    settingsInstance(env).remoteUpdate();
+    assert.equal(app.session.holdsPause(app, 0, 0), true, 'the pause still gates automatic placement');
+    // the user reactivates through the panel: the row click is explicit
+    autoOf(env, 'greenTile-preset');
+    const row = findActor(app.panel.actor, /^gk-row(?: |$)/);
+    assert.ok(row, 'the preset row is in the panel');
+    row.emit('clicked');
+    assert.equal(app.session.holdsPause(app, 0, 0), false, 'the click superseded the retained pause');
+    assert.equal(app.session.pendingAuto.length, 0);
+    assert.ok(a.moves.length + b.moves.length > 0, 'and it actually tiles');
+    ext.disable();
+});
+
+function findActor(root, styleRe) {
+    const seen = new Set();
+    const visit = (actor) => {
+        if (!actor || seen.has(actor)) {
+            return null;
+        }
+        seen.add(actor);
+        if (styleRe.test(actor.style_class || '')) {
+            return actor;
+        }
+        for (const child of actor.children || []) {
+            const hit = visit(child);
+            if (hit) {
+                return hit;
+            }
+        }
+        return visit(actor.child);
+    };
+    return visit(root);
+}

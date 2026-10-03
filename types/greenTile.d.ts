@@ -237,6 +237,10 @@ type SessionFacade = {
     sameSlot(app: AppFacade, aMonitor: number, aWs: number, bMonitor: number, bWs: number): boolean;
     /** Whether a retained pause covers that monitor+workspace. */
     holdsPause(app: AppFacade, monitorIndex: number, wsIndex: number): boolean;
+    /** Drops the retained intent for that slot (an explicit command superseded it). */
+    dropIntent(app: AppFacade, monitorIndex: number, wsIndex: number): void;
+    /** Collapses the retained queue to one intent per effective slot, newest wins. */
+    normalizePending(app: AppFacade): void;
     destroy(): void;
 };
 

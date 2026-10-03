@@ -12,7 +12,7 @@
  * @property {() => number} focusMonitorIndex
  * @property {(app: AppFacade, monitorIndex: number, wsIndex: number) => { auto: boolean }} layoutFor
  * @property {(app: AppFacade, monitorIndex: number, wsIndex: number, patch: {}) => boolean} layoutSet
- * @property {(app: AppFacade, monitorIndex: number, focused: CinnamonWindow | null) => void} retileMonitor
+ * @property {(app: AppFacade, monitorIndex: number, focused: CinnamonWindow | null, animate?: boolean, wsIndex?: number | null) => void} retileMonitor
  * @property {() => void} borderUpdate
  * @property {(op: string) => boolean} grabIsResize
  * @property {(app: AppFacade, w: CinnamonWindow, op: string) => boolean} dropBegin
@@ -244,7 +244,7 @@ export type AutoDeps = {
         auto: boolean;
     };
     layoutSet: (app: AppFacade, monitorIndex: number, wsIndex: number, patch: {}) => boolean;
-    retileMonitor: (app: AppFacade, monitorIndex: number, focused: CinnamonWindow | null) => void;
+    retileMonitor: (app: AppFacade, monitorIndex: number, focused: CinnamonWindow | null, animate?: boolean, wsIndex?: number | null) => void;
     borderUpdate: () => void;
     grabIsResize: (op: string) => boolean;
     dropBegin: (app: AppFacade, w: CinnamonWindow, op: string) => boolean;

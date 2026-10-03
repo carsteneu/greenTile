@@ -140,6 +140,25 @@ export const Session: {
          */
         sameSlot(app: AppFacade, aMonitor: number, aWs: number, bMonitor: number, bWs: number): boolean;
         /**
+         * Collapses the retained queue to ONE intent per effective slot, keeping the
+         * NEWEST (last pressed). The queue is built before the registry can resolve the
+         * effective key, so two numbered workspaces of a shared monitor ('*') can both
+         * sit in it for the same storage entry; every read and every application of the
+         * queue normalizes first, so the newest command is the one that survives.
+         * Entries the registry cannot resolve yet are kept untouched.
+         * @param {AppFacade} app
+         */
+        normalizePending(app: AppFacade): void;
+        /**
+         * Drops the retained intent for that slot: an explicit command that took effect
+         * supersedes it. Addresses the same effective slot, so a shared monitor's
+         * numbered workspaces are the one target they are.
+         * @param {AppFacade} app
+         * @param {number} monitorIndex
+         * @param {number} wsIndex
+         */
+        dropIntent(app: AppFacade, monitorIndex: number, wsIndex: number): void;
+        /**
          * Whether a RETAINED pause covers that monitor+workspace. An automatic retile
          * must not place windows against the user's last command just because the
          * stored setting still says `auto` — the retained command is what the user
@@ -323,6 +342,25 @@ export type SessionDeps = {
          * @returns {boolean}
          */
         sameSlot(app: AppFacade, aMonitor: number, aWs: number, bMonitor: number, bWs: number): boolean;
+        /**
+         * Collapses the retained queue to ONE intent per effective slot, keeping the
+         * NEWEST (last pressed). The queue is built before the registry can resolve the
+         * effective key, so two numbered workspaces of a shared monitor ('*') can both
+         * sit in it for the same storage entry; every read and every application of the
+         * queue normalizes first, so the newest command is the one that survives.
+         * Entries the registry cannot resolve yet are kept untouched.
+         * @param {AppFacade} app
+         */
+        normalizePending(app: AppFacade): void;
+        /**
+         * Drops the retained intent for that slot: an explicit command that took effect
+         * supersedes it. Addresses the same effective slot, so a shared monitor's
+         * numbered workspaces are the one target they are.
+         * @param {AppFacade} app
+         * @param {number} monitorIndex
+         * @param {number} wsIndex
+         */
+        dropIntent(app: AppFacade, monitorIndex: number, wsIndex: number): void;
         /**
          * Whether a RETAINED pause covers that monitor+workspace. An automatic retile
          * must not place windows against the user's last command just because the
