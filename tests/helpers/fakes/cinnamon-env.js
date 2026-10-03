@@ -423,6 +423,7 @@ const createCinnamonEnv = (options) => {
     };
     const makeSettings = (uuid, owner) => {
         const values = new Map(Object.entries(settingsDefaults));
+        const optionsStore = new Map();
         const sigHandlers = [];
         let nextSigId = 1;
         const instance = {
@@ -471,7 +472,17 @@ const createCinnamonEnv = (options) => {
             bindProperty(direction, key, prop, cb, data) {
                 return this.bind(key, prop, cb, data);
             },
-            setOptions() {},
+            // mirrors settings.js setOptions: stores the widget options AND
+            // rewrites the whole settings file (_saveToFile). The caller passes a
+            // freshly built options object, so the framework's identity check
+            // (settingsData[key].options != options) is always true — this is an
+            // own write of the settings FILE that must ride the own-write hook.
+            setOptions(key, pickOptions) {
+                this.callLog.push({ op: 'setOptions', key, finalized: this.finalized });
+                optionsStore.set(key, pickOptions);
+                writeSettingsFile(uuid, values);
+                notifySettingsMonitors(uuid);
+            },
             getValue(key) {
                 if (!values.has(key))
                     {throw new Error('fake settings: no default for "' + key + '" (uuid ' + uuid + ')');}

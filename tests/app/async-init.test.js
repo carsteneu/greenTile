@@ -146,6 +146,28 @@ const bootBeforeReply = (env, ext) => {
 
 const autoOf = (env, key) => env.keybindingManager.hotkeys.get(key).cb();
 
+test('item 3: a failing workspace reconnect mid-life leaves no partial set and does not throw', () => {
+    const { env, ext } = makeEnv();
+    const ws = makeWorkspace();
+    env.workspaces.push(ws);
+    env.layoutManager.monitors.push(MONITOR);
+    ext.enable();
+    env.flushDisplayConfigNoReply();
+    assert.equal(ws.count(), 2, 'both handlers registered');
+    // a second workspace whose window-removed connect fails: the reconnect that
+    // notify::n-workspaces triggers must not leave a half-connected set behind,
+    // and it must not let the throw escape into the signal emission
+    env.workspaces.push(makeWorkspace('window-removed'));
+    env.workspaceManager.emit('notify::n-workspaces');
+    assert.equal(ws.count(), 0, 'the all-or-nothing reconnect dropped the whole set');
+    assert.equal(env.logErrors.some((l) => l.indexOf('greenTile workspace reconnect failed') === 0), true,
+        'the reconnect failure is reported');
+    assert.equal(env.workspaceManager.count('notify::n-workspaces'), 1,
+        'the changed-signal observer itself survives');
+    ext.disable();
+    assert.equal(env.totalHandlers(), 0);
+});
+
 test('item 4: auto-off before the monitor reply is applied at readiness, not dropped', () => {
     const { env, ext } = makeEnv();
     bootBeforeReply(env, ext);

@@ -152,6 +152,24 @@ test('item 5: an own layoutSet does not drop a pending split, and a resize after
     ext.disable();
 });
 
+test('item 5: an own setOptions (app-picker repopulate) does not drop a pending split', () => {
+    const { env, ext } = makeEnv();
+    const { app, ref } = enabledWithLayouts(env, ext);
+    const inst = settingsInstance(env);
+
+    app.split.remember(app, ref, { 0: 0.4, 1: 0.6 }, false);
+    // the app picker is repopulated on start and on every installed-changed; it
+    // rewrites the whole settings file through setOptions — an own write, exactly
+    // like setValue, and the file event it produces must not invalidate
+    app.excl.populate(inst);
+    assert.equal(flushTimers(env).length, 1, 'the repopulate did not drop the pending split');
+    const mark = inst.callLog.length;
+    fireFlush(env);
+    assert.equal(layoutsWritesSince(inst, mark).filter((c) => c.value.indexOf('0.4') !== -1).length, 1,
+        'the pending split still reached the settings');
+    ext.disable();
+});
+
 test('item 5: the file observer is armed per App and released with it', () => {
     const { env, ext } = makeEnv();
     const { app } = enabledWithLayouts(env, ext);

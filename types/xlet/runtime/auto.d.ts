@@ -63,10 +63,12 @@ export const Auto: {
          */
         _deferAuto(app: AppFacade, monitorIndex: number, wsIndex: number, auto: boolean): void;
         /**
-         * Applies the auto on/off commands queued before the registry was ready, in
-         * their original order — called by the monitor-ready callback after
-         * connectAll and before the settle retile, so no automatic tiling runs
-         * against a requested pause.
+         * Applies the auto on/off commands queued before the registry was ready —
+         * called by the monitor-ready callback after connectAll and before the settle
+         * retile, so no automatic tiling runs against a requested pause. Each intent
+         * leaves the queue only once it is written, so a throw mid-way keeps the rest
+         * for the next monitor-ready; an intent whose monitor no longer exists is
+         * dropped (there is no key to address it, and nothing ever will be).
          * @param {AppFacade} app
          */
         applyPending(app: AppFacade): void;
