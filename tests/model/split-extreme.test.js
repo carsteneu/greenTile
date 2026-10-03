@@ -48,6 +48,13 @@ const assertFractionsAndRaw = (kind, shape, split, area, out, label) => {
     finals.forEach((r, i) => {
         assert.ok(r.every(Number.isFinite), `${label}: final frame ${i} finite: ${r}`);
         assert.ok(r[2] >= 1 && r[3] >= 1, `${label}: final frame ${i} at least 1 px: ${r}`);
+        // a usable area must contain every final frame (issue 12: the original
+        // counterexample was a final frame at x=637 in a 600px area). A degenerate
+        // area (0 on an axis) cannot contain anything — that case is guarded at
+        // placement time instead.
+        if (area[2] >= 1 && area[3] >= 1) {
+            assert.ok(inside(r, area), `${label}: final frame ${i} inside the area: ${r}`);
+        }
     });
 };
 
@@ -129,4 +136,36 @@ test('issue 12: feasible ordinary splits are untouched (no regression of the acc
     assert.ok(out, 'a feasible-but-short budget still tiles');
     const fr = m.splitRects('cols', shape, out, box).map((r) => g.gapCell(r, box, GAP));
     assert.deepEqual(fr.map((r) => r[2]), [69, 69, 69, 69, 68, 68, 68, 68, 68], 'the accepted fair shares are unchanged');
+});
+
+test('issue 12: a non-integer axis length returns fractions summing to exactly 1', () => {
+    for (const n of [2, 3, 5]) {
+        const shape = new Array(n).fill(1);
+        const area = [0, 0, 49.6, 600];
+        const out = m.splitMinimal('cols', shape, null, area, GAP, MIN);
+        const eff = effective('cols', shape, out);
+        assert.ok(near(sum(eff.major), 1, 1e-9), `n=${n}: major sums to exactly 1, got ${sum(eff.major)}`);
+        assert.ok(eff.major.every((f) => f > 0 && Number.isFinite(f)), `n=${n}: fractions positive and finite`);
+        const rects = m.splitRects('cols', shape, out, area);
+        const last = rects[rects.length - 1];
+        assert.ok(last[0] + last[2] <= area[0] + area[2] + 1e-6, `n=${n}: the last raw cell stays inside the area`);
+        const finals = rects.map((r) => g.gapCell(r, area, GAP));
+        for (const r of finals) {
+            assert.ok(r[0] >= area[0] - 1e-6 && r[1] >= area[1] - 1e-6
+                && r[0] + r[2] <= area[0] + area[2] + 1e-6 && r[1] + r[3] <= area[1] + area[3] + 1e-6,
+                `n=${n}: the final frame stays inside the fractional area, got ${JSON.stringify(r)}`);
+        }
+    }
+});
+
+test('issue 12: final frames stay inside a tiny usable area on both axes', () => {
+    for (const [kind, shape] of [['cols', [1, 1, 1, 1]], ['rows', [1, 1, 1, 1]]]) {
+        const area = [0, 0, 10, 10];
+        const out = m.splitMinimal(kind, shape, null, area, GAP, MIN);
+        const finals = m.splitRects(kind, shape, out, area).map((r) => g.gapCell(r, area, GAP));
+        for (const r of finals) {
+            assert.ok(inside(r, area), `${kind}: final frame inside the 10x10 area: ${r}`);
+            assert.ok(r[2] >= 1 && r[3] >= 1, `${kind}: at least 1px: ${r}`);
+        }
+    }
 });

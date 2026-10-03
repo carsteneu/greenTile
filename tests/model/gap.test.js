@@ -57,6 +57,35 @@ test('the cell never collapses below 1px', () => {
     assert.ok(c[2] >= 1 && c[3] >= 1);
 });
 
+test('a gap larger than the cell never pushes the frame outside a usable area', () => {
+    // issue 12: on a 10x10 work area the four cells are 2.5px wide, so the 48px
+    // gap exceeds each cell. The insets must not move a frame past the area.
+    const a = [0, 0, 10, 10];
+    const cells = [[0, 0, 2.5, 10], [2.5, 0, 2.5, 10], [5, 0, 2.5, 10], [7.5, 0, 2.5, 10]];
+    for (const cell of cells) {
+        const c = m.gapCell(cell, a, 48);
+        assert.ok(c[0] >= a[0] && c[1] >= a[1] && c[0] + c[2] <= a[0] + a[2] && c[1] + c[3] <= a[1] + a[3],
+            'frame inside the area, got ' + JSON.stringify(c));
+        assert.ok(c[2] >= 1 && c[3] >= 1, 'at least 1px, got ' + JSON.stringify(c));
+    }
+    // the same on the vertical axis
+    const b = [0, 0, 10, 10];
+    for (const cell of [[0, 0, 10, 2.5], [0, 2.5, 10, 2.5], [0, 5, 10, 2.5], [0, 7.5, 10, 2.5]]) {
+        const c = m.gapCell(cell, b, 48);
+        assert.ok(c[0] >= 0 && c[1] >= 0 && c[0] + c[2] <= 10 && c[1] + c[3] <= 10, JSON.stringify(c));
+    }
+});
+
+test('a bounded gap keeps a whole grid inside an offset tiny area', () => {
+    const a = [100, 200, 12, 12];
+    const out = [];
+    for (let i = 0; i < 3; i++)
+        {out.push(m.gapCell([100 + i * 4, 200, 4, 12], a, 48));}
+    for (const c of out) {
+        assert.ok(c[0] >= 100 && c[1] >= 200 && c[0] + c[2] <= 112 && c[1] + c[3] <= 212, JSON.stringify(c));
+    }
+});
+
 test('gap_value clamps to 0..MAX on the step and tolerates junk', () => {
     assert.equal(m.GAP_STEP, 2);
     assert.equal(m.gapValue(8), 8);
