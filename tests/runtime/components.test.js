@@ -451,9 +451,26 @@ const { Auto } = load('./lib/runtime/auto');
 // Minimal per-App shape: only the surfaces the Auto component reads through the
 // app parameter (monitors readiness, settle liveness, the placement owner the
 // unmanaged handler releases through).
+// The session owns the retained auto-on/off queue; the component tests need only
+// its published surface (one monitor here, so slots are the numbered pair).
+const makeSessionStub = () => {
+    const session = {
+        settle: { started: 0, start() {} },
+        pendingAuto: [],
+        sameSlot(aMonitor, aWs, bMonitor, bWs) {
+            return aMonitor === bMonitor && aWs === bWs;
+        },
+        normalizePending() {},
+        dropIntent() {
+            session.pendingAuto.length = 0;
+        },
+    };
+    return session;
+};
+
 const makeApp = (overrides = {}) => ({
     monitors: { ready: true, keys: ['mkey0', 'mkey1'] },
-    session: { settle: { started: 0, start() {} }, pendingAuto: [] },
+    session: makeSessionStub(),
     placement: { release() {} },
     ...overrides,
 });

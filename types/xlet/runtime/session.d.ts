@@ -117,6 +117,59 @@ export const Session: {
          */
         _isLive(app: AppFacade): boolean;
         /**
+         * The storage slot an auto command addresses: the monitor key plus the
+         * EFFECTIVE workspace key. On a monitor whose workspaces live on the primary
+         * only, every numbered workspace resolves to the same alias — one slot, one
+         * intent — so two commands for different numbered workspaces are the same
+         * command there. Null while the registry cannot resolve it yet.
+         * @param {AppFacade} app
+         * @param {number} monitorIndex
+         * @param {number} wsIndex
+         * @returns {string | null}
+         */
+        intentSlot(app: AppFacade, monitorIndex: number, wsIndex: number): string | null;
+        /**
+         * Whether two auto commands address the same slot — the same storage entry, or
+         * the same numbered pair while the registry cannot resolve the effective key.
+         * @param {AppFacade} app
+         * @param {number} aMonitor
+         * @param {number} aWs
+         * @param {number} bMonitor
+         * @param {number} bWs
+         * @returns {boolean}
+         */
+        sameSlot(app: AppFacade, aMonitor: number, aWs: number, bMonitor: number, bWs: number): boolean;
+        /**
+         * Collapses the retained queue to ONE intent per effective slot, keeping the
+         * NEWEST (last pressed). The queue is built before the registry can resolve the
+         * effective key, so two numbered workspaces of a shared monitor ('*') can both
+         * sit in it for the same storage entry; every read and every application of the
+         * queue normalizes first, so the newest command is the one that survives.
+         * Entries the registry cannot resolve yet are kept untouched.
+         * @param {AppFacade} app
+         */
+        normalizePending(app: AppFacade): void;
+        /**
+         * Drops the retained intent for that slot: an explicit command that took effect
+         * supersedes it. Addresses the same effective slot, so a shared monitor's
+         * numbered workspaces are the one target they are.
+         * @param {AppFacade} app
+         * @param {number} monitorIndex
+         * @param {number} wsIndex
+         */
+        dropIntent(app: AppFacade, monitorIndex: number, wsIndex: number): void;
+        /**
+         * Whether a RETAINED pause covers that monitor+workspace. An automatic retile
+         * must not place windows against the user's last command just because the
+         * stored setting still says `auto` — the retained command is what the user
+         * asked for last, and it is applied as soon as it can be written.
+         * @param {AppFacade} app
+         * @param {number} monitorIndex
+         * @param {number} wsIndex
+         * @returns {boolean}
+         */
+        holdsPause(app: AppFacade, monitorIndex: number, wsIndex: number): boolean;
+        /**
          * Rolls back an App whose asynchronous start failed: the observer set, the
          * hotkeys and the timers of a half-started App must not outlive their use — a
          * hotkey that addresses a registry nobody watches, a settle wait that would
@@ -266,6 +319,59 @@ export type SessionDeps = {
          * @param {AppFacade} app
          */
         _isLive(app: AppFacade): boolean;
+        /**
+         * The storage slot an auto command addresses: the monitor key plus the
+         * EFFECTIVE workspace key. On a monitor whose workspaces live on the primary
+         * only, every numbered workspace resolves to the same alias — one slot, one
+         * intent — so two commands for different numbered workspaces are the same
+         * command there. Null while the registry cannot resolve it yet.
+         * @param {AppFacade} app
+         * @param {number} monitorIndex
+         * @param {number} wsIndex
+         * @returns {string | null}
+         */
+        intentSlot(app: AppFacade, monitorIndex: number, wsIndex: number): string | null;
+        /**
+         * Whether two auto commands address the same slot — the same storage entry, or
+         * the same numbered pair while the registry cannot resolve the effective key.
+         * @param {AppFacade} app
+         * @param {number} aMonitor
+         * @param {number} aWs
+         * @param {number} bMonitor
+         * @param {number} bWs
+         * @returns {boolean}
+         */
+        sameSlot(app: AppFacade, aMonitor: number, aWs: number, bMonitor: number, bWs: number): boolean;
+        /**
+         * Collapses the retained queue to ONE intent per effective slot, keeping the
+         * NEWEST (last pressed). The queue is built before the registry can resolve the
+         * effective key, so two numbered workspaces of a shared monitor ('*') can both
+         * sit in it for the same storage entry; every read and every application of the
+         * queue normalizes first, so the newest command is the one that survives.
+         * Entries the registry cannot resolve yet are kept untouched.
+         * @param {AppFacade} app
+         */
+        normalizePending(app: AppFacade): void;
+        /**
+         * Drops the retained intent for that slot: an explicit command that took effect
+         * supersedes it. Addresses the same effective slot, so a shared monitor's
+         * numbered workspaces are the one target they are.
+         * @param {AppFacade} app
+         * @param {number} monitorIndex
+         * @param {number} wsIndex
+         */
+        dropIntent(app: AppFacade, monitorIndex: number, wsIndex: number): void;
+        /**
+         * Whether a RETAINED pause covers that monitor+workspace. An automatic retile
+         * must not place windows against the user's last command just because the
+         * stored setting still says `auto` — the retained command is what the user
+         * asked for last, and it is applied as soon as it can be written.
+         * @param {AppFacade} app
+         * @param {number} monitorIndex
+         * @param {number} wsIndex
+         * @returns {boolean}
+         */
+        holdsPause(app: AppFacade, monitorIndex: number, wsIndex: number): boolean;
         /**
          * Rolls back an App whose asynchronous start failed: the observer set, the
          * hotkeys and the timers of a half-started App must not outlive their use — a
