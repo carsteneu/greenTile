@@ -6,8 +6,9 @@
 const test = require('node:test');
 const assert = require('node:assert/strict');
 const {
-    makeEnv, makeWindow, makeWorkspace, enableOnMonitor, enableOnMonitors,
+    makeEnv, makeWindow, makeWorkspace, settingsInstance, enableOnMonitor, enableOnMonitors,
 } = require('../helpers/fakes/cinnamon-harness');
+const { makeEaseActor } = require('../helpers/fakes/ease-actor');
 
 // Wide enough for the row grids the drop tests key on (>= 2100 px keeps autoRows
 // for 4+ windows instead of autoNarrowStacks).
@@ -65,6 +66,138 @@ test('issue 8 regression: an active source still pushes along the monitor chain'
     assert.equal(w1.get_monitor(), 1, 'the active source was pushed onto the next monitor');
     assert.equal(env.logs.some((l) => l.indexOf('greenTile swap pushed') === 0), true, 'the chain push ran');
 });
+
+// The early Off was refused by corrupt storage, then an external repair restored
+// auto:true. Only an explicit reactivation may supersede the retained source pause.
+const retainedSwap = ({ monitorIndex = 0, wsIndex = 0, local = false, onlyPrimary = false } = {}) => {
+    const preset = { id: 'grid', name: 'Grid', rules: [{ min: 2, stacks: [2, 2] }] };
+    const { env, ext } = makeEnv({ layouts: '{bad', windowGap: 0, presets: JSON.stringify([preset]) });
+    env.gi.Gio.Settings.prototype.get_boolean = () => onlyPrimary;
+    const crossings = [];
+    for (let i = 0; i < 3; i++) {
+        const ws = makeWorkspace(env);
+        const handlers = new Map();
+        let nextId = 1;
+        ws.connect = (signal, callback) => {
+            const id = nextId++;
+            handlers.set(id, { signal, callback });
+            return id;
+        };
+        ws.disconnect = (id) => handlers.delete(id);
+        ws.index = () => i;
+        ws.list_windows = () => env.tabList.filter((w) => w.get_workspace() === ws);
+        ws.activate_with_focus = (w) => {
+            crossings.push(['activate-workspace', i]);
+            env.activeWorkspace = ws;
+            env.display.focus_window = w;
+        };
+    }
+    env.activeWorkspace = env.workspaces[wsIndex];
+    env.layoutManager.monitors.push(LEFT, RIGHT);
+    const actors = [];
+    const resets = [];
+    const rects = local ? [[0, 0, 1000, 550], [0, 550, 1000, 550], [1000, 0, 1000, 550], [1000, 550, 1000, 550]]
+        : [[monitorIndex * 2000 + 50, 70, 400, 300]];
+    const windows = rects.map((rect, i) => {
+        const actor = makeEaseActor();
+        actors.push(actor);
+        const w = makeWindow(env, i + 1, rect, monitorIndex, actor);
+        let workspace = env.activeWorkspace;
+        w.get_workspace = () => workspace;
+        w.change_workspace_by_index = (index) => {
+            crossings.push(['move-workspace', index]);
+            workspace = env.workspaces[index];
+        };
+        const moveMonitor = w.move_to_monitor;
+        w.move_to_monitor = (index) => {
+            crossings.push(['move-monitor', index]);
+            moveMonitor(index);
+        };
+        w.unmaximize = (flag) => resets.push([w.seq, flag]);
+        return w;
+    });
+    env.tabList.push(...windows);
+    env.display.focus_window = windows[0];
+    ext.enable();
+    env.keybindingManager.hotkeys.get('greenTile-autoOff').cb();
+    env.flushDisplayConfigNoReply();
+    const app = ext.currentSession().app;
+    assert.equal(app.monitors.ready, true, 'the asynchronous App start completed');
+    const ref = app.split.ref(app, monitorIndex, wsIndex, 2);
+    assert.equal(ref.wskey, onlyPrimary && monitorIndex !== 0 ? '*' : String(wsIndex + 1));
+    assert.equal(app.session.pendingAuto.length, 1, 'the refused early Off remains retained');
+    const repaired = JSON.stringify({ [ref.mkey]: { [ref.wskey]: { auto: true, ...(local ? { preset: 'grid' } : {}) } } });
+    env.settingsWriteFile('greenTile@carsteneu', 'layouts', repaired);
+    settingsInstance(env).remoteUpdate();
+    assert.equal(app.ops.layoutFor(app, monitorIndex, wsIndex).auto, true, 'the external repair restored stored auto');
+    assert.equal(app.session.holdsPause(app, monitorIndex, wsIndex), true, 'the repair did not reactivate the source');
+    const state = () => ({
+        windows: windows.map((w) => ({ rect: w.rect.slice(), monitor: w.get_monitor(), ws: w.get_workspace().index(), moves: w.moves.slice() })),
+        eases: actors.map((a) => a.eases.length), crossings: crossings.slice(), resets: resets.slice(),
+        overrides: windows.map((w) => app.auto.sortPeek(w.seq, 0)),
+        pending: JSON.stringify(app.session.pendingAuto), layouts: settingsInstance(env).getValue('layouts'),
+        timers: env.liveTimers(), swapLogs: env.logs.filter((l) => l.startsWith('greenTile swap')),
+    });
+    return { env, ext, app, windows, crossings, state };
+};
+
+for (const dir of ['left', 'right', 'up', 'down']) {
+    test('issues 4/8: retained pause prevents local swap effects after external repair: ' + dir, () => {
+        const f = retainedSwap({ local: true });
+        try {
+            f.env.display.focus_window = f.windows[dir === 'left' ? 2 : dir === 'up' ? 1 : 0];
+            const before = f.state();
+            f.env.keybindingManager.hotkeys.get('greenTile-swap-' + dir).cb();
+            assert.deepEqual(f.state(), before, 'no swap override, placement, animation, timer, write or intent consumption');
+        } finally { f.ext.disable(); }
+    });
+}
+
+for (const c of [
+    { name: 'monitor right', dir: 'right', monitorIndex: 0, wsIndex: 0 },
+    { name: 'monitor left', dir: 'left', monitorIndex: 1, wsIndex: 0 },
+    { name: 'workspace right', dir: 'right', monitorIndex: 1, wsIndex: 0 },
+    { name: 'workspace left', dir: 'left', monitorIndex: 0, wsIndex: 1 },
+    { name: 'secondary shared slot', dir: 'left', monitorIndex: 1, wsIndex: 1, onlyPrimary: true },
+]) {
+    test('issues 4/8: retained pause prevents the ' + c.name + ' chain after external repair', () => {
+        const f = retainedSwap(c);
+        try {
+            const before = f.state();
+            f.env.keybindingManager.hotkeys.get('greenTile-swap-' + c.dir).cb();
+            assert.deepEqual(f.state(), before, 'the retained source pause precedes every chain intervention');
+        } finally { f.ext.disable(); }
+    });
+}
+
+for (const control of ['auto-on', 'preset-row']) {
+    test('issues 4/8: explicit ' + control + ' reactivation permits the monitor chain again', () => {
+        const f = retainedSwap();
+        try {
+            if (control === 'auto-on') {
+                f.env.keybindingManager.hotkeys.get('greenTile-autoN').cb();
+            } else {
+                f.env.keybindingManager.hotkeys.get('greenTile-preset').cb();
+                const visit = (actor) => {
+                    if (!actor) { return null; }
+                    if (/^gk-row(?: |$)/.test(actor.style_class || '')) { return actor; }
+                    for (const child of actor.children || []) {
+                        const found = visit(child);
+                        if (found) { return found; }
+                    }
+                    return visit(actor.child);
+                };
+                const row = visit(f.app.panel.actor);
+                assert.ok(row, 'the real preset row actor exists');
+                row.emit('clicked');
+            }
+            assert.equal(f.app.session.holdsPause(f.app, 0, 0), false);
+            f.env.keybindingManager.hotkeys.get('greenTile-swap-right').cb();
+            assert.equal(f.windows[0].get_monitor(), 1, 'explicit reactivation enables the active chain');
+            assert.deepEqual(f.crossings, [['move-monitor', 1]]);
+        } finally { f.ext.disable(); }
+    });
+}
 
 // ---------------- issue 9: focus navigation must not consume the resize override ----------------
 
