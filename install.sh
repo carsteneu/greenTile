@@ -152,31 +152,60 @@ DATA_DIR="${XDG_DATA_HOME:-$HOME/.local/share}"
 for mofile in "$STAGE"/locale/*/LC_MESSAGES/*.mo; do
     [ -e "$mofile" ] || continue
     lang=$(basename "$(dirname "$(dirname "$mofile")")")
-    modest="$DATA_DIR/locale/$lang/LC_MESSAGES/$UUID.mo"
-    # same failure class as the mv below: report, keep going
-    if ! mkdir -p "$DATA_DIR/locale/$lang/LC_MESSAGES"; then
+    localedir="$DATA_DIR/locale/$lang/LC_MESSAGES"
+    modest="$localedir/$UUID.mo"
+    # same failure class as the moves below: report, keep going
+    if ! mkdir -p "$localedir"; then
         echo "Note: could not install the $lang translation — the extension works without it (English)." >&2
         continue
     fi
-    # Only a plain file is a catalogue we may replace. A directory — or a
-    # symlink to one — would make a plain mv move the catalogue *inside* it
-    # and still exit 0, leaving the path the loader reads as a directory: a
-    # silent false success. Refuse every non-regular target here (a symlink
-    # to a plain file included) and never delete what the user put there at
-    # this check; name the concrete path and keep the English fallback.
+    # Only a plain regular file is ours to replace. A directory — or a symlink
+    # to one — would make a plain mv move the catalogue *inside* it and still
+    # exit 0, leaving the path the loader reads as a directory: a silent false
+    # success. Refuse that up front, naming the concrete path.
     if { [ -e "$modest" ] || [ -L "$modest" ]; } &&
         { [ ! -f "$modest" ] || [ -L "$modest" ]; }; then
         echo "Note: $modest exists and is not a plain file — the $lang translation was left untouched; the extension falls back to English if no usable catalogue is found there." >&2
         continue
     fi
-    # -T: the destination is a name, never a container. A directory that
-    # appears between the check above and the move then fails the move
-    # (reported below) instead of nesting the catalogue; a symlink that
-    # appears in that window is replaced by the plain file, so the catalogue
-    # still lands on the path the loader reads.
-    if ! mv -T "$mofile" "$modest"; then
+    # None of the above is atomic, so the exchange itself is a fail-closed
+    # transaction inside $localedir: stage the catalogue as a hidden sibling,
+    # capture the current occupant by rename (a rename never deletes it),
+    # replace only a plain file, and create the final name with ln, which
+    # never clobbers. Anything that appears mid-flight — a link, a directory —
+    # makes the final ln fail or is handed straight back, and is reported; the
+    # path is never silently taken over. ln -T treats the destination as a
+    # name, never a container (plain ln would nest into a directory).
+    staged="$localedir/.$UUID.$$.new"
+    old="$localedir/.$UUID.$$.old"
+    if ! mv "$mofile" "$staged"; then
         echo "Note: could not install the $lang translation — the extension works without it (English)." >&2
+        continue
     fi
+    if [ -e "$modest" ] || [ -L "$modest" ]; then
+        if ! mv -T "$modest" "$old"; then
+            echo "Note: could not replace $modest — the $lang translation was not installed; the extension falls back to English if no usable catalogue is found there." >&2
+            rm -f "$staged"
+            continue
+        fi
+        if [ ! -f "$old" ] || [ -L "$old" ]; then
+            # not a plain catalogue: hand it straight back and refuse
+            if mv -T "$old" "$modest" 2>/dev/null; then
+                echo "Note: $modest exists and is not a plain file — the $lang translation was left untouched; the extension falls back to English if no usable catalogue is found there." >&2
+            else
+                echo "Note: $modest is not a plain file and is preserved at $old — the $lang translation was not installed; the extension falls back to English if no usable catalogue is found there." >&2
+            fi
+            rm -f "$staged"
+            continue
+        fi
+        rm -f "$old"
+    fi
+    if ! ln -T "$staged" "$modest"; then
+        echo "Note: could not install the $lang translation — $modest appeared in the meantime and was left untouched; the extension falls back to English if no usable catalogue is found there." >&2
+        rm -f "$staged"
+        continue
+    fi
+    rm -f "$staged"
 done
 
 echo "greenTile $UUID installed to $DEST"

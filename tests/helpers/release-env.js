@@ -19,8 +19,9 @@ const toolPath = (t) => {
     return r.status === 0 ? r.stdout.trim() : '';
 };
 const REAL_MV = toolPath('mv');
-if (['mv', 'zip', 'unzip', 'msgfmt'].some((t) => !toolPath(t))) {
-    throw new Error('shell-script tests need the mv, zip, unzip and msgfmt tools on PATH');
+const REAL_LN = toolPath('ln');
+if (['mv', 'ln', 'zip', 'unzip', 'msgfmt'].some((t) => !toolPath(t))) {
+    throw new Error('shell-script tests need the mv, ln, zip, unzip and msgfmt tools on PATH');
 }
 // Version the curl stub serves from .../releases/latest
 const LATEST = '9.9.9';
@@ -70,6 +71,69 @@ case "\${url#*://}" in
 esac
 exit 0
 `;
+
+// wget stub for the wget-only downloader path. The same GT_* switches drive
+// it, because they describe the simulated answer, not the tool that fetched
+// it; exit codes are wget's (4 = network failure).
+const WGET_STUB = `#!/usr/bin/env bash
+set -eu
+url=""; out=""
+while [ $# -gt 0 ]; do
+    case "$1" in
+        -qO-) ;;
+        -qO) out="$2"; shift ;;
+        *) url="$1" ;;
+    esac
+    shift
+done
+echo "wget $url" >> "\${GT_STUBLOG:?}"
+case "\${url#*://}" in
+    api.github.com/*)
+        [ -n "\${GT_CURL_API_FAIL:-}" ] && { exit 4; }
+        printf '{"tag_name": "v%s"}\\n' "\${GT_VERSION:?}"
+        [ -n "\${GT_CURL_API_PARTIAL:-}" ] && { exit 4; }
+        ;;
+    *releases/download*)
+        [ -n "\${GT_CURL_DL_FAIL:-}" ] && { exit 4; }
+        [ -n "$out" ] || { echo "wget stub: download without -qO" >&2; exit 2; }
+        cp "\${GT_ZIP:?}" "$out"
+        ;;
+    *)
+        echo "wget stub: unexpected url $url" >&2
+        exit 2
+        ;;
+esac
+exit 0
+`;
+
+// Builds a PATH directory that behaves like a system without curl: symlinks
+// every executable from the usual bin dirs EXCEPT curl and wget, then adds
+// the wget stub. Lets a test prove the wget branch is really taken.
+function makeWgetOnlyBin(dir) {
+    const bin = path.join(dir, 'wget-only-bin');
+    mkdir(bin);
+    for (const src of ['/usr/bin', '/bin']) {
+        let entries;
+        try {
+            entries = fs.readdirSync(src);
+        } catch {
+            continue;
+        }
+        for (const name of entries) {
+            if (name === 'curl' || name === 'wget') {continue;}
+            const dst = path.join(bin, name);
+            if (fs.existsSync(dst)) {continue;}
+            try {
+                fs.symlinkSync(path.join(src, name), dst);
+            } catch {
+                // unreadable or duplicate entry: not needed by the scripts
+            }
+        }
+    }
+    write(path.join(bin, 'wget'), WGET_STUB);
+    fs.chmodSync(path.join(bin, 'wget'), 0o755);
+    return bin;
+}
 
 // Builds the release-zip fixture with the layout build-release.sh produces:
 // greenTile-<version>/ containing install.sh (the repo's real one, so the
@@ -189,8 +253,8 @@ const copyScript = (dir, name) => {
 };
 
 module.exports = {
-    UUID, TMP, LATEST, EXT, REAL_MV,
-    makeFixtureZip, makeEnv, seedInstalled,
+    UUID, TMP, LATEST, EXT, REAL_MV, REAL_LN,
+    makeFixtureZip, makeEnv, seedInstalled, makeWgetOnlyBin,
     installedVersion, downloadedVersion,
     runScript, copyScript, mkdir, write,
 };
