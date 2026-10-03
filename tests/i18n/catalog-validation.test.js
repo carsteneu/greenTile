@@ -50,6 +50,14 @@ test('a missing msgfmt is reported, not silently skipped', (t) => {
     assert.match(r.stderr, /msgfmt/);
 });
 
+test('a bare validator name refuses to validate an unrelated working tree', () => {
+    const r = spawnSync('bash', ['check-catalogs.sh'], {
+        cwd: path.dirname(VALIDATOR), encoding: 'utf8',
+    });
+    assert.notEqual(r.status, 0, 'a bare name must not guess a repository');
+    assert.match(r.stderr, /invoke this script by path/);
+});
+
 // Faithful but narrow copy of the tree build-release.sh runs in: only the files
 // it reads, with the real catalogs. The real po/ is never modified.
 function makeReleaseFixture(t) {
@@ -91,13 +99,91 @@ test('build-release.sh refuses to build a zip from a broken catalog', (t) => {
     assert.equal(builtZip(root), null, 'a broken catalog must not produce a zip');
 });
 
+test('a broken last catalog fails both gates without replacing a valid release', (t) => {
+    const root = makeReleaseFixture(t);
+    const first = buildRelease(root);
+    assert.equal(first.status, 0, first.stdout + first.stderr);
+    const zip = builtZip(root);
+    const before = fs.readFileSync(zip);
+    const version = JSON.parse(fs.readFileSync(path.join(root, 'metadata.json'), 'utf8')).version;
+    const stage = path.join(root, 'dist', `greenTile-${version}`);
+    const marker = path.join(stage, 'previous-build-marker');
+    fs.writeFileSync(marker, 'previous stage remains intact\n');
+    fs.writeFileSync(path.join(root, 'po', 'zh_CN.po'), 'msgid "unterminated\n');
+
+    const gate = spawnSync('bash', ['./scripts/check-catalogs.sh'], { cwd: root, encoding: 'utf8' });
+    assert.notEqual(gate.status, 0, 'the validator must reach the last catalog');
+    assert.match(gate.stderr, /zh_CN\.po/);
+    const rebuilt = buildRelease(root);
+    assert.notEqual(rebuilt.status, 0, 'the actual release build must reject the last catalog');
+    assert.match(rebuilt.stderr, /zh_CN\.po/);
+    assert.deepEqual(fs.readFileSync(zip), before, 'the last good zip was replaced');
+    assert.equal(fs.readFileSync(marker, 'utf8'), 'previous stage remains intact\n');
+});
+
+test('a missing compiler fails the build without replacing a valid release', (t) => {
+    const root = makeReleaseFixture(t);
+    const first = buildRelease(root);
+    assert.equal(first.status, 0, first.stdout + first.stderr);
+    const zip = builtZip(root);
+    const before = fs.readFileSync(zip);
+    const bin = tmpDir(t, 'catalogs-build-no-msgfmt-');
+    const python = spawnSync('which', ['python3'], { encoding: 'utf8' });
+    assert.equal(python.status, 0, 'the actual build requires python3');
+    fs.symlinkSync(python.stdout.trim(), path.join(bin, 'python3'));
+    fs.symlinkSync('/bin/bash', path.join(bin, 'bash'));
+    const r = spawnSync('/bin/bash', ['build-release.sh'], {
+        cwd: root, encoding: 'utf8', env: { ...process.env, PATH: bin },
+    });
+    assert.notEqual(r.status, 0, 'a missing compiler must stop the build');
+    assert.match(r.stderr, /msgfmt.*not found/);
+    assert.deepEqual(fs.readFileSync(zip), before, 'the last good zip was replaced');
+});
+
 test('build-release.sh builds the unmodified catalogs and ships no validator', (t) => {
     const root = makeReleaseFixture(t);
     const r = buildRelease(root);
     assert.equal(r.status, 0, `the release build failed:\n${r.stdout}${r.stderr}`);
     const zip = builtZip(root);
     assert.ok(zip, 'the build must produce exactly one zip');
-    const entries = spawnSync('unzip', ['-Z1', zip], { encoding: 'utf8' }).stdout.split('\n').filter(Boolean);
-    assert.ok(entries.some((e) => e.endsWith('po/de.po')), 'the catalogs must ship');
-    assert.ok(!entries.some((e) => e.includes('scripts/')), 'dev-only scripts must not ship');
+    const listing = spawnSync('unzip', ['-Z1', zip], { encoding: 'utf8' });
+    assert.equal(listing.status, 0, listing.stderr);
+    const version = JSON.parse(fs.readFileSync(path.join(root, 'metadata.json'), 'utf8')).version;
+    const prefix = `greenTile-${version}/`;
+    const entries = listing.stdout.split('\n').filter(Boolean).map((e) => {
+        assert.ok(e.startsWith(prefix), `entry outside the release root: ${e}`);
+        return e.slice(prefix.length);
+    }).sort();
+    // The frozen release surface: independent of the build's cp commands and
+    // of directory enumeration, so missing or accidentally shipped files fail.
+    const uuid = 'greenTile@carsteneu/';
+    const libraries = [
+        'app/app.js', 'app/config.js',
+        'model/accent.js', 'model/drop.js', 'model/editor.js', 'model/exclude.js',
+        'model/fill.js', 'model/focus.js', 'model/gap.js', 'model/layouts.js',
+        'model/lifecycle.js', 'model/monitor.js', 'model/panel-size.js',
+        'model/settings-keys.js', 'model/single.js', 'model/split.js',
+        'model/state.js', 'model/swap.js', 'model/teardown.js', 'model/theme.js',
+        'runtime/auto.js', 'runtime/border.js', 'runtime/drop.js', 'runtime/exclusions.js',
+        'runtime/focus.js', 'runtime/hotkeys.js', 'runtime/monitors.js',
+        'runtime/panel-state.js', 'runtime/placement.js', 'runtime/scope.js',
+        'runtime/session.js', 'runtime/split.js', 'runtime/theme.js',
+        'tiling/debug.js', 'tiling/focus-nav.js', 'tiling/grab.js', 'tiling/layout.js',
+        'tiling/order.js', 'tiling/place.js', 'tiling/retile.js', 'tiling/screen.js',
+        'tiling/swap.js', 'tiling/windows.js',
+        'ui/draw.js', 'ui/editor.js', 'ui/i18n.js', 'ui/panel.js',
+    ];
+    const catalogs = [
+        'ca', 'da', 'de', 'es', 'eu', 'fi', 'fr', 'hu', 'it', 'ja', 'ko', 'nl',
+        'pt_BR', 'ro', 'ru', 'sv', 'tr', 'vi', 'zh_CN',
+    ];
+    const expected = [
+        '', 'install.sh', 'update.sh', uuid,
+        ...['extension.js', 'metadata.json', 'settings-schema.json', 'stylesheet.css',
+            'icon.png', 'LICENSE', 'lib/', 'po/'].map((e) => uuid + e),
+        ...['app/', 'model/', 'runtime/', 'tiling/', 'ui/'].map((e) => uuid + 'lib/' + e),
+        ...libraries.map((e) => uuid + 'lib/' + e),
+        ...catalogs.map((e) => uuid + 'po/' + e + '.po'),
+    ].sort();
+    assert.deepEqual(entries, expected, 'the complete shipped surface changed');
 });
