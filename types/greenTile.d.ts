@@ -233,6 +233,10 @@ type SessionFacade = {
     pendingAuto: Array<{ monitorIndex: number; wsIndex: number; auto: boolean }>;
     nextAccentGen(): string;
     rollbackApp(app: AppFacade): void;
+    /** Whether two auto commands address the same storage slot (effective ws key). */
+    sameSlot(app: AppFacade, aMonitor: number, aWs: number, bMonitor: number, bWs: number): boolean;
+    /** Whether a retained pause covers that monitor+workspace. */
+    holdsPause(app: AppFacade, monitorIndex: number, wsIndex: number): boolean;
     destroy(): void;
 };
 

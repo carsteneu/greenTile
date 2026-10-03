@@ -117,6 +117,40 @@ export const Session: {
          */
         _isLive(app: AppFacade): boolean;
         /**
+         * The storage slot an auto command addresses: the monitor key plus the
+         * EFFECTIVE workspace key. On a monitor whose workspaces live on the primary
+         * only, every numbered workspace resolves to the same alias — one slot, one
+         * intent — so two commands for different numbered workspaces are the same
+         * command there. Null while the registry cannot resolve it yet.
+         * @param {AppFacade} app
+         * @param {number} monitorIndex
+         * @param {number} wsIndex
+         * @returns {string | null}
+         */
+        intentSlot(app: AppFacade, monitorIndex: number, wsIndex: number): string | null;
+        /**
+         * Whether two auto commands address the same slot — the same storage entry, or
+         * the same numbered pair while the registry cannot resolve the effective key.
+         * @param {AppFacade} app
+         * @param {number} aMonitor
+         * @param {number} aWs
+         * @param {number} bMonitor
+         * @param {number} bWs
+         * @returns {boolean}
+         */
+        sameSlot(app: AppFacade, aMonitor: number, aWs: number, bMonitor: number, bWs: number): boolean;
+        /**
+         * Whether a RETAINED pause covers that monitor+workspace. An automatic retile
+         * must not place windows against the user's last command just because the
+         * stored setting still says `auto` — the retained command is what the user
+         * asked for last, and it is applied as soon as it can be written.
+         * @param {AppFacade} app
+         * @param {number} monitorIndex
+         * @param {number} wsIndex
+         * @returns {boolean}
+         */
+        holdsPause(app: AppFacade, monitorIndex: number, wsIndex: number): boolean;
+        /**
          * Rolls back an App whose asynchronous start failed: the observer set, the
          * hotkeys and the timers of a half-started App must not outlive their use — a
          * hotkey that addresses a registry nobody watches, a settle wait that would
@@ -266,6 +300,40 @@ export type SessionDeps = {
          * @param {AppFacade} app
          */
         _isLive(app: AppFacade): boolean;
+        /**
+         * The storage slot an auto command addresses: the monitor key plus the
+         * EFFECTIVE workspace key. On a monitor whose workspaces live on the primary
+         * only, every numbered workspace resolves to the same alias — one slot, one
+         * intent — so two commands for different numbered workspaces are the same
+         * command there. Null while the registry cannot resolve it yet.
+         * @param {AppFacade} app
+         * @param {number} monitorIndex
+         * @param {number} wsIndex
+         * @returns {string | null}
+         */
+        intentSlot(app: AppFacade, monitorIndex: number, wsIndex: number): string | null;
+        /**
+         * Whether two auto commands address the same slot — the same storage entry, or
+         * the same numbered pair while the registry cannot resolve the effective key.
+         * @param {AppFacade} app
+         * @param {number} aMonitor
+         * @param {number} aWs
+         * @param {number} bMonitor
+         * @param {number} bWs
+         * @returns {boolean}
+         */
+        sameSlot(app: AppFacade, aMonitor: number, aWs: number, bMonitor: number, bWs: number): boolean;
+        /**
+         * Whether a RETAINED pause covers that monitor+workspace. An automatic retile
+         * must not place windows against the user's last command just because the
+         * stored setting still says `auto` — the retained command is what the user
+         * asked for last, and it is applied as soon as it can be written.
+         * @param {AppFacade} app
+         * @param {number} monitorIndex
+         * @param {number} wsIndex
+         * @returns {boolean}
+         */
+        holdsPause(app: AppFacade, monitorIndex: number, wsIndex: number): boolean;
         /**
          * Rolls back an App whose asynchronous start failed: the observer set, the
          * hotkeys and the timers of a half-started App must not outlive their use — a

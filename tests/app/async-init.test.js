@@ -22,12 +22,13 @@ const { makeEnv, makeWindow, MONITOR, settingsInstance } = require('../helpers/f
 // A workspace hub with real connect/disconnect accounting. `failOn` makes the
 // first `times` connects of that signal throw — one-shot by default, persistent
 // when `times` is Infinity.
-const makeWorkspace = (failOn = null, times = 1) => {
+const makeWorkspace = (failOn = null, times = 1, wsIndex = 0) => {
     const handlers = [];
     let nextId = 1;
     let remaining = failOn ? times : 0;
     const attempts = [];
     return {
+        index: () => wsIndex,
         connect(sig, cb) {
             attempts.push(sig);
             if (remaining > 0 && failOn === sig) {
@@ -450,3 +451,109 @@ for (const oldAuto of [false, true]) {
         ext.disable();
     });
 }
+
+// --- Item 4: automatic placement vs. a retained pause (the three F cases) -----
+//
+// A retained command is what the user asked for LAST. Automatic placement must
+// never run against it, in three places it used to slip through:
+//   F1 an intent for ANOTHER workspace: the retile of an earlier queued On places
+//      in the ACTIVE workspace, before a later queued Off for that workspace lands;
+//   F2 the '*' alias: on a monitor whose workspaces live on the primary, two
+//      numbered workspaces are ONE storage slot, so a newer command must supersede
+//      a retained one for either number;
+//   F3 the preset blast: an unrelated settings edit (exclusions) retiles layouts
+//      directly, bypassing the debounced Auto guard.
+
+test('item 4/F1: a queued On for another workspace cannot place the active workspace before its queued Off', () => {
+    const { env, ext } = makeEnv();
+    const ws0 = makeWorkspace(null, 1, 0);
+    const ws1 = makeWorkspace(null, 1, 1);
+    ws0.list_windows = () => env.tabList;
+    ws1.list_windows = () => env.tabList;
+    env.workspaces.push(ws0, ws1);
+    env.activeWorkspace = ws0;
+    const a = makeWindow(env, 201, [50, 70, 320, 200]);
+    const b = makeWindow(env, 202, [450, 70, 320, 200]);
+    env.tabList.push(a, b);
+    env.display.focus_window = a;
+    env.layoutManager.monitors.push(MONITOR);
+    ext.enable();
+    // ws2 was enabled earlier (the fallback monitor key: no DisplayConfig states)
+    settingsInstance(env).setValue('layouts', JSON.stringify({ 'name:FakeMonitor-0|2000x1100': { '2': { auto: true } } }));
+    // both commands wait for the same DisplayConfig reply: On for ws0, then the
+    // user switches to ws1 and presses Off for it
+    autoOf(env, 'greenTile-autoN');
+    env.activeWorkspace = ws1;
+    autoOf(env, 'greenTile-autoOff');
+    env.flushDisplayConfigNoReply();
+    const app = ext.currentSession().app;
+    assert.equal(app.ops.layoutFor(app, 0, 1).auto, false, 'the queued pause is in the settings');
+    assert.equal(a.moves.length + b.moves.length, 0, 'the requested pause must prevent all placement');
+    assert.equal(env.liveTimers().filter((t) => t.ms === 400).length, 0, 'and no retile is scheduled against it');
+    ext.disable();
+});
+
+test('item 4/F2: a retained Off on a shared-workspace monitor is superseded by a newer On on another number', () => {
+    const { env, ext } = makeEnv({ layouts: '{invalid' });
+    // workspaces live on the primary only: every number on monitor 1 is '*'
+    env.gi.Gio.Settings.prototype.get_boolean = () => true;
+    const ws0 = makeWorkspace(null, 1, 0);
+    const ws1 = makeWorkspace(null, 1, 1);
+    ws0.list_windows = () => env.tabList;
+    ws1.list_windows = () => env.tabList;
+    env.workspaces.push(ws0, ws1);
+    env.activeWorkspace = ws0;
+    env.layoutManager.monitors.push(MONITOR, { x: 2000, y: 0, width: 1000, height: 1100 });
+    const w = makeWindow(env, 301, [2050, 70, 320, 200], 1);
+    env.tabList.push(w);
+    env.display.focus_window = w;
+    ext.enable();
+    env.flushDisplayConfigNoReply();
+    const app = ext.currentSession().app;
+    autoOf(env, 'greenTile-autoOff');
+    assert.equal(app.session.pendingAuto.length, 1, 'the corrupt guard refused the pause and it is retained');
+    const ref = app.split.ref(app, 1, 0, 2);
+    assert.equal(ref.wskey, '*', 'the secondary monitor shares the primary workspaces');
+    // the user repairs the setting, then presses On for another numbered workspace
+    env.settingsWriteFile('greenTile@carsteneu', 'layouts', JSON.stringify({ [ref.mkey]: { '*': { auto: false } } }));
+    settingsInstance(env).remoteUpdate();
+    env.activeWorkspace = ws1;
+    autoOf(env, 'greenTile-autoN');
+    assert.equal(app.ops.layoutFor(app, 1, 1).auto, true, 'the newer On took effect');
+    assert.equal(app.session.pendingAuto.length, 0, 'and it superseded the retained pause for the same slot');
+    // the recreation must not replay the superseded pause
+    env.layoutManager.emit('monitors-changed');
+    env.flushDisplayConfigNoReply();
+    const fresh = ext.currentSession().app;
+    assert.equal(fresh.ops.layoutFor(fresh, 1, 1).auto, true, 'the newer command must win across a recreation');
+    ext.disable();
+});
+
+test('item 4/F3: a retained pause gates the automatic preset retile of an unrelated settings edit', () => {
+    const { env, ext } = makeEnv({ layouts: '{invalid', windowGap: 48 });
+    const ws0 = makeWorkspace();
+    ws0.list_windows = () => env.tabList;
+    env.workspaces.push(ws0);
+    env.activeWorkspace = ws0;
+    const a = makeWindow(env, 401, [50, 70, 320, 200]);
+    const b = makeWindow(env, 402, [450, 70, 320, 200]);
+    env.tabList.push(a, b);
+    env.display.focus_window = a;
+    env.layoutManager.monitors.push(MONITOR);
+    ext.enable();
+    autoOf(env, 'greenTile-autoOff');
+    env.flushDisplayConfigNoReply();
+    const app = ext.currentSession().app;
+    const inst = settingsInstance(env);
+    app.ops.presetsWrite(app, [{ id: 'p', name: 'p', rules: [{ min: 2, stacks: [1, 1] }] }]);
+    const ref = app.split.ref(app, 0, 0, 2);
+    // the setting is repaired with auto+preset, then an UNRELATED dialog edit
+    // arrives: that is an automatic preset retile, not an explicit On command
+    env.settingsWriteFile('greenTile@carsteneu', 'layouts', JSON.stringify({ [ref.mkey]: { [ref.wskey]: { auto: true, preset: 'p' } } }));
+    inst.remoteUpdate();
+    env.settingsWriteFile('greenTile@carsteneu', 'exclusions', 'UnrelatedApplication');
+    inst.remoteUpdate();
+    assert.equal(a.moves.length + b.moves.length, 0, 'the retained pause must prevent automatic preset placement');
+    assert.equal(app.session.pendingAuto.length, 1, 'and the pause is still retained for when it can be written');
+    ext.disable();
+});
