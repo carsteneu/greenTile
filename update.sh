@@ -34,13 +34,22 @@ url_dl() {  # url file
 }
 
 latest() {
-    local tag
-    tag=$(url_get "https://api.github.com/repos/$REPO/releases/latest" |
-          sed -n 's/.*"tag_name": *"v\([^"]*\)".*/\1/p' | head -1)
+    local tag='' json='' headers=''
+    # The answer is only parsed when the transfer itself succeeded. url_get's
+    # exit status would otherwise be lost in the pipeline below (pipefail is
+    # off), and a truncated answer that already carries a tag would be taken
+    # as the confirmed release — curl even exits 18 when it printed a tag.
+    if json=$(url_get "https://api.github.com/repos/$REPO/releases/latest"); then
+        tag=$(printf '%s\n' "$json" |
+              sed -n 's/.*"tag_name": *"v\([^"]*\)".*/\1/p' | head -1)
+    fi
     # Fallback: follow the redirect of releases/latest (no API rate limit).
+    # Same rule: a partial header answer is not a confirmed tag.
     if [ -z "$tag" ] && command -v curl >/dev/null; then
-        tag=$(curl -fsSI "https://github.com/$REPO/releases/latest" |
-              sed -n 's/^[Ll]ocation: .*\/tag\/v\([^\r ]*\).*/\1/p' | head -1)
+        if headers=$(curl -fsSI "https://github.com/$REPO/releases/latest"); then
+            tag=$(printf '%s\n' "$headers" |
+                  sed -n 's/^[Ll]ocation: .*\/tag\/v\([^\r ]*\).*/\1/p' | head -1)
+        fi
     fi
     printf '%s' "$tag"
 }
