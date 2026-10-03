@@ -5,50 +5,28 @@ export const Config: {
         app: AppFacade;
         settings: any;
         /**
-         * Makes an authoritative external write of the layouts setting invalidate the
-         * App's deferred split writes (see Split.invalidate).
+         * Makes an external write of the layouts setting invalidate the App's
+         * deferred split writes (see Split.invalidate).
          *
-         * Two surfaces, because neither alone is sufficient: the framework reports a
-         * RELOADED setting only when its value differs (changed::layouts, emitted by
-         * _checkSettings), and the settings dialog rewrites the whole file BEFORE its
-         * asynchronous notification — so an import that restores the value already in
-         * memory, and a flush landing inside the write/notify gap, are invisible to it.
-         * The settings FILE has no such blind spot: the dialog rewrites it in both
-         * cases, and a Gio.FileMonitor sees the write.
+         * Covered by this surface: an external value-changing write whose reload
+         * reaches us before the 500 ms flush — the ordinary settings-dialog reset or
+         * import. settings.js emits changed::<key> only for a key whose RELOADED value
+         * differs (`_checkSettings`), and own writes never emit it (`_setValue` only
+         * stores and saves), so an own layoutSet/preset/drop/unrelated write leaves a
+         * pending resize valid.
          *
-         * Authorship: only a signal from a writer other than this App may invalidate.
-         * Every own write this extension makes goes through setValue or setOptions —
-         * both rewrite the settings file (settings.js _saveToFile) — and both cancel
-         * the monitor for the synchronous write and rebuild it afterwards (the
-         * settings dialog's own pause/resume technique, made strict by cancelling:
-         * disconnecting alone would still deliver the own write's queued event on the
-         * next main-loop turn). The bound properties are read-only in greenTile
-         * (nothing assigns them), so those two are the complete set of own writers.
-         * A destructive side effect is impossible in the other direction too: the
-         * monitor holds no state that a failed own write could poison.
-         *
-         * Cost of the file surface: every event invalidates, and the observer cannot
-         * tell WHICH key the writer touched (the event carries no key, and a dialog
-         * write rewrites the whole file on any widget change). A pending resize is
-         * therefore also dropped when the dialog writes an unrelated setting — the
-         * safe direction, since under-invalidating corrupts the external value.
+         * NOT covered (bounded, reported as BLOCKED — see docs/local/todo_fixes_2.md):
+         * (1) a value-IDENTICAL external write (a backup import that restores the value
+         *     already in memory) is invisible here by construction — there is no value
+         *     diff to report; (2) the settings dialog rewrites the whole FILE before its
+         *     asynchronous notification (JsonSettingsWidgets.save_settings ->
+         *     notify_callback -> remoteUpdate), so a flush landing in that gap still
+         *     merges the pending splits over the external value and the later reload
+         *     then sees no difference to correct it. Closing either case needs an
+         *     authorship signal this surface does not have; the options and their
+         *     contract conflicts are recorded on the BLOCKED report.
          */
         _initSettingsObserver(): void;
-        _settingsMonitor: any;
-        _settingsMonitorPath: any;
-        _settingsObserverFailed: boolean | undefined;
-        _settingsObserverStopped: boolean | undefined;
-        /**
-         * Runs an own settings write with the file monitor cancelled, so the write is
-         * never mistaken for an external one.
-         * @param {() => any} write
-         * @returns {any}
-         */
-        _settingsOwnWrite(write: () => any): any;
-        /** Cancels the file monitor: nothing observed until _resumeSettingsMonitor. */
-        _pauseSettingsMonitor(): void;
-        /** (Re)arms the file monitor on the settings file. */
-        _resumeSettingsMonitor(): void;
         registerHotkeys(): void;
         unregisterHotkeys(): void;
         destroy(): void;

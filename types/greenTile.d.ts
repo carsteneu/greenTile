@@ -183,7 +183,6 @@ type SettingsFacade = {
     bind(key: string, prop: string, cb: () => void, data?: any): void;
     setOptions(options: {}, profile?: any): void;
     connect(sigName: string, cb: (...args: any[]) => void): number;
-    file?: { get_path(): string } | null;
     finalize(): void;
 };
 

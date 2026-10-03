@@ -386,41 +386,6 @@ const createCinnamonEnv = (options) => {
     // --- settings: Cinnamon slot model, one object per uuid
     env.settingsSlots = new Map();
     env.settingsInstances = [];
-    // The settings FILE the framework writes (settings.js _saveToFile) and the
-    // file monitors watching it. `settingsWriteFile` is the settings dialog's
-    // path: it rewrites the whole file and notifies Cinnamon only afterwards
-    // (JsonSettingsWidgets.save_settings -> notify_callback -> remoteUpdate);
-    // `remoteUpdate` is that later notification (_checkSettings).
-    env.settingsFiles = new Map();
-    env.settingsFileMonitors = [];
-    const settingsPath = (uuid) => '/home/fake/.config/cinnamon/spices/' + uuid + '/-1.json';
-    const writeSettingsFile = (uuid, valuesMap) => {
-        const data = {};
-        for (const [k, v] of valuesMap) {
-            data[k] = { value: v };
-        }
-        env.settingsFiles.set(uuid, JSON.stringify(data, null, 4));
-    };
-    const notifySettingsMonitors = (uuid) => {
-        const path = settingsPath(uuid);
-        for (const monitor of env.settingsFileMonitors.slice()) {
-            if (monitor.path === path) {
-                monitor.emit('changed', monitor.file, null, 0);
-            }
-        }
-    };
-    env.settingsWriteFile = (uuid, key, value) => {
-        let data = {};
-        try {
-            data = JSON.parse(env.settingsFiles.get(uuid) || '{}');
-        }
-        catch (_e) {
-            data = {};
-        }
-        data[key] = { value: value };
-        env.settingsFiles.set(uuid, JSON.stringify(data, null, 4));
-        notifySettingsMonitors(uuid);
-    };
     const makeSettings = (uuid, owner) => {
         const values = new Map(Object.entries(settingsDefaults));
         const optionsStore = new Map();
@@ -431,8 +396,6 @@ const createCinnamonEnv = (options) => {
             bindings: [],
             finalized: false,
             callLog: [],
-            // the plain field settings.js _ensureSettingsFiles sets (Gio.File)
-            file: { get_path: () => settingsPath(uuid) },
             connect(sigName, cb) {
                 const id = nextSigId++;
                 sigHandlers.push({ sigName, cb, id });
@@ -472,16 +435,11 @@ const createCinnamonEnv = (options) => {
             bindProperty(direction, key, prop, cb, data) {
                 return this.bind(key, prop, cb, data);
             },
-            // mirrors settings.js setOptions: stores the widget options AND
-            // rewrites the whole settings file (_saveToFile). The caller passes a
-            // freshly built options object, so the framework's identity check
-            // (settingsData[key].options != options) is always true — this is an
-            // own write of the settings FILE that must ride the own-write hook.
+            // mirrors settings.js setOptions: stores the widget options (and, in
+            // the framework, also rewrites the settings file)
             setOptions(key, pickOptions) {
                 this.callLog.push({ op: 'setOptions', key, finalized: this.finalized });
                 optionsStore.set(key, pickOptions);
-                writeSettingsFile(uuid, values);
-                notifySettingsMonitors(uuid);
             },
             getValue(key) {
                 if (!values.has(key))
@@ -490,28 +448,23 @@ const createCinnamonEnv = (options) => {
             },
             setValue(key, v) {
                 this.callLog.push({ op: 'setValue', key, value: v, finalized: this.finalized });
-                // mirrors settings.js _setValue: an unchanged non-object value is
-                // not written to the file (and produces no file event)
-                if (values.get(key) !== v || typeof v === 'object') {
-                    values.set(key, v);
-                    writeSettingsFile(uuid, values);
-                    notifySettingsMonitors(uuid);
-                }
+                // mirrors settings.js _setValue: the in-memory field is set and
+                // saved; it does NOT emit changed::<key> (only _checkSettings does,
+                // for a reloaded value that differs)
+                values.set(key, v);
             },
             // cinnamonDBus.updateSetting -> settings.js remoteUpdate ->
-            // _checkSettings: reload the file, diff by VALUE, fire changed::<key>
-            // (and the bound callback) only for a key that really differs.
-            remoteUpdate() {
-                let data;
-                try {
-                    data = JSON.parse(env.settingsFiles.get(uuid) || '{}');
-                }
-                catch (_e) {
-                    return;
-                }
+            // _checkSettings: reload the settings payload, diff by VALUE, fire the
+            // bound callback and changed::<key> only for a key that really differs.
+            // An external write that restores the value already in memory produces
+            // no signal here — that is exactly the acceptance boundary the item 5
+            // BLOCKED report rests on.
+            remoteUpdate(payload) {
+                const data = payload || {};
                 for (const key of Object.keys(data)) {
-                    const value = data[key].value;
-                    if (values.get(key) === value || typeof value === 'object' && JSON.stringify(values.get(key)) === JSON.stringify(value)) {
+                    const value = data[key];
+                    const current = values.get(key);
+                    if (current === value || (typeof value === 'object' && JSON.stringify(current) === JSON.stringify(value))) {
                         continue;
                     }
                     values.set(key, value);
@@ -532,7 +485,6 @@ const createCinnamonEnv = (options) => {
         };
         env.settingsInstances.push(instance);
         env.settingsSlots.set(uuid, instance);
-        writeSettingsFile(uuid, values);
         return instance;
     };
 
@@ -559,58 +511,6 @@ const createCinnamonEnv = (options) => {
     const gio = {
         DBusCallFlags: { NONE: 'none' },
         FileMonitorFlags: { NONE: 0, WATCH_MOVES: 2 },
-        File: {
-            // the surfaces lib/app/config.js uses for the settings-file observer
-            new_for_path(path) {
-                return {
-                    get_path: () => path,
-                    monitor_file() {
-                        const monitor = {
-                            path,
-                            file: { get_path: () => path },
-                            connected: true,
-                            _handlers: [],
-                            _next: 1,
-                            connect(sigName, cb) {
-                                const id = this._next++;
-                                this._handlers.push({ sigName, cb, id });
-                                return id;
-                            },
-                            disconnect(id) {
-                                const at = this._handlers.findIndex((h) => h.id === id);
-                                if (at !== -1) {
-                                    this._handlers.splice(at, 1);
-                                }
-                            },
-                            // a cancelled monitor is dead: it is dropped from the
-                            // active set and delivers nothing (GLib semantics)
-                            cancel() {
-                                this.connected = false;
-                                const at = env.settingsFileMonitors.indexOf(this);
-                                if (at !== -1) {
-                                    env.settingsFileMonitors.splice(at, 1);
-                                }
-                            },
-                            emit(sigName, ...args) {
-                                if (!this.connected) {
-                                    return;
-                                }
-                                for (const h of this._handlers.slice()) {
-                                    if (h.sigName === sigName) {
-                                        h.cb(...args);
-                                    }
-                                }
-                            },
-                            count(sigName) {
-                                return this._handlers.filter((h) => !sigName || h.sigName === sigName).length;
-                            },
-                        };
-                        env.settingsFileMonitors.push(monitor);
-                        return monitor;
-                    },
-                };
-            },
-        },
         Cancellable: class {
             constructor() {
                 this.cancelled = false;
