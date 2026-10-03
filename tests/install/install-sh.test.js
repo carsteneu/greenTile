@@ -7,7 +7,7 @@ const test = require('node:test');
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const path = require('node:path');
-const { UUID, EXT, LATEST, TMP, REAL_MV, REAL_LN, runScript, mkdir, write } = require('../helpers/release-env');
+const { UUID, EXT, LATEST, TMP, REAL_MV, REAL_LN, REAL_RM, REAL_CAT, REAL_MKTEMP, runScript, mkdir, write } = require('../helpers/release-env');
 const { ROOT } = require('../helpers/cinnamon-loader');
 
 const cleanups = [];
@@ -97,6 +97,9 @@ exec "\${GT_REAL_MV:?}" "$@"
         PATH: `${x.bin}:${process.env.PATH}`,
         GT_REAL_MV: REAL_MV,
         GT_REAL_LN: REAL_LN,
+        GT_REAL_RM: REAL_RM,
+        GT_REAL_CAT: REAL_CAT,
+        GT_REAL_MKTEMP: REAL_MKTEMP,
     };
     if (failSwap) {
         x.env.GT_MVLOG = x.mvlog;
@@ -415,14 +418,15 @@ exec "\${GT_REAL_LN:?}" "$@"
     const r = runInstall(x);
     assert.equal(r.status, 0, `stderr: ${r.stderr}`);
     assert.ok(noteNaming(r, target), `the warning must name the destination: ${r.stderr}`);
-    // with no hard links at all the catalogue cannot go back to the path, so
-    // the contract is "never lost": it is either in place or preserved under
-    // the hidden name the note reports, never deleted and never partial
-    const kept = leftoversUnder(target);
-    const survivor = fs.existsSync(target) ? fs.readFileSync(target, 'utf8')
-        : (kept.length === 1 ? fs.readFileSync(path.join(path.dirname(target), kept[0]), 'utf8') : '(missing)');
-    assert.equal(survivor, 'previous catalogue\n', 'the previous catalogue must survive a failed exchange');
-    assert.deepEqual(kept.filter((e) => e.endsWith('.new')), [], `our staging file must not be left behind: ${kept.join(', ')}`);
+    // with no hard links at all neither the create nor the restore can work,
+    // so the contract is "never lost": the catalogue is either in place or
+    // preserved and reported, never deleted and never partially written
+    const present = fs.existsSync(target) ? [fs.readFileSync(target, 'utf8')] : [];
+    const preserved = present.concat(preservedUnder(target));
+    assert.ok(preserved.includes('previous catalogue\n'),
+        `the previous catalogue must survive, found: ${JSON.stringify(preserved)}`);
+    assert.deepEqual(leftoversUnder(target).filter((e) => e.endsWith('.new')), [],
+        'no staging file may be left behind');
 });
 
 // Wraps mv AND ln with a snippet that may act on the call's last argument
@@ -445,8 +449,42 @@ exec "${real}" "$@"
     x.env.GT_TARGET = moPath(x.home, 'de');
 }
 
+// finds a file by name among what the exchange left under the locale dir,
+// including one level inside a working directory we kept
+const findPreserved = (target, name) => {
+    const dir = path.dirname(target);
+    for (const entry of leftoversUnder(target)) {
+        for (const p of [path.join(dir, entry), ...(fs.lstatSync(path.join(dir, entry)).isDirectory()
+            ? fs.readdirSync(path.join(dir, entry)).map((i) => path.join(dir, entry, i)) : [])]) {
+            if (path.basename(p) === name && fs.lstatSync(p).isFile()) {return p;}
+            if (fs.lstatSync(p).isDirectory() && fs.existsSync(path.join(p, name))) {return path.join(p, name);}
+        }
+    }
+    return null;
+};
+
 const leftoversUnder = (target) => fs.readdirSync(path.dirname(target))
     .filter((e) => e.startsWith(`.${UUID}.`));
+
+// the catalogue-ish objects the exchange may have left under the locale dir,
+// whether they sit directly there or inside a working directory we kept
+const preservedUnder = (target) => {
+    const dir = path.dirname(target);
+    const out = [];
+    for (const entry of leftoversUnder(target)) {
+        const p = path.join(dir, entry);
+        const st = fs.lstatSync(p);
+        if (st.isFile()) {
+            out.push(fs.readFileSync(p, 'utf8'));
+        } else if (st.isDirectory()) {
+            for (const inner of fs.readdirSync(p)) {
+                const q = path.join(p, inner);
+                if (fs.lstatSync(q).isFile()) {out.push(fs.readFileSync(q, 'utf8'));}
+            }
+        }
+    }
+    return out;
+};
 
 test('a link that appears before the create is never overwritten', () => {
     const x = makeInstallEnv('install-mo-restore-boundary');
@@ -488,7 +526,7 @@ test('a link that appears while the occupant is captured stays in place', () => 
     // a plain catalogue: it must stay exactly where the user put it, and
     // nothing of ours may take its place
     wrapTools(x, `case "$last" in
-    *"\${GT_UUID:?}".*.old)
+    *".\${GT_UUID:?}"*/old)
         case " $* " in
             *" \${GT_TARGET:?} "*)
                 rm -f "\${GT_TARGET:?}"
@@ -507,46 +545,97 @@ esac`);
     assert.deepEqual(leftoversUnder(target), [], 'nothing of ours may be left behind');
 });
 
-test('a leftover object at the staging name is preserved, never overwritten', () => {
-    const x = makeInstallEnv('install-mo-stale-stage');
+test('the catalogue path is never removed by name', () => {
+    const x = makeInstallEnv('install-mo-no-rm');
     makeSource(x);
     const target = moPath(x.home, 'de');
-    // these working names are pid-derived, so a killed run can leave something
-    // under one; the installer must never overwrite it
-    wrapTools(x, `case "$last" in
-    *"\${GT_UUID:?}".*.new)
-        printf 'leftover' > "$last"
+    write(target, 'previous catalogue\n');
+    // removing the path name is itself a check/delete race: whatever takes the
+    // name in that instant is destroyed. The installer must not do it at all.
+    write(path.join(x.bin, 'rm'), `#!/usr/bin/env bash
+case " $* " in
+    *" \${GT_TARGET:?} "*)
+        touch "\${GT_RACE_SEEN:?}"
         ;;
-esac`);
+esac
+exec "\${GT_REAL_RM:?}" "$@"
+`);
+    fs.chmodSync(path.join(x.bin, 'rm'), 0o755);
+    x.env.GT_TARGET = target;
+    x.env.GT_RACE_SEEN = path.join(x.dir, 'rm-seen');
     const r = runInstall(x);
     assert.equal(r.status, 0, `stderr: ${r.stderr}`);
-    assert.ok(fs.existsSync(x.env.GT_RACE_SEEN), 'the wrapper must have reached the real tool');
-    const stale = leftoversUnder(target).filter((e) => e.endsWith('.new'));
-    assert.equal(stale.length, 1, `the leftover must be kept: ${JSON.stringify(leftoversUnder(target))}`);
-    assert.equal(fs.readFileSync(path.join(path.dirname(target), stale[0]), 'utf8'), 'leftover',
-        'the leftover must be byte-identical');
-    assert.ok(!fs.existsSync(target), 'nothing may be published over a taken working name');
+    assert.ok(!fs.existsSync(x.env.GT_RACE_SEEN),
+        'the catalogue path must never be removed by name — that would destroy whatever took it');
+    assert.equal(fs.readFileSync(target).readUInt32LE(0), GMO_MAGIC, 'the catalogue must be in place');
 });
 
-test('a leftover object at the backup name is preserved, never overwritten', () => {
-    const x = makeInstallEnv('install-mo-stale-backup');
+test('a claimed working name is never reopened for writing', () => {
+    const x = makeInstallEnv('install-mo-no-reopen');
     makeSource(x);
     const target = moPath(x.home, 'de');
-    write(target, 'previous catalogue\n'); // a plain file: passes the up-front check
-    wrapTools(x, `case "$last" in
-    *"\${GT_UUID:?}".*.old)
-        printf 'leftover' > "$last"
-        ;;
-esac`);
+    write(target, 'previous catalogue\n');
+    // force the cross-filesystem path, where an earlier version claimed the
+    // working name and then reopened it by path to write into it: a symlink
+    // planted in that window would redirect the write onto someone else's file
+    write(path.join(x.bin, 'ln'), `#!/usr/bin/env bash
+echo "ln: simulated cross-device failure" >&2
+exit 1
+`);
+    fs.chmodSync(path.join(x.bin, 'ln'), 0o755);
+    write(path.join(x.bin, 'cat'), `#!/usr/bin/env bash
+touch "\${GT_RACE_SEEN:?}"
+exec "\${GT_REAL_CAT:?}" "$@"
+`);
+    fs.chmodSync(path.join(x.bin, 'cat'), 0o755);
+    x.env.GT_RACE_SEEN = path.join(x.dir, 'cat-seen');
     const r = runInstall(x);
     assert.equal(r.status, 0, `stderr: ${r.stderr}`);
-    assert.ok(fs.existsSync(x.env.GT_RACE_SEEN), 'the wrapper must have reached the real tool');
-    const stale = leftoversUnder(target).filter((e) => e.endsWith('.old'));
-    assert.equal(stale.length, 1, `the leftover must be kept: ${JSON.stringify(leftoversUnder(target))}`);
-    assert.equal(fs.readFileSync(path.join(path.dirname(target), stale[0]), 'utf8'), 'leftover',
-        'the leftover must be byte-identical');
-    assert.equal(fs.readFileSync(target, 'utf8'), 'previous catalogue\n',
-        'the installed catalogue must stay in place');
+    assert.ok(!fs.existsSync(x.env.GT_RACE_SEEN),
+        'a claimed name must never be reopened by path to be written into');
+});
+
+test('the working directory is asked for exclusively', () => {
+    const x = makeInstallEnv('install-mo-workdir');
+    makeSource(x);
+    const target = moPath(x.home, 'de');
+    const log = path.join(x.dir, 'mktemp.log');
+    // the working name must be one the system guarantees is free, i.e. a
+    // unique-suffix template — not a name we picked and then hoped for
+    write(path.join(x.bin, 'mktemp'), `#!/usr/bin/env bash
+printf '%s\\n' "$*" >> "\${GT_MKTEMP_LOG:?}"
+exec "\${GT_REAL_MKTEMP:?}" "$@"
+`);
+    fs.chmodSync(path.join(x.bin, 'mktemp'), 0o755);
+    x.env.GT_MKTEMP_LOG = log;
+    const r = runInstall(x);
+    assert.equal(r.status, 0, `stderr: ${r.stderr}`);
+    assert.ok(fs.existsSync(log), 'the installer must take its working name exclusively');
+    const calls = fs.readFileSync(log, 'utf8').split('\n');
+    assert.ok(calls.some((l) => l.includes(path.dirname(target)) && l.includes('XXXXXX')),
+        `the working name must be a unique template next to the catalogue: ${calls.join(' | ')}`);
+});
+
+test('without an exclusive working name the catalogue is left untouched', () => {
+    const x = makeInstallEnv('install-mo-workdir-fails');
+    makeSource(x);
+    const target = moPath(x.home, 'de');
+    write(target, 'previous catalogue\n');
+    // only the working name NEXT TO THE CATALOGUE is taken away: the installer
+    // must report that, not fall back to writing under a name that may be taken
+    write(path.join(x.bin, 'mktemp'), `#!/usr/bin/env bash
+case " $* " in
+    *"\${GT_LOCALEDIR:?}"*) echo "mktemp: simulated failure" >&2; exit 1 ;;
+esac
+exec "\${GT_REAL_MKTEMP:?}" "$@"
+`);
+    fs.chmodSync(path.join(x.bin, 'mktemp'), 0o755);
+    x.env.GT_LOCALEDIR = path.dirname(target);
+    const r = runInstall(x);
+    assert.equal(r.status, 0, `stderr: ${r.stderr}`);
+    assert.ok(noteNaming(r, target), `the warning must name the destination: ${r.stderr}`);
+    assert.equal(fs.readFileSync(target, 'utf8'), 'previous catalogue\n', 'the catalogue must stay untouched');
+    assert.deepEqual(leftoversUnder(target), [], 'nothing may be left behind');
 });
 
 test('a directory captured mid-flight stays in place, never nested', () => {
@@ -557,7 +646,7 @@ test('a directory captured mid-flight stays in place, never nested', () => {
     // the occupant turns into a directory while it is being captured, so it is
     // not a plain catalogue: it must neither be nested into nor replaced
     wrapTools(x, `case "$last" in
-    *"\${GT_UUID:?}".*.old)
+    *".\${GT_UUID:?}"*/old)
         case " $* " in
             *" \${GT_TARGET:?} "*)
                 rm -f "\${GT_TARGET:?}"
@@ -570,9 +659,12 @@ esac`);
     const r = runInstall(x);
     assert.equal(r.status, 0, `stderr: ${r.stderr}`);
     assert.ok(fs.existsSync(x.env.GT_RACE_SEEN), 'the simulated capture race must have fired');
-    assert.ok(fs.statSync(target).isDirectory(), 'the directory must stay exactly where it is');
-    assert.deepEqual(fs.readdirSync(target), ['keep.txt'], 'the directory content must be intact');
-    assert.deepEqual(leftoversUnder(target), [], 'nothing of ours may be left behind');
+    assert.ok(!fs.existsSync(target), 'nothing may be nested or created at the path');
+    // the directory cannot be hard-linked back, so it is preserved, intact and
+    // reported rather than dropped over whatever holds the name
+    const kept = findPreserved(target, 'keep.txt');
+    assert.ok(kept, `the captured directory must be preserved: ${JSON.stringify(leftoversUnder(target))}`);
+    assert.equal(fs.readFileSync(kept, 'utf8'), 'user file', 'the captured directory content must be intact');
     assert.ok(noteNaming(r, target), `the warning must name the destination: ${r.stderr}`);
 });
 

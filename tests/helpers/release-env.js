@@ -20,6 +20,9 @@ const toolPath = (t) => {
 };
 const REAL_MV = toolPath('mv');
 const REAL_LN = toolPath('ln');
+const REAL_RM = toolPath('rm');
+const REAL_CAT = toolPath('cat');
+const REAL_MKTEMP = toolPath('mktemp');
 if (['mv', 'ln', 'zip', 'unzip', 'msgfmt'].some((t) => !toolPath(t))) {
     throw new Error('shell-script tests need the mv, ln, zip, unzip and msgfmt tools on PATH');
 }
@@ -253,7 +256,7 @@ const copyScript = (dir, name) => {
 };
 
 module.exports = {
-    UUID, TMP, LATEST, EXT, REAL_MV, REAL_LN,
+    UUID, TMP, LATEST, EXT, REAL_MV, REAL_LN, REAL_RM, REAL_CAT, REAL_MKTEMP,
     makeFixtureZip, makeEnv, seedInstalled, makeWgetOnlyBin,
     installedVersion, downloadedVersion,
     runScript, copyScript, mkdir, write,
