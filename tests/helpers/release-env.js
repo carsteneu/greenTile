@@ -50,10 +50,13 @@ case "\${url#*://}" in
     api.github.com/*)
         [ -n "\${GT_CURL_API_FAIL:-}" ] && { exit 22; }
         printf '{"tag_name": "v%s"}\\n' "\${GT_VERSION:?}"
+        # a truncated transfer: the answer is printed but curl exits non-zero
+        [ -n "\${GT_CURL_API_PARTIAL:-}" ] && { exit 18; }
         ;;
     *github.com/*releases/latest)
         [ -n "\${GT_CURL_HEAD_FAIL:-}" ] && { exit 22; }
         printf 'location: https://github.com/carsteneu/greenTile/releases/tag/v%s\\r\\n' "\${GT_VERSION:?}"
+        [ -n "\${GT_CURL_HEAD_PARTIAL:-}" ] && { exit 18; }
         ;;
     *releases/download*)
         [ -n "\${GT_CURL_DL_FAIL:-}" ] && { exit 22; }
@@ -65,6 +68,7 @@ case "\${url#*://}" in
         exit 2
         ;;
 esac
+exit 0
 `;
 
 // Builds the release-zip fixture with the layout build-release.sh produces:

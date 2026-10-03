@@ -133,3 +133,36 @@ test('download failure: clear error and no change to an existing installation', 
     assert.ok(r.stderr.includes('download failed'), `stderr: ${r.stderr}`);
     assert.equal(installedVersion(x.home), '1.2.0');
 });
+
+// issue 14: the downloader's transfer status must gate the answer, so a
+// truncated response that already contains a tag is not taken as confirmed
+test('partial API transfer error: the printed tag is discarded and the redirect fallback takes over', () => {
+    const { x, script } = setup('update-api-partial', '1.2.0');
+    const r = runScript(script, [], { ...x.env, GT_CURL_API_PARTIAL: '1' });
+    assert.equal(r.status, 0, `stderr: ${r.stderr}`);
+    // the api.github.com URL ends in releases/latest too, so match the
+    // redirect host exactly to prove the fallback was actually consulted
+    assert.ok(fs.readFileSync(x.stublog, 'utf8').split('\n')
+        .includes('curl https://github.com/carsteneu/greenTile/releases/latest'),
+    'a partial API answer must not skip the documented redirect fallback');
+    assert.equal(installedVersion(x.home), LATEST);
+    assert.equal(downloadedVersion(x.stublog), LATEST);
+});
+
+test('partial API transfer error with failing fallback: abort, existing installation untouched', () => {
+    const { x, script } = setup('update-api-partial-nohead', '1.2.0');
+    const r = runScript(script, [], { ...x.env, GT_CURL_API_PARTIAL: '1', GT_CURL_HEAD_FAIL: '1' });
+    assert.equal(r.status, 1, `stdout: ${r.stdout} stderr: ${r.stderr}`);
+    assert.ok(r.stderr.includes('could not determine the latest release'), `stderr: ${r.stderr}`);
+    assert.equal(installedVersion(x.home), '1.2.0');
+    assert.equal(downloadedVersion(x.stublog), null);
+});
+
+test('partial redirect transfer error: not confirmed, abort with untouched installation', () => {
+    const { x, script } = setup('update-head-partial', '1.2.0');
+    const r = runScript(script, [], { ...x.env, GT_CURL_API_FAIL: '1', GT_CURL_HEAD_PARTIAL: '1' });
+    assert.equal(r.status, 1, `stdout: ${r.stdout} stderr: ${r.stderr}`);
+    assert.ok(r.stderr.includes('could not determine the latest release'), `stderr: ${r.stderr}`);
+    assert.equal(installedVersion(x.home), '1.2.0');
+    assert.equal(downloadedVersion(x.stublog), null);
+});
