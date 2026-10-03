@@ -168,6 +168,24 @@ test('item 3: a failing workspace reconnect mid-life leaves no partial set and d
     assert.equal(env.totalHandlers(), 0);
 });
 
+test('item 3: a failed start after a recreation still arms the settle wait', () => {
+    const { env, ext } = makeEnv();
+    env.workspaces.push(makeWorkspace());
+    env.layoutManager.monitors.push(MONITOR);
+    ext.enable();
+    env.flushDisplayConfigNoReply();
+    // a monitor change routes the settle wait through a recreation
+    env.workspaces.push(makeWorkspace('window-removed'));
+    env.layoutManager.emit('monitors-changed');
+    env.flushDisplayConfigNoReply();
+    assert.equal(env.logErrors.some((l) => l.indexOf('greenTile monitor-ready start failed') === 0), true,
+        'the failed start is reported');
+    // the settle wait retiles the windows Muffin moved onto the new monitor: it
+    // must not be skipped just because the observer registration failed
+    assert.ok(env.liveTimers().some((t) => t.kind === 'mainloop'), 'the settle wait was still armed');
+    ext.disable();
+});
+
 test('item 4: auto-off before the monitor reply is applied at readiness, not dropped', () => {
     const { env, ext } = makeEnv();
     bootBeforeReply(env, ext);
