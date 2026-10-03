@@ -150,7 +150,7 @@ error when `lib/` was never deployed; when an older `lib/` is still on disk the
 entry loads instead and silently runs that old library code.
 
 - **Tests:** `npm test` (or `node --test tests/*/*.test.js`) — every test file exactly once, on Node 18 or newer. Test files live one level below `tests/` (`tests/<area>/<name>.test.js`); `node --test tests/` would only work on Node 18/20.
-- **Tooling:** `npm ci` once, then `npm run check` — tests, typecheck and lint in one run. Types are JSDoc checked with `tsc --checkJs` (`npm run typecheck`); there are no TypeScript sources and no build step, everything ships as plain JavaScript.
+- **Tooling:** `npm ci` once, then `npm run check` — tests, typecheck, lint and a catalog check in one run (the catalog check compiles every `po/*.po` with `msgfmt`, so it needs gettext like the installer; CI installs it). Types are JSDoc checked with `tsc --checkJs` (`npm run typecheck`); there are no TypeScript sources and no build step, everything ships as plain JavaScript.
 - **CI:** `.github/workflows/ci.yml` runs `npm run check` on Node 18 and 22 for every push and pull request, and builds the release zip to check that it holds the runtime files only.
 - **Release guard:** `tests/architecture/shipped-files.test.js` freezes the zip surface: dev-only material (npm configs, types, tests, research, CI) must never reach `build-release.sh` or `lib/`.
 - **Releases:** pushing a `v*` tag runs the checks, verifies that the tag matches the version in `metadata.json`, builds the zip and attaches it to the release (`.github/workflows/release.yml`).
