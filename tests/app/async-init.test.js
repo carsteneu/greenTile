@@ -379,3 +379,74 @@ test('item 4: a refused direct pause is not reported as applied either', () => {
 function instLayouts(env) {
     return settingsInstance(env).getValue('layouts');
 }
+
+// --- Item 4: a retained intent must not outlive the user's newest command ------
+//
+// Two orderings the plain "apply the queue at readiness" rule gets wrong:
+//  1. a pause the guard REFUSED (corrupt layouts) is repaired later — an
+//     automatic retile must apply (or at least honour) that pause, not place
+//     windows against it;
+//  2. a retained intent must not REPLAY over a later explicit opposite command,
+//     which supersedes it (one intent per monitor+workspace, newest wins).
+
+test('item 4: a retained pause is applied before the automatic retile after a repair', () => {
+    const { env, ext } = makeEnv({ layouts: '{invalid' });
+    const ws = makeWorkspace();
+    ws.list_windows = () => env.tabList;
+    env.workspaces.push(ws);
+    env.activeWorkspace = { index: () => 0 };
+    const w = makeWindow(env, 101, [50, 70, 420, 310]);
+    const w2 = makeWindow(env, 102, [600, 70, 420, 310]);
+    env.tabList.push(w, w2);
+    env.layoutManager.monitors.push(MONITOR);
+    ext.enable();
+    // the pause is refused by the corrupt-layouts guard and retained
+    autoOf(env, 'greenTile-autoOff');
+    env.flushDisplayConfigNoReply();
+    const app = ext.currentSession().app;
+    assert.equal(app.session.pendingAuto.length, 1, 'the refused pause is retained');
+    assert.equal(env.logs.includes('greenTile auto tiling off for ws0'), false, 'and not reported as applied');
+    // the user repairs the setting, with auto ON in it
+    const ref = app.split.ref(app, 0, 0, 2);
+    settingsInstance(env).setValue('layouts', JSON.stringify({ [ref.mkey]: { [ref.wskey]: { auto: true } } }));
+    settingsInstance(env).remoteUpdate();
+    // a workspace switch arms the debounced retile; firing it must not place
+    // windows against the retained pause
+    env.windowManager.emit('switch-workspace');
+    const debounce = env.liveTimers().find((t) => t.ms === 300);
+    assert.ok(debounce, 'the automatic retile is armed');
+    const entry = [...env.timers.entries()].find(([id]) => id === debounce.id);
+    env.timers.delete(debounce.id);
+    entry[1].cb();
+    assert.deepEqual(w.moves, [], 'a retained pause must gate the automatic retile');
+    assert.deepEqual(w2.moves, []);
+    assert.equal(app.ops.layoutFor(app, 0, 0).auto, false, 'the retained pause was written when it became possible');
+    assert.equal(app.session.pendingAuto.length, 0, 'and it left the queue');
+    ext.disable();
+});
+
+for (const oldAuto of [false, true]) {
+    test('item 4: a retained ' + (oldAuto ? 'On' : 'Off') + ' cannot replay over a newer opposite command', () => {
+        const { env, ext } = makeEnv({ layouts: '{invalid' });
+        bootBeforeReply(env, ext);
+        autoOf(env, oldAuto ? 'greenTile-autoN' : 'greenTile-autoOff');
+        env.flushDisplayConfigNoReply();
+        const app = ext.currentSession().app;
+        assert.equal(app.session.pendingAuto.length, 1, 'the refused command is retained');
+        // the setting is repaired (carrying the OLD state), then the user presses
+        // the opposite command directly: it succeeds and supersedes the retained one
+        const ref = app.split.ref(app, 0, 0, 2);
+        settingsInstance(env).setValue('layouts', JSON.stringify({ [ref.mkey]: { [ref.wskey]: { auto: oldAuto } } }));
+        settingsInstance(env).remoteUpdate();
+        autoOf(env, oldAuto ? 'greenTile-autoOff' : 'greenTile-autoN');
+        assert.equal(app.ops.layoutFor(app, 0, 0).auto, !oldAuto, 'the newer explicit command took effect');
+        assert.equal(app.session.pendingAuto.length, 0, 'and it superseded the retained intent');
+        // a recreation must not replay the stale intent
+        env.layoutManager.emit('monitors-changed');
+        env.flushDisplayConfigNoReply();
+        const fresh = ext.currentSession().app;
+        assert.equal(fresh.ops.layoutFor(fresh, 0, 0).auto, !oldAuto, 'the last explicit command must win');
+        assert.equal(fresh.session.pendingAuto.length, 0);
+        ext.disable();
+    });
+}

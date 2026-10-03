@@ -390,6 +390,19 @@ const createCinnamonEnv = (options) => {
     // with the method override it needed): the list stays so a test can assert
     // that no watch is installed.
     env.settingsFileMonitors = [];
+    // The framework's settings FILE holds the SCHEMA entry per key plus its value
+    // (settings.js merges settings-schema.json into settingsData and saves that),
+    // and a settings instance restores its settingsData from it. The file model
+    // therefore carries the schema fields, not only the values — a fixture that
+    // layers the real settings.js methods on top depends on it (setOptions needs
+    // the key's `options`).
+    let schema = {};
+    try {
+        schema = JSON.parse(require('node:fs').readFileSync(REPO_ROOT + '/settings-schema.json', 'utf8'));
+    }
+    catch (_e) {
+        schema = {};
+    }
     // The settings FILE the framework keeps (settings.js _saveToFile) and the
     // dialog's whole-file rewrite path. `settingsWriteFile` models the dialog
     // (and any external writer) putting a value on disk; `remoteUpdate()` with no
@@ -409,6 +422,22 @@ const createCinnamonEnv = (options) => {
     };
     const makeSettings = (uuid, owner) => {
         const values = new Map(Object.entries(settingsDefaults));
+        // A real settings instance loads the file it (or the dialog) wrote before,
+        // so own writes survive an App recreation: seed from the persisted file.
+        const persisted = env.settingsFiles.get(uuid);
+        if (persisted) {
+            try {
+                const data = JSON.parse(persisted);
+                for (const key of Object.keys(data)) {
+                    if (data[key] && Object.hasOwn(data[key], 'value')) {
+                        values.set(key, data[key].value);
+                    }
+                }
+            }
+            catch (_e) {
+                // an unreadable file keeps the defaults, like a fresh install
+            }
+        }
         const optionsStore = new Map();
         const sigHandlers = [];
         let nextSigId = 1;
@@ -469,10 +498,24 @@ const createCinnamonEnv = (options) => {
             },
             setValue(key, v) {
                 this.callLog.push({ op: 'setValue', key, value: v, finalized: this.finalized });
-                // mirrors settings.js _setValue: the in-memory field is set and
-                // saved; it does NOT emit changed::<key> (only _checkSettings does,
-                // for a reloaded value that differs)
-                values.set(key, v);
+                // mirrors settings.js _setValue: the field is written and the file
+                // SAVED only when the value differs (objects always save). The
+                // vendor compares with loose `!=`; greenTile's keys hold booleans,
+                // strings and objects, where strict equality is the same decision.
+                // It does NOT emit changed::<key> (only _checkSettings does, for a
+                // reloaded value that differs).
+                if (typeof v === 'object' || values.get(key) !== v) {
+                    values.set(key, v);
+                    this.saveFile();
+                }
+            },
+            /** Writes the whole settings file, as settings.js _saveToFile does. */
+            saveFile() {
+                const data = {};
+                for (const [k, v] of values) {
+                    data[k] = Object.assign({}, schema[k] || {}, { value: v });
+                }
+                env.settingsFiles.set(uuid, JSON.stringify(data, null, 4));
             },
             // cinnamonDBus.updateSetting -> settings.js remoteUpdate ->
             // _checkSettings: reload the settings payload, diff by VALUE, fire the
@@ -520,6 +563,8 @@ const createCinnamonEnv = (options) => {
         };
         env.settingsInstances.push(instance);
         env.settingsSlots.set(uuid, instance);
+        // the framework writes the file when the xlet's settings are created
+        instance.saveFile();
         return instance;
     };
 

@@ -63,6 +63,48 @@ export const Auto: {
          */
         _deferAuto(app: AppFacade, monitorIndex: number, wsIndex: number, auto: boolean): void;
         /**
+         * The retained intent for that monitor+workspace, if any.
+         * @param {AppFacade} app
+         * @param {number} monitorIndex
+         * @param {number} wsIndex
+         * @returns {{monitorIndex: number, wsIndex: number, auto: boolean} | undefined}
+         */
+        _pendingIntent(app: AppFacade, monitorIndex: number, wsIndex: number): {
+            monitorIndex: number;
+            wsIndex: number;
+            auto: boolean;
+        } | undefined;
+        /**
+         * Drops the retained intent for that key: an explicit command that took effect
+         * (or a newer explicit command) supersedes it, one per monitor+workspace.
+         * @param {AppFacade} app
+         * @param {number} monitorIndex
+         * @param {number} wsIndex
+         */
+        _dropIntent(app: AppFacade, monitorIndex: number, wsIndex: number): void;
+        /**
+         * Retains an intent the layout guard REFUSED (a corrupt layouts setting): the
+         * newest explicit command is the pending one, so it replaces any older one and
+         * is applied once the setting can take it.
+         * @param {AppFacade} app
+         * @param {number} monitorIndex
+         * @param {number} wsIndex
+         * @param {boolean} auto
+         */
+        _holdRefused(app: AppFacade, monitorIndex: number, wsIndex: number, auto: boolean): void;
+        /**
+         * Applies a retained intent that outranks the stored setting — one held while
+         * the layouts setting was corrupt — and reports whether an automatic retile may
+         * proceed for that monitor+workspace. A retained PAUSE that still cannot be
+         * written returns false: the stored `auto` would otherwise place windows
+         * against the user's last command.
+         * @param {AppFacade} app
+         * @param {number} monitorIndex
+         * @param {number} wsIndex
+         * @returns {boolean}
+         */
+        _applyOrHonorPending(app: AppFacade, monitorIndex: number, wsIndex: number): boolean;
+        /**
          * Applies the auto on/off commands queued before the registry was ready —
          * called by the monitor-ready callback after connectAll and before the settle
          * retile, so no automatic tiling runs against a requested pause. Each intent
