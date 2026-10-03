@@ -34,6 +34,12 @@ if [ -e "$DEST" ] || [ -L "$DEST" ]; then
     DEST_ID=$(stat -c %i "$DEST" 2>/dev/null || true)
 fi
 
+# Set once the staged tree has taken the place of the previous installation:
+# from then on the previous tree is superseded and must never be put back — even
+# if $DEST looks free for a moment because a competing installer moved our just
+# published tree aside. Without this the EXIT trap undid a finished install.
+PUBLISHED=0
+
 STAGE=$(mktemp -d "$PARENT/.greenTile-install.XXXXXX")
 NEW="$STAGE/$UUID"
 BACKUP="$STAGE/old"
@@ -43,11 +49,12 @@ cleanup() {
         return
     fi
     # $BACKUP holds the previous installation from the moment it is moved aside.
-    # It is the user's only copy as long as the new tree has not taken its place
-    # at $DEST — the staged tree is still in the stage, or $DEST is gone again.
-    # Then it is never deleted: it goes back if $DEST is free, otherwise the
-    # stage is kept and its path is printed.
-    if { [ -e "$BACKUP" ] || [ -L "$BACKUP" ]; } &&
+    # It is the user's only copy only until this run has published: after a
+    # successful swap $DEST holds the new tree, so the previous one is superseded
+    # and the stage is dropped. Before that it is kept: it goes back if $DEST is
+    # free, otherwise the stage stays and its path is printed.
+    if [ "$PUBLISHED" = 0 ] &&
+        { [ -e "$BACKUP" ] || [ -L "$BACKUP" ]; } &&
         { [ -e "$NEW" ] || [ -L "$NEW" ] || { [ ! -e "$DEST" ] && [ ! -L "$DEST" ]; }; }; then
         if [ ! -e "$DEST" ] && [ ! -L "$DEST" ] && mv -T "$BACKUP" "$DEST"; then
             echo "install.sh: the previous installation is back in place at $DEST." >&2
@@ -131,6 +138,7 @@ if ! mv -T "$NEW" "$DEST"; then
     fi
     exit 1
 fi
+PUBLISHED=1
 # The swap succeeded: the new tree is at $DEST and the staged copy has left the
 # stage, so the EXIT trap no longer keeps the stage for the previous one.
 

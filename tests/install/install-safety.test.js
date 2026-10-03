@@ -8,6 +8,7 @@ const test = require('node:test');
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const path = require('node:path');
+const crypto = require('node:crypto');
 const { spawn, spawnSync } = require('node:child_process');
 const { UUID, EXT, LATEST, TMP, REAL_MV, mkdir, write } = require('../helpers/release-env');
 const { ROOT } = require('../helpers/cinnamon-loader');
@@ -79,6 +80,14 @@ case "\${GT_MODE:-none}" in
         # the swap itself went through, the signal arrives right after it
         case "$src" in
             */.greenTile-install.*/${UUID}) "$GT_REAL_MV" "$@"; kill -TERM "$PPID"; exit 0 ;;
+        esac
+        ;;
+    stolen-after-swap)
+        # after this run published, a competing installer moves the just published
+        # tree aside (it will give it back from its own abort path). $DEST is free
+        # again while this run exits — the previous tree must not come back.
+        case "$src" in
+            */.greenTile-install.*/${UUID}) "$GT_REAL_MV" "$@"; "$GT_REAL_MV" -T "$GT_DEST" "$GT_DEST.stolen"; exit 0 ;;
         esac
         ;;
     no-target)
@@ -187,6 +196,37 @@ const oldSurvives = (x) => fs.existsSync(path.join(destOf(x), 'old-only'))
 // ...and DEST must then hold that tree, not a half-removed one
 const oldIntactOrAbsent = (x) => !fs.existsSync(destOf(x)) || version(destOf(x)) === '1.2.0';
 const announced = (r) => /preserved at|back in place/.test(r.stderr);
+// byte-level snapshot of a tree: relative path -> sha256 of the file, 'dir' for a
+// directory. Renaming preserves every byte of the previous installation; a marker
+// file alone would not show a tree that was truncated or half-removed.
+function treeFingerprint(root) {
+    const files = {};
+    const walk = (dir, rel) => {
+        const entries = fs.readdirSync(dir, { withFileTypes: true })
+            .sort((a, b) => a.name.localeCompare(b.name));
+        for (const e of entries) {
+            const r = rel ? `${rel}/${e.name}` : e.name;
+            const p = path.join(dir, e.name);
+            if (e.isDirectory()) {
+                files[`${r}/`] = 'dir';
+                walk(p, r);
+            } else {
+                files[r] = crypto.createHash('sha256').update(fs.readFileSync(p)).digest('hex');
+            }
+        }
+    };
+    if (fs.existsSync(root)) {walk(root, '');}
+    return files;
+}
+// where the previous installation survived: back at DEST or inside a preserved stage
+function oldTreePath(x) {
+    if (fs.existsSync(path.join(destOf(x), 'old-only'))) {return destOf(x);}
+    for (const s of stages(x)) {
+        const p = path.join(s, 'old');
+        if (fs.existsSync(path.join(p, 'old-only'))) {return p;}
+    }
+    return null;
+}
 
 const run = (x) => spawnSync('bash', [path.join(x.here, 'install.sh')],
     { cwd: x.here, env: x.env, encoding: 'utf8' });
@@ -195,6 +235,7 @@ test('SIGTERM after the previous tree was moved aside: it survives and is announ
     const x = makeEnv('safety-sigterm');
     useStub(x, 'interrupt');
     seedOldInstall(x.home);
+    const before = treeFingerprint(destOf(x));
     const r = run(x);
     assert.notEqual(r.status, 0, `an interrupted run must not look successful: ${r.stdout}`);
     assert.ok(r.status === 143 || r.signal === 'SIGTERM', `expected a terminated shell, got status=${r.status} signal=${r.signal}`);
@@ -202,6 +243,7 @@ test('SIGTERM after the previous tree was moved aside: it survives and is announ
     assert.ok(!fs.existsSync(path.join(destOf(x), UUID)), 'the new tree was nested inside DEST');
     assert.ok(oldSurvives(x), `the only copy of the previous installation was destroyed — stderr: ${r.stderr}`);
     assert.ok(oldIntactOrAbsent(x), `DEST must hold the previous installation or nothing: ${version(destOf(x))}`);
+    assert.deepEqual(treeFingerprint(oldTreePath(x)), before, 'the previous installation survived with changed bytes');
     assert.ok(announced(r), `stderr must say where the previous installation went: ${r.stderr}`);
 });
 
@@ -209,12 +251,14 @@ test('SIGINT after the previous tree was moved aside: it survives and is announc
     const x = makeEnv('safety-sigint');
     useStub(x, 'interrupt-int');
     seedOldInstall(x.home);
+    const before = treeFingerprint(destOf(x));
     const r = run(x);
     assert.notEqual(r.status, 0, `an interrupted run must not look successful: ${r.stdout}`);
     assert.ok(r.status === 130 || r.signal === 'SIGINT', `expected an interrupted shell, got status=${r.status} signal=${r.signal}`);
     assert.notEqual(version(destOf(x)), LATEST, 'an interrupted run must not publish the new tree');
     assert.ok(oldSurvives(x), `the only copy of the previous installation was destroyed — stderr: ${r.stderr}`);
     assert.ok(oldIntactOrAbsent(x), `DEST must hold the previous installation or nothing: ${version(destOf(x))}`);
+    assert.deepEqual(treeFingerprint(oldTreePath(x)), before, 'the previous installation survived with changed bytes');
     assert.ok(announced(r), `stderr must say where the previous installation went: ${r.stderr}`);
 });
 
@@ -231,6 +275,28 @@ test('SIGTERM right after a successful swap: no advice that would undo it', () =
         `the superseded previous installation must not keep the stage alive: ${stages(x).join(', ')}`);
     assert.ok(!/preserved at/.test(r.stderr),
         `a completed install must not tell the user to move the old tree back: ${r.stderr}`);
+});
+
+test('a competing installer holding the just published tree does not bring the previous one back', () => {
+    const x = makeEnv('safety-stolen-after-swap');
+    useStub(x, 'stolen-after-swap');
+    seedOldInstall(x.home);
+    const r = run(x);
+    // the swap succeeded: the new tree left the stage and was published
+    assert.ok(r.stdout.includes('installed to'), `the completed install must be reported: ${r.stdout}`);
+    // it was then moved aside by the competitor, so $DEST is momentarily free —
+    // the EXIT trap must not mistake that for a lost publication and undo the swap
+    assert.ok(!fs.existsSync(path.join(destOf(x), 'old-only')),
+        'the previous installation was restored over the just published tree');
+    assert.ok(!/preserved at|back in place/.test(r.stderr),
+        `a completed install must not advise moving the previous tree back: ${r.stderr}`);
+    // the tree the competitor holds is exactly the new one ...
+    assert.equal(version(destOf(x) + '.stolen'), LATEST, 'the held tree must be the published one');
+    assert.ok(fs.existsSync(path.join(destOf(x) + '.stolen', 'lib', 'core.js')), 'the held tree is incomplete');
+    // ... and once the competitor gives it back the result is one consistent runtime
+    fs.renameSync(destOf(x) + '.stolen', destOf(x));
+    assert.equal(version(destOf(x)), LATEST);
+    assert.ok(fs.existsSync(path.join(destOf(x), 'lib', 'core.js')));
 });
 
 test('an mv without coreutils -T: abort with the previous installation untouched', () => {
@@ -250,6 +316,7 @@ test('a DEST another installer published while this one staged is not moved away
     const x = makeEnv('safety-replaced-while-staging');
     useStub(x, 'none');
     seedOldInstall(x.home);
+    const before = treeFingerprint(destOf(x));
     // the real msgfmt path runs during staging, i.e. between looking at what is
     // at $DEST and the swap — exactly where a competing installer publishes
     const realMsgfmt = spawnSync('which', ['msgfmt'], { encoding: 'utf8' }).stdout.trim();
@@ -268,6 +335,7 @@ exec ${realMsgfmt} "$@"
     assert.ok(fs.existsSync(path.join(destOf(x), 'competitor-only')), 'the other installation lost files');
     assert.ok(!fs.existsSync(path.join(destOf(x), UUID)), 'a tree was nested inside DEST');
     assert.equal(version(destOf(x) + '.previous'), '1.2.0', 'the previous installation was destroyed');
+    assert.deepEqual(treeFingerprint(destOf(x) + '.previous'), before, 'the previous installation lost bytes');
     assert.equal(stages(x).length, 0, `nothing of ours was moved aside: ${stages(x).join(', ')}`);
 });
 
@@ -275,12 +343,14 @@ test('a tree published between the check and the move is given back, not updated
     const x = makeEnv('safety-published-during-move');
     useStub(x, 'replaced');
     seedOldInstall(x.home);
+    const before = treeFingerprint(destOf(x));
     const r = run(x);
     assert.notEqual(r.status, 0, 'the tree published in the meantime must not be swallowed');
     assert.equal(version(destOf(x)), 'competitor', 'the other installation is not at DEST any more');
     assert.ok(fs.existsSync(path.join(destOf(x), 'competitor-only')), 'the other installation lost files');
     assert.ok(!fs.existsSync(path.join(destOf(x), UUID)), 'a tree was nested inside DEST');
     assert.equal(version(destOf(x) + '.previous'), '1.2.0', 'the previous installation was destroyed');
+    assert.deepEqual(treeFingerprint(destOf(x) + '.previous'), before, 'the previous installation lost bytes');
     assert.ok(!r.stdout.includes('installed to'), 'nothing was installed, so nothing may be announced');
     assert.equal(stages(x).length, 0, `the given-back tree must not keep a stage: ${stages(x).join(', ')}`);
 });
@@ -289,6 +359,7 @@ test('a competing installer publishes DEST before the swap: no nesting, no false
     const x = makeEnv('safety-nested');
     useStub(x, 'nested');
     seedOldInstall(x.home);
+    const before = treeFingerprint(destOf(x));
     const r = run(x);
     assert.notEqual(r.status, 0, `a lost swap must not report success: ${r.stdout}`);
     assert.ok(!fs.existsSync(path.join(destOf(x), UUID)), 'the new tree was nested inside DEST');
@@ -296,6 +367,7 @@ test('a competing installer publishes DEST before the swap: no nesting, no false
     assert.ok(!r.stdout.includes('installed to'), 'a failed publication must not claim the extension was installed');
     assert.ok(fs.existsSync(path.join(destOf(x), 'competitor-only')), 'the competing installation was overwritten');
     assert.ok(oldSurvives(x), `the previous installation is gone — stderr: ${r.stderr}`);
+    assert.deepEqual(treeFingerprint(oldTreePath(x)), before, 'the previous installation lost bytes');
     assert.ok(r.stderr.includes('preserved at'), `stderr must point at the backup: ${r.stderr}`);
 });
 
@@ -303,12 +375,14 @@ test('a DEST created during the restore is not overwritten and cannot nest the b
     const x = makeEnv('safety-restore-race');
     useStub(x, 'restore-race');
     seedOldInstall(x.home);
+    const before = treeFingerprint(destOf(x));
     const r = run(x);
     assert.notEqual(r.status, 0, `a failed restore must not report success: ${r.stdout}`);
     assert.ok(!fs.existsSync(path.join(destOf(x), 'old')), 'the backup was nested into the competing DEST');
     assert.ok(fs.existsSync(path.join(destOf(x), 'competitor-only')), 'the competing installation was overwritten');
     assert.ok(!r.stderr.includes('intact and restored'), `a failed restore must not claim the installation is back: ${r.stderr}`);
     assert.ok(oldSurvives(x), `the previous installation is gone — stderr: ${r.stderr}`);
+    assert.deepEqual(treeFingerprint(oldTreePath(x)), before, 'the previous installation lost bytes');
     assert.ok(r.stderr.includes('preserved at'), `stderr must point at the backup: ${r.stderr}`);
 });
 
@@ -316,11 +390,13 @@ test('DEST reappearing before the swap aborts without touching it and keeps the 
     const x = makeEnv('safety-reappears');
     useStub(x, 'early-backup');
     seedOldInstall(x.home);
+    const before = treeFingerprint(destOf(x));
     const r = run(x);
     assert.notEqual(r.status, 0, `the abort must not report success: ${r.stdout}`);
     assert.ok(!fs.existsSync(path.join(destOf(x), UUID)), 'the new tree was nested inside DEST');
     assert.ok(fs.existsSync(path.join(destOf(x), 'competitor-only')), 'the installation that appeared was overwritten');
     assert.ok(oldSurvives(x), `the previous installation is gone — stderr: ${r.stderr}`);
+    assert.deepEqual(treeFingerprint(oldTreePath(x)), before, 'the previous installation lost bytes');
     assert.ok(announced(r), `stderr must say where the previous installation went: ${r.stderr}`);
     assert.ok(!r.stderr.includes('nothing was changed'), `the tree was moved aside, the message must not deny it: ${r.stderr}`);
 });
