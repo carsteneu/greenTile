@@ -541,7 +541,8 @@ const createCinnamonEnv = (options) => {
     };
     const cinnamon = {
         AppSystem: { get_default: () => env.appSystem },
-        WindowTracker: { get_default: () => ({ get_window_app: () => ({}) }) },
+        // a window flagged __noApp has no owning app (app-less dialog/normal window)
+        WindowTracker: { get_default: () => ({ get_window_app: (w) => (w && w.__noApp ? null : ({})) }) },
         Cursor: { RESIZE_BOTTOM_RIGHT: 0 },
     };
     // Fake St actor wired like a signalHub-bearing node: records handler

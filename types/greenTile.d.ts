@@ -248,12 +248,14 @@ type AutoFacade = {
     scheduleAll(app: AppFacade, delayMs: number): void;
     scheduleMonitor(app: AppFacade, monitorIndex: number, delayMs: number): void;
     pendingTake(monitorIndex: number): Set<number>;
+    pendingForget(seq: number): void;
     activate(app: AppFacade): void;
     deactivate(app: AppFacade): void;
     connectAll(app: AppFacade): void;
     resizeStartTake(seq: number): { rect: Rect; monitor: number } | undefined;
     sortOverride(seq: number, rect: Rect, now: number): void;
     sortTake(seq: number, now: number): Rect | null;
+    sortPeek(seq: number, now: number): Rect | null;
     sortClear(seq: number): void;
     sortPoll(now: number): void;
     destroy(): void;
