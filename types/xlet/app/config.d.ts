@@ -15,7 +15,8 @@ export const Config: {
          * stores and saves), so an own layoutSet/preset/drop/unrelated write leaves a
          * pending resize valid.
          *
-         * NOT covered (bounded, reported as BLOCKED — see docs/local/todo_fixes_2.md):
+         * NOT covered (bounded BLOCKED, reproduced by
+         * tests/app/settings-external-write.blocked-evidence.js):
          * (1) a value-IDENTICAL external write (a backup import that restores the value
          *     already in memory) is invisible here by construction — there is no value
          *     diff to report; (2) the settings dialog rewrites the whole FILE before its

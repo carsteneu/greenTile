@@ -128,7 +128,7 @@ test('item 5: a corrupt layouts setting is not replaced by the pending flush', (
     ext.disable();
 });
 
-test('item 5: the reload observer is wired per App and released with it', () => {
+test('item 5: the reload observer is wired once, survives a recreation exactly once, and is released at finalize', () => {
     const { env, ext } = makeEnv();
     const { app } = enabledWithLayouts(env, ext);
     const inst = settingsInstance(env);
@@ -137,6 +137,9 @@ test('item 5: the reload observer is wired per App and released with it', () => 
     env.layoutManager.emit('monitors-changed');
     env.flushDisplayConfigNoReply();
     assert.notEqual(ext.currentSession().app, app, 'the App was recreated');
+    assert.equal(settingsInstance(env).count('changed::layouts'), 1,
+        'the recreated App wired its own subscription once — not a second one');
+    assert.equal(inst.count('changed::layouts'), 0, 'and the previous App finalize released the old one');
 
     ext.disable();
     assert.equal(settingsInstance(env).count('changed::layouts'), 0, 'finalize released the reload surface');

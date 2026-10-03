@@ -135,10 +135,11 @@ export const Auto: {
         /** @param {AppFacade} app */
         _connectAll(app: AppFacade): void;
         /**
-         * Releases every acquisition connectAll made and rebuilds the scope, leaving
-         * the component exactly as it was before the attempt.
+         * Releases every acquisition connectAll made and rebuilds the scope.
+         * @returns {boolean} whether the release was clean (the scope's signal manager
+         *   is empty again), i.e. whether a retry may safely re-register
          */
-        _rollbackConnectAll(): void;
+        _rollbackConnectAll(): boolean;
         /** @param {number} monitorIndex */
         pendingTake(monitorIndex: number): any;
         /**

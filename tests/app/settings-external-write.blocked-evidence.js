@@ -2,7 +2,7 @@
 // ITEM 5 BLOCKED — EXECUTABLE EVIDENCE, INTENTIONALLY NOT PART OF `npm test`.
 //
 // The suite glob is `tests/*/*.test.js`; this file is named `*.blocked-evidence.js`
-// so `npm test` stays green. It reproduces the two acceptance cases item 5 does
+// so `npm test` stays green. It reproduces the three acceptance cases item 5 does
 // NOT close, on the current tree. Run it directly to see them fail:
 //
 //   node --test tests/app/settings-external-write.blocked-evidence.js
@@ -22,10 +22,17 @@
 //   resurrects the pending splits instead of dropping them.
 //
 // Attribution for a real closure needs either a framework write-method hook (an
-// instance override of settings.setValue/setOptions — forbidden by the change
+// instance override of settings.setValue/setOptions — rejected by the change
 // contract) or every own writer routed through a Config-owned write function
-// (panel.js/editor.js/drop.js/exclusions.js are outside this section's ownership),
-// so both are reported as options rather than implemented.
+// (the 11 own-write sites are layout.js:135,142, exclusions.js:134,234,237,
+// split.js:157, panel.js:140,235,502, editor.js:107 — panel/editor/exclusions are
+// outside this section's ownership), so both are reported as options rather than
+// implemented. The two cases the retained surface DOES close are asserted in
+// tests/app/settings-external-write.test.js.
+//
+// A/B/C are NOT machine-checked by `npm test` (by construction — the fake's
+// remoteUpdate models _checkSettings' value diff, which is exactly what makes A
+// invisible). This file is the only executable record; keep it.
 const test = require('node:test');
 const assert = require('node:assert/strict');
 const { makeEnv, enableOnMonitor, settingsInstance } = require('../helpers/fakes/cinnamon-harness');

@@ -25,8 +25,10 @@ const makeWorkspace = (failOn = null, times = 1) => {
     const handlers = [];
     let nextId = 1;
     let remaining = failOn ? times : 0;
+    const attempts = [];
     return {
         connect(sig, cb) {
+            attempts.push(sig);
             if (remaining > 0 && failOn === sig) {
                 remaining -= 1;
                 throw new Error('injected ' + sig + ' connect failure');
@@ -34,6 +36,9 @@ const makeWorkspace = (failOn = null, times = 1) => {
             const id = nextId++;
             handlers.push({ sig, cb, id });
             return id;
+        },
+        attempts(sig) {
+            return attempts.filter((s) => s === sig).length;
         },
         disconnect(id) {
             const at = handlers.findIndex((h) => h.id === id);
@@ -110,6 +115,7 @@ test('item 3: a one-shot connect failure is retried once and registers everythin
     // complete observer set — no half-started state and no error reported
     assert.equal(ws.count('window-added'), 1, 'exactly one window-added handler after the retry');
     assert.equal(ws.count('window-removed'), 1, 'exactly one window-removed handler after the retry');
+    assert.equal(ws.attempts('window-removed'), 2, 'the failing connect was attempted exactly twice (one retry)');
     assert.equal(env.workspaceManager.count('notify::n-workspaces'), 1);
     assert.equal(env.display.count('grab-op-begin'), 1);
     assert.equal(env.display.count('window-created'), 1);
@@ -119,6 +125,26 @@ test('item 3: a one-shot connect failure is retried once and registers everythin
     ext.disable();
     assert.equal(env.totalHandlers(), 0, 'the retry leaves nothing behind');
     assert.equal(env.liveTimers().length, 0);
+});
+
+test('item 3: a rollback that did not release cleanly is not retried (no duplicate handlers)', () => {
+    const { env, ext } = makeEnv();
+    const ws = makeWorkspace('window-removed', Infinity);
+    env.workspaces.push(ws);
+    env.layoutManager.monitors.push(MONITOR);
+    ext.enable();
+    const app = ext.currentSession().app;
+    // Simulate the one precondition that makes a retry unsafe: the scope release
+    // left an entry in the signal manager. Retrying would connect a fresh
+    // callback next to the surviving handler and double-handle every event, so
+    // the failure must propagate instead.
+    app.auto._deps.signalManager.getSignals = () => [{ sigName: 'x', obj: {}, cb: null, id: 1 }];
+    env.flushDisplayConfigNoReply();
+    assert.equal(ws.attempts('window-removed'), 1, 'the failing connect was attempted once — no retry over a dirty slate');
+    assert.equal(env.logErrors.some((l) => l.indexOf('greenTile monitor-ready start failed') === 0), true,
+        'the failure is reported');
+    assert.equal(ws.count(), 0, 'and the partial set was still released');
+    ext.disable();
 });
 
 test('item 3: a persistent connect failure rolls the whole start back and reports it', () => {
@@ -184,7 +210,6 @@ test('item 3: a fresh App after the failed one registers everything exactly once
         'the first start failed');
     // the failing workspace is gone with the old workspace set: the recreation
     // builds a fresh App whose connectAll registers the full set exactly once
-    bad.count = () => 0;
     env.workspaces = [makeWorkspace()];
     env.layoutManager.emit('monitors-changed');
     env.flushDisplayConfigNoReply();
@@ -257,8 +282,8 @@ test('item 3: a failing queued write keeps its intent queued and the observers i
     };
     env.flushDisplayConfigNoReply();
     const app = ext.currentSession().app;
-    assert.equal(env.logErrors.some((l) => l.indexOf('greenTile monitor-ready start failed') === 0), true,
-        'the failing ready-phase step is reported, not thrown out of the callback');
+    assert.equal(env.logErrors.some((l) => l.indexOf('greenTile pending auto command failed') === 0), true,
+        'the failing queued write is reported under its own label, not thrown out of the callback');
     assert.equal(app.session.pendingAuto.length, 1, 'the intent stays queued for the next monitor-ready');
     assert.equal(env.greenTileHotkeys().length, 14, 'the hotkeys survive');
     assert.equal(env.workspaceManager.count('notify::n-workspaces'), 1, 'the observer phase that succeeded is intact');
