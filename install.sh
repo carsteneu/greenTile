@@ -181,8 +181,9 @@ for mofile in "$STAGE"/locale/*/LC_MESSAGES/*.mo; do
     old="$localedir/.$UUID.$$.old"
     replaced=''
     if ! mv -T "$mofile" "$staged"; then
-        # a failed cross-device copy leaves our own partial file behind; a
-        # stale object under that hidden name is not ours and is left alone
+        # a failed cross-device copy leaves our own partial file behind, so
+        # remove it; a non-regular object under that hidden name is not ours
+        # and is left alone
         if [ -f "$staged" ] && [ ! -L "$staged" ]; then
             rm -f "$staged"
         fi
@@ -220,8 +221,10 @@ for mofile in "$STAGE"/locale/*/LC_MESSAGES/*.mo; do
             echo "Note: could not install the $lang translation — the previous catalogue was left in place at $modest; the extension falls back to English if no usable catalogue is found there." >&2
         elif [ -n "$replaced" ]; then
             echo "Note: could not install the $lang translation — the previous catalogue is preserved at $replaced; the extension falls back to English if no usable catalogue is found at $modest." >&2
-        else
+        elif [ -e "$modest" ] || [ -L "$modest" ]; then
             echo "Note: could not install the $lang translation — $modest appeared in the meantime and was left untouched; the extension falls back to English if no usable catalogue is found there." >&2
+        else
+            echo "Note: could not install the $lang translation — no catalogue could be created at $modest; the extension falls back to English if no usable catalogue is found there." >&2
         fi
         rm -f "$staged"
         continue

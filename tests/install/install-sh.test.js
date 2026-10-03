@@ -581,3 +581,21 @@ esac`);
         'the captured directory content must be intact');
     assert.ok(noteNaming(r, target), `the warning must name the destination: ${r.stderr}`);
 });
+
+test('a create that fails with nothing at the path reports the real cause', () => {
+    const x = makeInstallEnv('install-mo-create-cause');
+    makeSource(x);
+    const target = moPath(x.home, 'de');
+    // no hard-link support anywhere: every create fails, and nothing ever
+    // appeared at the path, so the note must not blame a racing object
+    write(path.join(x.bin, 'ln'), `#!/usr/bin/env bash
+echo "ln: hard link not supported" >&2
+exit 1
+`);
+    fs.chmodSync(path.join(x.bin, 'ln'), 0o755);
+    const r = runInstall(x);
+    assert.equal(r.status, 0, `stderr: ${r.stderr}`);
+    assert.ok(noteNaming(r, target), `the warning must name the destination: ${r.stderr}`);
+    assert.ok(!r.stderr.includes('appeared in the meantime'),
+        `nothing appeared, so the note must not blame a racing object: ${r.stderr}`);
+});
