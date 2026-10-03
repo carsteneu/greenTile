@@ -3,8 +3,8 @@
 # ~/.local/share/cinnamon/extensions/ and compiles the translations.
 # Run it from the unpacked release zip (install.sh sits next to greenTile@carsteneu/).
 # The complete new installation is staged next to the destination and
-# validated; the old one is only replaced by a directory rename, and restored
-# if that rename fails.
+# validated; the previous one is only taken out of the way by a directory
+# rename, and it stays recoverable until the swap has succeeded.
 set -eu
 
 UUID=greenTile@carsteneu
@@ -22,19 +22,51 @@ done
 
 PARENT=$(dirname "$DEST")
 mkdir -p "$PARENT"
+# A catchable signal must still report or restore. SIGKILL cannot be caught:
+# then the stage with the backup simply stays on disk, without a message.
+trap 'exit 143' TERM
+trap 'exit 130' INT
+
+# What sits at $DEST right now. A tree that is no longer this one was published
+# by another install.sh meanwhile and is not ours to move away.
+DEST_ID=""
+if [ -e "$DEST" ] || [ -L "$DEST" ]; then
+    DEST_ID=$(stat -c %i "$DEST" 2>/dev/null || true)
+fi
+
+# Set once the staged tree has taken the place of the previous installation:
+# from then on the previous tree is superseded and must never be put back — even
+# if $DEST looks free for a moment because a competing installer moved our just
+# published tree aside. Without this the EXIT trap undid a finished install.
+PUBLISHED=0
+
 STAGE=$(mktemp -d "$PARENT/.greenTile-install.XXXXXX")
-RESTORE_FAILED=""
+NEW="$STAGE/$UUID"
+BACKUP="$STAGE/old"
 cleanup() {
-    # If even the restore failed, the backup inside the stage is the user's
-    # only copy — keep it and point the way back, instead of removing it.
-    if [ -n "$RESTORE_FAILED" ]; then
-        echo "install.sh: your previous installation is preserved at $STAGE/old — move it back to $DEST by hand." >&2
+    trap - TERM INT
+    if [ -z "${STAGE:-}" ]; then
+        return
+    fi
+    # $BACKUP holds the previous installation from the moment it is moved aside.
+    # It is the user's only copy only until this run has published: after a
+    # successful swap $DEST holds the new tree, so the previous one is superseded
+    # and the stage is dropped. Before that it is kept: it goes back if $DEST is
+    # free, otherwise the stage stays and its path is printed.
+    if [ "$PUBLISHED" = 0 ] &&
+        { [ -e "$BACKUP" ] || [ -L "$BACKUP" ]; } &&
+        { [ -e "$NEW" ] || [ -L "$NEW" ] || { [ ! -e "$DEST" ] && [ ! -L "$DEST" ]; }; }; then
+        if [ ! -e "$DEST" ] && [ ! -L "$DEST" ] && mv -T "$BACKUP" "$DEST"; then
+            echo "install.sh: the previous installation is back in place at $DEST." >&2
+            rm -rf "$STAGE"
+        else
+            echo "install.sh: your previous installation is preserved at $BACKUP — move it back to $DEST by hand." >&2
+        fi
         return
     fi
     rm -rf "$STAGE"
 }
 trap cleanup EXIT
-NEW="$STAGE/$UUID"
 
 # Stage everything first: a failure up to the swap leaves the previous
 # installation untouched. Translations are compiled here too, so a broken
@@ -60,32 +92,58 @@ done
 
 # Replace the old installation wholesale: one rename puts the new tree in
 # place, so no partial or mixed state can survive; files the package does not
-# ship (stale modules, leftover po/, a stray old LICENSE) vanish with it. A
-# failed swap moves the backup back; if even that fails, the EXIT trap keeps
-# the backup and points at it — it is the only surviving copy.
-BACKUP="$STAGE/old"
-if [ -e "$DEST" ]; then
-    mv "$DEST" "$BACKUP"
+# ship (stale modules, leftover po/, a stray old LICENSE) vanish with it. mv -T
+# treats the target as a plain name instead of a container, so a $DEST that
+# another install.sh creates in between makes the rename fail instead of
+# nesting the tree inside it, and the previous installation goes back via the
+# EXIT trap. -T is coreutils mv, i.e. GNU/Linux, the only platform Cinnamon
+# runs on; where it is missing the swap fails and this installer aborts with
+# the previous installation untouched — it never falls back to a nesting mv.
+if [ -e "$DEST" ] || [ -L "$DEST" ]; then
+    # Only the tree from the start of this run may be handed to the stage. The
+    # check before the rename cannot be atomic, so the rename itself is the
+    # step that counts and what it moved is identified afterwards: the stage
+    # then holds exactly the tree that was at $DEST in that instant.
+    if [ "$(stat -c %i "$DEST" 2>/dev/null || true)" != "$DEST_ID" ]; then
+        echo "install.sh: $DEST was replaced while this install was preparing — aborting without touching it." >&2
+        exit 1
+    fi
+    if ! mv -T "$DEST" "$BACKUP"; then
+        echo "install.sh: could not move $DEST aside — aborting, nothing of yours was changed." >&2
+        exit 1
+    fi
+    if [ "$(stat -c %i "$BACKUP" 2>/dev/null || true)" != "$DEST_ID" ]; then
+        # not the tree this install looked at: another install.sh published
+        # meanwhile, so its installation goes back untouched
+        if mv -T "$BACKUP" "$DEST" 2>/dev/null; then
+            echo "install.sh: another install.sh published to $DEST while this one was preparing — aborting, its installation is back in place." >&2
+        else
+            # $BACKUP is that other tree, not this user's previous installation:
+            # keep the stage and stop the EXIT trap from reporting it as ours.
+            echo "install.sh: another install.sh published to $DEST while this one was preparing — aborting, its tree is preserved at $BACKUP." >&2
+            STAGE=""
+        fi
+        exit 1
+    fi
 fi
-if [ -e "$DEST" ]; then
-    # $DEST is back while our backup holds the moved-away tree — most likely
-    # a second install.sh running concurrently; do not touch anything.
-    echo "install.sh: $DEST appeared during the install (another install.sh running?) — aborting, nothing was changed." >&2
+if [ -e "$DEST" ] || [ -L "$DEST" ]; then
+    # $DEST is back while the stage holds the tree we moved aside — most likely
+    # a second install.sh. Never publish over what it wrote and never discard
+    # the copy we hold: the EXIT trap reports where it is.
+    echo "install.sh: another install.sh wrote to $DEST in the meantime — aborting without touching it." >&2
     exit 1
 fi
-if ! mv "$NEW" "$DEST"; then
-    if [ -e "$BACKUP" ]; then
-        if mv "$BACKUP" "$DEST"; then
-            echo "install.sh: could not replace $DEST — your previous installation is intact and restored." >&2
-        else
-            RESTORE_FAILED=1
-            echo "install.sh: replacing $DEST failed and the backup could not be restored — the previous installation is preserved at $BACKUP. Move it back to $DEST by hand." >&2
-        fi
+if ! mv -T "$NEW" "$DEST"; then
+    if [ -e "$BACKUP" ] || [ -L "$BACKUP" ]; then
+        echo "install.sh: could not replace $DEST." >&2
     else
         echo "install.sh: could not install to $DEST — nothing was changed." >&2
     fi
     exit 1
 fi
+PUBLISHED=1
+# The swap succeeded: the new tree is at $DEST and the staged copy has left the
+# stage, so the EXIT trap no longer keeps the stage for the previous one.
 
 # The extension loads translations from GLib.get_user_data_dir()/locale (the
 # XDG data dir); mirror that here instead of hardcoding ~/.local/share.
