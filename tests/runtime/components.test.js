@@ -84,6 +84,8 @@ const makeSettle = () => {
         now: ck.now,
         log: (msg) => logs.push(msg),
         onSettled: (app) => settledApps.push(app),
+        // the component tests settle for an App the session still owns
+        isLive: () => true,
     });
     return { ck, ml, logs, settledApps, settle };
 };

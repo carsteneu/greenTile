@@ -11,7 +11,7 @@
  * @property {() => CinnamonWindow | null} focusWindow
  * @property {() => number} focusMonitorIndex
  * @property {(app: AppFacade, monitorIndex: number, wsIndex: number) => { auto: boolean }} layoutFor
- * @property {(app: AppFacade, monitorIndex: number, wsIndex: number, patch: {}) => void} layoutSet
+ * @property {(app: AppFacade, monitorIndex: number, wsIndex: number, patch: {}) => boolean} layoutSet
  * @property {(app: AppFacade, monitorIndex: number, focused: CinnamonWindow | null) => void} retileMonitor
  * @property {() => void} borderUpdate
  * @property {(op: string) => boolean} grabIsResize
@@ -66,11 +66,11 @@ export const Auto: {
          * Applies the auto on/off commands queued before the registry was ready —
          * called by the monitor-ready callback after connectAll and before the settle
          * retile, so no automatic tiling runs against a requested pause. Each intent
-         * leaves the queue once it has been handed to the writer, so a throw mid-way
-         * keeps the rest for the next monitor-ready; an intent whose monitor no longer
-         * exists is dropped (there is no key to address it, and nothing ever will be).
-         * A write the layout guard still refuses (a corrupt layouts value) is reported
-         * as pending-then-applied like any other — the guard's own log is the signal.
+         * leaves the queue only once the layout write actually happened, so a throw
+         * mid-way (or a refusal by the layout guard, e.g. a corrupt layouts setting)
+         * keeps it queued for the next monitor-ready; an intent whose monitor no
+         * longer exists is dropped (there is no key to address it, and nothing ever
+         * will be).
          * @param {AppFacade} app
          */
         applyPending(app: AppFacade): void;
@@ -201,7 +201,7 @@ export type AutoDeps = {
     layoutFor: (app: AppFacade, monitorIndex: number, wsIndex: number) => {
         auto: boolean;
     };
-    layoutSet: (app: AppFacade, monitorIndex: number, wsIndex: number, patch: {}) => void;
+    layoutSet: (app: AppFacade, monitorIndex: number, wsIndex: number, patch: {}) => boolean;
     retileMonitor: (app: AppFacade, monitorIndex: number, focused: CinnamonWindow | null) => void;
     borderUpdate: () => void;
     grabIsResize: (op: string) => boolean;

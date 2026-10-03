@@ -386,6 +386,27 @@ const createCinnamonEnv = (options) => {
     // --- settings: Cinnamon slot model, one object per uuid
     env.settingsSlots = new Map();
     env.settingsInstances = [];
+    // No settings-FILE monitor exists any more (item 5's file surface was removed
+    // with the method override it needed): the list stays so a test can assert
+    // that no watch is installed.
+    env.settingsFileMonitors = [];
+    // The settings FILE the framework keeps (settings.js _saveToFile) and the
+    // dialog's whole-file rewrite path. `settingsWriteFile` models the dialog
+    // (and any external writer) putting a value on disk; `remoteUpdate()` with no
+    // payload models cinnamonDBus.updateSetting -> settings.js remoteUpdate, which
+    // reloads the FILE and only then diffs by value.
+    env.settingsFiles = new Map();
+    env.settingsWriteFile = (uuid, key, value) => {
+        let data = {};
+        try {
+            data = JSON.parse(env.settingsFiles.get(uuid) || '{}');
+        }
+        catch (_e) {
+            data = {};
+        }
+        data[key] = { value: value };
+        env.settingsFiles.set(uuid, JSON.stringify(data, null, 4));
+    };
     const makeSettings = (uuid, owner) => {
         const values = new Map(Object.entries(settingsDefaults));
         const optionsStore = new Map();
@@ -460,7 +481,21 @@ const createCinnamonEnv = (options) => {
             // no signal here — that is exactly the acceptance boundary the item 5
             // BLOCKED report rests on.
             remoteUpdate(payload) {
-                const data = payload || {};
+                let data = payload;
+                if (data === undefined) {
+                    // no payload: reload the file, as the framework does
+                    try {
+                        const stored = JSON.parse(env.settingsFiles.get(uuid) || '{}');
+                        data = {};
+                        for (const key of Object.keys(stored)) {
+                            data[key] = stored[key].value;
+                        }
+                    }
+                    catch (_e) {
+                        return;
+                    }
+                }
+                data = data || {};
                 for (const key of Object.keys(data)) {
                     const value = data[key];
                     const current = values.get(key);

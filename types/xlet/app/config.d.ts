@@ -3,6 +3,7 @@
 export const Config: {
     new (app: AppFacade): {
         app: AppFacade;
+        _destroyed: boolean;
         settings: any;
         /**
          * Makes an external write of the layouts setting invalidate the App's

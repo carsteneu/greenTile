@@ -198,7 +198,7 @@ type OpsFacade = {
     focusMonitorIndex(): number;
     collectWindows(app: AppFacade, monitor: CinnamonMonitor, focus: CinnamonWindow | null, ws?: number | null): CinnamonWindow[];
     layoutFor(app: AppFacade, monitorIndex: number, wsIndex: number): { preset: Preset | null; auto: boolean };
-    layoutSet(app: AppFacade, monitorIndex: number, wsIndex: number, patch: {}): void;
+    layoutSet(app: AppFacade, monitorIndex: number, wsIndex: number, patch: {}): boolean;
     retileMonitor(app: AppFacade, monitorIndex: number, focused: CinnamonWindow | null, animate?: boolean, wsIndex?: number | null): void;
     presetsRead(app: AppFacade): Preset[];
     presetsWrite(app: AppFacade, presets: Preset[]): void;
@@ -232,6 +232,7 @@ type SessionFacade = {
     /** Auto on/off commands pressed before the monitor registry was ready. */
     pendingAuto: Array<{ monitorIndex: number; wsIndex: number; auto: boolean }>;
     nextAccentGen(): string;
+    rollbackApp(app: AppFacade): void;
     destroy(): void;
 };
 
@@ -363,6 +364,8 @@ type AppFacade = {
         register(bindings: Array<{ name: string; bindings: any; callback: () => void }>): void;
         remove(): void;
     };
+    /** Tears the App down (lib/app/app.js); the session's rollback path uses it. */
+    destroy(): void;
 };
 
 /** gettext binding, lib/ui/i18n.js */
