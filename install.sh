@@ -166,11 +166,11 @@ for mofile in "$STAGE"/locale/*/LC_MESSAGES/*.mo; do
     # this check; name the concrete path and keep the English fallback.
     if { [ -e "$modest" ] || [ -L "$modest" ]; } &&
         { [ ! -f "$modest" ] || [ -L "$modest" ]; }; then
-        echo "Note: $modest exists and is not a plain file — the $lang translation was not installed; the extension works without it (English)." >&2
+        echo "Note: $modest exists and is not a plain file — the $lang translation was left untouched; the extension falls back to English if no usable catalogue is found there." >&2
         continue
     fi
     # -T: the destination is a name, never a container. A directory that
-    # appears between the check above and the move then fails the rename
+    # appears between the check above and the move then fails the move
     # (reported below) instead of nesting the catalogue; a symlink that
     # appears in that window is replaced by the plain file, so the catalogue
     # still lands on the path the loader reads.
