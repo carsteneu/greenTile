@@ -10,7 +10,7 @@ const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const {
     EXT, LATEST, makeEnv, seedInstalled, installedVersion, downloadedVersion,
-    runScript, copyScript,
+    runScript, copyScript, makeWgetOnlyBin,
 } = require('../helpers/release-env');
 const path = require('node:path');
 
@@ -162,6 +162,34 @@ test('partial redirect transfer error: not confirmed, abort with untouched insta
     const { x, script } = setup('update-head-partial', '1.2.0');
     const r = runScript(script, [], { ...x.env, GT_CURL_API_FAIL: '1', GT_CURL_HEAD_PARTIAL: '1' });
     assert.equal(r.status, 1, `stdout: ${r.stdout} stderr: ${r.stderr}`);
+    assert.ok(r.stderr.includes('could not determine the latest release'), `stderr: ${r.stderr}`);
+    assert.equal(installedVersion(x.home), '1.2.0');
+    assert.equal(downloadedVersion(x.stublog), null);
+});
+
+// issue 14 on the wget path: url_get uses wget when curl is unavailable, and
+// the same transfer-status gate has to hold there. Runs on a PATH that has no
+// curl at all, so wget is provably the downloader.
+test('wget-only host: a successful answer installs', () => {
+    const { x, script } = setup('update-wget-ok', '1.2.0');
+    const r = runScript(script, [], { ...x.env, PATH: makeWgetOnlyBin(x.dir) });
+    assert.equal(r.status, 0, `stdout: ${r.stdout} stderr: ${r.stderr}`);
+    assert.ok(fs.readFileSync(x.stublog, 'utf8').includes('wget https://api.github.com/'),
+        'wget must have fetched the release');
+    assert.equal(installedVersion(x.home), LATEST);
+    assert.equal(downloadedVersion(x.stublog), LATEST);
+});
+
+test('wget-only host: a parsable partial answer is discarded and the run aborts untouched', () => {
+    const { x, script } = setup('update-wget-partial', '1.2.0');
+    const r = runScript(script, [], {
+        ...x.env,
+        PATH: makeWgetOnlyBin(x.dir),
+        GT_CURL_API_PARTIAL: '1',
+    });
+    assert.equal(r.status, 1, `stdout: ${r.stdout} stderr: ${r.stderr}`);
+    assert.ok(fs.readFileSync(x.stublog, 'utf8').includes('wget https://api.github.com/'),
+        'wget must have fetched the release answer, so the abort proves the discarded answer');
     assert.ok(r.stderr.includes('could not determine the latest release'), `stderr: ${r.stderr}`);
     assert.equal(installedVersion(x.home), '1.2.0');
     assert.equal(downloadedVersion(x.stublog), null);
