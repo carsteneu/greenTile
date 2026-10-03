@@ -168,49 +168,54 @@ for mofile in "$STAGE"/locale/*/LC_MESSAGES/*.mo; do
         echo "Note: $modest exists and is not a plain file — the $lang translation was left untouched; the extension falls back to English if no usable catalogue is found there." >&2
         continue
     fi
-    # None of the above is atomic, so the exchange itself is a fail-closed
-    # transaction inside $localedir: stage the catalogue as a hidden sibling,
-    # capture the current occupant by rename (a rename never deletes it), put
-    # the new name in place with ln -T (which never clobbers and never nests
-    # into a directory), and only then discard a captured plain file. Anything
-    # that appears mid-flight makes the create fail or is handed straight
-    # back, and is reported with the concrete path. Residual: a kill inside
-    # the window leaves the hidden names behind (nothing is ever deleted) —
-    # same acknowledged class as the staging dir above.
+    # The exchange never moves, renames over or deletes anything that is not
+    # ours. Both working names are pid-derived, so a killed run can leave an
+    # object under one; they are therefore taken with ln, which fails
+    # atomically when a name is already taken — a leftover there is preserved
+    # and reported instead of being overwritten. Publishing and every restore
+    # also use ln -T, which fails on any existing name and never nests into a
+    # directory, and the installed catalogue leaves the path only while it is
+    # still provably the very file that was captured.
     staged="$localedir/.$UUID.$$.new"
     old="$localedir/.$UUID.$$.old"
     replaced=''
-    if ! mv -T "$mofile" "$staged"; then
-        # a failed cross-device copy leaves our own partial file behind, so
-        # remove it; a non-regular object under that hidden name is not ours
-        # and is left alone
-        if [ -f "$staged" ] && [ ! -L "$staged" ]; then
-            rm -f "$staged"
+    if ! ln -T "$mofile" "$staged" 2>/dev/null; then
+        # ln cannot cross filesystems; claim the name without clobbering
+        # instead (noclobber opens with O_EXCL) and fill it by copy
+        if ! ( set -C; : >"$staged" ) 2>/dev/null; then
+            echo "Note: could not install the $lang translation — the working name $staged is already taken and was left alone; the extension falls back to English if no usable catalogue is found there." >&2
+            continue
         fi
-        echo "Note: could not install the $lang translation — any catalogue already at $modest is kept; the extension falls back to English if no usable catalogue is found there." >&2
-        continue
+        if ! cat "$mofile" >"$staged" 2>/dev/null; then
+            rm -f "$staged"
+            echo "Note: could not install the $lang translation — the catalogue could not be staged at $staged; the extension falls back to English if no usable catalogue is found there." >&2
+            continue
+        fi
     fi
+    rm -f "$mofile"
     if [ -e "$modest" ] || [ -L "$modest" ]; then
-        if ! mv -T "$modest" "$old"; then
-            echo "Note: could not replace $modest — the $lang translation was not installed; the extension falls back to English if no usable catalogue is found there." >&2
+        # capture the occupant under an exclusively taken name; it is not moved
+        # out of the path yet, so a refusal leaves it exactly where it is
+        if ! ln -T "$modest" "$old" 2>/dev/null; then
+            echo "Note: could not install the $lang translation — the object at $modest could not be captured under $old and was left untouched; the extension falls back to English if no usable catalogue is found there." >&2
             rm -f "$staged"
             continue
         fi
         if [ ! -f "$old" ] || [ -L "$old" ]; then
-            # Not a plain catalogue: hand it back with the same non-clobbering
-            # primitive used to publish — ln fails atomically when the name is
-            # taken, so an object that appeared meanwhile always wins and is
-            # never overwritten.
-            if ln -T "$old" "$modest" 2>/dev/null; then
-                rm -f "$old"
-                echo "Note: $modest is not a plain file and was left untouched — the $lang translation was not installed; the extension falls back to English if no usable catalogue is found there." >&2
-            else
-                echo "Note: $modest was not a plain file and is preserved at $old — the $lang translation was not installed; the extension falls back to English if no usable catalogue is found there." >&2
-            fi
+            # a link or a directory: never moved, so it stays where the user
+            # put it, and our own link is dropped
+            rm -f "$old"
+            echo "Note: $modest exists and is not a plain file — the $lang translation was left untouched; the extension falls back to English if no usable catalogue is found there." >&2
+            rm -f "$staged"
+            continue
+        fi
+        if [ "$(stat -c %i -- "$modest" 2>/dev/null)" != "$(stat -c %i -- "$old" 2>/dev/null)" ]; then
+            echo "Note: $modest changed while it was being read — the $lang translation was not installed; the object there is left untouched and the previous catalogue is preserved at $old." >&2
             rm -f "$staged"
             continue
         fi
         replaced="$old"
+        rm -f "$modest"
     fi
     if ! ln -T "$staged" "$modest"; then
         # the create failed (no hard-link support, a racing object, …): the

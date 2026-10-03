@@ -379,7 +379,7 @@ test('a symlink that appears in the window is preserved, its referent untouched,
     assert.ok(noteNaming(r, target), `the warning must name the destination: ${r.stderr}`);
 });
 
-test('a symlink appearing after a plain file was captured is handed back, not consumed', () => {
+test('a symlink appearing after a plain file was captured stays where it is', () => {
     const x = makeInstallEnv('install-mo-race-aside');
     makeSource(x);
     const target = moPath(x.home, 'de');
@@ -448,7 +448,7 @@ exec "${real}" "$@"
 const leftoversUnder = (target) => fs.readdirSync(path.dirname(target))
     .filter((e) => e.startsWith(`.${UUID}.`));
 
-test('a create failure must not clobber a link that appeared, and must keep the captured catalogue', () => {
+test('a link that appears before the create is never overwritten', () => {
     const x = makeInstallEnv('install-mo-restore-boundary');
     makeSource(x);
     const target = moPath(x.home, 'de');
@@ -456,8 +456,8 @@ test('a create failure must not clobber a link that appeared, and must keep the 
     write(referent, 'appeared bytes\n');
     write(target, 'previous catalogue\n'); // a plain file: passes the up-front check
     // the first attempt to put the catalogue at $modest finds a link already
-    // there (the wrapper creates it, the real tool then refuses). The restore
-    // that follows must not overwrite that link.
+    // there (the wrapper creates it, the real tool then refuses); nothing the
+    // installer does afterwards may overwrite that link
     wrapTools(x, `case "$last" in
     "\${GT_TARGET:?}")
         if [ ! -e "\${GT_RACE_ONCE:?}" ]; then
@@ -470,32 +470,25 @@ esac`);
     const r = runInstall(x);
     assert.equal(r.status, 0, `stderr: ${r.stderr}`);
     assert.ok(raceFired(x), 'the simulated collision must have fired');
-    assert.ok(fs.lstatSync(target).isSymbolicLink(), 'the link that appeared must survive the restore');
+    assert.ok(fs.lstatSync(target).isSymbolicLink(), 'the link that appeared must survive');
     assert.equal(fs.readFileSync(referent, 'utf8'), 'appeared bytes\n', 'the link referent must be untouched');
     assert.ok(noteNaming(r, target), `the warning must name the destination: ${r.stderr}`);
-    const kept = leftoversUnder(target);
-    assert.equal(kept.length, 1, `the captured catalogue must be kept, found: ${kept.join(', ') || 'nothing'}`);
-    assert.equal(fs.readFileSync(path.join(path.dirname(target), kept[0]), 'utf8'), 'previous catalogue\n',
-        'the kept object must be the captured catalogue itself');
+    assert.deepEqual(leftoversUnder(target).filter((e) => e.endsWith('.new')), [],
+        'no staging file may be left behind');
 });
 
-test('a give-back must not clobber a second link that appeared', () => {
-    const x = makeInstallEnv('install-mo-giveback-boundary');
+test('a link that appears while the occupant is captured stays in place', () => {
+    const x = makeInstallEnv('install-mo-capture-link');
     makeSource(x);
     const target = moPath(x.home, 'de');
     const captured = path.join(x.dir, 'captured.mo');
-    const collision = path.join(x.dir, 'collision.mo');
     write(captured, 'captured bytes\n');
-    write(collision, 'collision bytes\n');
     write(target, 'placeholder\n'); // a plain file: passes the up-front check
-    // while the occupant is captured it becomes a link (so it is not a plain
-    // catalogue and has to be handed back); before that give-back a second
-    // link appears at the path, which the give-back must not overwrite.
-    wrapTools(x, `prev="\${@: -2:1}"
-case "$last" in
+    // the occupant turns into a link while it is being captured, so it is not
+    // a plain catalogue: it must stay exactly where the user put it, and
+    // nothing of ours may take its place
+    wrapTools(x, `case "$last" in
     *"\${GT_UUID:?}".*.old)
-        # the occupant of the target is what gets captured: make it a link, so
-        # it is not a plain catalogue and has to be handed back
         case " $* " in
             *" \${GT_TARGET:?} "*)
                 rm -f "\${GT_TARGET:?}"
@@ -503,63 +496,66 @@ case "$last" in
                 ;;
         esac
         ;;
-    "\${GT_TARGET:?}")
-        # the give-back is the call whose source is the captured object
-        case "$prev" in
-            *"\${GT_UUID:?}".*.old)
-                if [ ! -e "\${GT_RACE_ONCE:?}" ]; then
-                    touch "\${GT_RACE_ONCE}"
-                    ln -s "\${GT_COLLISION:?}" "\${GT_TARGET:?}"
-                fi
-                ;;
-        esac
-        ;;
 esac`);
     x.env.GT_CAPTURED = captured;
-    x.env.GT_COLLISION = collision;
     const r = runInstall(x);
     assert.equal(r.status, 0, `stderr: ${r.stderr}`);
-    assert.ok(raceFired(x), 'the simulated collision must have fired');
-    // both objects are links, so survival is only provable by WHICH link is
-    // at the path: a give-back that overwrites would leave the captured one
-    assert.equal(fs.readlinkSync(target), collision, 'the second link must survive the give-back');
-    assert.equal(fs.readFileSync(collision, 'utf8'), 'collision bytes\n', 'the second link referent must be untouched');
+    assert.ok(fs.existsSync(x.env.GT_RACE_SEEN), 'the wrapper must have reached the real tool');
+    assert.equal(fs.readlinkSync(target), captured, 'the link must stay exactly where it is');
+    assert.equal(fs.readFileSync(captured, 'utf8'), 'captured bytes\n', 'its referent must be untouched');
     assert.ok(noteNaming(r, target), `the warning must name the destination: ${r.stderr}`);
-    const kept = leftoversUnder(target);
-    assert.equal(kept.length, 1, `the captured link must be kept, found: ${kept.join(', ') || 'nothing'}`);
-    assert.equal(fs.readlinkSync(path.join(path.dirname(target), kept[0])), captured,
-        'the kept object must be the captured link');
-    assert.equal(fs.readFileSync(path.join(path.dirname(target), kept[0]), 'utf8'), 'captured bytes\n',
-        'the kept link must still resolve to the captured catalogue');
+    assert.deepEqual(leftoversUnder(target), [], 'nothing of ours may be left behind');
 });
 
-test('a failed stage removes only our own partial file', () => {
-    const x = makeInstallEnv('install-mo-stage-partial');
+test('a leftover object at the staging name is preserved, never overwritten', () => {
+    const x = makeInstallEnv('install-mo-stale-stage');
     makeSource(x);
     const target = moPath(x.home, 'de');
-    // a cross-device or out-of-space move can leave a partial copy of the
-    // catalogue at the hidden staging name; it is ours and must not survive
+    // these working names are pid-derived, so a killed run can leave something
+    // under one; the installer must never overwrite it
     wrapTools(x, `case "$last" in
     *"\${GT_UUID:?}".*.new)
-        printf 'partial' > "$last"
-        echo "mv: simulated transfer failure" >&2
-        exit 1
+        printf 'leftover' > "$last"
         ;;
 esac`);
     const r = runInstall(x);
     assert.equal(r.status, 0, `stderr: ${r.stderr}`);
-    assert.ok(fs.existsSync(x.env.GT_RACE_SEEN), 'the simulated stage failure must have fired');
-    assert.deepEqual(leftoversUnder(target), [], 'our own partial staging file must be removed');
+    assert.ok(fs.existsSync(x.env.GT_RACE_SEEN), 'the wrapper must have reached the real tool');
+    const stale = leftoversUnder(target).filter((e) => e.endsWith('.new'));
+    assert.equal(stale.length, 1, `the leftover must be kept: ${JSON.stringify(leftoversUnder(target))}`);
+    assert.equal(fs.readFileSync(path.join(path.dirname(target), stale[0]), 'utf8'), 'leftover',
+        'the leftover must be byte-identical');
+    assert.ok(!fs.existsSync(target), 'nothing may be published over a taken working name');
 });
 
-test('a directory captured mid-flight is preserved and reported, never nested', () => {
+test('a leftover object at the backup name is preserved, never overwritten', () => {
+    const x = makeInstallEnv('install-mo-stale-backup');
+    makeSource(x);
+    const target = moPath(x.home, 'de');
+    write(target, 'previous catalogue\n'); // a plain file: passes the up-front check
+    wrapTools(x, `case "$last" in
+    *"\${GT_UUID:?}".*.old)
+        printf 'leftover' > "$last"
+        ;;
+esac`);
+    const r = runInstall(x);
+    assert.equal(r.status, 0, `stderr: ${r.stderr}`);
+    assert.ok(fs.existsSync(x.env.GT_RACE_SEEN), 'the wrapper must have reached the real tool');
+    const stale = leftoversUnder(target).filter((e) => e.endsWith('.old'));
+    assert.equal(stale.length, 1, `the leftover must be kept: ${JSON.stringify(leftoversUnder(target))}`);
+    assert.equal(fs.readFileSync(path.join(path.dirname(target), stale[0]), 'utf8'), 'leftover',
+        'the leftover must be byte-identical');
+    assert.equal(fs.readFileSync(target, 'utf8'), 'previous catalogue\n',
+        'the installed catalogue must stay in place');
+});
+
+test('a directory captured mid-flight stays in place, never nested', () => {
     const x = makeInstallEnv('install-mo-capture-dir');
     makeSource(x);
     const target = moPath(x.home, 'de');
     write(target, 'previous catalogue\n'); // a plain file: passes the up-front check
     // the occupant turns into a directory while it is being captured, so it is
-    // not a plain catalogue: the give-back must neither nest into it nor
-    // replace it with a plain file
+    // not a plain catalogue: it must neither be nested into nor replaced
     wrapTools(x, `case "$last" in
     *"\${GT_UUID:?}".*.old)
         case " $* " in
@@ -574,11 +570,9 @@ esac`);
     const r = runInstall(x);
     assert.equal(r.status, 0, `stderr: ${r.stderr}`);
     assert.ok(fs.existsSync(x.env.GT_RACE_SEEN), 'the simulated capture race must have fired');
-    assert.ok(!fs.existsSync(target), 'nothing may be left, nested or created at the path');
-    const kept = leftoversUnder(target);
-    assert.equal(kept.length, 1, `the captured directory must be kept, found: ${kept.join(', ') || 'nothing'}`);
-    assert.equal(fs.readFileSync(path.join(path.dirname(target), kept[0], 'keep.txt'), 'utf8'), 'user file',
-        'the captured directory content must be intact');
+    assert.ok(fs.statSync(target).isDirectory(), 'the directory must stay exactly where it is');
+    assert.deepEqual(fs.readdirSync(target), ['keep.txt'], 'the directory content must be intact');
+    assert.deepEqual(leftoversUnder(target), [], 'nothing of ours may be left behind');
     assert.ok(noteNaming(r, target), `the warning must name the destination: ${r.stderr}`);
 });
 
