@@ -690,3 +690,35 @@ function findActor(root, styleRe) {
     };
     return visit(root);
 }
+
+test('item 4/F3c: a preset-row click supersedes a retained pause even when auto is already on', () => {
+    const { env, ext } = makeEnv({ layouts: '{invalid', windowGap: 48 });
+    const ws0 = makeWorkspace(null, 1, 0);
+    ws0.list_windows = () => env.tabList;
+    env.workspaces.push(ws0);
+    env.activeWorkspace = ws0;
+    const a = makeWindow(env, 811, [50, 70, 320, 200]);
+    const b = makeWindow(env, 812, [450, 70, 320, 200]);
+    env.tabList.push(a, b);
+    env.display.focus_window = a;
+    env.layoutManager.monitors.push(MONITOR);
+    ext.enable();
+    autoOf(env, 'greenTile-autoOff');    // refused → retained
+    env.flushDisplayConfigNoReply();
+    const app = ext.currentSession().app;
+    app.ops.presetsWrite(app, [{ id: 'p', name: 'p', rules: [{ min: 2, stacks: [1, 1] }] }]);
+    const ref = app.split.ref(app, 0, 0, 2);
+    // the repair carries auto TRUE: the stored state already says on, so the row
+    // click's auto branch is skipped and only its own (preset) write can supersede
+    env.settingsWriteFile('greenTile@carsteneu', 'layouts', JSON.stringify({ [ref.mkey]: { [ref.wskey]: { auto: true, preset: 'p' } } }));
+    settingsInstance(env).remoteUpdate();
+    assert.equal(app.session.holdsPause(app, 0, 0), true, 'the retained pause still gates automatic placement');
+    autoOf(env, 'greenTile-preset');
+    const row = findActor(app.panel.actor, /^gk-row(?: |$)/);
+    assert.ok(row, 'the preset row is in the panel');
+    row.emit('clicked');
+    assert.equal(app.session.holdsPause(app, 0, 0), false, 'the click superseded the retained pause');
+    assert.equal(app.session.pendingAuto.length, 0);
+    assert.ok(a.moves.length + b.moves.length > 0, 'and it actually tiles');
+    ext.disable();
+});
