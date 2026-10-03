@@ -407,3 +407,38 @@ test('issue 11: the columns hotkey gives a focused app-less window no column', (
     assert.equal(w1.rect[0], 0, 'the first admissible window starts at column 0');
     assert.ok(w2.rect[0] > w1.rect[0], 'the second admissible window sits to its right');
 });
+
+test('issue 11: the focus fallback routes to the first admissible tab-list entry', () => {
+    const { env, ext } = makeEnv({ windowGap: 0 });
+    enableOnMonitors(env, ext, [LEFT, RIGHT]);
+    activeWorkspace(env);
+    // the dialog is the first tab-list entry on the other monitor: an unfiltered
+    // fallback would resolve it and retile its (empty) monitor
+    const dialog = makeWindow(env, 1, [0, 0, 300, 300], 0, null, { windowType: env.gi.Meta.WindowType.DIALOG });
+    const w1 = makeWindow(env, 2, [2000, 0, 400, 300], 1);
+    const w2 = makeWindow(env, 3, [2500, 0, 400, 300], 1);
+    env.tabList.push(dialog, w1, w2);
+    env.display.focus_window = dialog;
+    const app = ext.currentSession().app;
+    app.auto.activate(app);
+    assert.deepEqual(w1.rect, [2000, 0, 1000, 1100], 'the admissible fallback window tiled its own monitor');
+    assert.deepEqual(w2.rect, [3000, 0, 1000, 1100], 'the second admissible window filled the next cell');
+    assert.deepEqual(dialog.rect, [0, 0, 300, 300], 'the dialog itself stayed untouched');
+});
+
+test('issue 11: the panel window count follows the same admissibility as the retile', () => {
+    const { env, ext } = makeEnv({ windowGap: 0 });
+    enableOnMonitor(env, ext);
+    activeWorkspace(env);
+    const orphan = makeWindow(env, 1, [0, 0, 300, 300], 0, null, { noApp: true });
+    const w1 = makeWindow(env, 2, [400, 0, 400, 300], 0);
+    const w2 = makeWindow(env, 3, [900, 0, 400, 300], 0);
+    env.tabList.push(orphan, w1, w2);
+    env.display.focus_window = orphan;
+    const app = ext.currentSession().app;
+    app.ops.layoutSet(app, 0, 0, { auto: true });
+    assert.equal(app.ops.windowCount(app), 2, 'the inadmissible focus is not counted');
+    app.auto.activate(app);
+    assert.deepEqual(w1.rect, [0, 0, 1000, 1100], 'the retile placed exactly the two admissible windows');
+    assert.deepEqual(w2.rect, [1000, 0, 1000, 1100]);
+});
