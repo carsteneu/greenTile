@@ -181,6 +181,11 @@ for mofile in "$STAGE"/locale/*/LC_MESSAGES/*.mo; do
     old="$localedir/.$UUID.$$.old"
     replaced=''
     if ! mv -T "$mofile" "$staged"; then
+        # a failed cross-device copy leaves our own partial file behind; a
+        # stale object under that hidden name is not ours and is left alone
+        if [ -f "$staged" ] && [ ! -L "$staged" ]; then
+            rm -f "$staged"
+        fi
         echo "Note: could not install the $lang translation — any catalogue already at $modest is kept; the extension falls back to English if no usable catalogue is found there." >&2
         continue
     fi
@@ -191,8 +196,12 @@ for mofile in "$STAGE"/locale/*/LC_MESSAGES/*.mo; do
             continue
         fi
         if [ ! -f "$old" ] || [ -L "$old" ]; then
-            # not a plain catalogue: hand it straight back and refuse
-            if { [ ! -e "$modest" ] && [ ! -L "$modest" ]; } && mv -T "$old" "$modest" 2>/dev/null; then
+            # Not a plain catalogue: hand it back with the same non-clobbering
+            # primitive used to publish — ln fails atomically when the name is
+            # taken, so an object that appeared meanwhile always wins and is
+            # never overwritten.
+            if ln -T "$old" "$modest" 2>/dev/null; then
+                rm -f "$old"
                 echo "Note: $modest is not a plain file and was left untouched — the $lang translation was not installed; the extension falls back to English if no usable catalogue is found there." >&2
             else
                 echo "Note: $modest was not a plain file and is preserved at $old — the $lang translation was not installed; the extension falls back to English if no usable catalogue is found there." >&2
@@ -203,9 +212,11 @@ for mofile in "$STAGE"/locale/*/LC_MESSAGES/*.mo; do
         replaced="$old"
     fi
     if ! ln -T "$staged" "$modest"; then
-        # the create failed (no hard-link support, a racing link, …): the
-        # previous catalogue must not be lost, so put it back
-        if [ -n "$replaced" ] && mv -T "$replaced" "$modest" 2>/dev/null; then
+        # the create failed (no hard-link support, a racing object, …): the
+        # previous catalogue must never be lost, and putting it back must not
+        # overwrite whatever took the name meanwhile
+        if [ -n "$replaced" ] && ln -T "$replaced" "$modest" 2>/dev/null; then
+            rm -f "$replaced"
             echo "Note: could not install the $lang translation — the previous catalogue was left in place at $modest; the extension falls back to English if no usable catalogue is found there." >&2
         elif [ -n "$replaced" ]; then
             echo "Note: could not install the $lang translation — the previous catalogue is preserved at $replaced; the extension falls back to English if no usable catalogue is found at $modest." >&2
