@@ -152,12 +152,26 @@ DATA_DIR="${XDG_DATA_HOME:-$HOME/.local/share}"
 for mofile in "$STAGE"/locale/*/LC_MESSAGES/*.mo; do
     [ -e "$mofile" ] || continue
     lang=$(basename "$(dirname "$(dirname "$mofile")")")
+    modest="$DATA_DIR/locale/$lang/LC_MESSAGES/$UUID.mo"
     # same failure class as the mv below: report, keep going
     if ! mkdir -p "$DATA_DIR/locale/$lang/LC_MESSAGES"; then
         echo "Note: could not install the $lang translation — the extension works without it (English)." >&2
         continue
     fi
-    if ! mv "$mofile" "$DATA_DIR/locale/$lang/LC_MESSAGES/$UUID.mo"; then
+    # Only a plain file is a catalogue we may replace. A directory — or a
+    # symlink to one — would make a plain mv move the catalogue *inside* it
+    # and still exit 0, leaving the path the loader reads as a directory: a
+    # silent false success. Never delete what the user put there; name the
+    # concrete path and keep the English fallback instead.
+    if { [ -e "$modest" ] || [ -L "$modest" ]; } &&
+        { [ ! -f "$modest" ] || [ -L "$modest" ]; }; then
+        echo "Note: $modest exists and is not a plain file — the $lang translation was not installed; the extension works without it (English)." >&2
+        continue
+    fi
+    # -T: the destination is a name, never a container, so anything that
+    # appears between the check above and the move fails the rename instead
+    # of nesting the catalogue inside it.
+    if ! mv -T "$mofile" "$modest"; then
         echo "Note: could not install the $lang translation — the extension works without it (English)." >&2
     fi
 done

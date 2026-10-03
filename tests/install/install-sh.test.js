@@ -252,3 +252,67 @@ test('update with failed restore: backup is kept for manual recovery', () => {
     assert.equal(fs.readFileSync(path.join(parent, kept[0], 'old', 'lib', 'old.js'), 'utf8').trim(), 'var old = 1;', 'old lib module lost from the backup');
     assert.ok(fs.readFileSync(path.join(parent, kept[0], 'old', 'extension.js'), 'utf8').includes('OLD extension'), 'old extension lost from the backup');
 });
+
+// issue 15: the catalogue path must be a plain file. Anything else (a
+// directory, or a symlink to one) would make a plain mv move the catalogue
+// INSIDE that target and still report success, leaving the path the loader
+// reads as a directory. These cases must be refused, named, and never deleted.
+const GMO_MAGIC = 0x950412de; // native-endian .mo magic, the first 4 bytes
+
+test('a directory at the .mo path is refused with a named warning and kept intact', () => {
+    const x = makeInstallEnv('install-mo-dir');
+    makeSource(x);
+    const target = moPath(x.home, 'de');
+    mkdir(target);
+    write(path.join(target, 'user-owned.txt'), 'keep me\n');
+    const r = runInstall(x);
+    assert.equal(r.status, 0, `stderr: ${r.stderr}`);
+    assert.ok(fs.statSync(target).isDirectory(), 'the user directory must stay a directory, not be replaced');
+    assert.deepEqual(fs.readdirSync(target), ['user-owned.txt'], 'the catalogue must not be nested inside the directory');
+    assert.ok(r.stderr.includes(target), `the warning must name the destination: ${r.stderr}`);
+    assert.ok(r.stderr.includes('English'), `the warning must state the English limitation: ${r.stderr}`);
+});
+
+test('a symlink to a directory at the .mo path is refused, symlink and target stay untouched', () => {
+    const x = makeInstallEnv('install-mo-link-dir');
+    makeSource(x);
+    const target = moPath(x.home, 'de');
+    const realDir = path.join(x.dir, 'user-locale-dir');
+    mkdir(realDir);
+    mkdir(path.dirname(target));
+    fs.symlinkSync(realDir, target);
+    const r = runInstall(x);
+    assert.equal(r.status, 0, `stderr: ${r.stderr}`);
+    assert.ok(fs.lstatSync(target).isSymbolicLink(), 'the user symlink must not be replaced');
+    assert.deepEqual(fs.readdirSync(realDir), [], 'the catalogue must not be nested in the link target');
+    assert.ok(r.stderr.includes(target), `the warning must name the destination: ${r.stderr}`);
+});
+
+test('a symlink to a file at the .mo path is refused, symlink and target stay untouched', () => {
+    const x = makeInstallEnv('install-mo-link-file');
+    makeSource(x);
+    const target = moPath(x.home, 'de');
+    const realFile = path.join(x.dir, 'user.mo');
+    write(realFile, 'not a catalogue\n');
+    mkdir(path.dirname(target));
+    fs.symlinkSync(realFile, target);
+    const r = runInstall(x);
+    assert.equal(r.status, 0, `stderr: ${r.stderr}`);
+    assert.ok(fs.lstatSync(target).isSymbolicLink(), 'the user symlink must not be replaced');
+    assert.equal(fs.readFileSync(realFile, 'utf8'), 'not a catalogue\n', 'the link target must be untouched');
+    assert.ok(r.stderr.includes(target), `the warning must name the destination: ${r.stderr}`);
+});
+
+test('a regular .mo file at the path is replaced with a valid compiled catalogue', () => {
+    const x = makeInstallEnv('install-mo-file');
+    makeSource(x);
+    const target = moPath(x.home, 'de');
+    write(target, 'stale catalogue\n');
+    const r = runInstall(x);
+    assert.equal(r.status, 0, `stderr: ${r.stderr}`);
+    const stat = fs.lstatSync(target);
+    assert.ok(stat.isFile() && !stat.isSymbolicLink(), 'the path must hold a plain file');
+    const buf = fs.readFileSync(target);
+    assert.equal(buf.readUInt32LE(0), GMO_MAGIC, 'the replaced file must be real msgfmt output');
+    assert.ok(!buf.toString('latin1').includes('stale catalogue'), 'the stale content must be gone');
+});
