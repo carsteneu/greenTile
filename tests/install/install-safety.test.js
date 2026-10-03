@@ -109,6 +109,25 @@ case "\${GT_MODE:-none}" in
                 ;;
         esac
         ;;
+    mismatch-kept)
+        # this run's move picks up a competitor's tree (ours was already moved
+        # away by it), and a third tree appears at DEST so the give-back fails
+        case "$dst" in
+            */.greenTile-install.*/old)
+                "$GT_REAL_MV" -T "$GT_DEST" "$GT_DEST.previous" || exit 3
+                mkdir -p "$GT_DEST"
+                printf '{"version": "competitor"}\\\\n' > "$GT_DEST/metadata.json"
+                printf 'competitor\\\\n' > "$GT_DEST/competitor-only"
+                ;;
+        esac
+        case "$src" in
+            */.greenTile-install.*/old)
+                mkdir -p "$GT_DEST"
+                printf '{"version": "third"}\\\\n' > "$GT_DEST/metadata.json"
+                printf 'third\\\\n' > "$GT_DEST/third-only"
+                ;;
+        esac
+        ;;
     killed)
         "$GT_REAL_MV" "$@"
         if [ "$src" = "$GT_DEST" ]; then kill -KILL "$PPID"; fi
@@ -353,6 +372,29 @@ test('a tree published between the check and the move is given back, not updated
     assert.deepEqual(treeFingerprint(destOf(x) + '.previous'), before, 'the previous installation lost bytes');
     assert.ok(!r.stdout.includes('installed to'), 'nothing was installed, so nothing may be announced');
     assert.equal(stages(x).length, 0, `the given-back tree must not keep a stage: ${stages(x).join(', ')}`);
+});
+
+test('a foreign tree that cannot be given back is not reported as the user\'s previous installation', () => {
+    const x = makeEnv('safety-mismatch-kept');
+    useStub(x, 'mismatch-kept');
+    seedOldInstall(x.home);
+    const r = run(x);
+    assert.notEqual(r.status, 0, 'the installer that could not hand the tree back must not report success');
+    assert.ok(!r.stdout.includes('installed to'), 'nothing was installed');
+    // the held tree is reported as what it is (the other installer's) ...
+    assert.ok(r.stderr.includes('its tree is preserved at'), `the held tree must be reported: ${r.stderr}`);
+    // ... and must never be described as this user's previous installation, which
+    // would send them to clobber a third tree
+    assert.ok(!r.stderr.includes('your previous installation is preserved'),
+        `a foreign tree must not be labelled as the user's previous installation: ${r.stderr}`);
+    // the tree that now occupies DEST is left untouched, and the user's real
+    // previous installation is still where the competitor moved it
+    assert.equal(version(destOf(x)), 'third', 'the tree at DEST was modified');
+    assert.ok(fs.existsSync(path.join(destOf(x), 'third-only')), 'the tree at DEST lost files');
+    assert.equal(version(destOf(x) + '.previous'), '1.2.0', 'the user\'s previous installation was destroyed');
+    // the competitor tree that could not be given back is preserved in the stage
+    assert.ok(stages(x).some((s) => fs.existsSync(path.join(s, 'old', 'competitor-only'))),
+        'the tree that could not be given back was not preserved');
 });
 
 test('a competing installer publishes DEST before the swap: no nesting, no false success', () => {

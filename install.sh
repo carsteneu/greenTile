@@ -118,7 +118,10 @@ if [ -e "$DEST" ] || [ -L "$DEST" ]; then
         if mv -T "$BACKUP" "$DEST" 2>/dev/null; then
             echo "install.sh: another install.sh published to $DEST while this one was preparing — aborting, its installation is back in place." >&2
         else
+            # $BACKUP is that other tree, not this user's previous installation:
+            # keep the stage and stop the EXIT trap from reporting it as ours.
             echo "install.sh: another install.sh published to $DEST while this one was preparing — aborting, its tree is preserved at $BACKUP." >&2
+            STAGE=""
         fi
         exit 1
     fi
