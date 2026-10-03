@@ -316,3 +316,25 @@ test('a regular .mo file at the path is replaced with a valid compiled catalogue
     assert.equal(buf.readUInt32LE(0), GMO_MAGIC, 'the replaced file must be real msgfmt output');
     assert.ok(!buf.toString('latin1').includes('stale catalogue'), 'the stale content must be gone');
 });
+
+test('a directory that appears after the type check fails the swap instead of nesting', () => {
+    const x = makeInstallEnv('install-mo-race');
+    makeSource(x);
+    const target = moPath(x.home, 'de');
+    // wrap mv so that a concurrent actor creates the destination as a
+    // directory in the window between the check and the rename: mv -T must
+    // fail (reported) rather than move the catalogue inside it
+    write(path.join(x.bin, 'mv'), `#!/usr/bin/env bash
+if [ "\${1:-}" = "-T" ] && [ "\${@: -1}" = "\${GT_RACE_MO:?}" ]; then
+    mkdir -p "\${GT_RACE_MO}"
+fi
+exec "\${GT_REAL_MV:?}" "$@"
+`);
+    fs.chmodSync(path.join(x.bin, 'mv'), 0o755);
+    x.env.GT_RACE_MO = target;
+    const r = runInstall(x);
+    assert.equal(r.status, 0, `stderr: ${r.stderr}`);
+    assert.ok(fs.statSync(target).isDirectory(), 'the racing directory must not be replaced');
+    assert.deepEqual(fs.readdirSync(target), [], 'the catalogue must not be nested in the racing directory');
+    assert.ok(r.stderr.includes('could not install the de translation'), `the failed swap must be reported: ${r.stderr}`);
+});
