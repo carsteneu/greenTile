@@ -170,16 +170,18 @@ for mofile in "$STAGE"/locale/*/LC_MESSAGES/*.mo; do
     fi
     # None of the above is atomic, so the exchange itself is a fail-closed
     # transaction inside $localedir: stage the catalogue as a hidden sibling,
-    # capture the current occupant by rename (a rename never deletes it),
-    # replace only a plain file, and create the final name with ln, which
-    # never clobbers. Anything that appears mid-flight — a link, a directory —
-    # makes the final ln fail or is handed straight back, and is reported; the
-    # path is never silently taken over. ln -T treats the destination as a
-    # name, never a container (plain ln would nest into a directory).
+    # capture the current occupant by rename (a rename never deletes it), put
+    # the new name in place with ln -T (which never clobbers and never nests
+    # into a directory), and only then discard a captured plain file. Anything
+    # that appears mid-flight makes the create fail or is handed straight
+    # back, and is reported with the concrete path. Residual: a kill inside
+    # the window leaves the hidden names behind (nothing is ever deleted) —
+    # same acknowledged class as the staging dir above.
     staged="$localedir/.$UUID.$$.new"
     old="$localedir/.$UUID.$$.old"
-    if ! mv "$mofile" "$staged"; then
-        echo "Note: could not install the $lang translation — the extension works without it (English)." >&2
+    replaced=''
+    if ! mv -T "$mofile" "$staged"; then
+        echo "Note: could not install the $lang translation — any catalogue already at $modest is kept; the extension falls back to English if no usable catalogue is found there." >&2
         continue
     fi
     if [ -e "$modest" ] || [ -L "$modest" ]; then
@@ -190,22 +192,33 @@ for mofile in "$STAGE"/locale/*/LC_MESSAGES/*.mo; do
         fi
         if [ ! -f "$old" ] || [ -L "$old" ]; then
             # not a plain catalogue: hand it straight back and refuse
-            if mv -T "$old" "$modest" 2>/dev/null; then
-                echo "Note: $modest exists and is not a plain file — the $lang translation was left untouched; the extension falls back to English if no usable catalogue is found there." >&2
+            if { [ ! -e "$modest" ] && [ ! -L "$modest" ]; } && mv -T "$old" "$modest" 2>/dev/null; then
+                echo "Note: $modest is not a plain file and was left untouched — the $lang translation was not installed; the extension falls back to English if no usable catalogue is found there." >&2
             else
-                echo "Note: $modest is not a plain file and is preserved at $old — the $lang translation was not installed; the extension falls back to English if no usable catalogue is found there." >&2
+                echo "Note: $modest was not a plain file and is preserved at $old — the $lang translation was not installed; the extension falls back to English if no usable catalogue is found there." >&2
             fi
             rm -f "$staged"
             continue
         fi
-        rm -f "$old"
+        replaced="$old"
     fi
     if ! ln -T "$staged" "$modest"; then
-        echo "Note: could not install the $lang translation — $modest appeared in the meantime and was left untouched; the extension falls back to English if no usable catalogue is found there." >&2
+        # the create failed (no hard-link support, a racing link, …): the
+        # previous catalogue must not be lost, so put it back
+        if [ -n "$replaced" ] && mv -T "$replaced" "$modest" 2>/dev/null; then
+            echo "Note: could not install the $lang translation — the previous catalogue was left in place at $modest; the extension falls back to English if no usable catalogue is found there." >&2
+        elif [ -n "$replaced" ]; then
+            echo "Note: could not install the $lang translation — the previous catalogue is preserved at $replaced; the extension falls back to English if no usable catalogue is found at $modest." >&2
+        else
+            echo "Note: could not install the $lang translation — $modest appeared in the meantime and was left untouched; the extension falls back to English if no usable catalogue is found there." >&2
+        fi
         rm -f "$staged"
         continue
     fi
     rm -f "$staged"
+    if [ -n "$replaced" ]; then
+        rm -f "$replaced"
+    fi
 done
 
 echo "greenTile $UUID installed to $DEST"

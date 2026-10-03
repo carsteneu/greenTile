@@ -348,7 +348,7 @@ exec "${real}" "$@"
     x.env.GT_RACE_SEEN = path.join(x.dir, 'race-seen');
     x.env.GT_RACE_ONCE = path.join(x.dir, 'race-once');
 }
-const raceReached = (x) => fs.existsSync(x.env.GT_RACE_SEEN);
+const raceFired = (x) => fs.existsSync(x.env.GT_RACE_ONCE) && fs.existsSync(x.env.GT_RACE_SEEN);
 
 test('a directory that appears in the window is kept, never nested, and reported', () => {
     const x = makeInstallEnv('install-mo-race-dir');
@@ -357,7 +357,7 @@ test('a directory that appears in the window is kept, never nested, and reported
     raceWrapper(x, target, 'mkdir -p "$GT_RACE_MO"');
     const r = runInstall(x);
     assert.equal(r.status, 0, `stderr: ${r.stderr}`);
-    assert.ok(raceReached(x), 'the simulated race must have fired');
+    assert.ok(raceFired(x), 'the simulated race must have fired');
     assert.ok(fs.statSync(target).isDirectory(), 'the raced-in directory must be preserved');
     assert.deepEqual(fs.readdirSync(target), [], 'the catalogue must not be nested in the raced-in directory');
     assert.ok(noteNaming(r, target), `the warning must name the destination: ${r.stderr}`);
@@ -373,7 +373,7 @@ test('a symlink that appears in the window is preserved, its referent untouched,
     x.env.GT_RACE_LINK = referent;
     const r = runInstall(x);
     assert.equal(r.status, 0, `stderr: ${r.stderr}`);
-    assert.ok(raceReached(x), 'the simulated race must have fired');
+    assert.ok(raceFired(x), 'the simulated race must have fired');
     assert.ok(fs.lstatSync(target).isSymbolicLink(), 'the raced-in symlink must be preserved, not replaced by a regular file');
     assert.equal(fs.readFileSync(referent, 'utf8'), 'user bytes\n', 'the link referent must be untouched');
     assert.ok(noteNaming(r, target), `the warning must name the destination: ${r.stderr}`);
@@ -390,9 +390,32 @@ test('a symlink appearing after a plain file was captured is handed back, not co
     x.env.GT_RACE_LINK = referent;
     const r = runInstall(x);
     assert.equal(r.status, 0, `stderr: ${r.stderr}`);
-    assert.ok(raceReached(x), 'the simulated race must have fired');
+    assert.ok(raceFired(x), 'the simulated race must have fired');
     assert.ok(fs.lstatSync(target).isSymbolicLink(), 'the raced-in symlink must be handed back, not consumed');
     assert.equal(fs.readFileSync(referent, 'utf8'), 'user bytes\n', 'the link referent must be untouched');
     assert.deepEqual(fs.readdirSync(path.dirname(target)), [`${UUID}.mo`], 'no exchange leftovers');
     assert.ok(noteNaming(r, target), `the warning must name the destination: ${r.stderr}`);
+});
+
+test('a failing create keeps the previous catalogue rather than deleting it', () => {
+    const x = makeInstallEnv('install-mo-create-fails');
+    makeSource(x);
+    const target = moPath(x.home, 'de');
+    write(target, 'previous catalogue\n');
+    // the create fails for the reason this fix must survive: no hard links
+    // (a filesystem without them, or any other error), not a racing actor
+    write(path.join(x.bin, 'ln'), `#!/usr/bin/env bash
+case " $* " in
+    *" \${GT_FAIL_MO:?} "*) echo "ln: hard link not supported" >&2; exit 1 ;;
+esac
+exec "\${GT_REAL_LN:?}" "$@"
+`);
+    fs.chmodSync(path.join(x.bin, 'ln'), 0o755);
+    x.env.GT_FAIL_MO = target;
+    const r = runInstall(x);
+    assert.equal(r.status, 0, `stderr: ${r.stderr}`);
+    assert.ok(noteNaming(r, target), `the warning must name the destination: ${r.stderr}`);
+    const survivors = fs.existsSync(target) ? fs.readFileSync(target, 'utf8') : '(missing)';
+    assert.equal(survivors, 'previous catalogue\n', 'the previous catalogue must survive a failed exchange');
+    assert.deepEqual(fs.readdirSync(path.dirname(target)), [`${UUID}.mo`], 'no exchange leftovers');
 });
