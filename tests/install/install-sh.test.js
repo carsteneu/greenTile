@@ -466,6 +466,20 @@ const findPreserved = (target, name) => {
 const leftoversUnder = (target) => fs.readdirSync(path.dirname(target))
     .filter((e) => e.startsWith(`.${UUID}.`));
 
+// every name the exchange left behind, including inside a kept working dir
+const leftoverNames = (target) => {
+    const dir = path.dirname(target);
+    const out = [];
+    for (const entry of leftoversUnder(target)) {
+        const p = path.join(dir, entry);
+        out.push(entry);
+        if (fs.lstatSync(p).isDirectory()) {
+            for (const inner of fs.readdirSync(p)) {out.push(inner);}
+        }
+    }
+    return out;
+};
+
 // the catalogue-ish objects the exchange may have left under the locale dir,
 // whether they sit directly there or inside a working directory we kept
 const preservedUnder = (target) => {
@@ -684,4 +698,76 @@ exit 1
     assert.ok(noteNaming(r, target), `the warning must name the destination: ${r.stderr}`);
     assert.ok(!r.stderr.includes('appeared in the meantime'),
         `nothing appeared, so the note must not blame a racing object: ${r.stderr}`);
+});
+
+test('a refused give-back keeps the preserved object but not our staged file', () => {
+    const x = makeInstallEnv('install-mo-giveback-preserve');
+    makeSource(x);
+    const target = moPath(x.home, 'de');
+    const captured = path.join(x.dir, 'captured.mo');
+    write(captured, 'captured bytes\n');
+    write(target, 'placeholder\n'); // a plain file: passes the up-front check
+    // the occupant turns into a link while it is captured, and every give-back
+    // is refused: the object must be preserved, but the catalogue we staged for
+    // ourselves must not be left lying next to it
+    wrapTools(x, `tool="\${0##*/}"
+case "$last" in
+    *".\${GT_UUID:?}"*/old)
+        case " $* " in
+            *" \${GT_TARGET:?} "*)
+                rm -f "\${GT_TARGET:?}"
+                "\${GT_REAL_LN:?}" -s "\${GT_CAPTURED:?}" "\${GT_TARGET:?}"
+                ;;
+        esac
+        ;;
+    "\${GT_TARGET:?}")
+        if [ "$tool" = ln ]; then exit 1; fi
+        ;;
+esac`);
+    x.env.GT_CAPTURED = captured;
+    const r = runInstall(x);
+    assert.equal(r.status, 0, `stderr: ${r.stderr}`);
+    assert.ok(fs.existsSync(x.env.GT_RACE_SEEN), 'the wrapper must have reached the real tool');
+    assert.ok(leftoverNames(target).includes('old'), `the captured link must be kept: ${JSON.stringify(leftoverNames(target))}`);
+    assert.ok(!leftoverNames(target).includes('new'), `our own staged file must not be left behind: ${JSON.stringify(leftoverNames(target))}`);
+    assert.ok(noteNaming(r, target), `the warning must name the destination: ${r.stderr}`);
+});
+
+test('a refused restore keeps the preserved catalogue but not our staged file', () => {
+    const x = makeInstallEnv('install-mo-restore-preserve');
+    makeSource(x);
+    const target = moPath(x.home, 'de');
+    write(target, 'previous catalogue\n');
+    // every create fails, so the previous catalogue is preserved and reported —
+    // and the catalogue we staged for ourselves must not be left next to it
+    write(path.join(x.bin, 'ln'), `#!/usr/bin/env bash
+echo "ln: hard link not supported" >&2
+exit 1
+`);
+    fs.chmodSync(path.join(x.bin, 'ln'), 0o755);
+    const r = runInstall(x);
+    assert.equal(r.status, 0, `stderr: ${r.stderr}`);
+    assert.ok(leftoverNames(target).includes('old'), `the captured catalogue must be kept: ${JSON.stringify(leftoverNames(target))}`);
+    assert.ok(!leftoverNames(target).includes('new'), `our own staged file must not be left behind: ${JSON.stringify(leftoverNames(target))}`);
+    assert.ok(noteNaming(r, target), `the warning must name the destination: ${r.stderr}`);
+});
+
+test('a staging failure names the catalogue it could not install', () => {
+    const x = makeInstallEnv('install-mo-stage-warn');
+    makeSource(x);
+    const target = moPath(x.home, 'de');
+    write(target, 'previous catalogue\n');
+    write(path.join(x.bin, 'mv'), `#!/usr/bin/env bash
+case "\${@: -1}" in
+    *".\${GT_UUID:?}"*/new) echo "mv: simulated staging failure" >&2; exit 1 ;;
+esac
+exec "\${GT_REAL_MV:?}" "$@"
+`);
+    fs.chmodSync(path.join(x.bin, 'mv'), 0o755);
+    x.env.GT_UUID = UUID;
+    const r = runInstall(x);
+    assert.equal(r.status, 0, `stderr: ${r.stderr}`);
+    assert.ok(noteNaming(r, target), `the warning must name the destination: ${r.stderr}`);
+    assert.equal(fs.readFileSync(target, 'utf8'), 'previous catalogue\n', 'the catalogue must stay untouched');
+    assert.deepEqual(leftoversUnder(target), [], 'nothing may be left behind');
 });

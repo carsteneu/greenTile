@@ -186,7 +186,7 @@ for mofile in "$STAGE"/locale/*/LC_MESSAGES/*.mo; do
     replaced=''
     if ! mv -T "$mofile" "$staged"; then
         rm -rf "$work"
-        echo "Note: could not install the $lang translation — the catalogue could not be staged; the extension falls back to English if no usable catalogue is found there." >&2
+        echo "Note: could not install the $lang translation — the catalogue could not be staged for $modest; the extension falls back to English if no usable catalogue is found there." >&2
         continue
     fi
     if [ -e "$modest" ] || [ -L "$modest" ]; then
@@ -203,6 +203,7 @@ for mofile in "$STAGE"/locale/*/LC_MESSAGES/*.mo; do
                 rm -rf "$work"
                 echo "Note: $modest is not a plain file and was left untouched — the $lang translation was not installed; the extension falls back to English if no usable catalogue is found there." >&2
             else
+                rm -f "$staged"
                 echo "Note: $modest is not a plain file and is preserved at $old — the $lang translation was not installed; the extension falls back to English if no usable catalogue is found there." >&2
             fi
             continue
@@ -217,6 +218,7 @@ for mofile in "$STAGE"/locale/*/LC_MESSAGES/*.mo; do
             rm -rf "$work"
             echo "Note: could not install the $lang translation — the previous catalogue was left in place at $modest; the extension falls back to English if no usable catalogue is found there." >&2
         elif [ -n "$replaced" ]; then
+            rm -f "$staged"
             echo "Note: could not install the $lang translation — the previous catalogue is preserved at $replaced; the extension falls back to English if no usable catalogue is found at $modest." >&2
         else
             rm -rf "$work"
