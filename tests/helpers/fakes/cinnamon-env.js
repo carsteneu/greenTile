@@ -386,13 +386,87 @@ const createCinnamonEnv = (options) => {
     // --- settings: Cinnamon slot model, one object per uuid
     env.settingsSlots = new Map();
     env.settingsInstances = [];
+    // No settings-FILE monitor exists any more (item 5's file surface was removed
+    // with the method override it needed): the list stays so a test can assert
+    // that no watch is installed.
+    env.settingsFileMonitors = [];
+    // The framework's settings FILE holds the SCHEMA entry per key plus its value
+    // (settings.js merges settings-schema.json into settingsData and saves that),
+    // and a settings instance restores its settingsData from it. The file model
+    // therefore carries the schema fields, not only the values — a fixture that
+    // layers the real settings.js methods on top depends on it (setOptions needs
+    // the key's `options`).
+    let schema = {};
+    try {
+        schema = JSON.parse(require('node:fs').readFileSync(REPO_ROOT + '/settings-schema.json', 'utf8'));
+    }
+    catch (_e) {
+        schema = {};
+    }
+    // The settings FILE the framework keeps (settings.js _saveToFile) and the
+    // dialog's whole-file rewrite path. `settingsWriteFile` models the dialog
+    // (and any external writer) putting a value on disk; `remoteUpdate()` with no
+    // payload models cinnamonDBus.updateSetting -> settings.js remoteUpdate, which
+    // reloads the FILE and only then diffs by value.
+    env.settingsFiles = new Map();
+    env.settingsWriteFile = (uuid, key, value) => {
+        let data = {};
+        try {
+            data = JSON.parse(env.settingsFiles.get(uuid) || '{}');
+        }
+        catch (_e) {
+            data = {};
+        }
+        data[key] = { value: value };
+        env.settingsFiles.set(uuid, JSON.stringify(data, null, 4));
+    };
     const makeSettings = (uuid, owner) => {
         const values = new Map(Object.entries(settingsDefaults));
+        // A real settings instance loads the file it (or the dialog) wrote before,
+        // so own writes survive an App recreation: seed from the persisted file.
+        const persisted = env.settingsFiles.get(uuid);
+        if (persisted) {
+            try {
+                const data = JSON.parse(persisted);
+                for (const key of Object.keys(data)) {
+                    if (data[key] && Object.hasOwn(data[key], 'value')) {
+                        values.set(key, data[key].value);
+                    }
+                }
+            }
+            catch (_e) {
+                // an unreadable file keeps the defaults, like a fresh install
+            }
+        }
+        const optionsStore = new Map();
+        const sigHandlers = [];
+        let nextSigId = 1;
         const instance = {
             uuid,
             bindings: [],
             finalized: false,
             callLog: [],
+            connect(sigName, cb) {
+                const id = nextSigId++;
+                sigHandlers.push({ sigName, cb, id });
+                return id;
+            },
+            disconnect(id) {
+                const at = sigHandlers.findIndex((h) => h.id === id);
+                if (at !== -1) {
+                    sigHandlers.splice(at, 1);
+                }
+            },
+            count(sigName) {
+                return sigHandlers.filter((h) => !sigName || h.sigName === sigName).length;
+            },
+            emit(sigName, ...args) {
+                for (const h of sigHandlers.slice()) {
+                    if (h.sigName === sigName) {
+                        h.cb(...args);
+                    }
+                }
+            },
             bind(key, prop, cb, data) {
                 // mirrors /usr/share/cinnamon/js/ui/settings.js bindWithObject:
                 // the bound property is a live getter/setter on the bind object
@@ -411,7 +485,12 @@ const createCinnamonEnv = (options) => {
             bindProperty(direction, key, prop, cb, data) {
                 return this.bind(key, prop, cb, data);
             },
-            setOptions() {},
+            // mirrors settings.js setOptions: stores the widget options (and, in
+            // the framework, also rewrites the settings file)
+            setOptions(key, pickOptions) {
+                this.callLog.push({ op: 'setOptions', key, finalized: this.finalized });
+                optionsStore.set(key, pickOptions);
+            },
             getValue(key) {
                 if (!values.has(key))
                     {throw new Error('fake settings: no default for "' + key + '" (uuid ' + uuid + ')');}
@@ -419,16 +498,73 @@ const createCinnamonEnv = (options) => {
             },
             setValue(key, v) {
                 this.callLog.push({ op: 'setValue', key, value: v, finalized: this.finalized });
-                values.set(key, v);
+                // mirrors settings.js _setValue: the field is written and the file
+                // SAVED only when the value differs (objects always save). The
+                // vendor compares with loose `!=`; greenTile's keys hold booleans,
+                // strings and objects, where strict equality is the same decision.
+                // It does NOT emit changed::<key> (only _checkSettings does, for a
+                // reloaded value that differs).
+                if (typeof v === 'object' || values.get(key) !== v) {
+                    values.set(key, v);
+                    this.saveFile();
+                }
+            },
+            /** Writes the whole settings file, as settings.js _saveToFile does. */
+            saveFile() {
+                const data = {};
+                for (const [k, v] of values) {
+                    data[k] = Object.assign({}, schema[k] || {}, { value: v });
+                }
+                env.settingsFiles.set(uuid, JSON.stringify(data, null, 4));
+            },
+            // cinnamonDBus.updateSetting -> settings.js remoteUpdate ->
+            // _checkSettings: reload the settings payload, diff by VALUE, fire the
+            // bound callback and changed::<key> only for a key that really differs.
+            // An external write that restores the value already in memory produces
+            // no signal here — that is exactly the acceptance boundary the item 5
+            // BLOCKED report rests on.
+            remoteUpdate(payload) {
+                let data = payload;
+                if (data === undefined) {
+                    // no payload: reload the file, as the framework does
+                    try {
+                        const stored = JSON.parse(env.settingsFiles.get(uuid) || '{}');
+                        data = {};
+                        for (const key of Object.keys(stored)) {
+                            data[key] = stored[key].value;
+                        }
+                    }
+                    catch (_e) {
+                        return;
+                    }
+                }
+                data = data || {};
+                for (const key of Object.keys(data)) {
+                    const value = data[key];
+                    const current = values.get(key);
+                    if (current === value || (typeof value === 'object' && JSON.stringify(current) === JSON.stringify(value))) {
+                        continue;
+                    }
+                    values.set(key, value);
+                    for (const b of this.bindings) {
+                        if (b.key === key && b.cb) {
+                            b.cb();
+                        }
+                    }
+                    this.emit('changed::' + key);
+                }
             },
             finalize() {
                 this.finalized = true;
                 this.callLog.push({ op: 'finalize' });
+                sigHandlers.length = 0;
                 env.settingsSlots.set(uuid, null);
             },
         };
         env.settingsInstances.push(instance);
         env.settingsSlots.set(uuid, instance);
+        // the framework writes the file when the xlet's settings are created
+        instance.saveFile();
         return instance;
     };
 
@@ -454,6 +590,7 @@ const createCinnamonEnv = (options) => {
     };
     const gio = {
         DBusCallFlags: { NONE: 'none' },
+        FileMonitorFlags: { NONE: 0, WATCH_MOVES: 2 },
         Cancellable: class {
             constructor() {
                 this.cancelled = false;

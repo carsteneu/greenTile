@@ -11,6 +11,7 @@
  * @property {() => number} now clock, Date.now in production
  * @property {(msg: string) => void} log global.log
  * @property {(app: AppFacade) => void} onSettled the fanned-out retile, autoScheduleAll
+ * @property {(app: AppFacade) => boolean} isLive whether that App is still the live one
  */
 export const Settle: {
     new (deps: SettleDeps): {
@@ -18,6 +19,7 @@ export const Settle: {
         _now: () => number;
         _log: (msg: string) => void;
         _onSettled: (app: AppFacade) => void;
+        _isLive: (app: AppFacade) => boolean;
         _timer: number;
         pending: boolean;
         started: number;
@@ -64,6 +66,7 @@ export const Session: {
             _now: () => number;
             _log: (msg: string) => void;
             _onSettled: (app: AppFacade) => void;
+            _isLive: (app: AppFacade) => boolean;
             _timer: number;
             pending: boolean;
             started: number;
@@ -84,7 +87,15 @@ export const Session: {
             consumePending(app: AppFacade): void;
             destroy(): void;
         };
+        /** @type {AppFacade | null} */
+        _rolledBack: AppFacade | null;
         monitorFallbackLogged: boolean;
+        /** @type {Array<{monitorIndex: number, wsIndex: number, auto: boolean}>} */
+        pendingAuto: {
+            monitorIndex: number;
+            wsIndex: number;
+            auto: boolean;
+        }[];
         splitCorruptLogged: boolean;
         layoutsWriteGuardLogged: boolean;
         accentGenSeq: number;
@@ -100,6 +111,30 @@ export const Session: {
         nextAccentGen(): string;
         /** Creates the App and connects the monitors-changed recreate handler. */
         start(): void;
+        /**
+         * Whether that App is the live, fully started one — a rolled back shell is not.
+         * @param {AppFacade} app
+         */
+        _isLive(app: AppFacade): boolean;
+        /**
+         * Rolls back an App whose asynchronous start failed: the observer set, the
+         * hotkeys and the timers of a half-started App must not outlive their use — a
+         * hotkey that addresses a registry nobody watches, a settle wait that would
+         * retile into a torn-down App, a registry that still reports ready. The App's
+         * resources go and its registry flag is cleared, whatever failed (observers,
+         * a queued auto command, the settle wait).
+         *
+         * Synchronous by design: the caller is the monitor-ready reply, which ends
+         * with this callback (Monitors.refresh calls onReady as its last statement),
+         * so nothing of that component runs after the App is torn down.
+         *
+         * The App SHELL stays referenced until the next recreation, so the session has
+         * a single owner for it and no dangling timer holds a freed object; it is
+         * inert — its hotkeys are unregistered, its handlers released, its registry
+         * flag cleared, and its settle wait expires silently (Settle.isLive).
+         * @param {AppFacade} app
+         */
+        rollbackApp(app: AppFacade): void;
         destroy(): void;
         /** Session teardown is also the end of the exclusion lifetime. */
         _releaseExclusions(): void;
@@ -129,6 +164,10 @@ export type SettleDeps = {
      * the fanned-out retile, autoScheduleAll
      */
     onSettled: (app: AppFacade) => void;
+    /**
+     * whether that App is still the live one
+     */
+    isLive: (app: AppFacade) => boolean;
 };
 /**
  * Session owner: runs the App create/recreate/destroy flow and carries what
@@ -177,6 +216,7 @@ export type SessionDeps = {
             _now: () => number;
             _log: (msg: string) => void;
             _onSettled: (app: AppFacade) => void;
+            _isLive: (app: AppFacade) => boolean;
             _timer: number;
             pending: boolean;
             started: number;
@@ -197,7 +237,15 @@ export type SessionDeps = {
             consumePending(app: AppFacade): void;
             destroy(): void;
         };
+        /** @type {AppFacade | null} */
+        _rolledBack: AppFacade | null;
         monitorFallbackLogged: boolean;
+        /** @type {Array<{monitorIndex: number, wsIndex: number, auto: boolean}>} */
+        pendingAuto: {
+            monitorIndex: number;
+            wsIndex: number;
+            auto: boolean;
+        }[];
         splitCorruptLogged: boolean;
         layoutsWriteGuardLogged: boolean;
         accentGenSeq: number;
@@ -213,6 +261,30 @@ export type SessionDeps = {
         nextAccentGen(): string;
         /** Creates the App and connects the monitors-changed recreate handler. */
         start(): void;
+        /**
+         * Whether that App is the live, fully started one — a rolled back shell is not.
+         * @param {AppFacade} app
+         */
+        _isLive(app: AppFacade): boolean;
+        /**
+         * Rolls back an App whose asynchronous start failed: the observer set, the
+         * hotkeys and the timers of a half-started App must not outlive their use — a
+         * hotkey that addresses a registry nobody watches, a settle wait that would
+         * retile into a torn-down App, a registry that still reports ready. The App's
+         * resources go and its registry flag is cleared, whatever failed (observers,
+         * a queued auto command, the settle wait).
+         *
+         * Synchronous by design: the caller is the monitor-ready reply, which ends
+         * with this callback (Monitors.refresh calls onReady as its last statement),
+         * so nothing of that component runs after the App is torn down.
+         *
+         * The App SHELL stays referenced until the next recreation, so the session has
+         * a single owner for it and no dangling timer holds a freed object; it is
+         * inert — its hotkeys are unregistered, its handlers released, its registry
+         * flag cleared, and its settle wait expires silently (Settle.isLive).
+         * @param {AppFacade} app
+         */
+        rollbackApp(app: AppFacade): void;
         destroy(): void;
         /** Session teardown is also the end of the exclusion lifetime. */
         _releaseExclusions(): void;
