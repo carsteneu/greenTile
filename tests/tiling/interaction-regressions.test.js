@@ -442,3 +442,24 @@ test('issue 11: the panel window count follows the same admissibility as the ret
     assert.deepEqual(w1.rect, [0, 0, 1000, 1100], 'the retile placed exactly the two admissible windows');
     assert.deepEqual(w2.rect, [1000, 0, 1000, 1100]);
 });
+
+test('issue 10: the close path alone clears a fresh record on a paused monitor', () => {
+    const { env, ext } = makeEnv({ windowGap: 0 });
+    enableOnMonitor(env, ext);
+    const ws = activeWorkspace(env);
+    const app = ext.currentSession().app;
+    // monitor 0 stays paused, so no retile ever drains the pending sets here
+    const closed = makeWindow(env, 1, [0, 0, 300, 300], 0);
+    env.tabList.push(closed);
+    app.auto.trackWindow(app, closed);
+    app.auto.onWindowAdded(app, ws, closed);
+    const kept = makeWindow(env, 2, [400, 0, 300, 300], 0);
+    env.tabList.push(kept);
+    app.auto.onWindowAdded(app, ws, kept);
+    // the guaranteed close path: the window's unmanaged fires whether or not
+    // window-removed follows (and even when it arrives on an inactive workspace)
+    closed.emit('unmanaged');
+    const pending = app.auto.pendingTake(0);
+    assert.equal(pending.has(2), true, 'the live fresh window keeps its record');
+    assert.equal(pending.has(1), false, 'the closed window left no record on the close path');
+});
