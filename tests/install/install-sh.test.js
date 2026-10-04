@@ -421,3 +421,40 @@ exec "\${GT_REAL_MV:?}" "$@"
     assert.equal(fs.readFileSync(target, 'utf8'), 'previous catalogue\n', 'the previous catalogue must survive');
     assert.deepEqual(leftoversUnder(target), [], 'nothing may be left behind');
 });
+
+// a PATH that behaves like a system without flock: symlink the usual bin dirs
+// except flock, so the installer's `command -v flock` check fails for real
+function binWithoutFlock(dir) {
+    const bin = path.join(dir, 'no-flock-bin');
+    mkdir(bin);
+    for (const src of ['/usr/bin', '/bin']) {
+        let entries;
+        try {
+            entries = fs.readdirSync(src);
+        } catch {
+            continue;
+        }
+        for (const name of entries) {
+            if (name === 'flock') {continue;}
+            const dst = path.join(bin, name);
+            if (fs.existsSync(dst)) {continue;}
+            try {
+                fs.symlinkSync(path.join(src, name), dst);
+            } catch {
+                // unreadable or duplicate entry: not needed by the installer
+            }
+        }
+    }
+    return bin;
+}
+
+test('without flock the installer aborts clearly and leaves the installation untouched', () => {
+    const x = makeInstallEnv('install-no-flock');
+    makeSource(x);
+    seedOldInstall(x.home);
+    const r = runScript(path.join(x.dir, 'release', 'install.sh'), [],
+        Object.assign({}, x.env, { PATH: binWithoutFlock(x.dir) }));
+    assert.notEqual(r.status, 0, 'a missing flock must fail the install');
+    assert.ok(r.stderr.includes('need flock'), `the diagnostic must name flock: ${r.stderr}`);
+    oldInstallIntact(x);
+});
