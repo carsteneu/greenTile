@@ -7,7 +7,7 @@ const test = require('node:test');
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const path = require('node:path');
-const { UUID, EXT, LATEST, TMP, REAL_MV, REAL_LN, REAL_RM, REAL_CAT, REAL_MKTEMP, runScript, mkdir, write } = require('../helpers/release-env');
+const { UUID, EXT, LATEST, TMP, REAL_MV, REAL_RM, REAL_MKTEMP, runScript, mkdir, write } = require('../helpers/release-env');
 const { ROOT } = require('../helpers/cinnamon-loader');
 
 const cleanups = [];
@@ -95,11 +95,9 @@ exec "\${GT_REAL_MV:?}" "$@"
     x.env = {
         HOME: x.home,
         PATH: `${x.bin}:${process.env.PATH}`,
-        GT_REAL_MV: REAL_MV,
-        GT_REAL_LN: REAL_LN,
-        GT_REAL_RM: REAL_RM,
-        GT_REAL_CAT: REAL_CAT,
-        GT_REAL_MKTEMP: REAL_MKTEMP,
+            GT_REAL_MV: REAL_MV,
+            GT_REAL_RM: REAL_RM,
+            GT_REAL_MKTEMP: REAL_MKTEMP,
     };
     if (failSwap) {
         x.env.GT_MVLOG = x.mvlog;

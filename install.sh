@@ -33,19 +33,19 @@ command -v flock >/dev/null || {
     exit 1
 }
 LOCK="$PARENT/.greenTile.lock"
-exec 9>"$LOCK"
+exec 9>>"$LOCK"
 if ! flock -n 9; then
     echo "install.sh: another greenTile install is already running for this account — try again once it finished." >&2
     exit 1
 fi
 
 # A catchable signal must still report or restore. SIGKILL cannot be caught:
-# then the stage with the backup simply stays on disk, without a message.
+# then the stage with the backup simply stays on disk, without a message. The
+# EXIT trap is installed before anything is created, so an early signal leaves
+# nothing of ours behind.
 trap 'exit 143' TERM
 trap 'exit 130' INT
-STAGE=$(mktemp -d "$PARENT/.greenTile-install.XXXXXX")
-NEW="$STAGE/$UUID"
-BACKUP="$STAGE/old"
+STAGE="" NEW="" BACKUP="" WORK=""
 # Roll back the previous installation unless the new tree was already published.
 # While NEW still sits in the stage the swap has not happened and BACKUP is the
 # user's only copy of the old tree; once the rename has taken NEW out of the
@@ -56,7 +56,10 @@ BACKUP="$STAGE/old"
 # is reported and the stage kept, so the copy is never deleted.
 cleanup() {
     trap - TERM INT
-    if [ -z "${STAGE:-}" ]; then
+    if [ -n "$WORK" ]; then
+        rm -rf "$WORK"
+    fi
+    if [ -z "$STAGE" ]; then
         return
     fi
     if [ ! -e "$NEW" ] && [ ! -L "$NEW" ]; then
@@ -75,6 +78,9 @@ cleanup() {
     rm -rf "$STAGE"
 }
 trap cleanup EXIT
+STAGE=$(mktemp -d "$PARENT/.greenTile-install.XXXXXX")
+NEW="$STAGE/$UUID"
+BACKUP="$STAGE/old"
 
 # Stage everything first: a failure up to the swap leaves the previous
 # installation untouched. Translations are compiled here too, so a broken
@@ -147,14 +153,15 @@ for mofile in "$STAGE"/locale/*/LC_MESSAGES/*.mo; do
     # rename is atomic on the destination filesystem and replaces only a plain
     # regular file; a failure at any step leaves the previous catalogue as it
     # was, and the extension then works without that translation (English).
-    if ! work=$(mktemp -d "$localedir/.$UUID.XXXXXX" 2>/dev/null); then
+    if ! WORK=$(mktemp -d "$localedir/.$UUID.XXXXXX" 2>/dev/null); then
         echo "Note: could not install the $lang translation — no working directory could be created next to $modest; the extension falls back to English if no usable catalogue is found there." >&2
         continue
     fi
-    if ! cp "$mofile" "$work/catalogue" || ! mv -T "$work/catalogue" "$modest"; then
+    if ! cp "$mofile" "$WORK/catalogue" || ! mv -T "$WORK/catalogue" "$modest"; then
         echo "Note: could not install the $lang translation — $modest was left unchanged; the extension falls back to English if no usable catalogue is found there." >&2
     fi
-    rm -rf "$work"
+    rm -rf "$WORK"
+    WORK=""
 done
 
 echo "greenTile $UUID installed to $DEST"
