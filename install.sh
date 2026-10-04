@@ -184,69 +184,19 @@ for mofile in "$STAGE"/locale/*/LC_MESSAGES/*.mo; do
         echo "Note: $modest exists and is not a plain file — the $lang translation was left untouched; the extension falls back to English if no usable catalogue is found there." >&2
         continue
     fi
-    # The exchange happens inside a working directory of our own, created
-    # exclusively next to the catalogue (this is also the same filesystem, so
-    # nothing here is ever a copy): nothing under it can be a leftover from
-    # another run or belong to the user, so a rename into it cannot overwrite
-    # anything of theirs. Publishing, giving back and restoring all use ln -T,
-    # which fails on any existing name and never nests into a directory, and
-    # the path name itself is never deleted. Residual: a kill leaves the
-    # working directory behind (nothing user-owned is ever deleted, and a
-    # preserved object is reported with its path).
+    # Catalogues sit apart from the extension and can be on another filesystem,
+    # so the compiled catalogue is copied into a working directory of our own —
+    # created exclusively next to its destination — and renamed into place. The
+    # rename is atomic on the destination filesystem and replaces only a plain
+    # regular file; a failure at any step leaves the previous catalogue as it
+    # was, and the extension then works without that translation (English).
     if ! work=$(mktemp -d "$localedir/.$UUID.XXXXXX" 2>/dev/null); then
-        echo "Note: could not install the $lang translation — no exclusive working directory could be created next to $modest; the extension falls back to English if no usable catalogue is found there." >&2
+        echo "Note: could not install the $lang translation — no working directory could be created next to $modest; the extension falls back to English if no usable catalogue is found there." >&2
         continue
     fi
-    staged="$work/new"
-    old="$work/old"
-    replaced=''
-    if ! mv -T "$mofile" "$staged"; then
-        rm -rf "$work"
-        echo "Note: could not install the $lang translation — the catalogue could not be staged for $modest; the extension falls back to English if no usable catalogue is found there." >&2
-        continue
+    if ! cp "$mofile" "$work/catalogue" || ! mv -T "$work/catalogue" "$modest"; then
+        echo "Note: could not install the $lang translation — $modest was left unchanged; the extension falls back to English if no usable catalogue is found there." >&2
     fi
-    if [ -e "$modest" ] || [ -L "$modest" ]; then
-        if ! mv -T "$modest" "$old"; then
-            rm -rf "$work"
-            echo "Note: could not replace $modest — the $lang translation was not installed; the extension falls back to English if no usable catalogue is found there." >&2
-            continue
-        fi
-        if [ ! -f "$old" ] || [ -L "$old" ]; then
-            # not a plain catalogue: give it back with the non-clobbering
-            # primitive; a name that is taken meanwhile wins and the object
-            # stays here, reported, instead of being written over
-            if ln -T "$old" "$modest" 2>/dev/null; then
-                rm -rf "$work"
-                echo "Note: $modest is not a plain file and was left untouched — the $lang translation was not installed; the extension falls back to English if no usable catalogue is found there." >&2
-            else
-                rm -f "$staged"
-                echo "Note: $modest is not a plain file and is preserved at $old — the $lang translation was not installed; the extension falls back to English if no usable catalogue is found there." >&2
-            fi
-            continue
-        fi
-        replaced="$old"
-    fi
-    if ! ln -T "$staged" "$modest"; then
-        # the create failed (a racing object, no hard-link support, …): the
-        # previous catalogue must not be lost, and putting it back must not
-        # overwrite whatever took the name meanwhile
-        if [ -n "$replaced" ] && ln -T "$replaced" "$modest" 2>/dev/null; then
-            rm -rf "$work"
-            echo "Note: could not install the $lang translation — the previous catalogue was left in place at $modest; the extension falls back to English if no usable catalogue is found there." >&2
-        elif [ -n "$replaced" ]; then
-            rm -f "$staged"
-            echo "Note: could not install the $lang translation — the previous catalogue is preserved at $replaced; the extension falls back to English if no usable catalogue is found at $modest." >&2
-        else
-            rm -rf "$work"
-            if [ -e "$modest" ] || [ -L "$modest" ]; then
-                echo "Note: could not install the $lang translation — $modest appeared in the meantime and was left untouched; the extension falls back to English if no usable catalogue is found there." >&2
-            else
-                echo "Note: could not install the $lang translation — no catalogue could be created at $modest; the extension falls back to English if no usable catalogue is found there." >&2
-            fi
-        fi
-        continue
-    fi
-    # published: the working directory goes, and with it the captured catalogue
     rm -rf "$work"
 done
 
