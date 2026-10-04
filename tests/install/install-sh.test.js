@@ -120,7 +120,7 @@ const readMetaVersion = (x) => {
 // the extensions parent must contain no staging leftovers after any outcome
 const noStagingLeftovers = (x) => {
     const parent = path.join(x.home, '.local', 'share', 'cinnamon', 'extensions');
-    return fs.readdirSync(parent).filter((e) => e.startsWith('.greenTile'));
+    return fs.readdirSync(parent).filter((e) => e.startsWith('.greenTile-install.'));
 };
 const oldInstallIntact = (x) => {
     assert.equal(readMetaVersion(x), '1.2.0');

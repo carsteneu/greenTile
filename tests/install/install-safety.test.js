@@ -549,7 +549,86 @@ test('two concurrent fresh installers: exactly one publishes, nothing is left be
     const runs = await Promise.all([spawnInstall(x), spawnInstall(x)]);
     assert.deepEqual(runs.map((r) => r.status).sort(), [0, 1],
         `expected one success and one clean refusal: ${JSON.stringify(runs)}`);
+      assert.equal(version(destOf(x)), LATEST);
+      assert.ok(!fs.existsSync(path.join(destOf(x), UUID)), 'a tree was nested inside DEST');
+      assert.equal(stages(x).length, 0, `a fresh install has nothing to preserve: ${stages(x).join(', ')}`);
+  });
+
+// The lock: one covering lock serializes cooperating installers for the same
+// account and destination. A blocking msgfmt keeps the first installer inside
+// its critical section (the lock is taken before staging), so a second run
+// provably meets a held lock instead of racing a fast first run. `exec 9>&-`
+// drops the lock descriptor the stub would otherwise inherit, so the lock is
+// released exactly when the installer process ends — a real msgfmt is short
+// lived, the stub only stays alive to hold the test steady.
+const REAL_MSGFMT = spawnSync('which', ['msgfmt'], { encoding: 'utf8' }).stdout.trim();
+function blockMsgfmt(x) {
+    const hold = path.join(x.dir, 'hold');
+    mkdir(hold);
+    write(path.join(x.bin, 'msgfmt'), `#!/usr/bin/env bash
+exec 9>&- 2>/dev/null || true
+touch "${hold}/started"
+while [ ! -e "${hold}/release" ]; do sleep 0.02; done
+exec ${REAL_MSGFMT} "$@"
+`);
+    fs.chmodSync(path.join(x.bin, 'msgfmt'), 0o755);
+    x.hold = hold;
+}
+const waitForFile = async (p, timeout = 5000) => {
+    const t0 = Date.now();
+    while (!fs.existsSync(p)) {
+        if (Date.now() - t0 > timeout) { throw new Error(`timed out waiting for ${p}`); }
+        await new Promise((r) => setTimeout(r, 20));
+    }
+};
+// The first installer must outlive the second while it holds the lock; it runs
+// in its own process group (detached) with ignored stdio, so killing the group
+// takes the blocking stub down with it and no inherited pipe keeps a read open.
+const holderGroups = [];
+test.after(() => {
+    for (const pid of holderGroups) { try { process.kill(-pid, 'SIGKILL'); } catch { /* already gone */ } }
+});
+const spawnHolder = (x) => {
+    const p = spawn('bash', [path.join(x.here, 'install.sh')],
+        { cwd: x.here, env: x.env, detached: true, stdio: 'ignore' });
+    holderGroups.push(p.pid);
+    return p;
+};
+// A second installer with the real msgfmt (no blocking stub): without a lock it
+// then shows up as an ordinary concurrent success, not a stall.
+const runSecond = (x, timeout = 8000) => spawnSync('bash', [path.join(x.here, 'install.sh')],
+    { cwd: x.here, env: { ...x.env, PATH: process.env.PATH }, encoding: 'utf8', timeout, killSignal: 'SIGKILL' });
+
+test('a second installer is refused with a clear message while the first holds the lock', { timeout: 30000 }, async () => {
+    const x = makeEnv('lock-refused');
+    seedOldInstall(x.home);
+    blockMsgfmt(x);
+    const first = spawnHolder(x);
+    await waitForFile(path.join(x.hold, 'started'));
+    const second = runSecond(x);
+    assert.equal(second.signal, null, 'the second installer must be refused, not left running');
+    assert.ok(second.status > 0, `the second installer must not run concurrently: ${JSON.stringify(second)}`);
+    assert.match(second.stderr, /already running/, `the refusal must name the running install: ${second.stderr}`);
+    assert.equal(version(destOf(x)), '1.2.0', 'the refused installer changed the installation');
+    write(path.join(x.hold, 'release'), '');
+    await new Promise((r) => first.on('close', r));
     assert.equal(version(destOf(x)), LATEST);
-    assert.ok(!fs.existsSync(path.join(destOf(x), UUID)), 'a tree was nested inside DEST');
-    assert.equal(stages(x).length, 0, `a fresh install has nothing to preserve: ${stages(x).join(', ')}`);
+    assert.ok(fs.existsSync(path.join(destOf(x), 'lib', 'core.js')), 'the published tree is incomplete');
+});
+
+test('the lock is released when its holder is killed, and a later installer then succeeds', { timeout: 30000 }, async () => {
+    const x = makeEnv('lock-release-kill');
+    seedOldInstall(x.home);
+    blockMsgfmt(x);
+    const first = spawnHolder(x);
+    await waitForFile(path.join(x.hold, 'started'));
+    const during = runSecond(x);
+    assert.equal(during.signal, null, 'the lock must be held while the first installer runs');
+    assert.ok(during.status > 0, 'the concurrent installer must be refused while the lock is held');
+    process.kill(-first.pid, 'SIGKILL'); // takes the installer and its blocked stub down together
+    await new Promise((r) => first.on('close', r));
+    const after = runSecond(x);
+    assert.equal(after.status, 0, `a later installer must acquire the released lock: ${after.stderr}`);
+    assert.equal(version(destOf(x)), LATEST);
+    assert.ok(fs.existsSync(path.join(destOf(x), 'lib', 'core.js')), 'the published tree is incomplete');
 });

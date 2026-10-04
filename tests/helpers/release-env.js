@@ -23,8 +23,8 @@ const REAL_LN = toolPath('ln');
 const REAL_RM = toolPath('rm');
 const REAL_CAT = toolPath('cat');
 const REAL_MKTEMP = toolPath('mktemp');
-if (['mv', 'ln', 'zip', 'unzip', 'msgfmt'].some((t) => !toolPath(t))) {
-    throw new Error('shell-script tests need the mv, ln, zip, unzip and msgfmt tools on PATH');
+if (['mv', 'ln', 'zip', 'unzip', 'msgfmt', 'flock'].some((t) => !toolPath(t))) {
+    throw new Error('shell-script tests need the mv, ln, zip, unzip, msgfmt and flock tools on PATH');
 }
 // Version the curl stub serves from .../releases/latest
 const LATEST = '9.9.9';

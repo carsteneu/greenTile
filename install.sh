@@ -22,6 +22,22 @@ done
 
 PARENT=$(dirname "$DEST")
 mkdir -p "$PARENT"
+
+# Cooperative installers for the same account serialize on one lock: the second
+# one fails clearly instead of interleaving with the first. The lock file is
+# never removed — unlinking it would let a later installer lock a different
+# inode — and flock releases the lock automatically when this process ends.
+command -v flock >/dev/null || {
+    echo "install.sh: need flock (package util-linux) to serialize installs." >&2
+    exit 1
+}
+LOCK="$PARENT/.greenTile.lock"
+exec 9>"$LOCK"
+if ! flock -n 9; then
+    echo "install.sh: another greenTile install is already running for this account — try again once it finished." >&2
+    exit 1
+fi
+
 # A catchable signal must still report or restore. SIGKILL cannot be caught:
 # then the stage with the backup simply stays on disk, without a message.
 trap 'exit 143' TERM
