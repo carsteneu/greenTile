@@ -98,6 +98,16 @@ export const Split: {
          */
         forget(refKey: string): void;
         /**
+         * Drops every deferred split write and its flush timer. An external write of
+         * the layouts setting (the settings dialog's reset, an import — or its save
+         * of a whole stale copy) is authoritative: flush() re-reads the setting and
+         * would otherwise merge the splits computed against the old value back in.
+         * The accel state is untouched, so a held resize key keeps accelerating.
+         */
+        invalidate(): void;
+        /** Removes the armed flush timer, if any (its source may already be gone). */
+        _dropFlushTimer(): void;
+        /**
          * true when the monitor + workspace has stored (or pending) splits or dragged shapes —
          * shows the reset button
          * @param {AppFacade} app

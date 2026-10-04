@@ -51,13 +51,19 @@ const makeEnv = (extraSettings = {}) => {
 };
 
 // Fake MetaWindow recording move_resize_frame / move_frame with enough signal
-// hub surface for the auto/border observers that ride along.
-const makeWindow = (env, seq, rect, monitor = 0, withActor = null) => {
+// hub surface for the auto/border observers that ride along. `options` is
+// additive: windowType/wmClass feed the eligibility filters (dialogs, app-less
+// windows), noApp marks a window whose tracker lookup fails, and move_to_monitor
+// keeps get_monitor() live like Meta does on a real cross-monitor move.
+const makeWindow = (env, seq, rect, monitor = 0, withActor = null, options = {}) => {
     const handlers = [];
     let nextId = 1;
+    let mon = monitor;
     const window = {
         seq,
         minimized: false,
+        /** @type {boolean} marked windows have no owning app (app-less window) */
+        __noApp: options.noApp === true,
         moves: [],
         rect: rect.slice(),
         connect(sig, cb) {
@@ -80,10 +86,10 @@ const makeWindow = (env, seq, rect, monitor = 0, withActor = null) => {
                     {h.cb(...args);}}
         },
         get_stable_sequence: () => seq,
-        get_window_type: () => 6,
-        get_wm_class: () => 'FakeWindow',
+        get_window_type: () => (options.windowType !== undefined ? options.windowType : 6),
+        get_wm_class: () => (options.wmClass !== undefined ? options.wmClass : 'FakeWindow'),
         get_title: () => 'FakeWindow' + seq,
-        get_monitor: () => monitor,
+        get_monitor: () => mon,
         get_workspace: () => env.activeWorkspace,
         is_on_all_workspaces: () => false,
         get_frame_rect: () => ({ x: window.rect[0], y: window.rect[1], width: window.rect[2], height: window.rect[3] }),
@@ -101,7 +107,9 @@ const makeWindow = (env, seq, rect, monitor = 0, withActor = null) => {
             env.display.focus_window = window;
         },
         change_workspace_by_index() {},
-        move_to_monitor() {},
+        move_to_monitor(index) {
+            mon = index;
+        },
     };
     return window;
 };

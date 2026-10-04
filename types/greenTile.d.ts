@@ -182,6 +182,7 @@ type SettingsFacade = {
     setValue(key: string, value: any): void;
     bind(key: string, prop: string, cb: () => void, data?: any): void;
     setOptions(options: {}, profile?: any): void;
+    connect(sigName: string, cb: (...args: any[]) => void): number;
     finalize(): void;
 };
 
@@ -197,7 +198,7 @@ type OpsFacade = {
     focusMonitorIndex(): number;
     collectWindows(app: AppFacade, monitor: CinnamonMonitor, focus: CinnamonWindow | null, ws?: number | null): CinnamonWindow[];
     layoutFor(app: AppFacade, monitorIndex: number, wsIndex: number): { preset: Preset | null; auto: boolean };
-    layoutSet(app: AppFacade, monitorIndex: number, wsIndex: number, patch: {}): void;
+    layoutSet(app: AppFacade, monitorIndex: number, wsIndex: number, patch: {}): boolean;
     retileMonitor(app: AppFacade, monitorIndex: number, focused: CinnamonWindow | null, animate?: boolean, wsIndex?: number | null): void;
     presetsRead(app: AppFacade): Preset[];
     presetsWrite(app: AppFacade, presets: Preset[]): void;
@@ -228,7 +229,18 @@ type SessionFacade = {
     panelSaved: any;
     exclToggles: Map<number, boolean>;
     exclWatches: Map<number, { disconnect: () => void }>;
+    /** Auto on/off commands pressed before the monitor registry was ready. */
+    pendingAuto: Array<{ monitorIndex: number; wsIndex: number; auto: boolean }>;
     nextAccentGen(): string;
+    rollbackApp(app: AppFacade): void;
+    /** Whether two auto commands address the same storage slot (effective ws key). */
+    sameSlot(app: AppFacade, aMonitor: number, aWs: number, bMonitor: number, bWs: number): boolean;
+    /** Whether a retained pause covers that monitor+workspace. */
+    holdsPause(app: AppFacade, monitorIndex: number, wsIndex: number): boolean;
+    /** Drops the retained intent for that slot (an explicit command superseded it). */
+    dropIntent(app: AppFacade, monitorIndex: number, wsIndex: number): void;
+    /** Collapses the retained queue to one intent per effective slot, newest wins. */
+    normalizePending(app: AppFacade): void;
     destroy(): void;
 };
 
@@ -248,12 +260,15 @@ type AutoFacade = {
     scheduleAll(app: AppFacade, delayMs: number): void;
     scheduleMonitor(app: AppFacade, monitorIndex: number, delayMs: number): void;
     pendingTake(monitorIndex: number): Set<number>;
+    pendingForget(seq: number): void;
     activate(app: AppFacade): void;
     deactivate(app: AppFacade): void;
+    applyPending(app: AppFacade): void;
     connectAll(app: AppFacade): void;
     resizeStartTake(seq: number): { rect: Rect; monitor: number } | undefined;
     sortOverride(seq: number, rect: Rect, now: number): void;
     sortTake(seq: number, now: number): Rect | null;
+    sortPeek(seq: number, now: number): Rect | null;
     sortClear(seq: number): void;
     sortPoll(now: number): void;
     destroy(): void;
@@ -270,6 +285,7 @@ type SplitFacade = {
     destroy(): void;
     any(app: AppFacade, monitorIndex: number, wsIndex: number): boolean;
     reset(app: AppFacade, monitorIndex: number, wsIndex: number): void;
+    invalidate(): void;
 };
 
 /** Monitor registry facade (lib/runtime/monitors.js). */
@@ -356,6 +372,8 @@ type AppFacade = {
         register(bindings: Array<{ name: string; bindings: any; callback: () => void }>): void;
         remove(): void;
     };
+    /** Tears the App down (lib/app/app.js); the session's rollback path uses it. */
+    destroy(): void;
 };
 
 /** gettext binding, lib/ui/i18n.js */

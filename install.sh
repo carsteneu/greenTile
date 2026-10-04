@@ -3,8 +3,8 @@
 # ~/.local/share/cinnamon/extensions/ and compiles the translations.
 # Run it from the unpacked release zip (install.sh sits next to greenTile@carsteneu/).
 # The complete new installation is staged next to the destination and
-# validated; the old one is only replaced by a directory rename, and restored
-# if that rename fails.
+# validated; the previous one is only taken out of the way by a directory
+# rename, and it stays recoverable until the swap has succeeded.
 set -eu
 
 UUID=greenTile@carsteneu
@@ -22,19 +22,52 @@ done
 
 PARENT=$(dirname "$DEST")
 mkdir -p "$PARENT"
+# A catchable signal must still report or restore. SIGKILL cannot be caught:
+# then the stage with the backup simply stays on disk, without a message.
+trap 'exit 143' TERM
+trap 'exit 130' INT
+
+# What sits at $DEST right now. A tree that is no longer this one was published
+# by another install.sh meanwhile and is not ours to move away.
+DEST_ID=""
+if [ -e "$DEST" ] || [ -L "$DEST" ]; then
+    DEST_ID=$(stat -c %i "$DEST" 2>/dev/null || true)
+fi
+
+# Set once the staged tree has taken the place of the previous installation:
+# from then on the previous tree is superseded and must never be put back — even
+# if $DEST looks free for a moment because a competing installer moved our just
+# published tree aside. Without this the EXIT trap undid a finished install.
+PUBLISHED=0
+
 STAGE=$(mktemp -d "$PARENT/.greenTile-install.XXXXXX")
-RESTORE_FAILED=""
+NEW="$STAGE/$UUID"
+BACKUP="$STAGE/old"
 cleanup() {
-    # If even the restore failed, the backup inside the stage is the user's
-    # only copy — keep it and point the way back, instead of removing it.
-    if [ -n "$RESTORE_FAILED" ]; then
-        echo "install.sh: your previous installation is preserved at $STAGE/old — move it back to $DEST by hand." >&2
+    trap - TERM INT
+    if [ -z "${STAGE:-}" ]; then
+        return
+    fi
+    # $BACKUP holds the previous installation from the moment it is moved aside.
+    # It is the user's only copy only until this run has published: after a
+    # successful rename NEW is gone, even if a signal preceded PUBLISHED=1 and a
+    # competitor now holds that published tree. An empty DEST alone is not proof
+    # of a failed publication. Before publication NEW still exists: the backup
+    # goes back if DEST is free, otherwise its path is printed and the stage kept.
+    if [ "$PUBLISHED" = 0 ] &&
+        { [ -e "$BACKUP" ] || [ -L "$BACKUP" ]; } &&
+        { [ -e "$NEW" ] || [ -L "$NEW" ]; }; then
+        if [ ! -e "$DEST" ] && [ ! -L "$DEST" ] && mv -T "$BACKUP" "$DEST"; then
+            echo "install.sh: the previous installation is back in place at $DEST." >&2
+            rm -rf "$STAGE"
+        else
+            echo "install.sh: your previous installation is preserved at $BACKUP — move it back to $DEST by hand." >&2
+        fi
         return
     fi
     rm -rf "$STAGE"
 }
 trap cleanup EXIT
-NEW="$STAGE/$UUID"
 
 # Stage everything first: a failure up to the swap leaves the previous
 # installation untouched. Translations are compiled here too, so a broken
@@ -60,32 +93,58 @@ done
 
 # Replace the old installation wholesale: one rename puts the new tree in
 # place, so no partial or mixed state can survive; files the package does not
-# ship (stale modules, leftover po/, a stray old LICENSE) vanish with it. A
-# failed swap moves the backup back; if even that fails, the EXIT trap keeps
-# the backup and points at it — it is the only surviving copy.
-BACKUP="$STAGE/old"
-if [ -e "$DEST" ]; then
-    mv "$DEST" "$BACKUP"
+# ship (stale modules, leftover po/, a stray old LICENSE) vanish with it. mv -T
+# treats the target as a plain name instead of a container, so a $DEST that
+# another install.sh creates in between makes the rename fail instead of
+# nesting the tree inside it, and the previous installation goes back via the
+# EXIT trap. -T is coreutils mv, i.e. GNU/Linux, the only platform Cinnamon
+# runs on; where it is missing the swap fails and this installer aborts with
+# the previous installation untouched — it never falls back to a nesting mv.
+if [ -e "$DEST" ] || [ -L "$DEST" ]; then
+    # Only the tree from the start of this run may be handed to the stage. The
+    # check before the rename cannot be atomic, so the rename itself is the
+    # step that counts and what it moved is identified afterwards: the stage
+    # then holds exactly the tree that was at $DEST in that instant.
+    if [ "$(stat -c %i "$DEST" 2>/dev/null || true)" != "$DEST_ID" ]; then
+        echo "install.sh: $DEST was replaced while this install was preparing — aborting without touching it." >&2
+        exit 1
+    fi
+    if ! mv -T "$DEST" "$BACKUP"; then
+        echo "install.sh: could not move $DEST aside — aborting, nothing of yours was changed." >&2
+        exit 1
+    fi
+    if [ "$(stat -c %i "$BACKUP" 2>/dev/null || true)" != "$DEST_ID" ]; then
+        # not the tree this install looked at: another install.sh published
+        # meanwhile, so its installation goes back untouched
+        if mv -T "$BACKUP" "$DEST" 2>/dev/null; then
+            echo "install.sh: another install.sh published to $DEST while this one was preparing — aborting, its installation is back in place." >&2
+        else
+            # $BACKUP is that other tree, not this user's previous installation:
+            # keep the stage and stop the EXIT trap from reporting it as ours.
+            echo "install.sh: another install.sh published to $DEST while this one was preparing — aborting, its tree is preserved at $BACKUP." >&2
+            STAGE=""
+        fi
+        exit 1
+    fi
 fi
-if [ -e "$DEST" ]; then
-    # $DEST is back while our backup holds the moved-away tree — most likely
-    # a second install.sh running concurrently; do not touch anything.
-    echo "install.sh: $DEST appeared during the install (another install.sh running?) — aborting, nothing was changed." >&2
+if [ -e "$DEST" ] || [ -L "$DEST" ]; then
+    # $DEST is back while the stage holds the tree we moved aside — most likely
+    # a second install.sh. Never publish over what it wrote and never discard
+    # the copy we hold: the EXIT trap reports where it is.
+    echo "install.sh: another install.sh wrote to $DEST in the meantime — aborting without touching it." >&2
     exit 1
 fi
-if ! mv "$NEW" "$DEST"; then
-    if [ -e "$BACKUP" ]; then
-        if mv "$BACKUP" "$DEST"; then
-            echo "install.sh: could not replace $DEST — your previous installation is intact and restored." >&2
-        else
-            RESTORE_FAILED=1
-            echo "install.sh: replacing $DEST failed and the backup could not be restored — the previous installation is preserved at $BACKUP. Move it back to $DEST by hand." >&2
-        fi
+if ! mv -T "$NEW" "$DEST"; then
+    if [ -e "$BACKUP" ] || [ -L "$BACKUP" ]; then
+        echo "install.sh: could not replace $DEST." >&2
     else
         echo "install.sh: could not install to $DEST — nothing was changed." >&2
     fi
     exit 1
 fi
+PUBLISHED=1
+# The swap succeeded: the new tree is at $DEST and the staged copy has left the
+# stage, so the EXIT trap no longer keeps the stage for the previous one.
 
 # The extension loads translations from GLib.get_user_data_dir()/locale (the
 # XDG data dir); mirror that here instead of hardcoding ~/.local/share.
@@ -93,14 +152,86 @@ DATA_DIR="${XDG_DATA_HOME:-$HOME/.local/share}"
 for mofile in "$STAGE"/locale/*/LC_MESSAGES/*.mo; do
     [ -e "$mofile" ] || continue
     lang=$(basename "$(dirname "$(dirname "$mofile")")")
-    # same failure class as the mv below: report, keep going
-    if ! mkdir -p "$DATA_DIR/locale/$lang/LC_MESSAGES"; then
+    localedir="$DATA_DIR/locale/$lang/LC_MESSAGES"
+    modest="$localedir/$UUID.mo"
+    # same failure class as the moves below: report, keep going
+    if ! mkdir -p "$localedir"; then
         echo "Note: could not install the $lang translation — the extension works without it (English)." >&2
         continue
     fi
-    if ! mv "$mofile" "$DATA_DIR/locale/$lang/LC_MESSAGES/$UUID.mo"; then
-        echo "Note: could not install the $lang translation — the extension works without it (English)." >&2
+    # Only a plain regular file is ours to replace. A directory — or a symlink
+    # to one — would make a plain mv move the catalogue *inside* it and still
+    # exit 0, leaving the path the loader reads as a directory: a silent false
+    # success. Refuse that up front, naming the concrete path.
+    if { [ -e "$modest" ] || [ -L "$modest" ]; } &&
+        { [ ! -f "$modest" ] || [ -L "$modest" ]; }; then
+        echo "Note: $modest exists and is not a plain file — the $lang translation was left untouched; the extension falls back to English if no usable catalogue is found there." >&2
+        continue
     fi
+    # The exchange happens inside a working directory of our own, created
+    # exclusively next to the catalogue (this is also the same filesystem, so
+    # nothing here is ever a copy): nothing under it can be a leftover from
+    # another run or belong to the user, so a rename into it cannot overwrite
+    # anything of theirs. Publishing, giving back and restoring all use ln -T,
+    # which fails on any existing name and never nests into a directory, and
+    # the path name itself is never deleted. Residual: a kill leaves the
+    # working directory behind (nothing user-owned is ever deleted, and a
+    # preserved object is reported with its path).
+    if ! work=$(mktemp -d "$localedir/.$UUID.XXXXXX" 2>/dev/null); then
+        echo "Note: could not install the $lang translation — no exclusive working directory could be created next to $modest; the extension falls back to English if no usable catalogue is found there." >&2
+        continue
+    fi
+    staged="$work/new"
+    old="$work/old"
+    replaced=''
+    if ! mv -T "$mofile" "$staged"; then
+        rm -rf "$work"
+        echo "Note: could not install the $lang translation — the catalogue could not be staged for $modest; the extension falls back to English if no usable catalogue is found there." >&2
+        continue
+    fi
+    if [ -e "$modest" ] || [ -L "$modest" ]; then
+        if ! mv -T "$modest" "$old"; then
+            rm -rf "$work"
+            echo "Note: could not replace $modest — the $lang translation was not installed; the extension falls back to English if no usable catalogue is found there." >&2
+            continue
+        fi
+        if [ ! -f "$old" ] || [ -L "$old" ]; then
+            # not a plain catalogue: give it back with the non-clobbering
+            # primitive; a name that is taken meanwhile wins and the object
+            # stays here, reported, instead of being written over
+            if ln -T "$old" "$modest" 2>/dev/null; then
+                rm -rf "$work"
+                echo "Note: $modest is not a plain file and was left untouched — the $lang translation was not installed; the extension falls back to English if no usable catalogue is found there." >&2
+            else
+                rm -f "$staged"
+                echo "Note: $modest is not a plain file and is preserved at $old — the $lang translation was not installed; the extension falls back to English if no usable catalogue is found there." >&2
+            fi
+            continue
+        fi
+        replaced="$old"
+    fi
+    if ! ln -T "$staged" "$modest"; then
+        # the create failed (a racing object, no hard-link support, …): the
+        # previous catalogue must not be lost, and putting it back must not
+        # overwrite whatever took the name meanwhile
+        if [ -n "$replaced" ] && ln -T "$replaced" "$modest" 2>/dev/null; then
+            rm -rf "$work"
+            echo "Note: could not install the $lang translation — the previous catalogue was left in place at $modest; the extension falls back to English if no usable catalogue is found there." >&2
+        elif [ -n "$replaced" ]; then
+            rm -f "$staged"
+            echo "Note: could not install the $lang translation — the previous catalogue is preserved at $replaced; the extension falls back to English if no usable catalogue is found at $modest." >&2
+        else
+            rm -rf "$work"
+            if [ -e "$modest" ] || [ -L "$modest" ]; then
+                echo "Note: could not install the $lang translation — $modest appeared in the meantime and was left untouched; the extension falls back to English if no usable catalogue is found there." >&2
+            else
+                echo "Note: could not install the $lang translation — no catalogue could be created at $modest; the extension falls back to English if no usable catalogue is found there." >&2
+            fi
+        fi
+        continue
+    fi
+    # published: the working directory goes, and with it the captured catalogue
+    rm -rf "$work"
 done
 
 echo "greenTile $UUID installed to $DEST"

@@ -11,8 +11,8 @@
  * @property {() => CinnamonWindow | null} focusWindow
  * @property {() => number} focusMonitorIndex
  * @property {(app: AppFacade, monitorIndex: number, wsIndex: number) => { auto: boolean }} layoutFor
- * @property {(app: AppFacade, monitorIndex: number, wsIndex: number, patch: {}) => void} layoutSet
- * @property {(app: AppFacade, monitorIndex: number, focused: CinnamonWindow | null) => void} retileMonitor
+ * @property {(app: AppFacade, monitorIndex: number, wsIndex: number, patch: {}) => boolean} layoutSet
+ * @property {(app: AppFacade, monitorIndex: number, focused: CinnamonWindow | null, animate?: boolean, wsIndex?: number | null) => void} retileMonitor
  * @property {() => void} borderUpdate
  * @property {(op: string) => boolean} grabIsResize
  * @property {(app: AppFacade, w: CinnamonWindow, op: string) => boolean} dropBegin
@@ -49,6 +49,73 @@ export const Auto: {
          * @param {number} ms
          */
         scheduleAll(app: AppFacade, ms: number): void;
+        /**
+         * @param {AppFacade} app
+         * @param {number} monitorIndex
+         * @returns {boolean}
+         */
+        _monitorWritable(app: AppFacade, monitorIndex: number): boolean;
+        /**
+         * @param {AppFacade} app
+         * @param {number} monitorIndex
+         * @param {number} wsIndex
+         * @param {boolean} auto
+         */
+        _deferAuto(app: AppFacade, monitorIndex: number, wsIndex: number, auto: boolean): void;
+        /**
+         * The retained intent for that monitor+workspace, if any.
+         * @param {AppFacade} app
+         * @param {number} monitorIndex
+         * @param {number} wsIndex
+         * @returns {{monitorIndex: number, wsIndex: number, auto: boolean} | undefined}
+         */
+        _pendingIntent(app: AppFacade, monitorIndex: number, wsIndex: number): {
+            monitorIndex: number;
+            wsIndex: number;
+            auto: boolean;
+        } | undefined;
+        /**
+         * Drops the retained intent for that key: an explicit command that took effect
+         * (or a newer explicit command) supersedes it, one per monitor+workspace.
+         * @param {AppFacade} app
+         * @param {number} monitorIndex
+         * @param {number} wsIndex
+         */
+        _dropIntent(app: AppFacade, monitorIndex: number, wsIndex: number): void;
+        /**
+         * Retains an intent the layout guard REFUSED (a corrupt layouts setting): the
+         * newest explicit command is the pending one, so it replaces any older one and
+         * is applied once the setting can take it.
+         * @param {AppFacade} app
+         * @param {number} monitorIndex
+         * @param {number} wsIndex
+         * @param {boolean} auto
+         */
+        _holdRefused(app: AppFacade, monitorIndex: number, wsIndex: number, auto: boolean): void;
+        /**
+         * Applies a retained intent that outranks the stored setting — one held while
+         * the layouts setting was corrupt — and reports whether an automatic retile may
+         * proceed for that monitor+workspace. A retained PAUSE that still cannot be
+         * written returns false: the stored `auto` would otherwise place windows
+         * against the user's last command.
+         * @param {AppFacade} app
+         * @param {number} monitorIndex
+         * @param {number} wsIndex
+         * @returns {boolean}
+         */
+        _applyOrHonorPending(app: AppFacade, monitorIndex: number, wsIndex: number): boolean;
+        /**
+         * Applies the auto on/off commands queued before the registry was ready —
+         * called by the monitor-ready callback after connectAll and before the settle
+         * retile, so no automatic tiling runs against a requested pause. Each intent
+         * leaves the queue only once the layout write actually happened, so a throw
+         * mid-way (or a refusal by the layout guard, e.g. a corrupt layouts setting)
+         * keeps it queued for the next monitor-ready; an intent whose monitor no
+         * longer exists is dropped (there is no key to address it, and nothing ever
+         * will be).
+         * @param {AppFacade} app
+         */
+        applyPending(app: AppFacade): void;
         /** @param {AppFacade} app */
         activate(app: AppFacade): void;
         /** @param {AppFacade} app */
@@ -107,8 +174,20 @@ export const Auto: {
         _connectWorkspace(app: AppFacade, ws: AnyRecord): void;
         /** @param {AppFacade} app */
         connectAll(app: AppFacade): void;
+        /** @param {AppFacade} app */
+        _connectAll(app: AppFacade): void;
+        /**
+         * Releases every acquisition connectAll made and rebuilds the scope.
+         * @returns {boolean} whether the release was clean (the scope's signal manager
+         *   is empty again), i.e. whether a retry may safely re-register
+         */
+        _rollbackConnectAll(): boolean;
         /** @param {number} monitorIndex */
         pendingTake(monitorIndex: number): any;
+        /**
+         * @param {number} seq
+         */
+        pendingForget(seq: number): void;
         /** @param {number} seq */
         resizeStartTake(seq: number): any;
         /**
@@ -122,6 +201,11 @@ export const Auto: {
          * @param {number} now
          */
         sortTake(seq: number, now: number): any;
+        /**
+         * @param {number} seq
+         * @param {number} now
+         */
+        sortPeek(seq: number, now: number): any;
         /** @param {number} seq */
         sortClear(seq: number): void;
         /** @param {number} now */
@@ -159,8 +243,8 @@ export type AutoDeps = {
     layoutFor: (app: AppFacade, monitorIndex: number, wsIndex: number) => {
         auto: boolean;
     };
-    layoutSet: (app: AppFacade, monitorIndex: number, wsIndex: number, patch: {}) => void;
-    retileMonitor: (app: AppFacade, monitorIndex: number, focused: CinnamonWindow | null) => void;
+    layoutSet: (app: AppFacade, monitorIndex: number, wsIndex: number, patch: {}) => boolean;
+    retileMonitor: (app: AppFacade, monitorIndex: number, focused: CinnamonWindow | null, animate?: boolean, wsIndex?: number | null) => void;
     borderUpdate: () => void;
     grabIsResize: (op: string) => boolean;
     dropBegin: (app: AppFacade, w: CinnamonWindow, op: string) => boolean;

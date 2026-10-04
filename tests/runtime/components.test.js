@@ -84,6 +84,8 @@ const makeSettle = () => {
         now: ck.now,
         log: (msg) => logs.push(msg),
         onSettled: (app) => settledApps.push(app),
+        // the component tests settle for an App the session still owns
+        isLive: () => true,
     });
     return { ck, ml, logs, settledApps, settle };
 };
@@ -449,9 +451,26 @@ const { Auto } = load('./lib/runtime/auto');
 // Minimal per-App shape: only the surfaces the Auto component reads through the
 // app parameter (monitors readiness, settle liveness, the placement owner the
 // unmanaged handler releases through).
+// The session owns the retained auto-on/off queue; the component tests need only
+// its published surface (one monitor here, so slots are the numbered pair).
+const makeSessionStub = () => {
+    const session = {
+        settle: { started: 0, start() {} },
+        pendingAuto: [],
+        sameSlot(aMonitor, aWs, bMonitor, bWs) {
+            return aMonitor === bMonitor && aWs === bWs;
+        },
+        normalizePending() {},
+        dropIntent() {
+            session.pendingAuto.length = 0;
+        },
+    };
+    return session;
+};
+
 const makeApp = (overrides = {}) => ({
-    monitors: { ready: true },
-    session: { settle: { started: 0, start() {} } },
+    monitors: { ready: true, keys: ['mkey0', 'mkey1'] },
+    session: makeSessionStub(),
     placement: { release() {} },
     ...overrides,
 });
@@ -535,16 +554,16 @@ test('auto bridges: pendingTake resets per monitor, resizeStartTake consumes onc
 
 test('auto activate/deactivate: layout stored when off, retile follows, border refreshes, one log line per switch', () => {
     const { logs, calls, auto } = makeAuto({ focus: { get_monitor: () => 1 }, auto: false });
-    auto.activate('app');
+    auto.activate(makeApp());
     assert.deepEqual(calls.layoutSet, [{ monitorIndex: 1, wsIndex: 3, patch: { auto: true } }],
         'activating a paused monitor stores auto on for the monitor+workspace');
     assert.deepEqual(logs, ['greenTile auto tiling on for ws3']);
     const { logs: logs2, calls: calls2, auto: auto2 } = makeAuto({ focus: null, auto: true });
-    auto2.activate('app');
+    auto2.activate(makeApp());
     assert.deepEqual(calls2.layoutSet, [], 'already-on monitor: no settings write');
     assert.deepEqual(logs2, [], 'already-on monitor: no repeat log');
     assert.equal(calls2.retileMonitor.length, 1, 'pressing it again just tiles again');
-    auto2.deactivate('app');
+    auto2.deactivate(makeApp());
     assert.deepEqual(calls2.layoutSet, [{ monitorIndex: 1, wsIndex: 3, patch: { auto: false } }],
         'deactivation stores auto off for the focus monitor');
     assert.deepEqual(logs2, ['greenTile auto tiling off for ws3']);

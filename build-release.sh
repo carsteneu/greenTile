@@ -8,6 +8,10 @@ UUID=greenTile@carsteneu
 VER=$(python3 -c 'import json; print(json.load(open("metadata.json"))["version"])')
 STAGE="dist/greenTile-$VER"
 
+# A catalog that does not compile would only break in install.sh after the
+# release was published — stop here, before the existing artifact is removed.
+./scripts/check-catalogs.sh
+
 rm -rf "$STAGE" "dist/greenTile-$VER.zip"
 mkdir -p "$STAGE/$UUID/po"
 cp extension.js metadata.json settings-schema.json stylesheet.css icon.png LICENSE "$STAGE/$UUID/"
