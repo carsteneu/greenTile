@@ -6,6 +6,7 @@ export function layoutFor(app: AppFacade, monitorIndex: number, wsIndex: number)
     preset: Preset | null;
     auto: boolean;
 };
+export function autoAllowed(app: AppFacade, monitorIndex: number, wsIndex: number): boolean;
 export function layoutSet(app: AppFacade, monitorIndex: number, wsIndex: number, patch: {}): boolean;
 export function presetsWrite(app: AppFacade, presets: Preset[]): void;
 export function rulesPick(rules: Rule[], n: number): Rule | null;
