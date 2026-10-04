@@ -4,9 +4,11 @@
  * grip on it (St widget construction, Clutter event objects, Meta structs).
  * Dev-only: consumed by tsc, never part of the release zip.
  *
- * The runtime model matches Cinnamon's fileUtils.js createExports: module
- * code runs inside a 'use strict'-wrapped function with require/exports/
- * module bound, and `imports` and `global` are true globals of the shell.
+ * Library code uses the native GJS importer and the typed XletTree namespace;
+ * top-level var/function declarations provide the public module surface.
+ * Cinnamon 6.6 still wraps extension.js with fileUtils.js createExports, but
+ * the libraries do not use require/exports/module. `imports` and `global`
+ * are globals provided by the shell.
  */
 
 

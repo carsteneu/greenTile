@@ -8,14 +8,14 @@ Every feature in one line or two. Details and screenshots are in the [README](RE
 - **Auto retile**: opening, closing, minimizing or restoring a window retiles its monitor after 300 ms. Dialogs are ignored.
 - **Retile on workspace switch**: switching to a workspace with auto mode on tiles it again.
 - **Auto grid**: the layout used without a preset. From 2100 px width up to 6 windows in a row, then evenly filled full-width rows; on narrower monitors up to 3 in a row, then 3 columns with stacks.
-- **Screen-position order**: windows are placed in the order they already have on screen, so a hand-made arrangement is kept.
+- **Screen-position order**: windows are placed in the order they already have on screen. New windows normally join the end; a successful explicit drop keeps its chosen position, and focus navigation does not consume resize-order protection.
 - **Active workspace only**: only visible windows of the active workspace are tiled; minimized windows and other workspaces are left alone.
 - **Fixed columns**: `Super+Ctrl+3` and `Super+Ctrl+6` tile the windows of the focused monitor into 3 or 6 columns of equal width, in screen order; works without auto mode.
 - **Panel-aware work area**: Cinnamon panels that do not auto-hide are kept free; tiled windows are unmaximized first.
 - **Snap on release**: a window moved by hand snaps into the slot where it is dropped; its neighbours move up.
 - **Cross-monitor moves**: dragging a window to another monitor retiles both monitors.
 - **Animation**: windows glide into place in 250 ms. The window gets its final size at once, only the picture moves, so terminal text does not flicker. Can be turned off (**Animate tiling**).
-- **Window gap**: 0 to 48 px between tiled windows, set in the preset panel. Only inner edges move; windows stay flush with the screen edges.
+- **Window gap**: 0 to 48 px between tiled windows, set in the preset panel. Only inner edges move; windows stay flush with the screen edges. Insets are reduced when the available area cannot contain the requested gap.
 - **Directional focus**: `Super+Arrow` moves the keyboard focus to the neighbouring tiled window in that direction; at the monitor edge Left/Right continue onto the adjacent monitor. Native edge tiling everywhere else.
 - **Focus border**: after a `Super+Arrow` focus move, a thin border in the state color marks the newly focused window for three seconds; mouse and `Alt+Tab` focus changes do not show it, maximized and fullscreen windows never get it. Can be turned off.
 - **Single window fill**: when **Fill the monitor with a single window** is on, a lone tiled window on an auto-mode workspace or an assigned preset fills the whole usable area instead of being left untouched; with a preset, its rule for one window applies if it has one. Off by default, takes effect immediately.
@@ -25,7 +25,7 @@ Every feature in one line or two. Details and screenshots are in the [README](RE
 - **Presets**: named layouts made of rules by window count. Each rule sets the columns and how many windows each column stacks.
 - **Per monitor and workspace**: every monitor and workspace can have its own preset.
 - **Gap-free fill**: no cell stays empty: with fewer windows, stacked cells and then columns are dropped; with more windows, the rightmost column takes the rest.
-- **Pause**: `Super+Ctrl+D` pauses an assigned preset without removing it.
+- **Pause**: `Super+Ctrl+D` keeps the assigned preset but stops auto tiling, snap-on-release and swaps from that monitor and workspace. A pause requested before monitor readiness is retained; Auto on or an explicit preset selection resumes tiling.
 
 ## Preset panel
 
@@ -54,7 +54,7 @@ Every feature in one line or two. Details and screenshots are in the [README](RE
 
 - **Moving borders by mouse**: drag a tiled window's edge; the shared border moves and the neighbours follow. Corners move both axes.
 - **Moving borders by keyboard**: `Super+Alt+Arrow` makes the focused window wider, narrower, taller or shorter. A tap moves 1 px, holding speeds up to 64 px per step.
-- **Minimum size**: no window gets smaller than 120 px.
+- **Minimum size**: targets 120 px per dimension where space allows. An impossible budget is shared evenly instead; invalid or unplaceable frames are not applied. Application-enforced minimum sizes can still exceed the requested cells.
 - **Borders per window count**: borders are remembered per monitor, workspace and window count and survive resolution and gap changes.
 - **Split by drag**: dropping a window on the outer 25 % of another window's cell stacks it above or below, or opens a new column or row beside it. A translucent preview shows the result before release.
 - **Cross-monitor split**: split drops also work onto another monitor.
@@ -69,7 +69,7 @@ Every feature in one line or two. Details and screenshots are in the [README](RE
 
 ## Multiple monitors
 
-- **Stable monitor keys**: monitors are recognised by vendor, product and serial (plus connector for identical panels), so replugging or rearranging keeps assignments.
+- **Monitor keys**: hardware identity uses vendor, product and serial, plus the connector when the serial is missing or all zeros. If detection fails, a separate name-and-size fallback is used; assignments are not automatically transferred between hardware and fallback keys.
 - **Settle after hotplug**: after a monitor change greenTile waits until windows have moved and then retiles once.
 - **Workspaces only on primary**: with this Muffin setting, secondary monitors use one layout for all workspaces. Read live.
 
@@ -84,5 +84,6 @@ Every feature in one line or two. Details and screenshots are in the [README](RE
 - **Configurable hotkeys**: every key can be changed on the **Hotkeys** settings page.
 - **Live settings**: changes to hotkeys, the never tile list and colors apply without reloading.
 - **Translations**: all strings go through gettext; 19 languages, all complete.
-- **Release zip with installer**: `install.sh` installs the extension and compiles the translations; `update.sh` fetches and installs the latest release.
+- **Release zip with installer**: `install.sh` stages the extension and compiles translations before replacing the installation; `update.sh` fetches and installs the latest release. A Cinnamon restart is needed to activate updated library code, not just an extension toggle or reload.
+- **Validation**: automated tests, type and architecture checks, plus compilation of all translation catalogs before a release build. This does not replace live Cinnamon compatibility testing.
 - **Diagnostics**: `~/.xsession-errors` logs which windows were skipped and why (minimized, excluded, other monitor, no app, window type).

@@ -1,9 +1,7 @@
 'use strict';
-// Keeps tsconfig rootDirs in sync with the lib/ layers: Cinnamon resolves
-// every require against the xlet root (fileUtils.js), so a root-relative
-// require only type-checks when the importing directory is listed as a
-// rootDir. A new directory under lib/ must therefore be added there — this
-// test fails until it is, instead of falling back to untyped modules.
+// Keeps the tsconfig directory inventory aligned with JavaScript-containing
+// lib/ layers and checks that its entries still exist. Runtime dependencies use
+// the native XLET namespace; generated declarations provide cross-module types.
 const test = require('node:test');
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
@@ -34,7 +32,7 @@ test('tsconfig rootDirs covers every lib/ directory containing .js files', () =>
     assert.ok(Array.isArray(rootDirs), 'tsconfig.compilerOptions.rootDirs is missing');
     for (const dir of dirs) {
         const key = `lib/${dir}`;
-        assert.ok(rootDirs.includes(key), `rootDirs is missing '${key}' — root-relative requires inside it would type-check as untyped`);
+        assert.ok(rootDirs.includes(key), `rootDirs is missing JavaScript-containing '${key}'`);
     }
 });
 

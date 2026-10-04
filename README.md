@@ -7,7 +7,7 @@ Window tiling for Cinnamon: presets per monitor and workspace, an auto mode, sna
 ![Preset panel](docs/screenshots/preset-panel.png)
 
 - **UUID:** `greenTile@carsteneu`
-- **Requires:** Cinnamon 6.6 or newer (tested on Linux Mint)
+- **Requires:** Cinnamon 6.6; tested on Linux Mint with X11. Newer Cinnamon versions and Wayland are not yet fully verified.
 - **Website:** [carsteneu.github.io/greenTile](https://carsteneu.github.io/greenTile/)
 - **Video tour (6 min):** [YouTube](https://youtu.be/niI0LHYb1A8)
 - **All features at a glance:** [FEATURES.md](FEATURES.md)
@@ -74,6 +74,8 @@ Auto mode is switched per monitor and workspace. It is on by default where a pre
 
 Only visible windows of the active workspace are tiled. The order follows their position on screen.
 
+Pausing keeps the preset assigned but stops automatic tiling, snap-on-release and swapping from that monitor and workspace. Turning auto mode on or selecting a preset explicitly resumes tiling. A pause requested before monitor detection finishes is retained until it can be applied. New windows normally join the end of the layout; an explicit successful drop takes precedence over that automatic ordering.
+
 Without a preset, the auto grid depends on the monitor width:
 
 - **2100 px and wider:** up to 6 windows in one row, then evenly spread over full-width rows (7 = 4 + 3, 8 = 4 + 4).
@@ -83,7 +85,7 @@ With **Fill the monitor with a single window** on (settings, **Settings** page, 
 
 ## Adjusting the layout
 
-**Moving borders.** Drag the edge of a tiled window, or use `Super+Alt+Arrow`. Neighbours follow, no window gets smaller than 120 px. Borders are remembered per monitor, workspace and window count, so opening a fourth window uses the 4-window layout and closing it brings the 3-window borders back.
+**Moving borders.** Drag the edge of a tiled window, or use `Super+Alt+Arrow`. Neighbours follow. greenTile targets a minimum of 120 px per dimension when the available area and gaps allow it. When that is impossible, it distributes the remaining space evenly and reduces oversized gap insets; invalid or unplaceable frames are left untouched. Applications can enforce larger minimum sizes, so their actual windows may not fit the requested cells. Borders are remembered per monitor, workspace and window count, so opening a fourth window uses the 4-window layout and closing it brings the 3-window borders back.
 
 **Splitting by drag.** While moving a window over another tiled window, a preview shows where it will land. The outer 25 % of a cell are drop zones:
 
@@ -107,11 +109,13 @@ Borders and dragged layouts apply only in auto mode, not to `Super+Ctrl+3/6`.
 
 ## Multiple monitors
 
-Presets and auto mode are stored per monitor and workspace. Monitors are recognised by vendor, product and serial, so replugging or rearranging displays keeps every assignment. After a monitor change, greenTile waits until the windows have settled and then retiles once.
+Presets and auto mode are stored per monitor and workspace. When DisplayConfig provides a hardware identity, greenTile uses vendor, product and serial, with the connector added when the serial is missing or all zeros, to find the saved assignments after replugging or rearranging displays. If hardware detection fails, it uses a separate name-and-size fallback key. Assignments under the hardware key and the fallback key are not automatically joined. After a monitor change, greenTile waits until the windows have settled and then retiles once.
 
 With `workspaces-only-on-primary` on, secondary monitors share one layout across all workspaces.
 
 Known limitation: layouts are keyed by workspace number and shift when a workspace is removed.
+
+An external layout reset or import cancels older pending resize writes when Cinnamon delivers a changed value. Identical-value imports and the short interval before an external file change is delivered are not fully protected; avoid resetting or importing layouts while a resize is still pending.
 
 ## Appearance
 
@@ -125,23 +129,16 @@ Looking for a specific feature? [FEATURES.md](FEATURES.md) lists all of them.
 
 ## Development
 
-Deploy from a checkout. The DBus reload at the end re-reads only `extension.js`; when `lib/` changed, restart Cinnamon (X11: `Alt+F2` then `r`; Wayland: log out and back in) — the running process keeps the library code it loaded at startup:
+Build and install from a checkout using the same validated package as a release. The installer stages the extension and translations before replacing the existing installation. These commands install files; they do not activate changed library code in a running Cinnamon:
 
 ```bash
-D=~/.local/share/cinnamon/extensions/greenTile@carsteneu
-mkdir -p "$D"
-node --check extension.js
-cp extension.js metadata.json settings-schema.json stylesheet.css icon.png LICENSE "$D"/
-rm -rf "$D/lib"
-cp -R lib "$D/lib"
-for po in po/*.po; do
-  lang=$(basename "$po" .po)
-  mkdir -p ~/.local/share/locale/"$lang"/LC_MESSAGES
-  msgfmt --check -o ~/.local/share/locale/"$lang"/LC_MESSAGES/greenTile@carsteneu.mo "$po"
-done
-dbus-send --session --print-reply --dest=org.Cinnamon /org/Cinnamon org.Cinnamon.Eval \
-  string:"imports.ui.extensionSystem.disableExtension('greenTile@carsteneu'); imports.ui.extensionSystem.enableExtension('greenTile@carsteneu'); 'reloaded'"
-# that reload re-reads extension.js only; after a lib/ change, restart Cinnamon
+npm ci
+npm run check
+./build-release.sh
+version=$(node -p "require('./metadata.json').version")
+"./dist/greenTile-$version/install.sh"
+# Then restart Cinnamon on X11: Alt+F2, type r, press Enter.
+# Under Wayland, log out and back in instead.
 ```
 
 extension.js is the single entry and imports the modules from `lib/` — always
@@ -159,7 +156,7 @@ entry loads instead and silently runs that old library code.
 
 ### Architecture
 
-Plain CommonJS modules, loaded by Cinnamon's xlet `require`, in five layers. A module may only require modules of its own or a lower layer, and the require graph is strictly acyclic (Cinnamon's loader recurses forever on a cycle):
+Plain JavaScript modules, loaded through the native GJS importer, in five layers. A module may only import modules of its own or a lower layer, and the dependency graph is strictly acyclic:
 
 | Layer | Concern |
 |---|---|
@@ -169,7 +166,7 @@ Plain CommonJS modules, loaded by Cinnamon's xlet `require`, in five layers. A m
 | `lib/ui/` | preset panel, editor, Cairo drawing, gettext binding |
 | `lib/app/` | composition root: `App` builds the components, `Config` binds the settings and the hotkeys |
 
-`extension.js` starts the session in `enable()` and destroys it in `disable()`; a monitor change replaces the App inside the session. Modules load through the native GJS importer: every file resolves its own tree via `imports.extensions['greenTile@carsteneu'].lib.…` (loaded through the xlet directory importer on both Cinnamon 6.6 and 6.8), and only top-level `var`/function declarations are visible across modules. The guards in `tests/architecture/` enforce the layer table, the acyclic graph, zero module-level state, model purity, the settings key list and the shipped file list. `tests/` is organised like `lib/` (`model/`, `tiling/`, `runtime/`, `app/`) plus `architecture/`, `i18n/` and `helpers/`.
+`extension.js` starts the session in `enable()` and destroys it in `disable()`; a monitor change replaces the App inside the session. Library modules resolve their dependencies via `imports.extensions['greenTile@carsteneu'].lib.…`, and top-level `var`/function declarations expose their public API. On Cinnamon 6.6 the entry still uses Cinnamon's legacy wrapper, while `lib/` already uses native imports. This loading boundary has also been checked against pinned upstream source, not a complete Cinnamon 6.8 runtime. Native library modules stay cached until Cinnamon restarts. The guards in `tests/architecture/` enforce the layer table, the acyclic graph, no mutable module-level state apart from the entry's private lifecycle holder, model purity, the settings key list and the shipped file list. Generated declarations in `types/xlet/` keep cross-module JSDoc types checked without adding runtime build output. `tests/` is organised like `lib/` (`model/`, `tiling/`, `runtime/`, `app/`) plus `architecture/`, `i18n/` and `helpers/`.
 
 ## Origin
 

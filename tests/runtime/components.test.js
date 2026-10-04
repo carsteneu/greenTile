@@ -8,9 +8,8 @@
 // texts and timings are pinned by these tests.
 const test = require('node:test');
 const assert = require('node:assert/strict');
-// Components are loaded through the shared loader: their internal requires are
-// root-relative the way Cinnamon's fileUtils resolves them ('./lib/…' from any
-// file), which plain Node require cannot resolve from lib/runtime/.
+// Components import dependencies through the native XLET namespace. The shared
+// loader models that importer surface in Node, with injected Cinnamon fakes.
 const { load } = require('../helpers/cinnamon-loader');
 const { Session, Settle } = load('./lib/runtime/session');
 const { Monitors } = load('./lib/runtime/monitors');
