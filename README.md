@@ -15,7 +15,7 @@ Window tiling for Cinnamon: presets per monitor and workspace, an auto mode, sna
 ## Installation
 
 1. Download `greenTile-<version>.zip` from [Releases](https://github.com/carsteneu/greenTile/releases) and unzip it.
-2. Run `./install.sh`. It copies the extension to `~/.local/share/cinnamon/extensions/greenTile@carsteneu/` and compiles the translations (needs `msgfmt` from gettext, otherwise the UI stays English).
+2. Run `./install.sh`. It copies the extension to `~/.local/share/cinnamon/extensions/greenTile@carsteneu/` and compiles the translations (needs `msgfmt` from gettext, otherwise the UI stays English; it also needs `flock` from util-linux). Two installs started at once for the same account serialize on a lock — the later one stops with a note instead of interleaving.
 3. Restart Cinnamon (`Ctrl+Alt+Esc`, or `Alt+F2` → `r`). For an update this is what activates the replaced files: a running Cinnamon keeps the extension code it loaded at startup. On Wayland that restart does not exist, log out and back in instead.
 4. Enable greenTile in System Settings → Extensions.
 
@@ -129,7 +129,7 @@ Looking for a specific feature? [FEATURES.md](FEATURES.md) lists all of them.
 
 ## Development
 
-Build and install from a checkout using the same validated package as a release. The installer stages the extension and translations before replacing the existing installation. These commands install files; they do not activate changed library code in a running Cinnamon:
+Build and install from a checkout using the same validated package as a release. The installer stages the extension and translations before replacing the existing installation, and serializes cooperating installs for the same account on one lock. These commands install files; they do not activate changed library code in a running Cinnamon:
 
 ```bash
 npm ci

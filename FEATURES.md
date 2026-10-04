@@ -84,6 +84,6 @@ Every feature in one line or two. Details and screenshots are in the [README](RE
 - **Configurable hotkeys**: every key can be changed on the **Hotkeys** settings page.
 - **Live settings**: changes to hotkeys, the never tile list and colors apply without reloading.
 - **Translations**: all strings go through gettext; 19 languages, all complete.
-- **Release zip with installer**: `install.sh` stages the extension and compiles translations before replacing the installation; `update.sh` fetches and installs the latest release. A Cinnamon restart is needed to activate updated library code, not just an extension toggle or reload.
+- **Release zip with installer**: `install.sh` stages the extension and compiles translations before replacing the installation, and serializes concurrent installs for the same account on one lock; `update.sh` fetches and installs the latest release. A Cinnamon restart is needed to activate updated library code, not just an extension toggle or reload.
 - **Validation**: automated tests, type and architecture checks, plus compilation of all translation catalogs before a release build. This does not replace live Cinnamon compatibility testing.
 - **Diagnostics**: `~/.xsession-errors` logs which windows were skipped and why (minimized, excluded, other monitor, no app, window type).
