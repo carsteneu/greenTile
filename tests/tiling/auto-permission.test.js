@@ -9,7 +9,7 @@ const test = require('node:test');
 const assert = require('node:assert/strict');
 
 const { load } = require('../helpers/cinnamon-loader');
-const { makeEnv, enableOnMonitor } = require('../helpers/fakes/cinnamon-harness');
+const { makeEnv, makeWindow, makeWorkspace, enableOnMonitor } = require('../helpers/fakes/cinnamon-harness');
 
 // autoAllowed reads `imports.ui.main.layoutManager.monitors`, so the module must be
 // loaded through the fake env that installed `globalThis.imports`; the real app from
@@ -74,5 +74,28 @@ test('autoAllowed: the real app agrees with its own stored state and retained qu
     app.session.pendingAuto.push({ monitorIndex: 0, wsIndex: 0, auto: false });
     assert.equal(app.session.holdsPause(app, 0, 0), true, 'the pause is retained');
     assert.equal(autoAllowed(app, 0, 0), false, 'a retained pause wins over stored on');
+    ext.disable();
+});
+
+// The retile reaches the same decision through the shared query: with the stored
+// setting on but a pause retained, an automatic retile places nothing.
+test('autoAllowed gates the retile: a retained pause leaves the windows unmoved', () => {
+    const { env, ext } = makeEnv();
+    enableOnMonitor(env, ext);
+    const app = ext.currentSession().app;
+    const ws = makeWorkspace(env);
+    ws.index = () => 0;
+    env.activeWorkspace = ws;
+    const w1 = makeWindow(env, 1, [0, 0, 1000, 1100], 0);
+    const w2 = makeWindow(env, 2, [1000, 0, 1000, 1100], 0);
+    env.tabList.push(w1, w2);
+    app.ops.layoutSet(app, 0, 0, { auto: true });
+    app.ops.retileMonitor(app, 0, null, false);
+    assert.ok(w1.moves.length + w2.moves.length > 0, 'an allowed retile places the windows');
+    w1.moves.length = 0;
+    w2.moves.length = 0;
+    app.session.pendingAuto.push({ monitorIndex: 0, wsIndex: 0, auto: false });
+    app.ops.retileMonitor(app, 0, null, false);
+    assert.equal(w1.moves.length + w2.moves.length, 0, 'a retained pause gates the retile');
     ext.disable();
 });
