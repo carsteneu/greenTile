@@ -7,7 +7,7 @@ const test = require('node:test');
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const path = require('node:path');
-const { UUID, EXT, LATEST, TMP, REAL_MV, REAL_LN, REAL_RM, REAL_CAT, REAL_MKTEMP, runScript, mkdir, write } = require('../helpers/release-env');
+const { UUID, EXT, LATEST, TMP, REAL_MV, REAL_RM, REAL_MKTEMP, runScript, mkdir, write } = require('../helpers/release-env');
 const { ROOT } = require('../helpers/cinnamon-loader');
 
 const cleanups = [];
@@ -95,11 +95,9 @@ exec "\${GT_REAL_MV:?}" "$@"
     x.env = {
         HOME: x.home,
         PATH: `${x.bin}:${process.env.PATH}`,
-        GT_REAL_MV: REAL_MV,
-        GT_REAL_LN: REAL_LN,
-        GT_REAL_RM: REAL_RM,
-        GT_REAL_CAT: REAL_CAT,
-        GT_REAL_MKTEMP: REAL_MKTEMP,
+            GT_REAL_MV: REAL_MV,
+            GT_REAL_RM: REAL_RM,
+            GT_REAL_MKTEMP: REAL_MKTEMP,
     };
     if (failSwap) {
         x.env.GT_MVLOG = x.mvlog;
@@ -120,7 +118,7 @@ const readMetaVersion = (x) => {
 // the extensions parent must contain no staging leftovers after any outcome
 const noStagingLeftovers = (x) => {
     const parent = path.join(x.home, '.local', 'share', 'cinnamon', 'extensions');
-    return fs.readdirSync(parent).filter((e) => e.startsWith('.greenTile'));
+    return fs.readdirSync(parent).filter((e) => e.startsWith('.greenTile-install.'));
 };
 const oldInstallIntact = (x) => {
     assert.equal(readMetaVersion(x), '1.2.0');
@@ -326,239 +324,14 @@ test('a regular .mo file at the path is replaced with a valid compiled catalogue
     assert.deepEqual(fs.readdirSync(path.dirname(target)), [`${UUID}.mo`], 'no exchange leftovers');
 });
 
-// Wraps mv AND ln so a simulated concurrent actor can change the `.mo` path
-// between install.sh's checks and its final create, then delegates to the
-// real tool. It fires once (GT_RACE_ONCE) and touches GT_RACE_SEEN right
-// before delegating, proving the real tool was reached — so a race test can
-// never pass vacuously on the wrapper's own early exit.
-function raceWrapper(x, target, action) {
-    for (const [tool, real] of [['mv', REAL_MV], ['ln', REAL_LN]]) {
-        write(path.join(x.bin, tool), `#!/usr/bin/env bash
-case " $* " in
-    *" \${GT_RACE_MO:?} "*)
-        if [ ! -e "\${GT_RACE_ONCE:?}" ]; then
-            touch "\${GT_RACE_ONCE}"
-            ${action}
-        fi
-        ;;
-esac
-touch "\${GT_RACE_SEEN:?}"
-exec "${real}" "$@"
-`);
-        fs.chmodSync(path.join(x.bin, tool), 0o755);
-    }
-    x.env.GT_RACE_MO = target;
-    x.env.GT_RACE_SEEN = path.join(x.dir, 'race-seen');
-    x.env.GT_RACE_ONCE = path.join(x.dir, 'race-once');
-}
-const raceFired = (x) => fs.existsSync(x.env.GT_RACE_ONCE) && fs.existsSync(x.env.GT_RACE_SEEN);
-
-test('a directory that appears in the window is kept, never nested, and reported', () => {
-    const x = makeInstallEnv('install-mo-race-dir');
-    makeSource(x);
-    const target = moPath(x.home, 'de');
-    raceWrapper(x, target, 'mkdir -p "$GT_RACE_MO"');
-    const r = runInstall(x);
-    assert.equal(r.status, 0, `stderr: ${r.stderr}`);
-    assert.ok(raceFired(x), 'the simulated race must have fired');
-    assert.ok(fs.statSync(target).isDirectory(), 'the raced-in directory must be preserved');
-    assert.deepEqual(fs.readdirSync(target), [], 'the catalogue must not be nested in the raced-in directory');
-    assert.ok(noteNaming(r, target), `the warning must name the destination: ${r.stderr}`);
-});
-
-test('a symlink that appears in the window is preserved, its referent untouched, and reported', () => {
-    const x = makeInstallEnv('install-mo-race-link');
-    makeSource(x);
-    const target = moPath(x.home, 'de');
-    const referent = path.join(x.dir, 'user-catalogue.mo');
-    write(referent, 'user bytes\n');
-    raceWrapper(x, target, 'ln -s "$GT_RACE_LINK" "$GT_RACE_MO"');
-    x.env.GT_RACE_LINK = referent;
-    const r = runInstall(x);
-    assert.equal(r.status, 0, `stderr: ${r.stderr}`);
-    assert.ok(raceFired(x), 'the simulated race must have fired');
-    assert.ok(fs.lstatSync(target).isSymbolicLink(), 'the raced-in symlink must be preserved, not replaced by a regular file');
-    assert.equal(fs.readFileSync(referent, 'utf8'), 'user bytes\n', 'the link referent must be untouched');
-    assert.ok(noteNaming(r, target), `the warning must name the destination: ${r.stderr}`);
-});
-
-test('a symlink appearing after a plain file was captured stays where it is', () => {
-    const x = makeInstallEnv('install-mo-race-aside');
-    makeSource(x);
-    const target = moPath(x.home, 'de');
-    const referent = path.join(x.dir, 'user-catalogue.mo');
-    write(referent, 'user bytes\n');
-    write(target, 'old catalogue\n'); // a plain file at the initial check
-    raceWrapper(x, target, 'rm -f "$GT_RACE_MO"; ln -s "$GT_RACE_LINK" "$GT_RACE_MO"');
-    x.env.GT_RACE_LINK = referent;
-    const r = runInstall(x);
-    assert.equal(r.status, 0, `stderr: ${r.stderr}`);
-    assert.ok(raceFired(x), 'the simulated race must have fired');
-    assert.ok(fs.lstatSync(target).isSymbolicLink(), 'the raced-in symlink must be handed back, not consumed');
-    assert.equal(fs.readFileSync(referent, 'utf8'), 'user bytes\n', 'the link referent must be untouched');
-    assert.deepEqual(fs.readdirSync(path.dirname(target)), [`${UUID}.mo`], 'no exchange leftovers');
-    assert.ok(noteNaming(r, target), `the warning must name the destination: ${r.stderr}`);
-});
-
-test('a failing create keeps the previous catalogue rather than deleting it', () => {
-    const x = makeInstallEnv('install-mo-create-fails');
-    makeSource(x);
-    const target = moPath(x.home, 'de');
-    write(target, 'previous catalogue\n');
-    // the create fails for the reason this fix must survive: no hard links
-    // (a filesystem without them, or any other error), not a racing actor
-    write(path.join(x.bin, 'ln'), `#!/usr/bin/env bash
-case " $* " in
-    *" \${GT_FAIL_MO:?} "*) echo "ln: hard link not supported" >&2; exit 1 ;;
-esac
-exec "\${GT_REAL_LN:?}" "$@"
-`);
-    fs.chmodSync(path.join(x.bin, 'ln'), 0o755);
-    x.env.GT_FAIL_MO = target;
-    const r = runInstall(x);
-    assert.equal(r.status, 0, `stderr: ${r.stderr}`);
-    assert.ok(noteNaming(r, target), `the warning must name the destination: ${r.stderr}`);
-    // with no hard links at all neither the create nor the restore can work,
-    // so the contract is "never lost": the catalogue is either in place or
-    // preserved and reported, never deleted and never partially written
-    const present = fs.existsSync(target) ? [fs.readFileSync(target, 'utf8')] : [];
-    const preserved = present.concat(preservedUnder(target));
-    assert.ok(preserved.includes('previous catalogue\n'),
-        `the previous catalogue must survive, found: ${JSON.stringify(preserved)}`);
-    assert.deepEqual(leftoversUnder(target).filter((e) => e.endsWith('.new')), [],
-        'no staging file may be left behind');
-});
-
-// Wraps mv AND ln with a snippet that may act on the call's last argument
-// before delegating to the real tool. Primitive-agnostic on purpose: a test
-// must not stop firing just because the fix publishes with a different tool.
-// The patterns are UUID-scoped so the extension-tree swap is never touched.
-function wrapTools(x, body) {
-    for (const [tool, real] of [['mv', REAL_MV], ['ln', REAL_LN]]) {
-        write(path.join(x.bin, tool), `#!/usr/bin/env bash
-last="\${@: -1}"
-${body}
-touch "\${GT_RACE_SEEN:?}"
-exec "${real}" "$@"
-`);
-        fs.chmodSync(path.join(x.bin, tool), 0o755);
-    }
-    x.env.GT_UUID = UUID;
-    x.env.GT_RACE_SEEN = path.join(x.dir, 'race-seen');
-    x.env.GT_RACE_ONCE = path.join(x.dir, 'race-once');
-    x.env.GT_TARGET = moPath(x.home, 'de');
-}
-
-// finds a file by name among what the exchange left under the locale dir,
-// including one level inside a working directory we kept
-const findPreserved = (target, name) => {
-    const dir = path.dirname(target);
-    for (const entry of leftoversUnder(target)) {
-        for (const p of [path.join(dir, entry), ...(fs.lstatSync(path.join(dir, entry)).isDirectory()
-            ? fs.readdirSync(path.join(dir, entry)).map((i) => path.join(dir, entry, i)) : [])]) {
-            if (path.basename(p) === name && fs.lstatSync(p).isFile()) {return p;}
-            if (fs.lstatSync(p).isDirectory() && fs.existsSync(path.join(p, name))) {return path.join(p, name);}
-        }
-    }
-    return null;
-};
-
+// every name our exchange leaves behind under the catalogue's directory
 const leftoversUnder = (target) => fs.readdirSync(path.dirname(target))
     .filter((e) => e.startsWith(`.${UUID}.`));
 
-// every name the exchange left behind, including inside a kept working dir
-const leftoverNames = (target) => {
-    const dir = path.dirname(target);
-    const out = [];
-    for (const entry of leftoversUnder(target)) {
-        const p = path.join(dir, entry);
-        out.push(entry);
-        if (fs.lstatSync(p).isDirectory()) {
-            for (const inner of fs.readdirSync(p)) {out.push(inner);}
-        }
-    }
-    return out;
-};
-
-// the catalogue-ish objects the exchange may have left under the locale dir,
-// whether they sit directly there or inside a working directory we kept
-const preservedUnder = (target) => {
-    const dir = path.dirname(target);
-    const out = [];
-    for (const entry of leftoversUnder(target)) {
-        const p = path.join(dir, entry);
-        const st = fs.lstatSync(p);
-        if (st.isFile()) {
-            out.push(fs.readFileSync(p, 'utf8'));
-        } else if (st.isDirectory()) {
-            for (const inner of fs.readdirSync(p)) {
-                const q = path.join(p, inner);
-                if (fs.lstatSync(q).isFile()) {out.push(fs.readFileSync(q, 'utf8'));}
-            }
-        }
-    }
-    return out;
-};
-
-test('a link that appears before the create is never overwritten', () => {
-    const x = makeInstallEnv('install-mo-restore-boundary');
-    makeSource(x);
-    const target = moPath(x.home, 'de');
-    const referent = path.join(x.dir, 'appeared.mo');
-    write(referent, 'appeared bytes\n');
-    write(target, 'previous catalogue\n'); // a plain file: passes the up-front check
-    // the first attempt to put the catalogue at $modest finds a link already
-    // there (the wrapper creates it, the real tool then refuses); nothing the
-    // installer does afterwards may overwrite that link
-    wrapTools(x, `case "$last" in
-    "\${GT_TARGET:?}")
-        if [ ! -e "\${GT_RACE_ONCE:?}" ]; then
-            touch "\${GT_RACE_ONCE}"
-            ln -s "\${GT_LINK:?}" "\${GT_TARGET:?}"
-        fi
-        ;;
-esac`);
-    x.env.GT_LINK = referent;
-    const r = runInstall(x);
-    assert.equal(r.status, 0, `stderr: ${r.stderr}`);
-    assert.ok(raceFired(x), 'the simulated collision must have fired');
-    assert.ok(fs.lstatSync(target).isSymbolicLink(), 'the link that appeared must survive');
-    assert.equal(fs.readFileSync(referent, 'utf8'), 'appeared bytes\n', 'the link referent must be untouched');
-    assert.ok(noteNaming(r, target), `the warning must name the destination: ${r.stderr}`);
-    assert.deepEqual(leftoversUnder(target).filter((e) => e.endsWith('.new')), [],
-        'no staging file may be left behind');
-});
-
-test('a link that appears while the occupant is captured stays in place', () => {
-    const x = makeInstallEnv('install-mo-capture-link');
-    makeSource(x);
-    const target = moPath(x.home, 'de');
-    const captured = path.join(x.dir, 'captured.mo');
-    write(captured, 'captured bytes\n');
-    write(target, 'placeholder\n'); // a plain file: passes the up-front check
-    // the occupant turns into a link while it is being captured, so it is not
-    // a plain catalogue: it must stay exactly where the user put it, and
-    // nothing of ours may take its place
-    wrapTools(x, `case "$last" in
-    *".\${GT_UUID:?}"*/old)
-        case " $* " in
-            *" \${GT_TARGET:?} "*)
-                rm -f "\${GT_TARGET:?}"
-                ln -s "\${GT_CAPTURED:?}" "\${GT_TARGET:?}"
-                ;;
-        esac
-        ;;
-esac`);
-    x.env.GT_CAPTURED = captured;
-    const r = runInstall(x);
-    assert.equal(r.status, 0, `stderr: ${r.stderr}`);
-    assert.ok(fs.existsSync(x.env.GT_RACE_SEEN), 'the wrapper must have reached the real tool');
-    assert.equal(fs.readlinkSync(target), captured, 'the link must stay exactly where it is');
-    assert.equal(fs.readFileSync(captured, 'utf8'), 'captured bytes\n', 'its referent must be untouched');
-    assert.ok(noteNaming(r, target), `the warning must name the destination: ${r.stderr}`);
-    assert.deepEqual(leftoversUnder(target), [], 'nothing of ours may be left behind');
-});
-
+// The pre-existing directory / symlink refusals are pinned above. The tests
+// below pin the rest of the catalogue behaviour: the path is never removed by
+// name, the working name is taken exclusively, and a failed publish leaves the
+// previous catalogue in place and reported.
 test('the catalogue path is never removed by name', () => {
     const x = makeInstallEnv('install-mo-no-rm');
     makeSource(x);
@@ -582,31 +355,6 @@ exec "\${GT_REAL_RM:?}" "$@"
     assert.ok(!fs.existsSync(x.env.GT_RACE_SEEN),
         'the catalogue path must never be removed by name — that would destroy whatever took it');
     assert.equal(fs.readFileSync(target).readUInt32LE(0), GMO_MAGIC, 'the catalogue must be in place');
-});
-
-test('a claimed working name is never reopened for writing', () => {
-    const x = makeInstallEnv('install-mo-no-reopen');
-    makeSource(x);
-    const target = moPath(x.home, 'de');
-    write(target, 'previous catalogue\n');
-    // force the cross-filesystem path, where an earlier version claimed the
-    // working name and then reopened it by path to write into it: a symlink
-    // planted in that window would redirect the write onto someone else's file
-    write(path.join(x.bin, 'ln'), `#!/usr/bin/env bash
-echo "ln: simulated cross-device failure" >&2
-exit 1
-`);
-    fs.chmodSync(path.join(x.bin, 'ln'), 0o755);
-    write(path.join(x.bin, 'cat'), `#!/usr/bin/env bash
-touch "\${GT_RACE_SEEN:?}"
-exec "\${GT_REAL_CAT:?}" "$@"
-`);
-    fs.chmodSync(path.join(x.bin, 'cat'), 0o755);
-    x.env.GT_RACE_SEEN = path.join(x.dir, 'cat-seen');
-    const r = runInstall(x);
-    assert.equal(r.status, 0, `stderr: ${r.stderr}`);
-    assert.ok(!fs.existsSync(x.env.GT_RACE_SEEN),
-        'a claimed name must never be reopened by path to be written into');
 });
 
 test('the working directory is asked for exclusively', () => {
@@ -652,122 +400,61 @@ exec "\${GT_REAL_MKTEMP:?}" "$@"
     assert.deepEqual(leftoversUnder(target), [], 'nothing may be left behind');
 });
 
-test('a directory captured mid-flight stays in place, never nested', () => {
-    const x = makeInstallEnv('install-mo-capture-dir');
-    makeSource(x);
-    const target = moPath(x.home, 'de');
-    write(target, 'previous catalogue\n'); // a plain file: passes the up-front check
-    // the occupant turns into a directory while it is being captured, so it is
-    // not a plain catalogue: it must neither be nested into nor replaced
-    wrapTools(x, `case "$last" in
-    *".\${GT_UUID:?}"*/old)
-        case " $* " in
-            *" \${GT_TARGET:?} "*)
-                rm -f "\${GT_TARGET:?}"
-                mkdir -p "\${GT_TARGET:?}"
-                printf 'user file' > "\${GT_TARGET:?}/keep.txt"
-                ;;
-        esac
-        ;;
-esac`);
-    const r = runInstall(x);
-    assert.equal(r.status, 0, `stderr: ${r.stderr}`);
-    assert.ok(fs.existsSync(x.env.GT_RACE_SEEN), 'the simulated capture race must have fired');
-    assert.ok(!fs.existsSync(target), 'nothing may be nested or created at the path');
-    // the directory cannot be hard-linked back, so it is preserved, intact and
-    // reported rather than dropped over whatever holds the name
-    const kept = findPreserved(target, 'keep.txt');
-    assert.ok(kept, `the captured directory must be preserved: ${JSON.stringify(leftoversUnder(target))}`);
-    assert.equal(fs.readFileSync(kept, 'utf8'), 'user file', 'the captured directory content must be intact');
-    assert.ok(noteNaming(r, target), `the warning must name the destination: ${r.stderr}`);
-});
-
-test('a create that fails with nothing at the path reports the real cause', () => {
-    const x = makeInstallEnv('install-mo-create-cause');
-    makeSource(x);
-    const target = moPath(x.home, 'de');
-    // no hard-link support anywhere: every create fails, and nothing ever
-    // appeared at the path, so the note must not blame a racing object
-    write(path.join(x.bin, 'ln'), `#!/usr/bin/env bash
-echo "ln: hard link not supported" >&2
-exit 1
-`);
-    fs.chmodSync(path.join(x.bin, 'ln'), 0o755);
-    const r = runInstall(x);
-    assert.equal(r.status, 0, `stderr: ${r.stderr}`);
-    assert.ok(noteNaming(r, target), `the warning must name the destination: ${r.stderr}`);
-    assert.ok(!r.stderr.includes('appeared in the meantime'),
-        `nothing appeared, so the note must not blame a racing object: ${r.stderr}`);
-});
-
-test('a refused give-back keeps the preserved object but not our staged file', () => {
-    const x = makeInstallEnv('install-mo-giveback-preserve');
-    makeSource(x);
-    const target = moPath(x.home, 'de');
-    const captured = path.join(x.dir, 'captured.mo');
-    write(captured, 'captured bytes\n');
-    write(target, 'placeholder\n'); // a plain file: passes the up-front check
-    // the occupant turns into a link while it is captured, and every give-back
-    // is refused: the object must be preserved, but the catalogue we staged for
-    // ourselves must not be left lying next to it
-    wrapTools(x, `tool="\${0##*/}"
-case "$last" in
-    *".\${GT_UUID:?}"*/old)
-        case " $* " in
-            *" \${GT_TARGET:?} "*)
-                rm -f "\${GT_TARGET:?}"
-                "\${GT_REAL_LN:?}" -s "\${GT_CAPTURED:?}" "\${GT_TARGET:?}"
-                ;;
-        esac
-        ;;
-    "\${GT_TARGET:?}")
-        if [ "$tool" = ln ]; then exit 1; fi
-        ;;
-esac`);
-    x.env.GT_CAPTURED = captured;
-    const r = runInstall(x);
-    assert.equal(r.status, 0, `stderr: ${r.stderr}`);
-    assert.ok(fs.existsSync(x.env.GT_RACE_SEEN), 'the wrapper must have reached the real tool');
-    assert.ok(leftoverNames(target).includes('old'), `the captured link must be kept: ${JSON.stringify(leftoverNames(target))}`);
-    assert.ok(!leftoverNames(target).includes('new'), `our own staged file must not be left behind: ${JSON.stringify(leftoverNames(target))}`);
-    assert.ok(noteNaming(r, target), `the warning must name the destination: ${r.stderr}`);
-});
-
-test('a refused restore keeps the preserved catalogue but not our staged file', () => {
-    const x = makeInstallEnv('install-mo-restore-preserve');
+test('a failing catalogue publish keeps the previous catalogue and warns', () => {
+    const x = makeInstallEnv('install-mo-publish-fail');
     makeSource(x);
     const target = moPath(x.home, 'de');
     write(target, 'previous catalogue\n');
-    // every create fails, so the previous catalogue is preserved and reported —
-    // and the catalogue we staged for ourselves must not be left next to it
-    write(path.join(x.bin, 'ln'), `#!/usr/bin/env bash
-echo "ln: hard link not supported" >&2
-exit 1
-`);
-    fs.chmodSync(path.join(x.bin, 'ln'), 0o755);
-    const r = runInstall(x);
-    assert.equal(r.status, 0, `stderr: ${r.stderr}`);
-    assert.ok(leftoverNames(target).includes('old'), `the captured catalogue must be kept: ${JSON.stringify(leftoverNames(target))}`);
-    assert.ok(!leftoverNames(target).includes('new'), `our own staged file must not be left behind: ${JSON.stringify(leftoverNames(target))}`);
-    assert.ok(noteNaming(r, target), `the warning must name the destination: ${r.stderr}`);
-});
-
-test('a staging failure names the catalogue it could not install', () => {
-    const x = makeInstallEnv('install-mo-stage-warn');
-    makeSource(x);
-    const target = moPath(x.home, 'de');
-    write(target, 'previous catalogue\n');
+    // the rename into place fails (e.g. the filesystem refuses it): the
+    // previous catalogue must stay and the note must name the path, so the
+    // extension keeps working (English fallback if the catalogue is unusable)
     write(path.join(x.bin, 'mv'), `#!/usr/bin/env bash
 case "\${@: -1}" in
-    *".\${GT_UUID:?}"*/new) echo "mv: simulated staging failure" >&2; exit 1 ;;
+    */${UUID}.mo) echo "mv: simulated failure" >&2; exit 1 ;;
 esac
 exec "\${GT_REAL_MV:?}" "$@"
 `);
     fs.chmodSync(path.join(x.bin, 'mv'), 0o755);
-    x.env.GT_UUID = UUID;
     const r = runInstall(x);
     assert.equal(r.status, 0, `stderr: ${r.stderr}`);
     assert.ok(noteNaming(r, target), `the warning must name the destination: ${r.stderr}`);
-    assert.equal(fs.readFileSync(target, 'utf8'), 'previous catalogue\n', 'the catalogue must stay untouched');
+    assert.equal(fs.readFileSync(target, 'utf8'), 'previous catalogue\n', 'the previous catalogue must survive');
     assert.deepEqual(leftoversUnder(target), [], 'nothing may be left behind');
+});
+
+// a PATH that behaves like a system without flock: symlink the usual bin dirs
+// except flock, so the installer's `command -v flock` check fails for real
+function binWithoutFlock(dir) {
+    const bin = path.join(dir, 'no-flock-bin');
+    mkdir(bin);
+    for (const src of ['/usr/bin', '/bin']) {
+        let entries;
+        try {
+            entries = fs.readdirSync(src);
+        } catch {
+            continue;
+        }
+        for (const name of entries) {
+            if (name === 'flock') {continue;}
+            const dst = path.join(bin, name);
+            if (fs.existsSync(dst)) {continue;}
+            try {
+                fs.symlinkSync(path.join(src, name), dst);
+            } catch {
+                // unreadable or duplicate entry: not needed by the installer
+            }
+        }
+    }
+    return bin;
+}
+
+test('without flock the installer aborts clearly and leaves the installation untouched', () => {
+    const x = makeInstallEnv('install-no-flock');
+    makeSource(x);
+    seedOldInstall(x.home);
+    const r = runScript(path.join(x.dir, 'release', 'install.sh'), [],
+        Object.assign({}, x.env, { PATH: binWithoutFlock(x.dir) }));
+    assert.notEqual(r.status, 0, 'a missing flock must fail the install');
+    assert.ok(r.stderr.includes('need flock'), `the diagnostic must name flock: ${r.stderr}`);
+    oldInstallIntact(x);
 });

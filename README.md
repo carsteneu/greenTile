@@ -15,11 +15,11 @@ Window tiling for Cinnamon: presets per monitor and workspace, an auto mode, sna
 ## Installation
 
 1. Download `greenTile-<version>.zip` from [Releases](https://github.com/carsteneu/greenTile/releases) and unzip it.
-2. Run `./install.sh`. It copies the extension to `~/.local/share/cinnamon/extensions/greenTile@carsteneu/` and compiles the translations (needs `msgfmt` from gettext, otherwise the UI stays English).
+2. Run `./install.sh`. It copies the extension to `~/.local/share/cinnamon/extensions/greenTile@carsteneu/` and compiles the translations (needs `msgfmt` from gettext, otherwise the UI stays English; it also needs `flock` from util-linux). Two installs of this version started at once for the same account share one lock: the first runs, the later one stops with a note instead of interleaving (an older installer that predates the lock is not covered).
 3. Restart Cinnamon (`Ctrl+Alt+Esc`, or `Alt+F2` → `r`). For an update this is what activates the replaced files: a running Cinnamon keeps the extension code it loaded at startup. On Wayland that restart does not exist, log out and back in instead.
 4. Enable greenTile in System Settings → Extensions.
 
-To update an installed greenTile, run `./update.sh` from the unpacked zip instead: it downloads the latest release from GitHub and installs it (needs `unzip` and `curl` or `wget`). Re-running it does nothing when the newest version is already installed; `--force` reinstalls. An update replaces the installed files, but the running Cinnamon keeps the library code it loaded at startup — enabling the extension again or reloading it re-reads only `extension.js`. Restart Cinnamon (X11) or log out and back in (Wayland) before judging the new version.
+To update an installed greenTile, run `./update.sh` from the unpacked zip instead: it downloads the latest release from GitHub and installs it (needs `unzip`, `curl` or `wget`, and `flock` from util-linux, which the bundled installer uses to serialize concurrent installs). Re-running it does nothing when the newest version is already installed; `--force` reinstalls. An update replaces the installed files, but the running Cinnamon keeps the library code it loaded at startup — enabling the extension again or reloading it re-reads only `extension.js`. Restart Cinnamon (X11) or log out and back in (Wayland) before judging the new version.
 
 **Updating from 1.2.0 or older:** the settings of four hotkeys have new internal names — *Tile all windows into 3 columns*, *Tile all windows into 6 columns* and turning automatic tiling on and off. On the first start Cinnamon resets these four to their defaults (`Super+Ctrl+3`, `Super+Ctrl+6`, `Super+Ctrl+A`, `Super+Ctrl+D`). If you had changed them, set them again on the **Hotkeys** page. All other settings, presets and layouts are kept.
 
@@ -129,7 +129,7 @@ Looking for a specific feature? [FEATURES.md](FEATURES.md) lists all of them.
 
 ## Development
 
-Build and install from a checkout using the same validated package as a release. The installer stages the extension and translations before replacing the existing installation. These commands install files; they do not activate changed library code in a running Cinnamon:
+Build and install from a checkout using the same validated package as a release. The installer stages the extension and translations before replacing the existing installation, and serializes cooperating installs for the same account on one lock. These commands install files; they do not activate changed library code in a running Cinnamon:
 
 ```bash
 npm ci
