@@ -56,6 +56,18 @@ export const Auto: {
          */
         _monitorWritable(app: AppFacade, monitorIndex: number): boolean;
         /**
+         * Stores an auto on/off command for its monitor+workspace slot, newest wins: the
+         * intent already retained for the slot is dropped, the new one appended. The one
+         * enqueue path — reached both when the registry cannot address the target yet and
+         * when the layout guard refused the write (a corrupt layouts setting). The queue
+         * stays bounded by the monitor/workspace count, so a held hotkey cannot grow it.
+         * @param {AppFacade} app
+         * @param {number} monitorIndex
+         * @param {number} wsIndex
+         * @param {boolean} auto
+         */
+        _retainAuto(app: AppFacade, monitorIndex: number, wsIndex: number, auto: boolean): void;
+        /**
          * @param {AppFacade} app
          * @param {number} monitorIndex
          * @param {number} wsIndex
@@ -92,6 +104,18 @@ export const Auto: {
          * @param {boolean} auto
          */
         _holdRefused(app: AppFacade, monitorIndex: number, wsIndex: number, auto: boolean): void;
+        /**
+         * Applies an explicit auto on/off command: writes it when the registry can
+         * address the monitor, then drops the retained intent for that slot — removed
+         * ONLY once the write actually landed, so a refused write (a corrupt layouts
+         * setting) leaves the intent in place. The one successful-write/removal path.
+         * @param {AppFacade} app
+         * @param {number} monitorIndex
+         * @param {number} wsIndex
+         * @param {boolean} auto
+         * @returns {boolean} whether the command was written
+         */
+        _applyAuto(app: AppFacade, monitorIndex: number, wsIndex: number, auto: boolean): boolean;
         /**
          * Applies a retained intent that outranks the stored setting — one held while
          * the layouts setting was corrupt — and reports whether an automatic retile may
