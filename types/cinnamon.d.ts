@@ -110,6 +110,10 @@ declare const imports: {
         timeout_add(ms: number, callback: () => boolean, priority?: number): number;
         source_remove(id: number): void;
     };
+    byteArray: {
+        /** UTF-8 string to ByteArray (a Uint8Array), for GLib.Bytes. */
+        fromString(contents: string): Uint8Array;
+    };
     gettext: {
         bindtextdomain(domain: string, dir: string): void;
         dgettext(domain: string, msgid: string): string;

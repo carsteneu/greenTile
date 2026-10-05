@@ -188,6 +188,12 @@ const createCinnamonEnv = (options) => {
         // original addChrome/removeChrome were no-ops)
         chromeChildren: [],
         gioSettings: [],
+        // every ByteArray handed to Gio.File.replace_contents_bytes_async (the
+        // theme's accent stylesheet write); the file ops complete synchronously
+        // so enable() still leaves the sheet loaded
+        accentWrites: [],
+        // stylesheet-file cleanup: paths removed via Gio.File.delete_async
+        accentDeletes: [],
         // schema values for fake Gio.Settings.get_string, keyed by schema_id:
         // { 'org.x.apps.portal': { 'color-scheme': 'prefer-dark' } }
         schemaValues: {},
@@ -380,7 +386,17 @@ const createCinnamonEnv = (options) => {
         build_filenamev: (parts) => parts.join('/'),
         path_get_dirname: (p) => p.split('/').slice(0, -1).join('/') || '.',
         mkdir_with_parents: () => true,
-        file_set_contents: () => true,
+        // GLib.Bytes wrapper for the async accent write. The theme passes
+        // imports.byteArray.fromString(css) (a Uint8Array); Bytes keeps it
+        // verbatim so a test can read the written stylesheet back.
+        Bytes: class {
+            constructor(contents) {
+                if (!(contents instanceof Uint8Array)) {
+                    throw new TypeError('GLib.Bytes: expected a ByteArray (Uint8Array)');
+                }
+                this.contents = contents;
+            }
+        },
     };
 
     // --- settings: Cinnamon slot model, one object per uuid
@@ -591,6 +607,32 @@ const createCinnamonEnv = (options) => {
     const gio = {
         DBusCallFlags: { NONE: 'none' },
         FileMonitorFlags: { NONE: 0, WATCH_MOVES: 2 },
+        FileCreateFlags: { NONE: 0, PRIVATE: 1, REPLACE_DESTINATION: 2 },
+        // Synchronous-completing async file ops for the lifecycle tests: the real
+        // engine completes asynchronously, but the accent write must land before
+        // enable() returns so the sheet is loaded (the async timing itself is
+        // covered by tests/runtime/theme.test.js over an on-demand fake).
+        File: {
+            new_for_path(path) {
+                return {
+                    get_path: () => path,
+                    replace_contents_bytes_async(bytes, _etag, _backup, _flags, _cancellable, cb) {
+                        env.accentWrites.push(bytes.contents);
+                        cb(null, {});
+                    },
+                    replace_contents_finish() {
+                        return [true, 'fake-etag'];
+                    },
+                    delete_async(_priority, _cancellable, cb) {
+                        env.accentDeletes.push(path);
+                        cb(null, {});
+                    },
+                    delete_finish() {
+                        return true;
+                    },
+                };
+            },
+        },
         Cancellable: class {
             constructor() {
                 this.cancelled = false;
@@ -841,6 +883,11 @@ const createCinnamonEnv = (options) => {
         dgettext: (_domain, str) => str,
         gettext: (str) => str,
     };
+    // imports.byteArray: fromString() -> ByteArray (Uint8Array), the exact shape
+    // the theme feeds to GLib.Bytes for the accent stylesheet write
+    env.byteArray = {
+        fromString: (contents) => new TextEncoder().encode(contents),
+    };
     env.imports = new Proxy(function () {}, {
         get: (t, p) => {
             if (p === Symbol.toPrimitive)
@@ -853,6 +900,8 @@ const createCinnamonEnv = (options) => {
                 {return env.mainloop;}
             if (p === 'gettext')
                 {return env.gettext;}
+            if (p === 'byteArray')
+                {return env.byteArray;}
             if (p === 'extensions')
                 {return env.extensions;}
             if (p === 'misc')

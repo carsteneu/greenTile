@@ -9,8 +9,7 @@
  * @property {AnyRecord} main imports.ui.main
  * @property {AnyRecord} global the global object
  * @property {AnyRecord} glib imports.gi.GLib
- * @property {AnyRecord} session the extension Session carrying the accent generation
- * sequence and the last-written stylesheet content
+ * @property {AnyRecord} byteArray imports.byteArray, fromString() = ByteArray
  * @property {() => string} nextAccentGen () => 'gk-acc<n>'
  * @property {() => AnyRecord | null} panelOpen () => app.panel.actor, null while no panel is open
  * @property {(app: AppFacade) => void} panelRebuild (app) => panelRebuild(app)
@@ -23,6 +22,15 @@
  * @property {SettingsFacade} settings
  * @property {AppFacade} app
  */
+/**
+ * One look request queued behind the asynchronous stylesheet write.
+ * @typedef {Object} LookRequest
+ * @property {string} css the generated stylesheet content for this look
+ * @property {'dark' | 'light'} theme the resolved panel theme
+ * @property {Rgb} base the resolved accent color
+ * @property {Rgb} stateBase the resolved state color
+ * @property {ThemeConfig} config
+ */
 export const Theme: {
     new (deps: ThemeDeps): {
         _deps: ThemeDeps;
@@ -31,7 +39,7 @@ export const Theme: {
         _main: AnyRecord;
         _global: AnyRecord;
         _glib: AnyRecord;
-        _session: AnyRecord;
+        _byteArray: AnyRecord;
         /** @type {'dark' | 'light'} */ _theme: "dark" | "light";
         _config: ThemeConfig | null;
         _portal: any;
@@ -39,11 +47,25 @@ export const Theme: {
         _cinnamon: any;
         _cinnamonSig: number;
         _rgb: any;
-        _stateRgb: any;
+        _stateRgb: Rgb | null;
         _path: any;
         _themeObj: any;
         _themeSig: number;
         _gen: string;
+        _written: string;
+        _loaded: string;
+        _busy: boolean;
+        _pending: {
+            config: ThemeConfig;
+            css: string;
+            theme: "dark" | "light";
+            base: any;
+            stateBase: any;
+        } | null;
+        _destroyed: boolean;
+        _deleteWhenDone: boolean;
+        _directoryReady: boolean;
+        _token: string;
         /** Resolved panel theme. */
         get theme(): "dark" | "light";
         /** Resolved accent color.
@@ -81,15 +103,46 @@ export const Theme: {
         _probe(className: string, pseudoClass: string): Rgb | null;
         /**
          * @param {AnyRecord} theme the live St.Theme object
-         * @param {string} path stylesheet path
+         * @param {string} css the content that is now on disk at the stylesheet path
          */
-        _load(theme: AnyRecord, path: string): void;
+        _load(theme: AnyRecord, css: string): void;
         _unload(): void;
         _accentPath(): any;
         /**
          * @param {ThemeConfig} config
+         * @param {'dark' | 'light'} theme the freshly resolved panel theme
          */
-        _apply(config: ThemeConfig): void;
+        _apply(config: ThemeConfig, theme: "dark" | "light"): void;
+        /** Writes the pending request's css when needed; the newest request wins. */
+        _drain(): void;
+        /**
+         * A settled write (or its failure): commit the look when this request is
+         * still the newest, and on failure re-run the queue so a newer request wins.
+         * @param {LookRequest} request
+         * @param {any} error
+         */
+        _settle(request: LookRequest, error: any): void;
+        /** Prepares the private (0700) cache directory once after a successful mkdir. */
+        _mkdir(): void;
+        /**
+         * Starts the async bytes write of css to this Theme's file, user-only
+         * (Gio.FileCreateFlags.PRIVATE) and replacing any previous content. No
+         * Cancellable is passed: cancelling an in-flight replace may leave the
+         * destination truncated. A construction throw is routed to done so the
+         * queue never wedges.
+         * @param {string} css
+         * @param {(error: any) => void} done
+         */
+        _write(css: string, done: (error: any) => void): void;
+        /**
+         * Commits a persisted (or unchanged) look: theme class, colors, sheet
+         * (re)load and the border and an open panel repaint. Only runs while this
+         * component is alive — a write may settle after destroy().
+         * @param {LookRequest} request
+         */
+        _commit(request: LookRequest): void;
+        /** Best-effort async removal of this Theme's stylesheet file. */
+        _deleteFile(): void;
     };
 };
 /**
@@ -118,10 +171,9 @@ export type ThemeDeps = {
      */
     glib: AnyRecord;
     /**
-     * the extension Session carrying the accent generation
-     * sequence and the last-written stylesheet content
+     * imports.byteArray, fromString() = ByteArray
      */
-    session: AnyRecord;
+    byteArray: AnyRecord;
     /**
      * () => 'gk-acc<n>'
      */
@@ -143,4 +195,26 @@ export type ThemeDeps = {
 export type ThemeConfig = {
     settings: SettingsFacade;
     app: AppFacade;
+};
+/**
+ * One look request queued behind the asynchronous stylesheet write.
+ */
+export type LookRequest = {
+    /**
+     * the generated stylesheet content for this look
+     */
+    css: string;
+    /**
+     * the resolved panel theme
+     */
+    theme: "dark" | "light";
+    /**
+     * the resolved accent color
+     */
+    base: Rgb;
+    /**
+     * the resolved state color
+     */
+    stateBase: Rgb;
+    config: ThemeConfig;
 };
