@@ -182,6 +182,9 @@ const createCinnamonEnv = (options) => {
         timers: new Map(),
         cancellables: [],
         tabList: [],
+        // pointer position the fake global.get_pointer reports; a test can move it
+        // (drag/drop target resolution)
+        pointer: [0, 0],
         uiGroupChildren: [],
         overlayChildren: [],
         // chrome surface accounting for the preset panel (additive: the
@@ -341,7 +344,7 @@ const createCinnamonEnv = (options) => {
             if (p === 'get_current_time')
                 {return () => 0;}
             if (p === 'get_pointer')
-                {return () => [0, 0];}
+                {return () => env.pointer;}
             if (p === 'set_cursor' || p === 'unset_cursor')
                 {return () => {};}
             throw new Error('fake global: unknown property "' + String(p) + '"');

@@ -13,7 +13,7 @@
  * @property {(app: AppFacade, monitorIndex: number, wsIndex: number, patch: {}) => void} layoutSet
  * @property {(monitor: CinnamonMonitor) => Rect} usableArea
  * @property {(app: AppFacade) => number} gap
- * @property {(app: AppFacade, wins: CinnamonWindow[], layout: Layout, split: Split | null, area: Rect, animate: boolean) => void} placeRects
+ * @property {(app: AppFacade, wins: CinnamonWindow[], layout: Layout, area: Rect, animate: boolean, monitorIndex: number, wsIndex: number, n: number) => FittedLayout} placeFit
  * @property {() => Rgb} accentRgb
  */
 /**
@@ -100,7 +100,7 @@ export type DropDeps = {
     layoutSet: (app: AppFacade, monitorIndex: number, wsIndex: number, patch: {}) => void;
     usableArea: (monitor: CinnamonMonitor) => Rect;
     gap: (app: AppFacade) => number;
-    placeRects: (app: AppFacade, wins: CinnamonWindow[], layout: Layout, split: Split | null, area: Rect, animate: boolean) => void;
+    placeFit: (app: AppFacade, wins: CinnamonWindow[], layout: Layout, area: Rect, animate: boolean, monitorIndex: number, wsIndex: number, n: number) => FittedLayout;
     accentRgb: () => Rgb;
 };
 /**

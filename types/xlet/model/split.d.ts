@@ -14,7 +14,7 @@ export function splitEdgeRef(kind: "cols" | "rows", shape: readonly number[], id
 export function splitHasEdge(kind: "cols" | "rows", shape: readonly number[], idx: number, edge: string): boolean;
 export function splitAxis(kind: "cols" | "rows", list: "major" | "minor", area: Rect): [number, number];
 export function splitBorderPos(kind: "cols" | "rows", shape: readonly number[], split: Split | null, idx: number, edge: string, area: Rect): number | null;
-export function splitMove(kind: "cols" | "rows", shape: readonly number[], split: Split | null, idx: number, edge: string, pos: number, area: Rect, minPx: number): Split | null;
+export function splitMove(kind: "cols" | "rows", shape: readonly number[], split: Split | null, idx: number, edge: string, pos: number, area: Rect, minPx: number | number[]): Split | null;
 export function splitKeyTarget(kind: "cols" | "rows", shape: readonly number[], idx: number, action: string): {
     edge: string;
     sign: number;
@@ -26,4 +26,23 @@ export function splitAccel(state: AccelState | null, action: string, now: number
 export function splitOpEdges(name: string): string[];
 export function splitFrameEdges(from: Rect, to: Rect): string[];
 export function splitMinimal(kind: "cols" | "rows", shape: readonly number[], split: Split | null, area: Rect, gap: number, minPx: number): Split | null;
+export function splitMinSizes(kind: "cols" | "rows", shape: readonly number[], mins: Array<{
+    w: number;
+    h: number;
+}>): {
+    major: number[];
+    minor: number[][];
+};
+export function splitFitShape(kind: "cols" | "rows", shape: readonly number[], mins: Array<{
+    w: number;
+    h: number;
+}>, width: number, height: number, gap: number): number[];
+export function splitFit(kind: "cols" | "rows", shape: readonly number[], mins: Array<{
+    w: number;
+    h: number;
+}>, area: Rect, gap: number, minPx: number, base: Split | null): {
+    kind: "cols" | "rows";
+    shape: number[];
+    split: Split | null;
+};
 export function sortOrder(rects: Rect[], columnMajor: boolean): number[];

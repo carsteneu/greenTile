@@ -53,14 +53,18 @@ const makeEnv = (extraSettings = {}) => {
 // Fake MetaWindow recording move_resize_frame / move_frame with enough signal
 // hub surface for the auto/border observers that ride along. `options` is
 // additive: windowType/wmClass feed the eligibility filters (dialogs, app-less
-// windows), noApp marks a window whose tracker lookup fails, and move_to_monitor
-// keeps get_monitor() live like Meta does on a real cross-monitor move.
+// windows), noApp marks a window whose tracker lookup fails, minSize models an
+// application-enforced minimum frame (the WM refuses a smaller request and keeps
+// the minimum, exactly like a terminal that snaps to its character grid), and
+// move_to_monitor keeps get_monitor() live like Meta does on a real
+// cross-monitor move. `minSize` is a live array, so a test can relax it later.
 const makeWindow = (env, seq, rect, monitor = 0, withActor = null, options = {}) => {
     const handlers = [];
     let nextId = 1;
     let mon = monitor;
     const window = {
         seq,
+        minSize: options.minSize || null,
         minimized: false,
         /** @type {boolean} marked windows have no owning app (app-less window) */
         __noApp: options.noApp === true,
@@ -96,7 +100,8 @@ const makeWindow = (env, seq, rect, monitor = 0, withActor = null, options = {})
         get_compositor_private: () => withActor,
         move_resize_frame(anim, x, y, w, h) {
             window.moves.push(['resize', x, y, w, h]);
-            window.rect = [x, y, w, h];
+            const min = window.minSize;
+            window.rect = [x, y, min ? Math.max(w, min[0]) : w, min ? Math.max(h, min[1]) : h];
         },
         move_frame(anim, x, y) {
             window.moves.push(['move', x, y]);
