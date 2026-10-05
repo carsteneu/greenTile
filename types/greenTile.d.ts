@@ -146,6 +146,8 @@ type Preset = {
 /** A resolved tiling layout: base grid + optional preset rule metadata (retile logs). */
 type Layout = DragLayout & {
     rule?: Rule;
+    /** Transient action geometry; never a stored preset or shape field. */
+    split?: Split | null;
 };
 
 /** border-frame reference of a cell edge as produced by splitEdgeRef. */
@@ -276,6 +278,12 @@ type AutoFacade = {
 /** Split-runtime facade (lib/runtime/split.js). */
 type SplitFacade = {
     for(app: AppFacade, monitorIndex: number, wsIndex: number, windowCount: number, layout: DragLayout): SplitShape | null;
+    manual(app: AppFacade, monitorIndex: number, wsIndex: number, n: number): SplitShape | null;
+    effective(app: AppFacade, monitorIndex: number, wsIndex: number, n: number, layout: Layout, ordered: CinnamonWindow[]): FittedLayout;
+    fit(app: AppFacade, monitorIndex: number, wsIndex: number, n: number, layout: Layout, mins: Array<{ w: number; h: number }>, area: Rect, gap: number): FittedLayout;
+    setPlacement(app: AppFacade, monitorIndex: number, wsIndex: number, n: number, entry: { kind: 'cols' | 'rows'; shape: number[]; split: Split | null; seqs: number[]; mins: Array<{ seq: number; w: number; h: number }> }): void;
+    placementFor(app: AppFacade, monitorIndex: number, wsIndex: number, n: number, ordered: CinnamonWindow[]): FittedLayout | null;
+    minsFor(app: AppFacade, monitorIndex: number, wsIndex: number, n: number, ordered: CinnamonWindow[]): Array<{ w: number; h: number }>;
     onResizeEnd(app: AppFacade, win: CinnamonWindow, op: string): void;
     ref(app: AppFacade, monitorIndex: number, wsIndex: number, n: number): { key: string; mkey: string; wskey: string; n: string } | null;
     forget(refKey: string): void;
@@ -383,6 +391,17 @@ type Rgb = readonly [number, number, number];
 
 /** The model split (kind per orientation, cell grid) produced by lib/model/split.js. Same shape as the global  Split  above; the alias keeps JSDoc unambiguous inside lib/runtime/split.js, whose class exports the name Split. */
 type SplitShape = Split;
+
+/** Effective arrangement of a layout after the application-minimum fit (Split.fit):
+ * the kind is unchanged, the shape may hold fewer horizontally adjacent windows
+ * (more vertical stacking), split is the effective read-time split or null for the
+ * equal division. Consumed by the placement and every focus/swap/drop/resize path so
+ * they address the settled geometry. */
+type FittedLayout = {
+    kind: 'cols' | 'rows';
+    shape: number[];
+    split: Split | null;
+};
 
 /** HSL color triplet [h (0–360), s (0–1), l (0–1)] as produced by accentHsl. */
 type Hsl = [number, number, number];
