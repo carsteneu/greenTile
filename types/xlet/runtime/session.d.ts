@@ -99,7 +99,6 @@ export const Session: {
         splitCorruptLogged: boolean;
         layoutsWriteGuardLogged: boolean;
         accentGenSeq: number;
-        accentCss: string;
         panelSaved: any;
         exclToggles: Map<any, any>;
         exclWatches: Map<any, any>;
@@ -302,7 +301,6 @@ export type SessionDeps = {
         splitCorruptLogged: boolean;
         layoutsWriteGuardLogged: boolean;
         accentGenSeq: number;
-        accentCss: string;
         panelSaved: any;
         exclToggles: Map<any, any>;
         exclWatches: Map<any, any>;

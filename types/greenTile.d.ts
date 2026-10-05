@@ -225,7 +225,6 @@ type SessionFacade = {
     splitCorruptLogged: boolean;
     layoutsWriteGuardLogged: boolean;
     accentGenSeq: number;
-    accentCss: string;
     panelSaved: any;
     exclToggles: Map<number, boolean>;
     exclWatches: Map<number, { disconnect: () => void }>;

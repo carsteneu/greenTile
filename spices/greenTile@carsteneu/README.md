@@ -39,6 +39,6 @@ All hotkeys can be changed on the **Hotkeys** page of the settings.
 
 ## Source and license
 
-Source, issue tracker and releases: [github.com/carsteneu/greenTile](https://github.com/carsteneu/greenTile)
+Source and bug reports: [github.com/carsteneu/greenTile](https://github.com/carsteneu/greenTile)
 
 GNU General Public License, version 3, like gTile. Original code by vibou and shuairan (gTile), modifications and additions © 2026 carsten_eu.
