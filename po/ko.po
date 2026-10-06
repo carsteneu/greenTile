@@ -90,15 +90,15 @@ msgstr "결과: %s"
 
 #: lib/ui/panel.js:100
 msgid "Edit preset"
-msgstr ""
+msgstr "프리셋 편집"
 
 #: lib/ui/panel.js:117
 msgid "Assigned"
-msgstr ""
+msgstr "할당됨"
 
 #: lib/ui/panel.js:119
 msgid "Remove assignment"
-msgstr ""
+msgstr "할당 해제"
 
 #: lib/ui/panel.js:150
 msgid "Gap between windows"
@@ -154,16 +154,16 @@ msgstr "아직 프리셋이 없습니다."
 #: lib/ui/panel.js:497
 #, javascript-format
 msgid "Preview for %d window"
-msgstr ""
+msgstr "창 %d개 미리보기"
 
 #: lib/ui/panel.js:498
 #, javascript-format
 msgid "Preview for %d windows"
-msgstr ""
+msgstr "창 %d개 미리보기"
 
 #: lib/ui/panel.js:498
 msgid "No windows open — base layout"
-msgstr ""
+msgstr "열린 창 없음 — 기본 레이아웃"
 
 #: lib/ui/panel.js:512
 msgid "New preset"
@@ -171,7 +171,7 @@ msgstr "새 프리셋"
 
 #: lib/ui/panel.js:515
 msgid "Click a card to apply it to this workspace and tile right away"
-msgstr ""
+msgstr "카드를 클릭하면 이 작업 공간에 프리셋을 적용하고 창을 즉시 타일링합니다"
 
 #. metadata.json->name
 msgid "greenTile"

@@ -88,15 +88,15 @@ msgstr "结果：%s"
 
 #: lib/ui/panel.js:100
 msgid "Edit preset"
-msgstr ""
+msgstr "编辑预设"
 
 #: lib/ui/panel.js:117
 msgid "Assigned"
-msgstr ""
+msgstr "已分配"
 
 #: lib/ui/panel.js:119
 msgid "Remove assignment"
-msgstr ""
+msgstr "取消分配"
 
 #: lib/ui/panel.js:150
 msgid "Gap between windows"
@@ -152,16 +152,16 @@ msgstr "尚无预设。"
 #: lib/ui/panel.js:497
 #, javascript-format
 msgid "Preview for %d window"
-msgstr ""
+msgstr "%d 个窗口的预览"
 
 #: lib/ui/panel.js:498
 #, javascript-format
 msgid "Preview for %d windows"
-msgstr ""
+msgstr "%d 个窗口的预览"
 
 #: lib/ui/panel.js:498
 msgid "No windows open — base layout"
-msgstr ""
+msgstr "没有打开的窗口 — 基础布局"
 
 #: lib/ui/panel.js:512
 msgid "New preset"
@@ -169,7 +169,7 @@ msgstr "新建预设"
 
 #: lib/ui/panel.js:515
 msgid "Click a card to apply it to this workspace and tile right away"
-msgstr ""
+msgstr "单击卡片，将预设应用到此工作区并立即平铺窗口"
 
 #. metadata.json->name
 msgid "greenTile"

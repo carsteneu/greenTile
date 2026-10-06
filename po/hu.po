@@ -91,15 +91,15 @@ msgstr "Eredmény: %s"
 
 #: lib/ui/panel.js:100
 msgid "Edit preset"
-msgstr ""
+msgstr "Előbeállítás szerkesztése"
 
 #: lib/ui/panel.js:117
 msgid "Assigned"
-msgstr ""
+msgstr "Hozzárendelve"
 
 #: lib/ui/panel.js:119
 msgid "Remove assignment"
-msgstr ""
+msgstr "Hozzárendelés megszüntetése"
 
 #: lib/ui/panel.js:150
 msgid "Gap between windows"
@@ -155,16 +155,16 @@ msgstr "Még nincsenek előbeállítások."
 #: lib/ui/panel.js:497
 #, javascript-format
 msgid "Preview for %d window"
-msgstr ""
+msgstr "Előnézet %d ablak esetén"
 
 #: lib/ui/panel.js:498
 #, javascript-format
 msgid "Preview for %d windows"
-msgstr ""
+msgstr "Előnézet %d ablak esetén"
 
 #: lib/ui/panel.js:498
 msgid "No windows open — base layout"
-msgstr ""
+msgstr "Nincs nyitott ablak — alapelrendezés"
 
 #: lib/ui/panel.js:512
 msgid "New preset"
@@ -172,7 +172,7 @@ msgstr "Új előbeállítás"
 
 #: lib/ui/panel.js:515
 msgid "Click a card to apply it to this workspace and tile right away"
-msgstr ""
+msgstr "Kattints egy kártyára, hogy alkalmazd az előbeállítást ezen a munkaterületen, és azonnal csempézd az ablakokat"
 
 #. metadata.json->name
 msgid "greenTile"

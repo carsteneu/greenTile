@@ -91,15 +91,15 @@ msgstr "Rezultat: %s"
 
 #: lib/ui/panel.js:100
 msgid "Edit preset"
-msgstr ""
+msgstr "Editează presetarea"
 
 #: lib/ui/panel.js:117
 msgid "Assigned"
-msgstr ""
+msgstr "Atribuită"
 
 #: lib/ui/panel.js:119
 msgid "Remove assignment"
-msgstr ""
+msgstr "Elimină atribuirea"
 
 #: lib/ui/panel.js:150
 msgid "Gap between windows"
@@ -155,16 +155,16 @@ msgstr "Nicio presetare încă."
 #: lib/ui/panel.js:497
 #, javascript-format
 msgid "Preview for %d window"
-msgstr ""
+msgstr "Previzualizare pentru %d fereastră"
 
 #: lib/ui/panel.js:498
 #, javascript-format
 msgid "Preview for %d windows"
-msgstr ""
+msgstr "Previzualizare — ferestre: %d"
 
 #: lib/ui/panel.js:498
 msgid "No windows open — base layout"
-msgstr ""
+msgstr "Nicio fereastră deschisă — aranjament de bază"
 
 #: lib/ui/panel.js:512
 msgid "New preset"
@@ -173,6 +173,8 @@ msgstr "Presetare nouă"
 #: lib/ui/panel.js:515
 msgid "Click a card to apply it to this workspace and tile right away"
 msgstr ""
+"Fă clic pe un card pentru a-l aplica acestui spațiu de lucru și a aranja "
+"imediat ferestrele în mozaic"
 
 #. metadata.json->name
 msgid "greenTile"

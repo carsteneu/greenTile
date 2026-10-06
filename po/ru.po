@@ -90,15 +90,15 @@ msgstr "Результат: %s"
 
 #: lib/ui/panel.js:100
 msgid "Edit preset"
-msgstr ""
+msgstr "Изменить преднастройку"
 
 #: lib/ui/panel.js:117
 msgid "Assigned"
-msgstr ""
+msgstr "Назначена"
 
 #: lib/ui/panel.js:119
 msgid "Remove assignment"
-msgstr ""
+msgstr "Отменить назначение"
 
 #: lib/ui/panel.js:150
 msgid "Gap between windows"
@@ -154,16 +154,16 @@ msgstr "Преднастроек пока нет."
 #: lib/ui/panel.js:497
 #, javascript-format
 msgid "Preview for %d window"
-msgstr ""
+msgstr "Предпросмотр — число окон: %d"
 
 #: lib/ui/panel.js:498
 #, javascript-format
 msgid "Preview for %d windows"
-msgstr ""
+msgstr "Предпросмотр — число окон: %d"
 
 #: lib/ui/panel.js:498
 msgid "No windows open — base layout"
-msgstr ""
+msgstr "Нет открытых окон — базовая раскладка"
 
 #: lib/ui/panel.js:512
 msgid "New preset"
@@ -171,7 +171,7 @@ msgstr "Новая преднастройка"
 
 #: lib/ui/panel.js:515
 msgid "Click a card to apply it to this workspace and tile right away"
-msgstr ""
+msgstr "Щёлкните по карточке, чтобы применить преднастройку к этой рабочей области и сразу расположить окна мозаикой"
 
 #. metadata.json->name
 msgid "greenTile"

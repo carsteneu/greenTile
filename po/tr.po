@@ -93,15 +93,15 @@ msgstr "Sonuç: %s"
 
 #: lib/ui/panel.js:100
 msgid "Edit preset"
-msgstr ""
+msgstr "Ön ayarı düzenle"
 
 #: lib/ui/panel.js:117
 msgid "Assigned"
-msgstr ""
+msgstr "Atanmış"
 
 #: lib/ui/panel.js:119
 msgid "Remove assignment"
-msgstr ""
+msgstr "Atamayı kaldır"
 
 #: lib/ui/panel.js:150
 msgid "Gap between windows"
@@ -157,16 +157,16 @@ msgstr "Henüz ön ayar yok."
 #: lib/ui/panel.js:497
 #, javascript-format
 msgid "Preview for %d window"
-msgstr ""
+msgstr "%d pencere için önizleme"
 
 #: lib/ui/panel.js:498
 #, javascript-format
 msgid "Preview for %d windows"
-msgstr ""
+msgstr "%d pencere için önizleme"
 
 #: lib/ui/panel.js:498
 msgid "No windows open — base layout"
-msgstr ""
+msgstr "Açık pencere yok — temel düzen"
 
 #: lib/ui/panel.js:512
 msgid "New preset"
@@ -174,7 +174,7 @@ msgstr "Yeni ön ayar"
 
 #: lib/ui/panel.js:515
 msgid "Click a card to apply it to this workspace and tile right away"
-msgstr ""
+msgstr "Ön ayarı bu çalışma alanına uygulamak ve pencereleri hemen döşemek için bir karta tıklayın"
 
 #. metadata.json->name
 msgid "greenTile"

@@ -91,15 +91,15 @@ msgstr "Risultato: %s"
 
 #: lib/ui/panel.js:100
 msgid "Edit preset"
-msgstr ""
+msgstr "Modifica preimpostazione"
 
 #: lib/ui/panel.js:117
 msgid "Assigned"
-msgstr ""
+msgstr "Assegnata"
 
 #: lib/ui/panel.js:119
 msgid "Remove assignment"
-msgstr ""
+msgstr "Rimuovi assegnazione"
 
 #: lib/ui/panel.js:150
 msgid "Gap between windows"
@@ -155,16 +155,16 @@ msgstr "Ancora nessuna preimpostazione."
 #: lib/ui/panel.js:497
 #, javascript-format
 msgid "Preview for %d window"
-msgstr ""
+msgstr "Anteprima per %d finestra"
 
 #: lib/ui/panel.js:498
 #, javascript-format
 msgid "Preview for %d windows"
-msgstr ""
+msgstr "Anteprima per %d finestre"
 
 #: lib/ui/panel.js:498
 msgid "No windows open — base layout"
-msgstr ""
+msgstr "Nessuna finestra aperta — disposizione di base"
 
 #: lib/ui/panel.js:512
 msgid "New preset"
@@ -173,6 +173,8 @@ msgstr "Nuova preimpostazione"
 #: lib/ui/panel.js:515
 msgid "Click a card to apply it to this workspace and tile right away"
 msgstr ""
+"Fai clic su una scheda per applicarla a questa area di lavoro e affiancare "
+"subito le finestre"
 
 #. metadata.json->name
 msgid "greenTile"

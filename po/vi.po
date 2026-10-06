@@ -90,15 +90,15 @@ msgstr "Kết quả: %s"
 
 #: lib/ui/panel.js:100
 msgid "Edit preset"
-msgstr ""
+msgstr "Sửa cấu hình sẵn"
 
 #: lib/ui/panel.js:117
 msgid "Assigned"
-msgstr ""
+msgstr "Đã gán"
 
 #: lib/ui/panel.js:119
 msgid "Remove assignment"
-msgstr ""
+msgstr "Bỏ gán"
 
 #: lib/ui/panel.js:150
 msgid "Gap between windows"
@@ -154,16 +154,16 @@ msgstr "Chưa có cấu hình sẵn nào."
 #: lib/ui/panel.js:497
 #, javascript-format
 msgid "Preview for %d window"
-msgstr ""
+msgstr "Xem trước cho %d cửa sổ"
 
 #: lib/ui/panel.js:498
 #, javascript-format
 msgid "Preview for %d windows"
-msgstr ""
+msgstr "Xem trước cho %d cửa sổ"
 
 #: lib/ui/panel.js:498
 msgid "No windows open — base layout"
-msgstr ""
+msgstr "Không có cửa sổ nào đang mở — bố cục cơ bản"
 
 #: lib/ui/panel.js:512
 msgid "New preset"
@@ -171,7 +171,7 @@ msgstr "Cấu hình sẵn mới"
 
 #: lib/ui/panel.js:515
 msgid "Click a card to apply it to this workspace and tile right away"
-msgstr ""
+msgstr "Nhấp vào một thẻ để áp dụng cấu hình sẵn cho không gian làm việc này và xếp ô các cửa sổ ngay"
 
 #. metadata.json->name
 msgid "greenTile"

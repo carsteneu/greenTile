@@ -90,15 +90,15 @@ msgstr "結果: %s"
 
 #: lib/ui/panel.js:100
 msgid "Edit preset"
-msgstr ""
+msgstr "プリセットを編集"
 
 #: lib/ui/panel.js:117
 msgid "Assigned"
-msgstr ""
+msgstr "割り当て済み"
 
 #: lib/ui/panel.js:119
 msgid "Remove assignment"
-msgstr ""
+msgstr "割り当てを解除"
 
 #: lib/ui/panel.js:150
 msgid "Gap between windows"
@@ -154,16 +154,16 @@ msgstr "プリセットはまだありません。"
 #: lib/ui/panel.js:497
 #, javascript-format
 msgid "Preview for %d window"
-msgstr ""
+msgstr "%d 個のウィンドウのプレビュー"
 
 #: lib/ui/panel.js:498
 #, javascript-format
 msgid "Preview for %d windows"
-msgstr ""
+msgstr "%d 個のウィンドウのプレビュー"
 
 #: lib/ui/panel.js:498
 msgid "No windows open — base layout"
-msgstr ""
+msgstr "開いているウィンドウなし — 基本レイアウト"
 
 #: lib/ui/panel.js:512
 msgid "New preset"
@@ -171,7 +171,7 @@ msgstr "新規プリセット"
 
 #: lib/ui/panel.js:515
 msgid "Click a card to apply it to this workspace and tile right away"
-msgstr ""
+msgstr "カードをクリックすると、このワークスペースにプリセットを適用し、すぐにウィンドウをタイル配置します"
 
 #. metadata.json->name
 msgid "greenTile"
