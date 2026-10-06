@@ -154,6 +154,7 @@ type XletTree = {
             fill: typeof import('./xlet/model/fill');
             focus: typeof import('./xlet/model/focus');
             gap: typeof import('./xlet/model/gap');
+            grid: typeof import('./xlet/model/grid');
             layouts: typeof import('./xlet/model/layouts');
             lifecycle: typeof import('./xlet/model/lifecycle');
             monitor: typeof import('./xlet/model/monitor');

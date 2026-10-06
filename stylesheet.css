@@ -63,6 +63,16 @@
     margin-right: 6px;
 }
 
+/* Shared preview context line between the title bar and the card grid; carries
+   the header background so it reads as part of the title bar. */
+.gk-preview {
+    color: #8b91a0;
+    font-size: 11px;
+    padding: 0 14px 8px 14px;
+    background-color: #262a35;
+    border-bottom: 1px solid #333846;
+}
+
 /* Auto tiling state of the workspace in the title bar: grey when off, the
    "assigned" green when on. */
 .gk-auto {
@@ -79,7 +89,7 @@
     background-color: rgba(255, 255, 255, 0.08);
 }
 
-/* The state rules below (the green of "Auto: on", assigned rows and the row
+/* The state rules below (the green of "Auto: on", assigned cards and the card
    stripe down to .gk-sub) are overridden at runtime by the generated
    stylesheet (setting "State color"); keep them in sync with
    stateCss in lib/model/state.js. */
@@ -94,50 +104,67 @@
     background-color: rgba(156, 224, 114, 0.16);
 }
 
-.gk-row {
-    padding: 0;
-    border: 1px solid #2a2e39;
-    border-top-width: 0;
-    border-left-width: 0;
-    border-right-width: 0;
-}
-
-.gk-row:hover {
-    background-color: #262a35;
-}
-
-.gk-row-assigned {
-    background-color: rgba(156, 224, 114, 0.06);
-}
-
-.gk-row-assigned:hover {
-    background-color: rgba(156, 224, 114, 0.13);
-}
-
-.gk-row-stripe {
-    width: 3px;
-    background-color: #9ce072;
-}
-
-/* 6px of panel background to the right of the rows: hover and assigned tint
-   end before the edge. Together with the 4px right padding in .gk-row-box the
-   wrenches line up vertically under the ✕ of the title bar (centre ≈ 427px). */
-.gk-rows {
-    padding-right: 6px;
-}
-
-.gk-row-box {
-    padding: 12px 4px 12px 14px;
+/* Preset cards: a responsive grid whose column count is computed in
+   lib/model/grid.js from the panel width. The row/column spacing here must stay
+   PRESET_CARD_GAP (14px) and the .gk-card-box padding PRESET_CARD_PAD (8px).
+   Only the card area scrolls; the header, gap row and New preset stay put. */
+.gk-cards {
+    padding: 10px 14px 4px 14px;
     spacing: 14px;
 }
 
-.gk-row-text {
-    spacing: 2px;
+.gk-card-row {
+    spacing: 14px;
+}
+
+.gk-card {
+    padding: 0;
+    background-color: #232733;
+    border: 1px solid #2a2e39;
+    border-radius: 6px;
+}
+
+.gk-card:hover {
+    background-color: #262a35;
+    border-color: #3a4050;
+}
+
+/* Keyboard focus is separate from hover and always visible (never hover-only). */
+.gk-card:focus {
+    border-color: #8b91a0;
+    background-color: rgba(255, 255, 255, 0.05);
+}
+
+.gk-card-assigned {
+    background-color: rgba(156, 224, 114, 0.06);
+}
+
+.gk-card-assigned:hover {
+    background-color: rgba(156, 224, 114, 0.13);
+}
+
+.gk-card-stripe {
+    width: 3px;
+    background-color: #9ce072;
+    border-radius: 5px 0 0 5px;
+}
+
+.gk-card-box {
+    padding: 8px;
+    spacing: 4px;
+}
+
+.gk-card-top {
+    spacing: 4px;
+}
+
+.gk-card-state {
+    spacing: 4px;
 }
 
 .gk-name {
     color: #e8eaf0;
-    font-size: 16px;
+    font-size: 14px;
 }
 
 .gk-sub {
@@ -530,6 +557,12 @@
     background-color: rgba(0, 0, 0, 0.06);
 }
 
+.gk-light .gk-preview {
+    color: #5f6672;
+    background-color: #e9ecf2;
+    border-bottom-color: #d5d9e2;
+}
+
 /* The light state rules below are overridden at runtime by the generated
    stylesheet (setting "State color"). */
 .gk-light .gk-auto-on {
@@ -543,23 +576,30 @@
     background-color: rgba(78, 165, 48, 0.18);
 }
 
-.gk-light .gk-row {
+.gk-light .gk-card {
+    background-color: #eef0f5;
     border-color: #d5d9e2;
 }
 
-.gk-light .gk-row:hover {
-    background-color: #eceef5;
+.gk-light .gk-card:hover {
+    background-color: #e4e8f0;
+    border-color: #c3c9d6;
 }
 
-.gk-light .gk-row-assigned {
+.gk-light .gk-card:focus {
+    border-color: #5f6672;
+    background-color: rgba(0, 0, 0, 0.04);
+}
+
+.gk-light .gk-card-assigned {
     background-color: rgba(78, 165, 48, 0.08);
 }
 
-.gk-light .gk-row-assigned:hover {
+.gk-light .gk-card-assigned:hover {
     background-color: rgba(78, 165, 48, 0.16);
 }
 
-.gk-light .gk-row-stripe {
+.gk-light .gk-card-stripe {
     background-color: #4ea530;
 }
 
