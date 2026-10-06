@@ -45,15 +45,16 @@ A preset is a list of rules by window count. Each rule sets the number of column
 
 **Preset panel** (`Super+Ctrl+P`, works on the monitor of the focused window):
 
-- Click a row to assign the preset and tile right away. The panel stays open, so you can try several presets.
-- ✕ in a row removes the assignment, 🔧 opens the editor, **＋ New preset** starts an empty one.
+- Click a card to assign the preset and tile right away. The panel stays open, so you can try several presets.
+- The cards form a grid: as many equal-width columns as the panel width holds, each with a large preview of the layout a click would apply.
+- ✎ on a card opens that preset in the editor; ✕ on the assigned card removes the assignment. **＋ New preset** starts an empty one.
 - **Auto: on / off** in the title bar shows and switches auto mode (green = on).
 - **Gap between windows** sets the gap between tiled windows (0 to 48 px). Screen edges stay flush.
 - **Reset sizes** appears when borders were moved or layouts dragged, and returns to equal sizes.
 - The sun/moon button switches between light and dark; ⚙ opens the settings.
 - Drag the title bar to move the panel, ◢ to resize it. `Esc`, ✕ or a click outside closes it.
 
-The thumbnail shows what a click would tile right now. No cell ever stays empty: with fewer windows than cells, the highest column gives up a cell (on a tie the right one), with fewer windows than columns, columns drop from the right. With more windows than cells, the rightmost column takes the rest.
+The preview on each card shows what a click would tile right now. No cell ever stays empty: with fewer windows than cells, the highest column gives up a cell (on a tie the right one), with fewer windows than columns, columns drop from the right. With more windows than cells, the rightmost column takes the rest.
 
 ### Editor
 
@@ -123,7 +124,7 @@ On the **Settings** page under **Preset panel**:
 
 - **Panel theme:** follow the desktop (default), always light, or always dark.
 - **Accent color:** follow the Cinnamon theme (default) or a custom color.
-- **State color** for "Auto: on" and assigned rows: green (default), follow the theme, or custom.
+- **State color** for "Auto: on" and the assigned card: green (default), follow the theme, or custom.
 
 Looking for a specific feature? [FEATURES.md](FEATURES.md) lists all of them.
 

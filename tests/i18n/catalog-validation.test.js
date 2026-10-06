@@ -160,7 +160,7 @@ test('build-release.sh builds the unmodified catalogs and ships no validator', (
     const libraries = [
         'app/app.js', 'app/config.js',
         'model/accent.js', 'model/drop.js', 'model/editor.js', 'model/exclude.js',
-        'model/fill.js', 'model/focus.js', 'model/gap.js', 'model/layouts.js',
+        'model/fill.js', 'model/focus.js', 'model/gap.js', 'model/grid.js', 'model/layouts.js',
         'model/lifecycle.js', 'model/monitor.js', 'model/panel-size.js',
         'model/settings-keys.js', 'model/single.js', 'model/split.js',
         'model/state.js', 'model/swap.js', 'model/teardown.js', 'model/theme.js',

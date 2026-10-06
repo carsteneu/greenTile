@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: greenTile 2.2.0\n"
 "Report-Msgid-Bugs-To: https://github.com/carsteneu\n"
-"POT-Creation-Date: 2026-10-01 17:54+0200\n"
+"POT-Creation-Date: 2026-10-06 14:31+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,136 +17,157 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: lib/ui/editor.js:66
+#: lib/ui/editor.js:68
 msgid "Please enter a name."
 msgstr ""
 
-#: lib/ui/editor.js:122
+#: lib/ui/editor.js:130
 #, javascript-format
 msgid "from %d"
 msgstr ""
 
-#: lib/ui/editor.js:267
+#: lib/ui/editor.js:279
 msgid "Rules (by window count)"
 msgstr ""
 
-#: lib/ui/editor.js:271
+#: lib/ui/editor.js:283
 msgid "Rule"
 msgstr ""
 
-#: lib/ui/editor.js:272
+#: lib/ui/editor.js:284
 msgid "Delete rule"
 msgstr ""
 
-#: lib/ui/editor.js:280
+#: lib/ui/editor.js:292
 msgid "Rule applies from"
 msgstr ""
 
-#: lib/ui/editor.js:287
+#: lib/ui/editor.js:299
 msgid "windows"
 msgstr ""
 
-#: lib/ui/editor.js:289
+#: lib/ui/editor.js:301
 msgid "Painter"
 msgstr ""
 
-#: lib/ui/editor.js:306
+#: lib/ui/editor.js:318
 msgid ""
 "Click or drag: the row sets how many windows the column holds. Right-click "
 "removes a column."
 msgstr ""
 
-#: lib/ui/editor.js:311
+#: lib/ui/editor.js:323
 msgid "Name"
 msgstr ""
 
-#: lib/ui/editor.js:312
+#: lib/ui/editor.js:324
 msgid "Preset name"
 msgstr ""
 
-#: lib/ui/editor.js:317
+#: lib/ui/editor.js:329
 msgid "Delete preset"
 msgstr ""
 
-#: lib/ui/editor.js:320
+#: lib/ui/editor.js:332
 msgid "Really delete?"
 msgstr ""
 
-#: lib/ui/editor.js:321
+#: lib/ui/editor.js:333
 msgid "Delete"
 msgstr ""
 
-#: lib/ui/editor.js:325
+#: lib/ui/editor.js:337
 msgid "Save"
 msgstr ""
 
-#: lib/ui/editor.js:350
+#: lib/ui/editor.js:362
 #, javascript-format
 msgid "Result: %s"
 msgstr ""
 
-#: lib/ui/panel.js:77
-#, javascript-format
-msgid "assigned — workspace %d"
+#: lib/ui/panel.js:100
+msgid "Edit preset"
 msgstr ""
 
 #: lib/ui/panel.js:117
+msgid "Assigned"
+msgstr ""
+
+#: lib/ui/panel.js:119
+msgid "Remove assignment"
+msgstr ""
+
+#: lib/ui/panel.js:150
 msgid "Gap between windows"
 msgstr ""
 
-#: lib/ui/panel.js:123
+#: lib/ui/panel.js:156
 #, javascript-format
 msgid "%d px"
 msgstr ""
 
-#: lib/ui/panel.js:143
+#: lib/ui/panel.js:176
 msgid "Reset sizes"
 msgstr ""
 
-#: lib/ui/panel.js:186
+#: lib/ui/panel.js:219
 #, javascript-format
 msgid "Presets — workspace %d · %s"
 msgstr ""
 
-#: lib/ui/panel.js:188
+#: lib/ui/panel.js:221
 msgid "Create preset"
 msgstr ""
 
-#: lib/ui/panel.js:188
+#: lib/ui/panel.js:221
 #, javascript-format
 msgid "Edit %s"
 msgstr ""
 
-#: lib/ui/panel.js:193
+#: lib/ui/panel.js:232
 msgid "Back"
 msgstr ""
 
-#: lib/ui/panel.js:202
+#: lib/ui/panel.js:241 lib/ui/panel.js:247
 msgid "Auto: on"
 msgstr ""
 
-#: lib/ui/panel.js:202
+#: lib/ui/panel.js:241 lib/ui/panel.js:247
 msgid "Auto: off"
 msgstr ""
 
-#: lib/ui/panel.js:225
+#: lib/ui/panel.js:269
 msgid "Dark theme"
 msgstr ""
 
-#: lib/ui/panel.js:225
+#: lib/ui/panel.js:269
 msgid "Light theme"
 msgstr ""
 
-#: lib/ui/panel.js:357
+#: lib/ui/panel.js:477
 msgid "No presets yet."
 msgstr ""
 
-#: lib/ui/panel.js:374
+#: lib/ui/panel.js:497
+#, javascript-format
+msgid "Preview for %d window"
+msgstr ""
+
+#: lib/ui/panel.js:498
+#, javascript-format
+msgid "Preview for %d windows"
+msgstr ""
+
+#: lib/ui/panel.js:498
+msgid "No windows open — base layout"
+msgstr ""
+
+#: lib/ui/panel.js:512
 msgid "New preset"
 msgstr ""
 
-#: lib/ui/panel.js:377
-msgid "Click a row to apply it to this workspace and tile right away"
+#: lib/ui/panel.js:515
+msgid "Click a card to apply it to this workspace and tile right away"
 msgstr ""
 
 #. metadata.json->name
@@ -395,10 +416,10 @@ msgstr ""
 msgid "State color of the preset panel when State color is Custom."
 msgstr ""
 
-#: .yesmem/tmp/makepot-stage/greenTile@carsteneu/lib/runtime/exclusions.js:201
+#: lib/runtime/exclusions.js:270
 msgid "Window floats"
 msgstr ""
 
-#: .yesmem/tmp/makepot-stage/greenTile@carsteneu/lib/runtime/exclusions.js:201
+#: lib/runtime/exclusions.js:270
 msgid "Window tiles again"
 msgstr ""

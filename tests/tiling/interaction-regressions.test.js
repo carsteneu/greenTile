@@ -170,7 +170,7 @@ for (const c of [
     });
 }
 
-for (const control of ['auto-on', 'preset-row']) {
+for (const control of ['auto-on', 'preset-card']) {
     test('issues 4/8: explicit ' + control + ' reactivation permits the monitor chain again', () => {
         const f = retainedSwap();
         try {
@@ -180,7 +180,7 @@ for (const control of ['auto-on', 'preset-row']) {
                 f.env.keybindingManager.hotkeys.get('greenTile-preset').cb();
                 const visit = (actor) => {
                     if (!actor) { return null; }
-                    if (/^gk-row(?: |$)/.test(actor.style_class || '')) { return actor; }
+                    if (/^gk-card(?: |$)/.test(actor.style_class || '')) { return actor; }
                     for (const child of actor.children || []) {
                         const found = visit(child);
                         if (found) { return found; }
@@ -188,7 +188,7 @@ for (const control of ['auto-on', 'preset-row']) {
                     return visit(actor.child);
                 };
                 const row = visit(f.app.panel.actor);
-                assert.ok(row, 'the real preset row actor exists');
+                assert.ok(row, 'the real preset card actor exists');
                 row.emit('clicked');
             }
             assert.equal(f.app.session.holdsPause(f.app, 0, 0), false);

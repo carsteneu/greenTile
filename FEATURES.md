@@ -29,17 +29,19 @@ Every feature in one line or two. Details and screenshots are in the [README](RE
 
 ## Preset panel
 
-- **Panel**: `Super+Ctrl+P` opens the list of presets for the monitor of the focused window, titled with workspace and monitor name.
-- **Live thumbnails**: each row shows the layout a click would produce with the current number of windows.
-- **Assignment marker**: the assigned preset is highlighted and marked with the workspace number; ✕ removes the assignment.
-- **One-click assign**: a click assigns the preset and tiles at once; the panel stays open for trying more.
+- **Panel**: `Super+Ctrl+P` opens the presets for the monitor of the focused window, titled with workspace and monitor name.
+- **Card grid**: equal-width cards in as many columns as the panel width holds, so the same panel works on a laptop and an ultrawide.
+- **Live previews**: each card shows the layout a click would produce with the current number of windows.
+- **Assignment marker**: the assigned card carries a colored edge, a check and the ✕ that removes the assignment.
+- **One-click assign**: a click assigns the preset and tiles at once; the panel stays open for trying more. The assigned look moves in place.
+- **Edit button**: the pencil on a card opens that preset in the editor, without applying it.
 - **Auto switch**: the title bar shows and toggles auto mode (green = on).
 - **Reset sizes**: returns moved borders and dragged layouts of this monitor and workspace to equal sizes.
 - **Movable and resizable**: drag the title bar to move, ◢ to resize. Position and size are kept and fit the current monitor.
 - **Closes like a popup**: `Esc`, ✕, a click outside or a newly focused window closes it; the click still reaches its target.
 - **Settings shortcut**: ⚙ opens the extension settings.
 - **Follows the workspace**: switching workspaces while the list is open updates title, assignment and thumbnails.
-- **Scrolling list**: with many presets the list scrolls instead of growing off screen.
+- **Scrolling grid**: with many presets the card area scrolls instead of growing off screen.
 
 ## Preset editor
 
@@ -77,7 +79,7 @@ Every feature in one line or two. Details and screenshots are in the [README](RE
 
 - **Panel theme**: follow the desktop, or always light or dark; toggle with the sun/moon button.
 - **Accent color**: taken from the current Cinnamon theme (updates live) or a custom color.
-- **State color**: color of "Auto: on" and assigned rows: green, theme accent or custom.
+- **State color**: color of "Auto: on" and the assigned card: green, theme accent or custom.
 
 ## General
 

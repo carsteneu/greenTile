@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: greenTile 2.2.0\n"
 "Report-Msgid-Bugs-To: https://github.com/carsteneu\n"
-"POT-Creation-Date: 2026-10-01 17:54+0200\n"
+"POT-Creation-Date: 2026-10-06 14:31+0200\n"
 "PO-Revision-Date: 2023-11-02 11:34-0300\n"
 "Last-Translator: \n"
 "Language-Team: Spanish\n"
@@ -17,40 +17,40 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "X-Generator: Poedit 3.4\n"
 
-#: lib/ui/editor.js:66
+#: lib/ui/editor.js:68
 msgid "Please enter a name."
 msgstr "Introduzca un nombre."
 
-#: lib/ui/editor.js:122
+#: lib/ui/editor.js:130
 #, javascript-format
 msgid "from %d"
 msgstr "desde %d"
 
-#: lib/ui/editor.js:267
+#: lib/ui/editor.js:279
 msgid "Rules (by window count)"
 msgstr "Reglas (según el número de ventanas)"
 
-#: lib/ui/editor.js:271
+#: lib/ui/editor.js:283
 msgid "Rule"
 msgstr "Regla"
 
-#: lib/ui/editor.js:272
+#: lib/ui/editor.js:284
 msgid "Delete rule"
 msgstr "Eliminar regla"
 
-#: lib/ui/editor.js:280
+#: lib/ui/editor.js:292
 msgid "Rule applies from"
 msgstr "La regla se aplica a partir de"
 
-#: lib/ui/editor.js:287
+#: lib/ui/editor.js:299
 msgid "windows"
 msgstr "ventanas"
 
-#: lib/ui/editor.js:289
+#: lib/ui/editor.js:301
 msgid "Painter"
 msgstr "Área de dibujo"
 
-#: lib/ui/editor.js:306
+#: lib/ui/editor.js:318
 msgid ""
 "Click or drag: the row sets how many windows the column holds. Right-click "
 "removes a column."
@@ -58,100 +58,119 @@ msgstr ""
 "Haga clic o arrastre: la fila determina cuántas ventanas contiene la "
 "columna. Con el clic derecho se elimina una columna."
 
-#: lib/ui/editor.js:311
+#: lib/ui/editor.js:323
 msgid "Name"
 msgstr "Nombre"
 
-#: lib/ui/editor.js:312
+#: lib/ui/editor.js:324
 msgid "Preset name"
 msgstr "Nombre del preajuste"
 
-#: lib/ui/editor.js:317
+#: lib/ui/editor.js:329
 msgid "Delete preset"
 msgstr "Eliminar preajuste"
 
-#: lib/ui/editor.js:320
+#: lib/ui/editor.js:332
 msgid "Really delete?"
 msgstr "¿Eliminar de verdad?"
 
-#: lib/ui/editor.js:321
+#: lib/ui/editor.js:333
 msgid "Delete"
 msgstr "Eliminar"
 
-#: lib/ui/editor.js:325
+#: lib/ui/editor.js:337
 msgid "Save"
 msgstr "Guardar"
 
-#: lib/ui/editor.js:350
+#: lib/ui/editor.js:362
 #, javascript-format
 msgid "Result: %s"
 msgstr "Resultado: %s"
 
-#: lib/ui/panel.js:77
-#, javascript-format
-msgid "assigned — workspace %d"
-msgstr "asignado — área de trabajo %d"
+#: lib/ui/panel.js:100
+msgid "Edit preset"
+msgstr ""
 
 #: lib/ui/panel.js:117
+msgid "Assigned"
+msgstr ""
+
+#: lib/ui/panel.js:119
+msgid "Remove assignment"
+msgstr ""
+
+#: lib/ui/panel.js:150
 msgid "Gap between windows"
 msgstr "Separación entre ventanas"
 
-#: lib/ui/panel.js:123
+#: lib/ui/panel.js:156
 #, javascript-format
 msgid "%d px"
 msgstr "%d px"
 
-#: lib/ui/panel.js:143
+#: lib/ui/panel.js:176
 msgid "Reset sizes"
 msgstr "Restablecer tamaños"
 
-#: lib/ui/panel.js:186
+#: lib/ui/panel.js:219
 #, javascript-format
 msgid "Presets — workspace %d · %s"
 msgstr "Preajustes — área de trabajo %d · %s"
 
-#: lib/ui/panel.js:188
+#: lib/ui/panel.js:221
 msgid "Create preset"
 msgstr "Crear preajuste"
 
-#: lib/ui/panel.js:188
+#: lib/ui/panel.js:221
 #, javascript-format
 msgid "Edit %s"
 msgstr "Editar %s"
 
-#: lib/ui/panel.js:193
+#: lib/ui/panel.js:232
 msgid "Back"
 msgstr "Atrás"
 
-#: lib/ui/panel.js:202
+#: lib/ui/panel.js:241 lib/ui/panel.js:247
 msgid "Auto: on"
 msgstr "Auto: activado"
 
-#: lib/ui/panel.js:202
+#: lib/ui/panel.js:241 lib/ui/panel.js:247
 msgid "Auto: off"
 msgstr "Auto: desactivado"
 
-#: lib/ui/panel.js:225
+#: lib/ui/panel.js:269
 msgid "Dark theme"
 msgstr "Tema oscuro"
 
-#: lib/ui/panel.js:225
+#: lib/ui/panel.js:269
 msgid "Light theme"
 msgstr "Tema claro"
 
-#: lib/ui/panel.js:357
+#: lib/ui/panel.js:477
 msgid "No presets yet."
 msgstr "Aún no hay preajustes."
 
-#: lib/ui/panel.js:374
+#: lib/ui/panel.js:497
+#, javascript-format
+msgid "Preview for %d window"
+msgstr ""
+
+#: lib/ui/panel.js:498
+#, javascript-format
+msgid "Preview for %d windows"
+msgstr ""
+
+#: lib/ui/panel.js:498
+msgid "No windows open — base layout"
+msgstr ""
+
+#: lib/ui/panel.js:512
 msgid "New preset"
 msgstr "Nuevo preajuste"
 
-#: lib/ui/panel.js:377
-msgid "Click a row to apply it to this workspace and tile right away"
+#: lib/ui/panel.js:515
+msgid "Click a card to apply it to this workspace and tile right away"
 msgstr ""
-"Haga clic en una fila para aplicarla a esta área de trabajo y organizar en "
-"mosaico al instante"
 
 #. metadata.json->name
 msgid "greenTile"
@@ -430,10 +449,10 @@ msgstr ""
 "Color de estado del panel de preajustes cuando «Color de estado» está en "
 "«Personalizado»."
 
-#: .yesmem/tmp/makepot-stage/greenTile@carsteneu/lib/runtime/exclusions.js:201
+#: lib/runtime/exclusions.js:270
 msgid "Window floats"
 msgstr "Ventana flotante"
 
-#: .yesmem/tmp/makepot-stage/greenTile@carsteneu/lib/runtime/exclusions.js:201
+#: lib/runtime/exclusions.js:270
 msgid "Window tiles again"
 msgstr "Ventana de nuevo en mosaico"

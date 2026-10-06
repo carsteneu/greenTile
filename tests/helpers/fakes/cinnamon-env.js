@@ -793,8 +793,14 @@ const createCinnamonEnv = (options) => {
             this.py = y;
         }
         set_size() {}
-        set_width() {}
-        set_height() {}
+        // Records the width request (there is no allocation in the fake): the
+        // card grid tests read it back to prove the cards follow the panel width.
+        set_width(w) {
+            this.width = w;
+        }
+        set_height(h) {
+            this.height = h;
+        }
         get_height() {
             return 0;
         }
@@ -874,7 +880,7 @@ const createCinnamonEnv = (options) => {
             KEY_Escape: 'Escape',
             AnimationMode: { EASE_OUT_QUAD: 'ease-out-quad' },
         },
-        Pango: { EllipsizeMode: { NONE: 'none' } },
+        Pango: { EllipsizeMode: { NONE: 'none', END: 'end' } },
     });
 
     // the xlet dir importer as both module generations expose it on the
