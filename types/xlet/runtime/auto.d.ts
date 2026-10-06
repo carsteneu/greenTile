@@ -30,6 +30,7 @@ export const Auto: {
         _scope: any;
         _overrides: Map<any, any>;
         _timers: Map<any, any>;
+        _destroyed: boolean;
         _pending: Map<any, any>;
         _lastMonitor: Map<any, any>;
         _grabMonitor: Map<any, any>;

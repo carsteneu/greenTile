@@ -19,8 +19,9 @@
 //     binding map is what the next App adopts as its rollback target;
 //   - Meta cleanup must happen even when the binding-map entry is already gone,
 //     otherwise our dispatcher keeps swallowing the key;
-//   - a newer owner that registered after us is never restored over, deleted or
-//     Meta-reset.
+//   - a newer owner that registered after us is never restored over — EXCEPT on
+//     the 6.6 direct route, which has no read-back and unavoidably resets the
+//     name to muffin's builtin (the platform-limit tests at the end pin that).
 const test = require('node:test');
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
@@ -41,6 +42,7 @@ const makeMeta = () => {
                 {meta.customHandlers.delete(name);}
             else
                 {meta.customHandlers.set(name, fn);}
+            return true;
         },
     };
     return meta;
@@ -124,14 +126,16 @@ const harness = ({ generation = 'upstream' } = {}) => {
         }
         else
             {metaControl.installs.push(name);}
-        rawSet(name, fn);
+        return rawSet(name, fn);
     };
+    const logs = [];
     const focus = new Focus({
         meta,
         keybindingManager: manager || undefined,
         hotkey: (_app, dir) => () => calls.push(dir),
+        logError: (message) => logs.push(message),
     });
-    return { meta, manager, metaControl, focus, calls, app, state: manager && manager.state ? manager.state : { actionMode: 1 } };
+    return { meta, manager, metaControl, focus, calls, app, logs, state: manager && manager.state ? manager.state : { actionMode: 1 } };
 };
 
 /** A foreign prior with no recording, for tests that only need identity. */
@@ -566,4 +570,110 @@ test('6.6 direct route platform limit: an unknown foreign Meta handler is not re
     focus.destroy();
     assert.equal(meta.customHandlers.has('push-tile-left'), false,
         'reset target is muffin builtin; the foreign direct handler is undiscoverable');
+});
+
+test('6.6 direct route platform limit: a handler registered AFTER us is not restorable either', () => {
+    // Same limit, second half: the 6.6 direct route exposes no ownership signal at
+    // all — no readable handler and no manager map — so destroy() cannot tell
+    // whether the current handler is still ours and necessarily resets the name to
+    // muffin's builtin. That also drops a handler another owner registered AFTER us.
+    // Native probe 2026-10-06 (cjs, muffin 6.6): Meta exposes only
+    // keybindings_set_custom_handler and it returns a boolean, never the previous
+    // handler — there is no supported read-back. Reported, not worked around.
+    const { meta, focus, app } = harness({ generation: 'legacy' });
+    focus.connect(app);
+    const newer = () => {};
+    meta.customHandlers.set('push-tile-left', newer);
+    focus.destroy();
+    assert.equal(meta.customHandlers.has('push-tile-left'), false,
+        'the newer direct-route owner is unavoidably reset to muffin builtin');
+});
+
+for (const failure of ['false', 'throw after install']) {
+    test('6.6 registration failure (' + failure + '): native default and other directions survive', () => {
+        const { meta, focus, app, calls, logs } = harness({ generation: 'legacy' });
+        const rawSet = meta.keybindings_set_custom_handler;
+        meta.keybindings_set_custom_handler = (name, fn) => {
+            if (name === 'push-tile-left' && fn !== null) {
+                if (failure === 'false')
+                    {return false;}
+                rawSet(name, fn);
+                throw new Error('injected install failure after effect');
+            }
+            return rawSet(name, fn);
+        };
+        assert.doesNotThrow(() => focus.connect(app));
+        assert.equal(meta.customHandlers.has('push-tile-left'), false, 'failed direction uses native default');
+        for (const name of NAMES.filter((bindingName) => bindingName !== 'push-tile-left'))
+            {deliver(meta, name, {});}
+        assert.deepEqual(calls, ['right', 'up', 'down'], 'other directions still work');
+        assert.equal(logs.length, 1, 'only the failed direction is logged');
+        assert.match(logs[0], /push-tile-left.*Cinnamon default restored/);
+        assert.doesNotThrow(() => focus.destroy());
+        assert.equal(meta.customHandlers.size, 0);
+    });
+}
+
+test('6.6 registration and fallback failure: log uncertainty and retain an inert reset retry', () => {
+    const { meta, focus, app, calls, logs } = harness({ generation: 'legacy' });
+    const rawSet = meta.keybindings_set_custom_handler;
+    let fail = true;
+    meta.keybindings_set_custom_handler = (name, fn) => {
+        if (fail && name === 'push-tile-left') {
+            if (fn === null)
+                {return false;}
+            rawSet(name, fn);
+            throw new Error('injected install failure after effect');
+        }
+        return rawSet(name, fn);
+    };
+    assert.doesNotThrow(() => focus.connect(app));
+    deliver(meta, 'push-tile-left', {});
+    assert.deepEqual(calls, [], 'failed partial install cannot call the App');
+    assert.match(logs[0], /push-tile-left.*default reset failed/);
+    assert.doesNotMatch(logs[0], /default restored/);
+    fail = false;
+    focus.destroy();
+    assert.equal(meta.customHandlers.size, 0, 'disable retries the incomplete reset');
+});
+
+test('6.6 false reset: reported, isolated and retryable instead of silently accepted', () => {
+    const { meta, focus, app, calls, logs } = harness({ generation: 'legacy' });
+    focus.connect(app);
+    assert.deepEqual(logs, [], 'normal registration is silent');
+    const rawSet = meta.keybindings_set_custom_handler;
+    let fail = true;
+    meta.keybindings_set_custom_handler = (name, fn) =>
+        fail && name === 'push-tile-left' && fn === null ? false : rawSet(name, fn);
+    assert.throws(() => focus.destroy(), /push-tile-left/);
+    assert.deepEqual([...meta.customHandlers.keys()], ['push-tile-left'], 'other three reset despite false');
+    deliver(meta, 'push-tile-left', {});
+    assert.deepEqual(calls, [], 'unreleased dispatcher is inert');
+    fail = false;
+    assert.doesNotThrow(() => focus.destroy());
+    assert.equal(meta.customHandlers.size, 0);
+});
+
+test('6.6 missing action: registration and default reset both fail without false success or unbounded retries', () => {
+    const { meta, focus, app, logs } = harness({ generation: 'legacy' });
+    const rawSet = meta.keybindings_set_custom_handler;
+    let attempts = 0;
+    meta.keybindings_set_custom_handler = (name, fn) => {
+        if (name === 'push-tile-left') {
+            attempts++;
+            return false;
+        }
+        return rawSet(name, fn);
+    };
+    focus.connect(app);
+    assert.equal(attempts, 2, 'one install and one default reset attempt');
+    assert.match(logs[0], /push-tile-left.*default reset failed/);
+    assert.doesNotMatch(logs[0], /default restored/);
+    assert.equal(meta.customHandlers.size, 3, 'other directions remain registered');
+    for (let retry = 0; retry < 2; retry++) {
+        const before = attempts;
+        assert.throws(() => focus.destroy(), /push-tile-left/);
+        assert.equal(attempts - before, 2, 'one reset and one recovery per teardown');
+        assert.equal(meta.customHandlers.size, 0, 'other directions were released');
+    }
 });

@@ -55,7 +55,7 @@ declare const MetaNS: {
     Display: AnyRecord;
     WorkspaceManager: AnyRecord;
     MonitorManager: { get(): AnyRecord };
-    keybindings_set_custom_handler(name: string, callback: (...args: any[]) => void): void;
+    keybindings_set_custom_handler(name: string, callback: (...args: any[]) => void): boolean;
 };
 
 /**

@@ -102,10 +102,15 @@ export const Theme: {
          */
         _probe(className: string, pseudoClass: string): Rgb | null;
         /**
+         * Loads the accent sheet on the live theme. St.Theme.load_stylesheet returns
+         * a boolean (and may throw): a false return is a REFUSED load — the load is
+         * then not recorded at all, so no generation class marks a sheet that is not
+         * there and this Theme stays unloaded (a later changed() retries).
          * @param {AnyRecord} theme the live St.Theme object
          * @param {string} css the content that is now on disk at the stylesheet path
+         * @returns {boolean} whether the sheet is loaded
          */
-        _load(theme: AnyRecord, css: string): void;
+        _load(theme: AnyRecord, css: string): boolean;
         _unload(): void;
         _accentPath(): any;
         /**
@@ -137,7 +142,10 @@ export const Theme: {
         /**
          * Commits a persisted (or unchanged) look: theme class, colors, sheet
          * (re)load and the border and an open panel repaint. Only runs while this
-         * component is alive — a write may settle after destroy().
+         * component is alive — a write may settle after destroy(). A sheet the live
+         * theme refuses is NOT committed (the panel is not restyled against a look
+         * whose sheet is missing); the same-path reload already dropped the previous
+         * sheet, and a later changed() retries.
          * @param {LookRequest} request
          */
         _commit(request: LookRequest): void;

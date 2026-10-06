@@ -404,6 +404,87 @@ const enableWithMonitor = (env, ext) => {
     env.flushDisplayConfigNoReply();
 };
 
+// Fault isolation in Auto.destroy (lib/runtime/auto.js): a throwing teardown
+// step must not skip the remaining timer removals or the external signal
+// disconnection — otherwise the Auto's Scope keeps callbacks into the
+// destroyed App after disable.
+test('auto destroy: a throwing source_remove does not abort the signal release', () => {
+    const { env, ext } = loadExtension();
+    enableWithMonitor(env, ext);
+    const app = ext.currentSession().app;
+    app.auto.scheduleMonitor(app, 0, 300);
+    assert.equal(env.liveTimers().length, 1, 'one auto debounce timer is live');
+    const realRemove = env.mainloop.source_remove.bind(env.mainloop);
+    env.mainloop.source_remove = () => { throw new Error('injected source-remove failure'); };
+    assert.doesNotThrow(() => ext.disable(), 'Config.destroy isolates the auto failure');
+    assert.equal(env.display.count(), 0, 'every display observer is released despite the throw');
+    assert.equal(env.workspaceManager.count(), 0, 'the workspace reconnect handler is released');
+    assert.equal(env.windowManager.count(), 0, 'the switch-workspace observer is released');
+    assert.equal(env.settingsSlots.get('greenTile@carsteneu'), null, 'settings finalized last');
+    assert.equal(env.logErrors.some((m) => m.includes('auto timer not removed')), true,
+        'the un-removed source is reported, not hidden');
+    env.mainloop.source_remove = realRemove;
+});
+
+test('auto destroy: a throwing source_remove for one timer still removes the others', () => {
+    const { env, ext } = loadExtension();
+    enableWithMonitor(env, ext);
+    const app = ext.currentSession().app;
+    app.auto.scheduleMonitor(app, 0, 300);
+    app.auto.scheduleMonitor(app, 1, 300);
+    const ids = [...app.auto._timers.values()];
+    assert.equal(ids.length, 2, 'two per-monitor timers are live');
+    const realRemove = env.mainloop.source_remove.bind(env.mainloop);
+    const attempts = [];
+    env.mainloop.source_remove = (id) => {
+        attempts.push(id);
+        if (id === ids[0]) {
+            throw new Error('injected source-remove failure');
+        }
+        realRemove(id);
+    };
+    assert.doesNotThrow(() => ext.disable());
+    assert.deepEqual(attempts.slice().sort(), ids.slice().sort(), 'both timer removals were attempted');
+    assert.equal(env.timers.has(ids[1]), false, 'the second timer was removed despite the first throwing');
+    env.mainloop.source_remove = realRemove;
+});
+
+test('auto destroy: a throwing dropStop does not skip the signal release', () => {
+    const { env, ext } = loadExtension();
+    enableWithMonitor(env, ext);
+    const app = ext.currentSession().app;
+    app.auto._deps.dropStop = () => { throw new Error('injected dropStop failure'); };
+    assert.doesNotThrow(() => ext.disable());
+    assert.equal(env.display.count(), 0, 'display observers are still released');
+    assert.equal(env.workspaceManager.count(), 0, 'the workspace reconnect handler is still released');
+    assert.equal(env.windowManager.count(), 0, 'switch-workspace is still released');
+});
+
+test('auto: a surviving debounce timer is inert after destroy (no reach into the finalized App)', () => {
+    const { env, ext } = loadExtension();
+    enableWithMonitor(env, ext);
+    const app = ext.currentSession().app;
+    app.auto.scheduleMonitor(app, 0, 300);
+    const id = [...app.auto._timers.values()][0];
+    const realRemove = env.mainloop.source_remove.bind(env.mainloop);
+    env.mainloop.source_remove = () => { throw new Error('injected source-remove failure'); };
+    assert.doesNotThrow(() => ext.disable());
+    env.mainloop.source_remove = realRemove;
+    // the failed removal left the source scheduled: it may still fire once
+    const entry = env.timers.get(id);
+    assert.ok(entry, 'the un-removed source is still scheduled');
+    // a late fire must not reach the App (its settings are finalized): stub the
+    // settings-touching surface and prove it is never called
+    let layoutCalls = 0;
+    let retiles = 0;
+    app.auto._deps.layoutFor = () => { layoutCalls += 1; return { preset: null, auto: true }; };
+    app.auto._deps.retileMonitor = () => { retiles += 1; };
+    const result = entry.cb();
+    assert.equal(result, false, 'the late callback stops its source');
+    assert.equal(layoutCalls, 0, 'the late callback never reads the (finalized) settings');
+    assert.equal(retiles, 0, 'the late callback retiles nothing');
+});
+
 const settingsInstance = (env) => env.settingsInstances.find((s) => s.uuid === 'greenTile@carsteneu');
 
 test('split: a pending hotkey-step split leaves the 500 ms flush timer; disable flushes it into the settings before finalize', () => {
@@ -1045,8 +1126,13 @@ test('an enable failing at the 3rd hotkey rolls back hotkeys, installed-changed 
     assert.equal(env.totalHandlers(), 0);
 });
 
-test('a failure at focus.connect rolls back hotkeys, installed-changed, theme sheet and settings', () => {
+test('a manager failure at focus.connect rolls back hotkeys, installed-changed, theme sheet and settings', () => {
     const { env, ext } = loadExtension();
+    env.keybindingManager.bindings = new Map();
+    env.keybindingManager.setBuiltinHandler = (name, actionId, callback) => {
+        env.gi.Meta.keybindings_set_custom_handler(name, callback);
+        env.keybindingManager.bindings.set(actionId, { name, callback });
+    };
     const realSet = env.gi.Meta.keybindings_set_custom_handler;
     env.gi.Meta.keybindings_set_custom_handler = function (name, fn) {
         if (name === 'push-tile-down') {
@@ -1070,6 +1156,23 @@ test('a failure at focus.connect rolls back hotkeys, installed-changed, theme sh
     assert.equal(env.appSystem.count('installed-changed'), 1);
     ext.disable();
     assert.equal(env.totalHandlers(), 0);
+});
+
+test('6.6 focus registration fallback logs the failure without aborting the extension', () => {
+    const { env, ext } = loadExtension();
+    const realSet = env.gi.Meta.keybindings_set_custom_handler;
+    env.gi.Meta.keybindings_set_custom_handler = (name, callback) =>
+        name === 'push-tile-down' && callback !== null ? false : realSet(name, callback);
+    enableWithMonitor(env, ext);
+    assert.deepEqual(env.greenTileHotkeys(), HOTKEY_NAMES, 'tiling hotkeys remain available');
+    assert.equal(env.customBindings.has('push-tile-down'), false, 'failed direction uses Cinnamon default');
+    assert.equal(env.customBindings.size, 3, 'other focus directions are registered');
+    assert.equal(env.logErrors.length, 1, 'one targeted registration log');
+    assert.match(env.logErrors[0], /push-tile-down.*Cinnamon default restored/);
+    ext.disable();
+    assert.equal(env.customBindings.size, 0);
+    assert.equal(env.totalHandlers(), 0);
+    assert.equal(env.settingsSlots.get('greenTile@carsteneu'), null);
 });
 
 test('a failed App recreation leaves no App and no resources; the next monitor change succeeds exactly once', () => {

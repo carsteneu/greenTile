@@ -606,6 +606,10 @@ const createCinnamonEnv = (options) => {
         unloads: [],
         load_stylesheet(path) {
             this.loads.push(path);
+            // the real St.Theme.load_stylesheet returns a boolean; the fake mirrors
+            // it so a test cannot pass on an undefined return the native call never
+            // produces
+            return true;
         },
         unload_stylesheet(path) {
             const at = this.loads.indexOf(path);
@@ -709,6 +713,7 @@ const createCinnamonEnv = (options) => {
                 {env.customBindings.delete(name);}
             else
                 {env.customBindings.set(name, fn);}
+            return true;
         },
         // muffin builtin action ids: push-tile-* are wm builtins, resolved by
         // name through Meta.KeyBindingAction (focus.js manager route)

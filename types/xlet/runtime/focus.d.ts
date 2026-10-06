@@ -7,6 +7,7 @@
  * @property {AnyRecord} meta imports.gi.Meta
  * @property {AnyRecord} [keybindingManager] imports.ui.main.keybindingManager — absent on the 6.6 fake surface
  * @property {(app: AppFacade, dir: 'left' | 'right' | 'up' | 'down') => (display: AnyRecord, win: CinnamonWindow) => void} hotkey focusHotkey from lib/tiling/focus-nav.js; the names of FOCUS_BINDING_NAMES end in exactly these directions
+ * @property {(message: string) => void} [logError] registration failures
  */
 /**
  * One acquired binding.
@@ -25,6 +26,7 @@ export const Focus: {
         _meta: AnyRecord;
         _manager: any;
         _hotkey: (app: AppFacade, dir: "left" | "right" | "up" | "down") => (display: AnyRecord, win: CinnamonWindow) => void;
+        _logError: (message: string) => void;
         /** @type {FocusRegistration[]} */
         _registrations: FocusRegistration[];
         /**
@@ -90,6 +92,11 @@ export const Focus: {
          * @param {FocusRegistration} registration
          */
         _retryMetaReset(registration: FocusRegistration): void;
+        /**
+         * @param {string} name
+         * @param {((...args: any[]) => void) | null} handler
+         */
+        _setMeta(name: string, handler: ((...args: any[]) => void) | null): void;
     };
 };
 /**
@@ -109,6 +116,10 @@ export type FocusDeps = {
      * focusHotkey from lib/tiling/focus-nav.js; the names of FOCUS_BINDING_NAMES end in exactly these directions
      */
     hotkey: (app: AppFacade, dir: "left" | "right" | "up" | "down") => (display: AnyRecord, win: CinnamonWindow) => void;
+    /**
+     * registration failures
+     */
+    logError?: ((message: string) => void) | undefined;
 };
 /**
  * One acquired binding.

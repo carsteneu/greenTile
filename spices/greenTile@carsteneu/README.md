@@ -35,6 +35,7 @@ All hotkeys can be changed on the **Hotkeys** page of the settings.
 - After an update, restart Cinnamon on X11 (`Alt+F2` → `r` → Enter, or `Ctrl+Alt+Esc`). Reloading or toggling the extension alone does not activate updated native library modules. Under Wayland, log out and back in instead; that is an activation instruction, not a claim of tested Wayland support.
 - An external layout reset or import cancels older pending resize writes once Cinnamon reports a changed value. Avoid importing or resetting layouts during an unfinished resize; identical-value imports and notification timing still have limitations.
 - If **gTile** is still installed, disable it: both extensions claim the same keys.
+- On Cinnamon 6.6, avoid other extensions overriding `push-tile-*`: disabling greenTile restores Cinnamon's defaults, not their handlers.
 - greenTile is self-contained: no configuration outside the standard xlet settings, no runtime downloads.
 
 ## Source and license

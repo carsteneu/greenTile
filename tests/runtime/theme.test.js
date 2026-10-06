@@ -41,6 +41,9 @@ const makeEnv = () => {
           failBytes: false,
           failMkdir: false,
         gen: 100,
+        // St.Theme.load_stylesheet returns a boolean; a test flips loadOk to false
+        // to drive a failed load (native: missing file -> false, no throw)
+        loadOk: true,
     };
 
     const makeFile = (p) => ({
@@ -94,7 +97,7 @@ const makeEnv = () => {
     };
     env.byteArray = { fromString: (s) => new TextEncoder().encode(s) };
     env.stTheme = {
-        load_stylesheet: (p) => env.loads.push(p),
+        load_stylesheet: (p) => { env.loads.push(p); return env.loadOk; },
         unload_stylesheet: (p) => env.unloads.push(p),
     };
     env.st = {
@@ -339,7 +342,7 @@ test('a replaced live St.Theme object forces a sheet reload even for unchanged c
     assert.equal(env.loads.length, 1);
     // Cinnamon theme switch: loadTheme installed a NEW St.Theme object
     env.stTheme = {
-        load_stylesheet: (p) => env.loads.push(p),
+        load_stylesheet: (p) => { env.loads.push(p); return env.loadOk; },
         unload_stylesheet: (p) => env.unloads.push(p),
     };
     theme.changed();
@@ -413,4 +416,56 @@ test('out-of-order completion: an old owner late write lands on its own file, ne
     assert.equal(env.writes.find((w) => w.path === oldPath).text.includes('200, 10, 20'), true, 'the old write landed on its own file');
     assert.equal(env.loads.includes(newPath), true, 'the new owner loaded its own file');
     assert.equal(env.loads.includes(oldPath), false, 'the old owner file is never loaded by the new owner');
+});
+
+test('a failed load_stylesheet is not counted as a loaded look and retries on the next change', () => {
+    const env = makeEnv();
+    env.loadOk = false;
+    const { theme, config } = makeTheme(env);
+    theme.init(config);
+    env.flush();
+    assert.equal(env.loads.length, 1, 'the load was attempted');
+    assert.equal(theme._themeObj, null, 'a failed load records no live theme object');
+    assert.equal(theme._loaded, '', 'no content is recorded as loaded');
+    assert.equal(theme.gen, '', 'no generation class is taken for a failed load');
+    assert.equal(env.logs.some((l) => l.startsWith('greenTile: accent stylesheet: ')), true,
+        'the failed load is reported');
+    env.loadOk = true;
+    theme.changed();
+    env.flush();
+    assert.equal(env.loads.length, 2, 'a later change retries the load');
+    assert.match(theme.gen, /^gk-acc\d+$/, 'the successful retry takes a generation class');
+    assert.equal(theme._loaded !== '', true, 'the retry records the loaded content');
+});
+
+test('a load that fails after a successful load keeps the previous colors and retries', () => {
+    const env = makeEnv();
+    const { theme, config } = makeTheme(env);
+    theme.init(config);
+    env.flush();
+    assert.match(theme.gen, /^gk-acc\d+$/, 'A: a generation class was taken');
+    assert.equal(theme._loaded !== '', true, 'A: content was recorded as loaded');
+    assert.equal(env.restyles, 1, 'A: the border restyled');
+    const firstGen = theme.gen;
+    // B: different colors, but the live theme refuses to load the sheet
+    env.loadOk = false;
+    config.settings = settings({ accentColor: 'rgb(30, 40, 50)' });
+    theme.changed();
+    env.flush();
+    assert.equal(env.loads.length, 2, 'B: the load was attempted');
+    assert.equal(env.unloads.length, 1, 'B: the same-path reload has already dropped A\'s sheet');
+    assert.equal(theme._themeObj, null, 'B: no live theme object is recorded');
+    assert.equal(theme._loaded, '', 'B: nothing is recorded as loaded');
+    assert.equal(theme.gen, '', 'B: no generation class for a sheet that is not there');
+    assert.equal(theme.rgb[0], 200, 'B: the refused look is not committed (colors stay A)');
+    assert.equal(env.restyles, 1, 'B: no repaint for a look whose sheet did not load');
+    // the next change retries; once the theme accepts the sheet, the look commits
+    env.loadOk = true;
+    theme.changed();
+    env.flush();
+    assert.equal(env.loads.length, 3, 'the retry attempts the load again');
+    assert.match(theme.gen, /^gk-acc\d+$/, 'the retry takes a fresh generation class');
+    assert.notEqual(theme.gen, firstGen, 'the generation class is never reused');
+    assert.equal(theme.rgb[0], 30, 'the retry commits the configured accent');
+    assert.equal(env.restyles, 2, 'the retry repaints');
 });
