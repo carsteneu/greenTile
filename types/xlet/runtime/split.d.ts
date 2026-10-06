@@ -21,7 +21,7 @@ export const SPLIT_FLUSH_MS: number;
  * @property {(monitor: CinnamonMonitor, focus: CinnamonWindow | null, ws?: number | null) => CinnamonWindow[]} collectWindows
  * @property {(monitor: CinnamonMonitor) => Rect} usableArea
  * @property {(app: AppFacade) => number} gap
- * @property {(app: AppFacade, monitorIndex: number, focused: CinnamonWindow | null, animate?: boolean, wsIndex?: number | null) => void} retileMonitor
+ * @property {(app: AppFacade, monitorIndex: number, focused: CinnamonWindow | null, animate?: boolean, wsIndex?: number | null, actionLayout?: Layout | null) => void} retileMonitor
  * @property {(op: string) => string} grabOpName
  * @property {(app: AppFacade, windows: CinnamonWindow[], columnMajor: boolean, consume?: boolean) => CinnamonWindow[]} sortReadingOrder
  */
@@ -82,43 +82,22 @@ export const Split: {
          */
         manual(app: AppFacade, monitorIndex: number, wsIndex: number, n: number): SplitShape | null;
         /**
-         * Stored split for the shape it has to describe (kind, shape), null when the
-         * stored value does not. Called with the NOMINAL shape by for(), and with the
-         * EFFECTIVE shape by fit(): an arrangement regrouped to fewer columns is a
-         * different shape, and a resize the user made on it is stored in that shape — it
-         * has to be read back against exactly that shape, or it would be dropped and the
-         * user's stored split destroyed.
-         * @param {AppFacade} app
-         * @param {number} monitorIndex
-         * @param {number} wsIndex
-         * @param {number} n
-         * @param {'cols'|'rows'} kind
-         * @param {readonly number[]} shape
-         * @returns {SplitShape | null}
-         */
-        _stored(app: AppFacade, monitorIndex: number, wsIndex: number, n: number, kind: "cols" | "rows", shape: readonly number[]): SplitShape | null;
-        /**
          * Records the arrangement that was actually PLACED for a (monitor, workspace, window
-         * count): its kind/shape/split, the IDENTITY of the windows in placement order, and
-         * the cell minima the placement observed. REPLACED, never merged — the entry only
-         * ever describes the most recent placement, so nothing needs invalidating.
+         * surface): fit and stable identities, plus explicit cells when the fit alone cannot
+         * describe an underfilled command. External resets invalidate it at the existing seam.
          * @param {AppFacade} app
          * @param {number} monitorIndex
          * @param {number} wsIndex
          * @param {number} n
-         * @param {{kind: 'cols'|'rows', shape: number[], split: Split | null, seqs: number[], mins: Array<{seq: number, w: number, h: number}>}} entry
+         * @param {(FittedLayout & {mins: Array<{seq: number, w: number, h: number}>}) | null} entry null clears this surface only
          */
-        setPlacement(app: AppFacade, monitorIndex: number, wsIndex: number, n: number, entry: {
-            kind: "cols" | "rows";
-            shape: number[];
-            split: Split | null;
-            seqs: number[];
+        setPlacement(app: AppFacade, monitorIndex: number, wsIndex: number, n: number, entry: (FittedLayout & {
             mins: Array<{
                 seq: number;
                 w: number;
                 h: number;
             }>;
-        }): void;
+        }) | null): void;
         /**
          * The recorded arrangement when it describes EXACTLY these windows in this order,
          * null otherwise. The identity check is the point: a window closed and replaced at
@@ -143,31 +122,16 @@ export const Split: {
          * @param {number} wsIndex
          * @param {number} n
          * @param {CinnamonWindow[]} ordered
+         * @param {{monitorIndex: number, wsIndex: number}} [source] source surface of an incoming window
          * @returns {Array<{w: number, h: number}>}
          */
-        minsFor(app: AppFacade, monitorIndex: number, wsIndex: number, n: number, ordered: CinnamonWindow[]): Array<{
+        minsFor(app: AppFacade, monitorIndex: number, wsIndex: number, n: number, ordered: CinnamonWindow[], source?: {
+            monitorIndex: number;
+            wsIndex: number;
+        }): Array<{
             w: number;
             h: number;
         }>;
-        /**
-         * @param {AppFacade} app
-         * @param {number} monitorIndex
-         * @param {number} wsIndex
-         * @param {number} n
-         * @param {CinnamonWindow[]} ordered
-         * @returns {{kind: 'cols'|'rows', shape: number[], split: Split | null, seqs: number[], mins: Array<{seq: number, w: number, h: number}>} | null}
-         */
-        _entry(app: AppFacade, monitorIndex: number, wsIndex: number, n: number, ordered: CinnamonWindow[]): {
-            kind: "cols" | "rows";
-            shape: number[];
-            split: Split | null;
-            seqs: number[];
-            mins: Array<{
-                seq: number;
-                w: number;
-                h: number;
-            }>;
-        } | null;
         /**
          * Effective arrangement for the ordered windows of a layout: the arrangement the last
          * placement under this key ACTUALLY produced, when that placement describes exactly
@@ -182,9 +146,10 @@ export const Split: {
          * @param {number} n
          * @param {Layout} layout
          * @param {CinnamonWindow[]} ordered
+         * @param {Rect[]} [frames] action-start frames in the same ordered identity sequence
          * @returns {FittedLayout}
          */
-        effective(app: AppFacade, monitorIndex: number, wsIndex: number, n: number, layout: Layout, ordered: CinnamonWindow[]): FittedLayout;
+        effective(app: AppFacade, monitorIndex: number, wsIndex: number, n: number, layout: Layout, ordered: CinnamonWindow[], frames?: Rect[]): FittedLayout;
         /**
          * The arrangement for explicit cell minima — what placeFit re-runs on as it gathers
          * the evidence of its own placements. The effective shape is decided BEFORE the
@@ -343,7 +308,7 @@ export type SplitDeps = {
     collectWindows: (monitor: CinnamonMonitor, focus: CinnamonWindow | null, ws?: number | null) => CinnamonWindow[];
     usableArea: (monitor: CinnamonMonitor) => Rect;
     gap: (app: AppFacade) => number;
-    retileMonitor: (app: AppFacade, monitorIndex: number, focused: CinnamonWindow | null, animate?: boolean, wsIndex?: number | null) => void;
+    retileMonitor: (app: AppFacade, monitorIndex: number, focused: CinnamonWindow | null, animate?: boolean, wsIndex?: number | null, actionLayout?: Layout | null) => void;
     grabOpName: (op: string) => string;
     sortReadingOrder: (app: AppFacade, windows: CinnamonWindow[], columnMajor: boolean, consume?: boolean) => CinnamonWindow[];
 };

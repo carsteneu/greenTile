@@ -40,7 +40,7 @@ export function splitFitShape(kind: "cols" | "rows", shape: readonly number[], m
 export function splitFit(kind: "cols" | "rows", shape: readonly number[], mins: Array<{
     w: number;
     h: number;
-}>, area: Rect, gap: number, minPx: number, base: Split | null): {
+}>, area: Rect, gap: number, minPx: number, base: Split | null, knownShape?: number[], gapArea?: Rect): {
     kind: "cols" | "rows";
     shape: number[];
     split: Split | null;
