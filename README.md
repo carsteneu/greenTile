@@ -4,7 +4,9 @@ Window tiling for Cinnamon: presets per monitor and workspace, an auto mode, sna
 
 [![greenTile in action: windows tile as they open, then a window is split into another one by drag, with a translucent preview](docs/screenshots/demo.gif)](https://youtu.be/niI0LHYb1A8)
 
-![Preset panel](docs/screenshots/preset-panel.png)
+![greenTile 2.2.1 preset selection: twelve starter cards with layout previews, edit controls and an assigned preset](docs/screenshots/preset-panel.png)
+
+_The preset selection in 2.2.1: twelve editable starters in a responsive card grid. Example previews for six windows; click a card to apply it or ✎ to edit._
 
 - **UUID:** `greenTile@carsteneu`
 - **Requires:** Cinnamon 6.6; tested on Linux Mint with X11. Newer Cinnamon versions and Wayland are not yet fully verified.
