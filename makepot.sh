@@ -40,6 +40,10 @@ find "$STAGE/$UUID" -name '*.js' | sort | xargs xgettext \
     --language=JavaScript --from-code=UTF-8 --keyword=translate \
     --package-version="$VERSION" --output="$STAGE.translate.pot"
 msgcat --use-first --output-file="$POT" "$STAGE.pot" "$STAGE.translate.pot"
+# xgettext records the scanned path in every "#:" source reference. The scan runs
+# on the staging copy, so strip that prefix — the shipped template and the merged
+# catalogs must carry repository-relative paths, not this machine's staging dir.
+sed -i "s#$STAGE/$UUID/##g" "$POT"
 rm -rf "$STAGE" "$STAGE.pot" "$STAGE.translate.pot"
 
 # cinnamon-xlet-makepot writes xgettext's placeholder header; replace it.

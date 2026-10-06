@@ -9,8 +9,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: greenTile 2.2.0\n"
 "Report-Msgid-Bugs-To: https://github.com/carsteneu\n"
-"POT-Creation-Date: 2026-10-06 14:13+0200\n"
-"PO-Revision-Date: 2026-09-28 17:17+0200\n"
+"POT-Creation-Date: 2026-10-06 14:31+0200\n"
+"PO-Revision-Date: 2026-10-06 14:32+0200\n"
 "Last-Translator: carsten_eu\n"
 "Language-Team: German\n"
 "Language: de\n"
@@ -90,90 +90,90 @@ msgstr "Speichern"
 msgid "Result: %s"
 msgstr "Ergebnis: %s"
 
-#: lib/ui/panel.js:96
+#: lib/ui/panel.js:100
 msgid "Edit preset"
-msgstr ""
+msgstr "Preset bearbeiten"
 
-#: lib/ui/panel.js:112
+#: lib/ui/panel.js:117
 msgid "Assigned"
-msgstr ""
+msgstr "Zugewiesen"
 
-#: lib/ui/panel.js:114
+#: lib/ui/panel.js:119
 msgid "Remove assignment"
-msgstr ""
+msgstr "Zuweisung entfernen"
 
-#: lib/ui/panel.js:136
+#: lib/ui/panel.js:150
 msgid "Gap between windows"
 msgstr "Abstand zwischen Fenstern"
 
-#: lib/ui/panel.js:142
+#: lib/ui/panel.js:156
 #, javascript-format
 msgid "%d px"
 msgstr "%d px"
 
-#: lib/ui/panel.js:162
+#: lib/ui/panel.js:176
 msgid "Reset sizes"
 msgstr "Größen zurücksetzen"
 
-#: lib/ui/panel.js:205
+#: lib/ui/panel.js:219
 #, javascript-format
 msgid "Presets — workspace %d · %s"
 msgstr "Presets — Arbeitsfläche %d · %s"
 
-#: lib/ui/panel.js:207
+#: lib/ui/panel.js:221
 msgid "Create preset"
 msgstr "Neues Preset"
 
-#: lib/ui/panel.js:207
+#: lib/ui/panel.js:221
 #, javascript-format
 msgid "Edit %s"
 msgstr "%s bearbeiten"
 
-#: lib/ui/panel.js:218
+#: lib/ui/panel.js:232
 msgid "Back"
 msgstr "zurück"
 
-#: lib/ui/panel.js:227 lib/ui/panel.js:233
+#: lib/ui/panel.js:241 lib/ui/panel.js:247
 msgid "Auto: on"
 msgstr "Auto: an"
 
-#: lib/ui/panel.js:227 lib/ui/panel.js:233
+#: lib/ui/panel.js:241 lib/ui/panel.js:247
 msgid "Auto: off"
 msgstr "Auto: aus"
 
-#: lib/ui/panel.js:255
+#: lib/ui/panel.js:269
 msgid "Dark theme"
 msgstr "Dunkles Design"
 
-#: lib/ui/panel.js:255
+#: lib/ui/panel.js:269
 msgid "Light theme"
 msgstr "Helles Design"
 
-#: lib/ui/panel.js:443
+#: lib/ui/panel.js:477
 msgid "No presets yet."
 msgstr "Noch keine Presets vorhanden."
 
-#: lib/ui/panel.js:464
+#: lib/ui/panel.js:497
 #, javascript-format
 msgid "Preview for %d window"
-msgstr ""
+msgstr "Vorschau für %d Fenster"
 
-#: lib/ui/panel.js:465
+#: lib/ui/panel.js:498
 #, javascript-format
 msgid "Preview for %d windows"
-msgstr ""
+msgstr "Vorschau für %d Fenster"
 
-#: lib/ui/panel.js:465
+#: lib/ui/panel.js:498
 msgid "No windows open — base layout"
-msgstr ""
+msgstr "Keine Fenster offen — Grundlayout"
 
-#: lib/ui/panel.js:479
+#: lib/ui/panel.js:512
 msgid "New preset"
 msgstr "Neu anlegen"
 
-#: lib/ui/panel.js:482
+#: lib/ui/panel.js:515
 msgid "Click a card to apply it to this workspace and tile right away"
-msgstr ""
+msgstr "Klick auf eine Karte = sofort auf dieser Fläche anwenden & kacheln"
 
 #. metadata.json->name
 msgid "greenTile"
@@ -447,10 +447,10 @@ msgid "State color of the preset panel when State color is Custom."
 msgstr ""
 "Statusfarbe des Preset-Panels, wenn die Statusfarbe auf Eigene Farbe steht."
 
-#: .yesmem/tmp/makepot-stage/greenTile@carsteneu/lib/runtime/exclusions.js:270
+#: lib/runtime/exclusions.js:270
 msgid "Window floats"
 msgstr "Fenster schwebt frei"
 
-#: .yesmem/tmp/makepot-stage/greenTile@carsteneu/lib/runtime/exclusions.js:270
+#: lib/runtime/exclusions.js:270
 msgid "Window tiles again"
 msgstr "Fenster wird wieder gekachelt"

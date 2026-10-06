@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: greenTile 2.2.0\n"
 "Report-Msgid-Bugs-To: https://github.com/carsteneu\n"
-"POT-Creation-Date: 2026-10-06 14:13+0200\n"
+"POT-Creation-Date: 2026-10-06 14:31+0200\n"
 "PO-Revision-Date: 2021-01-12 21:08+0100\n"
 "Last-Translator: Åke Engelbrektson <eson@svenskasprakfiler.se>\n"
 "Language-Team: Svenska Språkfiler <contactform@svenskasprakfiler.se>\n"
@@ -89,88 +89,88 @@ msgstr "Spara"
 msgid "Result: %s"
 msgstr "Resultat: %s"
 
-#: lib/ui/panel.js:96
+#: lib/ui/panel.js:100
 msgid "Edit preset"
 msgstr ""
 
-#: lib/ui/panel.js:112
+#: lib/ui/panel.js:117
 msgid "Assigned"
 msgstr ""
 
-#: lib/ui/panel.js:114
+#: lib/ui/panel.js:119
 msgid "Remove assignment"
 msgstr ""
 
-#: lib/ui/panel.js:136
+#: lib/ui/panel.js:150
 msgid "Gap between windows"
 msgstr "Avstånd mellan fönster"
 
-#: lib/ui/panel.js:142
+#: lib/ui/panel.js:156
 #, javascript-format
 msgid "%d px"
 msgstr "%d px"
 
-#: lib/ui/panel.js:162
+#: lib/ui/panel.js:176
 msgid "Reset sizes"
 msgstr "Återställ storlekar"
 
-#: lib/ui/panel.js:205
+#: lib/ui/panel.js:219
 #, javascript-format
 msgid "Presets — workspace %d · %s"
 msgstr "Förinställningar — arbetsyta %d · %s"
 
-#: lib/ui/panel.js:207
+#: lib/ui/panel.js:221
 msgid "Create preset"
 msgstr "Skapa förinställning"
 
-#: lib/ui/panel.js:207
+#: lib/ui/panel.js:221
 #, javascript-format
 msgid "Edit %s"
 msgstr "Redigera %s"
 
-#: lib/ui/panel.js:218
+#: lib/ui/panel.js:232
 msgid "Back"
 msgstr "Tillbaka"
 
-#: lib/ui/panel.js:227 lib/ui/panel.js:233
+#: lib/ui/panel.js:241 lib/ui/panel.js:247
 msgid "Auto: on"
 msgstr "Auto: på"
 
-#: lib/ui/panel.js:227 lib/ui/panel.js:233
+#: lib/ui/panel.js:241 lib/ui/panel.js:247
 msgid "Auto: off"
 msgstr "Auto: av"
 
-#: lib/ui/panel.js:255
+#: lib/ui/panel.js:269
 msgid "Dark theme"
 msgstr "Mörkt tema"
 
-#: lib/ui/panel.js:255
+#: lib/ui/panel.js:269
 msgid "Light theme"
 msgstr "Ljust tema"
 
-#: lib/ui/panel.js:443
+#: lib/ui/panel.js:477
 msgid "No presets yet."
 msgstr "Inga förinställningar än."
 
-#: lib/ui/panel.js:464
+#: lib/ui/panel.js:497
 #, javascript-format
 msgid "Preview for %d window"
 msgstr ""
 
-#: lib/ui/panel.js:465
+#: lib/ui/panel.js:498
 #, javascript-format
 msgid "Preview for %d windows"
 msgstr ""
 
-#: lib/ui/panel.js:465
+#: lib/ui/panel.js:498
 msgid "No windows open — base layout"
 msgstr ""
 
-#: lib/ui/panel.js:479
+#: lib/ui/panel.js:512
 msgid "New preset"
 msgstr "Ny förinställning"
 
-#: lib/ui/panel.js:482
+#: lib/ui/panel.js:515
 msgid "Click a card to apply it to this workspace and tile right away"
 msgstr ""
 
@@ -442,10 +442,10 @@ msgstr "Anpassad statusfärg"
 msgid "State color of the preset panel when State color is Custom."
 msgstr "Statusfärg för förinställningspanelen när Statusfärg är Anpassad."
 
-#: .yesmem/tmp/makepot-stage/greenTile@carsteneu/lib/runtime/exclusions.js:270
+#: lib/runtime/exclusions.js:270
 msgid "Window floats"
 msgstr "Fönstret flyter"
 
-#: .yesmem/tmp/makepot-stage/greenTile@carsteneu/lib/runtime/exclusions.js:270
+#: lib/runtime/exclusions.js:270
 msgid "Window tiles again"
 msgstr "Fönstret kaklas igen"
