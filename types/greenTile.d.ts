@@ -148,6 +148,8 @@ type Layout = DragLayout & {
     rule?: Rule;
     /** Transient action geometry; never a stored preset or shape field. */
     split?: Split | null;
+    /** Occupied extent of a one-off underfilled column action; never persisted. */
+    area?: Rect;
 };
 
 /** border-frame reference of a cell edge as produced by splitEdgeRef. */
@@ -279,11 +281,11 @@ type AutoFacade = {
 type SplitFacade = {
     for(app: AppFacade, monitorIndex: number, wsIndex: number, windowCount: number, layout: DragLayout): SplitShape | null;
     manual(app: AppFacade, monitorIndex: number, wsIndex: number, n: number): SplitShape | null;
-    effective(app: AppFacade, monitorIndex: number, wsIndex: number, n: number, layout: Layout, ordered: CinnamonWindow[]): FittedLayout;
+    effective(app: AppFacade, monitorIndex: number, wsIndex: number, n: number, layout: Layout, ordered: CinnamonWindow[], frames?: Rect[]): FittedLayout;
     fit(app: AppFacade, monitorIndex: number, wsIndex: number, n: number, layout: Layout, mins: Array<{ w: number; h: number }>, area: Rect, gap: number): FittedLayout;
-    setPlacement(app: AppFacade, monitorIndex: number, wsIndex: number, n: number, entry: { kind: 'cols' | 'rows'; shape: number[]; split: Split | null; seqs: number[]; mins: Array<{ seq: number; w: number; h: number }> }): void;
+    setPlacement(app: AppFacade, monitorIndex: number, wsIndex: number, n: number, entry: (FittedLayout & { mins: Array<{ seq: number; w: number; h: number }> }) | null): void;
     placementFor(app: AppFacade, monitorIndex: number, wsIndex: number, n: number, ordered: CinnamonWindow[]): FittedLayout | null;
-    minsFor(app: AppFacade, monitorIndex: number, wsIndex: number, n: number, ordered: CinnamonWindow[]): Array<{ w: number; h: number }>;
+    minsFor(app: AppFacade, monitorIndex: number, wsIndex: number, n: number, ordered: CinnamonWindow[], source?: { monitorIndex: number; wsIndex: number }): Array<{ w: number; h: number }>;
     onResizeEnd(app: AppFacade, win: CinnamonWindow, op: string): void;
     ref(app: AppFacade, monitorIndex: number, wsIndex: number, n: number): { key: string; mkey: string; wskey: string; n: string } | null;
     forget(refKey: string): void;
@@ -401,6 +403,9 @@ type FittedLayout = {
     kind: 'cols' | 'rows';
     shape: number[];
     split: Split | null;
+    /** Explicit current cells when an underfilled command or unplaced window-set change cannot be reconstructed from the fit. */
+    cells?: Rect[];
+    area?: Rect;
 };
 
 /** HSL color triplet [h (0–360), s (0–1), l (0–1)] as produced by accentHsl. */
