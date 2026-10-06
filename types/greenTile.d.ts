@@ -183,6 +183,7 @@ type SortItem = { i: number; r: Rect; c: number };
 /** Settings access as greenTile uses it (values are JSON data / strings). */
 type SettingsFacade = {
     getValue(key: string): any;
+    getDefaultValue(key: string): any;
     setValue(key: string, value: any): void;
     bind(key: string, prop: string, cb: () => void, data?: any): void;
     setOptions(options: {}, profile?: any): void;

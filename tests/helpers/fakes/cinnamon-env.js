@@ -160,6 +160,9 @@ const SETTINGS_DEFAULTS = {
     excludeAppPicker: 'picker',
     layouts: '',
     presets: '[]',
+    // Ordinary fixtures model a user who already completed the import. Migration
+    // tests explicitly pass false to exercise the first-start path.
+    starterPresetsImported: true,
     panelTheme: false,
     accentMode: false,
     accentColor: '',
@@ -514,6 +517,10 @@ const createCinnamonEnv = (options) => {
                 if (!values.has(key))
                     {throw new Error('fake settings: no default for "' + key + '" (uuid ' + uuid + ')');}
                 return values.get(key);
+            },
+            getDefaultValue(key) {
+                if (!schema[key]) throw new Error('fake settings: unknown default ' + key);
+                return schema[key].default;
             },
             setValue(key, v) {
                 this.callLog.push({ op: 'setValue', key, value: v, finalized: this.finalized });

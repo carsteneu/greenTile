@@ -81,3 +81,76 @@ test('stored boolean values survive the checkbox -> switch upgrade', () => {
         }
     }
 });
+
+test('a first install includes twelve distinct editable starter presets', () => {
+    const presets = JSON.parse(schema.presets.default);
+    assert.equal(presets.length, 12);
+    assert.equal(new Set(presets.map(p => p.id)).size, 12, 'unique editable IDs');
+    assert.equal(new Set(presets.map(p => p.name)).size, 12, 'distinct names');
+    assert.equal(new Set(presets.map(p => JSON.stringify(p.rules[0].stacks))).size, 12, 'distinct base layouts');
+    for (const preset of presets) {
+        assert.match(preset.id, /^p\d+$/);
+        assert.ok(preset.name.trim());
+        assert.equal(preset.rules[0].min, 2, 'available from two windows');
+        let previous = 1;
+        for (const rule of preset.rules) {
+            assert.ok(rule.min > previous && rule.min <= 50, 'ascending valid thresholds');
+            previous = rule.min;
+            assert.ok(rule.stacks.length >= 1 && rule.stacks.length <= 6);
+            assert.ok(rule.stacks.every(n => Number.isInteger(n) && n >= 1 && n <= 4));
+        }
+    }
+});
+
+test('starter presets survive the normal reader and cover every supported window count', () => {
+    const { load } = require('../helpers/cinnamon-loader');
+    const layout = load('./lib/tiling/layout.js');
+    const { fillStacks } = load('./lib/model/fill.js');
+    const presets = JSON.parse(schema.presets.default);
+    assert.equal(presets.length, 12);
+    const app = { config: { settings: { getValue: () => schema.presets.default,
+        setValue: () => assert.fail('reading presets must not rewrite settings') } } };
+    assert.deepEqual(layout.presetsRead(app), presets);
+    for (const preset of presets) {
+        for (let n = 2; n <= 24; n++) {
+            const picked = layout.rulesPick(preset.rules, n);
+            assert.ok(picked, `${preset.name}: rule for ${n}`);
+            assert.equal(fillStacks(picked.stacks, n).reduce((a, b) => a + b, 0), n);
+        }
+    }
+});
+
+test('upgrading keeps custom or deliberately empty presets instead of reseeding', () => {
+    for (const stored of ['[]', '', '[{"id":"mine","name":"Custom","rules":[]}]']) {
+        const upgraded = doUpgrade({ presets: { value: stored } }, structuredClone(schema));
+        assert.equal(upgraded.presets.value, stored);
+    }
+});
+
+test('starter presets represent twelve different effective layout families', () => {
+    const { load } = require('../helpers/cinnamon-loader');
+    const { rulesPick } = load('./lib/tiling/layout.js');
+    const { fillStacks } = load('./lib/model/fill.js');
+    const signatures = JSON.parse(schema.presets.default).map(preset =>
+        JSON.stringify(Array.from({ length: 49 }, (_, i) =>
+            fillStacks(rulesPick(preset.rules, i + 2).stacks, i + 2))));
+    assert.equal(new Set(signatures).size, 12, 'no two presets always apply the same layout');
+});
+
+test('fresh selection size fits twelve cards in four columns and three rows', () => {
+    const { load } = require('../helpers/cinnamon-loader');
+    const { gridAvailable, gridColumns, gridRows } = load('./lib/model/grid.js');
+    const size = JSON.parse(schema.panelSize.default);
+    assert.deepEqual(size, { list: { w: 800, h: 480 } }, 'editor size remains unchanged');
+    const cols = gridColumns(gridAvailable(size.list.w));
+    assert.equal(cols, 4);
+    assert.equal(gridRows(JSON.parse(schema.presets.default), cols).length, 3);
+    assert.equal(schema.layouts.default, '', 'no monitor or workspace is assigned automatically');
+});
+
+test('upgrading preserves previously stored panel sizes including an unset size', () => {
+    for (const stored of ['', '{"list":{"w":640,"h":220},"editor":{"w":700,"h":180}}']) {
+        const upgraded = doUpgrade({ panelSize: { value: stored } }, structuredClone(schema));
+        assert.equal(upgraded.panelSize.value, stored);
+    }
+});

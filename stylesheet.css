@@ -284,6 +284,23 @@
     padding: 8px 14px;
 }
 
+/* Selection view only: one pixel smaller; editor typography stays unchanged. */
+.gk-panel-list {
+    font-size: 15px;
+}
+
+.gk-panel-list .gk-title {
+    font-size: 15px;
+}
+
+.gk-panel-list .gk-name {
+    font-size: 13px;
+}
+
+.gk-panel-list .gk-plus {
+    font-size: 15px;
+}
+
 /* Preset editor (view 2) — tokens from the approved prototype: labels 11px
    #8b91a0 uppercase, rule rows padding 8px 10px, active rule orange stripe
    2px + tint, painter #14161d with 6px inset, button #ff9640 on #14161d. */
