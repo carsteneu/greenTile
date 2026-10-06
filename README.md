@@ -178,6 +178,24 @@ greenTile is a fork of **gTile** 2.2.1 (`gTile@shuairan`):
 
 The starting point was gTile's shipped bundle `5.4/gTile.js`. The extension skeleton and the translation sources (`po/`) come from gTile; the classic grid was removed, everything else described above was added in greenTile. If gTile is still installed, disable it, since both claim the same keys.
 
+greenTile has been largely rebuilt. Nearly unchanged code inherited from gTile accounts for **less than 1% of today's runtime code** in the source comparison described below. Several gTile-derived helpers remain, and the project's original attribution and GPL licensing are unchanged.
+
+<details>
+<summary>Source comparison: scope and method</summary>
+
+A source comparison for **greenTile 2.2.0** (`15ec54f`) found **250 matching code tokens** in near-verbatim sequences:
+
+| Compared runtime code | Total tokens | Tokens in matching sequences | Share |
+|---|---:|---:|---:|
+| gTile 2.2.1 reference | 11,083 | 250 | **2.26%** |
+| Current greenTile | 54,180 | 250 | **0.46%** |
+
+This measures near-verbatim textual overlap, not independent authorship or a percentage of the tool that is "completely new": shorter or structurally rewritten derived code is not fully captured.
+
+**Measurement scope and method:** the reference is gTile 2.2.1 at Linux Mint Spices commit [`f17b3da36c6bb8db7359c3f978aebe8c93ec6968`](https://github.com/linuxmint/cinnamon-spices-extensions/tree/f17b3da36c6bb8db7359c3f978aebe8c93ec6968/gTile%40shuairan). Its `src/base` and `src/5_4` TypeScript runtime sources are transpiled to ES2022 with TypeScript 5.9.3, preserving upstream's legacy decorator mode and excluding generated helper definitions and type-only module markers. Espree 10.4.0 tokenizes these and greenTile's `extension.js` plus `lib/**/*.js`, without comments. The comparison counts each token once if it belongs to a matching contiguous sequence of at least 30 tokens, normalizing quote style, `const`/`let`/`var`, strict versus loose equality, and five known helper renames (`getPanelHeight` → `panelHeight`, `getUsableScreenArea` → `usableArea`, `reset_window` → `windowReset`, `move_resize_window` → `windowMoveResize`, `_` → `translate`). Tests, documentation, type declarations, tooling, CSS, configuration and translation catalogs are excluded. With a 50- or 80-token minimum, the measured shares are 1.59% of the reference and 0.32% of current greenTile, illustrating the threshold dependence.
+
+</details>
+
 ## License
 
 [GNU General Public License, version 3](https://www.gnu.org/licenses/gpl-3.0.html), like gTile. See `LICENSE`.
