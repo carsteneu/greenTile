@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: greenTile 2.2.0\n"
 "Report-Msgid-Bugs-To: https://github.com/carsteneu\n"
-"POT-Creation-Date: 2026-10-01 17:54+0200\n"
+"POT-Creation-Date: 2026-10-06 14:13+0200\n"
 "PO-Revision-Date: 2024-08-11 23:42+0900\n"
 "Last-Translator: Kevin Kim <chaeya@gmail.com>\n"
 "Language-Team: Korean\n"
@@ -18,40 +18,40 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "X-Generator: Poedit 3.4.2\n"
 
-#: lib/ui/editor.js:66
+#: lib/ui/editor.js:68
 msgid "Please enter a name."
 msgstr "이름을 입력하세요."
 
-#: lib/ui/editor.js:122
+#: lib/ui/editor.js:130
 #, javascript-format
 msgid "from %d"
 msgstr "%d개 이상"
 
-#: lib/ui/editor.js:267
+#: lib/ui/editor.js:279
 msgid "Rules (by window count)"
 msgstr "규칙 (창 개수별)"
 
-#: lib/ui/editor.js:271
+#: lib/ui/editor.js:283
 msgid "Rule"
 msgstr "규칙"
 
-#: lib/ui/editor.js:272
+#: lib/ui/editor.js:284
 msgid "Delete rule"
 msgstr "규칙 삭제"
 
-#: lib/ui/editor.js:280
+#: lib/ui/editor.js:292
 msgid "Rule applies from"
 msgstr "규칙 적용 조건:"
 
-#: lib/ui/editor.js:287
+#: lib/ui/editor.js:299
 msgid "windows"
 msgstr "개 창 이상"
 
-#: lib/ui/editor.js:289
+#: lib/ui/editor.js:301
 msgid "Painter"
 msgstr "레이아웃 그리기"
 
-#: lib/ui/editor.js:306
+#: lib/ui/editor.js:318
 msgid ""
 "Click or drag: the row sets how many windows the column holds. Right-click "
 "removes a column."
@@ -59,98 +59,119 @@ msgstr ""
 "클릭 또는 드래그: 행으로 열에 들어갈 창 개수를 정합니다. 오른쪽 클릭하면 열"
 "이 제거됩니다."
 
-#: lib/ui/editor.js:311
+#: lib/ui/editor.js:323
 msgid "Name"
 msgstr "이름"
 
-#: lib/ui/editor.js:312
+#: lib/ui/editor.js:324
 msgid "Preset name"
 msgstr "프리셋 이름"
 
-#: lib/ui/editor.js:317
+#: lib/ui/editor.js:329
 msgid "Delete preset"
 msgstr "프리셋 삭제"
 
-#: lib/ui/editor.js:320
+#: lib/ui/editor.js:332
 msgid "Really delete?"
 msgstr "정말 삭제할까요?"
 
-#: lib/ui/editor.js:321
+#: lib/ui/editor.js:333
 msgid "Delete"
 msgstr "삭제"
 
-#: lib/ui/editor.js:325
+#: lib/ui/editor.js:337
 msgid "Save"
 msgstr "저장"
 
-#: lib/ui/editor.js:350
+#: lib/ui/editor.js:362
 #, javascript-format
 msgid "Result: %s"
 msgstr "결과: %s"
 
-#: lib/ui/panel.js:77
-#, javascript-format
-msgid "assigned — workspace %d"
-msgstr "할당됨 — 작업 공간 %d"
+#: lib/ui/panel.js:96
+msgid "Edit preset"
+msgstr ""
 
-#: lib/ui/panel.js:117
+#: lib/ui/panel.js:112
+msgid "Assigned"
+msgstr ""
+
+#: lib/ui/panel.js:114
+msgid "Remove assignment"
+msgstr ""
+
+#: lib/ui/panel.js:136
 msgid "Gap between windows"
 msgstr "창 사이 간격"
 
-#: lib/ui/panel.js:123
+#: lib/ui/panel.js:142
 #, javascript-format
 msgid "%d px"
 msgstr "%d px"
 
-#: lib/ui/panel.js:143
+#: lib/ui/panel.js:162
 msgid "Reset sizes"
 msgstr "크기 초기화"
 
-#: lib/ui/panel.js:186
+#: lib/ui/panel.js:205
 #, javascript-format
 msgid "Presets — workspace %d · %s"
 msgstr "프리셋 — 작업 공간 %d · %s"
 
-#: lib/ui/panel.js:188
+#: lib/ui/panel.js:207
 msgid "Create preset"
 msgstr "프리셋 만들기"
 
-#: lib/ui/panel.js:188
+#: lib/ui/panel.js:207
 #, javascript-format
 msgid "Edit %s"
 msgstr "%s 편집"
 
-#: lib/ui/panel.js:193
+#: lib/ui/panel.js:218
 msgid "Back"
 msgstr "뒤로"
 
-#: lib/ui/panel.js:202
+#: lib/ui/panel.js:227 lib/ui/panel.js:233
 msgid "Auto: on"
 msgstr "자동: 켬"
 
-#: lib/ui/panel.js:202
+#: lib/ui/panel.js:227 lib/ui/panel.js:233
 msgid "Auto: off"
 msgstr "자동: 끔"
 
-#: lib/ui/panel.js:225
+#: lib/ui/panel.js:255
 msgid "Dark theme"
 msgstr "어두운 테마"
 
-#: lib/ui/panel.js:225
+#: lib/ui/panel.js:255
 msgid "Light theme"
 msgstr "밝은 테마"
 
-#: lib/ui/panel.js:357
+#: lib/ui/panel.js:443
 msgid "No presets yet."
 msgstr "아직 프리셋이 없습니다."
 
-#: lib/ui/panel.js:374
+#: lib/ui/panel.js:464
+#, javascript-format
+msgid "Preview for %d window"
+msgstr ""
+
+#: lib/ui/panel.js:465
+#, javascript-format
+msgid "Preview for %d windows"
+msgstr ""
+
+#: lib/ui/panel.js:465
+msgid "No windows open — base layout"
+msgstr ""
+
+#: lib/ui/panel.js:479
 msgid "New preset"
 msgstr "새 프리셋"
 
-#: lib/ui/panel.js:377
-msgid "Click a row to apply it to this workspace and tile right away"
-msgstr "행을 클릭하면 이 작업 공간에 적용하고 바로 타일링합니다"
+#: lib/ui/panel.js:482
+msgid "Click a card to apply it to this workspace and tile right away"
+msgstr ""
 
 #. metadata.json->name
 msgid "greenTile"
@@ -417,10 +438,10 @@ msgstr "사용자 지정 상태 색"
 msgid "State color of the preset panel when State color is Custom."
 msgstr "'상태 색'이 '사용자 지정'일 때 프리셋 패널의 상태 색입니다."
 
-#: .yesmem/tmp/makepot-stage/greenTile@carsteneu/lib/runtime/exclusions.js:201
+#: .yesmem/tmp/makepot-stage/greenTile@carsteneu/lib/runtime/exclusions.js:270
 msgid "Window floats"
 msgstr "창 플로팅"
 
-#: .yesmem/tmp/makepot-stage/greenTile@carsteneu/lib/runtime/exclusions.js:201
+#: .yesmem/tmp/makepot-stage/greenTile@carsteneu/lib/runtime/exclusions.js:270
 msgid "Window tiles again"
 msgstr "창 다시 타일링"

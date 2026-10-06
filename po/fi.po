@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: greenTile 2.2.0\n"
 "Report-Msgid-Bugs-To: https://github.com/carsteneu\n"
-"POT-Creation-Date: 2026-10-01 17:54+0200\n"
+"POT-Creation-Date: 2026-10-06 14:13+0200\n"
 "PO-Revision-Date: 2024-07-25 20:23+0300\n"
 "Last-Translator: Kimmo Kujansuu <mrkujansuu@gmail.com>\n"
 "Language-Team: Finnish\n"
@@ -19,40 +19,40 @@ msgstr ""
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 "X-Generator: Poedit 2.3\n"
 
-#: lib/ui/editor.js:66
+#: lib/ui/editor.js:68
 msgid "Please enter a name."
 msgstr "Anna nimi."
 
-#: lib/ui/editor.js:122
+#: lib/ui/editor.js:130
 #, javascript-format
 msgid "from %d"
 msgstr "%d alkaen"
 
-#: lib/ui/editor.js:267
+#: lib/ui/editor.js:279
 msgid "Rules (by window count)"
 msgstr "Säännöt (ikkunamäärän mukaan)"
 
-#: lib/ui/editor.js:271
+#: lib/ui/editor.js:283
 msgid "Rule"
 msgstr "Sääntö"
 
-#: lib/ui/editor.js:272
+#: lib/ui/editor.js:284
 msgid "Delete rule"
 msgstr "Poista sääntö"
 
-#: lib/ui/editor.js:280
+#: lib/ui/editor.js:292
 msgid "Rule applies from"
 msgstr "Sääntö koskee vähintään"
 
-#: lib/ui/editor.js:287
+#: lib/ui/editor.js:299
 msgid "windows"
 msgstr "ikkunaa"
 
-#: lib/ui/editor.js:289
+#: lib/ui/editor.js:301
 msgid "Painter"
 msgstr "Piirtoalue"
 
-#: lib/ui/editor.js:306
+#: lib/ui/editor.js:318
 msgid ""
 "Click or drag: the row sets how many windows the column holds. Right-click "
 "removes a column."
@@ -60,100 +60,119 @@ msgstr ""
 "Napsauta tai vedä: rivi määrää, montako ikkunaa sarakkeeseen mahtuu. Oikea "
 "napsautus poistaa sarakkeen."
 
-#: lib/ui/editor.js:311
+#: lib/ui/editor.js:323
 msgid "Name"
 msgstr "Nimi"
 
-#: lib/ui/editor.js:312
+#: lib/ui/editor.js:324
 msgid "Preset name"
 msgstr "Esiasetuksen nimi"
 
-#: lib/ui/editor.js:317
+#: lib/ui/editor.js:329
 msgid "Delete preset"
 msgstr "Poista esiasetus"
 
-#: lib/ui/editor.js:320
+#: lib/ui/editor.js:332
 msgid "Really delete?"
 msgstr "Poistetaanko varmasti?"
 
-#: lib/ui/editor.js:321
+#: lib/ui/editor.js:333
 msgid "Delete"
 msgstr "Poista"
 
-#: lib/ui/editor.js:325
+#: lib/ui/editor.js:337
 msgid "Save"
 msgstr "Tallenna"
 
-#: lib/ui/editor.js:350
+#: lib/ui/editor.js:362
 #, javascript-format
 msgid "Result: %s"
 msgstr "Tulos: %s"
 
-#: lib/ui/panel.js:77
-#, javascript-format
-msgid "assigned — workspace %d"
-msgstr "määritetty — työtila %d"
+#: lib/ui/panel.js:96
+msgid "Edit preset"
+msgstr ""
 
-#: lib/ui/panel.js:117
+#: lib/ui/panel.js:112
+msgid "Assigned"
+msgstr ""
+
+#: lib/ui/panel.js:114
+msgid "Remove assignment"
+msgstr ""
+
+#: lib/ui/panel.js:136
 msgid "Gap between windows"
 msgstr "Ikkunoiden väli"
 
-#: lib/ui/panel.js:123
+#: lib/ui/panel.js:142
 #, javascript-format
 msgid "%d px"
 msgstr "%d px"
 
-#: lib/ui/panel.js:143
+#: lib/ui/panel.js:162
 msgid "Reset sizes"
 msgstr "Palauta koot"
 
-#: lib/ui/panel.js:186
+#: lib/ui/panel.js:205
 #, javascript-format
 msgid "Presets — workspace %d · %s"
 msgstr "Esiasetukset — työtila %d · %s"
 
-#: lib/ui/panel.js:188
+#: lib/ui/panel.js:207
 msgid "Create preset"
 msgstr "Luo esiasetus"
 
-#: lib/ui/panel.js:188
+#: lib/ui/panel.js:207
 #, javascript-format
 msgid "Edit %s"
 msgstr "Muokkaa: %s"
 
-#: lib/ui/panel.js:193
+#: lib/ui/panel.js:218
 msgid "Back"
 msgstr "Takaisin"
 
-#: lib/ui/panel.js:202
+#: lib/ui/panel.js:227 lib/ui/panel.js:233
 msgid "Auto: on"
 msgstr "Auto: päällä"
 
-#: lib/ui/panel.js:202
+#: lib/ui/panel.js:227 lib/ui/panel.js:233
 msgid "Auto: off"
 msgstr "Auto: pois"
 
-#: lib/ui/panel.js:225
+#: lib/ui/panel.js:255
 msgid "Dark theme"
 msgstr "Tumma teema"
 
-#: lib/ui/panel.js:225
+#: lib/ui/panel.js:255
 msgid "Light theme"
 msgstr "Vaalea teema"
 
-#: lib/ui/panel.js:357
+#: lib/ui/panel.js:443
 msgid "No presets yet."
 msgstr "Ei vielä esiasetuksia."
 
-#: lib/ui/panel.js:374
+#: lib/ui/panel.js:464
+#, javascript-format
+msgid "Preview for %d window"
+msgstr ""
+
+#: lib/ui/panel.js:465
+#, javascript-format
+msgid "Preview for %d windows"
+msgstr ""
+
+#: lib/ui/panel.js:465
+msgid "No windows open — base layout"
+msgstr ""
+
+#: lib/ui/panel.js:479
 msgid "New preset"
 msgstr "Uusi esiasetus"
 
-#: lib/ui/panel.js:377
-msgid "Click a row to apply it to this workspace and tile right away"
+#: lib/ui/panel.js:482
+msgid "Click a card to apply it to this workspace and tile right away"
 msgstr ""
-"Napsauta riviä ottaaksesi sen käyttöön tässä työtilassa ja laatoittaaksesi "
-"heti"
 
 #. metadata.json->name
 msgid "greenTile"
@@ -430,10 +449,10 @@ msgstr "Mukautettu tilaväri"
 msgid "State color of the preset panel when State color is Custom."
 msgstr "Esiasetuspaneelin tilaväri, kun Tilaväri on ”Mukautettu”."
 
-#: .yesmem/tmp/makepot-stage/greenTile@carsteneu/lib/runtime/exclusions.js:201
+#: .yesmem/tmp/makepot-stage/greenTile@carsteneu/lib/runtime/exclusions.js:270
 msgid "Window floats"
 msgstr "Ikkuna kelluu"
 
-#: .yesmem/tmp/makepot-stage/greenTile@carsteneu/lib/runtime/exclusions.js:201
+#: .yesmem/tmp/makepot-stage/greenTile@carsteneu/lib/runtime/exclusions.js:270
 msgid "Window tiles again"
 msgstr "Ikkuna laatoitetaan taas"
