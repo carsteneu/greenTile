@@ -14,7 +14,7 @@
  */
 
 /* gKachel preset panel — tokens 1:1 from the approved HTML mockup
-   (base font 16px, row padding 12px 14px, gap 14px, thumb 54x34).
+   (base font 16px, card grid spacing 14px, card padding 8px, preview 58px high).
    One-sided borders: full border + zero widths (St has no reliable
    per-side colours, Mint-X uses the same pattern). */
 .gk-panel {
@@ -106,7 +106,9 @@
 
 /* Preset cards: a responsive grid whose column count is computed in
    lib/model/grid.js from the panel width. The row/column spacing here must stay
-   PRESET_CARD_GAP (14px) and the .gk-card-box padding PRESET_CARD_PAD (8px).
+   PRESET_CARD_GAP (14px), the .gk-card-box padding PRESET_CARD_PAD (8px) and the
+   stripe 3px plus the 1px .gk-card border — panel.js subtracts them from the
+   preview width (PRESET_CARD_CHROME_W).
    Only the card area scrolls; the header, gap row and New preset stay put. */
 .gk-cards {
     padding: 10px 14px 4px 14px;
@@ -127,12 +129,6 @@
 .gk-card:hover {
     background-color: #262a35;
     border-color: #3a4050;
-}
-
-/* Keyboard focus is separate from hover and always visible (never hover-only). */
-.gk-card:focus {
-    border-color: #8b91a0;
-    background-color: rgba(255, 255, 255, 0.05);
 }
 
 .gk-card-assigned {
@@ -172,6 +168,9 @@
     font-size: 11px;
 }
 
+/* Icon buttons. The card's pencil (.gk-card-edit) and unassign ✕
+   (.gk-card-unassign) carry no rule of their own: they take this look, and the
+   class names serve as stable selectors for the panel tests. */
 .gk-icon-btn {
     color: #8b91a0;
     font-size: 16px;
@@ -584,11 +583,6 @@
 .gk-light .gk-card:hover {
     background-color: #e4e8f0;
     border-color: #c3c9d6;
-}
-
-.gk-light .gk-card:focus {
-    border-color: #5f6672;
-    background-color: rgba(0, 0, 0, 0.04);
 }
 
 .gk-light .gk-card-assigned {

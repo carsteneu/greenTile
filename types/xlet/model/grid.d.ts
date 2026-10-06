@@ -10,6 +10,9 @@ export const PRESET_GRID_PAD: number;
 /** Width reserved for the vertical scrollbar so a full row never overflows it
  *  (px; the panel's scroll view bar is ~21px while it is shown). */
 export const PRESET_SCROLLBAR: number;
+/** The .gk-panel 1px border on both sides (px) — it sits inside the panel width
+ *  and takes room away from the card area. */
+export const PRESET_PANEL_BORDER: number;
 export function gridAvailable(panelWidth: number): number;
 export function gridColumns(available: number, minW?: number, gap?: number): number;
 export function gridCardWidth(available: number, columns: number, gap?: number): number;

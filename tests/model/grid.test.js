@@ -8,18 +8,25 @@ const assert = require('node:assert/strict');
 
 const { load } = require('../helpers/cinnamon-loader');
 
-const { gridAvailable, gridColumns, gridCardWidth, gridRows, PRESET_CARD_MIN_W, PRESET_CARD_GAP, PRESET_GRID_PAD, PRESET_SCROLLBAR } = load('./lib/model/grid.js');
+const { gridAvailable, gridColumns, gridCardWidth, gridRows, PRESET_CARD_MIN_W, PRESET_CARD_GAP, PRESET_GRID_PAD, PRESET_SCROLLBAR, PRESET_PANEL_BORDER } = load('./lib/model/grid.js');
 
 test('the model exposes the fixed layout tokens', () => {
     assert.equal(PRESET_CARD_MIN_W, 160);
     assert.equal(PRESET_CARD_GAP, 14);
     assert.equal(PRESET_GRID_PAD, 14);
     assert.equal(PRESET_SCROLLBAR, 21);
+    assert.equal(PRESET_PANEL_BORDER, 2);
 });
 
-test('gridAvailable subtracts both paddings and the reserved scrollbar from the panel width', () => {
-    assert.equal(gridAvailable(600), 600 - 2 * PRESET_GRID_PAD - PRESET_SCROLLBAR);
-    assert.equal(gridAvailable(800), 800 - 2 * PRESET_GRID_PAD - PRESET_SCROLLBAR);
+test('gridAvailable subtracts the border, both paddings and the reserved scrollbar from the panel width', () => {
+    assert.equal(gridAvailable(600), 600 - PRESET_PANEL_BORDER - 2 * PRESET_GRID_PAD - PRESET_SCROLLBAR);
+    assert.equal(gridAvailable(800), 800 - PRESET_PANEL_BORDER - 2 * PRESET_GRID_PAD - PRESET_SCROLLBAR);
+});
+
+test('the card area plus the panel chrome never exceeds the panel width', () => {
+    for (const width of [420, 600, 800, 1000, 1440, 1920]) {
+        assert.equal(gridAvailable(width) + PRESET_PANEL_BORDER + 2 * PRESET_GRID_PAD + PRESET_SCROLLBAR, width);
+    }
 });
 
 test('gridAvailable never goes below one pixel for tiny or invalid widths', () => {
@@ -55,7 +62,7 @@ test('gridColumns clamps invalid widths to one column', () => {
 test('gridCardWidth splits the available width evenly and never overflows', () => {
     const avail = gridAvailable(600);
     const cols = gridColumns(avail);
-    assert.equal(gridCardWidth(avail, cols), 174);
+    assert.equal(gridCardWidth(avail, cols), 173);
     assert.ok(cols * gridCardWidth(avail, cols) + (cols - 1) * PRESET_CARD_GAP <= avail);
 });
 

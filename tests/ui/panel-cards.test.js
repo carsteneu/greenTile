@@ -171,6 +171,66 @@ test('the unassign action clears only the assignment, never the preset', () => {
     ext.disable();
 });
 
+test('unassigning lets the Auto button follow the stored state again', () => {
+    // A first card click leaves an entry with only `preset` (auto is derived from
+    // it), so dropping the preset drops Auto with it — the header must say so
+    // instead of keeping the stale "Auto: on".
+    const { env, ext } = makeEnv({ presets: JSON.stringify(PRESETS) });
+    const { app } = openPanel(env, ext, PRESETS);
+    const autoBtn = () => byClass(app.panel.actor, /^gk-auto(?: |$)/)[0];
+    assert.equal(autoBtn().label, 'Auto: off', 'Auto starts off');
+    cardOf(app, 'Alpha').emit('clicked');
+    assert.equal(autoBtn().label, 'Auto: on', 'applying a preset turns Auto on');
+    byClass(cardOf(app, 'Alpha'), /gk-card-unassign/)[0].emit('clicked');
+    assert.equal(app.ops.layoutFor(app, 0, 0).auto, false, 'Auto is off again in the layout');
+    assert.equal(autoBtn().label, 'Auto: off', 'and the header follows it');
+    ext.disable();
+});
+
+test('a stored width clamped to the monitor sizes the cards for the width really used', () => {
+    // Open with a width wider than the monitor: the panel clamps it, and the two
+    // refills (raw stored width, then clamped) land in the same column band — the
+    // second must move the card width instead of returning early on the columns.
+    const grid = load('./lib/model/grid.js');
+    const { env, ext } = makeEnv({
+        presets: JSON.stringify(PRESETS),
+        panelSize: JSON.stringify({ list: { w: MONITOR.width + 50, h: 400 } }),
+    });
+    const { app } = openPanel(env, ext);
+    const avail = grid.gridAvailable(MONITOR.width);
+    const wide = grid.gridAvailable(MONITOR.width + 50);
+    assert.equal(grid.gridColumns(avail), grid.gridColumns(wide), 'both widths stay in the same column band');
+    const expected = grid.gridCardWidth(avail, grid.gridColumns(avail));
+    assert.notEqual(expected, grid.gridCardWidth(wide, grid.gridColumns(wide)), 'the card width really differs between the two bands');
+    const built = cards(app);
+    assert.equal(built.length, PRESETS.length);
+    for (const card of built) {
+        assert.equal(card.width, expected, 'the card follows the clamped panel width');
+    }
+    ext.disable();
+});
+
+test('a single preset builds one card in one row', () => {
+    const only = [PRESETS[0]];
+    const { env, ext } = makeEnv({ presets: JSON.stringify(only) });
+    const { app } = openPanel(env, ext, only);
+    assert.equal(cards(app).length, 1, 'one card');
+    const rows = byClass(app.panel.actor, /^gk-card-row(?: |$)/);
+    assert.equal(rows.length, 1, 'one row');
+    assert.equal(rows[0].children.length, 1, 'holding the only card');
+    ext.disable();
+});
+
+test('a long preset name is ellipsized inside the card instead of growing it', () => {
+    const long = { id: 'z', name: 'Ultrawide 49 inch left stack right stack', rules: [{ min: 1, stacks: [1] }] };
+    const { env, ext } = makeEnv({ presets: JSON.stringify([long]) });
+    const { app } = openPanel(env, ext, [long]);
+    const label = byClass(cardOf(app, long.name), /^gk-name(?: |$)/)[0];
+    assert.equal(label.text, long.name, 'the full name is kept as the label text');
+    assert.equal(label.clutter_text.ellipsize, 'end', 'the label truncates with an ellipsis');
+    ext.disable();
+});
+
 test('the edit action opens the editor instead of applying the preset', () => {
     const { env, ext } = makeEnv({ presets: JSON.stringify(PRESETS) });
     const { app, window } = openPanel(env, ext, PRESETS, { assign: 'a' });
