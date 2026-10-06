@@ -98,6 +98,31 @@ const cardOf = (app, name) => cards(app).find((c) => {
     return label && label.text === name;
 });
 
+test('the panel opens when BoxLayout rejects native-invalid fill constructor properties', () => {
+    // Cinnamon 6.6.9 rejects x_fill on St.BoxLayout: it is child packing,
+    // not an actor constructor property. The loose shared fake misses this.
+    const { env, ext } = makeEnv({ presets: JSON.stringify(PRESETS) });
+    const St = env.gi.St;
+    const BoxLayout = St.BoxLayout;
+    St.BoxLayout = class extends BoxLayout {
+        constructor(props = {}) {
+            for (const prop of ['x_fill', 'y_fill']) {
+                if (Object.prototype.hasOwnProperty.call(props, prop)) {
+                    throw new Error(`No property ${prop} on StBoxLayout`);
+                }
+            }
+            super(props);
+        }
+    };
+    try {
+        const { app } = openPanel(env, ext);
+        assert.equal(cards(app).length, PRESETS.length, 'all cards open through the actual hotkey');
+    }
+    finally {
+        ext.disable();
+    }
+});
+
 test('the list builds one card per preset with a preview, name and both actions', () => {
     const { env, ext } = makeEnv({ presets: JSON.stringify(PRESETS) });
     const { app } = openPanel(env, ext);
