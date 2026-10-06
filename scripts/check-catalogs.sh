@@ -27,6 +27,7 @@ else
 fi
 
 status=0
+empty=0
 for po in "${files[@]}"; do
     if [ ! -e "$po" ]; then
         echo "check-catalogs: catalog not found: $po" >&2
@@ -34,10 +35,27 @@ for po in "${files[@]}"; do
     elif ! msgfmt --check -o /dev/null "$po"; then
         echo "check-catalogs: $po does not compile — the release would ship a broken translation." >&2
         status=1
+    else
+        # Compiling is all this gate can require: a string that was added since
+        # the last translation sync is legitimately untranslated and falls back
+        # to English. Count it anyway — a release should not ship that silently.
+        # LC_ALL=C keeps the statistics line parseable regardless of the locale,
+        # and the comma split lets it read "87 translated, 7 untranslated".
+        count=$(LC_ALL=C msgfmt --statistics -o /dev/null "$po" 2>&1 \
+            | tr ',' '\n' | sed -n 's/^ *\([0-9][0-9]*\) untranslated.*/\1/p')
+        count=${count:-0}
+        if [ "$count" -gt 0 ]; then
+            echo "check-catalogs: ${po##*/} has $count untranslated string(s)" >&2
+            empty=$((empty + count))
+        fi
     fi
 done
 
 if [ "$status" -ne 0 ]; then
     exit 1
 fi
-echo "check-catalogs: ${#files[@]} catalogs compile"
+if [ "$empty" -gt 0 ]; then
+    echo "check-catalogs: ${#files[@]} catalogs compile, $empty untranslated string(s) in total"
+else
+    echo "check-catalogs: ${#files[@]} catalogs compile, all strings translated"
+fi
