@@ -43,6 +43,10 @@ All keys can be changed on the **Hotkeys** page of the settings (Extensions mana
 
 A preset is a list of rules by window count. Each rule sets the number of columns and how many windows each column stacks. You assign a preset to a monitor and workspace.
 
+Fresh installations include twelve editable starter presets: Two columns, Three columns, Four columns, Six columns, Vertical stack, Five columns, Grid 2 × 2, Grid 3 × 2, Grid 4 × 2, Left main + stacks, Right main and Center main. They adapt to the current window count; names describe their base arrangement. The initial selection panel uses four columns and three rows on displays with sufficient space, with slightly smaller text. When space is limited the card area can scroll; the existing 600 px minimum panel width still applies.
+
+On the first start after upgrading to a version with these starters, greenTile adds them **once** to the existing list, even if that list is empty. Existing definitions, assignments and saved panel sizes are not replaced. A preset with the same name is kept as-is, and new presets receive unused IDs. A saved completion marker prevents later starts or updates from restoring starters you delete or modifying ones you rename or edit. Unreadable preset or layout data is left untouched, with the import postponed until it can be read safely. No starter preset is assigned automatically. This runs inside the extension, so it works with the updater, manual installation and Spices alike.
+
 **Preset panel** (`Super+Ctrl+P`, works on the monitor of the focused window):
 
 - Click a card to assign the preset and tile right away. The panel stays open, so you can try several presets.

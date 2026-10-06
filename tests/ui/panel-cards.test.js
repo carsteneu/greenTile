@@ -60,7 +60,9 @@ const openPanel = (env, ext, presets = PRESETS, extra = {}) => {
     // "no window" case) is what this test means, not a leftover of enable().
     env.display.focus_window = extra.focus === undefined ? w : extra.focus;
     const app = ext.currentSession().app;
-    app.ops.presetsWrite(app, presets);
+    if (extra.seedPresets !== false) {
+        app.ops.presetsWrite(app, presets);
+    }
     if (extra.assign) {
         assert.equal(app.ops.layoutSet(app, 0, 0, { preset: extra.assign }), true, 'preset assigned before opening');
     }
@@ -322,4 +324,40 @@ test('the model is loaded through the shipped namespace', () => {
     const grid = load('./lib/model/grid.js');
     assert.equal(typeof grid.gridColumns, 'function');
     assert.equal(grid.gridColumns(grid.gridAvailable(600)), 3);
+});
+
+test('fresh install panel displays all twelve starter cards in a four-by-three grid', () => {
+    const fs = require('node:fs');
+    const path = require('node:path');
+    const { ROOT } = require('../helpers/cinnamon-loader');
+    const schema = JSON.parse(fs.readFileSync(path.join(ROOT, 'settings-schema.json'), 'utf8'));
+    const presets = JSON.parse(schema.presets.default);
+    const { env, ext } = makeEnv({ presets: schema.presets.default, panelSize: schema.panelSize.default });
+    try {
+        const { app } = openPanel(env, ext, presets, { seedPresets: false });
+        assert.equal(cards(app).length, 12);
+        const rows = byClass(app.panel.actor, /^gk-card-row(?: |$)/);
+        assert.deepEqual(rows.map(r => r.children.length), [4, 4, 4]);
+        assert.equal(app.panel.actor.width, 800);
+        assert.equal(byClass(app.panel.actor, /^gk-scroll(?: |$)/)[0].height, 480);
+        assert.match(app.panel.actor.style_class, /\bgk-panel-list\b/);
+        // Font reduction belongs to view 1 only; opening the editor keeps its typography.
+        byClass(cards(app)[0], /gk-card-edit/)[0].emit('clicked');
+        assert.doesNotMatch(app.panel.actor.style_class, /\bgk-panel-list\b/);
+    }
+    finally {
+        ext.disable();
+    }
+});
+
+test('selection typography is one pixel smaller without changing the editor', () => {
+    const fs = require('node:fs');
+    const path = require('node:path');
+    const { ROOT } = require('../helpers/cinnamon-loader');
+    const css = fs.readFileSync(path.join(ROOT, 'stylesheet.css'), 'utf8');
+    assert.match(css, /\.gk-panel-list\s*\{[^}]*font-size:\s*15px;/);
+    assert.match(css, /\.gk-panel-list \.gk-name\s*\{[^}]*font-size:\s*13px;/);
+    assert.match(css, /\.gk-panel-list \.gk-title\s*\{[^}]*font-size:\s*15px;/);
+    assert.match(css, /\.gk-panel-list \.gk-plus\s*\{[^}]*font-size:\s*15px;/);
+    assert.match(css, /\.gk-panel\s*\{[^}]*font-size:\s*16px;/);
 });

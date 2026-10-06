@@ -5,6 +5,7 @@ export const Config: {
         app: AppFacade;
         _destroyed: boolean;
         settings: any;
+        _importStarterPresets(): void;
         /**
          * Makes an external write of the layouts setting invalidate the App's
          * deferred split writes (see Split.invalidate).
