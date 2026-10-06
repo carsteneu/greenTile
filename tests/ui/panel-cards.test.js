@@ -210,6 +210,20 @@ test('a stored width clamped to the monitor sizes the cards for the width really
     ext.disable();
 });
 
+test('a card is a keyboard stop with a focus look of its own', () => {
+    // St.Button activates on Enter/Space once focused, so can_focus is the keyboard
+    // path to a preset and the focus look must stay separate from hover.
+    const fs = require('node:fs');
+    const path = require('node:path');
+    const { ROOT } = require('../helpers/cinnamon-loader');
+    const { env, ext } = makeEnv({ presets: JSON.stringify(PRESETS) });
+    const { app } = openPanel(env, ext);
+    assert.equal(cardOf(app, 'Alpha').can_focus, true, 'the card takes the keyboard focus');
+    const css = fs.readFileSync(path.join(ROOT, 'stylesheet.css'), 'utf8');
+    assert.match(css, /\.gk-card:focus \{/, 'the card carries a focus rule');
+    ext.disable();
+});
+
 test('a single preset builds one card in one row', () => {
     const only = [PRESETS[0]];
     const { env, ext } = makeEnv({ presets: JSON.stringify(only) });

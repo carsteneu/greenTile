@@ -131,6 +131,12 @@
     border-color: #3a4050;
 }
 
+/* Keyboard focus is separate from hover and always visible (never hover-only). */
+.gk-card:focus {
+    border-color: #8b91a0;
+    background-color: rgba(255, 255, 255, 0.05);
+}
+
 .gk-card-assigned {
     background-color: rgba(156, 224, 114, 0.06);
 }
@@ -583,6 +589,11 @@
 .gk-light .gk-card:hover {
     background-color: #e4e8f0;
     border-color: #c3c9d6;
+}
+
+.gk-light .gk-card:focus {
+    border-color: #5f6672;
+    background-color: rgba(0, 0, 0, 0.04);
 }
 
 .gk-light .gk-card-assigned {
