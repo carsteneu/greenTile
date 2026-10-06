@@ -219,18 +219,18 @@ test('generated state CSS carries every state selector in both scopes', () => {
     for (const selector of [
         '.gk-panel .gk-auto-on { color: rgb(156, 224, 114); border-color: rgba(156, 224, 114, 0.5); background-color: rgba(156, 224, 114, 0.08); }',
         '.gk-panel .gk-auto-on:hover { color: rgb(156, 224, 114); background-color: rgba(156, 224, 114, 0.16); }',
-        '.gk-panel .gk-row-assigned { background-color: rgba(156, 224, 114, 0.06); }',
-        '.gk-panel .gk-row-assigned:hover { background-color: rgba(156, 224, 114, 0.13); }',
-        '.gk-panel .gk-row-stripe { background-color: rgb(156, 224, 114); }',
+        '.gk-panel .gk-card-assigned { background-color: rgba(156, 224, 114, 0.06); }',
+        '.gk-panel .gk-card-assigned:hover { background-color: rgba(156, 224, 114, 0.13); }',
+        '.gk-panel .gk-card-stripe { background-color: rgb(156, 224, 114); }',
         '.gk-panel .gk-sub { color: rgb(156, 224, 114); }',
     ])
         {assert.equal(css.includes(selector), true, selector);}
     for (const selector of [
         '.gk-panel.gk-light .gk-auto-on { color: rgb(63, 143, 34); border-color: rgba(78, 165, 48, 0.5); background-color: rgba(78, 165, 48, 0.1); }',
         '.gk-panel.gk-light .gk-auto-on:hover { color: rgb(63, 143, 34); background-color: rgba(78, 165, 48, 0.18); }',
-        '.gk-panel.gk-light .gk-row-assigned { background-color: rgba(78, 165, 48, 0.08); }',
-        '.gk-panel.gk-light .gk-row-assigned:hover { background-color: rgba(78, 165, 48, 0.16); }',
-        '.gk-panel.gk-light .gk-row-stripe { background-color: rgb(78, 165, 48); }',
+        '.gk-panel.gk-light .gk-card-assigned { background-color: rgba(78, 165, 48, 0.08); }',
+        '.gk-panel.gk-light .gk-card-assigned:hover { background-color: rgba(78, 165, 48, 0.16); }',
+        '.gk-panel.gk-light .gk-card-stripe { background-color: rgb(78, 165, 48); }',
         '.gk-panel.gk-light .gk-sub { color: rgb(63, 143, 34); }',
     ])
         {assert.equal(css.includes(selector), true, selector);}

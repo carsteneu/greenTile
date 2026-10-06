@@ -566,7 +566,7 @@ test('item 4/F3: a retained pause gates the automatic preset retile of an unrela
 // F2b: two numbered workspaces of one shared slot can BOTH be retained (the
 //      queue is built before the registry can resolve the slot); the newest must
 //      be the one that survives and is applied — never the older.
-// F3b: an explicit panel preset-row click is a reactivation: it must supersede a
+// F3b: an explicit panel preset-card click is a reactivation: it must supersede a
 //      retained pause for its target instead of being gated by it.
 
 test('item 4/F1b: an On for an inactive workspace does not tile the active one', () => {
@@ -639,7 +639,7 @@ for (const oldAuto of [false, true]) {
     });
 }
 
-test('item 4/F3b: an explicit preset-row click supersedes the retained pause for its target', () => {
+test('item 4/F3b: an explicit preset-card click supersedes the retained pause for its target', () => {
     const { env, ext } = makeEnv({ layouts: '{invalid', windowGap: 48 });
     const ws0 = makeWorkspace(null, 1, 0);
     ws0.list_windows = () => env.tabList;
@@ -661,8 +661,8 @@ test('item 4/F3b: an explicit preset-row click supersedes the retained pause for
     assert.equal(app.session.holdsPause(app, 0, 0), true, 'the pause still gates automatic placement');
     // the user reactivates through the panel: the row click is explicit
     autoOf(env, 'greenTile-preset');
-    const row = findActor(app.panel.actor, /^gk-row(?: |$)/);
-    assert.ok(row, 'the preset row is in the panel');
+    const row = findActor(app.panel.actor, /^gk-card(?: |$)/);
+    assert.ok(row, 'the preset card is in the panel');
     row.emit('clicked');
     assert.equal(app.session.holdsPause(app, 0, 0), false, 'the click superseded the retained pause');
     assert.equal(app.session.pendingAuto.length, 0);
@@ -691,7 +691,7 @@ function findActor(root, styleRe) {
     return visit(root);
 }
 
-test('item 4/F3c: a preset-row click supersedes a retained pause even when auto is already on', () => {
+test('item 4/F3c: a preset-card click supersedes a retained pause even when auto is already on', () => {
     const { env, ext } = makeEnv({ layouts: '{invalid', windowGap: 48 });
     const ws0 = makeWorkspace(null, 1, 0);
     ws0.list_windows = () => env.tabList;
@@ -714,8 +714,8 @@ test('item 4/F3c: a preset-row click supersedes a retained pause even when auto 
     settingsInstance(env).remoteUpdate();
     assert.equal(app.session.holdsPause(app, 0, 0), true, 'the retained pause still gates automatic placement');
     autoOf(env, 'greenTile-preset');
-    const row = findActor(app.panel.actor, /^gk-row(?: |$)/);
-    assert.ok(row, 'the preset row is in the panel');
+    const row = findActor(app.panel.actor, /^gk-card(?: |$)/);
+    assert.ok(row, 'the preset card is in the panel');
     row.emit('clicked');
     assert.equal(app.session.holdsPause(app, 0, 0), false, 'the click superseded the retained pause');
     assert.equal(app.session.pendingAuto.length, 0);
