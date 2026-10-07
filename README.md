@@ -9,7 +9,7 @@ Window tiling for Cinnamon: presets per monitor and workspace, an auto mode, sna
 _The preset selection in 2.2.1: twelve editable starters in a responsive card grid. Example previews for six windows; click a card to apply it or ✎ to edit._
 
 - **UUID:** `greenTile@carsteneu`
-- **Requires:** Cinnamon 6.4; tested on Linux Mint with X11. Newer Cinnamon versions and Wayland are not yet fully verified.
+- **Requires:** Cinnamon 6.0 or newer; tested on Linux Mint 21.3–22.3 (Cinnamon 6.0–6.6) with X11. Newer Cinnamon versions and Wayland are not yet fully verified.
 - **Website:** [carsteneu.github.io/greenTile](https://carsteneu.github.io/greenTile/)
 - **Video tour (6 min):** [YouTube](https://youtu.be/niI0LHYb1A8)
 - **All features at a glance:** [FEATURES.md](FEATURES.md)
