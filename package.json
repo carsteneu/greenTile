@@ -1,6 +1,6 @@
 {
     "name": "greenTile",
-    "version": "2.2.2",
+    "version": "2.2.3",
     "private": true,
     "description": "Window tiling extension for Cinnamon — development tooling only; the shipped extension needs none of this.",
     "license": "GPL-3.0-only",

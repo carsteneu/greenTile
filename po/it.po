@@ -6,7 +6,7 @@
 # Dragone2 <dragone2@risposteinformatiche.it>, 2023.
 msgid ""
 msgstr ""
-"Project-Id-Version: greenTile 2.2.2\n"
+"Project-Id-Version: greenTile 2.2.3\n"
 "Report-Msgid-Bugs-To: https://github.com/carsteneu\n"
 "POT-Creation-Date: 2026-10-06 14:31+0200\n"
 "PO-Revision-Date: 2023-03-31 10:43+0200\n"
