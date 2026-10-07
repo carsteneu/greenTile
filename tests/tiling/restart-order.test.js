@@ -9,7 +9,7 @@
 const test = require('node:test');
 const assert = require('node:assert/strict');
 const {
-    MONITOR, makeEnv, makeWindow, makeWorkspace, settingsInstance, enableOnMonitor,
+    makeEnv, makeWindow, makeWorkspace, settingsInstance, enableOnMonitor,
 } = require('../helpers/fakes/cinnamon-harness');
 
 const PATH = '/run/user/1000/greenTile@carsteneu/order.json';
@@ -60,7 +60,7 @@ const fireMs = (env, ms) => {
 };
 
 test('a placement records the placed order of the surface, debounced into the runtime file', () => {
-    const { env, ext, app } = scene();
+    const { env, app } = scene();
     const w1 = makeWindow(env, 11, [10, 10, 400, 300], 0, null, { description: '0x1' });
     const w2 = makeWindow(env, 12, [500, 0, 400, 300], 0, null, { description: '0x2' });
     env.tabList.push(w1, w2);
@@ -85,7 +85,7 @@ test('a restart restores the recorded order instead of re-deriving it from the s
 
     // run 2: a fresh process — new Muffin stable sequences, the SAME descriptions,
     // but Muffin pushed 0x2 to the left edge before greenTile loaded
-    const { env, ext, app } = scene(recorded);
+    const { env, ext } = scene(recorded);
     const b2 = makeWindow(env, 91, [0, 0, 400, 300], 0, null, { description: '0x2' });
     const b1 = makeWindow(env, 92, [500, 0, 400, 300], 0, null, { description: '0x1' });
     env.tabList.push(b2, b1);
@@ -100,7 +100,7 @@ test('windows that are not in the stored order keep the reading order and come a
     // file was written) sorts by position and lands after them. The surface key
     // is monitor-derived and identical across envs, so probe it once.
     const key = surfaceKey(scene().app);
-    const { env, ext, app } = scene(storedFile(key, ['0x1', '0x2']));
+    const { env, ext } = scene(storedFile(key, ['0x1', '0x2']));
     const c1 = makeWindow(env, 91, [1500, 0, 400, 300], 0, null, { description: '0x9' });
     const c2 = makeWindow(env, 92, [0, 0, 400, 300], 0, null, { description: '0x2' });
     const c3 = makeWindow(env, 93, [500, 0, 400, 300], 0, null, { description: '0x1' });
@@ -114,7 +114,7 @@ test('windows that are not in the stored order keep the reading order and come a
 });
 
 test('without a stored order the reading order of the current positions is used (today\'s behaviour)', () => {
-    const { env, ext, app } = scene();
+    const { env, ext } = scene();
     const w2 = makeWindow(env, 91, [0, 0, 400, 300], 0, null, { description: '0x2' });
     const w1 = makeWindow(env, 92, [500, 0, 400, 300], 0, null, { description: '0x1' });
     env.tabList.push(w2, w1);
@@ -136,7 +136,7 @@ test('a corrupt store is ignored (logged) and the reading order is used', () => 
 });
 
 test('windows without an X11 description (Wayland) are never recorded', () => {
-    const { env, ext, app } = scene();
+    const { env, app } = scene();
     const w1 = makeWindow(env, 11, [10, 10, 400, 300]);
     const w2 = makeWindow(env, 12, [500, 0, 400, 300]);
     env.tabList.push(w1, w2);
@@ -147,7 +147,7 @@ test('windows without an X11 description (Wayland) are never recorded', () => {
 });
 
 test('a surface with a single identifiable window records nothing', () => {
-    const { env, ext, app } = scene();
+    const { env, app } = scene();
     const w1 = makeWindow(env, 11, [10, 10, 400, 300], 0, null, { description: '0x1' });
     const w2 = makeWindow(env, 12, [500, 0, 400, 300]);
     env.tabList.push(w1, w2);
@@ -184,7 +184,7 @@ test('only the FIRST retile of a surface uses the stored order', () => {
 });
 
 test('the store never touches the settings', () => {
-    const { env, ext, app } = scene();
+    const { env, app } = scene();
     const layouts = settingsInstance(env).getValue('layouts');
     const w1 = makeWindow(env, 11, [10, 10, 400, 300], 0, null, { description: '0x1' });
     const w2 = makeWindow(env, 12, [500, 0, 400, 300], 0, null, { description: '0x2' });
