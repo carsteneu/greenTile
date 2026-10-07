@@ -1,6 +1,6 @@
 # greenTile
 
-Window tiling for Cinnamon: presets per monitor and workspace, an auto mode, snap-on-release, draggable borders and keyboard swapping. A fork of gTile, requires Cinnamon 6.0 or newer; tested on Linux Mint 21.3–22.3 (Cinnamon 6.0–6.6) with X11. Newer Cinnamon versions and Wayland are not yet fully verified.
+Window tiling for Cinnamon: presets per monitor and workspace, an auto mode, snap-on-release, draggable borders and keyboard swapping. A fork of gTile, requires Cinnamon 6.0.4 or newer; tested on Linux Mint 21.3–22.3 (Cinnamon 6.0.4–6.6) with X11. Newer Cinnamon versions and Wayland are not yet fully verified.
 
 ## Features
 
