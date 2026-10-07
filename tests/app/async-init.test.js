@@ -280,6 +280,67 @@ test('item 3: a destroyed wrapper throws before any handler is connected', () =>
     assert.equal(env.totalHandlers(), 0);
 });
 
+// --- Startup settle ------------------------------------------------------------
+//
+// A Cinnamon restart re-manages every window and Muffin pushes windows around
+// while it does (live: 13 of 23 windows moved left by 1920 px on a 5120 px
+// monitor). The first App after enable therefore owes the same settle wait a
+// monitor change owes: once Muffin is quiet, the active workspace of every
+// monitor with automatic tiling on is retiled — a paused one stays untouched.
+
+const fireTimer = (env, timer) => {
+    const entry = [...env.timers.entries()].find(([id]) => id === timer.id);
+    env.timers.delete(timer.id);
+    entry[1].cb();
+};
+
+const bootWithWindows = (env, ext, auto) => {
+    const ws0 = makeWorkspace(null, 1, 0);
+    ws0.list_windows = () => env.tabList;
+    env.workspaces.push(ws0);
+    env.activeWorkspace = ws0;
+    const a = makeWindow(env, 901, [50, 70, 320, 200]);
+    const b = makeWindow(env, 902, [450, 70, 320, 200]);
+    env.tabList.push(a, b);
+    env.display.focus_window = a;
+    env.layoutManager.monitors.push(MONITOR);
+    ext.enable();
+    settingsInstance(env).setValue('layouts', JSON.stringify({ 'name:FakeMonitor-0|2000x1100': { '1': { auto } } }));
+    return { a, b };
+};
+
+test('startup: the first monitor reply after enable arms one settle wait that retiles the active workspace', () => {
+    const { env, ext } = makeEnv();
+    const { a, b } = bootWithWindows(env, ext, true);
+    env.flushDisplayConfigNoReply();
+    const waits = env.liveTimers().filter((t) => t.kind === 'mainloop');
+    assert.equal(waits.length, 1, 'exactly one settle wait is armed at startup');
+    assert.equal(a.moves.length + b.moves.length, 0, 'nothing is placed before Muffin has settled');
+    fireTimer(env, waits[0]);
+    assert.equal(env.logs.some((l) => l.indexOf('greenTile monitors settled after') === 0), true, 'the wait settled');
+    // the settle fans out into the regular debounced retile of the active workspace
+    for (const due of env.liveTimers().filter((t) => t.ms === 0)) {
+        fireTimer(env, due);
+    }
+    assert.ok(a.moves.length + b.moves.length > 0, 'the active workspace is retiled once Muffin is quiet');
+    assert.equal(ext.currentSession().settle.pending, false, 'the owed wait was consumed');
+    ext.disable();
+});
+
+test('startup: the settle wait leaves a paused workspace untouched', () => {
+    const { env, ext } = makeEnv();
+    const { a, b } = bootWithWindows(env, ext, false);
+    env.flushDisplayConfigNoReply();
+    const wait = env.liveTimers().find((t) => t.kind === 'mainloop');
+    assert.ok(wait, 'the wait is owed regardless of the stored state');
+    fireTimer(env, wait);
+    for (const due of env.liveTimers().filter((t) => t.ms === 0)) {
+        fireTimer(env, due);
+    }
+    assert.equal(a.moves.length + b.moves.length, 0, 'a paused workspace is never placed by the startup settle');
+    ext.disable();
+});
+
 // --- Item 4 -----------------------------------------------------------------
 
 const bootBeforeReply = (env, ext) => {

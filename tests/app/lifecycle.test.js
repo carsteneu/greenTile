@@ -58,7 +58,12 @@ test('enable connects the documented handler set exactly once', () => {
     assert.equal(env.display.count('window-created'), 1);
     assert.equal(env.workspaceManager.count('notify::n-workspaces'), 1);
     assert.equal(env.workspaceManager.count('workspace-switched'), 1);
-    assert.equal(env.windowManager.count('switch-workspace'), 1);    assert.equal(env.liveTimers().length, 0, 'no timer without a pending settle');
+    assert.equal(env.windowManager.count('switch-workspace'), 1);
+    // the only timer after enable is the startup settle wait (a Cinnamon restart
+    // moves windows like a monitor change does)
+    const timers = env.liveTimers();
+    assert.equal(timers.length, 1, 'exactly the startup settle wait is armed');
+    assert.equal(timers[0].kind, 'mainloop');
     assert.equal(env.settingsSlots.get('greenTile@carsteneu') === null, false);
 });
 
@@ -284,7 +289,7 @@ test('disable/enable on the same loaded module yields exactly one live session s
     assert.equal(env.layoutManager.count('monitors-changed'), 1, 'one session handler, not two');
     assert.deepEqual(env.greenTileHotkeys(), HOTKEY_NAMES, 'exactly the 14 hotkeys, once');
     assert.equal(env.display.count('grab-op-begin'), 1);
-    assert.equal(env.liveTimers().length, 0, 'no leftover settle timer across the cycle');
+    assert.equal(env.liveTimers().length, 1, 'no leftover settle timer across the cycle: only the new session\'s wait');
 });
 
 // Fake MetaWindow / workspace: signal accounting + just enough geometry for the
@@ -413,7 +418,7 @@ test('auto destroy: a throwing source_remove does not abort the signal release',
     enableWithMonitor(env, ext);
     const app = ext.currentSession().app;
     app.auto.scheduleMonitor(app, 0, 300);
-    assert.equal(env.liveTimers().length, 1, 'one auto debounce timer is live');
+    assert.equal(env.liveTimers().filter((t) => t.ms === 300).length, 1, 'one auto debounce timer is live');
     const realRemove = env.mainloop.source_remove.bind(env.mainloop);
     env.mainloop.source_remove = () => { throw new Error('injected source-remove failure'); };
     assert.doesNotThrow(() => ext.disable(), 'Config.destroy isolates the auto failure');
@@ -444,7 +449,7 @@ test('auto destroy: a throwing source_remove for one timer still removes the oth
         realRemove(id);
     };
     assert.doesNotThrow(() => ext.disable());
-    assert.deepEqual(attempts.slice().sort(), ids.slice().sort(), 'both timer removals were attempted');
+    assert.deepEqual(attempts.filter((id) => ids.includes(id)).sort(), ids.slice().sort(), 'both timer removals were attempted');
     assert.equal(env.timers.has(ids[1]), false, 'the second timer was removed despite the first throwing');
     env.mainloop.source_remove = realRemove;
 });

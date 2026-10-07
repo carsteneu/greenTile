@@ -138,6 +138,15 @@ test('settle teardown resets started when nothing is pending', () => {
     assert.deepEqual(ml.pendingMs(), [2000]);
 });
 
+test('settle teardown reports a failing timer removal instead of throwing', () => {
+    const { ml, logs, settle } = makeSettle();
+    settle.start('app1');
+    ml.source_remove = () => { throw new Error('injected source-remove failure'); };
+    assert.doesNotThrow(() => settle.teardown(), 'a disable right after enable must not throw out of the session');
+    assert.equal(logs.some((l) => l.indexOf('greenTile settle timer not removed:') === 0), true, 'the failure is reported');
+    assert.doesNotThrow(() => settle.destroy(), 'the forgotten id is not retried');
+});
+
 test('a monitor change 14 s after the first stays inside the 15 s cap', () => {
     const { ck, ml, logs, settle } = makeSettle();
     settle.start('app1');
@@ -436,6 +445,13 @@ test('monitors-changed flags pending without consuming it (settle rides the recr
     session.start();
     layoutManager.emit('monitors-changed');
     assert.equal(session.settle.pending, true);
+});
+
+test('session start owes one settle wait: Muffin moves windows during a Cinnamon restart too', () => {
+    const { created, session } = makeSession();
+    session.start();
+    assert.equal(created.length, 1);
+    assert.equal(session.settle.pending, true, 'the first App arms the wait through consumePending');
 });
 
 test('session destroy stops the app, resets the settle wait and releases the handler', () => {
