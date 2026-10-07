@@ -1,0 +1,278 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Automatic window tiling on Cinnamon (Linux Mint) · greenTile</title>
+<meta name="description" content="Cinnamon snaps one window at a time. How to get automatic tiling on Linux Mint Cinnamon with the greenTile extension, step by step, and where its limits are.">
+<link rel="canonical" href="https://greentile.io/auto-tiling-cinnamon/">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="greenTile">
+<meta property="og:title" content="Automatic window tiling on Cinnamon (Linux Mint)">
+<meta property="og:description" content="What Cinnamon tiles on its own, what it leaves to you, and how to make windows tile themselves as they open with the greenTile extension.">
+<meta property="og:url" content="https://greentile.io/auto-tiling-cinnamon/">
+<meta property="og:image" content="https://greentile.io/screenshots/tour-poster.jpg">
+<meta property="og:image:width" content="1280">
+<meta property="og:image:height" content="720">
+<meta property="og:image:alt" content="greenTile: tiling for Cinnamon, six windows in one row">
+<style>
+@font-face{font-family:"Bricolage";src:url(../fonts/bricolage-normal-200_800.woff2) format("woff2");font-weight:200 800;font-stretch:75% 100%}
+@font-face{font-family:"Instrument";src:url(../fonts/instrument-normal-400_700.woff2) format("woff2");font-weight:400 700}
+@font-face{font-family:"Instrument";src:url(../fonts/instrument-italic-400_700.woff2) format("woff2");font-weight:400 700;font-style:italic}
+@font-face{font-family:"JBMono";src:url(../fonts/jbmono-normal-400_700.woff2) format("woff2");font-weight:400 700}
+
+/* tokens and base: the same as the home page (../index.html) */
+:root{
+  --sage:#E6ECE2;
+  --sheet:#F7F9F5;
+  --ink:#13201A;
+  --moss:#2F6A1E;
+  --leaf:#4EA530;
+  --amber:#F0A23B;
+  --rule:#C5D0BF;
+  --mute:#5B6B60;
+  --r:10px;
+}
+*{box-sizing:border-box}
+html{background:var(--sage);color:var(--ink)}
+body{margin:0;font:400 17px/1.55 "Instrument",system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+a{color:inherit}
+:focus-visible{outline:3px solid var(--amber);outline-offset:3px;border-radius:4px}
+.wrap{max-width:1180px;margin:0 auto;padding:0 clamp(20px,4vw,48px)}
+
+nav{display:flex;align-items:center;justify-content:space-between;padding:22px 0}
+.mark{display:flex;align-items:center;gap:10px;font:700 21px/1 "Bricolage";letter-spacing:-.02em;text-decoration:none}
+.mark i{display:grid;grid-template-columns:1fr 1fr;gap:2px;width:22px;height:22px}
+.mark i b{background:var(--leaf);border-radius:2px}
+.mark i b:nth-child(2){background:var(--moss)}
+.mark i b:first-child{grid-row:span 2}
+nav ul{display:flex;gap:26px;list-style:none;margin:0;padding:0;font-size:15px}
+nav ul a{text-decoration:none;color:var(--mute)}
+nav ul a:hover,nav ul a[aria-current]{color:var(--ink)}
+.gh{font:600 14px/1 "Instrument";padding:10px 14px;border:1.5px solid var(--ink);border-radius:999px;text-decoration:none}
+.gh:hover{background:var(--ink);color:var(--sage)}
+
+.hero{padding:clamp(28px,6vh,72px) 0 24px}
+.eyebrow{font:500 13px/1 "JBMono";letter-spacing:.06em;text-transform:uppercase;color:var(--moss);display:flex;gap:10px;align-items:center}
+.eyebrow::before{content:"";width:28px;height:2px;background:var(--leaf)}
+h1{font:800 clamp(42px,6.2vw,88px)/.94 "Bricolage";font-variation-settings:"opsz" 96;letter-spacing:-.045em;margin:20px 0 22px;max-width:13ch}
+h1 em{font-style:normal;color:var(--leaf);white-space:nowrap}
+.lede{font-size:clamp(18px,1.6vw,21px);max-width:46ch;color:#2A3A30;margin:0 0 28px}
+.cta{display:flex;flex-wrap:wrap;gap:14px;align-items:center}
+.btn{font:600 16px/1 "Instrument";padding:15px 22px;border-radius:999px;background:var(--ink);color:var(--sage);text-decoration:none;display:inline-block}
+.btn:hover{background:var(--moss)}
+.keys{display:inline-flex;gap:6px;align-items:center;font-size:14px;color:var(--mute)}
+kbd{font:600 13px/1 "JBMono";padding:7px 9px 8px;border-radius:7px;background:var(--sheet);border:1px solid var(--rule);box-shadow:0 2px 0 var(--rule);color:var(--ink)}
+code{font:500 .9em "JBMono";background:var(--sheet);border:1px solid var(--rule);border-radius:5px;padding:1px 5px}
+
+/* the short answer, set like the dark feature card on the home page */
+.hero-top{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,420px);gap:48px;align-items:end}
+.answer{background:var(--ink);color:var(--sage);border-radius:var(--r);padding:26px 26px 28px}
+.answer h2{font:700 22px/1.1 "Bricolage";letter-spacing:-.02em;margin:0 0 10px;max-width:none}
+.answer p{margin:0 0 12px;color:#C9D5C3;font-size:15.5px}
+.answer p:last-child{margin:0}
+.answer kbd{background:#223329;border-color:#3A4D40;box-shadow:0 2px 0 #3A4D40;color:var(--sage)}
+.demo{margin:clamp(30px,5vh,52px) 0 0}
+.demo img{display:block;width:100%;height:auto;border-radius:12px;box-shadow:0 30px 60px -30px rgba(19,32,26,.55),0 0 0 1px rgba(19,32,26,.12)}
+.demo figcaption{margin-top:14px;font:500 13px/1.4 "JBMono";color:var(--mute)}
+
+section{padding:clamp(48px,8vh,88px) 0}
+h2{font:750 clamp(32px,4.2vw,52px)/1 "Bricolage";letter-spacing:-.035em;margin:0 0 12px;max-width:18ch}
+.sub{color:var(--mute);max-width:56ch;margin:0 0 32px}
+
+/* native vs missing: two columns of ruled rows, like the hotkey list */
+.versus{display:grid;grid-template-columns:1fr 1fr;gap:0 48px}
+.versus h3{font:700 22px/1.1 "Bricolage";letter-spacing:-.02em;margin:0;padding:0 0 14px;border-bottom:1.5px solid var(--ink)}
+.versus ul{list-style:none;margin:0;padding:0}
+.versus li{padding:14px 0 16px;border-bottom:1px solid var(--rule);color:#34443A;font-size:16px}
+.versus li b{display:block;font:600 16px/1.3 "Instrument";color:var(--ink);margin-bottom:3px}
+.versus .k{display:inline-flex;gap:4px;margin-top:6px}
+.versus .gap li b::before{content:"";display:inline-block;width:10px;height:10px;border-radius:2px;background:var(--amber);margin-right:8px;vertical-align:1px}
+
+/* a real sequence, so it is numbered */
+.steps{list-style:none;counter-reset:s;margin:0;padding:0;display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+.steps li{counter-increment:s;background:var(--sheet);border:1px solid #D6DED1;border-radius:var(--r);padding:22px 24px 24px;display:flex;flex-direction:column;gap:8px}
+.steps li::before{content:counter(s);font:600 13px/1 "JBMono";color:var(--moss)}
+.steps h3{font:700 21px/1.15 "Bricolage";letter-spacing:-.02em;margin:0}
+.steps p{margin:0;color:#34443A;font-size:15.5px}
+.steps .k{display:flex;gap:5px;flex-wrap:wrap;margin-top:auto;padding-top:6px}
+
+.note{max-width:68ch;margin:28px 0 0;padding:18px 22px;border-left:3px solid var(--amber);background:var(--sheet);border-radius:0 var(--r) var(--r) 0;color:#2A3A30;font-size:16px}
+.note b{color:var(--ink)}
+
+.install{display:grid;grid-template-columns:1fr 1.2fr;gap:40px;align-items:start}
+.install>*{min-width:0}
+.install code{overflow-wrap:anywhere}
+.install h3{font:700 20px/1.15 "Bricolage";letter-spacing:-.02em;margin:22px 0 6px}
+.install h3:first-of-type{margin-top:0}
+.install p{margin:0 0 10px;color:#2A3A30;max-width:52ch}
+pre{margin:0;background:var(--ink);color:#DDE7D8;border-radius:var(--r);padding:22px 24px;font:500 14px/1.7 "JBMono";overflow:auto}
+pre .c{color:#7E9483}pre .g{color:#8FD16F}
+
+.limits{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(2,1fr);gap:0 48px;border-top:1.5px solid var(--ink)}
+.limits li{padding:14px 0 16px;border-bottom:1px solid var(--rule);display:flex;flex-direction:column;gap:4px;font-size:15.5px;line-height:1.5;color:#34443A}
+.limits b{font:600 16px/1.25 "Instrument";color:var(--ink)}
+
+.next{display:flex;flex-wrap:wrap;gap:14px;align-items:center;margin-top:36px}
+.next.tight{margin-top:20px}
+.next a.plain{font:600 16px/1 "Instrument";padding:14px 20px;border:1.5px solid var(--ink);border-radius:999px;text-decoration:none}
+.next a.plain:hover{background:var(--ink);color:var(--sage)}
+
+footer{padding:36px 0 56px;border-top:1px solid var(--rule);display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px;color:var(--mute);font-size:14px}
+
+@media (max-width:980px){
+  .hero-top,.install,.versus{grid-template-columns:1fr;gap:32px}
+  .steps,.limits{grid-template-columns:1fr}
+  nav ul{display:none}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <nav>
+    <a class="mark" href="../"><i><b></b><b></b><b></b></i>greenTile</a>
+    <ul><li><a href="../">Home</a></li><li><a href="./" aria-current="page">Auto tiling</a></li><li><a href="../gtile-alternative/">vs gTile</a></li><li><a href="#install">Install</a></li></ul>
+    <a class="gh" href="https://github.com/carsteneu/greenTile">github.com/carsteneu/greenTile</a>
+  </nav>
+
+  <header class="hero">
+    <div class="hero-top">
+      <div>
+        <div class="eyebrow">Linux Mint · Cinnamon</div>
+        <h1>Auto tiling on <em>Cinnamon.</em></h1>
+        <p class="lede">Cinnamon can snap a window to half or a quarter of the screen, one window at a time. It does not arrange your windows for you. For that you need an extension, and this page shows how to set one up, without leaving Cinnamon.</p>
+        <div class="cta">
+          <a class="btn" href="#steps">Show me how</a>
+          <a class="keys" href="#native">What Cinnamon already does</a>
+        </div>
+      </div>
+      <aside class="answer" aria-labelledby="short">
+        <h2 id="short">The short answer</h2>
+        <p>Install the greenTile extension and switch it on. Then press <kbd>Super</kbd><kbd>Ctrl</kbd><kbd>A</kbd> on a workspace.</p>
+        <p>From then on every window you open, close, minimize or restore on that monitor and workspace is retiled into a grid automatically. Your other workspaces stay as they are until you do the same there.</p>
+      </aside>
+    </div>
+    <figure class="demo">
+      <img src="../screenshots/demo.gif" width="1600" height="450" fetchpriority="high" decoding="async" alt="Windows on a wide monitor tile themselves as they open; then one window is dragged onto another and splits it, with a translucent preview of the result">
+      <figcaption>Auto mode on a 32:9 monitor: windows take their place as they open, then a drag splits one of them.</figcaption>
+    </figure>
+  </header>
+</div>
+
+<section id="native">
+  <div class="wrap">
+    <h2>What Cinnamon does on its own.</h2>
+    <p class="sub">Cinnamon's window manager, Muffin, has tiling built in. It is good at placing a single window quickly. Everything beyond that is up to you.</p>
+    <div class="versus">
+      <div>
+        <h3>Built in</h3>
+        <ul>
+          <li><b>Edge tiling by mouse</b>Drag a window against a screen edge and it fills that half. Depending on a setting, the top edge maximizes it instead.</li>
+          <li><b>Halves and quarters</b>Besides the four halves, Muffin knows a quarter tile for each corner of the screen.</li>
+          <li><b>Keyboard</b>Super with an arrow key pushes the focused window towards that side of the screen. The keys can be changed in Cinnamon's keyboard settings.<span class="k"><kbd>Super</kbd><kbd>←</kbd><kbd>→</kbd><kbd>↑</kbd><kbd>↓</kbd></span></li>
+        </ul>
+      </div>
+      <div class="gap">
+        <h3>Not built in</h3>
+        <ul>
+          <li><b>Arranging by itself</b>Each tile is one action on one window. A new window opens wherever the application puts it, and a closed one leaves a hole.</li>
+          <li><b>More than halves and quarters</b>Three or six columns, a main window with a stack beside it, a wide centre column: there is no way to set up shapes like these.</li>
+          <li><b>Layouts per monitor and workspace</b>There is nothing to remember that workspace 2 on the ultrawide is for three columns.</li>
+          <li><b>Gaps</b>There is no setting for space between tiled windows.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="steps">
+  <div class="wrap">
+    <h2>How to get windows that tile themselves.</h2>
+    <p class="sub">With greenTile installed and enabled (see <a href="#install">install</a> below), this is the whole setup. Nothing has to be configured first.</p>
+    <ol class="steps">
+      <li>
+        <h3>Turn on auto mode</h3>
+        <p>Press the key on the workspace you want tiled. It acts on the monitor of the focused window, and its windows tile at once. Auto mode is stored per monitor and workspace, so it only affects the one you are on. A single window is left as it is unless you switch on <i>Fill the monitor with a single window</i> in the settings.</p>
+        <div class="k"><kbd>Super</kbd><kbd>Ctrl</kbd><kbd>A</kbd></div>
+      </li>
+      <li>
+        <h3>Open and close windows as usual</h3>
+        <p>New windows join the end of the layout. Opening, closing, minimizing or restoring a window retiles the monitor after 300 ms. Without a preset, a monitor 2100 px wide or wider gets up to six windows in one row, then even rows; a narrower one gets up to three in a row, then three columns with stacks.</p>
+      </li>
+      <li>
+        <h3>Pick a layout if you want a different shape</h3>
+        <p>The preset panel offers sixteen editable starters, from <i>Two columns</i> to <i>Wide center + stacks</i>, each with a live preview of what a click would do right now. Click one to assign it to this monitor and workspace, or paint your own on a 6 × 4 grid.</p>
+        <div class="k"><kbd>Super</kbd><kbd>Ctrl</kbd><kbd>P</kbd></div>
+      </li>
+      <li>
+        <h3>Adjust by hand</h3>
+        <p>Drag a border and the neighbours follow; borders are remembered per window count. Drop a window on the outer edge of another to split it; drop it in the middle and it takes that slot while its neighbours make room. Swap with the keyboard, and set a gap of 0 to 48 px in the preset panel.</p>
+        <div class="k"><kbd>Super</kbd><kbd>Alt</kbd>+arrow · <kbd>Super</kbd><kbd>Ctrl</kbd>+arrow</div>
+      </li>
+      <li>
+        <h3>Keep some windows out</h3>
+        <p>Let one window float with a key, press again to tile it again. Apps that should never tile go on a list in the settings, matched by window class, title or app id; an app picker fills in installed applications, flatpaks included.</p>
+        <div class="k"><kbd>Super</kbd><kbd>G</kbd></div>
+      </li>
+      <li>
+        <h3>Pause it again</h3>
+        <p>Auto mode off keeps the assigned preset but stops automatic tiling on this monitor and workspace. Turning it back on, or clicking a preset, resumes.</p>
+        <div class="k"><kbd>Super</kbd><kbd>Ctrl</kbd><kbd>D</kbd></div>
+      </li>
+    </ol>
+    <p class="note"><b>One change to Cinnamon's own keys:</b> on a monitor and workspace with auto mode on, <kbd>Super</kbd>+arrow moves the keyboard focus to the neighbouring tiled window instead of pushing the window to a half. Everywhere else, and for windows greenTile does not manage, the native edge tiling stays as it was. <kbd>Super</kbd>+arrow itself is Cinnamon's key and is changed in Cinnamon's keyboard settings; all of greenTile's own keys can be changed on the Hotkeys page of its settings.</p>
+  </div>
+</section>
+
+<section id="install">
+  <div class="wrap install">
+    <div>
+      <h2>Install greenTile.</h2>
+      <p class="sub">Requires Cinnamon 6.0.4 or newer. Tested on Linux Mint 21.3 to 22.3 (Cinnamon 6.0.4 to 6.6) with X11. Free software under the GPL v3.</p>
+      <h3>From Cinnamon's Extensions manager</h3>
+      <p>Not yet. greenTile is not listed in the Cinnamon Spices catalogue so far, so it does not show up under Extensions → Download. Until it is, use the release zip.</p>
+      <h3>With the installer script</h3>
+      <p>Download the zip from the latest release, unpack it and run <code>install.sh</code>. It copies the extension to <code>~/.local/share/cinnamon/extensions/greenTile@carsteneu/</code> and compiles the translations. It needs <code>flock</code> from util-linux; without <code>msgfmt</code> from gettext the interface stays in English. Then restart Cinnamon and enable greenTile in System Settings → Extensions.</p>
+      <h3>Updating</h3>
+      <p>Run <code>./update.sh</code> from the unpacked zip: it fetches the latest release and installs it. A running Cinnamon keeps the code it loaded at startup, so restart Cinnamon (X11) or log out and back in (Wayland) afterwards.</p>
+      <p>Building from a checkout is described in the <a href="https://github.com/carsteneu/greenTile#development">README</a>. If gTile is installed, disable it first: both use <kbd>Super</kbd><kbd>G</kbd>.</p>
+      <div class="next tight"><a class="btn" href="https://github.com/carsteneu/greenTile/releases/latest">Download the latest release</a></div>
+    </div>
+<pre><span class="c"># unpack the release zip and install for your user</span>
+unzip greenTile-*.zip
+cd greenTile-*/ &amp;&amp; ./install.sh
+
+<span class="c"># restart Cinnamon on X11 to load the new code</span>
+Ctrl+Alt+Esc   <span class="c"># or Alt+F2, then r</span>
+<span class="c"># Wayland: log out and back in instead</span>
+
+<span class="c"># then: System Settings → Extensions → <span class="g">greenTile</span> → enable</span>
+<span class="c"># and on the workspace you want tiled:</span>
+Super+Ctrl+A</pre>
+  </div>
+</section>
+
+<section id="limits">
+  <div class="wrap">
+    <h2>What greenTile does not do.</h2>
+    <p class="sub">If one of these is what you are after, a different tool fits better; it is worth knowing before you install.</p>
+    <ul class="limits">
+      <li><b>No dynamic tiling tree</b><span>There is no split tree that you build window by window, as in i3 or sway. Layouts come from the auto grid or from a preset's rules by window count; drag splits and moved borders adjust that layout.</span></li>
+      <li><b>No tabbed or stacked containers</b><span>Windows in a column are stacked one above the other, all visible. Several windows sharing one cell behind tabs is not supported.</span></li>
+      <li><b>Per-app rules are exclusions only</b><span>The never tile list keeps apps out of the grid. There is no rule that sends an app to a workspace or gives it a fixed size or position.</span></li>
+      <li><b>Visible windows of the active workspace</b><span>Minimized windows and other workspaces are left alone; a workspace with auto mode on is retiled when you switch to it.</span></li>
+      <li><b>Wayland: first tests only</b><span>On Linux Mint 22.3 (Cinnamon 6.6) auto tiling, retiling, the preset panel, the settings and native Wayland windows work. Swap, border resize and multi-monitor are not tested on Wayland yet.</span></li>
+      <li><b>Newer Cinnamon not yet verified</b><span>Releases are tested up to Cinnamon 6.6. Versions after that may work but have not been checked.</span></li>
+      <li><b>Layouts follow workspace numbers</b><span>Assignments are keyed by workspace number, so they shift when a workspace in front of them is removed.</span></li>
+      <li><b>Updates need a restart</b><span>Turning the extension off and on is not enough to load new library code: restart Cinnamon on X11, or log out on Wayland.</span></li>
+    </ul>
+    <div class="next">
+      <a class="btn" href="../">See all features</a>
+      <a class="plain" href="../gtile-alternative/">Coming from gTile? Compare the two</a>
+    </div>
+  </div>
+</section>
+
+<div class="wrap"><footer><span>greenTile · GPL v3 · based on gTile by vibou and shuairan</span><span><a href="../">Home</a> · <a href="../gtile-alternative/">greenTile vs gTile</a></span><span>Made for Linux Mint</span></footer></div>
+</body>
+</html>
