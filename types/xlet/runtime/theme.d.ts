@@ -79,12 +79,12 @@ export const Theme: {
         /** Current stylesheet generation class, '' while nothing is loaded. */
         get gen(): string;
         /**
-         * Cairo colors for the current theme (thumbnails, painter's dashed outline
-         * — everything the stylesheet does not cover).
-         * @param {'thumb' | 'outline'} key
+         * Cairo colors for the current theme (thumbnails, painter's dashed outline, the
+         * painter's handle ink — everything the stylesheet does not cover).
+         * @param {'thumb' | 'outline' | 'panel'} key
          * @returns {number[]}
          */
-        cairo(key: "thumb" | "outline"): number[];
+        cairo(key: "thumb" | "outline" | "panel"): number[];
         panelClass(): string;
         /**
          * @param {ThemeConfig} config
