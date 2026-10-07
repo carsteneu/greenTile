@@ -351,14 +351,23 @@ test('a state-less monitor keeps a usable fallback key without get_monitor_name'
     ]);
 });
 
-// The guard must not change 6.4+: the real name stays authoritative, so the
-// fallback key of a state-less monitor is built from it and not from the connector.
-test('with get_monitor_name present the reported name stays authoritative', () => {
-    const { env, monitors } = makeMonitors();
-    monitors.refresh(() => {});
-    withReply(env, [['DP-1', 'VND', 'PRD', '0x9f']]);
-    assert.deepEqual(monitors.keys, ['name:Screen-0|1920x1080', 'VND|PRD|0x9f']);
-    assert.deepEqual(monitors.labels, ['Screen-0', 'Screen-1']);
+// The guard must switch ONLY the name source: the same fixture in both worlds, so
+// anything that moves outside the name-derived key is a behaviour change on 6.4+.
+test('the guard switches only the name source, not the rest of the registry', () => {
+    const reply = [['DP-1', 'VND', 'PRD', '0x9f']];
+    const withApi = makeMonitors();
+    withApi.monitors.refresh(() => {});
+    withReply(withApi.env, reply);
+    const withoutApi = makeMonitors(undefined, false);
+    withoutApi.monitors.refresh(() => {});
+    withReply(withoutApi.env, reply);
+    assert.deepEqual(withApi.monitors.keys, ['name:Screen-0|1920x1080', 'VND|PRD|0x9f']);
+    assert.deepEqual(withoutApi.monitors.keys, ['name:monitor-0|1920x1080', 'VND|PRD|0x9f'],
+        'the fallback key follows the name source: index when even the connector is unknown');
+    assert.deepEqual(withApi.monitors.keys.slice(1), withoutApi.monitors.keys.slice(1),
+        'a monitor with DisplayConfig state keys identically in both worlds');
+    assert.deepEqual(withApi.monitors.labels, ['Screen-0', 'Screen-1']);
+    assert.deepEqual(withoutApi.monitors.labels, ['monitor-0', 'DP-1'], 'without the API the connector labels the monitor');
 });
 
 // Session --------------------------------------------------------------------
