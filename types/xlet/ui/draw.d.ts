@@ -8,6 +8,7 @@ export function panelThumb(app: AppFacade, stacks: number[], opts?: {
     vgap?: number;
     radius?: number;
     color?: Rgb | null;
+    spans?: number[] | null;
 }): any;
 export function panelMiddle(): {
     x_fill: boolean;

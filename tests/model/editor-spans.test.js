@@ -15,8 +15,9 @@ test('editorSpans pads missing columns with one and cuts the surplus', () => {
 });
 
 test('editorSpans normalizes corrupt values like the stacks clamp does', () => {
+    const infinite = Number.MAX_VALUE * 2;
     assert.deepEqual(m.editorSpans([2.9, 0, -3, '3', 'x', null], 6), [2, 1, 1, 3, 1, 1]);
-    assert.deepEqual(m.editorSpans([1e309, 1e9], 2), [1, 6]);
+    assert.deepEqual(m.editorSpans([infinite, 1e9], 2), [1, 6]);
 });
 
 test('editorMerge joins a column with its right neighbour', () => {
