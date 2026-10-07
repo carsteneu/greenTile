@@ -176,11 +176,14 @@ test('settle destroy removes a running wait and resets all state', () => {
 
 // Monitors -------------------------------------------------------------------
 
-const fakeGlobal = () => {
+// `hasMonitorName` models the Cinnamon 6.4 boundary: Meta.Display.get_monitor_name
+// exists from 6.4 on and is absent on 6.0-6.3, so the registry must cope with a
+// display that does not carry it.
+const fakeGlobal = (hasMonitorName = true) => {
     const logs = [];
     return {
         logs,
-        display: { get_monitor_name: (i) => 'Screen-' + i },
+        display: hasMonitorName ? { get_monitor_name: (i) => 'Screen-' + i } : {},
         log: (msg) => logs.push(msg),
     };
 };
@@ -226,11 +229,11 @@ const displayReply = (monitors, throwError) => ({
     },
 });
 
-const makeMonitors = (monitorMap) => {
+const makeMonitors = (monitorMap, hasMonitorName = true) => {
     const env = { calls: [], cancellables: [], settings: [] };
     const gio = makeGio(env);
     const session = { monitorFallbackLogged: false };
-    const g = fakeGlobal();
+    const g = fakeGlobal(hasMonitorName);
     const monitors = new Monitors({
         main: { layoutManager: { monitors: [{ width: 1920, height: 1080 }, { width: 1280, height: 1024 }] } },
         gio,
@@ -316,6 +319,55 @@ test('a failed GetCurrentState reply is logged, refresh still completes with fal
     assert.equal(monitors.ready, true, 'the fallback path still publishes the registry');
     assert.deepEqual(monitors.keys, ['name:Screen-0|1920x1080', 'name:Screen-1|1280x1024']);
     assert.match(logs[0], /^greenTile DisplayConfig\.GetCurrentState failed: Error: boom$/);
+});
+
+// Cinnamon 6.0-6.3: Meta.Display.get_monitor_name does not exist. The probe sits
+// inside the asynchronous GetCurrentState callback, so a TypeError there aborts the
+// whole refresh — `ready` stays false and every tiling path (auto, retile, swap,
+// resize) bails while the panel and the settings dialog keep working.
+test('monitors refresh survives a display without get_monitor_name (Cinnamon < 6.4)', () => {
+    const { env, monitors, logs } = makeMonitors(undefined, false);
+    const ready = [];
+    monitors.refresh(() => ready.push(1));
+    withReply(env, [['HDMI-0', 'VND', 'PRD', '0x1a2b'], ['DP-1', 'VND', 'PRD', '0x9f']]);
+    assert.equal(monitors.ready, true, 'the registry publishes without the 6.4-only API');
+    assert.deepEqual(monitors.keys, ['VND|PRD|0x1a2b', 'VND|PRD|0x9f']);
+    assert.deepEqual(monitors.labels, ['HDMI-0', 'DP-1'], 'the connector stands in for the missing name');
+    assert.deepEqual(ready, [1], 'onReady fired exactly once');
+    assert.deepEqual(logs, ['greenTile monitors: 0=VND|PRD|0x1a2b, 1=VND|PRD|0x9f']);
+});
+
+// The fallback branch (no DisplayConfig state for a monitor) also reads the name,
+// so it needs a defined stand-in: the connector, else the monitor index.
+test('a state-less monitor keeps a usable fallback key without get_monitor_name', () => {
+    const { env, session, monitors, logs } = makeMonitors({ 'DP-1': 1 }, false);
+    monitors.refresh(() => {});
+    withReply(env, [['DP-1', 'VND', 'PRD', '0x9f']]);
+    assert.deepEqual(monitors.keys, ['name:monitor-0|1920x1080', 'VND|PRD|0x9f']);
+    assert.equal(session.monitorFallbackLogged, true);
+    assert.deepEqual(logs, [
+        'greenTile monitor key fallback for monitor-0 (name:monitor-0|1920x1080)',
+        'greenTile monitors: 0=name:monitor-0|1920x1080, 1=VND|PRD|0x9f',
+    ]);
+});
+
+// The guard must switch ONLY the name source: the same fixture in both worlds, so
+// anything that moves outside the name-derived key is a behaviour change on 6.4+.
+test('the guard switches only the name source, not the rest of the registry', () => {
+    const reply = [['DP-1', 'VND', 'PRD', '0x9f']];
+    const withApi = makeMonitors();
+    withApi.monitors.refresh(() => {});
+    withReply(withApi.env, reply);
+    const withoutApi = makeMonitors(undefined, false);
+    withoutApi.monitors.refresh(() => {});
+    withReply(withoutApi.env, reply);
+    assert.deepEqual(withApi.monitors.keys, ['name:Screen-0|1920x1080', 'VND|PRD|0x9f']);
+    assert.deepEqual(withoutApi.monitors.keys, ['name:monitor-0|1920x1080', 'VND|PRD|0x9f'],
+        'the fallback key follows the name source: index when even the connector is unknown');
+    assert.deepEqual(withApi.monitors.keys.slice(1), withoutApi.monitors.keys.slice(1),
+        'a monitor with DisplayConfig state keys identically in both worlds');
+    assert.deepEqual(withApi.monitors.labels, ['Screen-0', 'Screen-1']);
+    assert.deepEqual(withoutApi.monitors.labels, ['monitor-0', 'DP-1'], 'without the API the connector labels the monitor');
 });
 
 // Session --------------------------------------------------------------------
