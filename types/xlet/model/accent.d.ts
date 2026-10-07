@@ -33,7 +33,7 @@ export function accentLuminance(rgb: Rgb): number;
 export function accentContrast(a: Rgb, b: Rgb): number;
 export function accentTextOn(rgb: Rgb): Rgb;
 export function accentInkOn(rgb: Rgb): Rgb;
-export function accentHandleInk(base: Rgb, panel: Rgb): {
+export function accentHandleInk(kind: "merge" | "split", base: Rgb, gap: Rgb): {
     fill: Rgb;
     rim: Rgb;
 };

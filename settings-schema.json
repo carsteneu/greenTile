@@ -206,7 +206,7 @@
    },
    "panelSize": {
       "type": "generic",
-      "default": "{\"list\":{\"w\":800,\"h\":480}}"
+      "default": "{\"list\":{\"w\":800,\"h\":560}}"
    },
    "windowGap": {
       "type": "spinbutton",

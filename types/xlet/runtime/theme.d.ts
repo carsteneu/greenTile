@@ -81,10 +81,10 @@ export const Theme: {
         /**
          * Cairo colors for the current theme (thumbnails, painter's dashed outline, the
          * painter's handle ink — everything the stylesheet does not cover).
-         * @param {'thumb' | 'outline' | 'panel'} key
+         * @param {'thumb' | 'outline' | 'painter'} key
          * @returns {number[]}
          */
-        cairo(key: "thumb" | "outline" | "panel"): number[];
+        cairo(key: "thumb" | "outline" | "painter"): number[];
         panelClass(): string;
         /**
          * @param {ThemeConfig} config

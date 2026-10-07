@@ -156,7 +156,9 @@ test('fresh selection size fits sixteen cards in four columns and four rows', ()
     const { load } = require('../helpers/cinnamon-loader');
     const { gridAvailable, gridColumns, gridRows } = load('./lib/model/grid.js');
     const size = JSON.parse(schema.panelSize.default);
-    assert.deepEqual(size, { list: { w: 800, h: 480 } }, 'editor size remains unchanged');
+    // 560 shows four card rows: a card is ~123 px high with a 14 px row gap, so sixteen
+    // starters need ~534 px in the card area — the old 480 was measured for twelve.
+    assert.deepEqual(size, { list: { w: 800, h: 560 } }, 'fresh selection size');
     const cols = gridColumns(gridAvailable(size.list.w));
     assert.equal(cols, 4);
     // Four rows of four; the card area scrolls when the panel is shorter than the rows
@@ -165,6 +167,25 @@ test('fresh selection size fits sixteen cards in four columns and four rows', ()
     assert.equal(rows.length, 4);
     assert.ok(rows.every(r => r.length === 4), 'four full rows');
     assert.equal(schema.layouts.default, '', 'no monitor or workspace is assigned automatically');
+});
+
+test('the four span starters are exactly the approved ones', () => {
+    // The property checks above accept any distinct-but-wrong span list (and the names are
+    // only labels), so the shipped values are pinned here: a swapped left/right rule or a
+    // mistyped span must fail, not just look distinct.
+    const presets = JSON.parse(schema.presets.default).slice(12);
+    assert.deepEqual(presets.map(p => [p.id, p.name, p.rules[0].stacks, p.rules[0].spans]), [
+        ['p13', 'Wide center', [1, 1, 1], [1, 4, 1]],
+        ['p14', 'Wide center + stacks', [2, 1, 2], [1, 4, 1]],
+        ['p15', 'Two thirds left', [1, 2], [4, 2]],
+        ['p16', 'Two thirds right', [2, 1], [2, 4]],
+    ]);
+    // …and the widths those spans mean once they reach the split maths.
+    const { load } = require('../helpers/cinnamon-loader');
+    const { splitEqual } = load('./lib/model/split.js');
+    assert.deepEqual(splitEqual('cols', [1, 1, 1], [1, 4, 1]).major, [1 / 6, 4 / 6, 1 / 6]);
+    assert.deepEqual(splitEqual('cols', [1, 2], [4, 2]).major, [4 / 6, 2 / 6]);
+    assert.deepEqual(splitEqual('cols', [2, 1], [2, 4]).major, [2 / 6, 4 / 6]);
 });
 
 test('upgrading preserves previously stored panel sizes including an unset size', () => {

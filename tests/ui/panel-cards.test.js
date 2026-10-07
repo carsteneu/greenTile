@@ -326,7 +326,11 @@ test('the model is loaded through the shipped namespace', () => {
     assert.equal(grid.gridColumns(grid.gridAvailable(600)), 3);
 });
 
-test('fresh install panel displays all sixteen starter cards in a four-by-four grid', () => {
+test('fresh install panel chunks all sixteen starter cards into four rows of four', () => {
+    // The row chunking and the grid width are what this fake CAN check; the card height and
+    // therefore the vertical fit come from the theme's text metrics, which the fake stubs,
+    // so how much of the fourth row is visible on the default panel height is only
+    // verifiable on a live desktop.
     const fs = require('node:fs');
     const path = require('node:path');
     const { ROOT } = require('../helpers/cinnamon-loader');
@@ -339,7 +343,7 @@ test('fresh install panel displays all sixteen starter cards in a four-by-four g
         const rows = byClass(app.panel.actor, /^gk-card-row(?: |$)/);
         assert.deepEqual(rows.map(r => r.children.length), [4, 4, 4, 4]);
         assert.equal(app.panel.actor.width, 800);
-        assert.equal(byClass(app.panel.actor, /^gk-scroll(?: |$)/)[0].height, 480);
+        assert.equal(byClass(app.panel.actor, /^gk-scroll(?: |$)/)[0].height, 560);
         assert.match(app.panel.actor.style_class, /\bgk-panel-list\b/);
         // Font reduction belongs to view 1 only; opening the editor keeps its typography.
         byClass(cards(app)[0], /gk-card-edit/)[0].emit('clicked');

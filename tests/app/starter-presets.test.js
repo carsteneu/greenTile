@@ -267,3 +267,14 @@ test('a failed generation save retries without appending the four twice', () => 
     assert.equal(JSON.parse(retry.disk.presets).length, 16, 'the four are not duplicated');
     assert.deepEqual(retry.writes, ['starterPresetsImported', 'starterGeneration']);
 });
+
+test('a counter beyond the current generation imports nothing and is left alone', () => {
+    const existing = twelve();
+    for (const generation of [3, 99]) {
+        const f = fixture(existing, {}, true, generation);
+        f.run();
+        assert.equal(f.disk.presets, JSON.stringify(existing), `generation ${generation} appends nothing`);
+        assert.deepEqual(f.writes, []);
+        assert.equal(f.disk.starterGeneration, generation, 'the stored value is not lowered');
+    }
+});
