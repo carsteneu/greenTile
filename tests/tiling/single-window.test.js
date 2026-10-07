@@ -99,6 +99,73 @@ test('a plain lone window still centers (positive control for the maximize guard
     assert.deepEqual(runLone('fill', null, {}).rect, AREA.slice());
 });
 
+// ---------------- the minimize path (orchestrator addendum) ----------------
+
+// Two windows tiled under the given mode, both tracked by the auto observer, so a
+// notify::minimized retile can be driven through the real 300 ms debounce.
+const twoWindowScene = (mode) => {
+    const { env, ext } = makeEnv({ windowGap: 0, singleWindowMode: mode, singleWindowMigrated: true });
+    enableOnMonitors(env, ext, [MONITOR]);
+    const ws = makeWorkspace(env);
+    ws.index = () => 0;
+    env.activeWorkspace = ws;
+    const aOptions = {};
+    const a = makeWindow(env, 1, SPAWN.slice(), 0, null, aOptions);
+    const b = makeWindow(env, 2, SPAWN.slice(), 0);
+    env.tabList.push(a, b);
+    env.display.focus_window = a;
+    const app = ext.currentSession().app;
+    app.ops.layoutSet(app, 0, 0, { preset: null, auto: true });
+    app.ops.retileMonitor(app, 0);
+    [a, b].forEach((w) => app.auto.trackWindow(app, w));
+    return { env, ext, app, a, b, aOptions };
+};
+
+// One notify::minimized driven through the observer's own debounce timer.
+const minimize = (env, app, w, minimized) => {
+    w.minimized = minimized;
+    w.emit('notify::minimized');
+    const key = app.auto._timers.get(0);
+    const t = (key != null ? env.timers.get(key) : null)
+        || [...env.timers.values()].find((x) => x && x.ms === 300);
+    assert.ok(t, 'the auto observer armed the 300 ms debounce');
+    t.cb();
+};
+
+// Two tiled windows -> minimize one -> the retile sees n = 1. The remaining
+// window was NOT maximized, so the mode applies to it like any other lone window.
+test('minimizing one of two tiled windows centers the remaining unmaximized one', () => {
+    const { env, app, a, b } = twoWindowScene('center');
+    assert.deepEqual([a.rect, b.rect], [[0, 0, 1000, 1100], [1000, 0, 1000, 1100]],
+        'both windows tile first');
+    minimize(env, app, b, true);
+    assert.deepEqual(a.rect, CENTER, 'the remaining window is not maximized -> it centers');
+    minimize(env, app, b, false);
+    assert.deepEqual([a.rect, b.rect], [[0, 0, 1000, 1100], [1000, 0, 1000, 1100]],
+        'unminimizing restores normal tiling for both');
+});
+
+test('minimizing one of two windows fills the remaining one in fill mode', () => {
+    const { env, app, a, b } = twoWindowScene('fill');
+    minimize(env, app, b, true);
+    assert.deepEqual(a.rect, AREA.slice(), 'fill takes the whole area');
+    minimize(env, app, b, false);
+    assert.deepEqual([a.rect, b.rect], [[0, 0, 1000, 1100], [1000, 0, 1000, 1100]],
+        'unminimizing restores normal tiling for both');
+});
+
+// Counter-case: the remaining window WAS maximized while it was alone, so the
+// minimize retile must leave it exactly where it is.
+test('a remaining window maximized while alone is not touched when the other minimizes', () => {
+    const { env, app, a, b, aOptions } = twoWindowScene('center');
+    const frame = a.rect.slice();
+    const moves = a.moves.length;
+    aOptions.maximized = 6; // the user maximized it while it is alone (fake Meta "both")
+    minimize(env, app, b, true);
+    assert.deepEqual(a.rect, frame, 'the maximized remaining window keeps its frame');
+    assert.equal(a.moves.length, moves, 'and no placement ran on it (no unmaximize, no center)');
+});
+
 test('regression: leave and fill agree for every count, and differ only at a lone window (144 cases)', () => {
     const fails = [];
     for (const preset of STARTERS) {
