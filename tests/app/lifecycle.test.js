@@ -320,6 +320,8 @@ const makeWindow = (seq) => {
         get_stable_sequence: () => seq,
         get_window_type: () => 6, // Meta.WindowType.NORMAL in the fake Meta
         get_wm_class: () => 'FakeWindow',
+        get_transient_for: () => null,
+        allows_resize: () => true,
         get_monitor: () => 0,
         get_workspace: () => null, // === activeWorkspace (null) in the default env
         is_on_all_workspaces: () => false,
@@ -580,6 +582,8 @@ test('drop: disable during an active drag destroys the preview actor and removes
         get_stable_sequence: () => seq,
         get_window_type: () => 6,
         get_wm_class: () => 'FakeWindow',
+        get_transient_for: () => null,
+        allows_resize: () => true,
         get_monitor: () => 0,
         get_workspace: () => env.activeWorkspace,
         minimized: false,
@@ -664,6 +668,8 @@ const makeFlashWindow = (seq) => {
         get_stable_sequence: () => seq,
         get_window_type: () => 6,
         get_wm_class: () => 'FakeWindow',
+        get_transient_for: () => null,
+        allows_resize: () => true,
         get_monitor: () => 0,
         get_workspace: () => null,
         is_on_all_workspaces: () => false,

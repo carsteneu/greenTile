@@ -596,3 +596,65 @@ test('issue 10: the close path alone clears a fresh record on a paused monitor',
     assert.equal(pending.has(2), true, 'the live fresh window keeps its record');
     assert.equal(pending.has(1), false, 'the closed window left no record on the close path');
 });
+
+// ---------------- transient and non-resizable windows are never tiled ----------------
+
+// A window that is transient for another (a preference/properties dialog typed
+// NORMAL) and a window that cannot be resized float where they are, like an
+// excluded window: they are neither counted nor moved, and they do not change the
+// count the other windows tile by.
+test('a transient NORMAL window is never tiled and does not change the others\' count', () => {
+    const { env, ext } = makeEnv({ windowGap: 0 });
+    enableOnMonitor(env, ext);
+    activeWorkspace(env);
+    const parent = makeWindow(env, 1, [400, 0, 400, 300], 0);
+    const child = makeWindow(env, 2, [0, 0, 300, 300], 0, null, { transientFor: parent });
+    const other = makeWindow(env, 3, [900, 0, 400, 300], 0);
+    env.tabList.push(parent, child, other);
+    env.display.focus_window = child;
+    const app = ext.currentSession().app;
+    app.ops.layoutSet(app, 0, 0, { auto: true });
+    assert.equal(app.ops.windowCount(app), 2, 'the transient window is counted by nobody');
+    app.auto.activate(app);
+    assert.deepEqual(child.rect, [0, 0, 300, 300], 'the transient window kept its own geometry');
+    assert.equal(child.moves.length, 0, 'no placement ran on the transient window');
+    assert.deepEqual(parent.rect, [0, 0, 1000, 1100], 'the parent filled the first of two cells');
+    assert.deepEqual(other.rect, [1000, 0, 1000, 1100], 'the other window filled the second cell');
+});
+
+test('a non-resizable window is never tiled and does not change the others\' count', () => {
+    const { env, ext } = makeEnv({ windowGap: 0 });
+    enableOnMonitor(env, ext);
+    activeWorkspace(env);
+    const fixed = makeWindow(env, 1, [0, 0, 300, 300], 0, null, { allowsResize: false });
+    const w1 = makeWindow(env, 2, [400, 0, 400, 300], 0);
+    const w2 = makeWindow(env, 3, [900, 0, 400, 300], 0);
+    env.tabList.push(fixed, w1, w2);
+    env.display.focus_window = fixed;
+    const app = ext.currentSession().app;
+    app.ops.layoutSet(app, 0, 0, { auto: true });
+    assert.equal(app.ops.windowCount(app), 2, 'the fixed-size window is counted by nobody');
+    app.auto.activate(app);
+    assert.deepEqual(fixed.rect, [0, 0, 300, 300], 'the fixed-size window kept its own geometry');
+    assert.equal(fixed.moves.length, 0, 'no placement ran on the fixed-size window');
+    assert.deepEqual(w1.rect, [0, 0, 1000, 1100]);
+    assert.deepEqual(w2.rect, [1000, 0, 1000, 1100]);
+});
+
+// Positive control for the pair above: an ordinary focused window (not transient,
+// resizable — the harness defaults) is still counted and tiled.
+test('positive control: an ordinary focused window is still tiled', () => {
+    const { env, ext } = makeEnv({ windowGap: 0 });
+    enableOnMonitor(env, ext);
+    activeWorkspace(env);
+    const w1 = makeWindow(env, 1, [0, 0, 300, 300], 0);
+    const w2 = makeWindow(env, 2, [400, 0, 400, 300], 0);
+    env.tabList.push(w1, w2);
+    env.display.focus_window = w1;
+    const app = ext.currentSession().app;
+    app.ops.layoutSet(app, 0, 0, { auto: true });
+    assert.equal(app.ops.windowCount(app), 2, 'both ordinary windows count');
+    app.auto.activate(app);
+    assert.deepEqual(w1.rect, [0, 0, 1000, 1100], 'the focused window was tiled');
+    assert.deepEqual(w2.rect, [1000, 0, 1000, 1100]);
+});
