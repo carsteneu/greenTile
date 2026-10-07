@@ -41,6 +41,7 @@ test('corrupt weights cannot produce a broken split', () => {
     assert.deepEqual(one([Number.MAX_VALUE * 2, 1]), [0.5, 0.5], 'a non-finite weight is not a fraction');
     assert.deepEqual(one(['2', '2']), [0.5, 0.5], 'a string weight is not a fraction');
     assert.deepEqual(one([Number.NaN, Number.NaN]), [0.5, 0.5]);
+    assert.deepEqual(one([Number.MAX_VALUE, Number.MAX_VALUE]), [0.5, 0.5], 'a sum overflowing to Infinity is not a fraction list');
 });
 
 test('weights and shape are not mutated', () => {

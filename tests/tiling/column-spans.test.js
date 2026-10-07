@@ -145,3 +145,22 @@ test('a border drag starts from the widths the user sees', () => {
     assert.ok(Math.abs(stored.major[0] - 0.25) < 1e-9, 'the stored split kept the weighted first column');
     assert.ok(stored.major[1] > 0.49 && stored.major[1] < 0.5, 'and the wide middle one: ' + stored.major[1]);
 });
+
+test('a minimum fit that regroups the same number of columns starts nominally again', () => {
+    const { app } = spansRun([{ min: 2, stacks: [1, 3], spans: [1, 2] }], 4);
+    const layout = { kind: 'cols', shape: [1, 3], weights: [1, 2] };
+    const area = [0, 0, 2400, 1100];
+    const mins = (h) => [1, 2, 3, 4].map(() => ({ w: 300, h: h }));
+    // Four windows fit as painted (two columns, the right one stacked three deep):
+    // the spans are the widths of exactly this shape.
+    const painted = app.split.fit(app, 0, 0, 4, layout, mins(250), area, 0);
+    assert.deepEqual(painted.shape, [1, 3]);
+    assert.ok(Math.abs(painted.split.major[0] - 1 / 3) < 1e-9,
+        'the weighted first column: ' + painted.split.major[0]);
+    // The three stacked windows no longer fit their minima: splitFitShape regroups to
+    // [2, 2] — the SAME column count, another grouping. The spans of [1, 3] are not the
+    // widths of [2, 2], so the fit is equal again.
+    const regrouped = app.split.fit(app, 0, 0, 4, layout, mins(400), area, 0);
+    assert.deepEqual(regrouped.shape, [2, 2]);
+    assert.deepEqual(regrouped.split.major, [0.5, 0.5]);
+});
