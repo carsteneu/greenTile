@@ -23,7 +23,7 @@ Every feature in one line or two. Details and screenshots are in the [README](RE
 ## Presets
 
 - **Presets**: named layouts made of rules by window count. Each rule sets the columns and how many windows each column stacks.
-- **Wide columns**: a column can span several painter grid columns (merge neighbours in the painter). The spans are the starting widths, so a rule of three columns with `[1, 2, 1]` tiles 25 % / 50 % / 25 %; borders dragged for the current window count still win, **Reset sizes** returns to the spans.
+- **Wide columns**: a column can span several painter grid columns (merge neighbours in the painter). The spans are the starting widths, so a rule of three columns with `[1, 2, 1]` tiles 25 % / 50 % / 25 %; a border dragged or a layout dropped for the current window count still wins, **Reset sizes** returns to the spans.
 - **Per monitor and workspace**: every monitor and workspace can have its own preset.
 - **Gap-free fill**: no cell stays empty: with fewer windows, stacked cells and then columns are dropped; with more windows, the rightmost column takes the rest.
 - **Pause**: `Super+Ctrl+D` keeps the assigned preset but stops auto tiling, snap-on-release and swaps from that monitor and workspace. A pause requested before monitor readiness is retained; Auto on or an explicit preset selection resumes tiling.
@@ -37,7 +37,7 @@ Every feature in one line or two. Details and screenshots are in the [README](RE
 - **One-click assign**: a click assigns the preset and tiles at once; the panel stays open for trying more. The assigned look moves in place.
 - **Edit button**: the pencil on a card opens that preset in the editor, without applying it.
 - **Auto switch**: the title bar shows and toggles auto mode (green = on).
-- **Reset sizes**: returns moved borders and dragged layouts of this monitor and workspace to equal sizes.
+- **Reset sizes**: returns moved borders and dragged layouts of this monitor and workspace to the preset's widths — the column spans when the rule has them, equal sizes otherwise.
 - **Movable and resizable**: drag the title bar to move, ◢ to resize. Position and size are kept and fit the current monitor.
 - **Closes like a popup**: `Esc`, ✕, a click outside or a newly focused window closes it; the click still reaches its target.
 - **Settings shortcut**: ⚙ opens the extension settings.

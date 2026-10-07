@@ -88,9 +88,25 @@ test('painting right of the painted columns adds one column while the grid has r
     assert.deepEqual(rule({ draft }), { min: 2, stacks: [1, 1, 1], spans: [1, 1, 1] });
 });
 
-test('a full painter grid offers no new column', () => {
+test('painting the last column of a full painter grid sets its count without adding a column', () => {
     const { draft, click } = painter({ min: 2, stacks: [1, 1, 1], spans: [2, 2, 2] });
-    click(590, 50);
-    assert.deepEqual(rule({ draft }), { min: 2, stacks: [1, 1, 1], spans: [2, 2, 2] },
-        'the last painted column was painted, no fourth column was appended');
+    // x = 590 sits in the last column (402..600), the bottom row is four windows.
+    click(590, 350);
+    assert.deepEqual(rule({ draft }), { min: 2, stacks: [1, 1, 4], spans: [2, 2, 2] });
+});
+
+test('a full painter grid offers no new column, not even beyond its right edge', () => {
+    // spans [2,2,2] already cover all six grid columns; the last one ends at the edge.
+    const full = painter({ min: 2, stacks: [1, 1, 1], spans: [2, 2, 2] });
+    full.click(600 + 10, 200);
+    assert.equal(rule(full).stacks.length, 3, 'no fourth column, stacks ' + JSON.stringify(rule(full).stacks));
+    assert.equal(rule(full).spans.reduce((a, b) => a + b, 0), 6, 'the spans still fit the grid');
+    // Same after a merge: five columns cover the six grid columns (spans sum 6).
+    const merged = painter({ min: 2, stacks: [1, 1, 1, 1, 1, 1], spans: [1, 1, 1, 1, 1, 1] });
+    merged.click(STEP - 1.5, 200);
+    assert.deepEqual(rule(merged).spans, [2, 1, 1, 1, 1]);
+    merged.click(600 + 10, 200);
+    assert.equal(rule(merged).stacks.length, 5, 'no sixth column, stacks ' + JSON.stringify(rule(merged).stacks));
+    assert.equal(rule(merged).spans.reduce((a, b) => a + b, 0), 6,
+        'spans over six are dropped again when the preset is read, so the merge would be lost');
 });
