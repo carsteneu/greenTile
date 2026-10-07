@@ -23,7 +23,7 @@ Every feature in one line or two. Details and screenshots are in the [README](RE
 ## Presets
 
 - **Presets**: named layouts made of rules by window count. Each rule sets the columns and how many windows each column stacks.
-- **Wide columns**: a column can span several painter grid columns (merge neighbours in the painter). The spans are the starting widths, so a rule of three columns with `[1, 2, 1]` tiles 25 % / 50 % / 25 %; a border dragged or a layout dropped for the current window count still wins, **Reset sizes** returns to the spans.
+- **Wide columns**: a column can span several painter grid columns (merge neighbours in the painter). The spans are the starting widths, so a rule of three columns with `[1, 2, 1]` tiles 25 % / 50 % / 25 %; a border dragged or a layout dropped for the current window count still wins over them until the next card click, or **Reset sizes**, returns to the spans.
 - **Per monitor and workspace**: every monitor and workspace can have its own preset.
 - **Gap-free fill**: no cell stays empty: with fewer windows, stacked cells and then columns are dropped; with more windows, the rightmost column takes the rest.
 - **Pause**: `Super+Ctrl+D` keeps the assigned preset but stops auto tiling, snap-on-release and swaps from that monitor and workspace. A pause requested before monitor readiness is retained; Auto on or an explicit preset selection resumes tiling.
@@ -34,10 +34,10 @@ Every feature in one line or two. Details and screenshots are in the [README](RE
 - **Card grid**: equal-width cards in as many columns as the panel width holds, so the same panel works on a laptop and an ultrawide.
 - **Live previews**: each card shows the layout a click would produce with the current number of windows.
 - **Assignment marker**: the assigned card carries a colored edge, a check and the ✕ that removes the assignment.
-- **One-click assign**: a click assigns the preset and tiles at once; the panel stays open for trying more. The assigned look moves in place.
+- **One-click assign**: a click assigns the preset and tiles at once, and it is binding — every moved border and dragged layout of this monitor and workspace is cleared as part of the click, so the preset's own widths apply. The panel stays open for trying more; the assigned look moves in place.
 - **Edit button**: the pencil on a card opens that preset in the editor, without applying it.
 - **Auto switch**: the title bar shows and toggles auto mode (green = on).
-- **Reset sizes**: returns moved borders and dragged layouts of this monitor and workspace to the preset's widths — the column spans when the rule has them, equal sizes otherwise.
+- **Reset sizes**: returns moved borders and dragged layouts of this monitor and workspace to the preset's widths — the column spans when the rule has them, equal sizes otherwise. A card click does the same.
 - **Movable and resizable**: drag the title bar to move, ◢ to resize. Position and size are kept and fit the current monitor.
 - **Closes like a popup**: `Esc`, ✕, a click outside or a newly focused window closes it; the click still reaches its target.
 - **Settings shortcut**: ⚙ opens the extension settings.
