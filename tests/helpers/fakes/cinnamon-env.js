@@ -869,7 +869,7 @@ const createCinnamonEnv = (options) => {
             }
         },
         DrawingArea: class extends FakeActor {},
-        ThemeContext: { get_for_stage: () => ({ get_theme: () => env.stTheme }) },
+        ThemeContext: { get_for_stage: () => ({ get_theme: () => env.stTheme, scale_factor: env.themeScale ?? 1 }) },
     };
     // --- gi branches: namespace list is strict (GObject access throws — greenTile
     // never touches it at runtime); the branches themselves are concrete.
