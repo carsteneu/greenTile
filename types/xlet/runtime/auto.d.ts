@@ -10,7 +10,7 @@
  * @property {AnyRecord} gobject imports.gi.GObject
  * @property {() => CinnamonWindow | null} focusWindow
  * @property {() => number} focusMonitorIndex
- * @property {(app: AppFacade, monitorIndex: number, wsIndex: number) => { auto: boolean }} layoutFor
+ * @property {(app: AppFacade, monitorIndex: number, wsIndex: number) => { preset: Preset | null, auto: boolean }} layoutFor
  * @property {(app: AppFacade, monitorIndex: number, wsIndex: number, patch: {}) => boolean} layoutSet
  * @property {(app: AppFacade, monitorIndex: number, focused: CinnamonWindow | null, animate?: boolean, wsIndex?: number | null) => void} retileMonitor
  * @property {() => void} borderUpdate
@@ -279,6 +279,7 @@ export type AutoDeps = {
     focusWindow: () => CinnamonWindow | null;
     focusMonitorIndex: () => number;
     layoutFor: (app: AppFacade, monitorIndex: number, wsIndex: number) => {
+        preset: Preset | null;
         auto: boolean;
     };
     layoutSet: (app: AppFacade, monitorIndex: number, wsIndex: number, patch: {}) => boolean;
