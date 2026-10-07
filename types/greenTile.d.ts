@@ -79,8 +79,14 @@ interface CinnamonWindow {
     get_title(): string;
     get_workspace(): CinnamonWorkspace;
     is_on_all_workspaces(): boolean;
-    get_maximized(): boolean | number;
+    /** Meta.Window.get_maximized() — a Meta.MaximizeFlags mask. */
+    get_maximized(): number;
     is_fullscreen(): boolean;
+    /** Meta.Window.get_transient_for() — the parent this window is transient
+     * for, null when it is not a child/dialog window. */
+    get_transient_for(): CinnamonWindow | null;
+    /** Meta.Window.allows_resize() — false for a fixed-size window. */
+    allows_resize(): boolean;
     unmaximize(flags: number): void;
     /** Meta.Window.move_resize_frame(user_op, x, y, width, height) */
     move_resize_frame(userOp: boolean, x: number, y: number, width: number, height: number): void;
