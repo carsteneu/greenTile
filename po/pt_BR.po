@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: greenTile 2.2.3\n"
 "Report-Msgid-Bugs-To: https://github.com/carsteneu\n"
-"POT-Creation-Date: 2026-10-07 16:09+0200\n"
+"POT-Creation-Date: 2026-10-07 17:41+0200\n"
 "PO-Revision-Date: 2022-02-09 15:35-0300\n"
 "Last-Translator: Marcelo Aof\n"
 "Language-Team: Brazilian Portuguese\n"
@@ -89,88 +89,88 @@ msgstr "Salvar"
 msgid "Result: %s"
 msgstr "Resultado: %s"
 
-#: lib/ui/panel.js:103
+#: lib/ui/panel.js:107
 msgid "Edit preset"
 msgstr "Editar predefinição"
 
-#: lib/ui/panel.js:123
+#: lib/ui/panel.js:127
 msgid "Assigned"
 msgstr "Atribuída"
 
-#: lib/ui/panel.js:125
+#: lib/ui/panel.js:129
 msgid "Remove assignment"
 msgstr "Remover atribuição"
 
-#: lib/ui/panel.js:156
+#: lib/ui/panel.js:164
 msgid "Gap between windows"
 msgstr "Espaço entre janelas"
 
-#: lib/ui/panel.js:162
+#: lib/ui/panel.js:170
 #, javascript-format
 msgid "%d px"
 msgstr "%d px"
 
-#: lib/ui/panel.js:182
+#: lib/ui/panel.js:190
 msgid "Reset sizes"
 msgstr "Redefinir tamanhos"
 
-#: lib/ui/panel.js:225
+#: lib/ui/panel.js:261
 #, javascript-format
 msgid "Presets — workspace %d · %s"
 msgstr "Predefinições — área de trabalho %d · %s"
 
-#: lib/ui/panel.js:227
+#: lib/ui/panel.js:263
 msgid "Create preset"
 msgstr "Criar predefinição"
 
-#: lib/ui/panel.js:227
+#: lib/ui/panel.js:263
 #, javascript-format
 msgid "Edit %s"
 msgstr "Editar %s"
 
-#: lib/ui/panel.js:238
+#: lib/ui/panel.js:278
 msgid "Back"
 msgstr "Voltar"
 
-#: lib/ui/panel.js:247 lib/ui/panel.js:253
+#: lib/ui/panel.js:287 lib/ui/panel.js:293
 msgid "Auto: on"
 msgstr "Auto: ligado"
 
-#: lib/ui/panel.js:247 lib/ui/panel.js:253
+#: lib/ui/panel.js:287 lib/ui/panel.js:293
 msgid "Auto: off"
 msgstr "Auto: desligado"
 
-#: lib/ui/panel.js:275
+#: lib/ui/panel.js:315
 msgid "Dark theme"
 msgstr "Tema escuro"
 
-#: lib/ui/panel.js:275
+#: lib/ui/panel.js:315
 msgid "Light theme"
 msgstr "Tema claro"
 
-#: lib/ui/panel.js:483
+#: lib/ui/panel.js:535
 msgid "No presets yet."
 msgstr "Nenhuma predefinição ainda."
 
-#: lib/ui/panel.js:503
+#: lib/ui/panel.js:555
 #, javascript-format
 msgid "Preview for %d window"
 msgstr "Prévia para %d janela"
 
-#: lib/ui/panel.js:504
+#: lib/ui/panel.js:556
 #, javascript-format
 msgid "Preview for %d windows"
 msgstr "Prévia para %d janelas"
 
-#: lib/ui/panel.js:504
+#: lib/ui/panel.js:556
 msgid "No windows open — base layout"
 msgstr "Nenhuma janela aberta — layout base"
 
-#: lib/ui/panel.js:518
+#: lib/ui/panel.js:570
 msgid "New preset"
 msgstr "Nova predefinição"
 
-#: lib/ui/panel.js:521
+#: lib/ui/panel.js:573
 msgid "Click a card to apply it to this workspace and tile right away"
 msgstr ""
 "Clique em um cartão para aplicá-lo a esta área de trabalho e organizar as "
@@ -367,6 +367,37 @@ msgid ""
 msgstr ""
 "Com a organização automática ou uma predefinição ativados, uma única janela "
 "organizada preenche toda a área útil em vez de ficar intocada."
+
+#. settings-schema.json->singleWindowMode->description
+#| msgid "Resize tiled windows"
+msgid "A single window"
+msgstr "Uma única janela"
+
+#. settings-schema.json->singleWindowMode->tooltip
+msgid ""
+"What happens to a lone tiled window when automatic tiling or a preset is on. "
+"\"Leave it untouched\" does nothing to it. \"Fill the monitor\" makes it "
+"fill the whole usable area. \"Center the window\" centers it at about 62 % "
+"of the width (golden ratio) and 90 % of the height."
+msgstr ""
+"O que acontece com uma janela lado a lado sozinha quando o mosaico "
+"automático ou uma predefinição está ativo. Deixar como está: não faz nada "
+"com ela. Preencher o monitor: ocupa toda a área útil. Centralizar a janela: "
+"centraliza em cerca de 62 % da largura (proporção áurea) e 90 % da altura."
+
+#. settings-schema.json->singleWindowMode->options
+msgid "Leave it untouched"
+msgstr "Deixar como está"
+
+#. settings-schema.json->singleWindowMode->options
+#| msgid "Fill the monitor with a single window"
+msgid "Fill the monitor"
+msgstr "Preencher o monitor"
+
+#. settings-schema.json->singleWindowMode->options
+#| msgid "Resize tiled windows"
+msgid "Center the window"
+msgstr "Centralizar a janela"
 
 #. settings-schema.json->panelTheme->description
 msgid "Theme of the preset panel"

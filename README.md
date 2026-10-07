@@ -91,7 +91,7 @@ Without a preset, the auto grid depends on the monitor width:
 - **2100 px and wider:** up to 6 windows in one row, then evenly spread over full-width rows (7 = 4 + 3, 8 = 4 + 4).
 - **Narrower:** up to 3 windows in one row, then 3 columns with stacks (4 = 1·1·2, 5 = 1·2·2, 6 = 2·2·2).
 
-With **Fill the monitor with a single window** on (settings, **Settings** page, off by default), a lone tiled window fills the whole usable area instead of being left untouched — with an assigned preset too, where its rule for one window applies if it has one. Switching it on retiles right away; switching it off just leaves lone windows be.
+With **A single window** (settings, **Settings** page) you choose what happens to the last tiled window of a workspace: **Leave it untouched** leaves it where it is, **Fill the monitor** makes it fill the whole usable area, and **Center the window** centers it at about 62 % of the width (the golden ratio) and 90 % of the height. This applies with an assigned preset too, where a rule for one window still wins if the preset has one. Changing the select retiles right away. New installs start on **Center the window**; an install that had the old **Fill the monitor with a single window** switch keeps its choice (fill or untouched).
 
 ## Adjusting the layout
 
