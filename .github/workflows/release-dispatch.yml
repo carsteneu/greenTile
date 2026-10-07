@@ -1,0 +1,110 @@
+name: release-dispatch
+
+# Manual, one-shot release started from the Actions tab (or `gh workflow run
+# release-dispatch -f version=X.Y.Z`). One run does the whole job: bump every
+# version marker (scripts/bump-version.sh), run the checks, build the zip,
+# commit "release X.Y.Z[: summary]" to main, tag vX.Y.Z, push both and publish
+# the GitHub Release with the zip.
+#
+# Duplicate-release safety: this run pushes the commit and tag with the
+# repository's GITHUB_TOKEN. A tag pushed that way does NOT start another
+# workflow run — GitHub: "if a workflow run pushes code using the repository's
+# GITHUB_TOKEN, a new workflow will not run even when the repository contains a
+# workflow configured to run when push events occur"
+# (docs.github.com/actions/concepts/security/github_token). release.yml is not
+# triggered for our tag, so there is no second release; and because it may not
+# fire, this workflow finishes the release itself instead of relying on it.
+#
+# release.yml (pushed v* tags) is left untouched: it still covers a hand-made
+# tag. This workflow keeps its own copy of the build/release steps rather than
+# sharing them — the shared surface is a handful of trivial steps, and folding
+# it into a reusable workflow would mean changing release.yml for no real gain.
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'New version, X.Y.Z without a v prefix'
+        required: true
+        type: string
+      summary:
+        description: 'Optional one-line summary for the commit message'
+        required: false
+        type: string
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: require the main branch
+        run: |
+          if [ "$GITHUB_REF" != "refs/heads/main" ]; then
+            echo "::error::release-dispatch must run on main, but GITHUB_REF is $GITHUB_REF"; exit 1
+          fi
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+      # The version input reaches the shell only through the environment and is
+      # validated here; it is never interpolated into a run: script.
+      - name: validate the version input
+        env:
+          VERSION: ${{ inputs.version }}
+        run: |
+          if ! printf '%s' "$VERSION" | grep -Eq '^(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)$'; then
+            echo "::error::invalid version '$VERSION' — expected X.Y.Z without a v prefix"; exit 1
+          fi
+      - name: fail early if the tag already exists
+        env:
+          VERSION: ${{ inputs.version }}
+        run: |
+          set -eu
+          if git rev-parse -q --verify "refs/tags/v$VERSION" >/dev/null; then
+            echo "::error::tag v$VERSION already exists"; exit 1
+          fi
+          if git ls-remote --exit-code --tags origin "refs/tags/v$VERSION" >/dev/null 2>&1; then
+            echo "::error::tag v$VERSION already exists on origin"; exit 1
+          fi
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: install release dependencies
+        run: sudo apt-get update && sudo apt-get install -y gettext zip unzip
+      - run: npm ci
+      - name: bump the version markers
+        env:
+          VERSION: ${{ inputs.version }}
+        run: ./scripts/bump-version.sh "$VERSION"
+      - run: npm run check
+      # Build before anything is pushed: a broken package must not leave a tag
+      # or a commit on main behind.
+      - run: ./build-release.sh
+      - name: commit and push the version bump to main
+        env:
+          VERSION: ${{ inputs.version }}
+          SUMMARY: ${{ inputs.summary }}
+        run: |
+          set -eu
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          message="release $VERSION"
+          if [ -n "$SUMMARY" ]; then message="$message: $SUMMARY"; fi
+          git commit -am "$message"
+          git push origin HEAD:main
+      - name: create and push the annotated tag
+        env:
+          VERSION: ${{ inputs.version }}
+        run: |
+          set -eu
+          git tag -a "v$VERSION" -m "greenTile $VERSION"
+          git push origin "v$VERSION"
+      - name: create the GitHub Release with the zip
+        env:
+          VERSION: ${{ inputs.version }}
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "v$VERSION" dist/*.zip \
+            --title "greenTile $VERSION" \
+            --notes "Unzip, run ./install.sh, restart Cinnamon (Ctrl+Alt+Esc), then enable greenTile in System Settings → Extensions. Details in the README."
