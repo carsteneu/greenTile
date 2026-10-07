@@ -104,3 +104,21 @@ test('changing the select retiles the surfaces greenTile tiles', () => {
     inst.bindings.find((b) => b.prop === 'singleWindowModeValue').cb();
     assert.deepEqual(wins.map((w) => w.rect), [CENTER], 'the change retiled into the centered layout');
 });
+
+// The centered layout carries an `area`, which also lands in the placement record
+// (placeFit). A second retile must not re-apply anything: no split can be stored
+// for a one-cell shape, so every retile has to reproduce the same frame.
+test('a retile never moves a lone window again, in every mode and gap', () => {
+    for (const mode of ['center', 'fill', 'leave']) {
+        for (const gap of [0, 8, 48]) {
+            const { app, wins } = run(mode, null, 1, gap);
+            const first = wins[0].rect.slice();
+            const want = mode === 'center' ? CENTER : (mode === 'fill' ? AREA.slice() : SPAWN.slice());
+            assert.deepEqual(first, want, `${mode} gap ${gap} frame`);
+            for (let i = 0; i < 2; i++) {
+                app.ops.retileMonitor(app, 0);
+                assert.deepEqual(wins[0].rect, first, `${mode} gap ${gap} moved on retile ${i + 2}`);
+            }
+        }
+    }
+});

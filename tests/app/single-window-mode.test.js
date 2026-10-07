@@ -86,6 +86,32 @@ test('a corrupt old value never turns the select on (safe choice: leave)', () =>
     }
 });
 
+// An install from 2.2.0 or older predates starterPresetsImported (added in
+// 2.2.1), so its preset list is the signal: real files of that era hold the
+// 2.2.0 default '[]' or the user's own presets, never the shipped starters.
+test('an install older than the marker key is recognised by its preset list', () => {
+    const own = '[{"id":"p1","name":"Mine","rules":[{"min":2,"stacks":[1,1]}]}]';
+    for (const presets of ['[]', own]) {
+        const off = fixture({ presets, singleWindowMigrated: false, fillSingleWindow: false });
+        off.run();
+        assert.equal(off.values.singleWindowMode, 'leave', 'switch off, presets=' + presets);
+        assert.deepEqual(off.writes, ['singleWindowMode', 'singleWindowMigrated']);
+        const on = fixture({ presets, singleWindowMigrated: false, fillSingleWindow: true });
+        on.run();
+        assert.equal(on.values.singleWindowMode, 'fill', 'switch on, presets=' + presets);
+    }
+});
+
+test('a file still holding the shipped starters is a fresh install, marker or not', () => {
+    for (const marker of [false, undefined]) {
+        const f = fixture({ starterPresetsImported: marker, presets: schema.presets.default,
+            singleWindowMigrated: false, fillSingleWindow: false });
+        f.run();
+        assert.equal(f.getValue('singleWindowMode'), 'center', 'marker=' + marker);
+        assert.deepEqual(f.writes, ['singleWindowMigrated'], 'the fresh default is not rewritten');
+    }
+});
+
 const enable = (settingsDefaults) => {
     const env = createCinnamonEnv({ settingsDefaults });
     globalThis.imports = env.imports;
@@ -104,9 +130,16 @@ test('enable migrates an existing install against the real settings slot', () =>
     assert.equal(inst.getValue('singleWindowMigrated'), true, 'the marker is set');
 });
 
+test('enable migrates a pre-2.2.1 install (old preset list, no marker)', () => {
+    const inst = enable({ starterPresetsImported: false, presets: '[]', singleWindowMigrated: false,
+        fillSingleWindow: true, singleWindowMode: 'center' });
+    assert.equal(inst.getValue('singleWindowMode'), 'fill', 'the old switch value carried over');
+});
+
 test('enable leaves a fresh install on the centered default', () => {
-    const inst = enable({ starterPresetsImported: false, singleWindowMigrated: false,
-        fillSingleWindow: false, singleWindowMode: 'center' });
+    // a file Cinnamon just created holds the shipped starters, the schema default
+    const inst = enable({ starterPresetsImported: false, presets: schema.presets.default,
+        singleWindowMigrated: false, fillSingleWindow: false, singleWindowMode: 'center' });
     assert.equal(inst.getValue('singleWindowMode'), 'center', 'the migration did not overwrite the fresh default');
     assert.equal(inst.getValue('singleWindowMigrated'), true, 'the marker is set');
 });
