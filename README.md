@@ -84,7 +84,7 @@ Auto mode is switched per monitor and workspace. It is on by default where a pre
 
 Only visible windows of the active workspace are tiled. The order follows their position on screen.
 
-After a Cinnamon restart on X11 (`Alt+F2` → `r`) the first retile of each monitor and workspace restores the window order it had before the restart, instead of re-deriving it from the positions Muffin moved the windows to while Cinnamon was coming up. The record is kept in the session's runtime directory and is gone after a log out; windows that are no longer there are simply skipped and the rest keep the position order. Without a record — the first run, or any run after a log out — the order follows the positions as usual. A window you place by hand (dragging it into another cell, or the swap hotkey) is the newer arrangement and is recorded at once, so it is never overwritten by an older record.
+After a Cinnamon restart on X11 (`Alt+F2` → `r`) the first retile of each monitor and workspace restores the window order it had before the restart, instead of re-deriving it from the positions Muffin moved the windows to while Cinnamon was coming up. The record is kept in the session's runtime directory and is gone after a log out; windows that are no longer there are simply skipped and the rest keep the position order. Without a record — the first run, or any run after a log out — the order follows the positions as usual. A window you place by hand (dragging it into another cell, or the swap hotkey) is the newer arrangement and is recorded at once, so it is never overwritten by an older record. Unplugging and replugging a monitor behaves the same way: the reconnect keeps the window order and retiles every workspace the monitor tiles, not only the one you are looking at.
 
 Pausing keeps the preset assigned but stops automatic tiling, snap-on-release and swapping from that monitor and workspace. Turning auto mode on or selecting a preset explicitly resumes tiling. A pause requested before monitor detection finishes is retained until it can be applied. New windows normally join the end of the layout; an explicit successful drop takes precedence over that automatic ordering.
 
@@ -121,7 +121,7 @@ Borders and dragged layouts apply only in auto mode, not to `Super+Ctrl+3/6`.
 
 ## Multiple monitors
 
-Presets and auto mode are stored per monitor and workspace. When DisplayConfig provides a hardware identity, greenTile uses vendor, product and serial, with the connector added when the serial is missing or all zeros, to find the saved assignments after replugging or rearranging displays. If hardware detection fails, it uses a separate name-and-size fallback key. Assignments under the hardware key and the fallback key are not automatically joined. After a monitor change, greenTile waits until the windows have settled and then retiles once.
+Presets and auto mode are stored per monitor and workspace. When DisplayConfig provides a hardware identity, greenTile uses vendor, product and serial, with the connector added when the serial is missing or all zeros, to find the saved assignments after replugging or rearranging displays. If hardware detection fails, it uses a separate name-and-size fallback key. Assignments under the hardware key and the fallback key are not automatically joined. After a monitor change, greenTile waits until the windows have settled and then retiles every workspace that is tiled, not only the active one.
 
 With `workspaces-only-on-primary` on, secondary monitors share one layout across all workspaces.
 

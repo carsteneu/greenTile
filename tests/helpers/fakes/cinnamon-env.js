@@ -302,7 +302,11 @@ const createCinnamonEnv = (options) => {
     env.display = Object.assign(signalHub('display'), {
         focus_window: null,
         get_monitor_name(i) {
-            return 'FakeMonitor-' + i;
+            // A monitor may carry a stable `name`; a test that unplugs and replugs
+            // monitors uses it so the fallback key follows the MONITOR and not its
+            // index (real keys come from the connector and survive reindexing).
+            const m = env.layoutManager.monitors[i];
+            return (m && m.name) ? m.name : 'FakeMonitor-' + i;
         },
     });
     env.workspaceManager = Object.assign(signalHub('workspaceManager'), {
