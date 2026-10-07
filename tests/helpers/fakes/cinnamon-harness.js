@@ -93,6 +93,10 @@ const makeWindow = (env, seq, rect, monitor = 0, withActor = null, options = {})
         get_window_type: () => (options.windowType !== undefined ? options.windowType : 6),
         get_wm_class: () => (options.wmClass !== undefined ? options.wmClass : 'FakeWindow'),
         get_title: () => 'FakeWindow' + seq,
+        // X11 window description (MetaWindow.get_description): survives a Cinnamon
+        // restart, so it is the identity the restart-order store records. A window
+        // without options.description models a Wayland client (no id).
+        get_description: () => (options.description !== undefined ? options.description : null),
         get_monitor: () => mon,
         get_workspace: () => env.activeWorkspace,
         is_on_all_workspaces: () => false,

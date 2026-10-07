@@ -166,6 +166,7 @@ type XletTree = {
             swap: typeof import('./xlet/model/swap');
             teardown: typeof import('./xlet/model/teardown');
             theme: typeof import('./xlet/model/theme');
+            'window-order': typeof import('./xlet/model/window-order');
         };
         runtime: {
             auto: typeof import('./xlet/runtime/auto');
@@ -175,6 +176,7 @@ type XletTree = {
             focus: typeof import('./xlet/runtime/focus');
             hotkeys: typeof import('./xlet/runtime/hotkeys');
             monitors: typeof import('./xlet/runtime/monitors');
+            orders: typeof import('./xlet/runtime/orders');
             'panel-state': typeof import('./xlet/runtime/panel-state');
             placement: typeof import('./xlet/runtime/placement');
             scope: typeof import('./xlet/runtime/scope');

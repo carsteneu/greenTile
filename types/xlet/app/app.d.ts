@@ -19,6 +19,8 @@ export const App: {
         monitors: any;
         /** @type {SplitFacade} */
         split: SplitFacade;
+        /** @type {OrdersFacade} */
+        orders: OrdersFacade;
         theme: any;
         /** @type {BorderFacade} */
         border: BorderFacade;
