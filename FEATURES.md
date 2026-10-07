@@ -23,6 +23,7 @@ Every feature in one line or two. Details and screenshots are in the [README](RE
 ## Presets
 
 - **Presets**: named layouts made of rules by window count. Each rule sets the columns and how many windows each column stacks.
+- **Wide columns**: a column can span several painter grid columns (merge neighbours in the painter). The spans are the starting widths, so a rule of three columns with `[1, 2, 1]` tiles 25 % / 50 % / 25 %; borders dragged for the current window count still win, **Reset sizes** returns to the spans.
 - **Per monitor and workspace**: every monitor and workspace can have its own preset.
 - **Gap-free fill**: no cell stays empty: with fewer windows, stacked cells and then columns are dropped; with more windows, the rightmost column takes the rest.
 - **Pause**: `Super+Ctrl+D` keeps the assigned preset but stops auto tiling, snap-on-release and swaps from that monitor and workspace. A pause requested before monitor readiness is retained; Auto on or an explicit preset selection resumes tiling.
@@ -46,7 +47,7 @@ Every feature in one line or two. Details and screenshots are in the [README](RE
 ## Preset editor
 
 - **Rule list**: add, select and delete rules; "from N" sets the window count a rule starts at, changed with − / +.
-- **Painter**: 6 × 4 grid. Click or drag to set how many windows each column holds, right-click removes a column.
+- **Painter**: 6 × 4 grid. Click or drag to set how many windows each column holds, right-click removes a column. The handle between two painted columns merges them, the handle inside a merged column splits it again.
 - **Result line**: shows the column stacks of the selected rule, e.g. `[1,2,2]`.
 - **Name check**: a preset cannot be saved without a name.
 - **Save and retile**: saving a preset in use retiles right away. `Esc` or ← Back discards the draft.

@@ -45,6 +45,8 @@ All keys can be changed on the **Hotkeys** page of the settings (Extensions mana
 
 A preset is a list of rules by window count. Each rule sets the number of columns and how many windows each column stacks. You assign a preset to a monitor and workspace.
 
+A painted column can span several of the six painter grid columns. Painted columns always stretch over the whole monitor, so the spans are the starting widths: three columns with the spans `[1, 2, 1]` tile 25 % / 50 % / 25 % — the four-column arrangement with the two middle columns merged. Borders you dragged for the current window count still win over the spans; **Reset sizes** returns to them.
+
 Fresh installations include twelve editable starter presets: Two columns, Three columns, Four columns, Six columns, Vertical stack, Five columns, Grid 2 × 2, Grid 3 × 2, Grid 4 × 2, Left main + stacks, Right main and Center main. They adapt to the current window count; names describe their base arrangement. The initial selection panel uses four columns and three rows on displays with sufficient space, with slightly smaller text. When space is limited the card area can scroll; the existing 600 px minimum panel width still applies.
 
 On the first start after upgrading to a version with these starters, greenTile adds them **once** to the existing list, even if that list is empty. Existing definitions, assignments and saved panel sizes are not replaced. A preset with the same name is kept as-is, and new presets receive unused IDs. A saved completion marker prevents later starts or updates from restoring starters you delete or modifying ones you rename or edit. Unreadable preset or layout data is left untouched, with the import postponed until it can be read safely. No starter preset is assigned automatically. This runs inside the extension, so it works with the updater, manual installation and Spices alike.
@@ -67,7 +69,7 @@ The preview on each card shows what a click would tile right now. No cell ever s
 ![Preset editor](docs/screenshots/preset-editor.png)
 
 - **Rules** (left): "from N" means the rule applies from N windows on; the last matching rule wins. **＋ Rule** adds one, **🗑** deletes the selected one.
-- **Painter:** 6 columns × 4 rows. Click or drag to set how many windows a column holds (top = 1, bottom = 4). Right-click removes a column.
+- **Painter:** 6 columns × 4 rows. Click or drag to set how many windows a column holds (top = 1, bottom = 4). Right-click removes a column. The handle on the line between two painted columns merges them into one wide column, the handle inside a merged column splits one grid column off again.
 - **Save** (or `Enter` in the name field) retiles right away if the preset is in use. **← Back** or `Esc` discards the draft.
 - **🗑 Delete preset** (solid red, right of Save) removes the preset after a confirmation and clears its workspace assignments. `Enter` in the name field always saves.
 
