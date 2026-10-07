@@ -41,6 +41,7 @@ elif (( nmaj == cmaj && nmin == cmin && npat > cpat )); then newer=1
 fi
 [ "$newer" -eq 1 ] || die "$NEW is not greater than the current version $CUR"
 
+shopt -s nullglob
 POS=(po/*.po)
 [ "${#POS[@]}" -gt 0 ] || die "no po/*.po catalogs found"
 POT="po/greenTile@carsteneu.pot"
@@ -58,7 +59,10 @@ cleanup() {
     local rc=$?
     if [ "$rc" -ne 0 ] && [ -f "$WORK/orig.tar" ]; then
         printf 'bump-version: failed — restoring the original files\n' >&2
-        tar -xf "$WORK/orig.tar" -C "$ROOT"
+        if ! tar -xf "$WORK/orig.tar" -C "$ROOT"; then
+            printf 'bump-version: rollback FAILED — the backup is kept at %s/orig.tar\n' "$WORK" >&2
+            return
+        fi
     fi
     rm -rf "$WORK"
 }

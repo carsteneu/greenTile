@@ -26,7 +26,8 @@ function makeVersionTree(t) {
 }
 
 test('every version marker equals metadata.json on the shipped tree', () => {
-    assert.match(readVersion(ROOT), /^\d+\.\d+\.\d+$/, 'metadata.json version is not a plain X.Y.Z');
+    assert.match(readVersion(ROOT), /^(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)$/,
+        'metadata.json version is not a plain X.Y.Z (no v prefix, no leading zeros)');
     const markers = collectMarkers(ROOT);
     assert.equal(markers.length, 24,
         'the marker set changed — update this guard and scripts/bump-version.sh together');

@@ -34,6 +34,12 @@ on:
 permissions:
   contents: write
 
+# Two dispatches for the same version would race on main and the tag. Never run
+# two of these at once; a queued run starts once the running one finishes.
+concurrency:
+  group: release-dispatch
+  cancel-in-progress: false
+
 jobs:
   release:
     runs-on: ubuntu-latest
@@ -91,7 +97,10 @@ jobs:
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           message="release $VERSION"
           if [ -n "$SUMMARY" ]; then message="$message: $SUMMARY"; fi
-          git commit -am "$message"
+          # Stage only the version markers: an unrelated tracked change must
+          # never ride into a release commit.
+          git add -- metadata.json package.json package-lock.json po
+          git commit -m "$message"
           git push origin HEAD:main
       - name: create and push the annotated tag
         env:
