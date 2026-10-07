@@ -66,8 +66,10 @@ const runLone = (mode, preset, options, gap = 0) => {
 // single-window mode must leave it exactly where it is — no unmaximize, no move
 // — in both placing modes (leave places nothing anyway).
 test('a lone maximized or fullscreen window is left untouched by center and fill', () => {
+    const centerPreset = STARTERS.find((p) => p.name === 'Center main');
+    assert.ok(centerPreset, 'the starter fixture still carries a "Center main" preset');
     for (const mode of ['center', 'fill']) {
-        for (const preset of [null, STARTERS.find((p) => p.name === 'Center main')]) {
+        for (const preset of [null, centerPreset]) {
             const label = `${mode}/${preset ? preset.name : 'auto'}`;
             const a = runLone(mode, preset, { maximized: 6 });
             assert.equal(a.env.gi.Meta.MaximizeFlags.HORIZONTAL | a.env.gi.Meta.MaximizeFlags.VERTICAL, 6,
@@ -86,6 +88,8 @@ test('a lone maximized or fullscreen window is left untouched by center and fill
 test('a one-directionally maximized lone window is still placed', () => {
     assert.deepEqual(runLone('center', null, { maximized: 2 }).rect, CENTER, 'horizontal only -> centered');
     assert.deepEqual(runLone('fill', null, { maximized: 4 }).rect, AREA.slice(), 'vertical only -> filled');
+    assert.deepEqual(runLone('center', null, { maximized: 4 }).rect, CENTER, 'vertical only -> still centered');
+    assert.deepEqual(runLone('fill', null, { maximized: 2 }).rect, AREA.slice(), 'horizontal only -> still filled');
 });
 
 // The guard belongs to the mode alone: a plain (unmaximized) lone window still

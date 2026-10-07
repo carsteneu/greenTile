@@ -658,3 +658,26 @@ test('positive control: an ordinary focused window is still tiled', () => {
     assert.deepEqual(w1.rect, [0, 0, 1000, 1100], 'the focused window was tiled');
     assert.deepEqual(w2.rect, [1000, 0, 1000, 1100]);
 });
+
+// The skip canary (lib/tiling/debug.js) logs a reason for every window the
+// collector skipped; 'UNKNOWN' means its reason list drifted from the filters.
+// The transient and non-resizable filters must name themselves.
+test('the skip canary names the transient and non-resizable reasons, never UNKNOWN', () => {
+    const { env, ext } = makeEnv({ windowGap: 0 });
+    enableOnMonitor(env, ext);
+    activeWorkspace(env);
+    const kept = makeWindow(env, 1, [0, 0, 300, 300], 0);
+    const child = makeWindow(env, 2, [400, 0, 300, 300], 0, null, { transientFor: kept });
+    const fixed = makeWindow(env, 3, [800, 0, 300, 300], 0, null, { allowsResize: false });
+    env.tabList.push(kept, child, fixed);
+    env.display.focus_window = kept;
+    const app = ext.currentSession().app;
+    app.ops.layoutSet(app, 0, 0, { auto: true });
+    env.logs.length = 0;
+    app.ops.retileMonitor(app, 0);
+    const skipped = env.logs.filter((line) => line.indexOf('greenTile skipped') === 0);
+    assert.equal(skipped.length, 1, 'exactly one skip line');
+    assert.match(skipped[0], /transient/, 'the transient window names its reason');
+    assert.match(skipped[0], /non-resizable/, 'the fixed-size window names its reason');
+    assert.equal(/UNKNOWN/.test(skipped[0]), false, 'no skipped window fell through the reason list');
+});

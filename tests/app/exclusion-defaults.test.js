@@ -137,16 +137,33 @@ const enable = (settingsDefaults) => {
     ext.init({ uuid: 'greenTile@carsteneu' });
     ext.enable();
     env.flushDisplayConfigNoReply();
-    return env.settingsInstances.find((s) => s.uuid === 'greenTile@carsteneu');
+    return { inst: env.settingsInstances.find((s) => s.uuid === 'greenTile@carsteneu'), ext };
 };
 
+// the fields Exclusions.isExcluded reads off a window; __noApp keeps the fake
+// WindowTracker out of the way — a class row is matched without an app id
+const winLike = (cls, inst, title) => ({
+    __noApp: true,
+    get_stable_sequence: () => 1,
+    get_wm_class: () => cls,
+    get_wm_class_instance: () => inst,
+    get_title: () => title,
+});
+
 test('enable seeds the row into an existing install and applies it', () => {
-    const inst = enable({ exclusions: [], exclusionsSeeded: false });
+    const { inst, ext } = enable({ exclusions: [], exclusionsSeeded: false });
     assert.deepEqual(inst.getValue('exclusions'), [SHELL_ROW]);
     assert.equal(inst.getValue('exclusionsSeeded'), true);
+    const excl = ext.currentSession().app.excl;
+    assert.equal(excl.isExcluded(winLike('Xlet-settings.py', 'xlet-settings.py', 'greenTile')), true,
+        'the seeded row is live in the running exclusion set');
+    assert.equal(excl.isExcluded(winLike('Gnome-terminal', 'gnome-terminal', 'notes')), false,
+        'an unrelated window is not excluded');
 });
 
 test('enable leaves a completed install (marker set, empty list) untouched', () => {
-    const inst = enable({ exclusions: [], exclusionsSeeded: true });
+    const { inst, ext } = enable({ exclusions: [], exclusionsSeeded: true });
     assert.deepEqual(inst.getValue('exclusions'), []);
+    assert.equal(ext.currentSession().app.excl.isExcluded(winLike('Xlet-settings.py', 'xlet-settings.py', 'greenTile')),
+        false, 'a row the user deleted stays deleted - no exclusion is applied');
 });
