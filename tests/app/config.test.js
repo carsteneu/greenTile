@@ -51,7 +51,7 @@ test('Config.BINDINGS declares the binds in the documented key order', () => {
     const expectedFirst = ['columns6Hotkey', 'columns3Hotkey', 'autoOnHotkey', 'autoOffHotkey',
         'presetHotkey', 'excludeHotkey', 'exclusions'];
     assert.deepEqual(declared.slice(0, 7), expectedFirst, 'hotkeys first, exclusions before the picker flow');
-    assert.equal(declared[declared.length - 1], 'fillSingleWindow', 'fillSingleWindow stays the last bind');
+    assert.equal(declared[declared.length - 1], 'singleWindowMode', 'singleWindowMode stays the last bind');
 });
 
 const BOUND_PROPS = [
@@ -61,7 +61,7 @@ const BOUND_PROPS = [
     'resizeWiderHotkey', 'resizeNarrowerHotkey', 'resizeTallerHotkey', 'resizeShorterHotkey',
     'swapLeftHotkey', 'swapRightHotkey', 'swapUpHotkey', 'swapDownHotkey',
     'panelTheme', 'accentMode', 'accentColor', 'stateMode', 'stateColor',
-    'focusBorderValue', 'fillSingleWindowValue',
+    'focusBorderValue', 'singleWindowModeValue',
 ].sort();
 
 test('enable binds the documented 23 settings properties', () => {

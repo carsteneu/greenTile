@@ -154,7 +154,8 @@ type Layout = DragLayout & {
     rule?: Rule;
     /** Transient action geometry; never a stored preset or shape field. */
     split?: Split | null;
-    /** Occupied extent of a one-off underfilled column action; never persisted. */
+    /** Occupied extent of a one-off underfilled column action, or of the centered
+     * single window; never persisted. */
     area?: Rect;
 };
 
