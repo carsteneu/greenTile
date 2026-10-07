@@ -54,6 +54,21 @@ test('Config.BINDINGS declares the binds in the documented key order', () => {
     assert.equal(declared[declared.length - 1], 'singleWindowMode', 'singleWindowMode stays the last bind');
 });
 
+// The fresh-install default rides on this pair: _importStarterPresets writes the
+// marker the migration reads as "an existing install". Running the import first would
+// send every fresh install to the old switch's value instead of the centered default.
+test('Config migrates the single-window mode before it imports the starter presets', () => {
+    const src = fs.readFileSync(path.join(ROOT, 'lib', 'app', 'config.js'), 'utf8');
+    const start = src.indexOf('constructor(app)');
+    assert.ok(start > -1, 'the Config constructor moved');
+    const body = src.slice(start, src.indexOf('\n    }\n', start));
+    const migrate = body.indexOf('this._migrateSingleWindow()');
+    const importPresets = body.indexOf('this._importStarterPresets()');
+    assert.ok(migrate > -1, '_migrateSingleWindow() missing from the constructor');
+    assert.ok(importPresets > -1, '_importStarterPresets() missing from the constructor');
+    assert.ok(migrate < importPresets, 'the migration must read the marker before the import writes it');
+});
+
 const BOUND_PROPS = [
     'columns6Hotkey', 'columns3Hotkey', 'autoOnHotkey', 'autoOffHotkey',
     'presetHotkey', 'excludeHotkey',

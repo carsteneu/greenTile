@@ -91,9 +91,10 @@ export const Orders: {
          * opening after a restart.
          *
          * Two callers exist and they differ in what they teach the store:
-         * - `explicit` (a swap, or the drag-and-drop that placed the window the user
-         *   moved): the placement IS the user's arrangement, so it is recorded and the
-         *   surface's pending restore is closed — a later retile must not undo it.
+         * - `explicit` (a swap, an edge resize, or the drag-and-drop that placed the
+         *   window the user moved): the placement IS the user's arrangement, so it is
+         *   recorded and the surface's pending restore is closed — a later retile must
+         *   not undo it.
          * - otherwise the retile placed the surface's windows by their live positions,
          *   which after a restart are the ones Muffin scrambled them into. That is no
          *   order to learn from while the surface's stored one is still waiting to be

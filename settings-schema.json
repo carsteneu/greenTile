@@ -229,27 +229,27 @@
       "description": "Border around the focused window",
       "tooltip": "After a Super+Arrow focus move, mark the newly focused window with a thin border in the state color for three seconds. Mouse clicks and Alt+Tab do not show it."
    },
-    "fillSingleWindow": {
-       "type": "switch",
-       "default": false,
-       "description": "Fill the monitor with a single window",
-       "tooltip": "With automatic tiling or a preset on, a single tiled window fills the whole usable area instead of being left untouched."
-    },
-    "singleWindowMode": {
-       "type": "combobox",
-       "default": "center",
-       "description": "A single window",
-       "tooltip": "What happens to a lone tiled window when automatic tiling or a preset is on. \"Leave it untouched\" does nothing to it. \"Fill the monitor\" makes it fill the whole usable area. \"Center the window\" centers it at about 62 % of the width (golden ratio) and 90 % of the height.",
-       "options": {
-          "Leave it untouched": "leave",
-          "Fill the monitor": "fill",
-          "Center the window": "center"
-       }
-    },
-    "singleWindowMigrated": {
-       "type": "generic",
-       "default": false
-    },
+   "fillSingleWindow": {
+      "type": "switch",
+      "default": false,
+      "description": "Fill the monitor with a single window",
+      "tooltip": "With automatic tiling or a preset on, a single tiled window fills the whole usable area instead of being left untouched."
+   },
+   "singleWindowMode": {
+      "type": "combobox",
+      "default": "center",
+      "description": "A single window",
+      "tooltip": "What happens to a lone tiled window when automatic tiling or a preset is on. \"Leave it untouched\" does nothing to it. \"Fill the monitor\" makes it fill the whole usable area. \"Center the window\" centers it at about 62 % of the width (golden ratio) and 90 % of the height.",
+      "options": {
+         "Leave it untouched": "leave",
+         "Fill the monitor": "fill",
+         "Center the window": "center"
+      }
+   },
+   "singleWindowMigrated": {
+      "type": "generic",
+      "default": false
+   },
    "panelTheme": {
       "type": "combobox",
       "default": "system",
