@@ -46,7 +46,7 @@ All keys can be changed on the **Hotkeys** page of the settings (Extensions mana
 
 A preset is a list of rules by window count. Each rule sets the number of columns and how many windows each column stacks. You assign a preset to a monitor and workspace.
 
-A painted column can span several of the six painter grid columns. Painted columns always stretch over the whole monitor, so the spans are the starting widths: three columns with the spans `[1, 2, 1]` tile 25 % / 50 % / 25 % — the four-column arrangement with the two middle columns merged. A border you dragged for the current window count, and a window layout you dropped for it, still win over the spans; **Reset sizes** returns to them.
+A painted column can span several of the six painter grid columns. Painted columns always stretch over the whole monitor, so the spans are the starting widths: three columns with the spans `[1, 2, 1]` tile 25 % / 50 % / 25 % — the four-column arrangement with the two middle columns merged. A border you dragged for the current window count, and a window layout you dropped for it, still win over the spans — until you click a card again, which clears them like **Reset sizes** does.
 
 Fresh installations include sixteen editable starter presets: Two columns, Three columns, Four columns, Six columns, Vertical stack, Five columns, Grid 2 × 2, Grid 3 × 2, Grid 4 × 2, Left main + stacks, Right main, Center main, Wide center, Wide center + stacks, Two thirds left and Two thirds right. They adapt to the current window count; names describe their base arrangement. Four of them (Wide center, Wide center + stacks, Two thirds left, Two thirds right) ship painted spans, so their wide column starts wide and the other columns take the extra windows. The initial selection panel uses four columns, is sized for four rows and uses slightly smaller text; a shorter display scrolls the card area, and the existing 600 px minimum panel width still applies.
 
@@ -54,12 +54,12 @@ On the first start after upgrading to a version with these starters, greenTile a
 
 **Preset panel** (`Super+Ctrl+P`, works on the monitor of the focused window):
 
-- Click a card to assign the preset and tile right away. The panel stays open, so you can try several presets.
+- Click a card to assign the preset and tile right away. A click is binding: it first clears this workspace's moved borders and dragged layouts (exactly what **Reset sizes** does), so the preset's own widths apply. The panel stays open, so you can try several presets.
 - The cards form a grid: as many equal-width columns as the panel width holds, each with a large preview of the layout a click would apply.
 - ✎ on a card opens that preset in the editor; ✕ on the assigned card removes the assignment. **＋ New preset** starts an empty one.
 - **Auto: on / off** in the title bar shows and switches auto mode (green = on).
 - **Gap between windows** sets the gap between tiled windows (0 to 48 px). Screen edges stay flush.
-- **Reset sizes** appears when borders were moved or layouts dragged, and returns to the preset's widths — the column spans when the rule has them, equal sizes otherwise.
+- **Reset sizes** appears when borders were moved or layouts dragged, and returns to the preset's widths — the column spans when the rule has them, equal sizes otherwise. Clicking a card does the same and takes the button away.
 - The sun/moon button switches between light and dark; ⚙ opens the settings.
 - Drag the title bar to move the panel, ◢ to resize it. `Esc`, ✕ or a click outside closes it.
 
