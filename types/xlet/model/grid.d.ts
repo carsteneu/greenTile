@@ -10,10 +10,18 @@ export const PRESET_GRID_PAD: number;
 /** Width reserved for the vertical scrollbar so a full row never overflows it
  *  (px; the panel's scroll view bar is ~21px while it is shown). */
 export const PRESET_SCROLLBAR: number;
-/** The .gk-panel 1px border on both sides (px) — it sits inside the panel width
+/** The .gk-panel border width per side (px) — it sits inside the panel width
  *  and takes room away from the card area. */
+export const PRESET_PANEL_BORDER_W: number;
+/** The .gk-panel border on both sides at scale 1 (px). */
 export const PRESET_PANEL_BORDER: number;
-/** The card's own horizontal chrome at scale 1 (px): the 1px .gk-card border on
+/** The .gk-card border width per side (px). */
+export const PRESET_CARD_BORDER_W: number;
+/** The .gk-card-stripe width (px). */
+export const PRESET_CARD_STRIPE_W: number;
+/** The .gk-card-box padding per side (px). */
+export const PRESET_CARD_BOX_PAD: number;
+/** The card's own horizontal chrome at scale 1 (px): the .gk-card border on
  *  both sides, the .gk-card-stripe and both .gk-card-box paddings. Mirror of
  *  panel.js's PRESET_CARD_CHROME_W (2 + 3 + 2 * PRESET_CARD_PAD) — keep them
  *  equal, the panel-card test pins the agreement. */

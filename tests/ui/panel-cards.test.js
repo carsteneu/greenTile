@@ -267,9 +267,8 @@ test('the panel lays the starter presets out at the theme scale factor (HiDPI re
         const rowWidth = expected.columns * expected.cardWidth + (expected.columns - 1) * expected.gap;
         assert.ok(rowWidth <= expected.available, `the card row (${rowWidth}) must fit the card area (${expected.available})`);
         assert.notEqual(expected.columns, grid.gridLayout(width, 1).columns, 'scale 2 really changes the column count');
-        // panel.js's PRESET_CARD_CHROME_W and the model's PRESET_CARD_CHROME are
-        // mirrors; pin the agreement through what the panel actually built.
-        assert.equal(expected.cardChrome, grid.PRESET_CARD_CHROME * 2, 'the scaled chrome follows the model token');
+        // The panel's PRESET_CARD_CHROME_W mirror is pinned by the preview width
+        // below: it is what the panel actually subtracted from the card.
         const thumb = findAll(cardOf(app, presets[0].name), (actor) => actor instanceof env.gi.St.DrawingArea)[0];
         assert.equal(thumb.width, expected.cardWidth - expected.cardChrome, 'the preview is sized beside the scaled chrome');
     }
