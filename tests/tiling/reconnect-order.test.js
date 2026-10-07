@@ -421,6 +421,55 @@ test('a retained pause on a background workspace survives the settle', () => {
     assert.deepEqual(w3.rect, before[1], 'a retained pause outranks the settle');
 });
 
+test('a placement right after the restore does not shrink the stored order', () => {
+    // restore() spends the surface's restore BEFORE the placement is recorded, so a
+    // window that is missing this pass (minimized, or not moved back yet) must not be
+    // dropped from the order the surface exists to keep.
+    const { env, ext, app } = scene();
+    env.files.set(PATH, JSON.stringify({
+        v: 1,
+        s: { [surfaceKey(app)]: ['0x1', '0x2', '0x3'] },
+    }));
+    const fresh = reconnect(env, ext);
+    const w1 = makeWindow(env, 11, [10, 10, 400, 300], 0, null, { description: '0x1' });
+    const w2 = makeWindow(env, 12, [500, 0, 400, 300], 0, null, { description: '0x2' });
+    env.tabList.push(w1, w2);
+    env.display.focus_window = w1;
+    startupRetile(env, ext);
+    assert.equal(fresh.session.orderUsed.has(surfaceKey(fresh)), true, 'the restore ran');
+    // nothing was written at all: the placement held fewer windows than the record
+    assert.equal([...env.timers.entries()].some(([, t]) => t.ms === 1000), false,
+        'the shrinking placement scheduled no write');
+    assert.deepEqual(JSON.parse(env.files.get(PATH)).s[surfaceKey(fresh)], ['0x1', '0x2', '0x3'],
+        'the window that is not on the surface this pass is not dropped');
+});
+
+test('a background settle does not move a window that is on every workspace', () => {
+    const { env, ext, app, ws1wins } = sceneTwoWs();
+    // the active workspace is paused, so no active retile will run and nothing would
+    // put a pinned window back on it
+    app.ops.layoutSet(app, 0, 0, { auto: false });
+    const b1 = makeWindow(env, 41, [10, 10, 300, 200], 0, null, { description: '0x41' });
+    const b2 = makeWindow(env, 42, [400, 0, 300, 200], 0, null, { description: '0x42' });
+    ws1wins.push(b1, b2);
+    const sticky = makeWindow(env, 31, [10, 10, 300, 200], 0, null, { description: '0x31' });
+    sticky.is_on_all_workspaces = () => true;
+    env.tabList.push(sticky);
+    ws1wins.push(sticky);
+    const pinned = sticky.rect.slice();
+
+    const settle = ext.currentSession().settle;
+    const armed = env.timers.get(settle._timer);
+    env.timers.delete(settle._timer);
+    armed.cb();
+    for (const [id, t] of [...env.timers.entries()].filter(([, e]) => e.ms === 0)) {
+        env.timers.delete(id);
+        t.cb();
+    }
+    assert.deepEqual(b1.rect, LEFT, 'the background workspace was still placed');
+    assert.deepEqual(sticky.rect, pinned, 'the pinned window is left where it is');
+});
+
 test('a window on every workspace ends in the active workspace cell after the settle', () => {
     // A sticky window is listed by every workspace; the background passes place it
     // first, the active workspace's debounced retile lands last and decides. The
