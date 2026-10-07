@@ -93,7 +93,7 @@ function enable() {
         /**
          * @param {any} app
          */
-        onSettled: (app) => app.auto.scheduleAll(app, 0),
+        onSettled: (app) => app.auto.settleAll(app),
         /**
          * @param {any} appSession
          */

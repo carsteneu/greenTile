@@ -51,6 +51,19 @@ export const Auto: {
          */
         scheduleAll(app: AppFacade, ms: number): void;
         /**
+         * The settle fan-out: by the time the settle wait expires Muffin has moved the
+         * windows of EVERY workspace — a Cinnamon restart re-manages them all, a monitor
+         * change parks them on the remaining monitor and moves them back — so the settle
+         * must place every workspace greenTile tiles, not only the active one. Otherwise
+         * a background workspace stays where Muffin left it until the user visits it.
+         * The active workspace keeps the debounced path (it applies a retained intent
+         * first and animates); the background workspaces are placed right here, without
+         * animation. Paused workspaces stay untouched: the retile gates on autoAllowed,
+         * and a workspace without auto or a preset is skipped.
+         * @param {AppFacade} app
+         */
+        settleAll(app: AppFacade): void;
+        /**
          * @param {AppFacade} app
          * @param {number} monitorIndex
          * @returns {boolean}
