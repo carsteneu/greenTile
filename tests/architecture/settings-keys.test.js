@@ -44,8 +44,8 @@ test('the schema carries exactly this persisted key set', () => {
         'columns3Hotkey', 'columns6Hotkey', 'excludeAppPicker', 'excludeHotkey',
         'exclusions', 'fillSingleWindow', 'focusBorder', 'layouts', 'panelSize',
         'panelTheme', 'presetHotkey', 'presets', 'resizeNarrowerHotkey',
-        'resizeShorterHotkey', 'resizeTallerHotkey', 'resizeWiderHotkey',
-          'starterPresetsImported', 'stateColor', 'stateMode', 'swapDownHotkey', 'swapLeftHotkey',
+          'resizeShorterHotkey', 'resizeTallerHotkey', 'resizeWiderHotkey',
+            'starterGeneration', 'starterPresetsImported', 'stateColor', 'stateMode', 'swapDownHotkey', 'swapLeftHotkey',
         'swapRightHotkey', 'swapUpHotkey', 'tileAnimation', 'windowGap',
     ].sort());
 });

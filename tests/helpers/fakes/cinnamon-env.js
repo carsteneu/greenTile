@@ -163,6 +163,9 @@ const SETTINGS_DEFAULTS = {
     // Ordinary fixtures model a user who already completed the import. Migration
     // tests explicitly pass false to exercise the first-start path.
     starterPresetsImported: true,
+    // The starter set this install already has: 1 = the twelve before the span
+    // starters, the current generation after the import ran.
+    starterGeneration: 2,
     panelTheme: false,
     accentMode: false,
     accentColor: '',

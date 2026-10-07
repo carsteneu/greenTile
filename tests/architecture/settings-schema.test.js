@@ -82,12 +82,16 @@ test('stored boolean values survive the checkbox -> switch upgrade', () => {
     }
 });
 
-test('a first install includes twelve distinct editable starter presets', () => {
+test('a first install includes sixteen distinct editable starter presets', () => {
     const presets = JSON.parse(schema.presets.default);
-    assert.equal(presets.length, 12);
-    assert.equal(new Set(presets.map(p => p.id)).size, 12, 'unique editable IDs');
-    assert.equal(new Set(presets.map(p => p.name)).size, 12, 'distinct names');
-    assert.equal(new Set(presets.map(p => JSON.stringify(p.rules[0].stacks))).size, 12, 'distinct base layouts');
+    assert.equal(presets.length, 16);
+    assert.equal(new Set(presets.map(p => p.id)).size, 16, 'unique editable IDs');
+    assert.equal(new Set(presets.map(p => p.name)).size, 16, 'distinct names');
+    // The base layout of a starter is its window counts PLUS the painted spans: the wide
+    // centre [1,1,1] with spans [1,4,1] is a different layout from "Three columns" [1,1,1]
+    // with no spans, so the spans belong in the distinctness key.
+    assert.equal(new Set(presets.map(p => JSON.stringify([p.rules[0].stacks, p.rules[0].spans || null]))).size, 16,
+        'distinct base layouts');
     for (const preset of presets) {
         assert.match(preset.id, /^p\d+$/);
         assert.ok(preset.name.trim());
@@ -98,6 +102,12 @@ test('a first install includes twelve distinct editable starter presets', () => 
             previous = rule.min;
             assert.ok(rule.stacks.length >= 1 && rule.stacks.length <= 6);
             assert.ok(rule.stacks.every(n => Number.isInteger(n) && n >= 1 && n <= 4));
+            if (rule.spans) {
+                assert.equal(rule.spans.length, rule.stacks.length, 'one span per painted column');
+                assert.ok(rule.spans.every(s => Number.isInteger(s) && s >= 1), 'a span counts grid columns');
+                assert.ok(rule.spans.reduce((a, b) => a + b, 0) <= 6,
+                    'spans stay inside the six grid columns, otherwise the reader drops them');
+            }
         }
     }
 });
@@ -107,7 +117,7 @@ test('starter presets survive the normal reader and cover every supported window
     const layout = load('./lib/tiling/layout.js');
     const { fillStacks } = load('./lib/model/fill.js');
     const presets = JSON.parse(schema.presets.default);
-    assert.equal(presets.length, 12);
+    assert.equal(presets.length, 16);
     const app = { config: { settings: { getValue: () => schema.presets.default,
         setValue: () => assert.fail('reading presets must not rewrite settings') } } };
     assert.deepEqual(layout.presetsRead(app), presets);
@@ -127,24 +137,33 @@ test('upgrading keeps custom or deliberately empty presets instead of reseeding'
     }
 });
 
-test('starter presets represent twelve different effective layout families', () => {
+test('starter presets represent sixteen different effective layout families', () => {
     const { load } = require('../helpers/cinnamon-loader');
     const { rulesPick } = load('./lib/tiling/layout.js');
     const { fillStacks } = load('./lib/model/fill.js');
+    // The family of a starter is the shape it settles on per window count AND the widths
+    // it gives those columns — the painted spans. Without the spans the wide centre would
+    // look identical to "Three columns".
     const signatures = JSON.parse(schema.presets.default).map(preset =>
-        JSON.stringify(Array.from({ length: 49 }, (_, i) =>
-            fillStacks(rulesPick(preset.rules, i + 2).stacks, i + 2))));
-    assert.equal(new Set(signatures).size, 12, 'no two presets always apply the same layout');
+        JSON.stringify(Array.from({ length: 49 }, (_, i) => {
+            const rule = rulesPick(preset.rules, i + 2);
+            return [fillStacks(rule.stacks, i + 2), rule.spans || null];
+        })));
+    assert.equal(new Set(signatures).size, 16, 'no two presets always apply the same layout');
 });
 
-test('fresh selection size fits twelve cards in four columns and three rows', () => {
+test('fresh selection size fits sixteen cards in four columns and four rows', () => {
     const { load } = require('../helpers/cinnamon-loader');
     const { gridAvailable, gridColumns, gridRows } = load('./lib/model/grid.js');
     const size = JSON.parse(schema.panelSize.default);
     assert.deepEqual(size, { list: { w: 800, h: 480 } }, 'editor size remains unchanged');
     const cols = gridColumns(gridAvailable(size.list.w));
     assert.equal(cols, 4);
-    assert.equal(gridRows(JSON.parse(schema.presets.default), cols).length, 3);
+    // Four rows of four; the card area scrolls when the panel is shorter than the rows
+    // need (README), the column count and the chunking are what the default size decides.
+    const rows = gridRows(JSON.parse(schema.presets.default), cols);
+    assert.equal(rows.length, 4);
+    assert.ok(rows.every(r => r.length === 4), 'four full rows');
     assert.equal(schema.layouts.default, '', 'no monitor or workspace is assigned automatically');
 });
 

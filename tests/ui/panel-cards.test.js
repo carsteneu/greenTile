@@ -326,7 +326,7 @@ test('the model is loaded through the shipped namespace', () => {
     assert.equal(grid.gridColumns(grid.gridAvailable(600)), 3);
 });
 
-test('fresh install panel displays all twelve starter cards in a four-by-three grid', () => {
+test('fresh install panel displays all sixteen starter cards in a four-by-four grid', () => {
     const fs = require('node:fs');
     const path = require('node:path');
     const { ROOT } = require('../helpers/cinnamon-loader');
@@ -335,9 +335,9 @@ test('fresh install panel displays all twelve starter cards in a four-by-three g
     const { env, ext } = makeEnv({ presets: schema.presets.default, panelSize: schema.panelSize.default });
     try {
         const { app } = openPanel(env, ext, presets, { seedPresets: false });
-        assert.equal(cards(app).length, 12);
+        assert.equal(cards(app).length, 16);
         const rows = byClass(app.panel.actor, /^gk-card-row(?: |$)/);
-        assert.deepEqual(rows.map(r => r.children.length), [4, 4, 4]);
+        assert.deepEqual(rows.map(r => r.children.length), [4, 4, 4, 4]);
         assert.equal(app.panel.actor.width, 800);
         assert.equal(byClass(app.panel.actor, /^gk-scroll(?: |$)/)[0].height, 480);
         assert.match(app.panel.actor.style_class, /\bgk-panel-list\b/);
