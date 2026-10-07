@@ -16,9 +16,15 @@ name: release-dispatch
 # fire, this workflow finishes the release itself instead of relying on it.
 #
 # release.yml (pushed v* tags) is left untouched: it still covers a hand-made
-# tag. This workflow keeps its own copy of the build/release steps rather than
-# sharing them — the shared surface is a handful of trivial steps, and folding
-# it into a reusable workflow would mean changing release.yml for no real gain.
+# tag. The zip-surface check is shared with ci.yml through scripts/check-zip.sh.
+#
+# Assumptions to hold in the repository settings:
+# - main is not branch-protected (no required PR/status checks/signed commits),
+#   or the push below is rejected; with protection, release via a PR instead.
+# - Actions may write: the default GITHUB_TOKEN permission must not be forced
+#   read-only at the org level.
+# Known limitation: if `gh release create` fails after the tag was pushed, the
+# tag guard blocks a plain re-run — finish it by hand with `gh release create`.
 on:
   workflow_dispatch:
     inputs:
@@ -84,10 +90,11 @@ jobs:
           VERSION: ${{ inputs.version }}
         run: ./scripts/bump-version.sh "$VERSION"
       - run: npm run check
-      # Build before anything is pushed: a broken package must not leave a tag
-      # or a commit on main behind.
+      # Build and verify before anything is pushed: a broken or wrong-shaped
+      # package must not leave a tag or a commit on main behind.
       - run: ./build-release.sh
-      - name: commit and push the version bump to main
+      - run: ./scripts/check-zip.sh
+      - name: commit, tag and push the release to main
         env:
           VERSION: ${{ inputs.version }}
           SUMMARY: ${{ inputs.summary }}
@@ -97,23 +104,27 @@ jobs:
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           message="release $VERSION"
           if [ -n "$SUMMARY" ]; then message="$message: $SUMMARY"; fi
-          # Stage only the version markers: an unrelated tracked change must
-          # never ride into a release commit.
-          git add -- metadata.json package.json package-lock.json po
+          # Stage only the version markers (tracked modifications): an unrelated
+          # change must never ride into a release commit.
+          git add -u -- metadata.json package.json package-lock.json po
           git commit -m "$message"
-          git push origin HEAD:main
-      - name: create and push the annotated tag
-        env:
-          VERSION: ${{ inputs.version }}
-        run: |
-          set -eu
+          # Absorb whatever was merged to main while this run was building, then
+          # tag the rebased commit and push both refs atomically.
+          git pull --rebase origin main
           git tag -a "v$VERSION" -m "greenTile $VERSION"
-          git push origin "v$VERSION"
+          git push --atomic origin HEAD:main "v$VERSION"
       - name: create the GitHub Release with the zip
         env:
           VERSION: ${{ inputs.version }}
           GH_TOKEN: ${{ github.token }}
         run: |
-          gh release create "v$VERSION" dist/*.zip \
-            --title "greenTile $VERSION" \
-            --notes "Unzip, run ./install.sh, restart Cinnamon (Ctrl+Alt+Esc), then enable greenTile in System Settings → Extensions. Details in the README."
+          set -eu
+          # Idempotent: a re-run after a partial failure completes the release
+          # instead of failing on "already exists".
+          if gh release view "v$VERSION" >/dev/null 2>&1; then
+            gh release upload "v$VERSION" dist/*.zip --clobber
+          else
+            gh release create "v$VERSION" dist/*.zip \
+              --title "greenTile $VERSION" \
+              --notes "Unzip, run ./install.sh, restart Cinnamon (Ctrl+Alt+Esc), then enable greenTile in System Settings → Extensions. Details in the README."
+          fi
