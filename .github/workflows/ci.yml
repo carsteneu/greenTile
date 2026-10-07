@@ -40,20 +40,4 @@ jobs:
         run: sudo apt-get update && sudo apt-get install -y gettext
       - run: ./build-release.sh
       - name: zip contains the runtime files and nothing dev-only
-        run: |
-          set -eu
-          zip=$(ls dist/*.zip)
-          unzip -Z1 "$zip" > zip.lst
-          root=$(head -n1 zip.lst)
-          for f in install.sh update.sh greenTile@carsteneu/extension.js greenTile@carsteneu/metadata.json \
-                   greenTile@carsteneu/settings-schema.json greenTile@carsteneu/stylesheet.css \
-                   greenTile@carsteneu/icon.png greenTile@carsteneu/LICENSE \
-                   greenTile@carsteneu/lib/app/app.js greenTile@carsteneu/po/de.po; do
-            grep -qx "$root$f" zip.lst || { echo "missing in zip: $f"; exit 1; }
-          done
-          if grep -E '(package(-lock)?\.json|tsconfig|eslint|/types/|/tests/|node_modules|\.github|/docs/|greenTile\.js$)' zip.lst; then
-            echo "dev-only or obsolete files in the zip"; exit 1
-          fi
-          mkdir unpacked && unzip -q "$zip" -d unpacked
-          find unpacked -name '*.js' -print0 | xargs -0 -n1 node --check
-          echo "zip ok: $(wc -l < zip.lst) entries"
+        run: ./scripts/check-zip.sh
