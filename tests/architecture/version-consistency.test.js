@@ -9,7 +9,7 @@ const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const path = require('node:path');
 const { ROOT } = require('../helpers/cinnamon-loader');
-const { markerFiles, collectMarkers, findMismatches, readVersion } = require('../helpers/version-markers');
+const { markerFiles, collectMarkers, findMismatches, readVersion, POT } = require('../helpers/version-markers');
 
 const TMP = path.join(ROOT, '.yesmem', 'tmp');
 fs.mkdirSync(TMP, { recursive: true });
@@ -29,9 +29,22 @@ test('every version marker equals metadata.json on the shipped tree', () => {
     assert.match(readVersion(ROOT), /^(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)$/,
         'metadata.json version is not a plain X.Y.Z (no v prefix, no leading zeros)');
     const markers = collectMarkers(ROOT);
-    assert.equal(markers.length, 24,
-        'the marker set changed — update this guard and scripts/bump-version.sh together');
+    // Derive the count rather than freezing it: adding a language is a normal
+    // change and both the guard and the bump script pick the new po up on their
+    // own. package-lock.json is the only file with two markers.
+    assert.equal(markers.length, markerFiles(ROOT).length + 1,
+        'collectMarkers found a different number of markers than markerFiles lists');
     assert.deepEqual(findMismatches(ROOT), []);
+});
+
+test('every catalog carries exactly one Project-Id-Version header', () => {
+    for (const rel of markerFiles(ROOT)) {
+        if (!rel.endsWith('.po') && rel !== POT) {
+            continue;
+        }
+        const hits = fs.readFileSync(path.join(ROOT, rel), 'utf8').split('Project-Id-Version:').length - 1;
+        assert.equal(hits, 1, `${rel}: expected exactly one Project-Id-Version header, found ${hits}`);
+    }
 });
 
 test('a po header that drifts from metadata.json is reported', (t) => {

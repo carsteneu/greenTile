@@ -9,8 +9,9 @@
 # .github/workflows/release-dispatch.yml) does that.
 #
 # Safety: every new file is computed and staged first, and only then swapped in;
-# an EXIT trap restores the originals if the swap fails, so a failed run never
-# leaves a half-bumped tree.
+# an EXIT trap restores the originals if the swap does not finish — on a failed
+# swap *or* an interrupt (INT/TERM/HUP) — so a run never leaves a half-bumped
+# tree.
 set -euo pipefail
 
 ROOT=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)
@@ -29,7 +30,10 @@ fi
 command -v node >/dev/null 2>&1 || die "node is required to edit the JSON files"
 
 CUR=$(node -p "require('./metadata.json').version")
-[ -n "$CUR" ] || die "could not read the current version from metadata.json"
+# CUR is used as an arithmetic operand below; keep a hand-edited metadata.json
+# from feeding anything but plain digits into (( )).
+[[ "$CUR" =~ ^(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)$ ]] \
+    || die "metadata.json version '$CUR' is not a plain X.Y.Z"
 
 # A bump must move strictly forward: same version is a mistake, lower is a revert.
 IFS=. read -r cmaj cmin cpat <<<"$CUR"
@@ -55,18 +59,23 @@ WORK=$(mktemp -d "$ROOT/.yesmem/tmp/bump-version.XXXXXX" 2>/dev/null) || {
     mkdir -p "$ROOT/.yesmem/tmp"
     WORK=$(mktemp -d "$ROOT/.yesmem/tmp/bump-version.XXXXXX")
 }
+SWAPPED=0
 cleanup() {
     local rc=$?
-    if [ "$rc" -ne 0 ] && [ -f "$WORK/orig.tar" ]; then
-        printf 'bump-version: failed — restoring the original files\n' >&2
+    # Restore whenever the swap did not finish — this also covers SIGINT/SIGTERM,
+    # where $? is 0 and an rc-based test would wrongly skip the restore.
+    if [ -f "$WORK/orig.tar" ] && [ "$SWAPPED" -eq 0 ]; then
+        printf 'bump-version: aborted — restoring the original files\n' >&2
         if ! tar -xf "$WORK/orig.tar" -C "$ROOT"; then
             printf 'bump-version: rollback FAILED — the backup is kept at %s/orig.tar\n' "$WORK" >&2
-            return
+            return "$rc"
         fi
     fi
     rm -rf "$WORK"
 }
 trap cleanup EXIT
+# Route signals through the EXIT trap so an interrupt runs the same restore.
+trap 'exit 130' INT TERM HUP
 
 mkdir -p "$WORK/new"
 BUMP_ROOT=$ROOT BUMP_STAGE="$WORK/new" BUMP_OLD="$CUR" BUMP_NEW="$NEW" \
@@ -131,6 +140,7 @@ for rel in "${FILES[@]}"; do
 done
 
 [ "$(node -p "require('./metadata.json').version")" = "$NEW" ] || die "post-swap check failed: metadata.json is not $NEW"
+SWAPPED=1
 
 printf 'bump-version: %s -> %s — %d files, %d markers updated\n' "$CUR" "$NEW" "${#FILES[@]}" "$MARKERS"
 printf 'next: run "npm run check", commit "release %s: <summary>", tag -a v%s -m "greenTile %s", push.\n' "$NEW" "$NEW" "$NEW"
