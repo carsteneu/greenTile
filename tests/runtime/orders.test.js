@@ -16,9 +16,12 @@ const PATH = RUNTIME_DIR + '/greenTile@carsteneu/order.json';
 
 const makeDeps = (initial = {}, opts = {}) => {
     const files = new Map(Object.entries(initial));
+    const fileType = { UNKNOWN: 0, REGULAR: 1, DIRECTORY: 2, SPECIAL: 3, SHORTCUT: 4, MOUNTABLE: 5 };
     const writes = [];
     const mkdirs = [];
     const logs = [];
+    const reads = [];
+    const queries = [];
     const timers = new Map();
     let nextTimer = 1;
     const deps = {
@@ -26,6 +29,8 @@ const makeDeps = (initial = {}, opts = {}) => {
         writes,
         mkdirs,
         logs,
+        reads,
+        queries,
         timers,
         glib: {
             get_user_runtime_dir: () => (opts.runtimeFallback ? CACHE_DIR : RUNTIME_DIR),
@@ -42,9 +47,24 @@ const makeDeps = (initial = {}, opts = {}) => {
         },
         gio: {
             FileCreateFlags: { NONE: 0, PRIVATE: 1, REPLACE_DESTINATION: 2 },
+            FileQueryInfoFlags: { NONE: 0, NOFOLLOW_SYMLINKS: 4 },
+            FileType: fileType,
             File: {
                 new_for_path: (path) => ({
+                    // modelled like the real Gio.File: the size/type is known before
+                    // the content is read, which is what the guard relies on
+                    query_info: (attrs, flags, _cancellable) => {
+                        queries.push({ path, attrs, flags });
+                        if (opts.queryThrows) {
+                            throw new Error('injected query failure');
+                        }
+                        return {
+                            get_file_type: () => (opts.fileType !== undefined ? opts.fileType : fileType.REGULAR),
+                            get_size: () => (opts.fileSize !== undefined ? opts.fileSize : (files.get(path) || '').length),
+                        };
+                    },
                     load_contents: () => {
+                        reads.push(path);
                         if (opts.readThrows) {
                             throw new Error('injected read failure');
                         }
@@ -319,4 +339,38 @@ test('an oversized file is ignored and logged instead of parsed', () => {
     const orders = new Orders(deps);
     assert.equal(orders.restore(app, 0, 0), null, 'the content is not trusted at any size');
     assert.ok(deps.logs.some((l) => l.includes('order')), 'and the rejection is logged');
+});
+
+test('a file that is not a small regular file is rejected BEFORE it is read', () => {
+    // A FIFO, a symlink to /dev/zero or a multi-GB file at the store path would
+    // block or exhaust the compositor's main thread inside load_contents, so the
+    // type and size are checked first and the content is never read.
+    for (const opts of [{ fileType: 3 /* SPECIAL: FIFO */ }, { fileType: 4 /* SHORTCUT: symlink */ }, { fileSize: orderModel.ORDER_MAX_BYTES + 1 }]) {
+        const deps = makeDeps({ [PATH]: stored({ 'MK0\n0': ['0xa', '0xb'] }) }, opts);
+        const orders = new Orders(deps);
+        assert.deepEqual(deps.reads, [], 'load_contents was not called for ' + JSON.stringify(opts));
+        assert.equal(deps.queries.length, 1, 'the type/size was queried');
+        assert.equal(deps.queries[0].flags, deps.gio.FileQueryInfoFlags.NOFOLLOW_SYMLINKS, 'without following a symlink');
+        assert.equal(orders.restore(makeApp(), 0, 0), null);
+    }
+});
+
+test('a query failure is tolerated and logged, never thrown', () => {
+    const deps = makeDeps({ [PATH]: stored({ 'MK0\n0': ['0xa', '0xb'] }) }, { queryThrows: true });
+    const orders = new Orders(deps);
+    assert.equal(orders.restore(makeApp(), 0, 0), null);
+    assert.deepEqual(deps.reads, [], 'nothing was read');
+    assert.ok(deps.logs.some((l) => l.includes('order')));
+});
+
+test('a surface key can never reach Object.prototype', () => {
+    // The file is untrusted: a "__proto__" key must become an ordinary property of
+    // the parsed map, not the map's prototype. (Built as a raw string — in an object
+    // literal "__proto__" would set the prototype and never reach the JSON.)
+    const raw = '{"v":1,"s":{"__proto__":["0x1","0x2"],"MK0\\n0":["0x3","0x4"]}}';
+    const parsed = orderModel.orderParse(raw);
+    assert.equal(Object.getPrototypeOf(parsed.s), null, 'the map has no inherited prototype');
+    assert.deepEqual(Object.keys(parsed.s).sort(), ['MK0\n0', '__proto__'].sort());
+    assert.deepEqual(orderModel.orderGet(parsed, 'MK0\n0'), ['0x3', '0x4']);
+    assert.equal({}.foo, undefined, 'Object.prototype itself is untouched');
 });

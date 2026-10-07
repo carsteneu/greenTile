@@ -6,7 +6,7 @@ export const ORDER_FILE: string;
 /**
  * @typedef {Object} OrdersDeps
  * @property {AnyRecord} glib imports.gi.GLib (get_user_runtime_dir, build_filenamev, mkdir_with_parents)
- * @property {AnyRecord} gio imports.gi.Gio (File.new_for_path, FileCreateFlags)
+ * @property {AnyRecord} gio imports.gi.Gio (File.new_for_path, query_info, FileCreateFlags, FileQueryInfoFlags, FileType)
  * @property {{ toString(bytes: Uint8Array): string, fromString(text: string): Uint8Array }} byteArray imports.byteArray
  * @property {AnyRecord} mainloop imports.mainloop (timeout_add, source_remove)
  * @property {AnyRecord} global the Cinnamon global object
@@ -58,6 +58,12 @@ export const Orders: {
             v: number;
             s: Record<string, string[]>;
         } | null;
+        /**
+         * Logs a rejected file once per store. A file that is not this code's own is
+         * never an error that could break tiling: it is ignored and reported.
+         * @param {string} why
+         */
+        _ignore(why: string): void;
         /** Arms (or re-arms) the coalesced write. */
         _schedule(): void;
         /**
@@ -111,7 +117,7 @@ export type OrdersDeps = {
      */
     glib: AnyRecord;
     /**
-     * imports.gi.Gio (File.new_for_path, FileCreateFlags)
+     * imports.gi.Gio (File.new_for_path, query_info, FileCreateFlags, FileQueryInfoFlags, FileType)
      */
     gio: AnyRecord;
     /**

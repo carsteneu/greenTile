@@ -208,6 +208,7 @@ const createCinnamonEnv = (options) => {
         // every write with the flags it used (PRIVATE must be among them)
         files: new Map(),
         fileWrites: [],
+        fileQueries: [],
         // schema values for fake Gio.Settings.get_string, keyed by schema_id:
         // { 'org.x.apps.portal': { 'color-scheme': 'prefer-dark' } }
         schemaValues: {},
@@ -633,6 +634,8 @@ const createCinnamonEnv = (options) => {
         DBusCallFlags: { NONE: 'none' },
         FileMonitorFlags: { NONE: 0, WATCH_MOVES: 2 },
         FileCreateFlags: { NONE: 0, PRIVATE: 1, REPLACE_DESTINATION: 2 },
+        FileQueryInfoFlags: { NONE: 0, NOFOLLOW_SYMLINKS: 4 },
+        FileType: { UNKNOWN: 0, REGULAR: 1, DIRECTORY: 2, SPECIAL: 3, SHORTCUT: 4, MOUNTABLE: 5 },
         // Synchronous-completing async file ops for the lifecycle tests: the real
         // engine completes asynchronously, but the accent write must land before
         // enable() returns so the sheet is loaded (the async timing itself is
@@ -641,6 +644,19 @@ const createCinnamonEnv = (options) => {
             new_for_path(path) {
                 return {
                     get_path: () => path,
+                    // lib/runtime/orders.js checks the type and the size BEFORE reading,
+                    // so the fake answers from env.fileType / env.fileSize when a test
+                    // plants something that is not a small regular file
+                    query_info(attrs, flags, _cancellable) {
+                        if (env.queryFileThrows) {
+                            throw new Error('fake: injected query failure');
+                        }
+                        env.fileQueries.push({ path, attrs, flags });
+                        return {
+                            get_file_type: () => (env.fileType !== undefined ? env.fileType : 1),
+                            get_size: () => (env.fileSize !== undefined ? env.fileSize : (env.files.get(path) || '').length),
+                        };
+                    },
                     // lib/runtime/orders.js: synchronous read of the runtime-order store
                     load_contents(_cancellable) {
                         if (env.readFileThrows) {
