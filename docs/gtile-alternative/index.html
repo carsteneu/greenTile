@@ -4,12 +4,12 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>A gTile alternative for Cinnamon: greenTile vs gTile · greenTile</title>
-<meta name="description" content="greenTile and gTile are both tiling extensions for the Cinnamon desktop, and greenTile started as a fork of gTile. gTile places the window you point at; greenTile arranges a whole workspace by itself. A fair comparison, and when gTile is still the better choice.">
+<meta name="description" content="greenTile and gTile are both tiling extensions for the Cinnamon desktop, and greenTile started as a fork of gTile. gTile places the window you point at; greenTile arranges a whole workspace by itself. A side by side comparison.">
 <link rel="canonical" href="https://greentile.io/gtile-alternative/">
 <meta property="og:type" content="article">
 <meta property="og:site_name" content="greenTile">
 <meta property="og:title" content="greenTile vs gTile: two ways to tile windows on Cinnamon">
-<meta property="og:description" content="gTile places the window you point at; greenTile arranges a whole workspace as windows open and close. How they differ, and when gTile is still the better choice.">
+<meta property="og:description" content="gTile places the window you point at; greenTile arranges a whole workspace as windows open and close. How they differ, and how to switch.">
 <meta property="og:url" content="https://greentile.io/gtile-alternative/">
 <meta property="og:image" content="https://greentile.io/screenshots/tour-poster.jpg">
 <meta property="og:image:width" content="1280">
@@ -94,10 +94,6 @@ table.cmp{width:100%;border-collapse:collapse;min-width:640px}
 .cmp td{color:#34443A;width:39%}
 .cmp kbd{font-size:11px;padding:3px 5px 4px}
 
-.better{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
-.better li{background:var(--sheet);border:1px solid #D6DED1;border-radius:var(--r);padding:20px 22px 22px;display:flex;flex-direction:column;gap:6px;font-size:15.5px;color:#34443A}
-.better b{font:700 20px/1.15 "Bricolage";letter-spacing:-.02em;color:var(--ink)}
-
 .steps{list-style:none;counter-reset:s;margin:0;padding:0;border-top:1.5px solid var(--ink);max-width:880px}
 .steps li{counter-increment:s;display:grid;grid-template-columns:48px 1fr;gap:0 12px;padding:16px 0 18px;border-bottom:1px solid var(--rule);color:#34443A;font-size:16px}
 .steps li::before{content:counter(s);font:600 13px/1.6 "JBMono";color:var(--moss)}
@@ -110,7 +106,7 @@ table.cmp{width:100%;border-collapse:collapse;min-width:640px}
 footer{padding:36px 0 56px;border-top:1px solid var(--rule);display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px;color:var(--mute);font-size:14px}
 
 @media (max-width:980px){
-  .models,.better{grid-template-columns:1fr}
+  .models{grid-template-columns:1fr}
   nav ul{display:none}
 }
 </style>
@@ -126,10 +122,10 @@ footer{padding:36px 0 56px;border-top:1px solid var(--rule);display:flex;justify
   <header class="hero">
     <div class="eyebrow">A gTile alternative for Cinnamon</div>
     <h1>greenTile vs <em>gTile.</em></h1>
-    <p class="lede">Both are tiling extensions for the Cinnamon desktop, and greenTile started as a fork of gTile. They answer different questions, though: gTile places the window you point at, greenTile arranges a whole workspace by itself. Here is how they compare, and when gTile is still the better pick.</p>
+    <p class="lede">Both are tiling extensions for the Cinnamon desktop, and greenTile started as a fork of gTile. They answer different questions, though: gTile places the window you point at, greenTile arranges a whole workspace by itself. Here is how they compare.</p>
     <div class="cta">
       <a class="btn" href="#compare">Compare them</a>
-      <a class="plain" href="#gtile-wins">When gTile fits better</a>
+      <a class="plain" href="#switch">Switching from gTile</a>
     </div>
 
     <div class="models">
@@ -176,19 +172,6 @@ footer{padding:36px 0 56px;border-top:1px solid var(--rule);display:flex;justify
         </tbody>
       </table>
     </div>
-  </div>
-</section>
-
-<section id="gtile-wins">
-  <div class="wrap">
-    <h2>When gTile is still the better choice.</h2>
-    <p class="sub">gTile has been in the Spices catalogue for years and does its job well. greenTile removed gTile's classic grid, so some of what gTile does is simply not there.</p>
-    <ul class="better">
-      <li><b>You place windows one by one</b>Selecting an exact rectangle of cells for one window, and leaving everything else floating, is what gTile is built for. greenTile has no free placement on a grid.</li>
-      <li><b>You want it from the Extensions manager</b>gTile installs with one click inside Cinnamon. greenTile is not in the catalogue yet and comes as a zip with an installer.</li>
-      <li><b>Your Cinnamon is older than 6.0.4</b>gTile supports much older releases. greenTile requires Cinnamon 6.0.4 or newer.</li>
-      <li><b>Nothing should move on its own</b>greenTile's strength is auto mode. It stays off where you do not turn it on, but if you never want windows rearranged for you, gTile matches that habit better.</li>
-    </ul>
   </div>
 </section>
 
