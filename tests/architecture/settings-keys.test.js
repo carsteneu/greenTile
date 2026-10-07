@@ -45,6 +45,7 @@ test('the schema carries exactly this persisted key set', () => {
         'exclusions', 'fillSingleWindow', 'focusBorder', 'layouts', 'panelSize',
         'panelTheme', 'presetHotkey', 'presets', 'resizeNarrowerHotkey',
           'resizeShorterHotkey', 'resizeTallerHotkey', 'resizeWiderHotkey',
+            'singleWindowMigrated', 'singleWindowMode',
             'starterGeneration', 'starterPresetsImported', 'stateColor', 'stateMode', 'swapDownHotkey', 'swapLeftHotkey',
         'swapRightHotkey', 'swapUpHotkey', 'tileAnimation', 'windowGap',
     ].sort());

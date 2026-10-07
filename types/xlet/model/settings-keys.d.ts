@@ -26,6 +26,8 @@ export const SETTINGS_KEYS: Readonly<{
     tileAnimation: "tileAnimation";
     focusBorder: "focusBorder";
     fillSingleWindow: "fillSingleWindow";
+    singleWindowMode: "singleWindowMode";
+    singleWindowMigrated: "singleWindowMigrated";
     panelTheme: "panelTheme";
     accentMode: "accentMode";
     accentColor: "accentColor";

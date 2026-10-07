@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: greenTile 2.2.3\n"
 "Report-Msgid-Bugs-To: https://github.com/carsteneu\n"
-"POT-Creation-Date: 2026-10-07 16:09+0200\n"
+"POT-Creation-Date: 2026-10-07 17:41+0200\n"
 "PO-Revision-Date: 2024-05-30 9:50+1\n"
 "Last-Translator: Muxutruk <muxutruk2@users.noreply.github.com>\n"
 "Language-Team: Basque <muxutruk2@users.noreply.github.com>\n"
@@ -87,88 +87,88 @@ msgstr "Gorde"
 msgid "Result: %s"
 msgstr "Emaitza: %s"
 
-#: lib/ui/panel.js:103
+#: lib/ui/panel.js:107
 msgid "Edit preset"
 msgstr "Editatu aurrezarpena"
 
-#: lib/ui/panel.js:123
+#: lib/ui/panel.js:127
 msgid "Assigned"
 msgstr "Esleituta"
 
-#: lib/ui/panel.js:125
+#: lib/ui/panel.js:129
 msgid "Remove assignment"
 msgstr "Kendu esleipena"
 
-#: lib/ui/panel.js:156
+#: lib/ui/panel.js:164
 msgid "Gap between windows"
 msgstr "Leihoen arteko tartea"
 
-#: lib/ui/panel.js:162
+#: lib/ui/panel.js:170
 #, javascript-format
 msgid "%d px"
 msgstr "%d px"
 
-#: lib/ui/panel.js:182
+#: lib/ui/panel.js:190
 msgid "Reset sizes"
 msgstr "Berrezarri tamainak"
 
-#: lib/ui/panel.js:225
+#: lib/ui/panel.js:261
 #, javascript-format
 msgid "Presets — workspace %d · %s"
 msgstr "Aurrezarpenak — %d. laneko area · %s"
 
-#: lib/ui/panel.js:227
+#: lib/ui/panel.js:263
 msgid "Create preset"
 msgstr "Sortu aurrezarpena"
 
-#: lib/ui/panel.js:227
+#: lib/ui/panel.js:263
 #, javascript-format
 msgid "Edit %s"
 msgstr "Editatu %s"
 
-#: lib/ui/panel.js:238
+#: lib/ui/panel.js:278
 msgid "Back"
 msgstr "Atzera"
 
-#: lib/ui/panel.js:247 lib/ui/panel.js:253
+#: lib/ui/panel.js:287 lib/ui/panel.js:293
 msgid "Auto: on"
 msgstr "Auto: aktibatuta"
 
-#: lib/ui/panel.js:247 lib/ui/panel.js:253
+#: lib/ui/panel.js:287 lib/ui/panel.js:293
 msgid "Auto: off"
 msgstr "Auto: desaktibatuta"
 
-#: lib/ui/panel.js:275
+#: lib/ui/panel.js:315
 msgid "Dark theme"
 msgstr "Gai iluna"
 
-#: lib/ui/panel.js:275
+#: lib/ui/panel.js:315
 msgid "Light theme"
 msgstr "Gai argia"
 
-#: lib/ui/panel.js:483
+#: lib/ui/panel.js:535
 msgid "No presets yet."
 msgstr "Oraindik ez dago aurrezarpenik."
 
-#: lib/ui/panel.js:503
+#: lib/ui/panel.js:555
 #, javascript-format
 msgid "Preview for %d window"
 msgstr "Aurrebista — leiho kopurua: %d"
 
-#: lib/ui/panel.js:504
+#: lib/ui/panel.js:556
 #, javascript-format
 msgid "Preview for %d windows"
 msgstr "Aurrebista — leiho kopurua: %d"
 
-#: lib/ui/panel.js:504
+#: lib/ui/panel.js:556
 msgid "No windows open — base layout"
 msgstr "Ez dago leiho irekirik — oinarrizko antolamendua"
 
-#: lib/ui/panel.js:518
+#: lib/ui/panel.js:570
 msgid "New preset"
 msgstr "Aurrezarpen berria"
 
-#: lib/ui/panel.js:521
+#: lib/ui/panel.js:573
 msgid "Click a card to apply it to this workspace and tile right away"
 msgstr ""
 "Egin klik txartel batean aurrezarpena laneko area honetan aplikatzeko eta "
@@ -367,6 +367,38 @@ msgstr ""
 "Mosaiko automatikoa edo aurrezarpena aktibatuta dagoenean, mosaikoko leiho "
 "bakar batek erabilgarri dagoen eremu osoa betetzen du, dagoen bezala uztea "
 "beharrean."
+
+#. settings-schema.json->singleWindowMode->description
+#| msgid "Resize tiled windows"
+msgid "A single window"
+msgstr "Leiho bakarra"
+
+#. settings-schema.json->singleWindowMode->tooltip
+msgid ""
+"What happens to a lone tiled window when automatic tiling or a preset is on. "
+"\"Leave it untouched\" does nothing to it. \"Fill the monitor\" makes it "
+"fill the whole usable area. \"Center the window\" centers it at about 62 % "
+"of the width (golden ratio) and 90 % of the height."
+msgstr ""
+"Zer gertatzen zaion lauza bakarreko leiho bati mosaiko automatikoa edo "
+"aurrezarpen bat aktibo dagoenean. Utzi ukitu gabe: ez dio ezer egiten. Bete "
+"monitorea: erabilgarri dagoen azalera osoa hartzen du. Zentratu leihoa: "
+"zabaleraren % 62 inguruan (urrezko proportzioa) eta altueraren % 90ean "
+"zentratzen du."
+
+#. settings-schema.json->singleWindowMode->options
+msgid "Leave it untouched"
+msgstr "Utzi ukitu gabe"
+
+#. settings-schema.json->singleWindowMode->options
+#| msgid "Fill the monitor with a single window"
+msgid "Fill the monitor"
+msgstr "Bete monitorea"
+
+#. settings-schema.json->singleWindowMode->options
+#| msgid "Resize tiled windows"
+msgid "Center the window"
+msgstr "Zentratu leihoa"
 
 #. settings-schema.json->panelTheme->description
 msgid "Theme of the preset panel"

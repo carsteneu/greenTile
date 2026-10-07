@@ -173,6 +173,8 @@ const SETTINGS_DEFAULTS = {
     stateColor: '',
     focusBorder: false,
     fillSingleWindow: false,
+    singleWindowMode: 'leave',
+    singleWindowMigrated: true,
     panelSize: '',
     windowGap: 8,
 };

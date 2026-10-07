@@ -5,6 +5,7 @@ export const Config: {
         app: AppFacade;
         _destroyed: boolean;
         settings: any;
+        _migrateSingleWindow(): void;
         _importStarterPresets(): void;
         /**
          * Makes an external write of the layouts setting invalidate the App's

@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: greenTile 2.2.3\n"
 "Report-Msgid-Bugs-To: https://github.com/carsteneu\n"
-"POT-Creation-Date: 2026-10-07 16:09+0200\n"
+"POT-Creation-Date: 2026-10-07 17:41+0200\n"
 "PO-Revision-Date: 2023-01-09 21:16+0100\n"
 "Last-Translator: Kálmán „KAMI” Szalai <kami911@gmail.com>\n"
 "Language-Team: Hungarian\n"
@@ -89,88 +89,88 @@ msgstr "Mentés"
 msgid "Result: %s"
 msgstr "Eredmény: %s"
 
-#: lib/ui/panel.js:103
+#: lib/ui/panel.js:107
 msgid "Edit preset"
 msgstr "Előbeállítás szerkesztése"
 
-#: lib/ui/panel.js:123
+#: lib/ui/panel.js:127
 msgid "Assigned"
 msgstr "Hozzárendelve"
 
-#: lib/ui/panel.js:125
+#: lib/ui/panel.js:129
 msgid "Remove assignment"
 msgstr "Hozzárendelés megszüntetése"
 
-#: lib/ui/panel.js:156
+#: lib/ui/panel.js:164
 msgid "Gap between windows"
 msgstr "Ablakok közötti távolság"
 
-#: lib/ui/panel.js:162
+#: lib/ui/panel.js:170
 #, javascript-format
 msgid "%d px"
 msgstr "%d px"
 
-#: lib/ui/panel.js:182
+#: lib/ui/panel.js:190
 msgid "Reset sizes"
 msgstr "Méretek visszaállítása"
 
-#: lib/ui/panel.js:225
+#: lib/ui/panel.js:261
 #, javascript-format
 msgid "Presets — workspace %d · %s"
 msgstr "Előbeállítások — %d. munkaterület · %s"
 
-#: lib/ui/panel.js:227
+#: lib/ui/panel.js:263
 msgid "Create preset"
 msgstr "Előbeállítás létrehozása"
 
-#: lib/ui/panel.js:227
+#: lib/ui/panel.js:263
 #, javascript-format
 msgid "Edit %s"
 msgstr "%s szerkesztése"
 
-#: lib/ui/panel.js:238
+#: lib/ui/panel.js:278
 msgid "Back"
 msgstr "Vissza"
 
-#: lib/ui/panel.js:247 lib/ui/panel.js:253
+#: lib/ui/panel.js:287 lib/ui/panel.js:293
 msgid "Auto: on"
 msgstr "Auto: be"
 
-#: lib/ui/panel.js:247 lib/ui/panel.js:253
+#: lib/ui/panel.js:287 lib/ui/panel.js:293
 msgid "Auto: off"
 msgstr "Auto: ki"
 
-#: lib/ui/panel.js:275
+#: lib/ui/panel.js:315
 msgid "Dark theme"
 msgstr "Sötét téma"
 
-#: lib/ui/panel.js:275
+#: lib/ui/panel.js:315
 msgid "Light theme"
 msgstr "Világos téma"
 
-#: lib/ui/panel.js:483
+#: lib/ui/panel.js:535
 msgid "No presets yet."
 msgstr "Még nincsenek előbeállítások."
 
-#: lib/ui/panel.js:503
+#: lib/ui/panel.js:555
 #, javascript-format
 msgid "Preview for %d window"
 msgstr "Előnézet %d ablak esetén"
 
-#: lib/ui/panel.js:504
+#: lib/ui/panel.js:556
 #, javascript-format
 msgid "Preview for %d windows"
 msgstr "Előnézet %d ablak esetén"
 
-#: lib/ui/panel.js:504
+#: lib/ui/panel.js:556
 msgid "No windows open — base layout"
 msgstr "Nincs nyitott ablak — alapelrendezés"
 
-#: lib/ui/panel.js:518
+#: lib/ui/panel.js:570
 msgid "New preset"
 msgstr "Új előbeállítás"
 
-#: lib/ui/panel.js:521
+#: lib/ui/panel.js:573
 msgid "Click a card to apply it to this workspace and tile right away"
 msgstr ""
 "Kattints egy kártyára, hogy alkalmazd az előbeállítást ezen a "
@@ -366,6 +366,38 @@ msgid ""
 msgstr ""
 "Automatikus csempézéssel vagy előbeállítással egyetlen csempézett ablak "
 "kitölti a teljes használható területet ahelyett, hogy érintetlenül maradna."
+
+#. settings-schema.json->singleWindowMode->description
+#| msgid "Resize tiled windows"
+msgid "A single window"
+msgstr "Egyetlen ablak"
+
+#. settings-schema.json->singleWindowMode->tooltip
+msgid ""
+"What happens to a lone tiled window when automatic tiling or a preset is on. "
+"\"Leave it untouched\" does nothing to it. \"Fill the monitor\" makes it "
+"fill the whole usable area. \"Center the window\" centers it at about 62 % "
+"of the width (golden ratio) and 90 % of the height."
+msgstr ""
+"Mi történik az egyetlen csempézett ablakkal, ha az automatikus csempézés "
+"vagy egy előbeállítás be van kapcsolva. Hagyd érintetlenül: nem tesz vele "
+"semmit. Töltse ki a monitort: kitölti a teljes hasznos területet. Ablak "
+"középre: körülbelül a szélesség 62 %-ánál (aranymetszés) és a magasság 90 %-"
+"ánál középre igazítja."
+
+#. settings-schema.json->singleWindowMode->options
+msgid "Leave it untouched"
+msgstr "Hagyd érintetlenül"
+
+#. settings-schema.json->singleWindowMode->options
+#| msgid "Fill the monitor with a single window"
+msgid "Fill the monitor"
+msgstr "Töltse ki a monitort"
+
+#. settings-schema.json->singleWindowMode->options
+#| msgid "Resize tiled windows"
+msgid "Center the window"
+msgstr "Ablak középre"
 
 #. settings-schema.json->panelTheme->description
 msgid "Theme of the preset panel"

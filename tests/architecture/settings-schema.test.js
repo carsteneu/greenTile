@@ -82,6 +82,41 @@ test('stored boolean values survive the checkbox -> switch upgrade', () => {
     }
 });
 
+test('the single-window select replaced the switch in the Tiling section', () => {
+    assert.deepEqual(schema.layout['tiling-section'].keys, ['tileAnimation', 'focusBorder', 'singleWindowMode']);
+    const sectionKeys = new Set(Object.values(schema.layout)
+        .filter((entry) => entry.type === 'section')
+        .flatMap((entry) => entry.keys));
+    assert.equal(sectionKeys.has('singleWindowMode'), true, 'the select is shown');
+    assert.equal(sectionKeys.has('fillSingleWindow'), false, 'the old key is hidden from every section but stays in the schema');
+});
+
+test('singleWindowMode is a combobox over language-neutral tokens, with the migration marker', () => {
+    assert.equal(schema.singleWindowMode.type, 'combobox');
+    assert.equal(schema.singleWindowMode.default, 'center');
+    assert.equal(schema.singleWindowMode.description, 'A single window');
+    assert.deepEqual(schema.singleWindowMode.options, {
+        'Leave it untouched': 'leave',
+        'Fill the monitor': 'fill',
+        'Center the window': 'center',
+    });
+    assert.equal(schema.singleWindowMigrated.type, 'generic');
+    assert.equal(schema.singleWindowMigrated.default, false);
+});
+
+test('a boolean on the combobox key itself would be dropped — the migration never writes one', () => {
+    // Replays the upgrade: a stored boolean is no valid combobox value and falls
+    // back to the default, so the migration must carry the old choice on the OLD
+    // key (fillSingleWindow, still a switch) and write the new key itself.
+    const template = () => ({ singleWindowMode: { type: 'combobox', default: 'leave', options: schema.singleWindowMode.options } });
+    for (const stored of [true, false]) {
+        assert.equal(doUpgrade({ singleWindowMode: { value: stored } }, template()).singleWindowMode.value, 'leave');
+    }
+    for (const stored of ['leave', 'fill', 'center']) {
+        assert.equal(doUpgrade({ singleWindowMode: { value: stored } }, template()).singleWindowMode.value, stored);
+    }
+});
+
 test('a first install includes sixteen distinct editable starter presets', () => {
     const presets = JSON.parse(schema.presets.default);
     assert.equal(presets.length, 16);

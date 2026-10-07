@@ -86,12 +86,15 @@ export const Orders: {
         /**
          * Records the order a placement produced. Only windows with an X11
          * description count (a Wayland window has none), and fewer than two leaves no
-         * order to restore. An unchanged order writes nothing.
+         * order to restore. An unchanged order writes nothing. A FIRST placement that
+         * holds fewer than two windows keeps the stored order: that set can still be
+         * opening after a restart.
          *
          * Two callers exist and they differ in what they teach the store:
-         * - `explicit` (a swap, or the drag-and-drop that placed the window the user
-         *   moved): the placement IS the user's arrangement, so it is recorded and the
-         *   surface's pending restore is closed — a later retile must not undo it.
+         * - `explicit` (a swap, an edge resize, or the drag-and-drop that placed the
+         *   window the user moved): the placement IS the user's arrangement, so it is
+         *   recorded and the surface's pending restore is closed — a later retile must
+         *   not undo it.
          * - otherwise the retile placed the surface's windows by their live positions,
          *   which after a restart are the ones Muffin scrambled them into. That is no
          *   order to learn from while the surface's stored one is still waiting to be
