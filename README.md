@@ -84,6 +84,8 @@ Auto mode is switched per monitor and workspace. It is on by default where a pre
 
 Only visible windows of the active workspace are tiled. The order follows their position on screen.
 
+After a Cinnamon restart on X11 (`Alt+F2` → `r`) the first retile of each monitor and workspace restores the window order it had before the restart, instead of re-deriving it from the positions Muffin moved the windows to while Cinnamon was coming up. The record is kept in the session's runtime directory and is gone after a log out; windows that are no longer there are simply skipped and the rest keep the position order. Without a record — the first run, or any run after a log out — the order follows the positions as usual. A window you place by hand (dragging it into another cell, or the swap hotkey) is the newer arrangement and is recorded at once, so it is never overwritten by an older record.
+
 Pausing keeps the preset assigned but stops automatic tiling, snap-on-release and swapping from that monitor and workspace. Turning auto mode on or selecting a preset explicitly resumes tiling. A pause requested before monitor detection finishes is retained until it can be applied. New windows normally join the end of the layout; an explicit successful drop takes precedence over that automatic ordering.
 
 Without a preset, the auto grid depends on the monitor width:
