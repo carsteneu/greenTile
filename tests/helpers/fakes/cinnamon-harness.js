@@ -112,6 +112,16 @@ const makeWindow = (env, seq, rect, monitor = 0, withActor = null, options = {})
             window.rect = [x, y, window.rect[2], window.rect[3]];
         },
         unmaximize() {},
+        // maximize/fullscreen state read by the single-window mode guard: a lone
+        // window the user maximized (both directions) or put fullscreen is left
+        // alone. `maximized` is the Meta.MaximizeFlags mask, 0 by default.
+        get_maximized: () => (options.maximized !== undefined ? options.maximized : 0),
+        is_fullscreen: () => options.fullscreen === true,
+        // a transient window (a child/properties dialog) and a window that cannot
+        // be resized are never tiled (windowTileable). Defaults keep every
+        // existing case byte-identical: not transient, resizable.
+        get_transient_for: () => (options.transientFor !== undefined ? options.transientFor : null),
+        allows_resize: () => (options.allowsResize !== undefined ? options.allowsResize : true),
         activate() {
             env.display.focus_window = window;
         },

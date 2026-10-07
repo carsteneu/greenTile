@@ -44,6 +44,57 @@ const run = (mode, preset, n, gap = 0) => {
     return { env, ext, app, wins, rects: wins.map((w) => w.rect) };
 };
 
+// The same scene as run() for a lone window whose maximize state the caller
+// sets through the harness window options.
+const runLone = (mode, preset, options, gap = 0) => {
+    const { env, ext } = makeEnv({ windowGap: gap, singleWindowMode: mode, singleWindowMigrated: true });
+    enableOnMonitors(env, ext, [MONITOR]);
+    const ws = makeWorkspace(env);
+    ws.index = () => 0;
+    env.activeWorkspace = ws;
+    const win = makeWindow(env, 1, SPAWN.slice(), 0, null, options);
+    env.tabList.push(win);
+    env.display.focus_window = win;
+    const app = ext.currentSession().app;
+    app.ops.presetsWrite(app, STARTERS);
+    app.ops.layoutSet(app, 0, 0, preset ? { preset: preset.id } : { preset: null, auto: true });
+    app.ops.retileMonitor(app, 0);
+    return { env, ext, app, win, rect: win.rect.slice() };
+};
+
+// A maximized or fullscreen window is the user's own full-area placement: the
+// single-window mode must leave it exactly where it is — no unmaximize, no move
+// — in both placing modes (leave places nothing anyway).
+test('a lone maximized or fullscreen window is left untouched by center and fill', () => {
+    for (const mode of ['center', 'fill']) {
+        for (const preset of [null, STARTERS.find((p) => p.name === 'Center main')]) {
+            const label = `${mode}/${preset ? preset.name : 'auto'}`;
+            const a = runLone(mode, preset, { maximized: 6 });
+            assert.equal(a.env.gi.Meta.MaximizeFlags.HORIZONTAL | a.env.gi.Meta.MaximizeFlags.VERTICAL, 6,
+                'the fake maximize "both" mask is 6 (harness constant)');
+            assert.deepEqual(a.rect, SPAWN.slice(), `${label}: a maximized lone window keeps its frame`);
+            assert.deepEqual(a.win.moves, [], `${label}: a maximized lone window is not moved`);
+            const b = runLone(mode, preset, { fullscreen: true });
+            assert.deepEqual(b.rect, SPAWN.slice(), `${label}: a fullscreen lone window keeps its frame`);
+            assert.deepEqual(b.win.moves, [], `${label}: a fullscreen lone window is not moved`);
+        }
+    }
+});
+
+// One-directional maximize is NOT the user's full-area placement: the mode still
+// tiles the other axis. (Documented decision; the harness "horizontal" mask is 2.)
+test('a one-directionally maximized lone window is still placed', () => {
+    assert.deepEqual(runLone('center', null, { maximized: 2 }).rect, CENTER, 'horizontal only -> centered');
+    assert.deepEqual(runLone('fill', null, { maximized: 4 }).rect, AREA.slice(), 'vertical only -> filled');
+});
+
+// The guard belongs to the mode alone: a plain (unmaximized) lone window still
+// centers/fills exactly as before — the positive control for the pair above.
+test('a plain lone window still centers (positive control for the maximize guard)', () => {
+    assert.deepEqual(runLone('center', null, {}).rect, CENTER);
+    assert.deepEqual(runLone('fill', null, {}).rect, AREA.slice());
+});
+
 test('regression: leave and fill agree for every count, and differ only at a lone window (144 cases)', () => {
     const fails = [];
     for (const preset of STARTERS) {
