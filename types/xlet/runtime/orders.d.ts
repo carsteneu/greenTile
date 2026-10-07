@@ -86,7 +86,9 @@ export const Orders: {
         /**
          * Records the order a placement produced. Only windows with an X11
          * description count (a Wayland window has none), and fewer than two leaves no
-         * order to restore. An unchanged order writes nothing.
+         * order to restore. An unchanged order writes nothing. A FIRST placement that
+         * holds fewer than two windows keeps the stored order: that set can still be
+         * opening after a restart.
          *
          * Two callers exist and they differ in what they teach the store:
          * - `explicit` (a swap, or the drag-and-drop that placed the window the user

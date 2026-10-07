@@ -193,3 +193,33 @@ test('a lone window neither spends the surface restore nor clears its stored ord
         assert.deepEqual(w2.rect, HALF_R, `${label}: 0x2 keeps its stored second place`);
     }
 });
+
+// The other half of the same guard: a user arrangement at n = 1 must still CLOSE the
+// surface's restore (orders.record: an explicit placement is the user's word, a later
+// retile must not undo it) — it just must not write an order, because one window is
+// none, and writing it would clear the entry stored for that surface.
+test('a lone window\'s user arrangement closes the restore without writing an order', () => {
+    const first = orderScene('center', null);
+    first.env.tabList.push(
+        makeWindow(first.env, 11, HALF_L, 0, null, { description: '0x1' }),
+        makeWindow(first.env, 12, HALF_R, 0, null, { description: '0x2' }),
+    );
+    first.env.display.focus_window = first.env.tabList[0];
+    first.app.ops.retileMonitor(first.app, 0);
+    fireMs(first.env, 1000);
+    const recorded = first.env.files.get(ORDER_PATH);
+    assert.ok(recorded, 'the order of two windows was recorded');
+
+    // the restart session has the lone window back and the user rearranges it
+    const second = orderScene('center', null, recorded);
+    const w1 = makeWindow(second.env, 91, [700, 0, 400, 300], 0, null, { description: '0x1' });
+    second.env.tabList.push(w1);
+    second.env.display.focus_window = w1;
+    second.app.auto.sortOverride(w1.get_stable_sequence(), HALF_L, 0);
+    second.app.ops.retileMonitor(second.app, 0);
+    assert.equal(second.app.session.orderUsed.has(surfaceKey(second.app)), true,
+        'the arrangement closed the surface restore');
+    assert.equal([...second.env.timers.values()].filter((t) => t.ms === 1000).length, 0,
+        'one window schedules no order write');
+    assert.equal(second.env.files.get(ORDER_PATH), recorded, 'the stored order is untouched');
+});
