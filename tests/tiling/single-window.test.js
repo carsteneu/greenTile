@@ -122,3 +122,74 @@ test('a retile never moves a lone window again, in every mode and gap', () => {
         }
     }
 });
+
+// The sibling restart-order feature (lib/runtime/orders.js) keeps the user's window
+// order across a Cinnamon restart. A surface whose windows are still opening retiles
+// at n = 1 first, and the mode makes that lone window a placed window — so the retile
+// must neither spend the surface's one restore nor record anything: an order needs two
+// windows (lib/model/window-order.js orderIds), and recording a single one would clear
+// the order stored for that surface.
+const ORDER_PATH = '/run/user/1000/greenTile@carsteneu/order.json';
+const HALF_L = [0, 0, 1000, 1100];
+const HALF_R = [1000, 0, 1000, 1100];
+const surfaceKey = (app) => app.monitors.keys[0] + '\n' + app.monitors.wsKey(0, 0);
+
+const fireMs = (env, ms) => {
+    const entry = [...env.timers.entries()].find(([, t]) => t.ms === ms);
+    assert.ok(entry, 'no timer of ' + ms + ' ms');
+    env.timers.delete(entry[0]);
+    entry[1].cb();
+};
+
+// One session of `mode` with `preset` (null = automatic tiling), an active workspace
+// and — for the restart session — the order file the previous session recorded.
+const orderScene = (mode, preset, stored) => {
+    const { env, ext } = makeEnv({ windowGap: 0, singleWindowMode: mode, singleWindowMigrated: true });
+    if (stored !== undefined) {
+        env.files.set(ORDER_PATH, stored);
+    }
+    enableOnMonitors(env, ext, [MONITOR]);
+    const ws = makeWorkspace(env);
+    ws.index = () => 0;
+    env.activeWorkspace = ws;
+    const app = ext.currentSession().app;
+    app.ops.presetsWrite(app, STARTERS);
+    app.ops.layoutSet(app, 0, 0, preset ? { preset: preset.id } : { preset: null, auto: true });
+    return { env, app };
+};
+
+test('a lone window neither spends the surface restore nor clears its stored order', () => {
+    const layouts = [
+        ['automatic tiling', null],
+        ['a preset', STARTERS.find((p) => p.name === 'Two columns')],
+    ];
+    for (const [label, preset] of layouts) {
+        // session 1: two windows record their order (0x1 left, 0x2 right)
+        const first = orderScene('center', preset);
+        first.env.tabList.push(
+            makeWindow(first.env, 11, HALF_L, 0, null, { description: '0x1' }),
+            makeWindow(first.env, 12, HALF_R, 0, null, { description: '0x2' }),
+        );
+        first.env.display.focus_window = first.env.tabList[0];
+        first.app.ops.retileMonitor(first.app, 0);
+        fireMs(first.env, 1000);
+        const recorded = first.env.files.get(ORDER_PATH);
+        assert.ok(recorded, `${label}: the order of two windows was recorded`);
+
+        // session 2 (the restart): only 0x1 is back, where Muffin moved it
+        const second = orderScene('center', preset, recorded);
+        const w1 = makeWindow(second.env, 91, [700, 0, 400, 300], 0, null, { description: '0x1' });
+        second.env.tabList.push(w1);
+        second.env.display.focus_window = w1;
+        second.app.ops.retileMonitor(second.app, 0);
+        assert.equal(second.app.session.orderUsed.has(surfaceKey(second.app)), false,
+            `${label}: the lone window must not spend the surface restore`);
+
+        // the second window returns where Muffin put it: the stored order must win
+        const w2 = makeWindow(second.env, 92, [10, 10, 400, 300], 0, null, { description: '0x2' });
+        second.env.tabList.push(w2);
+        second.app.ops.retileMonitor(second.app, 0);
+        assert.deepEqual(w1.rect, HALF_L, `${label}: 0x1 keeps its stored first place`);
+        assert.deepEqual(w2.rect, HALF_R, `${label}: 0x2 keeps its stored second place`);
+    }
+});
