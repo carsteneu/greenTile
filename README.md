@@ -54,12 +54,12 @@ On the first start after upgrading to a version with these starters, greenTile a
 
 **Preset panel** (`Super+Ctrl+P`, works on the monitor of the focused window):
 
-- Click a card to assign the preset and tile right away. A click is binding: it first clears this workspace's moved borders and dragged layouts (exactly what **Reset sizes** does), so the preset's own widths apply. The panel stays open, so you can try several presets.
+- Click a card to assign the preset and tile right away. A click is binding: it also clears this workspace's moved borders and dragged layouts — every window count, exactly what **Reset sizes** does — and then tiles the preset's own widths. The panel stays open, so you can try several presets.
 - The cards form a grid: as many equal-width columns as the panel width holds, each with a large preview of the layout a click would apply.
 - ✎ on a card opens that preset in the editor; ✕ on the assigned card removes the assignment. **＋ New preset** starts an empty one.
 - **Auto: on / off** in the title bar shows and switches auto mode (green = on).
 - **Gap between windows** sets the gap between tiled windows (0 to 48 px). Screen edges stay flush.
-- **Reset sizes** appears when borders were moved or layouts dragged, and returns to the preset's widths — the column spans when the rule has them, equal sizes otherwise. Clicking a card does the same and takes the button away.
+- **Reset sizes** is offered when borders were moved or layouts dragged on this monitor and workspace, and returns to the preset's widths — the column spans when the rule has them, equal sizes otherwise. Clicking a card does the same and takes the button away; sizes made while the panel is open bring it back the next time the panel is opened.
 - The sun/moon button switches between light and dark; ⚙ opens the settings.
 - Drag the title bar to move the panel, ◢ to resize it. `Esc`, ✕ or a click outside closes it.
 
@@ -95,7 +95,7 @@ With **Fill the monitor with a single window** on (settings, **Settings** page, 
 
 ## Adjusting the layout
 
-**Moving borders.** Drag the edge of a tiled window, or use `Super+Alt+Arrow`. Neighbours follow. greenTile targets a minimum of 120 px per dimension when the available area and gaps allow it. When that is impossible, it distributes the remaining space evenly and reduces oversized gap insets; invalid or unplaceable frames are left untouched. Applications can enforce larger minimum sizes, so their actual windows may not fit the requested cells. Borders are remembered per monitor, workspace and window count, so opening a fourth window uses the 4-window layout and closing it brings the 3-window borders back.
+**Moving borders.** Drag the edge of a tiled window, or use `Super+Alt+Arrow`. Neighbours follow. greenTile targets a minimum of 120 px per dimension when the available area and gaps allow it. When that is impossible, it distributes the remaining space evenly and reduces oversized gap insets; invalid or unplaceable frames are left untouched. Applications can enforce larger minimum sizes, so their actual windows may not fit the requested cells. Borders are remembered per monitor, workspace and window count, so opening a fourth window uses the 4-window layout and closing it brings the 3-window borders back. Clicking a preset card, or **Reset sizes**, clears all of them for that monitor and workspace at once — every window count, not just the current one — and there is no undo; editing a preset does not clear them, so an edit of the assigned preset stays under the dragged sizes until the next card click.
 
 **Splitting by drag.** While moving a window over another tiled window, a preview shows where it will land. The outer 25 % of a cell are drop zones:
 

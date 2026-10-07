@@ -66,8 +66,9 @@ const cardOf = (app, name) => cards(app).find((c) => {
 });
 /** Left edges of the columns the windows actually landed in. */
 const columns = (wins) => [...new Set(wins.map((w) => w.rect[0]))].sort((a, b) => a - b);
-/** Placement calls: one resize per window per retile (a plain move follows it, so counting
- *  the resizes keeps one retile at exactly one per window and catches a second one). */
+/** Placement calls: one resize per window per retile, so one retile keeps this at one per
+ *  window and a second one doubles it. (Windows that enforce a minimum can be placed more
+ *  than once inside a single retile, so keep fixture minima out of these cases.) */
 const places = (wins) => wins.reduce((sum, w) => sum + w.moves.filter((m) => m[0] === 'resize').length, 0);
 const entryOf = (env) => {
     const layouts = JSON.parse(settingsInstance(env).getValue('layouts'));
@@ -142,8 +143,9 @@ test('a card click clears this workspace dragged sizes and applies the clicked p
     const widths = cols.map((x) => wins.find((w) => w.rect[0] === x).rect[2]);
     assert.ok(widths[1] > widths[0] * 3.5, 'the middle column carries the spans, got ' + JSON.stringify(widths));
     assert.ok(Math.abs(widths[2] - widths[0]) <= 2, 'the outer columns stay equal, got ' + JSON.stringify(widths));
-    // Exactly one retile: the windows moved once. A reset placed AFTER the retile would
-    // have moved them twice (once with the stale shape, once with the preset).
+    // One retile: a second placement of the same preset layout would double this. The
+    // column positions above are what pins the ORDER (a reset after the retile leaves the
+    // dragged shape in place for the retile and shows five columns).
     assert.equal(places(wins), wins.length, 'one retile placed every window once');
     // The stored dragged sizes are gone for this monitor + workspace only.
     const entry = entryOf(env);
@@ -186,14 +188,22 @@ test('other workspaces and other monitors keep their dragged sizes', () => {
 
 test('a refused assignment leaves the dragged sizes untouched', () => {
     const { env, ext, app, wins } = setup();
-    const before = settingsInstance(env).getValue('layouts');
+    // The reset must not run at all here. Spying on the instance is what binds it: with
+    // only the store/no-log assertions the test also passed when the reset ran
+    // unconditionally, because a corrupt store refuses both writes on its own.
+    let resets = 0;
+    const original = app.split.reset;
+    app.split.reset = (...args) => {
+        resets += 1;
+        return original.apply(app.split, args);
+    };
     // A corrupt store makes every layoutSet refuse: nothing may be cleared then. The
     // store's own "is corrupt, not writing it" warning is expected; an assignment is not.
     settingsInstance(env).setValue('layouts', '{"broken"');
     cardOf(app, 'Wide').emit('clicked');
+    assert.equal(resets, 0, 'no reset ran when the assignment was refused');
     assert.equal(settingsInstance(env).getValue('layouts'), '{"broken"', 'the corrupt store is not rewritten');
     assert.ok(!env.logs.some((line) => /assigned/.test(line)), 'nothing was logged as assigned');
     assert.equal(columns(wins).length, 5, 'the windows keep their dragged layout');
     ext.disable();
-    assert.ok(before, 'sanity: there was a store to begin with');
 });
