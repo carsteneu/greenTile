@@ -34,6 +34,8 @@
   --r:10px;
 }
 *{box-sizing:border-box}
+html{scroll-behavior:smooth}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
 html{background:var(--sage);color:var(--ink)}
 body{margin:0;font:400 17px/1.55 "Instrument",system-ui,sans-serif;-webkit-font-smoothing:antialiased}
 a{color:inherit}
@@ -115,7 +117,7 @@ footer{padding:36px 0 56px;border-top:1px solid var(--rule);display:flex;justify
 <div class="wrap">
   <nav>
     <a class="mark" href="../"><i><b></b><b></b><b></b></i>greenTile</a>
-    <ul><li><a href="../">Home</a></li><li><a href="../auto-tiling-cinnamon/">Auto tiling</a></li><li><a href="./" aria-current="page">vs gTile</a></li><li><a href="#compare">Comparison</a></li></ul>
+    <ul><li><a href="../#tour">Video</a></li><li><a href="../#features">Features</a></li><li><a href="../#details">Details</a></li><li><a href="../#keys">Hotkeys</a></li><li><a href="../#install">Install</a></li><li><a href="../auto-tiling-cinnamon/">Auto tiling</a></li><li><a href="./" aria-current="page">vs gTile</a></li></ul>
     <a class="gh" href="https://github.com/carsteneu/greenTile">github.com/carsteneu/greenTile</a>
   </nav>
 
@@ -193,7 +195,6 @@ footer{padding:36px 0 56px;border-top:1px solid var(--rule);display:flex;justify
   <div class="wrap origin">
     <h2>Where greenTile comes from.</h2>
     <p>greenTile is a fork of gTile 2.2.1, which was written by vibou for GNOME Shell and ported to Cinnamon by shuairan. The extension skeleton and the translation sources come from gTile; the classic grid was removed and the preset and auto model built in its place. Nearly unchanged code inherited from gTile is less than 1 % of greenTile's runtime code, measured on version 2.2.0 as described in the <a href="https://github.com/carsteneu/greenTile#origin">README</a>. Both are free software under the GPL v3.</p>
-    <p>greenTile has limits of its own: no dynamic tiling tree as in i3, no tabbed containers, per-app rules for exclusions only. They are listed on the <a href="../auto-tiling-cinnamon/#limits">auto tiling page</a>.</p>
     <div class="next">
       <a class="btn" href="../auto-tiling-cinnamon/#install">Install greenTile</a>
       <a class="plain" href="../">See all features</a>
