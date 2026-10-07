@@ -92,6 +92,9 @@ interface CinnamonWindow {
     activate(time: number): void;
     /** Stable seq across App recreations (Meta.Window.get_stable_sequence). */
     get_stable_sequence(): number;
+    /** X11 window description ("0x…"), null for a Wayland client
+     * (Meta.Window.get_description) — the identity the restart-order store records. */
+    get_description(): string | null;
     get_wm_class_instance(): string | null;
     /** GObject signal id — lib/runtime (auto, exclusions, border) keeps it for disconnect. */
     connect(signal: string, callback: (...args: any[]) => void): number;
@@ -240,6 +243,8 @@ type SessionFacade = {
     panelSaved: any;
     exclToggles: Map<number, boolean>;
     exclWatches: Map<number, { disconnect: () => void }>;
+    /** Surfaces whose stored restart order was already used (first-use gate). */
+    orderUsed: Set<string>;
     /** Auto on/off commands pressed before the monitor registry was ready. */
     pendingAuto: Array<{ monitorIndex: number; wsIndex: number; auto: boolean }>;
     nextAccentGen(): string;
@@ -303,6 +308,15 @@ type SplitFacade = {
     any(app: AppFacade, monitorIndex: number, wsIndex: number): boolean;
     reset(app: AppFacade, monitorIndex: number, wsIndex: number): void;
     invalidate(): void;
+};
+
+/** Restart-order store (lib/runtime/orders.js): per-surface window order that
+ * survives a Cinnamon restart, written after every placement and consumed once
+ * per surface by the first retile after enable (lib/tiling/retile.js). */
+type OrdersFacade = {
+    restore(app: AppFacade, monitorIndex: number, wsIndex: number): string[] | null;
+    record(app: AppFacade, monitorIndex: number, wsIndex: number, ordered: CinnamonWindow[], explicit?: boolean): void;
+    destroy(): void;
 };
 
 /** Monitor registry facade (lib/runtime/monitors.js). */
@@ -372,6 +386,8 @@ type AppFacade = {
     auto: AutoFacade;
     placement: PlacementFacade;
     split: SplitFacade;
+    /** Restart-order store (lib/runtime/orders.js). */
+    orders: OrdersFacade;
     monitors: MonitorsFacade;
     excl: ExclFacade;
     ops: OpsFacade;

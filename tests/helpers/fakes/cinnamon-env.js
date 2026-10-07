@@ -205,6 +205,12 @@ const createCinnamonEnv = (options) => {
         accentWrites: [],
         // stylesheet-file cleanup: paths removed via Gio.File.delete_async
         accentDeletes: [],
+        // in-memory file system for the runtime-order store (lib/runtime/orders.js):
+        // path -> text (Gio.File.new_for_path load_contents/replace_contents), plus
+        // every write with the flags it used (PRIVATE must be among them)
+        files: new Map(),
+        fileWrites: [],
+        fileQueries: [],
         // schema values for fake Gio.Settings.get_string, keyed by schema_id:
         // { 'org.x.apps.portal': { 'color-scheme': 'prefer-dark' } }
         schemaValues: {},
@@ -391,6 +397,9 @@ const createCinnamonEnv = (options) => {
         get_monotonic_time: () => 0,
         get_home_dir: () => '/home/fake',
         get_user_cache_dir: () => '/home/fake/.cache',
+        // per-session runtime dir: the restart-order store lives here and is wiped
+        // at logout (lib/runtime/orders.js)
+        get_user_runtime_dir: () => '/run/user/1000',
         // XDG data dir: gettext mo lookup root (lib/ui/i18n.js), mirrors the
         // real GLib default under $XDG_DATA_HOME unset
         get_user_data_dir: () => '/home/fake/.local/share',
@@ -627,6 +636,8 @@ const createCinnamonEnv = (options) => {
         DBusCallFlags: { NONE: 'none' },
         FileMonitorFlags: { NONE: 0, WATCH_MOVES: 2 },
         FileCreateFlags: { NONE: 0, PRIVATE: 1, REPLACE_DESTINATION: 2 },
+        FileQueryInfoFlags: { NONE: 0, NOFOLLOW_SYMLINKS: 4 },
+        FileType: { UNKNOWN: 0, REGULAR: 1, DIRECTORY: 2, SPECIAL: 3, SHORTCUT: 4, MOUNTABLE: 5 },
         // Synchronous-completing async file ops for the lifecycle tests: the real
         // engine completes asynchronously, but the accent write must land before
         // enable() returns so the sheet is loaded (the async timing itself is
@@ -635,6 +646,40 @@ const createCinnamonEnv = (options) => {
             new_for_path(path) {
                 return {
                     get_path: () => path,
+                    // lib/runtime/orders.js checks the type and the size BEFORE reading,
+                    // so the fake answers from env.fileType / env.fileSize when a test
+                    // plants something that is not a small regular file
+                    query_info(attrs, flags, _cancellable) {
+                        if (env.queryFileThrows) {
+                            throw new Error('fake: injected query failure');
+                        }
+                        env.fileQueries.push({ path, attrs, flags });
+                        return {
+                            get_file_type: () => (env.fileType !== undefined ? env.fileType : 1),
+                            get_size: () => (env.fileSize !== undefined ? env.fileSize : (env.files.get(path) || '').length),
+                        };
+                    },
+                    // lib/runtime/orders.js: synchronous read of the runtime-order store
+                    load_contents(_cancellable) {
+                        if (env.readFileThrows) {
+                            throw new Error('fake: injected read failure');
+                        }
+                        if (!env.files.has(path)) {
+                            return [false, null];
+                        }
+                        return [true, new TextEncoder().encode(env.files.get(path))];
+                    },
+                    // lib/runtime/orders.js: atomic (local) replacement; the fake keeps
+                    // the text so a test can read it back
+                    replace_contents(bytes, _etag, _backup, flags, _cancellable) {
+                        if (env.writeFileThrows) {
+                            throw new Error('fake: injected write failure');
+                        }
+                        const text = new TextDecoder().decode(bytes);
+                        env.files.set(path, text);
+                        env.fileWrites.push({ path, text, flags });
+                        return [true, 'fake-etag'];
+                    },
                     replace_contents_bytes_async(bytes, _etag, _backup, _flags, _cancellable, cb) {
                         env.accentWrites.push(bytes.contents);
                         cb(null, {});
@@ -913,6 +958,7 @@ const createCinnamonEnv = (options) => {
     // the theme feeds to GLib.Bytes for the accent stylesheet write
     env.byteArray = {
         fromString: (contents) => new TextEncoder().encode(contents),
+        toString: (bytes) => new TextDecoder().decode(bytes),
     };
     env.imports = new Proxy(function () {}, {
         get: (t, p) => {

@@ -102,6 +102,8 @@ export const Session: {
         panelSaved: any;
         exclToggles: Map<any, any>;
         exclWatches: Map<any, any>;
+        /** @type {Set<string>} */
+        orderUsed: Set<string>;
         /** @type {any} */ app: any;
         _destroyed: boolean;
         /**
@@ -304,6 +306,8 @@ export type SessionDeps = {
         panelSaved: any;
         exclToggles: Map<any, any>;
         exclWatches: Map<any, any>;
+        /** @type {Set<string>} */
+        orderUsed: Set<string>;
         /** @type {any} */ app: any;
         _destroyed: boolean;
         /**
