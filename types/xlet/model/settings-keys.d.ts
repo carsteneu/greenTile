@@ -16,6 +16,7 @@ export const SETTINGS_KEYS: Readonly<{
     swapDownHotkey: "swapDownHotkey";
     presets: "presets";
     starterPresetsImported: "starterPresetsImported";
+    starterGeneration: "starterGeneration";
     excludeHotkey: "excludeHotkey";
     excludeAppPicker: "excludeAppPicker";
     exclusions: "exclusions";

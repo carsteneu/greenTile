@@ -127,12 +127,18 @@ type DragLayout = {
     shape: readonly number[];
     rule?: Rule;
     preset?: Preset;
+    /** Preset column spans cut to the filled column count: the starting widths of
+     * the layout while no border was dragged for this window count. */
+    weights?: number[];
 };
 
-/** A preset rule: applies from `min` windows on, `stacks` = windows per column. */
+/** A preset rule: applies from `min` windows on, `stacks` = windows per column,
+ * `spans` = painter grid columns each painted column covers (>= 1, sum <= 6,
+ * absent = one each). */
 type Rule = {
     min: number;
     stacks: number[];
+    spans?: number[];
 };
 
 /** A preset as stored in the "presets" setting. */

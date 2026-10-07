@@ -4,7 +4,7 @@
 export const SPLIT_MIN_PX: number;
 /** Maximum extra px a resize hotkey gains per detected key repeat. */
 export const SPLIT_STEP_MAX: number;
-export function splitEqual(kind: "cols" | "rows", shape: readonly number[]): Split;
+export function splitEqual(kind: "cols" | "rows", shape: readonly number[], weights?: readonly any[]): Split;
 export function splitNorm(parts: any, len: number): number[] | null;
 export function splitValid(kind: "cols" | "rows", shape: readonly number[], split: any): Split | null;
 export function splitParts(fractions: number[] | null, n: number, start: number, len: number): Array<[number, number]>;

@@ -46,9 +46,11 @@ All keys can be changed on the **Hotkeys** page of the settings (Extensions mana
 
 A preset is a list of rules by window count. Each rule sets the number of columns and how many windows each column stacks. You assign a preset to a monitor and workspace.
 
-Fresh installations include twelve editable starter presets: Two columns, Three columns, Four columns, Six columns, Vertical stack, Five columns, Grid 2 × 2, Grid 3 × 2, Grid 4 × 2, Left main + stacks, Right main and Center main. They adapt to the current window count; names describe their base arrangement. The initial selection panel uses four columns and three rows on displays with sufficient space, with slightly smaller text. When space is limited the card area can scroll; the existing 600 px minimum panel width still applies.
+A painted column can span several of the six painter grid columns. Painted columns always stretch over the whole monitor, so the spans are the starting widths: three columns with the spans `[1, 2, 1]` tile 25 % / 50 % / 25 % — the four-column arrangement with the two middle columns merged. A border you dragged for the current window count, and a window layout you dropped for it, still win over the spans; **Reset sizes** returns to them.
 
-On the first start after upgrading to a version with these starters, greenTile adds them **once** to the existing list, even if that list is empty. Existing definitions, assignments and saved panel sizes are not replaced. A preset with the same name is kept as-is, and new presets receive unused IDs. A saved completion marker prevents later starts or updates from restoring starters you delete or modifying ones you rename or edit. Unreadable preset or layout data is left untouched, with the import postponed until it can be read safely. No starter preset is assigned automatically. This runs inside the extension, so it works with the updater, manual installation and Spices alike.
+Fresh installations include sixteen editable starter presets: Two columns, Three columns, Four columns, Six columns, Vertical stack, Five columns, Grid 2 × 2, Grid 3 × 2, Grid 4 × 2, Left main + stacks, Right main, Center main, Wide center, Wide center + stacks, Two thirds left and Two thirds right. They adapt to the current window count; names describe their base arrangement. Four of them (Wide center, Wide center + stacks, Two thirds left, Two thirds right) ship painted spans, so their wide column starts wide and the other columns take the extra windows. The initial selection panel uses four columns, is sized for four rows and uses slightly smaller text; a shorter display scrolls the card area, and the existing 600 px minimum panel width still applies.
+
+On the first start after upgrading to a version with these starters, greenTile adds them **once** to the existing list, even if that list is empty. Existing definitions, assignments and saved panel sizes are not replaced. A preset with the same name is kept as-is, and new presets receive unused IDs. A saved completion marker prevents later starts or updates from restoring starters you delete or modifying ones you rename or edit. Starters added by a later version arrive once as well, for installs and fresh setups alike, and are recorded separately — so they never come back either, as long as the settings file survives; replacing it, for instance by downgrading to a version that does not know the record, starts the import over. Unreadable preset or layout data is left untouched, with the import postponed until it can be read safely. No starter preset is assigned automatically. This runs inside the extension, so it works with the updater, manual installation and Spices alike.
 
 **Preset panel** (`Super+Ctrl+P`, works on the monitor of the focused window):
 
@@ -57,7 +59,7 @@ On the first start after upgrading to a version with these starters, greenTile a
 - ✎ on a card opens that preset in the editor; ✕ on the assigned card removes the assignment. **＋ New preset** starts an empty one.
 - **Auto: on / off** in the title bar shows and switches auto mode (green = on).
 - **Gap between windows** sets the gap between tiled windows (0 to 48 px). Screen edges stay flush.
-- **Reset sizes** appears when borders were moved or layouts dragged, and returns to equal sizes.
+- **Reset sizes** appears when borders were moved or layouts dragged, and returns to the preset's widths — the column spans when the rule has them, equal sizes otherwise.
 - The sun/moon button switches between light and dark; ⚙ opens the settings.
 - Drag the title bar to move the panel, ◢ to resize it. `Esc`, ✕ or a click outside closes it.
 
@@ -68,7 +70,7 @@ The preview on each card shows what a click would tile right now. No cell ever s
 ![Preset editor](docs/screenshots/preset-editor.png)
 
 - **Rules** (left): "from N" means the rule applies from N windows on; the last matching rule wins. **＋ Rule** adds one, **🗑** deletes the selected one.
-- **Painter:** 6 columns × 4 rows. Click or drag to set how many windows a column holds (top = 1, bottom = 4). Right-click removes a column.
+- **Painter:** 6 columns × 4 rows. Click or drag to set how many windows a column holds (top = 1, bottom = 4). Right-click removes a column. The handle on the line between two painted columns merges them into one wide column, the handle inside a merged column splits one grid column off again.
 - **Save** (or `Enter` in the name field) retiles right away if the preset is in use. **← Back** or `Esc` discards the draft.
 - **🗑 Delete preset** (solid red, right of Save) removes the preset after a confirmation and clears its workspace assignments. `Enter` in the name field always saves.
 

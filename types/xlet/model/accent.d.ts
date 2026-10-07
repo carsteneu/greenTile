@@ -24,6 +24,18 @@ export const accentProbes: readonly string[][];
 export function accentProbeFirst(probeFn: (className: string, pseudoClass: string) => Rgb | null): Rgb | null;
 export function accentHsl(rgb: Rgb): Hsl;
 export function accentRgb(hsl: Hsl): Rgb;
+/** The two ink colours the accent model draws with: dark on bright bases, light on dark. */
+/** @type {Rgb} */
+export const accentInkDark: Rgb;
+/** @type {Rgb} */
+export const accentInkLight: Rgb;
+export function accentLuminance(rgb: Rgb): number;
+export function accentContrast(a: Rgb, b: Rgb): number;
 export function accentTextOn(rgb: Rgb): Rgb;
+export function accentInkOn(rgb: Rgb): Rgb;
+export function accentHandleInk(kind: "merge" | "split", base: Rgb, gap: Rgb): {
+    fill: Rgb;
+    rim: Rgb;
+};
 export function accentTones(base: Rgb): AccentTones;
 export function accentCss(tones: AccentTones): string;

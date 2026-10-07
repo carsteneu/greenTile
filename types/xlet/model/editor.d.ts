@@ -1,8 +1,9 @@
 // GENERATED from lib/ by scripts/generate-xlet-types.mjs — do not edit;
 // regenerate with: npm run gen:types
 /**
- * Preset editor model. A rule is {min, stacks}; stacks[i] = windows stacked in column i.
- * The painter grid of the approved prototype has 6 columns and 4 rows.
+ * Preset editor model. A rule is {min, stacks} with an optional parallel `spans`
+ * (grid columns a painted column covers, 1 when absent); stacks[i] = windows stacked
+ * in column i. The painter grid of the approved prototype has 6 columns and 4 rows.
  */
 /** Painter grid width, in columns. */
 export const editorCols: number;
@@ -14,9 +15,18 @@ export const editorMinFloor: number;
 export const editorMinCeiling: number;
 export function editorClampInt(v: number, lo: number, hi: number): number;
 export function editorClamp(stacks: number[]): number[];
+export function editorSpans(spans: any, len: number): number[];
 export function editorPaint(stacks: number[], col: number, row: number): number[];
 export function editorPaintRange(stacks: number[], from: number, to: number, row: number): number[];
 export function editorRemove(stacks: number[], col: number): number[];
+export function editorMerge(stacks: number[], spans: any, col: number): {
+    stacks: number[];
+    spans: number[];
+} | null;
+export function editorSplit(stacks: number[], spans: any, col: number): {
+    stacks: number[];
+    spans: number[];
+} | null;
 export function editorSort(rules: Rule[]): Rule[];
 export function editorAddRule(rules: Rule[]): {
     rules: Rule[];
