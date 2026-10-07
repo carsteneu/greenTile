@@ -743,8 +743,9 @@ const createCinnamonEnv = (options) => {
             get_uint() {
                 return 500;
             }
-            get_boolean() {
-                return false;
+            get_boolean(key) {
+                const perSchema = env.schemaValues[this.schema_id];
+                return Boolean(perSchema && perSchema[key] === true);
             }
             connect(sigName, callback) {
                 const id = this._nextHandlerId++;

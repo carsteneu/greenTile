@@ -51,9 +51,13 @@ const startupRetile = (env, ext) => {
 };
 
 // One env with the 2000 px monitor, one workspace, an active ws and the Halves
-// preset assigned.
-const scene = () => {
+// preset assigned. `fileText` seeds the stored order the App reads at construction
+// (so a test can hand it an order that disagrees with the live positions).
+const scene = (fileText) => {
     const { env, ext } = makeEnv({ windowGap: 0 });
+    if (fileText !== undefined) {
+        env.files.set(PATH, fileText);
+    }
     enableOnMonitor(env, ext);
     makeWorkspace(env);
     env.activeWorkspace = { index: () => 0 };
@@ -246,9 +250,35 @@ test('a user swap after the reconnect outranks the stored order', () => {
     fresh.ops.retileMonitor(fresh, 0);
     assert.deepEqual(w2.rect, LEFT, 'the user swap takes effect');
     assert.deepEqual(w1.rect, RIGHT);
-    // and a later retile keeps the user arrangement, not the stored order
+    // the swap is the user's word: it becomes the surface's order, so a later
+    // retile and a later re-connect both keep it instead of the older record
+    fireMs(env, 1000);
+    assert.deepEqual(JSON.parse(env.files.get(PATH)).s[surfaceKey(fresh)], ['0x2', '0x1'],
+        'the user swap replaced the stored order');
+    reconnect(env, ext);
+    startupRetile(env, ext);
+    assert.deepEqual(w2.rect, LEFT, 'the stored (user) order survives the next reconnect');
+});
+
+test('a retile carrying a user arrangement does not restore over it', () => {
+    // The falsifiable half of the guard: the surface's restore is still owed here
+    // (the recreate cleared the spend gate) and the arrangement disagrees with the
+    // stored order. If useRestore were wrongly true, the stored order would win.
+    const { env, ext, app } = scene();
+    const w1 = makeWindow(env, 11, [10, 10, 400, 300], 0, null, { description: '0x1' });
+    const w2 = makeWindow(env, 12, [500, 0, 400, 300], 0, null, { description: '0x2' });
+    env.tabList.push(w1, w2);
+    env.display.focus_window = w1;
+    // hand the fresh App an order that is the reverse of the user's arrangement
+    env.files.set(PATH, JSON.stringify({ v: 1, s: { [surfaceKey(app)]: ['0x2', '0x1'] } }));
+    const fresh = reconnect(env, ext);
+    assert.equal(fresh.session.orderUsed.has(surfaceKey(fresh)), false, 'the restore is owed');
+
+    // the user's arrangement: 0x1 left, 0x2 right (the reverse of the record)
+    fresh.auto.sortOverride(w1.get_stable_sequence(), LEFT, 0);
+    fresh.auto.sortOverride(w2.get_stable_sequence(), RIGHT, 0);
     fresh.ops.retileMonitor(fresh, 0);
-    assert.deepEqual(w2.rect, LEFT, 'the stored order must not undo the user swap');
+    assert.deepEqual(w1.rect, LEFT, 'the user arrangement wins over the stored order');
 });
 
 test('a monitor change does not spend the surface restore for a lone window', () => {
@@ -293,4 +323,130 @@ test('without a monitor change a later settle does not re-restore the stored ord
         timer.cb();
     }
     assert.deepEqual(w2.rect, LEFT, 'the later settle follows the current geometry, not the stored order');
+});
+
+test('a user-triggered retile of another workspace does not restore or spend its order', () => {
+    // The settle flag is explicit: the preset editor and the single-window mode
+    // retile workspaces the user is not looking at, and must keep sorting by
+    // position instead of imposing the record (and must not spend it).
+    const { env, ext, app, ws1wins } = sceneTwoWs();
+    const w4 = makeWindow(env, 14, [10, 10, 300, 200], 0, null, { description: '0x4' });
+    const w3 = makeWindow(env, 13, [400, 0, 300, 200], 0, null, { description: '0x3' });
+    ws1wins.push(w4, w3);
+    env.files.set(PATH, JSON.stringify({ v: 1, s: { [surfaceKeyWs(app, 1)]: ['0x3', '0x4'] } }));
+    const fresh = reconnect(env, ext);
+    const key = surfaceKeyWs(fresh, 1);
+    assert.equal(fresh.session.orderUsed.has(key), false, 'the background surface restore is owed');
+
+    // no settle flag: position order (0x4 left), the record (0x3 first) is untouched
+    fresh.ops.retileMonitor(fresh, 0, null, true, 1);
+    assert.deepEqual(w4.rect, LEFT, 'a plain background retile sorts by position');
+    assert.equal(fresh.session.orderUsed.has(key), false, 'and does not spend the surface restore');
+    assert.deepEqual(JSON.parse(env.files.get(PATH)).s[key], ['0x3', '0x4'], 'the record is intact');
+
+    // the settle fan-out does both
+    fresh.ops.retileMonitor(fresh, 0, null, false, 1, null, true);
+    assert.deepEqual(w3.rect, LEFT, 'the settle restores the record for the background workspace');
+    assert.equal(fresh.session.orderUsed.has(key), true, 'and spends it');
+});
+
+test('the settle calls one retile per surface: the active workspace is left to its debounce', () => {
+    const { env, ext, app } = sceneTwoWs();
+    const calls = [];
+    const deps = app.auto._deps;
+    const real = deps.retileMonitor;
+    deps.retileMonitor = (...args) => { calls.push(args); return real(...args); };
+
+    const armed = env.timers.get(ext.currentSession().settle._timer);
+    env.timers.delete(ext.currentSession().settle._timer);
+    armed.cb();
+
+    assert.deepEqual(calls.map((a) => [a[1], a[4]]), [[0, 1]],
+        'only the background workspace of the active monitor is placed synchronously');
+    assert.equal(calls[0][3], false, 'with animation off');
+    assert.equal(calls[0][6], true, 'and the settle flag set');
+    const pending = [...env.timers.entries()].filter(([, t]) => t.ms === 0);
+    assert.equal(pending.length, 1, 'the active workspace rides its own debounced retile');
+});
+
+test('a non-primary monitor places each shared surface once', () => {
+    const EXT = { x: 0, y: 0, width: 1920, height: 1080, name: 'AOC' };
+    const LAP = { x: 1920, y: 0, width: 1366, height: 768, name: 'eDP' };
+    const { env, ext } = makeEnv({ windowGap: 0 });
+    // workspaces live on the primary only: every numbered workspace of the
+    // secondary resolves to the same surface (wsKey '*')
+    env.schemaValues['org.cinnamon.muffin'] = { 'workspaces-only-on-primary': true };
+    enableOnMonitors(env, ext, [EXT, LAP]);
+    const ws = [];
+    for (let i = 0; i < 3; i++) {
+        ws.push(makeWorkspace(env));
+    }
+    env.activeWorkspace = { index: () => 0 };
+    const app = ext.currentSession().app;
+    app.ops.presetsWrite(app, [{ id: 'p1', name: 'Halves', rules: [{ min: 2, stacks: [1, 1] }] }]);
+    for (let i = 0; i < 3; i++) {
+        app.ops.layoutSet(app, 1, i, { preset: 'p1' });
+    }
+    const lw = [];
+    for (const w of ws) {
+        w.list_windows = () => lw;
+    }
+    const l1 = makeWindow(env, 21, [1930, 10, 300, 200], 1, null, { description: '0x21' });
+    const l2 = makeWindow(env, 22, [1930, 300, 300, 200], 1, null, { description: '0x22' });
+    lw.push(l1, l2);
+
+    const calls = [];
+    const deps = app.auto._deps;
+    const real = deps.retileMonitor;
+    deps.retileMonitor = (...args) => { calls.push(args); return real(...args); };
+    const settle = ext.currentSession().settle;
+    const armed = env.timers.get(settle._timer);
+    env.timers.delete(settle._timer);
+    armed.cb();
+    assert.deepEqual(calls.map((a) => [a[1], a[4], app.monitors.wsKey(a[1], a[4])]), [[1, 1, '*']],
+        'the shared secondary surface is placed once, not once per workspace');
+});
+
+test('a retained pause on a background workspace survives the settle', () => {
+    const { env, ext, app, ws1wins } = sceneTwoWs();
+    // the stored layout still says auto; the user's last command is the pause
+    app.session.pendingAuto.push({ monitorIndex: 0, wsIndex: 1, auto: false });
+    const w4 = makeWindow(env, 14, [10, 10, 300, 200], 0, null, { description: '0x4' });
+    const w3 = makeWindow(env, 13, [400, 0, 300, 200], 0, null, { description: '0x3' });
+    ws1wins.push(w4, w3);
+    const before = [w4.rect.slice(), w3.rect.slice()];
+
+    startupRetile(env, ext);
+    assert.deepEqual(w4.rect, before[0], 'a retained pause outranks the settle');
+    assert.deepEqual(w3.rect, before[1], 'a retained pause outranks the settle');
+});
+
+test('a window on every workspace ends in the active workspace cell after the settle', () => {
+    // A sticky window is listed by every workspace; the background passes place it
+    // first, the active workspace's debounced retile lands last and decides. The
+    // proof: a further active retile leaves it exactly where the settle left it.
+    const { env, ext, app, ws1wins } = sceneTwoWs();
+    const w1 = makeWindow(env, 11, [10, 10, 400, 300], 0, null, { description: '0x1' });
+    const w2 = makeWindow(env, 12, [500, 0, 400, 300], 0, null, { description: '0x2' });
+    env.tabList.push(w1, w2);
+    env.display.focus_window = w1;
+    const sticky = makeWindow(env, 31, [400, 300, 300, 200], 0, null, { description: '0x31' });
+    sticky.is_on_all_workspaces = () => true;
+    env.tabList.push(sticky);
+    ws1wins.push(sticky);
+
+    const settle = ext.currentSession().settle;
+    const armed = env.timers.get(settle._timer);
+    env.timers.delete(settle._timer);
+    armed.cb();
+    const pending = [...env.timers.entries()].filter(([, t]) => t.ms === 0);
+    assert.equal(pending.length, 1, 'the active workspace retile is armed');
+    env.timers.delete(pending[0][0]);
+    pending[0][1].cb();
+
+    // the active pass already decided its place: repeating it changes nothing. If
+    // the background pass had been the last writer, this would move it.
+    const after = sticky.rect.slice();
+    app.ops.retileMonitor(app, 0);
+    assert.deepEqual(sticky.rect, after, 'the settle left the sticky window in the active grid');
 });

@@ -10,7 +10,7 @@
  * @property {AnyRecord} mainloop mainloop backend
  * @property {() => number} now clock, Date.now in production
  * @property {(msg: string) => void} log global.log
- * @property {(app: AppFacade) => void} onSettled the fanned-out retile, autoScheduleAll
+ * @property {(app: AppFacade) => void} onSettled the fanned-out retile, auto.settleAll
  * @property {(app: AppFacade) => boolean} isLive whether that App is still the live one
  */
 export const Settle: {
@@ -54,7 +54,7 @@ export const Settle: {
  * @property {AnyRecord} gobject imports.gi.GObject
  * @property {() => number} now clock, Date.now in production
  * @property {(msg: string) => void} log global.log
- * @property {(app: AppFacade) => void} onSettled the fanned-out retile, autoScheduleAll
+ * @property {(app: AppFacade) => void} onSettled the fanned-out retile, auto.settleAll
  * @property {(session: Session) => { destroy(): void }} createApp builds the App on this session
  */
 export const Session: {
@@ -215,7 +215,7 @@ export type SettleDeps = {
      */
     log: (msg: string) => void;
     /**
-     * the fanned-out retile, autoScheduleAll
+     * the fanned-out retile, auto.settleAll
      */
     onSettled: (app: AppFacade) => void;
     /**
@@ -256,7 +256,7 @@ export type SessionDeps = {
      */
     log: (msg: string) => void;
     /**
-     * the fanned-out retile, autoScheduleAll
+     * the fanned-out retile, auto.settleAll
      */
     onSettled: (app: AppFacade) => void;
     /**

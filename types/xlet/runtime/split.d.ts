@@ -21,7 +21,7 @@ export const SPLIT_FLUSH_MS: number;
  * @property {(monitor: CinnamonMonitor, focus: CinnamonWindow | null, ws?: number | null) => CinnamonWindow[]} collectWindows
  * @property {(monitor: CinnamonMonitor) => Rect} usableArea
  * @property {(app: AppFacade) => number} gap
- * @property {(app: AppFacade, monitorIndex: number, focused: CinnamonWindow | null, animate?: boolean, wsIndex?: number | null, actionLayout?: Layout | null) => void} retileMonitor
+ * @property {(app: AppFacade, monitorIndex: number, focused: CinnamonWindow | null, animate?: boolean, wsIndex?: number | null, actionLayout?: Layout | null, settle?: boolean) => void} retileMonitor
  * @property {(op: string) => string} grabOpName
  * @property {(app: AppFacade, windows: CinnamonWindow[], columnMajor: boolean, consume?: boolean) => CinnamonWindow[]} sortReadingOrder
  */
@@ -308,7 +308,7 @@ export type SplitDeps = {
     collectWindows: (monitor: CinnamonMonitor, focus: CinnamonWindow | null, ws?: number | null) => CinnamonWindow[];
     usableArea: (monitor: CinnamonMonitor) => Rect;
     gap: (app: AppFacade) => number;
-    retileMonitor: (app: AppFacade, monitorIndex: number, focused: CinnamonWindow | null, animate?: boolean, wsIndex?: number | null, actionLayout?: Layout | null) => void;
+    retileMonitor: (app: AppFacade, monitorIndex: number, focused: CinnamonWindow | null, animate?: boolean, wsIndex?: number | null, actionLayout?: Layout | null, settle?: boolean) => void;
     grabOpName: (op: string) => string;
     sortReadingOrder: (app: AppFacade, windows: CinnamonWindow[], columnMajor: boolean, consume?: boolean) => CinnamonWindow[];
 };
