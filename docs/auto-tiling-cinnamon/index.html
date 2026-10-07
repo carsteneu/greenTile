@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Automatic window tiling on Cinnamon (Linux Mint) · greenTile</title>
-<meta name="description" content="Cinnamon snaps one window at a time to a half or a quarter of the screen, but it does not arrange your windows for you. How to get auto tiling on Linux Mint Cinnamon with the greenTile extension, step by step, and where its limits are.">
+<meta name="description" content="Cinnamon snaps one window at a time. How to get automatic tiling on Linux Mint Cinnamon with the greenTile extension, step by step, and where its limits are.">
 <link rel="canonical" href="https://greentile.io/auto-tiling-cinnamon/">
 <meta property="og:type" content="article">
 <meta property="og:site_name" content="greenTile">
@@ -153,7 +153,7 @@ footer{padding:36px 0 56px;border-top:1px solid var(--rule);display:flex;justify
       </aside>
     </div>
     <figure class="demo">
-      <img src="../screenshots/demo.gif" width="1600" height="450" loading="lazy" decoding="async" alt="Windows on a wide monitor tile themselves as they open; then one window is dragged onto another and splits it, with a translucent preview of the result">
+      <img src="../screenshots/demo.gif" width="1600" height="450" fetchpriority="high" decoding="async" alt="Windows on a wide monitor tile themselves as they open; then one window is dragged onto another and splits it, with a translucent preview of the result">
       <figcaption>Auto mode on a 32:9 monitor: windows take their place as they open, then a drag splits one of them.</figcaption>
     </figure>
   </header>
@@ -167,7 +167,7 @@ footer{padding:36px 0 56px;border-top:1px solid var(--rule);display:flex;justify
       <div>
         <h3>Built in</h3>
         <ul>
-          <li><b>Edge tiling by mouse</b>Drag a window against the left or right screen edge and it fills that half. The top edge maximizes it.</li>
+          <li><b>Edge tiling by mouse</b>Drag a window against a screen edge and it fills that half. Depending on a setting, the top edge maximizes it instead.</li>
           <li><b>Halves and quarters</b>Besides the four halves, Muffin knows a quarter tile for each corner of the screen.</li>
           <li><b>Keyboard</b>Super with an arrow key pushes the focused window towards that side of the screen. The keys can be changed in Cinnamon's keyboard settings.<span class="k"><kbd>Super</kbd><kbd>←</kbd><kbd>→</kbd><kbd>↑</kbd><kbd>↓</kbd></span></li>
         </ul>
@@ -192,7 +192,7 @@ footer{padding:36px 0 56px;border-top:1px solid var(--rule);display:flex;justify
     <ol class="steps">
       <li>
         <h3>Turn on auto mode</h3>
-        <p>Press the key on the workspace you want tiled. The windows on that monitor tile at once. Auto mode is stored per monitor and workspace, so it only affects the one you are on.</p>
+        <p>Press the key on the workspace you want tiled. It acts on the monitor of the focused window, and its windows tile at once. Auto mode is stored per monitor and workspace, so it only affects the one you are on. A single window is left as it is unless you switch on <i>Fill the monitor with a single window</i> in the settings.</p>
         <div class="k"><kbd>Super</kbd><kbd>Ctrl</kbd><kbd>A</kbd></div>
       </li>
       <li>
@@ -201,13 +201,13 @@ footer{padding:36px 0 56px;border-top:1px solid var(--rule);display:flex;justify
       </li>
       <li>
         <h3>Pick a layout if you want a different shape</h3>
-        <p>The preset panel offers sixteen editable starters, from two columns to a wide centre with stacks, each with a live preview of what a click would do right now. Click one to assign it to this monitor and workspace, or paint your own on a 6 × 4 grid.</p>
+        <p>The preset panel offers sixteen editable starters, from <i>Two columns</i> to <i>Wide center + stacks</i>, each with a live preview of what a click would do right now. Click one to assign it to this monitor and workspace, or paint your own on a 6 × 4 grid.</p>
         <div class="k"><kbd>Super</kbd><kbd>Ctrl</kbd><kbd>P</kbd></div>
       </li>
       <li>
         <h3>Adjust by hand</h3>
         <p>Drag a border and the neighbours follow; borders are remembered per window count. Drop a window on the outer edge of another to split it; drop it in the middle and it takes that slot while its neighbours make room. Swap with the keyboard, and set a gap of 0 to 48 px in the preset panel.</p>
-        <div class="k"><kbd>Super</kbd><kbd>Alt</kbd><kbd>←</kbd><kbd>→</kbd> · <kbd>Super</kbd><kbd>Ctrl</kbd><kbd>←</kbd><kbd>→</kbd></div>
+        <div class="k"><kbd>Super</kbd><kbd>Alt</kbd>+arrow · <kbd>Super</kbd><kbd>Ctrl</kbd>+arrow</div>
       </li>
       <li>
         <h3>Keep some windows out</h3>
@@ -220,7 +220,7 @@ footer{padding:36px 0 56px;border-top:1px solid var(--rule);display:flex;justify
         <div class="k"><kbd>Super</kbd><kbd>Ctrl</kbd><kbd>D</kbd></div>
       </li>
     </ol>
-    <p class="note"><b>One change to Cinnamon's own keys:</b> on a monitor and workspace with auto mode on, <kbd>Super</kbd>+arrow moves the keyboard focus to the neighbouring tiled window instead of pushing the window to a half. Everywhere else, and for windows greenTile does not manage, the native edge tiling stays as it was. All of greenTile's keys can be changed on the Hotkeys page of its settings.</p>
+    <p class="note"><b>One change to Cinnamon's own keys:</b> on a monitor and workspace with auto mode on, <kbd>Super</kbd>+arrow moves the keyboard focus to the neighbouring tiled window instead of pushing the window to a half. Everywhere else, and for windows greenTile does not manage, the native edge tiling stays as it was. <kbd>Super</kbd>+arrow itself is Cinnamon's key and is changed in Cinnamon's keyboard settings; all of greenTile's own keys can be changed on the Hotkeys page of its settings.</p>
   </div>
 </section>
 
@@ -232,10 +232,10 @@ footer{padding:36px 0 56px;border-top:1px solid var(--rule);display:flex;justify
       <h3>From Cinnamon's Extensions manager</h3>
       <p>Not yet. greenTile is not listed in the Cinnamon Spices catalogue so far, so it does not show up under Extensions → Download. Until it is, use the release zip.</p>
       <h3>With the installer script</h3>
-      <p>Download the zip from the latest release, unpack it and run <code>install.sh</code>. It copies the extension to <code>~/.local/share/cinnamon/extensions/greenTile@carsteneu/</code> and compiles the translations (it needs <code>msgfmt</code> from gettext for those, and <code>flock</code> from util-linux). Then restart Cinnamon and enable greenTile in System Settings → Extensions.</p>
+      <p>Download the zip from the latest release, unpack it and run <code>install.sh</code>. It copies the extension to <code>~/.local/share/cinnamon/extensions/greenTile@carsteneu/</code> and compiles the translations. It needs <code>flock</code> from util-linux; without <code>msgfmt</code> from gettext the interface stays in English. Then restart Cinnamon and enable greenTile in System Settings → Extensions.</p>
       <h3>Updating</h3>
       <p>Run <code>./update.sh</code> from the unpacked zip: it fetches the latest release and installs it. A running Cinnamon keeps the code it loaded at startup, so restart Cinnamon (X11) or log out and back in (Wayland) afterwards.</p>
-      <p>Building from a checkout is described in the <a href="https://github.com/carsteneu/greenTile#development">README</a>. If gTile is installed, disable it first: both extensions claim the same keys.</p>
+      <p>Building from a checkout is described in the <a href="https://github.com/carsteneu/greenTile#development">README</a>. If gTile is installed, disable it first: both use <kbd>Super</kbd><kbd>G</kbd>.</p>
       <div class="next tight"><a class="btn" href="https://github.com/carsteneu/greenTile/releases/latest">Download the latest release</a></div>
     </div>
 <pre><span class="c"># unpack the release zip and install for your user</span>
@@ -255,7 +255,7 @@ Super+Ctrl+A</pre>
 <section id="limits">
   <div class="wrap">
     <h2>What greenTile does not do.</h2>
-    <p class="sub">If one of these is what you are after, a different tool fits better. Better to know before you install.</p>
+    <p class="sub">If one of these is what you are after, a different tool fits better; it is worth knowing before you install.</p>
     <ul class="limits">
       <li><b>No dynamic tiling tree</b><span>There is no split tree that you build window by window, as in i3 or sway. Layouts come from the auto grid or from a preset's rules by window count; drag splits and moved borders adjust that layout.</span></li>
       <li><b>No tabbed or stacked containers</b><span>Windows in a column are stacked one above the other, all visible. Several windows sharing one cell behind tabs is not supported.</span></li>

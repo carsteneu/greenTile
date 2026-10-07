@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>A gTile alternative for Cinnamon: greenTile vs gTile · greenTile</title>
-<meta name="description" content="greenTile and gTile are both tiling extensions for the Cinnamon desktop, and greenTile started as a fork of gTile. gTile places the window you point at; greenTile arranges a whole workspace by itself. A side by side comparison.">
+<title>greenTile vs gTile: a gTile alternative for Cinnamon</title>
+<meta name="description" content="greenTile started as a fork of gTile. gTile places the window you point at; greenTile arranges a whole Cinnamon workspace by itself. A side by side comparison.">
 <link rel="canonical" href="https://greentile.io/gtile-alternative/">
 <meta property="og:type" content="article">
 <meta property="og:site_name" content="greenTile">
@@ -153,21 +153,21 @@ footer{padding:36px 0 56px;border-top:1px solid var(--rule);display:flex;justify
 <section id="compare">
   <div class="wrap">
     <h2>Side by side.</h2>
-    <p class="sub">Compared with gTile as it is listed in the Cinnamon Spices catalogue (the <code>5.4</code> code path) and greenTile as described in its <a href="https://github.com/carsteneu/greenTile/blob/main/FEATURES.md">feature list</a>.</p>
+    <p class="sub">Compared with gTile 2.2.1 from the Cinnamon Spices catalogue (the <code>5.4</code> code path, the version greenTile was forked from) and greenTile as described in its <a href="https://github.com/carsteneu/greenTile/blob/main/FEATURES.md">feature list</a>.</p>
     <div class="cmp-wrap">
       <table class="cmp">
-        <thead><tr><th scope="col"><span hidden>Topic</span></th><th scope="col">gTile</th><th scope="col">greenTile</th></tr></thead>
+        <thead><tr><td></td><th scope="col">gTile</th><th scope="col">greenTile</th></tr></thead>
         <tbody>
           <tr><th scope="row">How a window gets its place</th><td>You select an area of grid cells for the focused window: with the mouse, with the arrow keys and <kbd>Shift</kbd>, or by typing two tile labels.</td><td>The layout of the monitor and workspace decides. A window you drag is dropped into the slot under the pointer, or splits a neighbour when dropped on its edge.</td></tr>
           <tr><th scope="row">When a window opens or closes</th><td>Nothing moves. Two buttons in the grid, <i>Auto tile main and list</i> and <i>Auto tile two lists</i>, arrange all windows once when you click them.</td><td>With auto mode on, the monitor is retiled 300 ms later. New windows join the end of the layout.</td></tr>
           <tr><th scope="row">Layouts</th><td>Four grids on buttons <kbd>1</kbd> to <kbd>4</kbd>. Columns and rows are set in the settings, each with a relative span.</td><td>An automatic grid, sixteen editable starter presets and your own, painted on a 6 × 4 grid. A preset has rules by window count, so it adapts as windows come and go.</td></tr>
-          <tr><th scope="row">Per monitor and workspace</th><td>The same four grids everywhere. The grid opens on the monitor of the focused window.</td><td>Each monitor and workspace keeps its own preset and auto state, found again after replugging a monitor.</td></tr>
+          <tr><th scope="row">Per monitor and workspace</th><td>The same four grids everywhere. The grid opens on the monitor of the focused window by default.</td><td>Each monitor and workspace keeps its own preset and auto state, found again after replugging a monitor.</td></tr>
           <tr><th scope="row">Changing sizes afterwards</th><td>Open the grid again and select a different area.</td><td>Drag a border and the neighbours follow, or use <kbd>Super</kbd><kbd>Alt</kbd>+arrow. Borders are remembered per window count.</td></tr>
-          <tr><th scope="row">Moving windows around</th><td><kbd>Alt</kbd>+arrow in the grid moves the selection to another monitor.</td><td><kbd>Super</kbd><kbd>Ctrl</kbd>+arrow swaps with the neighbour and walks on to the next monitor and workspace.</td></tr>
+          <tr><th scope="row">Moving windows around</th><td><kbd>Alt</kbd>+arrow in the grid moves the selection to another monitor.</td><td><kbd>Super</kbd><kbd>Ctrl</kbd>+arrow swaps with the neighbour; left and right walk on to the next monitor and workspace.</td></tr>
           <tr><th scope="row">Gap between windows</th><td>No setting.</td><td>0 to 48 px, screen edges stay flush.</td></tr>
           <tr><th scope="row">Keeping windows out</th><td>No list of its own. When you tile a single window, only that window moves.</td><td>A never tile list by window class, title or app id, and <kbd>Super</kbd><kbd>G</kbd> to let one window float.</td></tr>
           <tr><th scope="row">Install</th><td>From Cinnamon's Extensions manager (Spices catalogue).</td><td>Release zip with an installer script. Not in the Spices catalogue yet.</td></tr>
-          <tr><th scope="row">Cinnamon versions</th><td>Ships code for releases from 3.8 on, with a separate path from 5.4.</td><td>6.0.4 or newer; tested on 6.0.4 to 6.6. Wayland works in first tests.</td></tr>
+          <tr><th scope="row">Cinnamon versions</th><td>Supports releases from 3.6 on, with separate code paths for 3.8 and 5.4.</td><td>6.0.4 or newer; tested on 6.0.4 to 6.6. Wayland works in first tests.</td></tr>
           <tr><th scope="row">Maintained by</th><td>The community, in the Linux Mint Spices repository.</td><td>Its author, on GitHub.</td></tr>
         </tbody>
       </table>
@@ -183,7 +183,7 @@ footer{padding:36px 0 56px;border-top:1px solid var(--rule);display:flex;justify
       <li><span><b>Disable gTile</b> in System Settings → Extensions.</span></li>
       <li><span><b>Install greenTile</b> from the <a href="../auto-tiling-cinnamon/#install">release zip</a>, restart Cinnamon and enable it.</span></li>
       <li><span><b>Press <kbd>Super</kbd><kbd>Ctrl</kbd><kbd>A</kbd></b> on a workspace. Its windows tile, and new ones join on their own from now on.</span></li>
-      <li><span><b>Rebuild your grids as presets</b> in the preset panel (<kbd>Super</kbd><kbd>Ctrl</kbd><kbd>P</kbd>). Column spans work the same way as in gTile's settings: three columns with spans 1, 2, 1 tile at 25 %, 50 % and 25 %. For <i>Auto tile main and list</i>, the starter <i>Two thirds left</i> keeps a wide column on the left and stacks the rest on the right.</span></li>
+      <li><span><b>Rebuild your grids as presets</b> in the preset panel (<kbd>Super</kbd><kbd>Ctrl</kbd><kbd>P</kbd>). Column spans are relative widths as in gTile's settings, painted on six grid columns: three columns with spans 1, 2, 1 tile at 25 %, 50 % and 25 %. For <i>Auto tile main and list</i>, the starter <i>Two thirds left</i> keeps a wide column on the left and stacks the rest on the right.</span></li>
       <li><span><b>Learn one new key:</b> in greenTile, <kbd>Super</kbd><kbd>G</kbd> does not open a grid. It lets the focused window float, and pressing it again tiles it again.</span></li>
     </ol>
   </div>
@@ -192,7 +192,7 @@ footer{padding:36px 0 56px;border-top:1px solid var(--rule);display:flex;justify
 <section id="origin">
   <div class="wrap origin">
     <h2>Where greenTile comes from.</h2>
-    <p>greenTile is a fork of gTile 2.2.1, which was written by vibou for GNOME Shell and ported to Cinnamon by shuairan. The extension skeleton and the translation sources come from gTile; the classic grid was removed and the preset and auto model built in its place. Nearly unchanged code inherited from gTile is less than 1 % of greenTile's runtime code today, measured as described in the <a href="https://github.com/carsteneu/greenTile#origin">README</a>. Both are free software under the GPL v3.</p>
+    <p>greenTile is a fork of gTile 2.2.1, which was written by vibou for GNOME Shell and ported to Cinnamon by shuairan. The extension skeleton and the translation sources come from gTile; the classic grid was removed and the preset and auto model built in its place. Nearly unchanged code inherited from gTile is less than 1 % of greenTile's runtime code, measured on version 2.2.0 as described in the <a href="https://github.com/carsteneu/greenTile#origin">README</a>. Both are free software under the GPL v3.</p>
     <p>greenTile has limits of its own: no dynamic tiling tree as in i3, no tabbed containers, per-app rules for exclusions only. They are listed on the <a href="../auto-tiling-cinnamon/#limits">auto tiling page</a>.</p>
     <div class="next">
       <a class="btn" href="../auto-tiling-cinnamon/#install">Install greenTile</a>
