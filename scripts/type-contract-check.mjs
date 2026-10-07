@@ -180,6 +180,27 @@ app.panel.close();
 console.log(app.ops.rebuild(app));
 `,
     },
+    {
+        name: 'legit-xlet-grid-layout',
+        expect: 'pass',
+        code: `
+const { gridLayout, gridAvailable, PRESET_CARD_CHROME } = imports.extensions['greenTile@carsteneu'].lib.model.grid;
+const layout = gridLayout(1429, 2);
+console.log(layout.available, layout.columns, layout.cardWidth, layout.gap, layout.minCard, layout.cardChrome, layout.rowWidth);
+console.log(gridAvailable(1429, 1), gridAvailable(600), PRESET_CARD_CHROME);
+`,
+    },
+    {
+        // the theme scale factor is a number: a string must not compile against the
+        // generated mirror (at runtime anything unusable falls back to 1, so the
+        // caller would silently get scale-1 geometry)
+        name: 'mutation-xlet-grid-layout-scale-arg',
+        expect: 'fail',
+        code: `
+const { gridLayout } = imports.extensions['greenTile@carsteneu'].lib.model.grid;
+gridLayout(1429, '2');
+`,
+    },
 ];
 
 const compile = (files) => {

@@ -237,6 +237,47 @@ test('a stored width clamped to the monitor sizes the cards for the width really
     ext.disable();
 });
 
+test('the panel lays the starter presets out at the theme scale factor (HiDPI regression)', () => {
+    // Round-1 VM finding: at St theme scale 2 the real .gk-card-row spacing is 28
+    // while the grid constants stayed 14, so the card row's minimum grew past the
+    // panel's allocation and St laid every child out wider than the panel's own
+    // background (measured live: 1476 px of row in a 1429 px panel). The panel must
+    // ask the model for the layout at the session's theme scale factor.
+    const fs = require('node:fs');
+    const path = require('node:path');
+    const { ROOT } = require('../helpers/cinnamon-loader');
+    const grid = load('./lib/model/grid.js');
+    const presets = JSON.parse(JSON.parse(fs.readFileSync(path.join(ROOT, 'settings-schema.json'), 'utf8')).presets.default);
+    const width = 1429;
+    const { env, ext } = makeEnv({
+        presets: JSON.stringify(presets),
+        panelSize: JSON.stringify({ list: { w: width, h: 480 } }),
+    });
+    env.themeScale = 2;
+    try {
+        const { app } = openPanel(env, ext, presets, { seedPresets: false });
+        const expected = grid.gridLayout(width, 2);
+        const built = cards(app);
+        assert.equal(built.length, presets.length, 'every preset still gets a card');
+        const rows = byClass(app.panel.actor, /^gk-card-row(?: |$)/);
+        assert.equal(rows[0].children.length, expected.columns, 'the first row holds the scaled column count');
+        for (const card of built) {
+            assert.equal(card.width, expected.cardWidth, 'the card follows the scaled layout');
+        }
+        const rowWidth = expected.columns * expected.cardWidth + (expected.columns - 1) * expected.gap;
+        assert.ok(rowWidth <= expected.available, `the card row (${rowWidth}) must fit the card area (${expected.available})`);
+        assert.notEqual(expected.columns, grid.gridLayout(width, 1).columns, 'scale 2 really changes the column count');
+        // panel.js's PRESET_CARD_CHROME_W and the model's PRESET_CARD_CHROME are
+        // mirrors; pin the agreement through what the panel actually built.
+        assert.equal(expected.cardChrome, grid.PRESET_CARD_CHROME * 2, 'the scaled chrome follows the model token');
+        const thumb = findAll(cardOf(app, presets[0].name), (actor) => actor instanceof env.gi.St.DrawingArea)[0];
+        assert.equal(thumb.width, expected.cardWidth - expected.cardChrome, 'the preview is sized beside the scaled chrome');
+    }
+    finally {
+        ext.disable();
+    }
+});
+
 test('a card is a keyboard stop with a focus look of its own', () => {
     // St.Button activates on Enter/Space once focused, so can_focus is the keyboard
     // path to a preset and the focus look must stay separate from hover.
