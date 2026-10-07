@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: greenTile 2.2.3\n"
 "Report-Msgid-Bugs-To: https://github.com/carsteneu\n"
-"POT-Creation-Date: 2026-10-06 14:31+0200\n"
+"POT-Creation-Date: 2026-10-07 16:09+0200\n"
 "PO-Revision-Date: 2024-07-25 20:23+0300\n"
 "Last-Translator: Kimmo Kujansuu <mrkujansuu@gmail.com>\n"
 "Language-Team: Finnish\n"
@@ -19,40 +19,40 @@ msgstr ""
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 "X-Generator: Poedit 2.3\n"
 
-#: lib/ui/editor.js:68
+#: lib/ui/editor.js:72
 msgid "Please enter a name."
 msgstr "Anna nimi."
 
-#: lib/ui/editor.js:130
+#: lib/ui/editor.js:144
 #, javascript-format
 msgid "from %d"
 msgstr "%d alkaen"
 
-#: lib/ui/editor.js:279
+#: lib/ui/editor.js:431
 msgid "Rules (by window count)"
 msgstr "Säännöt (ikkunamäärän mukaan)"
 
-#: lib/ui/editor.js:283
+#: lib/ui/editor.js:435
 msgid "Rule"
 msgstr "Sääntö"
 
-#: lib/ui/editor.js:284
+#: lib/ui/editor.js:436
 msgid "Delete rule"
 msgstr "Poista sääntö"
 
-#: lib/ui/editor.js:292
+#: lib/ui/editor.js:444
 msgid "Rule applies from"
 msgstr "Sääntö koskee vähintään"
 
-#: lib/ui/editor.js:299
+#: lib/ui/editor.js:451
 msgid "windows"
 msgstr "ikkunaa"
 
-#: lib/ui/editor.js:301
+#: lib/ui/editor.js:453
 msgid "Painter"
 msgstr "Piirtoalue"
 
-#: lib/ui/editor.js:318
+#: lib/ui/editor.js:471
 msgid ""
 "Click or drag: the row sets how many windows the column holds. Right-click "
 "removes a column."
@@ -60,119 +60,121 @@ msgstr ""
 "Napsauta tai vedä: rivi määrää, montako ikkunaa sarakkeeseen mahtuu. Oikea "
 "napsautus poistaa sarakkeen."
 
-#: lib/ui/editor.js:323
+#: lib/ui/editor.js:476
 msgid "Name"
 msgstr "Nimi"
 
-#: lib/ui/editor.js:324
+#: lib/ui/editor.js:477
 msgid "Preset name"
 msgstr "Esiasetuksen nimi"
 
-#: lib/ui/editor.js:329
+#: lib/ui/editor.js:482
 msgid "Delete preset"
 msgstr "Poista esiasetus"
 
-#: lib/ui/editor.js:332
+#: lib/ui/editor.js:485
 msgid "Really delete?"
 msgstr "Poistetaanko varmasti?"
 
-#: lib/ui/editor.js:333
+#: lib/ui/editor.js:486
 msgid "Delete"
 msgstr "Poista"
 
-#: lib/ui/editor.js:337
+#: lib/ui/editor.js:490
 msgid "Save"
 msgstr "Tallenna"
 
-#: lib/ui/editor.js:362
+#: lib/ui/editor.js:515
 #, javascript-format
 msgid "Result: %s"
 msgstr "Tulos: %s"
 
-#: lib/ui/panel.js:100
+#: lib/ui/panel.js:103
 msgid "Edit preset"
 msgstr "Muokkaa esiasetusta"
 
-#: lib/ui/panel.js:117
+#: lib/ui/panel.js:123
 msgid "Assigned"
 msgstr "Määritetty"
 
-#: lib/ui/panel.js:119
+#: lib/ui/panel.js:125
 msgid "Remove assignment"
 msgstr "Poista määritys"
 
-#: lib/ui/panel.js:150
+#: lib/ui/panel.js:156
 msgid "Gap between windows"
 msgstr "Ikkunoiden väli"
 
-#: lib/ui/panel.js:156
+#: lib/ui/panel.js:162
 #, javascript-format
 msgid "%d px"
 msgstr "%d px"
 
-#: lib/ui/panel.js:176
+#: lib/ui/panel.js:182
 msgid "Reset sizes"
 msgstr "Palauta koot"
 
-#: lib/ui/panel.js:219
+#: lib/ui/panel.js:225
 #, javascript-format
 msgid "Presets — workspace %d · %s"
 msgstr "Esiasetukset — työtila %d · %s"
 
-#: lib/ui/panel.js:221
+#: lib/ui/panel.js:227
 msgid "Create preset"
 msgstr "Luo esiasetus"
 
-#: lib/ui/panel.js:221
+#: lib/ui/panel.js:227
 #, javascript-format
 msgid "Edit %s"
 msgstr "Muokkaa: %s"
 
-#: lib/ui/panel.js:232
+#: lib/ui/panel.js:238
 msgid "Back"
 msgstr "Takaisin"
 
-#: lib/ui/panel.js:241 lib/ui/panel.js:247
+#: lib/ui/panel.js:247 lib/ui/panel.js:253
 msgid "Auto: on"
 msgstr "Auto: päällä"
 
-#: lib/ui/panel.js:241 lib/ui/panel.js:247
+#: lib/ui/panel.js:247 lib/ui/panel.js:253
 msgid "Auto: off"
 msgstr "Auto: pois"
 
-#: lib/ui/panel.js:269
+#: lib/ui/panel.js:275
 msgid "Dark theme"
 msgstr "Tumma teema"
 
-#: lib/ui/panel.js:269
+#: lib/ui/panel.js:275
 msgid "Light theme"
 msgstr "Vaalea teema"
 
-#: lib/ui/panel.js:477
+#: lib/ui/panel.js:483
 msgid "No presets yet."
 msgstr "Ei vielä esiasetuksia."
 
-#: lib/ui/panel.js:497
+#: lib/ui/panel.js:503
 #, javascript-format
 msgid "Preview for %d window"
 msgstr "Esikatselu: %d ikkuna"
 
-#: lib/ui/panel.js:498
+#: lib/ui/panel.js:504
 #, javascript-format
 msgid "Preview for %d windows"
 msgstr "Esikatselu: %d ikkunaa"
 
-#: lib/ui/panel.js:498
+#: lib/ui/panel.js:504
 msgid "No windows open — base layout"
 msgstr "Ei avoimia ikkunoita — perusasettelu"
 
-#: lib/ui/panel.js:512
+#: lib/ui/panel.js:518
 msgid "New preset"
 msgstr "Uusi esiasetus"
 
-#: lib/ui/panel.js:515
+#: lib/ui/panel.js:521
 msgid "Click a card to apply it to this workspace and tile right away"
-msgstr "Napsauta korttia ottaaksesi sen käyttöön tässä työtilassa ja laatoittaaksesi ikkunat heti"
+msgstr ""
+"Napsauta korttia ottaaksesi sen käyttöön tässä työtilassa ja laatoittaaksesi "
+"ikkunat heti"
 
 #. metadata.json->name
 msgid "greenTile"
@@ -349,10 +351,12 @@ msgstr "Reuna kohdistetun ikkunan ympärillä"
 #. settings-schema.json->focusBorder->tooltip
 msgid ""
 "After a Super+Arrow focus move, mark the newly focused window with a thin "
-"border in the state color for three seconds."
+"border in the state color for three seconds. Mouse clicks and Alt+Tab do not "
+"show it."
 msgstr ""
 "Kun kohdistus siirretään Super+nuolinäppäimellä, uusi kohdistettu ikkuna "
-"merkitään kolmeksi sekunniksi ohuella tilavärisellä reunalla."
+"merkitään kolmeksi sekunniksi ohuella tilavärisellä reunalla. Hiiren "
+"napsautukset ja Alt+Tab eivät näytä sitä."
 
 #. settings-schema.json->fillSingleWindow->description
 msgid "Fill the monitor with a single window"
@@ -429,13 +433,13 @@ msgstr "Tilaväri"
 
 #. settings-schema.json->stateMode->tooltip
 msgid ""
-"Color of the \"Auto: on\" marker and the assigned rows. Green keeps today's "
-"look. Follow theme tracks the accent color of the Cinnamon theme live. "
-"Custom uses the color below."
+"Color of the \"Auto: on\" marker, the assigned preset cards and the focus "
+"border. Green keeps today's look. Follow theme tracks the accent color of "
+"the Cinnamon theme live. Custom uses the color below."
 msgstr ""
-"”Auto: päällä” -merkin ja määritettyjen rivien väri. ”Vihreä” säilyttää "
-"nykyisen ulkoasun. ”Seuraa teemaa” käyttää Cinnamon-teeman korostusväriä "
-"reaaliajassa. ”Mukautettu” käyttää alla olevaa väriä."
+"”Auto: päällä” -merkin, määritettyjen esiasetuskorttien ja kohdistusreunan "
+"väri. ”Vihreä” säilyttää nykyisen ulkoasun. ”Seuraa teemaa” käyttää Cinnamon-"
+"teeman korostusväriä reaaliajassa. ”Mukautettu” käyttää alla olevaa väriä."
 
 #. settings-schema.json->stateMode->options
 msgid "Green"
@@ -446,8 +450,11 @@ msgid "Custom state color"
 msgstr "Mukautettu tilaväri"
 
 #. settings-schema.json->stateColor->tooltip
-msgid "State color of the preset panel when State color is Custom."
-msgstr "Esiasetuspaneelin tilaväri, kun Tilaväri on ”Mukautettu”."
+msgid ""
+"State color of the preset panel and the focus border when State color is "
+"Custom."
+msgstr ""
+"Esiasetuspaneelin ja kohdistusreunan tilaväri, kun Tilaväri on ”Mukautettu”."
 
 #: lib/runtime/exclusions.js:270
 msgid "Window floats"

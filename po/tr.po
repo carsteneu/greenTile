@@ -10,7 +10,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: greenTile 2.2.3\n"
 "Report-Msgid-Bugs-To: https://github.com/carsteneu\n"
-"POT-Creation-Date: 2026-10-06 14:31+0200\n"
+"POT-Creation-Date: 2026-10-07 16:09+0200\n"
 "PO-Revision-Date: 2025-03-05 17:30+0300\n"
 "Last-Translator: Erdem Uygun <uygun.erdem@gmail.com>\n"
 "Language-Team: Turkish <dev@pardus.org.tr>\n"
@@ -21,40 +21,40 @@ msgstr ""
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 "X-Generator: Gtranslator 42.0\n"
 
-#: lib/ui/editor.js:68
+#: lib/ui/editor.js:72
 msgid "Please enter a name."
 msgstr "Lütfen bir ad girin."
 
-#: lib/ui/editor.js:130
+#: lib/ui/editor.js:144
 #, javascript-format
 msgid "from %d"
 msgstr "%d ve üzeri"
 
-#: lib/ui/editor.js:279
+#: lib/ui/editor.js:431
 msgid "Rules (by window count)"
 msgstr "Kurallar (pencere sayısına göre)"
 
-#: lib/ui/editor.js:283
+#: lib/ui/editor.js:435
 msgid "Rule"
 msgstr "Kural"
 
-#: lib/ui/editor.js:284
+#: lib/ui/editor.js:436
 msgid "Delete rule"
 msgstr "Kuralı sil"
 
-#: lib/ui/editor.js:292
+#: lib/ui/editor.js:444
 msgid "Rule applies from"
 msgstr "Kural geçerli:"
 
-#: lib/ui/editor.js:299
+#: lib/ui/editor.js:451
 msgid "windows"
 msgstr "pencereden itibaren"
 
-#: lib/ui/editor.js:301
+#: lib/ui/editor.js:453
 msgid "Painter"
 msgstr "Çizim alanı"
 
-#: lib/ui/editor.js:318
+#: lib/ui/editor.js:471
 msgid ""
 "Click or drag: the row sets how many windows the column holds. Right-click "
 "removes a column."
@@ -62,119 +62,121 @@ msgstr ""
 "Tıklayın veya sürükleyin: satır, sütunun kaç pencere alacağını belirler. Sağ "
 "tıklama bir sütunu kaldırır."
 
-#: lib/ui/editor.js:323
+#: lib/ui/editor.js:476
 msgid "Name"
 msgstr "Ad"
 
-#: lib/ui/editor.js:324
+#: lib/ui/editor.js:477
 msgid "Preset name"
 msgstr "Ön ayar adı"
 
-#: lib/ui/editor.js:329
+#: lib/ui/editor.js:482
 msgid "Delete preset"
 msgstr "Ön ayarı sil"
 
-#: lib/ui/editor.js:332
+#: lib/ui/editor.js:485
 msgid "Really delete?"
 msgstr "Gerçekten silinsin mi?"
 
-#: lib/ui/editor.js:333
+#: lib/ui/editor.js:486
 msgid "Delete"
 msgstr "Sil"
 
-#: lib/ui/editor.js:337
+#: lib/ui/editor.js:490
 msgid "Save"
 msgstr "Kaydet"
 
-#: lib/ui/editor.js:362
+#: lib/ui/editor.js:515
 #, javascript-format
 msgid "Result: %s"
 msgstr "Sonuç: %s"
 
-#: lib/ui/panel.js:100
+#: lib/ui/panel.js:103
 msgid "Edit preset"
 msgstr "Ön ayarı düzenle"
 
-#: lib/ui/panel.js:117
+#: lib/ui/panel.js:123
 msgid "Assigned"
 msgstr "Atanmış"
 
-#: lib/ui/panel.js:119
+#: lib/ui/panel.js:125
 msgid "Remove assignment"
 msgstr "Atamayı kaldır"
 
-#: lib/ui/panel.js:150
+#: lib/ui/panel.js:156
 msgid "Gap between windows"
 msgstr "Pencereler arası boşluk"
 
-#: lib/ui/panel.js:156
+#: lib/ui/panel.js:162
 #, javascript-format
 msgid "%d px"
 msgstr "%d px"
 
-#: lib/ui/panel.js:176
+#: lib/ui/panel.js:182
 msgid "Reset sizes"
 msgstr "Boyutları sıfırla"
 
-#: lib/ui/panel.js:219
+#: lib/ui/panel.js:225
 #, javascript-format
 msgid "Presets — workspace %d · %s"
 msgstr "Ön ayarlar — çalışma alanı %d · %s"
 
-#: lib/ui/panel.js:221
+#: lib/ui/panel.js:227
 msgid "Create preset"
 msgstr "Ön ayar oluştur"
 
-#: lib/ui/panel.js:221
+#: lib/ui/panel.js:227
 #, javascript-format
 msgid "Edit %s"
 msgstr "Düzenle: %s"
 
-#: lib/ui/panel.js:232
+#: lib/ui/panel.js:238
 msgid "Back"
 msgstr "Geri"
 
-#: lib/ui/panel.js:241 lib/ui/panel.js:247
+#: lib/ui/panel.js:247 lib/ui/panel.js:253
 msgid "Auto: on"
 msgstr "Otomatik: açık"
 
-#: lib/ui/panel.js:241 lib/ui/panel.js:247
+#: lib/ui/panel.js:247 lib/ui/panel.js:253
 msgid "Auto: off"
 msgstr "Otomatik: kapalı"
 
-#: lib/ui/panel.js:269
+#: lib/ui/panel.js:275
 msgid "Dark theme"
 msgstr "Koyu tema"
 
-#: lib/ui/panel.js:269
+#: lib/ui/panel.js:275
 msgid "Light theme"
 msgstr "Açık tema"
 
-#: lib/ui/panel.js:477
+#: lib/ui/panel.js:483
 msgid "No presets yet."
 msgstr "Henüz ön ayar yok."
 
-#: lib/ui/panel.js:497
+#: lib/ui/panel.js:503
 #, javascript-format
 msgid "Preview for %d window"
 msgstr "%d pencere için önizleme"
 
-#: lib/ui/panel.js:498
+#: lib/ui/panel.js:504
 #, javascript-format
 msgid "Preview for %d windows"
 msgstr "%d pencere için önizleme"
 
-#: lib/ui/panel.js:498
+#: lib/ui/panel.js:504
 msgid "No windows open — base layout"
 msgstr "Açık pencere yok — temel düzen"
 
-#: lib/ui/panel.js:512
+#: lib/ui/panel.js:518
 msgid "New preset"
 msgstr "Yeni ön ayar"
 
-#: lib/ui/panel.js:515
+#: lib/ui/panel.js:521
 msgid "Click a card to apply it to this workspace and tile right away"
-msgstr "Ön ayarı bu çalışma alanına uygulamak ve pencereleri hemen döşemek için bir karta tıklayın"
+msgstr ""
+"Ön ayarı bu çalışma alanına uygulamak ve pencereleri hemen döşemek için bir "
+"karta tıklayın"
 
 #. metadata.json->name
 msgid "greenTile"
@@ -346,10 +348,12 @@ msgstr "Odaklanmış pencerenin etrafına çerçeve"
 #. settings-schema.json->focusBorder->tooltip
 msgid ""
 "After a Super+Arrow focus move, mark the newly focused window with a thin "
-"border in the state color for three seconds."
+"border in the state color for three seconds. Mouse clicks and Alt+Tab do not "
+"show it."
 msgstr ""
 "Super+Ok ile odak taşındıktan sonra yeni odaklanan pencereyi üç saniye "
-"boyunca durum renginde ince bir çerçeveyle işaretler."
+"boyunca durum renginde ince bir çerçeveyle işaretler. Fare tıklamaları ve "
+"Alt+Tab bunu göstermez."
 
 #. settings-schema.json->fillSingleWindow->description
 msgid "Fill the monitor with a single window"
@@ -425,13 +429,14 @@ msgstr "Durum rengi"
 
 #. settings-schema.json->stateMode->tooltip
 msgid ""
-"Color of the \"Auto: on\" marker and the assigned rows. Green keeps today's "
-"look. Follow theme tracks the accent color of the Cinnamon theme live. "
-"Custom uses the color below."
+"Color of the \"Auto: on\" marker, the assigned preset cards and the focus "
+"border. Green keeps today's look. Follow theme tracks the accent color of "
+"the Cinnamon theme live. Custom uses the color below."
 msgstr ""
-"“Otomatik: açık” işaretinin ve atanmış satırların rengi. “Yeşil” bugünkü "
-"görünümü korur. “Temayı izle” Cinnamon temasının vurgu rengini canlı olarak "
-"takip eder. “Özel” aşağıdaki rengi kullanır."
+"“Otomatik: açık” işaretinin, atanmış ön ayar kartlarının ve odak "
+"çerçevesinin rengi. “Yeşil” bugünkü görünümü korur. “Temayı izle” Cinnamon "
+"temasının vurgu rengini canlı olarak takip eder. “Özel” aşağıdaki rengi "
+"kullanır."
 
 #. settings-schema.json->stateMode->options
 msgid "Green"
@@ -442,9 +447,12 @@ msgid "Custom state color"
 msgstr "Özel durum rengi"
 
 #. settings-schema.json->stateColor->tooltip
-msgid "State color of the preset panel when State color is Custom."
+msgid ""
+"State color of the preset panel and the focus border when State color is "
+"Custom."
 msgstr ""
-"“Durum rengi” “Özel” olarak ayarlandığında ön ayar panelinin durum rengi."
+"“Durum rengi” “Özel” olarak ayarlandığında ön ayar panelinin ve odak "
+"çerçevesinin durum rengi."
 
 #: lib/runtime/exclusions.js:270
 msgid "Window floats"

@@ -227,7 +227,7 @@
       "type": "switch",
       "default": true,
       "description": "Border around the focused window",
-      "tooltip": "After a Super+Arrow focus move, mark the newly focused window with a thin border in the state color for three seconds."
+      "tooltip": "After a Super+Arrow focus move, mark the newly focused window with a thin border in the state color for three seconds. Mouse clicks and Alt+Tab do not show it."
    },
    "fillSingleWindow": {
       "type": "switch",
@@ -267,7 +267,7 @@
       "type": "combobox",
       "default": "green",
       "description": "State color",
-      "tooltip": "Color of the \"Auto: on\" marker and the assigned rows. Green keeps today's look. Follow theme tracks the accent color of the Cinnamon theme live. Custom uses the color below.",
+      "tooltip": "Color of the \"Auto: on\" marker, the assigned preset cards and the focus border. Green keeps today's look. Follow theme tracks the accent color of the Cinnamon theme live. Custom uses the color below.",
       "options": {
          "Green": "green",
          "Follow theme": "theme",
@@ -278,7 +278,7 @@
       "type": "colorchooser",
       "default": "rgb(156,224,114)",
       "description": "Custom state color",
-      "tooltip": "State color of the preset panel when State color is Custom.",
+      "tooltip": "State color of the preset panel and the focus border when State color is Custom.",
       "dependency": "stateMode=own"
    }
 }

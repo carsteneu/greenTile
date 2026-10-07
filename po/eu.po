@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: greenTile 2.2.3\n"
 "Report-Msgid-Bugs-To: https://github.com/carsteneu\n"
-"POT-Creation-Date: 2026-10-06 14:31+0200\n"
+"POT-Creation-Date: 2026-10-07 16:09+0200\n"
 "PO-Revision-Date: 2024-05-30 9:50+1\n"
 "Last-Translator: Muxutruk <muxutruk2@users.noreply.github.com>\n"
 "Language-Team: Basque <muxutruk2@users.noreply.github.com>\n"
@@ -17,40 +17,40 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: lib/ui/editor.js:68
+#: lib/ui/editor.js:72
 msgid "Please enter a name."
 msgstr "Idatzi izen bat."
 
-#: lib/ui/editor.js:130
+#: lib/ui/editor.js:144
 #, javascript-format
 msgid "from %d"
 msgstr "gutxienez %d"
 
-#: lib/ui/editor.js:279
+#: lib/ui/editor.js:431
 msgid "Rules (by window count)"
 msgstr "Arauak (leiho kopuruaren arabera)"
 
-#: lib/ui/editor.js:283
+#: lib/ui/editor.js:435
 msgid "Rule"
 msgstr "Araua"
 
-#: lib/ui/editor.js:284
+#: lib/ui/editor.js:436
 msgid "Delete rule"
 msgstr "Ezabatu araua"
 
-#: lib/ui/editor.js:292
+#: lib/ui/editor.js:444
 msgid "Rule applies from"
 msgstr "Araua aplikatzen da gutxienez"
 
-#: lib/ui/editor.js:299
+#: lib/ui/editor.js:451
 msgid "windows"
 msgstr "leihorekin"
 
-#: lib/ui/editor.js:301
+#: lib/ui/editor.js:453
 msgid "Painter"
 msgstr "Marrazketa-eremua"
 
-#: lib/ui/editor.js:318
+#: lib/ui/editor.js:471
 msgid ""
 "Click or drag: the row sets how many windows the column holds. Right-click "
 "removes a column."
@@ -58,119 +58,121 @@ msgstr ""
 "Egin klik edo arrastatu: errenkadak zehazten du zutabeak zenbat leiho "
 "hartzen dituen. Eskuineko klikak zutabe bat kentzen du."
 
-#: lib/ui/editor.js:323
+#: lib/ui/editor.js:476
 msgid "Name"
 msgstr "Izena"
 
-#: lib/ui/editor.js:324
+#: lib/ui/editor.js:477
 msgid "Preset name"
 msgstr "Aurrezarpenaren izena"
 
-#: lib/ui/editor.js:329
+#: lib/ui/editor.js:482
 msgid "Delete preset"
 msgstr "Ezabatu aurrezarpena"
 
-#: lib/ui/editor.js:332
+#: lib/ui/editor.js:485
 msgid "Really delete?"
 msgstr "Benetan ezabatu?"
 
-#: lib/ui/editor.js:333
+#: lib/ui/editor.js:486
 msgid "Delete"
 msgstr "Ezabatu"
 
-#: lib/ui/editor.js:337
+#: lib/ui/editor.js:490
 msgid "Save"
 msgstr "Gorde"
 
-#: lib/ui/editor.js:362
+#: lib/ui/editor.js:515
 #, javascript-format
 msgid "Result: %s"
 msgstr "Emaitza: %s"
 
-#: lib/ui/panel.js:100
+#: lib/ui/panel.js:103
 msgid "Edit preset"
 msgstr "Editatu aurrezarpena"
 
-#: lib/ui/panel.js:117
+#: lib/ui/panel.js:123
 msgid "Assigned"
 msgstr "Esleituta"
 
-#: lib/ui/panel.js:119
+#: lib/ui/panel.js:125
 msgid "Remove assignment"
 msgstr "Kendu esleipena"
 
-#: lib/ui/panel.js:150
+#: lib/ui/panel.js:156
 msgid "Gap between windows"
 msgstr "Leihoen arteko tartea"
 
-#: lib/ui/panel.js:156
+#: lib/ui/panel.js:162
 #, javascript-format
 msgid "%d px"
 msgstr "%d px"
 
-#: lib/ui/panel.js:176
+#: lib/ui/panel.js:182
 msgid "Reset sizes"
 msgstr "Berrezarri tamainak"
 
-#: lib/ui/panel.js:219
+#: lib/ui/panel.js:225
 #, javascript-format
 msgid "Presets — workspace %d · %s"
 msgstr "Aurrezarpenak — %d. laneko area · %s"
 
-#: lib/ui/panel.js:221
+#: lib/ui/panel.js:227
 msgid "Create preset"
 msgstr "Sortu aurrezarpena"
 
-#: lib/ui/panel.js:221
+#: lib/ui/panel.js:227
 #, javascript-format
 msgid "Edit %s"
 msgstr "Editatu %s"
 
-#: lib/ui/panel.js:232
+#: lib/ui/panel.js:238
 msgid "Back"
 msgstr "Atzera"
 
-#: lib/ui/panel.js:241 lib/ui/panel.js:247
+#: lib/ui/panel.js:247 lib/ui/panel.js:253
 msgid "Auto: on"
 msgstr "Auto: aktibatuta"
 
-#: lib/ui/panel.js:241 lib/ui/panel.js:247
+#: lib/ui/panel.js:247 lib/ui/panel.js:253
 msgid "Auto: off"
 msgstr "Auto: desaktibatuta"
 
-#: lib/ui/panel.js:269
+#: lib/ui/panel.js:275
 msgid "Dark theme"
 msgstr "Gai iluna"
 
-#: lib/ui/panel.js:269
+#: lib/ui/panel.js:275
 msgid "Light theme"
 msgstr "Gai argia"
 
-#: lib/ui/panel.js:477
+#: lib/ui/panel.js:483
 msgid "No presets yet."
 msgstr "Oraindik ez dago aurrezarpenik."
 
-#: lib/ui/panel.js:497
+#: lib/ui/panel.js:503
 #, javascript-format
 msgid "Preview for %d window"
 msgstr "Aurrebista — leiho kopurua: %d"
 
-#: lib/ui/panel.js:498
+#: lib/ui/panel.js:504
 #, javascript-format
 msgid "Preview for %d windows"
 msgstr "Aurrebista — leiho kopurua: %d"
 
-#: lib/ui/panel.js:498
+#: lib/ui/panel.js:504
 msgid "No windows open — base layout"
 msgstr "Ez dago leiho irekirik — oinarrizko antolamendua"
 
-#: lib/ui/panel.js:512
+#: lib/ui/panel.js:518
 msgid "New preset"
 msgstr "Aurrezarpen berria"
 
-#: lib/ui/panel.js:515
+#: lib/ui/panel.js:521
 msgid "Click a card to apply it to this workspace and tile right away"
-msgstr "Egin klik txartel batean aurrezarpena laneko area honetan aplikatzeko eta leihoak berehala mosaikoan antolatzeko"
+msgstr ""
+"Egin klik txartel batean aurrezarpena laneko area honetan aplikatzeko eta "
+"leihoak berehala mosaikoan antolatzeko"
 
 #. metadata.json->name
 msgid "greenTile"
@@ -346,10 +348,12 @@ msgstr "Fokuako leihoaren inguruko ertza"
 #. settings-schema.json->focusBorder->tooltip
 msgid ""
 "After a Super+Arrow focus move, mark the newly focused window with a thin "
-"border in the state color for three seconds."
+"border in the state color for three seconds. Mouse clicks and Alt+Tab do not "
+"show it."
 msgstr ""
 "Super+Gezia erabilita fokua mugitu ondoren, fokua jaso duen leihoa egoera "
-"koloreko ertz mehe batekin markatzen du hiru segundoz."
+"koloreko ertz mehe batekin markatzen du hiru segundoz. Saguaren klikek eta "
+"Alt+Tab-ek ez dute erakusten."
 
 #. settings-schema.json->fillSingleWindow->description
 msgid "Fill the monitor with a single window"
@@ -426,14 +430,14 @@ msgstr "Egoera kolorea"
 
 #. settings-schema.json->stateMode->tooltip
 msgid ""
-"Color of the \"Auto: on\" marker and the assigned rows. Green keeps today's "
-"look. Follow theme tracks the accent color of the Cinnamon theme live. "
-"Custom uses the color below."
+"Color of the \"Auto: on\" marker, the assigned preset cards and the focus "
+"border. Green keeps today's look. Follow theme tracks the accent color of "
+"the Cinnamon theme live. Custom uses the color below."
 msgstr ""
-"«Auto: aktibatuta» markaren eta esleitutako errenkaden kolorea. Berdea "
-"aukerak orain arteko itxura mantentzen du. Jarraitu gaiari aukerak Cinnamon "
-"gaiaren nabarmentze-kolorea jarraitzen du zuzenean. Pertsonalizatua aukerak "
-"beheko kolorea erabiltzen du."
+"«Auto: aktibatuta» markaren, esleitutako aurrezarpen-txartelen eta fokuaren "
+"ertzaren kolorea. Berdea aukerak orain arteko itxura mantentzen du. Jarraitu "
+"gaiari aukerak Cinnamon gaiaren nabarmentze-kolorea jarraitzen du zuzenean. "
+"Pertsonalizatua aukerak beheko kolorea erabiltzen du."
 
 #. settings-schema.json->stateMode->options
 msgid "Green"
@@ -444,10 +448,12 @@ msgid "Custom state color"
 msgstr "Egoera kolore pertsonalizatua"
 
 #. settings-schema.json->stateColor->tooltip
-msgid "State color of the preset panel when State color is Custom."
+msgid ""
+"State color of the preset panel and the focus border when State color is "
+"Custom."
 msgstr ""
-"Aurrezarpenen panelaren egoera kolorea, Egoera kolorea Pertsonalizatua "
-"denean."
+"Aurrezarpenen panelaren eta fokuaren ertzaren egoera kolorea, Egoera kolorea "
+"Pertsonalizatua denean."
 
 #: lib/runtime/exclusions.js:270
 msgid "Window floats"

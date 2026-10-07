@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: greenTile 2.2.3\n"
 "Report-Msgid-Bugs-To: https://github.com/carsteneu\n"
-"POT-Creation-Date: 2026-10-06 14:31+0200\n"
+"POT-Creation-Date: 2026-10-07 16:09+0200\n"
 "PO-Revision-Date: 2023-01-09 21:16+0100\n"
 "Last-Translator: Kálmán „KAMI” Szalai <kami911@gmail.com>\n"
 "Language-Team: Hungarian\n"
@@ -19,40 +19,40 @@ msgstr ""
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 "X-Generator: Poedit 3.0.1\n"
 
-#: lib/ui/editor.js:68
+#: lib/ui/editor.js:72
 msgid "Please enter a name."
 msgstr "Adj meg egy nevet."
 
-#: lib/ui/editor.js:130
+#: lib/ui/editor.js:144
 #, javascript-format
 msgid "from %d"
 msgstr "legalább %d"
 
-#: lib/ui/editor.js:279
+#: lib/ui/editor.js:431
 msgid "Rules (by window count)"
 msgstr "Szabályok (ablakszám szerint)"
 
-#: lib/ui/editor.js:283
+#: lib/ui/editor.js:435
 msgid "Rule"
 msgstr "Szabály"
 
-#: lib/ui/editor.js:284
+#: lib/ui/editor.js:436
 msgid "Delete rule"
 msgstr "Szabály törlése"
 
-#: lib/ui/editor.js:292
+#: lib/ui/editor.js:444
 msgid "Rule applies from"
 msgstr "A szabály érvényes legalább"
 
-#: lib/ui/editor.js:299
+#: lib/ui/editor.js:451
 msgid "windows"
 msgstr "ablak esetén"
 
-#: lib/ui/editor.js:301
+#: lib/ui/editor.js:453
 msgid "Painter"
 msgstr "Rajzterület"
 
-#: lib/ui/editor.js:318
+#: lib/ui/editor.js:471
 msgid ""
 "Click or drag: the row sets how many windows the column holds. Right-click "
 "removes a column."
@@ -60,119 +60,121 @@ msgstr ""
 "Kattints vagy húzd: a sor határozza meg, hány ablak fér az oszlopba. A jobb "
 "kattintás eltávolít egy oszlopot."
 
-#: lib/ui/editor.js:323
+#: lib/ui/editor.js:476
 msgid "Name"
 msgstr "Név"
 
-#: lib/ui/editor.js:324
+#: lib/ui/editor.js:477
 msgid "Preset name"
 msgstr "Előbeállítás neve"
 
-#: lib/ui/editor.js:329
+#: lib/ui/editor.js:482
 msgid "Delete preset"
 msgstr "Előbeállítás törlése"
 
-#: lib/ui/editor.js:332
+#: lib/ui/editor.js:485
 msgid "Really delete?"
 msgstr "Biztosan törlöd?"
 
-#: lib/ui/editor.js:333
+#: lib/ui/editor.js:486
 msgid "Delete"
 msgstr "Törlés"
 
-#: lib/ui/editor.js:337
+#: lib/ui/editor.js:490
 msgid "Save"
 msgstr "Mentés"
 
-#: lib/ui/editor.js:362
+#: lib/ui/editor.js:515
 #, javascript-format
 msgid "Result: %s"
 msgstr "Eredmény: %s"
 
-#: lib/ui/panel.js:100
+#: lib/ui/panel.js:103
 msgid "Edit preset"
 msgstr "Előbeállítás szerkesztése"
 
-#: lib/ui/panel.js:117
+#: lib/ui/panel.js:123
 msgid "Assigned"
 msgstr "Hozzárendelve"
 
-#: lib/ui/panel.js:119
+#: lib/ui/panel.js:125
 msgid "Remove assignment"
 msgstr "Hozzárendelés megszüntetése"
 
-#: lib/ui/panel.js:150
+#: lib/ui/panel.js:156
 msgid "Gap between windows"
 msgstr "Ablakok közötti távolság"
 
-#: lib/ui/panel.js:156
+#: lib/ui/panel.js:162
 #, javascript-format
 msgid "%d px"
 msgstr "%d px"
 
-#: lib/ui/panel.js:176
+#: lib/ui/panel.js:182
 msgid "Reset sizes"
 msgstr "Méretek visszaállítása"
 
-#: lib/ui/panel.js:219
+#: lib/ui/panel.js:225
 #, javascript-format
 msgid "Presets — workspace %d · %s"
 msgstr "Előbeállítások — %d. munkaterület · %s"
 
-#: lib/ui/panel.js:221
+#: lib/ui/panel.js:227
 msgid "Create preset"
 msgstr "Előbeállítás létrehozása"
 
-#: lib/ui/panel.js:221
+#: lib/ui/panel.js:227
 #, javascript-format
 msgid "Edit %s"
 msgstr "%s szerkesztése"
 
-#: lib/ui/panel.js:232
+#: lib/ui/panel.js:238
 msgid "Back"
 msgstr "Vissza"
 
-#: lib/ui/panel.js:241 lib/ui/panel.js:247
+#: lib/ui/panel.js:247 lib/ui/panel.js:253
 msgid "Auto: on"
 msgstr "Auto: be"
 
-#: lib/ui/panel.js:241 lib/ui/panel.js:247
+#: lib/ui/panel.js:247 lib/ui/panel.js:253
 msgid "Auto: off"
 msgstr "Auto: ki"
 
-#: lib/ui/panel.js:269
+#: lib/ui/panel.js:275
 msgid "Dark theme"
 msgstr "Sötét téma"
 
-#: lib/ui/panel.js:269
+#: lib/ui/panel.js:275
 msgid "Light theme"
 msgstr "Világos téma"
 
-#: lib/ui/panel.js:477
+#: lib/ui/panel.js:483
 msgid "No presets yet."
 msgstr "Még nincsenek előbeállítások."
 
-#: lib/ui/panel.js:497
+#: lib/ui/panel.js:503
 #, javascript-format
 msgid "Preview for %d window"
 msgstr "Előnézet %d ablak esetén"
 
-#: lib/ui/panel.js:498
+#: lib/ui/panel.js:504
 #, javascript-format
 msgid "Preview for %d windows"
 msgstr "Előnézet %d ablak esetén"
 
-#: lib/ui/panel.js:498
+#: lib/ui/panel.js:504
 msgid "No windows open — base layout"
 msgstr "Nincs nyitott ablak — alapelrendezés"
 
-#: lib/ui/panel.js:512
+#: lib/ui/panel.js:518
 msgid "New preset"
 msgstr "Új előbeállítás"
 
-#: lib/ui/panel.js:515
+#: lib/ui/panel.js:521
 msgid "Click a card to apply it to this workspace and tile right away"
-msgstr "Kattints egy kártyára, hogy alkalmazd az előbeállítást ezen a munkaterületen, és azonnal csempézd az ablakokat"
+msgstr ""
+"Kattints egy kártyára, hogy alkalmazd az előbeállítást ezen a "
+"munkaterületen, és azonnal csempézd az ablakokat"
 
 #. metadata.json->name
 msgid "greenTile"
@@ -346,10 +348,12 @@ msgstr "Keret a fókuszált ablak körül"
 #. settings-schema.json->focusBorder->tooltip
 msgid ""
 "After a Super+Arrow focus move, mark the newly focused window with a thin "
-"border in the state color for three seconds."
+"border in the state color for three seconds. Mouse clicks and Alt+Tab do not "
+"show it."
 msgstr ""
 "Super+Nyíl fókuszváltás után három másodpercig vékony, állapotszínű kerettel "
-"jelöli az újonnan fókuszba került ablakot."
+"jelöli az újonnan fókuszba került ablakot. Egérkattintásnál és Alt+Tab "
+"használatakor nem jelenik meg."
 
 #. settings-schema.json->fillSingleWindow->description
 msgid "Fill the monitor with a single window"
@@ -425,13 +429,14 @@ msgstr "Állapotszín"
 
 #. settings-schema.json->stateMode->tooltip
 msgid ""
-"Color of the \"Auto: on\" marker and the assigned rows. Green keeps today's "
-"look. Follow theme tracks the accent color of the Cinnamon theme live. "
-"Custom uses the color below."
+"Color of the \"Auto: on\" marker, the assigned preset cards and the focus "
+"border. Green keeps today's look. Follow theme tracks the accent color of "
+"the Cinnamon theme live. Custom uses the color below."
 msgstr ""
-"Az „Auto: be” jelölő és a hozzárendelt sorok színe. A „Zöld” megtartja a "
-"jelenlegi megjelenést. A „Téma követése” valós időben átveszi a Cinnamon-"
-"téma kiemelőszínét. Az „Egyéni” az alábbi színt használja."
+"Az „Auto: be” jelölő, a hozzárendelt előbeállítás-kártyák és a fókuszkeret "
+"színe. A „Zöld” megtartja a jelenlegi megjelenést. A „Téma követése” valós "
+"időben átveszi a Cinnamon-téma kiemelőszínét. Az „Egyéni” az alábbi színt "
+"használja."
 
 #. settings-schema.json->stateMode->options
 msgid "Green"
@@ -442,8 +447,12 @@ msgid "Custom state color"
 msgstr "Egyéni állapotszín"
 
 #. settings-schema.json->stateColor->tooltip
-msgid "State color of the preset panel when State color is Custom."
-msgstr "Az előbeállítás-panel állapotszíne, ha az Állapotszín értéke „Egyéni”."
+msgid ""
+"State color of the preset panel and the focus border when State color is "
+"Custom."
+msgstr ""
+"Az előbeállítás-panel és a fókuszkeret állapotszíne, ha az Állapotszín "
+"értéke „Egyéni”."
 
 #: lib/runtime/exclusions.js:270
 msgid "Window floats"

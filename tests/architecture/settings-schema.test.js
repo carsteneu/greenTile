@@ -67,7 +67,7 @@ test('descriptions and tooltips (the msgids) are untouched', () => {
     assert.equal(schema.tileAnimation.description, 'Animate tiling');
     assert.equal(schema.tileAnimation.tooltip, 'Windows glide into their new place. Off: they jump there at once.');
     assert.equal(schema.focusBorder.description, 'Border around the focused window');
-    assert.equal(schema.focusBorder.tooltip, 'After a Super+Arrow focus move, mark the newly focused window with a thin border in the state color for three seconds.');
+    assert.equal(schema.focusBorder.tooltip, 'After a Super+Arrow focus move, mark the newly focused window with a thin border in the state color for three seconds. Mouse clicks and Alt+Tab do not show it.');
     assert.equal(schema.fillSingleWindow.description, 'Fill the monitor with a single window');
     assert.equal(schema.fillSingleWindow.tooltip, 'With automatic tiling or a preset on, a single tiled window fills the whole usable area instead of being left untouched.');
 });
