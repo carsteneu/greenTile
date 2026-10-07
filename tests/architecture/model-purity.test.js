@@ -14,7 +14,7 @@ const path = require('node:path');
 
 const LIB_DIR = path.join(__dirname, '..', '..', 'lib', 'model');
 const files = fs.readdirSync(LIB_DIR).filter((f) => f.endsWith('.js')).sort();
-assert.equal(files.length, 19, 'expected the 19 extracted model modules');
+assert.equal(files.length, 20, 'expected the 20 extracted model modules');
 
 const purityRe = /imports\.(?!extensions\['greenTile@carsteneu'\])|\bSt\.|\bClutter\.|global\.|\bMain\.|\bMeta\./;
 const xletDesktopAccessRe = /XLET\.(?!lib\b)/;
