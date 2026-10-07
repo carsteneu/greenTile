@@ -4,6 +4,7 @@ export const ORDER_VERSION: number;
 export const ORDER_MAX_PER_SURFACE: number;
 export const ORDER_MAX_SURFACES: number;
 export const ORDER_MAX_KEY: number;
+export const ORDER_MAX_BYTES: number;
 export const ORDER_ID_RE: RegExp;
 export function orderKey(mkey: MonitorKey, wskey: WsKey): string;
 export function orderItemValid(id: unknown): boolean;

@@ -23,6 +23,7 @@ export const Orders: {
         _mainloop: AnyRecord;
         _global: AnyRecord;
         _log: (msg: string) => void;
+        _runtimeDir: string | null;
         _snapshot: {
             v: number;
             s: Record<string, string[]>;
@@ -30,10 +31,19 @@ export const Orders: {
         _store: {
             v: number;
             s: Record<string, string[]>;
+        } | {
+            v: any;
+            s: {};
         };
         _timer: number;
         _destroyed: boolean;
         _corruptLogged: boolean;
+        /**
+         * The directory the store lives in, or null when there is no per-session
+         * runtime dir to put it in.
+         * @returns {string | null}
+         */
+        _resolveRuntimeDir(): string | null;
         /** @returns {string} the order file path (built from the runtime dir, never from file content). */
         _path(): string;
         /** @returns {string} the directory the order file lives in. */
@@ -71,12 +81,23 @@ export const Orders: {
          * Records the order a placement produced. Only windows with an X11
          * description count (a Wayland window has none), and fewer than two leaves no
          * order to restore. An unchanged order writes nothing.
+         *
+         * Two callers exist and they differ in what they teach the store:
+         * - `explicit` (a swap, or the drag-and-drop that placed the window the user
+         *   moved): the placement IS the user's arrangement, so it is recorded and the
+         *   surface's pending restore is closed — a later retile must not undo it.
+         * - otherwise the retile placed the surface's windows by their live positions,
+         *   which after a restart are the ones Muffin scrambled them into. That is no
+         *   order to learn from while the surface's stored one is still waiting to be
+         *   restored (a background workspace retiled by an exclusion toggle): writing it
+         *   would destroy exactly the order the restore is for.
          * @param {AppFacade} app
          * @param {number} monitorIndex
          * @param {number} wsIndex
          * @param {CinnamonWindow[]} ordered the windows in placement order
+         * @param {boolean} [explicit] the placement came from a user arrangement
          */
-        record(app: AppFacade, monitorIndex: number, wsIndex: number, ordered: CinnamonWindow[]): void;
+        record(app: AppFacade, monitorIndex: number, wsIndex: number, ordered: CinnamonWindow[], explicit?: boolean): void;
         /**
          * Stops the debounce timer after flushing the pending write: the last
          * placement before a teardown is not lost.

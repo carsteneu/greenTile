@@ -9,7 +9,7 @@
 const test = require('node:test');
 const assert = require('node:assert/strict');
 const {
-    makeEnv, makeWindow, makeWorkspace, settingsInstance, enableOnMonitor,
+    makeEnv, makeWindow, makeWorkspace, settingsInstance, enableOnMonitor, enableOnMonitors,
 } = require('../helpers/fakes/cinnamon-harness');
 
 const PATH = '/run/user/1000/greenTile@carsteneu/order.json';
@@ -193,4 +193,76 @@ test('the store never touches the settings', () => {
     app.ops.retileMonitor(app, 0);
     fireMs(env, 1000);
     assert.equal(settingsInstance(env).getValue('layouts'), layouts, 'no settings churn');
+});
+
+test('a swap or edge resize wins over the stored order instead of being undone', () => {
+    const first = scene();
+    const a1 = makeWindow(first.env, 11, [10, 10, 400, 300], 0, null, { description: '0x1' });
+    const a2 = makeWindow(first.env, 12, [500, 0, 400, 300], 0, null, { description: '0x2' });
+    first.env.tabList.push(a1, a2);
+    first.env.display.focus_window = a1;
+    first.app.ops.retileMonitor(first.app, 0);
+    fireMs(first.env, 1000);
+    const recorded = first.env.files.get(PATH);
+
+    const { env, ext } = scene(recorded);
+    const w2 = makeWindow(env, 91, [0, 0, 400, 300], 0, null, { description: '0x2' });
+    const w1 = makeWindow(env, 92, [500, 0, 400, 300], 0, null, { description: '0x1' });
+    env.tabList.push(w2, w1);
+    env.display.focus_window = w1;
+    // the user swaps the two: the pending sort override is what the retile must honor
+    const app = ext.currentSession().app;
+    app.auto.sortOverride(w2.get_stable_sequence(), LEFT, 0);
+    app.auto.sortOverride(w1.get_stable_sequence(), RIGHT, 0);
+    app.ops.retileMonitor(app, 0);
+    assert.deepEqual(w2.rect, LEFT, 'the window the user moved left stays left');
+    assert.deepEqual(w1.rect, RIGHT);
+    // and that arrangement is now the recorded truth
+    fireMs(env, 1000);
+    assert.deepEqual(JSON.parse(env.files.get(PATH)).s[surfaceKey(app)], ['0x2', '0x1']);
+});
+
+test('a drag-and-drop placement is recorded straight away and survives the next retile', () => {
+    const MON = { x: 0, y: 0, width: 2400, height: 1100 };
+    const { env, ext } = makeEnv({ windowGap: 0 });
+    enableOnMonitors(env, ext, [MON]);
+    const ws = makeWorkspace(env);
+    ws.index = () => 0;
+    env.activeWorkspace = ws;
+    const mins = [[1300, 0], [500, 0], [1300, 0], [500, 0]];
+    const descs = ['0x1', '0x2', '0x3', '0x4'];
+    const wins = mins.map((m, i) => makeWindow(env, 11 + i, [i * 400 + 10, 10, 300, 300], 0, null,
+        { description: descs[i], minSize: m }));
+    env.tabList.push(...wins);
+    env.display.focus_window = wins[0];
+    const app = ext.currentSession().app;
+    const writeMs = () => [...env.timers.entries()].find(([, t]) => t.ms === 1000);
+    const flush = () => {
+        const timer = writeMs();
+        assert.ok(timer, 'a pending write');
+        env.timers.delete(timer[0]);
+        timer[1].cb();
+        return JSON.parse(env.files.get(PATH)).s[surfaceKey(app)];
+    };
+    app.ops.layoutSet(app, 0, 0, { auto: true });
+    app.ops.retileMonitor(app, 0, null, false);
+    const beforeDrop = flush();
+
+    const dropped = wins[3];
+    env.pointer = [600, 540];
+    app.drop.begin(app, dropped, env.gi.Meta.GrabOp.MOVING);
+    dropped.move_frame(false, 600, 530);
+    assert.equal(app.drop.end(app, dropped, env.gi.Meta.GrabOp.MOVING), true, 'the drop applied');
+    const afterDrop = wins.map((w) => w.rect.slice());
+    // the drop changed the order, and it is recorded WITHOUT waiting for a retile
+    const recorded = flush();
+    const byCell = wins.slice()
+        .sort((a, b) => (a.rect[1] - b.rect[1]) || (a.rect[0] - b.rect[0]))
+        .map((w) => w.get_description());
+    assert.notDeepEqual(recorded, beforeDrop, 'the drop rearranged the surface');
+    assert.deepEqual(recorded, byCell, 'the order the drop produced, cell by cell');
+    assert.deepEqual(recorded, ['0x1', '0x2', '0x4', '0x3'], 'the dropped window leads the cell it was dropped into');
+    // and a retile keeps the arrangement the drop produced
+    app.ops.retileMonitor(app, 0, null, false);
+    assert.deepEqual(wins.map((w) => w.rect), afterDrop, 'the dropped arrangement is stable');
 });

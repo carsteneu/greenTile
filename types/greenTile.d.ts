@@ -314,7 +314,7 @@ type SplitFacade = {
  * per surface by the first retile after enable (lib/tiling/retile.js). */
 type OrdersFacade = {
     restore(app: AppFacade, monitorIndex: number, wsIndex: number): string[] | null;
-    record(app: AppFacade, monitorIndex: number, wsIndex: number, ordered: CinnamonWindow[]): void;
+    record(app: AppFacade, monitorIndex: number, wsIndex: number, ordered: CinnamonWindow[], explicit?: boolean): void;
     destroy(): void;
 };
 
