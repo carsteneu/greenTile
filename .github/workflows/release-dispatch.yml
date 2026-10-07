@@ -66,7 +66,9 @@ jobs:
           VERSION: ${{ inputs.version }}
         run: |
           if ! printf '%s' "$VERSION" | grep -Eq '^(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)$'; then
-            echo "::error::invalid version '$VERSION' — expected X.Y.Z without a v prefix"; exit 1
+            # %q escapes the still-untrusted value so it cannot inject a
+            # workflow command (e.g. ::add-mask::) through a newline.
+            printf '::error::invalid version %q — expected X.Y.Z without a v prefix\n' "$VERSION"; exit 1
           fi
       - name: fail early if the tag already exists
         env:
