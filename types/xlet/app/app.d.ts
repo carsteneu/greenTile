@@ -21,6 +21,8 @@ export const App: {
         split: SplitFacade;
         /** @type {OrdersFacade} */
         orders: OrdersFacade;
+        /** @type {ActorSyncFacade} */
+        actorsync: ActorSyncFacade;
         theme: any;
         /** @type {BorderFacade} */
         border: BorderFacade;
