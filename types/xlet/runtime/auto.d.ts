@@ -57,7 +57,7 @@ export const Auto: {
         holdGeneration(): number;
         /**
          * Whether the shell's workspace-switch effect may still own the window actors
-         * (see SWITCH_EFFECT_MS): a frame moved now would be drawn at its old place.
+         * (see SWITCH_POLL_MS): a frame moved now would be drawn at its old place.
          * @returns {boolean}
          */
         switching(): boolean;
