@@ -724,6 +724,31 @@ test('a chain of switches does not extend the hold past three seconds', () => {
     f.finishSwitch();
 });
 
+test('a focus chain from an earlier hold does not carry a press over a click in the next hold', () => {
+    const f = setup();
+    f.env.activeWorkspace = f.ws12;
+    f.c.get_workspace = () => f.ws12; // three windows in a row on ws12
+    f.app.ops.retileMonitor(f.app, 0, null, false, 0);
+    const [x0, x1, x2] = [f.a, f.b, f.c].sort((p, q) => p.rect[0] - q.rect[0]);
+    // hold 1: focus left from x2 ends on x1 (chain: origin x2, after x1)
+    openHold(f);
+    f.env.display.focus_window = x2;
+    f.env.customBindings.get('push-tile-left')(f.env.display, x2);
+    f.finishSwitch();
+    advance(f.env);
+    assert.equal(f.env.display.focus_window, x1);
+    // the user clicks x2, switches again and presses focus left (Muffin hands x2) ...
+    f.env.display.focus_window = x2;
+    openHold(f);
+    f.env.customBindings.get('push-tile-left')(f.env.display, x2);
+    // ... and clicks x1 while the effect still runs
+    f.env.display.focus_window = x1;
+    f.finishSwitch();
+    advance(f.env);
+    assert.equal(f.env.display.focus_window, x1, 'the stale press was dropped, the clicked window keeps the focus');
+    assert.notEqual(f.env.display.focus_window, x0);
+});
+
 test('two focus presses inside one effect move two cells, as without the hold', () => {
     const f = setup();
     f.env.activeWorkspace = f.ws13;

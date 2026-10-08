@@ -47,8 +47,14 @@ export const Auto: {
             opts: AnyRecord;
         }>;
         _holdSince: number;
+        _holdGen: number;
         _pressSeq: number;
         _pressDropLogged: boolean;
+        /**
+         * The current hold's number (it grows with every hold that opens).
+         * @returns {number}
+         */
+        holdGeneration(): number;
         /**
          * Whether the shell's workspace-switch effect may still own the window actors
          * (see SWITCH_EFFECT_MS): a frame moved now would be drawn at its old place.
