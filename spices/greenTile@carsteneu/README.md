@@ -5,7 +5,7 @@ Window tiling for Cinnamon: presets per monitor and workspace, an auto mode, sna
 ## Features
 
 - **Presets per monitor and workspace** — rules by window count, e.g. "3 windows = 2 columns", "6 = 2·2·2". Assigned presets reapply when the window count changes.
-- **Auto mode** (`Super+Ctrl+A`) — new, closed, minimized and restored windows retile after 300 ms; new windows normally join the end, while an explicit successful drop keeps its chosen position. `Super+Ctrl+D` pauses automatic tiling, snap-on-release and swapping without removing the preset.
+- **Auto mode** (`Super+Ctrl+A`) — new, closed, minimized and restored windows retile after 300 ms; new windows normally join the end, while an explicit successful drop keeps its chosen position. `Super+Ctrl+D` pauses automatic tiling, snap-on-release and swapping without removing the preset; `Super+Ctrl+Left/Right` can still send the focused window away.
 - **Preset panel** (`Super+Ctrl+P`) — apply presets with one click, set the gap between windows (0–48 px), switch auto mode, all on the monitor of the focused window.
 - **Preset editor** — paint up to 6 columns × 4 rows, name it, and the preset retiles immediately if it is in use. Delete presets you no longer want.
 - **Moving borders** — drag a border or use `Super+Alt+Arrow` for finer control; neighbours follow, and border positions are remembered per window count. The 120 px minimum is a target where space allows, not a guarantee for overloaded layouts or application-enforced minimum sizes.

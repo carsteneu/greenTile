@@ -213,6 +213,43 @@ for (const c of [
     });
 }
 
+// A retained pause on the TARGET must be honoured like on the source: the window
+// only moves there, no slot override is armed that the gated retile never consumes
+// (it would sort the window on the next retile after an explicit resume).
+test('issues 4/8: a push INTO a surface with a retained pause moves only and arms no override', () => {
+    const f = retainedSwap();
+    try {
+        const visitor = makeWindow(f.env, 9, [2100, 100, 500, 400], 1);
+        f.env.tabList.push(visitor);
+        f.env.display.focus_window = visitor;
+        const before = f.state();
+        f.env.keybindingManager.hotkeys.get('greenTile-swap-left').cb();
+        const after = f.state();
+        assert.equal(visitor.get_monitor(), 0, 'the window was pushed onto the paused monitor');
+        assert.deepEqual(visitor.rect, [2100, 100, 500, 400], 'move only, no slot');
+        assert.equal(f.app.auto.sortPeek(9, 0), null, 'no override armed on the paused target');
+        sourceUntouched(before, after, -1);
+    } finally { f.ext.disable(); }
+});
+
+test('issues 4/8: a workspace push INTO a surface with a retained pause moves only and arms no override', () => {
+    const f = retainedSwap({ monitorIndex: 0, wsIndex: 1 });
+    try {
+        const visitor = makeWindow(f.env, 9, [2100, 100, 500, 400], 1);
+        let workspace = f.env.workspaces[0];
+        visitor.get_workspace = () => workspace;
+        visitor.change_workspace_by_index = (index) => { workspace = f.env.workspaces[index]; };
+        f.env.tabList.push(visitor);
+        f.env.activeWorkspace = f.env.workspaces[0];
+        f.env.display.focus_window = visitor;
+        f.env.keybindingManager.hotkeys.get('greenTile-swap-right').cb();
+        assert.deepEqual([visitor.get_workspace().index(), visitor.get_monitor()], [1, 0],
+            'the window crossed onto the paused monitor-workspace');
+        assert.deepEqual(visitor.rect, [2100, 100, 500, 400], 'move only, no slot');
+        assert.equal(f.app.auto.sortPeek(9, 0), null, 'no override armed on the paused target');
+    } finally { f.ext.disable(); }
+});
+
 for (const control of ['auto-on', 'preset-card']) {
     test('issues 4/8: explicit ' + control + ' reactivation permits the monitor chain again', () => {
         const f = retainedSwap();

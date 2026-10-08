@@ -19,7 +19,7 @@ const RIGHT_MON = { x: 2000, y: 0, width: 2000, height: 1000, index: 1 };
 const PRESET = { id: 'p2', name: 'Halves', rules: [{ min: 2, stacks: [1, 1] }, { min: 3, stacks: [1, 1, 1] }] };
 
 // n workspaces, each with its own window list; windows move between them like Muffin.
-const setup = (monitors, wsCount = 3) => {
+const setup = (monitors, wsCount = 3, { ready = true } = {}) => {
     const { env, ext } = makeEnv({
         windowGap: 0, presets: JSON.stringify([PRESET]), singleWindowMode: 'leave', singleWindowMigrated: true,
     });
@@ -53,10 +53,16 @@ const setup = (monitors, wsCount = 3) => {
         };
     }
     env.activeWorkspace = env.workspaces[0];
-    enableOnMonitors(env, ext, monitors);
+    if (ready) {
+        enableOnMonitors(env, ext, monitors);
+    } else {
+        // the DisplayConfig reply is deliberately NOT flushed: the registry is not ready
+        env.layoutManager.monitors.push(...monitors);
+        ext.enable();
+    }
     const app = ext.currentSession().app;
-    const win = (seq, rect, wsIndex, monitor = 0) => {
-        const w = makeWindow(env, seq, rect, monitor);
+    const win = (seq, rect, wsIndex, monitor = 0, options = {}) => {
+        const w = makeWindow(env, seq, rect, monitor, null, options);
         let workspace = env.workspaces[wsIndex];
         w.get_workspace = () => workspace;
         w.change_workspace_by_index = (index) => {
@@ -147,8 +153,47 @@ test('an untiled monitor pushes onto the tiled monitor next to it', () => {
     f.app.ops.layoutSet(f.app, 1, 0, { auto: true });
     f.press('right', a);
     assert.equal(a.get_monitor(), 1, 'the window moved onto the tiled monitor');
+    assert.deepEqual(a.rect, [2000, 0, 1000, 1000], 'it was slotted into the edge cell it came in through');
+    assert.deepEqual(b.rect, [3000, 0, 1000, 1000], 'the resident moved over');
     assert.deepEqual(keep.rect, [300, 600, 400, 300], 'the untiled source was not rearranged');
     assert.deepEqual(f.pushedLogs().filter((l) => l.indexOf('greenTile swap pushed') === 0).length, 1);
+});
+
+test('a paused monitor pushes onto the tiled monitor next to it without retiling what stays', () => {
+    const f = setup([LEFT_MON, RIGHT_MON], 1);
+    const a = f.win(1, [0, 0, 1000, 1000], 0, 0);
+    const keep = f.win(3, [1000, 0, 1000, 1000], 0, 0);
+    const b = f.win(2, [2200, 100, 500, 500], 0, 0);
+    b.get_monitor = () => 1;
+    f.app.ops.layoutSet(f.app, 0, 0, { preset: 'p2', auto: false }); // paused
+    f.app.ops.layoutSet(f.app, 1, 0, { auto: true });
+    f.press('right', a); // a has a right neighbour on the paused monitor: no local exchange
+    assert.equal(a.get_monitor(), 1, 'the window moved onto the tiled monitor');
+    assert.deepEqual([a.rect, b.rect], [[2000, 0, 1000, 1000], [3000, 0, 1000, 1000]], 'slotted on the target');
+    assert.deepEqual(keep.rect, [1000, 0, 1000, 1000], 'the window staying on the paused monitor kept its place');
+});
+
+test('a maximized window from an untiled workspace is slotted (and unmaximized) on a tiled one', () => {
+    const f = setup([WIDE]);
+    const a = f.win(1, [0, 0, 3000, 1000], 0, 0, { maximized: 6 });
+    const unmax = [];
+    a.unmaximize = (flags) => unmax.push(flags);
+    const b = f.win(2, [0, 0, 3000, 1000], 1);
+    f.app.ops.layoutSet(f.app, 0, 1, { auto: true });
+    f.press('right', a);
+    assert.equal(a.get_workspace().index(), 1, 'the maximized window was pushed');
+    assert.deepEqual([a.rect, b.rect], [[0, 0, 1500, 1000], [1500, 0, 1500, 1000]], 'slotted into the left edge cell');
+    assert.ok(unmax.length > 0, 'the tiled target took it out of the maximized state');
+});
+
+test('before the monitors are known Super+Ctrl+Left/Right does nothing (no push on a not-yet-ready start)', () => {
+    const f = setup([WIDE], 3, { ready: false });
+    assert.equal(f.app.monitors.ready, false, 'the registry is still pending');
+    const a = f.win(1, [100, 100, 600, 400], 0);
+    f.press('right', a);
+    assert.equal(a.get_workspace().index(), 0, 'the window stayed: whether the surfaces are tiled is not known yet');
+    assert.deepEqual(a.rect, [100, 100, 600, 400]);
+    assert.deepEqual(f.pushedLogs(), []);
 });
 
 for (const dir of ['up', 'down']) {
