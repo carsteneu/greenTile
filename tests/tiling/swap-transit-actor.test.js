@@ -749,6 +749,42 @@ test('a focus chain from an earlier hold does not carry a press over a click in 
     assert.notEqual(f.env.display.focus_window, x0);
 });
 
+test('push, focus, focus inside one hold still moves two cells', () => {
+    const f = setup();
+    f.env.activeWorkspace = f.ws12;
+    f.c.get_workspace = () => f.ws12;
+    f.app.ops.retileMonitor(f.app, 0, null, false, 0);
+    const [x0, , x2] = [f.a, f.b, f.c].sort((p, q) => p.rect[0] - q.rect[0]);
+    openHold(f);
+    f.env.display.focus_window = x2;
+    f.app.auto.afterSwitch('push', () => f.env.windowManager.emit('switch-workspace', f.env.windowManager, 1, 0, LEFT));
+    f.env.customBindings.get('push-tile-left')(f.env.display, x2);
+    f.env.customBindings.get('push-tile-left')(f.env.display, x2);
+    f.finishSwitch();
+    fire(f.env, 250); // the push opens a new hold; both presses are re-held into it
+    f.finishSwitch();
+    advance(f.env);
+    assert.equal(f.env.display.focus_window, x0, 'both presses moved the focus, two cells');
+});
+
+test('focus, push, focus inside one hold still moves two cells', () => {
+    const f = setup();
+    f.env.activeWorkspace = f.ws12;
+    f.c.get_workspace = () => f.ws12;
+    f.app.ops.retileMonitor(f.app, 0, null, false, 0);
+    const [x0, , x2] = [f.a, f.b, f.c].sort((p, q) => p.rect[0] - q.rect[0]);
+    openHold(f);
+    f.env.display.focus_window = x2;
+    f.env.customBindings.get('push-tile-left')(f.env.display, x2);
+    f.app.auto.afterSwitch('push', () => f.env.windowManager.emit('switch-workspace', f.env.windowManager, 1, 0, LEFT));
+    f.env.customBindings.get('push-tile-left')(f.env.display, x2);
+    f.finishSwitch();
+    fire(f.env, 250); // the first press runs, the push opens a new hold, the second is re-held
+    f.finishSwitch();
+    advance(f.env);
+    assert.equal(f.env.display.focus_window, x0, 'both presses moved the focus, two cells');
+});
+
 test('a focus press re-held behind a replayed push still continues the chain of the press before it', () => {
     const f = setup();
     f.env.activeWorkspace = f.ws12;
