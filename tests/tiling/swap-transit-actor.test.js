@@ -163,6 +163,9 @@ const setup = () => {
         const move = w.move_frame.bind(w);
         w.move_resize_frame = (userOp, x, y, width, height) => {
             const before = w.rect.slice();
+            if (env.moveProbe) {
+                env.moveProbe(w);
+            }
             resize(userOp, x, y, width, height);
             sync(before);
         };
@@ -514,4 +517,103 @@ test('a focus window moved on during the hold claims no cell on the surface it l
     });
     assert.deepEqual(frames([f.a, f.b]), ['0,0,2560,1440', '2560,0,2560,1440'], 'ws12 is two halves, no empty cell');
     assert.notDeepEqual(f.c.rect, [3413, 0, 1707, 1440], 'the window was not placed into a ws12 cell');
+});
+
+// A virtual clock: every timer fires at its due time, and the switch effect ends 150 ms
+// after the LAST switch (Cinnamon keeps the first origX across a switch inside the
+// effect and finishes on the new animation). Moves of a frame while an actor still
+// carries the effect's origX are recorded: those are the moves the cleanup undoes.
+const runClock = (f) => {
+    const { env } = f;
+    let now = 0;
+    let effectEnd = null;
+    const due = new Map();
+    const dueOf = (id, t) => {
+        if (!due.has(id)) {
+            due.set(id, now + t.ms);
+        }
+        return due.get(id);
+    };
+    env.windowManager.connect('switch-workspace', () => {
+        effectEnd = now + 150;
+    });
+    const bad = [];
+    env.moveProbe = (w) => {
+        if (f.all.some((x) => x.get_compositor_private().origX !== undefined)) {
+            bad.push('win' + w.seq + '@' + now);
+        }
+    };
+    const until = (limit) => {
+        for (;;) {
+            const timers = [...env.timers.entries()].filter(([, t]) => t.ms < 2000);
+            let next = null;
+            for (const [id, t] of timers) {
+                const at = dueOf(id, t);
+                if (next === null || at < next[1]) {
+                    next = [id, at];
+                }
+            }
+            const effectFirst = effectEnd !== null && (next === null || effectEnd <= next[1]);
+            const at = effectFirst ? effectEnd : next ? next[1] : null;
+            if (at === null || at > limit) {
+                now = limit;
+                return;
+            }
+            now = at;
+            if (effectFirst) {
+                effectEnd = null;
+                f.finishSwitch();
+                continue;
+            }
+            const t = env.timers.get(next[0]);
+            env.timers.delete(next[0]);
+            due.delete(next[0]);
+            t.cb();
+        }
+    };
+    return { until: (ms) => until(now + ms), bad: bad };
+};
+
+const keyRepeat = (spacing) => {
+    const f = setup();
+    // every surface carries its placement, as on the host
+    f.app.ops.retileMonitor(f.app, 0, null, false, 0);
+    f.app.ops.retileMonitor(f.app, 0, null, false, 1);
+    const clock = runClock(f);
+    const keys = ['greenTile-swap-left', 'greenTile-swap-left', 'greenTile-swap-left', 'greenTile-swap-left', 'greenTile-auto3'];
+    for (const key of keys) {
+        f.env.display.focus_window = f.lone;
+        f.env.keybindingManager.hotkeys.get(key).cb();
+        clock.until(spacing);
+    }
+    clock.until(3000);
+    return { f, bad: clock.bad };
+};
+
+test('held key repeat (pushes and a column hotkey inside the effect) ends like the same keys with pauses', () => {
+    const fast = keyRepeat(30);
+    const slow = keyRepeat(1500);
+    assert.deepEqual(fast.bad, [], 'no frame moved while the switch effect still owned the actors');
+    assert.deepEqual(desynced(fast.f.all), [], 'every actor is on its frame');
+    const where = (r) => r.f.all.map((w) => 'win' + w.seq + '@ws' + (w.get_workspace().index() + 12) + ' ' + w.rect.join(','));
+    assert.deepEqual(where(fast), where(slow), 'the fast sequence ended like the paused one');
+});
+
+test('an explicit arrangement kept from an older request is dropped when the window count changed', () => {
+    const f = setup();
+    f.env.activeWorkspace = f.ws13;
+    f.app.ops.retileMonitor(f.app, 0, f.c, true, 1);
+    f.env.windowManager.emit('switch-workspace', f.env.windowManager, 2, 1, LEFT);
+    // a swap's explicit fit for the two windows of ws13 ...
+    const twoCols = { kind: 'cols', shape: [1, 1], split: null, area: [0, 0, 5120, 1440] };
+    f.app.ops.retileMonitor(f.app, 0, f.c, true, 1, twoCols);
+    // ... and a third window arrives on ws13 before the hold ends
+    const e = makeWindow(f.env, 9, [100, 100, 500, 500], 0, null);
+    e.get_workspace = () => f.ws13;
+    f.all.push(e);
+    f.app.ops.retileMonitor(f.app, 0, null, true, 1);
+    f.finishSwitch();
+    fire(f.env, 250);
+    assert.deepEqual(frames([f.c, f.d, e]).sort(), ['0,0,1707,1440', '1707,0,1706,1440', '3413,0,1707,1440'].sort(),
+        'the three windows share the surface instead of two fitted into an old two-column arrangement');
 });

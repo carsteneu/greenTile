@@ -75,7 +75,8 @@ export const Auto: {
          * @param {() => void} fn
          */
         afterSwitchPress(fn: () => void): void;
-        _effectRunning(): any;
+        /** @returns {boolean} */
+        _effectRunning(): boolean;
         _monotonicMs(): number;
         _noteSwitch(): void;
         /**
@@ -88,6 +89,16 @@ export const Auto: {
          * @param {number} elapsed the time the hold has lasted once that wait is over
          */
         _armSwitchEnd(ms: number, elapsed: number): void;
+        /**
+         * Puts runs of a finished hold behind the ones a new hold collected meanwhile. A
+         * key held in both keeps the NEWER run and its options win; the older options fill
+         * in what it leaves empty (the afterSwitch merge rule, applied in time order).
+         * @param {Array<[string, {fn: (opts: AnyRecord) => void, opts: AnyRecord}]>} rest
+         */
+        _rehold(rest: Array<[string, {
+            fn: (opts: AnyRecord) => void;
+            opts: AnyRecord;
+        }]>): void;
         /**
          * @param {AppFacade} app
          * @param {number} monitorIndex
