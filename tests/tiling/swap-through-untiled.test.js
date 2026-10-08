@@ -162,15 +162,20 @@ test('an untiled monitor pushes onto the tiled monitor next to it', () => {
 test('a paused monitor pushes onto the tiled monitor next to it without retiling what stays', () => {
     const f = setup([LEFT_MON, RIGHT_MON], 1);
     const a = f.win(1, [0, 0, 1000, 1000], 0, 0);
-    const keep = f.win(3, [1000, 0, 1000, 1000], 0, 0);
+    // off any cell of the paused preset, so a source retile would visibly move it
+    const keep = f.win(3, [1200, 100, 500, 500], 0, 0);
     const b = f.win(2, [2200, 100, 500, 500], 0, 0);
     b.get_monitor = () => 1;
-    f.app.ops.layoutSet(f.app, 0, 0, { preset: 'p2', auto: false }); // paused
+    f.app.ops.layoutSet(f.app, 0, 0, { preset: 'p2', auto: false, shapes: { 2: { kind: 'cols', shape: [1, 1] } } }); // paused
     f.app.ops.layoutSet(f.app, 1, 0, { auto: true });
+    const layoutsBefore = f.app.config.settings.getValue('layouts');
+    const sourceKey = Object.keys(JSON.parse(layoutsBefore)).find((k) => JSON.parse(layoutsBefore)[k]['1'].preset === 'p2');
     f.press('right', a); // a has a right neighbour on the paused monitor: no local exchange
     assert.equal(a.get_monitor(), 1, 'the window moved onto the tiled monitor');
     assert.deepEqual([a.rect, b.rect], [[2000, 0, 1000, 1000], [3000, 0, 1000, 1000]], 'slotted on the target');
-    assert.deepEqual(keep.rect, [1000, 0, 1000, 1000], 'the window staying on the paused monitor kept its place');
+    assert.deepEqual(keep.rect, [1200, 100, 500, 500], 'the window staying on the paused monitor kept its place');
+    assert.equal(JSON.stringify(JSON.parse(f.app.config.settings.getValue('layouts'))[sourceKey]),
+        JSON.stringify(JSON.parse(layoutsBefore)[sourceKey]), 'the paused monitor\'s stored layout and sizes are unchanged');
 });
 
 test('a maximized window from an untiled workspace is slotted (and unmaximized) on a tiled one', () => {

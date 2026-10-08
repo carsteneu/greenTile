@@ -10,7 +10,7 @@ Window tiling for Cinnamon: presets per monitor and workspace, an auto mode, sna
 - **Preset editor** — paint up to 6 columns × 4 rows, name it, and the preset retiles immediately if it is in use. Delete presets you no longer want.
 - **Moving borders** — drag a border or use `Super+Alt+Arrow` for finer control; neighbours follow, and border positions are remembered per window count. The 120 px minimum is a target where space allows, not a guarantee for overloaded layouts or application-enforced minimum sizes.
 - **Splitting by drag** — drop a window at the edge zone of a tiled window to stack it, add a column or a row; a preview shows where it lands.
-- **Swapping** — `Super+Ctrl+Arrow` swaps the focused window with its neighbour; Left/Right continue across monitors and workspaces, also through untiled or paused ones, which they leave as they are.
+- **Swapping** — `Super+Ctrl+Arrow` swaps the focused window with its neighbour; Left/Right continue across monitors and workspaces, also through untiled or paused ones, which they leave as they are; there the window is only moved over and may lie on top of the windows already there.
 - **Focus navigation** — `Super+Arrow` moves the focus, with a short border flash so you can see where it went.
 - **Never tile** — a settings list by window class, title or app id (covers flatpaks); `Super+G` floats a single window temporarily.
 - **Theming** — light/dark/follow-system panel theme, accent and state colors (follow the Cinnamon theme or custom), animated tiling.

@@ -62,7 +62,7 @@ Every feature in one line or two. Details and screenshots are in the [README](RE
 - **Split by drag**: dropping a window on the outer 25 % of another window's cell stacks it above or below, or opens a new column or row beside it. A translucent preview shows the result before release.
 - **Cross-monitor split**: split drops also work onto another monitor.
 - **Swap by keyboard**: `Super+Ctrl+Arrow` swaps the focused window with its neighbour; borders stay where they are.
-- **Walk across monitors and workspaces**: Left/Right continue onto the next monitor and past the outermost one onto the previous or next workspace. Focus stays on the moved window. The walk passes surfaces without tiling or with tiling paused too: the window moves straight on, nothing left behind is rearranged, and it only keeps its size where the target does not tile.
+- **Walk across monitors and workspaces**: Left/Right continue onto the next monitor and past the outermost one onto the previous or next workspace. Focus stays on the moved window. The walk passes surfaces without tiling or with tiling paused too: the window moves straight on, nothing left behind is rearranged, and where the target does not tile it is only moved over as it is (it may lie on top of the windows there).
 
 ## Excluding windows
 

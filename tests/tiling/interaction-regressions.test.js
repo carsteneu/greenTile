@@ -250,6 +250,19 @@ test('issues 4/8: a workspace push INTO a surface with a retained pause moves on
     } finally { f.ext.disable(); }
 });
 
+test('issues 4/8: a push INTO the secondary shared slot with a retained pause moves only and arms no override', () => {
+    const f = retainedSwap({ monitorIndex: 1, wsIndex: 1, onlyPrimary: true });
+    try {
+        const visitor = makeWindow(f.env, 9, [100, 100, 500, 400], 0);
+        f.env.tabList.push(visitor);
+        f.env.display.focus_window = visitor;
+        f.env.keybindingManager.hotkeys.get('greenTile-swap-right').cb();
+        assert.equal(visitor.get_monitor(), 1, 'the window was pushed onto the secondary monitor');
+        assert.deepEqual(visitor.rect, [100, 100, 500, 400], 'move only, no slot');
+        assert.equal(f.app.auto.sortPeek(9, 0), null, 'no override armed on the paused shared slot');
+    } finally { f.ext.disable(); }
+});
+
 for (const control of ['auto-on', 'preset-card']) {
     test('issues 4/8: explicit ' + control + ' reactivation permits the monitor chain again', () => {
         const f = retainedSwap();
