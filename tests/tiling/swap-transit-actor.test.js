@@ -330,3 +330,50 @@ test('disable while a retile is held leaves no timer and places nothing afterwar
     f.finishSwitch();
     assert.deepEqual(frames(f.all), before, 'the held retile died with the App, nothing was placed');
 });
+
+test('held runs replay in the order of their newest request', () => {
+    const f = setup();
+    f.env.windowManager.emit('switch-workspace', f.env.windowManager, 2, 1, LEFT);
+    const order = [];
+    f.app.auto.afterSwitch('active', () => order.push('active-old'));
+    f.app.auto.afterSwitch('background', () => order.push('background'));
+    f.app.auto.afterSwitch('active', () => order.push('active-new'));
+    assert.deepEqual(order, [], 'nothing ran inside the effect');
+    fire(f.env, 250);
+    assert.deepEqual(order, ['background', 'active-new'], 'a replaced run moves to the end, the old one is gone');
+    f.finishSwitch();
+});
+
+for (const [label, patch] of [['animations are off', { animations_enabled: false }], ['a modal is pushed', { modalCount: 1 }]]) {
+    test('no hold when ' + label + ': the shell runs no switch effect then', () => {
+        const f = setup();
+        const main = f.env.mainBranch;
+        Object.assign(main, patch);
+        f.env.windowManager.emit('switch-workspace', f.env.windowManager, 2, 1, LEFT);
+        assert.equal(f.app.auto.switching(), false, 'no effect window was opened');
+        let ran = false;
+        f.app.auto.afterSwitch('k', () => {
+            ran = true;
+        });
+        assert.equal(ran, true, 'the retile runs at once');
+        Object.assign(main, { animations_enabled: true, modalCount: 0 });
+        f.finishSwitch();
+    });
+}
+
+test('a focus window finalized during the hold does not drop the surface placement', () => {
+    const f = setup();
+    f.env.activeWorkspace = f.ws13;
+    f.app.ops.retileMonitor(f.app, 0, f.c, true, 1);
+    f.env.windowManager.emit('switch-workspace', f.env.windowManager, 2, 1, LEFT);
+    f.app.ops.retileMonitor(f.app, 0, f.c, true, 0);
+    const errors = f.env.logErrors.length;
+    f.c.get_compositor_private = () => {
+        throw new Error('finalized wrapper');
+    };
+    f.c.get_workspace = () => f.ws13; // gone from ws12
+    fire(f.env, 250);
+    assert.equal(f.env.logErrors.length, errors, 'no error escaped the held run');
+    assert.deepEqual(heldLines(f.env), ['greenTile retile after workspace switch n=1'], 'the surface was still placed');
+    f.finishSwitch();
+});

@@ -50,7 +50,9 @@ export const Auto: {
         switching(): boolean;
         /**
          * Runs `fn` now, or — while the switch effect runs — once it ended. One held run
-         * per key: a newer request for the same surface replaces the older one.
+         * per key: a newer request for the same surface replaces the older one and moves
+         * to the end, so the held runs replay in the order of their newest request (the
+         * settle fan-out relies on the active surface being placed last).
          * @param {string} key the surface (monitor and workspace)
          * @param {() => void} fn
          */
