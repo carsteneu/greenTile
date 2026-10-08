@@ -314,6 +314,7 @@ type SplitFacade = {
     destroy(): void;
     any(app: AppFacade, monitorIndex: number, wsIndex: number): boolean;
     reset(app: AppFacade, monitorIndex: number, wsIndex: number): void;
+    forgetCount(app: AppFacade, monitorIndex: number, wsIndex: number, n: number): void;
     invalidate(): void;
 };
 

@@ -242,6 +242,19 @@ export const Split: {
          */
         reset(app: AppFacade, monitorIndex: number, wsIndex: number): void;
         /**
+         * Drops the size intent (pending split + stored split/shape) the surface holds for
+         * exactly one window count. The intent is keyed by count alone, so a composition
+         * change the user did not arrange would silently re-expose the sizes of the
+         * arrangement it replaced. reset() is the whole-surface form of this. The placement
+         * record is deliberately kept: it is keyed by surface only and its identity check
+         * (placementFor) makes a stale one inert, while the incoming landing still reads it.
+         * @param {AppFacade} app
+         * @param {number} monitorIndex
+         * @param {number} wsIndex
+         * @param {number} n
+         */
+        forgetCount(app: AppFacade, monitorIndex: number, wsIndex: number, n: number): void;
+        /**
          * Keyboard repeat delay for the hotkey acceleration: the desktop's repeat delay
          * plus margin, 600 ms as the fallback when the schema is unreadable.
          * @returns {number}
