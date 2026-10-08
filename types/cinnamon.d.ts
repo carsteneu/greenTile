@@ -169,6 +169,7 @@ type XletTree = {
             'window-order': typeof import('./xlet/model/window-order');
         };
         runtime: {
+            actorsync: typeof import('./xlet/runtime/actorsync');
             auto: typeof import('./xlet/runtime/auto');
             border: typeof import('./xlet/runtime/border');
             drop: typeof import('./xlet/runtime/drop');

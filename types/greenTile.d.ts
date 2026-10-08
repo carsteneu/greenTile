@@ -31,6 +31,14 @@ type CinnamonActor = {
     translation_y: number;
     scale_x: number;
     scale_y: number;
+    /** Clutter.Actor geometry: Muffin writes it from the frame rect, greenTile only
+     * reads it (lib/runtime/actorsync.js compares it with the frame after a retile). */
+    x: number;
+    y: number;
+    width: number;
+    height: number;
+    /** Clutter.Actor.is_destroyed — true once Muffin tore the actor down. */
+    is_destroyed(): boolean;
     /** Cinnamon Clutter.Actor.prototype.ease (environment.js _easeActor). */
     ease(props: Record<string, any>): void;
     /** Clutter.Actor.get_transition(propName) — the running transition of that
@@ -347,6 +355,25 @@ type BorderFacade = {
     destroy(): void;
 };
 
+/** The actor state a placement invalidates (lib/runtime/actorsync.js watch()). */
+type ActorWatch = {
+    window: CinnamonWindow;
+    actor: CinnamonActor;
+    offX: number;
+    offY: number;
+    offW: number;
+    offH: number;
+};
+
+/** Compositor-actor resync facade (lib/runtime/actorsync.js): verifies once after a
+ * placement that every placed window's actor followed its frame, and nudges once when
+ * it did not. */
+type ActorSyncFacade = {
+    watch(metaWindow: CinnamonWindow | null): ActorWatch | null;
+    arm(app: AppFacade, monitorIndex: number, wsIndex: number, watched: ActorWatch[]): void;
+    destroy(): void;
+};
+
 /** Drop-preview facade (lib/runtime/drop.js). */
 type DropFacade = {
     begin(app: AppFacade, w: CinnamonWindow, op: string): void;
@@ -394,6 +421,8 @@ type AppFacade = {
     auto: AutoFacade;
     placement: PlacementFacade;
     split: SplitFacade;
+    /** Post-placement compositor-actor verification (lib/runtime/actorsync.js). */
+    actorsync: ActorSyncFacade;
     /** Restart-order store (lib/runtime/orders.js). */
     orders: OrdersFacade;
     monitors: MonitorsFacade;

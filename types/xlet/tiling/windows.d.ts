@@ -5,4 +5,4 @@ export function windowMaximizedOrFullscreen(w: CinnamonWindow | null | undefined
 export function collectWindows(app: AppFacade, monitor: CinnamonMonitor, focusWindow: CinnamonWindow | null, wsIndex?: number | null | undefined): CinnamonWindow[];
 export function isOnAllWorkspaces(w: CinnamonWindow): boolean;
 export function windowReset(metaWindow: CinnamonWindow | null): void;
-export function windowMoveResize(metaWindow: CinnamonWindow | null, x: number, y: number, width: number, height: number): void;
+export function windowMoveResize(metaWindow: CinnamonWindow | null, x: number, y: number, width: number, height: number, animate?: boolean): void;

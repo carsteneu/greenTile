@@ -165,7 +165,7 @@ test('build-release.sh builds the unmodified catalogs and ships no validator', (
         'model/settings-keys.js', 'model/single.js', 'model/split.js',
         'model/state.js', 'model/swap.js', 'model/teardown.js', 'model/theme.js',
         'model/window-order.js',
-        'runtime/auto.js', 'runtime/border.js', 'runtime/drop.js', 'runtime/exclusions.js',
+        'runtime/actorsync.js', 'runtime/auto.js', 'runtime/border.js', 'runtime/drop.js', 'runtime/exclusions.js',
         'runtime/focus.js', 'runtime/hotkeys.js', 'runtime/monitors.js', 'runtime/orders.js',
         'runtime/panel-state.js', 'runtime/placement.js', 'runtime/scope.js',
         'runtime/session.js', 'runtime/split.js', 'runtime/theme.js',
