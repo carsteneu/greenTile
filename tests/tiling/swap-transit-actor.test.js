@@ -599,6 +599,27 @@ test('held key repeat (pushes and a column hotkey inside the effect) ends like t
     assert.deepEqual(where(fast), where(slow), 'the fast sequence ended like the paused one');
 });
 
+test('runs left after a replayed switch wait behind the new hold; a shared key keeps the newer run', () => {
+    const f = setup();
+    f.env.windowManager.emit('switch-workspace', f.env.windowManager, 2, 1, LEFT);
+    const order = [];
+    // the replayed run switches again and parks the surface retile it causes
+    f.app.auto.afterSwitch('push', () => {
+        order.push('push');
+        f.env.windowManager.emit('switch-workspace', f.env.windowManager, 1, 0, LEFT);
+        f.app.auto.afterSwitch('surface', (o) => order.push('surface-new settle=' + o.settle + ' layout=' + o.layout), { settle: false, layout: null });
+    });
+    f.app.auto.afterSwitch('surface', (o) => order.push('surface-old ' + o.settle), { settle: true, layout: 'L' });
+    f.app.auto.afterSwitch('press', () => order.push('press'));
+    f.finishSwitch();
+    fire(f.env, 250);
+    assert.deepEqual(order, ['push'], 'the rest did not run inside the new effect');
+    f.finishSwitch();
+    advance(f.env);
+    assert.deepEqual(order, ['push', 'surface-new settle=true layout=L', 'press'],
+        'the newer surface run kept its place before the press and took the older settle and layout');
+});
+
 test('an explicit arrangement kept from an older request is dropped when the window count changed', () => {
     const f = setup();
     f.env.activeWorkspace = f.ws13;
