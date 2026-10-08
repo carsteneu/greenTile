@@ -8,7 +8,7 @@
  * @property {AnyRecord} global the Cinnamon global object
  * @property {AnyRecord} signalManager fresh, this scope alone
  * @property {AnyRecord} gobject imports.gi.GObject
- * @property {AnyRecord} [glib] imports.gi.GLib (monotonic clock of the switch hold; absent reads as 0)
+ * @property {AnyRecord} glib imports.gi.GLib (monotonic clock of the switch hold and its total bound)
  * @property {() => CinnamonWindow | null} focusWindow
  * @property {() => number} focusMonitorIndex
  * @property {(app: AppFacade, monitorIndex: number, wsIndex: number) => { auto: boolean }} layoutFor
@@ -341,9 +341,9 @@ export type AutoDeps = {
      */
     gobject: AnyRecord;
     /**
-     * imports.gi.GLib (monotonic clock of the switch hold; absent reads as 0)
+     * imports.gi.GLib (monotonic clock of the switch hold and its total bound)
      */
-    glib?: AnyRecord;
+    glib: AnyRecord;
     focusWindow: () => CinnamonWindow | null;
     focusMonitorIndex: () => number;
     layoutFor: (app: AppFacade, monitorIndex: number, wsIndex: number) => {

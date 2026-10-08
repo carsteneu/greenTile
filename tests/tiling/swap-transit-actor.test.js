@@ -724,6 +724,104 @@ test('a chain of switches does not extend the hold past three seconds', () => {
     f.finishSwitch();
 });
 
+test('two focus presses inside one effect move two cells, as without the hold', () => {
+    const f = setup();
+    f.env.activeWorkspace = f.ws13;
+    // three windows on ws13 in a row: c | d | e
+    const e = f.d;
+    f.a.get_workspace = () => f.ws13;
+    f.app.ops.retileMonitor(f.app, 0, null, false, 1);
+    const row = [f.a, f.c, e].sort((p, q) => p.rect[0] - q.rect[0]);
+    openHold(f);
+    f.env.display.focus_window = row[2];
+    // Muffin hands both presses the window focused at the press: the right one
+    f.env.customBindings.get('push-tile-left')(f.env.display, row[2]);
+    f.env.customBindings.get('push-tile-left')(f.env.display, row[2]);
+    f.finishSwitch();
+    advance(f.env);
+    assert.equal(f.env.display.focus_window, row[0], 'the focus walked two cells to the left');
+});
+
+test('a newer request without animation decides over an older animated one', () => {
+    const f = setup();
+    f.env.activeWorkspace = f.ws12;
+    openHold(f);
+    const seen = [];
+    f.app.auto.afterSwitch('k', (o) => seen.push(o.animate), { animate: 'on' });
+    f.app.auto.afterSwitch('k', (o) => seen.push(o.animate), { animate: 'off' });
+    f.finishSwitch();
+    fire(f.env, 250);
+    assert.deepEqual(seen, ['off']);
+});
+
+test('a held retile without animation keeps that choice over an older animated request', () => {
+    const f = setup();
+    openHold(f);
+    f.app.ops.retileMonitor(f.app, 0, null, true, 0);
+    f.app.ops.retileMonitor(f.app, 0, null, false, 0);
+    const held = f.app.auto._afterSwitch.get('0\n0');
+    assert.ok(held, 'the surface retile is held');
+    assert.equal(held.opts.animate, 'off', 'the newest request decides');
+    f.finishSwitch();
+    advance(f.env);
+});
+
+test('after the total bound the running hold still ends', () => {
+    const f = setup();
+    let now = 0;
+    f.env.gi.GLib.get_monotonic_time = () => now * 1000;
+    openHold(f);
+    now = 3100;
+    openHold(f); // not extended any more
+    // the chain's effect keeps running (origX + live ease) — the hold still ends at its cap
+    const a = f.a.get_compositor_private();
+    a.origX = a.x;
+    a.foreignTransition('x', a.x + 10);
+    fire(f.env, 250);
+    let polls = 0;
+    while (f.app.auto.switching() && polls < 100) {
+        fireOnce(f.env, 20);
+        polls++;
+    }
+    assert.equal(f.app.auto.switching(), false, 'the hold ended');
+    assert.ok(polls <= 38, 'within the 1000 ms cap of the running look');
+    a.removeAllTransitions();
+    a.origX = undefined;
+    f.finishSwitch();
+});
+
+test('a held drop whose dragged window still lies mostly on another monitor is placed, not lost', () => {
+    const f = setup();
+    f.env.activeWorkspace = f.ws12;
+    f.app.ops.retileMonitor(f.app, 0, null, false, 0);
+    f.app.drop.begin(f.app, f.b, f.env.gi.Meta.GrabOp.MOVING);
+    f.b.rect = [0, 0, 400, 1440];
+    openHold(f);
+    f.env.pointer = [50, 700];
+    assert.equal(f.app.drop.end(f.app, f.b, f.env.gi.Meta.GrabOp.MOVING), true);
+    f.b.get_monitor = () => 1; // the frame's larger part is still on the source monitor
+    f.finishSwitch();
+    fire(f.env, 250);
+    assert.notDeepEqual(f.b.rect, [0, 0, 400, 1440], 'the dropped window was placed after the hold');
+    assert.ok(f.b.rect[0] <= f.a.rect[0] && f.b.rect[1] <= f.a.rect[1], 'into the first cell, as dropped');
+    assert.notDeepEqual(f.a.rect, [978, 72, 3164, 1296], 'the resident was not retiled alone');
+});
+
+test('a held drop whose neighbour moved to another workspace becomes a plain retile', () => {
+    const f = setup();
+    f.env.activeWorkspace = f.ws12;
+    f.app.ops.retileMonitor(f.app, 0, null, false, 0);
+    f.app.drop.begin(f.app, f.b, f.env.gi.Meta.GrabOp.MOVING);
+    f.b.rect = [0, 0, 400, 1440];
+    openHold(f);
+    f.env.pointer = [50, 700];
+    assert.equal(f.app.drop.end(f.app, f.b, f.env.gi.Meta.GrabOp.MOVING), true);
+    f.a.change_workspace_by_index(2); // moved to ws14 during the hold
+    f.finishSwitch();
+    fire(f.env, 250);
+    assert.deepEqual(f.b.rect, [978, 72, 3164, 1296], 'the remaining window was retiled alone (centred)');
+});
+
 test('at most 32 presses wait in one hold', () => {
     const f = setup();
     openHold(f);
