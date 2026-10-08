@@ -37,8 +37,10 @@ type CinnamonActor = {
     y: number;
     width: number;
     height: number;
-    /** Clutter.Actor.is_destroyed — true once Muffin tore the actor down. */
-    is_destroyed(): boolean;
+    /** Clutter.Actor.is_destroyed — true once Muffin tore the actor down. Consulted
+     * defensively (optional): get_compositor_private already reads null for a dead
+     * window, and not every actor stand-in in the tests carries it. */
+    is_destroyed?(): boolean;
     /** Cinnamon Clutter.Actor.prototype.ease (environment.js _easeActor). */
     ease(props: Record<string, any>): void;
     /** Clutter.Actor.get_transition(propName) — the running transition of that

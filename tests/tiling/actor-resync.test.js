@@ -18,7 +18,11 @@ const {
 const { makeEaseActor } = require('../helpers/fakes/ease-actor');
 
 const MONITOR = { x: 0, y: 0, width: 2000, height: 1100, index: 0 };
-const SYNC_MS = 300;
+const SYNC_MS = 320;
+// A client-decorated (CSD) window draws its frame inside a larger buffer: the actor sits
+// left of and above the frame rect by the GTK frame extents (16,10 left/top, 16,32
+// right/bottom on the host's Brave). The resync must preserve that offset.
+const CSD_OFFSET = [-16, -10, -32, -42];
 
 // Fire every timer of one delay, like the main loop reaching them.
 const fireAll = (env, ms) => {
@@ -35,12 +39,12 @@ const liveAt = (env, ms) => env.liveTimers().filter((t) => t.ms === ms).length;
 // x/y/width/height from the frame rect. `stale` models the measured defect — the sync is
 // stuck, so the first request after it is lost and a repeat of a request is a no-op, while
 // a request that DIFFERS from the last one seen makes the actor follow again.
-const actorFor = (stale, rect) => {
+const actorFor = (stale, rect, off = [0, 0, 0, 0]) => {
     const actor = makeEaseActor();
-    actor.x = rect[0];
-    actor.y = rect[1];
-    actor.width = rect[2];
-    actor.height = rect[3];
+    actor.x = rect[0] + off[0];
+    actor.y = rect[1] + off[1];
+    actor.width = rect[2] + off[2];
+    actor.height = rect[3] + off[3];
     actor.lastReq = rect.slice();
     actor.stuck = stale;
     actor.sync = (x, y, w, h) => {
@@ -52,19 +56,22 @@ const actorFor = (stale, rect) => {
             }
             return; // ... but this one is still lost: the actor does not follow it
         }
-        actor.x = x;
-        actor.y = y;
-        actor.width = w;
-        actor.height = h;
+        actor.x = x + off[0];
+        actor.y = y + off[1];
+        actor.width = w + off[2];
+        actor.height = h + off[3];
     };
     return actor;
 };
-// Wire the actor into the window the way Muffin does: every frame move re-syncs it.
+// Wire the actor into the window the way Muffin does: every frame move re-syncs it. The
+// user-op flag of each move is recorded so a test can tell a repair from a placement.
 const withActor = (env, seq, rect, actor) => {
     const w = makeWindow(env, seq, rect, 0, actor);
     const native = w.move_resize_frame.bind(w);
-    w.move_resize_frame = (animate, x, y, width, height) => {
-        native(animate, x, y, width, height);
+    w.userOps = [];
+    w.move_resize_frame = (userOp, x, y, width, height) => {
+        w.userOps.push(userOp);
+        native(userOp, x, y, width, height);
         actor.sync(x, y, width, height);
     };
     return w;
@@ -85,7 +92,7 @@ const setup = (staleFirst) => {
     ws.list_windows = () => env.tabList;
     env.activeWorkspace = ws;
     app.ops.layoutSet(app, 0, 0, { auto: true });
-    const a = actorFor(staleFirst, [500, 0, 700, 600]);
+    const a = actorFor(staleFirst, [500, 0, 700, 600], CSD_OFFSET);
     const b = actorFor(false, [900, 0, 900, 1100]);
     const w1 = withActor(env, 1, [500, 0, 700, 600], a);
     const w2 = withActor(env, 2, [900, 0, 900, 1100], b);
@@ -100,11 +107,13 @@ test('a stuck compositor actor is re-synced after the placement that displaced i
     const before = offset(a, w1);
     const bBefore = offset(b, w2);
     app.ops.retileMonitor(app, 0, w1, true, 0);
-    assert.notEqual(a.x, w1.rect[0], 'the model reproduces the host defect: the frame moved, the actor did not');
+    assert.notDeepEqual(offset(a, w1), before, 'the model reproduces the host defect: the frame moved, the actor did not');
     fireAll(env, SYNC_MS);
     assert.deepEqual(offset(a, w1), before, 'the actor ended up in sync with its frame');
+    assert.deepEqual(offset(a, w1), CSD_OFFSET, 'the CSD decoration offset was preserved, not equalized');
     assert.deepEqual(offset(b, w2), bBefore, 'the window that followed keeps its own offsets');
     assert.equal(resizeCalls(w1), 3, 'the placement plus exactly one nudge pair');
+    assert.deepEqual(w1.userOps.slice(-2), [false, false], 'the repair is marked as not a user move');
     assert.equal(resizeCalls(w2), 1, 'an actor that followed is never nudged');
     assert.equal(resyncs(env), 1, 'the repair is reported once');
 });
@@ -114,7 +123,7 @@ test('an actor that followed needs no nudge', () => {
     const { env, app, w1, w2, a } = f;
     const before = offset(a, w1);
     app.ops.retileMonitor(app, 0, w1, true, 0);
-    assert.equal(a.x, w1.rect[0], 'the actor followed the placement');
+    assert.deepEqual(offset(a, w1), before, 'the actor followed the placement');
     fireAll(env, SYNC_MS);
     assert.deepEqual(offset(a, w1), before, 'the actor still matches its frame');
     assert.equal(resizeCalls(w1), 1, 'only the placement move');
@@ -132,7 +141,7 @@ test('a newer placement on the same surface supersedes the pending check', () =>
     app.ops.retileMonitor(app, 0, w1, true, 0);
     assert.equal(liveAt(env, SYNC_MS), 1, 'one pending check per surface, not one per placement');
     fireAll(env, SYNC_MS);
-    assert.deepEqual(offset(a, w1), [0, 0, 0, 0], 'the actor is in sync with its frame');
+    assert.deepEqual(offset(a, w1), CSD_OFFSET, 'the actor is in sync with its frame');
     assert.equal(resizeCalls(w1), 4, 'two placements and exactly one nudge pair');
     assert.equal(resyncs(env), 1, 'the superseded check did not fire a second repair');
 });
@@ -153,7 +162,46 @@ test('a window without an actor and a minimized window are never nudged', () => 
     assert.match(lines[0], /n=1$/, 'only the window that has an actor was nudged');
     assert.equal(resizeCalls(bare), 1, 'an actor-less window is placed but never nudged');
     assert.equal(resizeCalls(min), 0, 'a minimized window is not placed and not nudged');
-    assert.deepEqual(offset(a, w1), [0, 0, 0, 0], 'the stuck actor was repaired');
+    assert.deepEqual(offset(a, w1), CSD_OFFSET, 'the stuck actor was repaired');
+});
+
+test('a maximized or fullscreen window is never nudged', () => {
+    const f = setup(true);
+    const { env, app, w1 } = f;
+    const maxed = withActor(env, 6, [0, 0, 600, 600], actorFor(true, [0, 0, 600, 600]));
+    maxed.get_maximized = () => 3;
+    const full = withActor(env, 7, [1400, 0, 600, 600], actorFor(true, [1400, 0, 600, 600]));
+    full.is_fullscreen = () => true;
+    env.tabList.push(maxed, full);
+    env.display.focus_window = w1;
+    app.ops.retileMonitor(app, 0, w1, true, 0);
+    const placed = [resizeCalls(maxed), resizeCalls(full)];
+    fireAll(env, SYNC_MS);
+    assert.deepEqual([resizeCalls(maxed), resizeCalls(full)], placed, 'neither mode was disturbed');
+    const lines = env.logs.filter((l) => l.indexOf('greenTile actor resync') === 0);
+    assert.equal(lines.length, 1, 'only the tiled window was repaired');
+    assert.match(lines[0], /n=1$/, 'the maximized and the fullscreen window were skipped');
+});
+
+test('a window that dies before the check leaves the others repaired and throws nothing', () => {
+    const f = setup(true);
+    const { env, app, w1, a } = f;
+    const dead = withActor(env, 8, [1500, 0, 400, 400], actorFor(true, [1500, 0, 400, 400]));
+    env.tabList.push(dead);
+    env.display.focus_window = w1;
+    app.ops.retileMonitor(app, 0, w1, true, 0);
+    // closed while the check is pending: the wrapper is finalized, so only
+    // get_compositor_private still reads (null) and the state getters throw
+    dead.get_compositor_private = () => null;
+    dead.get_maximized = () => {
+        throw new Error('finalized wrapper');
+    };
+    dead.is_fullscreen = () => {
+        throw new Error('finalized wrapper');
+    };
+    fireAll(env, SYNC_MS);
+    assert.deepEqual(offset(a, w1), CSD_OFFSET, 'the other windows of the surface were still repaired');
+    assert.equal(resyncs(env), 1, 'one repair line, no error escaped the timer');
 });
 
 test('disable leaves no pending check behind', () => {

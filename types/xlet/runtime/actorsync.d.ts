@@ -4,7 +4,8 @@
  * @typedef {Object} ActorSyncDeps
  * @property {AnyRecord} mainloop imports.mainloop (timeout_add, source_remove)
  * @property {(message: string) => void} log global.log
- * @property {(win: CinnamonWindow, x: number, y: number, width: number, height: number, animate: boolean) => void} moveResize windowMoveResize (lib/tiling/windows.js)
+ * @property {(win: CinnamonWindow, x: number, y: number, width: number, height: number, userOp: boolean) => void} moveResize windowMoveResize (lib/tiling/windows.js)
+ * @property {() => boolean} grabActive true while the user holds a grab (drag or resize)
  */
 /**
  * @typedef {Object} ActorWatch
@@ -19,7 +20,8 @@ export const ActorSync: {
     new (deps: ActorSyncDeps): {
         _mainloop: AnyRecord;
         _log: (message: string) => void;
-        _moveResize: (win: CinnamonWindow, x: number, y: number, width: number, height: number, animate: boolean) => void;
+        _moveResize: (win: CinnamonWindow, x: number, y: number, width: number, height: number, userOp: boolean) => void;
+        _grabActive: () => boolean;
         /** @type {Map<string, number>} surface key -> pending mainloop timer */
         _pending: Map<string, number>;
         _destroyed: boolean;
@@ -40,10 +42,16 @@ export const ActorSync: {
          */
         arm(app: AppFacade, monitorIndex: number, wsIndex: number, watched: ActorWatch[]): void;
         /**
-         * The one nudge per window whose actor did not follow. Reasons a window is left
-         * alone: it has no actor (or lost the one it had), it is minimized, maximized or
-         * fullscreen — none of them is in the tiling state the placement established, and a
-         * nudge would fight whatever mode took over.
+         * The one nudge per window whose actor did not follow. The window's actor is read
+         * first — get_compositor_private() reads null once Muffin tore the actor down and is
+         * therefore the accessor that survives a close, unlike the state getters of a wrapper
+         * that was finalized between placement and check — and every window is isolated, so
+         * one dead wrapper cannot drop the verification of the others.
+         *
+         * Left alone: a window without its actor (or with a different one), a minimized,
+         * maximized or fullscreen window (none of them is in the tiling state the placement
+         * established, and a nudge would fight whatever mode took over), a geometry a user
+         * currently holds in a grab, and a position the shell is animating right now.
          * @param {AppFacade} app
          * @param {number} monitorIndex
          * @param {number} wsIndex
@@ -69,7 +77,11 @@ export type ActorSyncDeps = {
     /**
      * windowMoveResize (lib/tiling/windows.js)
      */
-    moveResize: (win: CinnamonWindow, x: number, y: number, width: number, height: number, animate: boolean) => void;
+    moveResize: (win: CinnamonWindow, x: number, y: number, width: number, height: number, userOp: boolean) => void;
+    /**
+     * true while the user holds a grab (drag or resize)
+     */
+    grabActive: () => boolean;
 };
 export type ActorWatch = {
     window: CinnamonWindow;
