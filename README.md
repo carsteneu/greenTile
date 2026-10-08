@@ -4,9 +4,9 @@ Window tiling for Cinnamon: presets per monitor and workspace, an auto mode, sna
 
 [![greenTile in action: windows tile as they open, then a window is split into another one by drag, with a translucent preview](docs/screenshots/demo.gif)](https://youtu.be/niI0LHYb1A8)
 
-![greenTile 2.2.1 preset selection: twelve starter cards with layout previews, edit controls and an assigned preset](docs/screenshots/preset-panel.png)
+![greenTile preset selection: sixteen starter cards with layout previews, the four span starters in the bottom row, Wide center assigned](docs/screenshots/2.2.4/span-starters.png)
 
-_The preset selection in 2.2.1: twelve editable starters in a responsive card grid. Example previews for six windows; click a card to apply it or ✎ to edit._
+_The preset selection: sixteen editable starters in a responsive card grid, the four span starters in the bottom row. Click a card to apply it or ✎ to edit._
 
 - **UUID:** `greenTile@carsteneu`
 - **Requires:** Cinnamon 6.0.4 or newer; tested on Linux Mint 21.3–22.3 (Cinnamon 6.0.4–6.6) with X11. Newer Cinnamon versions are not yet verified.
@@ -48,6 +48,10 @@ A preset is a list of rules by window count. Each rule sets the number of column
 
 A painted column can span several of the six painter grid columns. Painted columns always stretch over the whole monitor, so the spans are the starting widths: three columns with the spans `[1, 2, 1]` tile 25 % / 50 % / 25 % — the four-column arrangement with the two middle columns merged. A border you dragged for the current window count, and a window layout you dropped for it, still win over the spans — until you click a card again, which clears them like **Reset sizes** does.
 
+![Three windows tiled by the Wide center preset: a wide middle column between two narrow ones](docs/screenshots/2.2.4/spans-desktop.png)
+
+_The **Wide center** starter (spans 1 : 4 : 1) with three windows._
+
 Fresh installations include sixteen editable starter presets: Two columns, Three columns, Four columns, Six columns, Vertical stack, Five columns, Grid 2 × 2, Grid 3 × 2, Grid 4 × 2, Left main + stacks, Right main, Center main, Wide center, Wide center + stacks, Two thirds left and Two thirds right. They adapt to the current window count; names describe their base arrangement. Four of them (Wide center, Wide center + stacks, Two thirds left, Two thirds right) ship painted spans, so their wide column starts wide and the other columns take the extra windows. The initial selection panel uses four columns at the default 100 % UI scale (a HiDPI or fractionally scaled session fits fewer, wider cards so they keep their preview), is sized for four rows and uses slightly smaller text; a shorter display scrolls the card area, and the existing 600 px minimum panel width still applies.
 
 On the first start after upgrading to a version with these starters, greenTile adds them **once** to the existing list, even if that list is empty. Existing definitions, assignments and saved panel sizes are not replaced. A preset with the same name is kept as-is, and new presets receive unused IDs. A saved completion marker prevents later starts or updates from restoring starters you delete or modifying ones you rename or edit. Starters added by a later version arrive once as well, for installs and fresh setups alike, and are recorded separately — so they never come back either, as long as the settings file survives; replacing it, for instance by downgrading to a version that does not know the record, starts the import over. Unreadable preset or layout data is left untouched, with the import postponed until it can be read safely. No starter preset is assigned automatically. This runs inside the extension, so it works with the updater, manual installation and Spices alike.
@@ -63,6 +67,10 @@ On the first start after upgrading to a version with these starters, greenTile a
 - The sun/moon button switches between light and dark; ⚙ opens the settings.
 - Drag the title bar to move the panel, ◢ to resize it. `Esc`, ✕ or a click outside closes it.
 
+![Schematic: dragged column sizes on the left, the preset's own layout on the right after a card click](docs/screenshots/2.2.4/binding-click.png)
+
+_A card click is binding: it clears the sizes you dragged and tiles the preset's own layout._
+
 The preview on each card shows what a click would tile right now. No cell ever stays empty: with fewer windows than cells, the highest column gives up a cell (on a tie the right one), with fewer windows than columns, columns drop from the right. With more windows than cells, the rightmost column takes the rest.
 
 ### Editor
@@ -73,6 +81,10 @@ The preview on each card shows what a click would tile right now. No cell ever s
 - **Painter:** 6 columns × 4 rows. Click or drag to set how many windows a column holds (top = 1, bottom = 4). Right-click removes a column. The handle on the line between two painted columns merges them into one wide column, the handle inside a merged column splits one grid column off again.
 - **Save** (or `Enter` in the name field) retiles right away if the preset is in use. **← Back** or `Esc` discards the draft.
 - **🗑 Delete preset** (solid red, right of Save) removes the preset after a confirmation and clears its workspace assignments. `Enter` in the name field always saves.
+
+![The painter with three painted columns, the middle one merged over two grid columns, handles on the boundaries](docs/screenshots/2.2.4/spans-editor.png)
+
+_Column spans in the painter: the middle column spans two grid columns (1 : 2 : 1, a 25 / 50 / 25 layout). The handles merge or split columns._
 
 ## Auto mode
 
@@ -86,6 +98,10 @@ Only visible windows of the active workspace are tiled. The order follows their 
 
 After a Cinnamon restart on X11 (`Alt+F2` → `r`) the first retile of each monitor and workspace restores the window order it had before the restart, instead of re-deriving it from the positions Muffin moved the windows to while Cinnamon was coming up. The record is kept in the session's runtime directory and is gone after a log out; windows that are no longer there are simply skipped and the rest keep the position order. Without a record — the first run, or any run after a log out — the order follows the positions as usual. A window you place by hand (dragging it into another cell, or the swap hotkey) is the newer arrangement and is recorded at once, so it is never overwritten by an older record. Unplugging and replugging a monitor behaves the same way: the reconnect keeps the window order and retiles every workspace the monitor tiles, not only the one you are looking at.
 
+![Schematic: four windows A to D keep their left-to-right order after a restart or a monitor change](docs/screenshots/2.2.4/order-kept.png)
+
+_The window order survives a Cinnamon restart and a monitor change (X11 only)._
+
 Pausing keeps the preset assigned but stops automatic tiling, snap-on-release and swapping from that monitor and workspace. Turning auto mode on or selecting a preset explicitly resumes tiling. A pause requested before monitor detection finishes is retained until it can be applied. New windows normally join the end of the layout; an explicit successful drop takes precedence over that automatic ordering.
 
 Without a preset, the auto grid depends on the monitor width:
@@ -94,6 +110,10 @@ Without a preset, the auto grid depends on the monitor width:
 - **Narrower:** up to 3 windows in one row, then 3 columns with stacks (4 = 1·1·2, 5 = 1·2·2, 6 = 2·2·2).
 
 With **A single window** (settings, **Settings** page) you choose what happens to the last tiled window of a workspace: **Leave it untouched** leaves it where it is, **Fill the monitor** makes it fill the whole usable area, and **Center the window** centers it at about 62 % of the width (the golden ratio) and 90 % of the height. This applies with an assigned preset too — a preset's own rules never place a lone window, they start at two. Changing the select retiles right away. New installs start on **Center the window**; an install that had the old **Fill the monitor with a single window** switch keeps its choice (fill or untouched). In the two placing modes the lone window is a tiled window like any other: a manual resize or drag snaps back on the next retile; a window that is already maximized (both directions) or fullscreen is left exactly as it is, whether you maximized it or the application opened that way. Downgrading to a version without the select falls back to the old switch, so a choice made here is lost then.
+
+![A lone terminal window centered on the desktop, about 62 % of the width and 90 % of the height](docs/screenshots/2.2.4/single-center.png)
+
+_**Center the window:** a lone window at about 62 % of the width and 90 % of the height._
 
 ## Adjusting the layout
 
@@ -118,6 +138,10 @@ Borders and dragged layouts apply only in auto mode, not to `Super+Ctrl+3/6`.
 
 - **Never tile list** (settings, **Settings** page): match by window class, title or app id. **Add an installed application** adds an app id row for you, which also covers flatpaks. Excluded windows float freely and do not count for the layout. A window that is transient for another (a child or properties dialog) and a window that cannot be resized are never tiled either, and the list starts with a row for the Cinnamon xlet settings dialogs — that includes greenTile's own settings window; delete the row to tile it like any other window.
 - **`Super+G`** lets a single window float until you press it again or close the window. This is not saved.
+
+![The greenTile settings dialog floating over three tiled terminals](docs/screenshots/2.2.4/dialog-floats.png)
+
+_Dialogs float: the greenTile settings window stays on top of the tiled windows instead of taking a cell._
 
 ## Multiple monitors
 
