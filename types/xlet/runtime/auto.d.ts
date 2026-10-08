@@ -40,8 +40,11 @@ export const Auto: {
         /** @type {Array<[CinnamonWindow, number, number, number]>} */
         _tracked: Array<[CinnamonWindow, number, number, number]>;
         _switchTimer: number;
-        /** @type {Map<string, () => void>} */
-        _afterSwitch: Map<string, () => void>;
+        /** @type {Map<string, {fn: (settle: boolean) => void, settle: boolean}>} */
+        _afterSwitch: Map<string, {
+            fn: (settle: boolean) => void;
+            settle: boolean;
+        }>;
         /**
          * Whether the shell's workspace-switch effect may still own the window actors
          * (see SWITCH_EFFECT_MS): a frame moved now would be drawn at its old place.
@@ -52,12 +55,20 @@ export const Auto: {
          * Runs `fn` now, or — while the switch effect runs — once it ended. One held run
          * per key: a newer request for the same surface replaces the older one and moves
          * to the end, so the held runs replay in the order of their newest request (the
-         * settle fan-out relies on the active surface being placed last).
+         * settle fan-out relies on the active surface being placed last). A replaced
+         * settle request is not lost: the run gets settle = true if any request had it.
          * @param {string} key the surface (monitor and workspace)
-         * @param {() => void} fn
+         * @param {(settle: boolean) => void} fn
+         * @param {boolean} [settle]
          */
-        afterSwitch(key: string, fn: () => void): void;
+        afterSwitch(key: string, fn: (settle: boolean) => void, settle?: boolean): void;
+        _effectRunning(): any;
         _noteSwitch(): void;
+        /**
+         * @param {number} ms the wait before the next look
+         * @param {number} elapsed the time the hold has lasted once that wait is over
+         */
+        _armSwitchEnd(ms: number, elapsed: number): void;
         /**
          * @param {AppFacade} app
          * @param {number} monitorIndex

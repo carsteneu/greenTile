@@ -371,6 +371,10 @@ const createCinnamonEnv = (options) => {
                 {return (...a) => env.logErrors.push(a.map(String).join(' '));}
             if (p === 'get_current_time')
                 {return () => 0;}
+            // the window actors (global.get_window_actors): empty unless a test
+            // installs its own list in env.windowActors
+            if (p === 'get_window_actors')
+                {return () => (typeof env.windowActors === 'function' ? env.windowActors() : (env.windowActors || []));}
             if (p === 'get_pointer')
                 {return () => env.pointer;}
             if (p === 'set_cursor' || p === 'unset_cursor')

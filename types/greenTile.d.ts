@@ -306,8 +306,8 @@ type AutoFacade = {
     sortPoll(now: number): void;
     /** whether the shell's workspace-switch effect still owns the window actors */
     switching(): boolean;
-    /** runs fn now, or once the switch effect ended (one held run per key, newest wins) */
-    afterSwitch(key: string, fn: () => void): void;
+    /** runs fn now, or once the switch effect ended (one held run per key, newest wins, settle OR-merged) */
+    afterSwitch(key: string, fn: (settle: boolean) => void, settle?: boolean): void;
     destroy(): void;
 };
 

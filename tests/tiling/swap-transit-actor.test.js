@@ -139,6 +139,8 @@ const setup = () => {
     }
     const [ws12, ws13, ws14] = env.workspaces;
     const finishSwitch = installSwitchEffect(env, all);
+    // global.get_window_actors(): the hold reads the effect's origX mark on them
+    env.windowActors = () => all.map((w) => w.get_compositor_private()).filter(Boolean);
     env.activeWorkspace = ws14;
     enableOnMonitors(env, ext, [WIDE]);
     const app = ext.currentSession().app;
@@ -190,6 +192,15 @@ const setup = () => {
     app.ops.layoutSet(app, 0, 1, { auto: true, preset: 'p2' });
     app.ops.layoutSet(app, 0, 2, { auto: true });
     return { env, ext, app, all, finishSwitch, a, b, c, d, lone, ws12, ws13, ws14 };
+};
+
+// Fire exactly one pending timer of that delay (a poll that re-arms itself must be
+// stepped, not drained).
+const fireOnce = (env, ms) => {
+    const entry = [...env.timers.entries()].find(([, t]) => t.ms === ms);
+    assert.ok(entry, 'a ' + ms + ' ms timer is pending');
+    env.timers.delete(entry[0]);
+    entry[1].cb();
 };
 
 // Lets the main loop run: every pending timer up to `limit` ms fires, shortest delay
@@ -309,11 +320,47 @@ test('a press during the effect is held too, and the surface ends in sync and wi
 test('a second switch inside the effect extends the hold to the last effect', () => {
     const f = setup();
     f.env.windowManager.emit('switch-workspace', f.env.windowManager, 2, 1, LEFT);
+    const first = f.env.liveTimers().find((t) => t.ms === 250).id;
     f.env.windowManager.emit('switch-workspace', f.env.windowManager, 1, 0, LEFT);
-    assert.equal(f.env.liveTimers().filter((t) => t.ms === 250).length, 1, 'one effect window, not two');
+    const live = f.env.liveTimers().filter((t) => t.ms === 250);
+    assert.equal(live.length, 1, 'one effect window, not two');
+    assert.notEqual(live[0].id, first, 'the first window was replaced by a new one');
     assert.equal(f.app.auto.switching(), true);
+    f.finishSwitch();
     fire(f.env, 250);
     assert.equal(f.app.auto.switching(), false, 'the window closed with the last effect');
+});
+
+test('an effect that outlasts 250 ms keeps the hold until its cleanup ran', () => {
+    const f = setup();
+    f.env.activeWorkspace = f.ws13;
+    f.app.ops.retileMonitor(f.app, 0, f.c, true, 1);
+    const before = frames(f.all);
+    f.env.display.focus_window = f.c;
+    f.env.keybindingManager.hotkeys.get('greenTile-swap-left').cb();
+    fire(f.env, 250); // a busy compositor frame: the effect is not done yet
+    assert.equal(f.app.auto.switching(), true, 'the hold is still on');
+    fireOnce(f.env, 20);
+    fireOnce(f.env, 20);
+    assert.deepEqual(frames(f.all), before, 'nothing was placed while the effect still ran');
+    f.finishSwitch();
+    advance(f.env);
+    assert.equal(f.app.auto.switching(), false);
+    assert.deepEqual(heldLines(f.env), ['greenTile retile after workspace switch n=2']);
+    assert.deepEqual(desynced(f.all), [], 'placed after the cleanup, in sync');
+});
+
+test('a hold whose effect never reports its end gives up after a second', () => {
+    const f = setup();
+    f.env.windowManager.emit('switch-workspace', f.env.windowManager, 2, 1, LEFT);
+    let polls = 0;
+    fire(f.env, 250);
+    while (f.app.auto.switching() && polls < 100) {
+        fireOnce(f.env, 20);
+        polls++;
+    }
+    assert.equal(f.app.auto.switching(), false, 'the hold ended without the cleanup');
+    assert.equal(polls, 38, '250 ms + 38 polls of 20 ms = the 1000 ms cap');
     f.finishSwitch();
 });
 
@@ -331,17 +378,19 @@ test('disable while a retile is held leaves no timer and places nothing afterwar
     assert.deepEqual(frames(f.all), before, 'the held retile died with the App, nothing was placed');
 });
 
-test('held runs replay in the order of their newest request', () => {
+test('held runs replay in the order of their newest request, a replaced settle survives', () => {
     const f = setup();
     f.env.windowManager.emit('switch-workspace', f.env.windowManager, 2, 1, LEFT);
     const order = [];
-    f.app.auto.afterSwitch('active', () => order.push('active-old'));
-    f.app.auto.afterSwitch('background', () => order.push('background'));
-    f.app.auto.afterSwitch('active', () => order.push('active-new'));
+    f.app.auto.afterSwitch('active', (s) => order.push('active-old ' + s));
+    f.app.auto.afterSwitch('background', (s) => order.push('background ' + s), true);
+    f.app.auto.afterSwitch('active', (s) => order.push('active-new ' + s));
+    f.app.auto.afterSwitch('background', (s) => order.push('background-user ' + s));
     assert.deepEqual(order, [], 'nothing ran inside the effect');
-    fire(f.env, 250);
-    assert.deepEqual(order, ['background', 'active-new'], 'a replaced run moves to the end, the old one is gone');
     f.finishSwitch();
+    fire(f.env, 250);
+    assert.deepEqual(order, ['active-new false', 'background-user true'],
+        'a replaced run moves to the end, the old one is gone, its settle is kept');
 });
 
 for (const [label, patch] of [['animations are off', { animations_enabled: false }], ['a modal is pushed', { modalCount: 1 }]]) {
@@ -367,6 +416,7 @@ test('a focus window finalized during the hold does not drop the surface placeme
     f.app.ops.retileMonitor(f.app, 0, f.c, true, 1);
     f.env.windowManager.emit('switch-workspace', f.env.windowManager, 2, 1, LEFT);
     f.app.ops.retileMonitor(f.app, 0, f.c, true, 0);
+    f.finishSwitch();
     const errors = f.env.logErrors.length;
     f.c.get_compositor_private = () => {
         throw new Error('finalized wrapper');
@@ -375,5 +425,35 @@ test('a focus window finalized during the hold does not drop the surface placeme
     fire(f.env, 250);
     assert.equal(f.env.logErrors.length, errors, 'no error escaped the held run');
     assert.deepEqual(heldLines(f.env), ['greenTile retile after workspace switch n=1'], 'the surface was still placed');
+});
+
+// The two ways a held focus window can leave the surface it was held for. The checks
+// run right after the hold ended, before the auto observer's own 300 ms retile.
+const leaveDuringHold = (leave) => {
+    const f = setup();
+    f.env.activeWorkspace = f.ws13;
+    f.app.ops.retileMonitor(f.app, 0, f.c, true, 1);
+    f.env.display.focus_window = f.c;
+    f.env.keybindingManager.hotkeys.get('greenTile-swap-left').cb();
+    assert.equal(f.c.get_workspace(), f.ws12);
+    leave(f);
     f.finishSwitch();
+    fire(f.env, 250);
+    return f;
+};
+
+test('a focus window closed during the hold claims no cell on the surface it was pushed to', () => {
+    const f = leaveDuringHold((g) => {
+        g.c.get_compositor_private = () => null; // Muffin cleared the actor: unmanaged
+        g.all.splice(g.all.indexOf(g.c), 1);
+    });
+    assert.deepEqual(frames([f.a, f.b]), ['0,0,2560,1440', '2560,0,2560,1440'], 'ws12 is two halves, no empty cell');
+});
+
+test('a focus window moved on during the hold claims no cell on the surface it left', () => {
+    const f = leaveDuringHold((g) => {
+        g.c.change_workspace_by_index(1); // back to ws13 before the effect ended
+    });
+    assert.deepEqual(frames([f.a, f.b]), ['0,0,2560,1440', '2560,0,2560,1440'], 'ws12 is two halves, no empty cell');
+    assert.notDeepEqual(f.c.rect, [3413, 0, 1707, 1440], 'the window was not placed into a ws12 cell');
 });
