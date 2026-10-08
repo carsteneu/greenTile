@@ -186,22 +186,43 @@ test('a maximized or fullscreen window is never nudged', () => {
 test('a window that dies before the check leaves the others repaired and throws nothing', () => {
     const f = setup(true);
     const { env, app, w1, a } = f;
-    const dead = withActor(env, 8, [1500, 0, 400, 400], actorFor(true, [1500, 0, 400, 400]));
-    env.tabList.push(dead);
+    // gone: Muffin cleared the compositor private (the unmanage state)
+    const gone = withActor(env, 8, [100, 0, 300, 400], actorFor(true, [100, 0, 300, 400]));
+    // finalized: the wrapper still hands out an actor, but its state getters throw
+    const zombie = withActor(env, 9, [500, 0, 300, 400], actorFor(true, [500, 0, 300, 400]));
+    zombie.get_maximized = () => {
+        throw new Error('finalized wrapper');
+    };
+    env.tabList.push(gone, zombie);
     env.display.focus_window = w1;
     app.ops.retileMonitor(app, 0, w1, true, 0);
-    // closed while the check is pending: the wrapper is finalized, so only
-    // get_compositor_private still reads (null) and the state getters throw
-    dead.get_compositor_private = () => null;
-    dead.get_maximized = () => {
-        throw new Error('finalized wrapper');
-    };
-    dead.is_fullscreen = () => {
-        throw new Error('finalized wrapper');
-    };
+    gone.get_compositor_private = () => null;
     fireAll(env, SYNC_MS);
+    // the throwing wrapper must not abort the loop: the tiled window is still repaired
     assert.deepEqual(offset(a, w1), CSD_OFFSET, 'the other windows of the surface were still repaired');
     assert.equal(resyncs(env), 1, 'one repair line, no error escaped the timer');
+});
+
+test('the repair stands down while a grab or a position animation is live', () => {
+    const f = setup(true);
+    const { env, app, w1, a } = f;
+    app.ops.retileMonitor(app, 0, w1, true, 0);
+    env.display.get_grab_op = () => env.gi.Meta.GrabOp.MOVING;
+    fireAll(env, SYNC_MS);
+    assert.notDeepEqual(offset(a, w1), CSD_OFFSET, 'a window the user drags is not moved');
+    assert.equal(resyncs(env), 0, 'nothing is reported while the user holds the grab');
+
+    // and a position the shell animates (the workspace-switch effect writes actor.x/y)
+    app.ops.retileMonitor(app, 0, w1, true, 0);
+    env.display.get_grab_op = () => env.gi.Meta.GrabOp.NONE;
+    a.foreignTransition('x', 42, () => {});
+    fireAll(env, SYNC_MS);
+    assert.notDeepEqual(offset(a, w1), CSD_OFFSET, 'the running animation is not fought');
+
+    // once both are over the same surface is repaired as usual
+    app.ops.retileMonitor(app, 0, w1, true, 0);
+    fireAll(env, SYNC_MS);
+    assert.deepEqual(offset(a, w1), CSD_OFFSET, 'the repair happens as soon as the geometry is free');
 });
 
 test('disable leaves no pending check behind', () => {
