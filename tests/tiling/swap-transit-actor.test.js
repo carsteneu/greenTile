@@ -654,6 +654,29 @@ test('a switch that animates no window opens no hold', () => {
     assert.equal(ran, true, 'a retile runs at once');
 });
 
+test('a switch whose windows the effect leaves alone (sticky, dragged along) opens no hold', () => {
+    const f = setup();
+    // Cinnamon skips windows on every workspace and the window being moved: no origX,
+    // no ease. Modelled as a switch between ws12 and ws13 whose actors it leaves alone.
+    const skipped = [f.a, f.b, f.c, f.d].map((w) => w.get_compositor_private());
+    const marks = skipped.map((a) => a.origX);
+    f.env.windowManager.emit('switch-workspace', f.env.windowManager, 7, 8, RIGHT);
+    assert.deepEqual(skipped.map((a) => a.origX), marks, 'the effect touched none of them');
+    assert.equal(f.app.auto.switching(), false);
+});
+
+test('a switch without its own effect during a running hold keeps holding until that effect ended', () => {
+    const f = setup();
+    openHold(f);
+    f.env.windowManager.emit('switch-workspace', f.env.windowManager, 7, 8, RIGHT);
+    assert.equal(f.app.auto.switching(), true, 'the running effect still holds');
+    fireOnce(f.env, 16);
+    assert.equal(f.app.auto.switching(), true, 'one frame later it still runs');
+    f.finishSwitch();
+    fireOnce(f.env, 16);
+    assert.equal(f.app.auto.switching(), false, 'the first look after its cleanup ends the hold');
+});
+
 test('the hold ends within one frame after the effect\'s cleanup, not after a fixed wait', () => {
     const f = setup();
     openHold(f);
