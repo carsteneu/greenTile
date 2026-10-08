@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 170" role="img" aria-label="Clicking a preset card clears the sizes you dragged and applies the preset layout">
+<defs><linearGradient id="dtbgB" x1="1" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2E5A33"/><stop offset=".5" stop-color="#1E3A25"/><stop offset="1" stop-color="#15271B"/></linearGradient></defs>
+<rect x="0" y="0" width="300" height="170" fill="#E6ECE2"/>
+<text x="150" y="16" text-anchor="middle" fill="#13201A" style="font:600 10px JBMono,monospace">a card click is binding</text>
+<rect x="4" y="32" width="88" height="96" rx="7" fill="#1B2A21"/>
+<rect x="8" y="36" width="80" height="88" rx="3.5" fill="url(#dtbgB)"/>
+<g><rect x="8" y="36" width="42" height="88" rx="3" fill="#F7F9F5"/><path d="M11 36h36a3 3 0 0 1 3 3v5h-42v-5a3 3 0 0 1 3 -3z" fill="#4EA530"/></g>
+<g><rect x="52" y="36" width="18" height="88" rx="3" fill="#F7F9F5"/><path d="M55 36h12a3 3 0 0 1 3 3v5h-18v-5a3 3 0 0 1 3 -3z" fill="#3E7CB1"/></g>
+<g><rect x="72" y="36" width="16" height="88" rx="3" fill="#F7F9F5"/><path d="M75 36h10a3 3 0 0 1 3 3v5h-16v-5a3 3 0 0 1 3 -3z" fill="#8E6CC4"/></g>
+<path d="M46 62l-4 4 4 4M54 62l4 4-4 4" stroke="#F0A23B" stroke-width="1.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M67 104l-4 4 4 4M76 104l4 4-4 4" stroke="#F0A23B" stroke-width="1.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+<text x="48" y="146" text-anchor="middle" fill="#5B6B60" style="font:500 10px JBMono,monospace">sizes you dragged</text>
+<path d="M100 80L196 80M191.5 83.1L196 80L191.5 76.9" stroke="#F0A23B" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+<text x="148" y="68" text-anchor="middle" fill="#F0A23B" style="font:500 9px JBMono,monospace">click a preset card</text>
+<rect x="208" y="32" width="88" height="96" rx="7" fill="#1B2A21"/>
+<rect x="212" y="36" width="80" height="88" rx="3.5" fill="url(#dtbgB)"/>
+<g><rect x="212" y="36" width="25.33" height="88" rx="3" fill="#F7F9F5"/><path d="M215 36h19.33a3 3 0 0 1 3 3v5h-25.33v-5a3 3 0 0 1 3 -3z" fill="#4EA530"/></g>
+<g><rect x="239.33" y="36" width="25.33" height="88" rx="3" fill="#F7F9F5"/><path d="M242.33 36h19.33a3 3 0 0 1 3 3v5h-25.33v-5a3 3 0 0 1 3 -3z" fill="#3E7CB1"/></g>
+<g><rect x="266.67" y="36" width="25.33" height="88" rx="3" fill="#F7F9F5"/><path d="M269.67 36h19.33a3 3 0 0 1 3 3v5h-25.33v-5a3 3 0 0 1 3 -3z" fill="#8E6CC4"/></g>
+<text x="252" y="146" text-anchor="middle" fill="#5B6B60" style="font:500 10px JBMono,monospace">the preset, applied</text>
+</svg>
