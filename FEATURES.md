@@ -18,7 +18,7 @@ Every feature in one line or two. Details and screenshots are in the [README](RE
 - **Window gap**: 0 to 48 px between tiled windows, set in the preset panel. Only inner edges move; windows stay flush with the screen edges. Insets are reduced when the available area cannot contain the requested gap.
 - **Directional focus**: `Super+Arrow` moves the keyboard focus to the neighbouring tiled window in that direction; at the monitor edge Left/Right continue onto the adjacent monitor. Native edge tiling everywhere else.
 - **Focus border**: after a `Super+Arrow` focus move, a thin border in the state color marks the newly focused window for three seconds; mouse and `Alt+Tab` focus changes do not show it, maximized and fullscreen windows never get it. Can be turned off.
-- **Single window**: the **A single window** select decides what happens to the last tiled window of an auto-mode workspace or an assigned preset — **Leave it untouched**, **Fill the monitor**, or **Center the window** (about 62 % of the width, the golden ratio, and 90 % of the height, centered). A preset's own rules never place a lone window — they start at two. Takes effect immediately. New installs default to **Center the window**; an upgrade keeps the old switch (fill or untouched). In **Fill the monitor** and **Center the window** the lone window is tiled like any other: a manual resize or drag snaps back on the next retile, and a maximized one is un-maximized when greenTile places it. A downgrade to a version without the select falls back to the old switch and loses a choice made here.
+- **Single window**: the **A single window** select decides what happens to the last tiled window of an auto-mode workspace or an assigned preset — **Leave it untouched**, **Fill the monitor**, or **Center the window** (about 62 % of the width, the golden ratio, and 90 % of the height, centered). A preset's own rules never place a lone window — they start at two. Takes effect immediately. New installs default to **Center the window**; an upgrade keeps the old switch (fill or untouched). In **Fill the monitor** and **Center the window** the lone window is tiled like any other: a manual resize or drag snaps back on the next retile; a window that is already maximized (both directions) or fullscreen is left exactly as it is — you maximized it, or the application opened it that way. A downgrade to a version without the select falls back to the old switch and loses a choice made here.
 
 ## Presets
 
@@ -67,6 +67,7 @@ Every feature in one line or two. Details and screenshots are in the [README](RE
 ## Excluding windows
 
 - **Never tile list**: rows matching window class, title or app id are never tiled and do not count for the layout.
+- **Never tiled on their own**: a window transient for another (a child or properties dialog) and a window that cannot be resized always float where they are. The list ships with a row for the Cinnamon xlet settings dialogs — greenTile's own settings window included; remove the row to tile them.
 - **App picker**: adds an installed application to the list by its app id, including flatpaks. The app list updates when software is installed or removed.
 - **Float one window**: `Super+G` lets the focused window float until pressed again or the window closes; an on-screen message confirms the state.
 

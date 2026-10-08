@@ -2,6 +2,7 @@
 // regenerate with: npm run gen:types
 export function singleMode(raw: any): "leave" | "fill" | "center";
 export function singleActive(raw: any, n: number): boolean;
+export function singleLeavesMaximized(raw: any, n: number, maximized: boolean): boolean;
 export const singleLayout: Readonly<{
     kind: "rows";
     shape: readonly number[];

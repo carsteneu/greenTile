@@ -198,7 +198,13 @@
          {"id": "match", "title": "Match", "type": "string", "options": {"Window class": "class", "Title contains": "title", "App id": "app"}},
          {"id": "text", "title": "Text", "type": "string"}
       ],
-      "default": []
+      "default": [
+         {"match": "class", "text": "xlet-settings.py"}
+      ]
+   },
+   "exclusionsSeeded": {
+      "type": "generic",
+      "default": false
    },
    "layouts": {
       "type": "generic",

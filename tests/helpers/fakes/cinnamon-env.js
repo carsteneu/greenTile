@@ -157,6 +157,9 @@ const SETTINGS_DEFAULTS = {
     swapUpHotkey: '<Super>Up',
     swapDownHotkey: '<Super>Down',
     exclusions: [],
+    // Ordinary fixtures model an install that already completed the built-in
+    // exclusion seed; the seed tests explicitly pass false for the first start.
+    exclusionsSeeded: true,
     excludeAppPicker: 'picker',
     layouts: '',
     presets: '[]',

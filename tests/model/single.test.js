@@ -37,6 +37,21 @@ test('singleActive places a window only for a lone one, and never on leave', () 
     }
 });
 
+// A window the user maximized (both directions) or put fullscreen is their own
+// full-area placement: the mode must not unmaximize it to re-place it. Only a
+// lone window counts, and only a placing mode (leave is already a no-op).
+test('singleLeavesMaximized leaves a maximized or fullscreen lone window alone', () => {
+    for (const mode of ['center', 'fill']) {
+        assert.equal(m.singleLeavesMaximized(mode, 1, true), true, mode + ' n=1 maximized');
+        assert.equal(m.singleLeavesMaximized(mode, 1, false), false, mode + ' n=1 plain');
+        assert.equal(m.singleLeavesMaximized(mode, 0, true), false, mode + ' n=0');
+        assert.equal(m.singleLeavesMaximized(mode, 2, true), false, mode + ' n=2');
+        assert.equal(m.singleLeavesMaximized(mode, 7, true), false, mode + ' n=7');
+    }
+    assert.equal(m.singleLeavesMaximized('leave', 1, true), false, 'leave places nothing anyway');
+    assert.equal(m.singleLeavesMaximized(undefined, 1, true), false, 'unknown mode reads as leave');
+});
+
 test('fallback layout is a single full-area row cell', () => {
     assert.deepEqual(m.singleLayout, { kind: 'rows', shape: [1] });
     const area = [0, 0, 1920, 1080];

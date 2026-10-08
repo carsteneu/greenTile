@@ -7,6 +7,7 @@ export const Config: {
         settings: any;
         _migrateSingleWindow(): void;
         _importStarterPresets(): void;
+        _seedExclusionDefaults(): void;
         /**
          * Makes an external write of the layouts setting invalidate the App's
          * deferred split writes (see Split.invalidate).

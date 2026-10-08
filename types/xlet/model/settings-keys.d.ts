@@ -20,6 +20,7 @@ export const SETTINGS_KEYS: Readonly<{
     excludeHotkey: "excludeHotkey";
     excludeAppPicker: "excludeAppPicker";
     exclusions: "exclusions";
+    exclusionsSeeded: "exclusionsSeeded";
     layouts: "layouts";
     panelSize: "panelSize";
     windowGap: "windowGap";
