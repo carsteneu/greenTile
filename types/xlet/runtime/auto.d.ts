@@ -12,7 +12,7 @@
  * @property {() => number} focusMonitorIndex
  * @property {(app: AppFacade, monitorIndex: number, wsIndex: number) => { auto: boolean }} layoutFor
  * @property {(app: AppFacade, monitorIndex: number, wsIndex: number, patch: {}) => boolean} layoutSet
- * @property {(app: AppFacade, monitorIndex: number, focused: CinnamonWindow | null, animate?: boolean, wsIndex?: number | null) => void} retileMonitor
+ * @property {(app: AppFacade, monitorIndex: number, focused: CinnamonWindow | null, animate?: boolean, wsIndex?: number | null, actionLayout?: Layout | null, settle?: boolean) => void} retileMonitor
  * @property {() => void} borderUpdate
  * @property {(op: string) => boolean} grabIsResize
  * @property {(app: AppFacade, w: CinnamonWindow, op: string) => boolean} dropBegin
@@ -50,6 +50,20 @@ export const Auto: {
          * @param {number} ms
          */
         scheduleAll(app: AppFacade, ms: number): void;
+        /**
+         * The settle fan-out: by the time the settle wait expires Muffin has moved the
+         * windows of EVERY workspace — a Cinnamon restart re-manages them all, a monitor
+         * change parks them on the remaining monitor and moves them back — so the settle
+         * must place every workspace greenTile tiles, not only the active one. Otherwise
+         * a background workspace stays where Muffin left it until the user visits it.
+         * The active workspace keeps the debounced path (it applies a retained intent
+         * first and animates); the background workspaces are placed right here, without
+         * animation. A paused workspace stays untouched: the retile gates on autoAllowed.
+         * On a monitor whose workspaces live on the primary only, every numbered
+         * workspace resolves to the same surface: it is placed once.
+         * @param {AppFacade} app
+         */
+        settleAll(app: AppFacade): void;
         /**
          * @param {AppFacade} app
          * @param {number} monitorIndex
@@ -269,7 +283,7 @@ export type AutoDeps = {
         auto: boolean;
     };
     layoutSet: (app: AppFacade, monitorIndex: number, wsIndex: number, patch: {}) => boolean;
-    retileMonitor: (app: AppFacade, monitorIndex: number, focused: CinnamonWindow | null, animate?: boolean, wsIndex?: number | null) => void;
+    retileMonitor: (app: AppFacade, monitorIndex: number, focused: CinnamonWindow | null, animate?: boolean, wsIndex?: number | null, actionLayout?: Layout | null, settle?: boolean) => void;
     borderUpdate: () => void;
     grabIsResize: (op: string) => boolean;
     dropBegin: (app: AppFacade, w: CinnamonWindow, op: string) => boolean;

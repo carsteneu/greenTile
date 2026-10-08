@@ -133,8 +133,32 @@ const makeWindow = (env, seq, rect, monitor = 0, withActor = null, options = {})
     return window;
 };
 
+// A workspace with the surface the auto observer connects to: window-added /
+// window-removed handlers, plus the window list. Real Cinnamon workspaces are
+// signal emitters; the Auto observer connects to every workspace in connectAll,
+// so a workspace that survives an App recreation (monitors-changed) must accept
+// a connect — otherwise the recreated App rolls back.
 const makeWorkspace = (env) => {
-    const ws = { list_windows: () => env.tabList };
+    const handlers = [];
+    let nextId = 1;
+    const ws = {
+        list_windows: () => env.tabList,
+        connect(sig, cb) {
+            const id = nextId++;
+            handlers.push({ sig, cb, id });
+            return id;
+        },
+        disconnect(id) {
+            const at = handlers.findIndex((h) => h.id === id);
+            if (at !== -1)
+                {handlers.splice(at, 1);}
+        },
+        emit(sig, ...args) {
+            for (const h of handlers.slice())
+                {if (h.sig === sig)
+                    {h.cb(...args);}}
+        },
+    };
     env.workspaces.push(ws);
     return ws;
 };

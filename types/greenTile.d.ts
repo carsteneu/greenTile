@@ -220,7 +220,7 @@ type OpsFacade = {
     collectWindows(app: AppFacade, monitor: CinnamonMonitor, focus: CinnamonWindow | null, ws?: number | null): CinnamonWindow[];
     layoutFor(app: AppFacade, monitorIndex: number, wsIndex: number): { preset: Preset | null; auto: boolean };
     layoutSet(app: AppFacade, monitorIndex: number, wsIndex: number, patch: {}): boolean;
-    retileMonitor(app: AppFacade, monitorIndex: number, focused: CinnamonWindow | null, animate?: boolean, wsIndex?: number | null): void;
+    retileMonitor(app: AppFacade, monitorIndex: number, focused: CinnamonWindow | null, animate?: boolean, wsIndex?: number | null, actionLayout?: Layout | null, settle?: boolean): void;
     presetsRead(app: AppFacade): Preset[];
     presetsWrite(app: AppFacade, presets: Preset[]): void;
     gap(app: AppFacade): number;
@@ -281,6 +281,7 @@ type AutoFacade = {
 
     scheduleAll(app: AppFacade, delayMs: number): void;
     scheduleMonitor(app: AppFacade, monitorIndex: number, delayMs: number): void;
+    settleAll(app: AppFacade): void;
     pendingTake(monitorIndex: number): Set<number>;
     pendingForget(seq: number): void;
     activate(app: AppFacade): void;

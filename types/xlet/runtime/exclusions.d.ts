@@ -10,7 +10,7 @@
  * @property {AnyRecord} main imports.ui.main, osdWindowManager
  * @property {AnyRecord} global the global object
  * @property {() => CinnamonWindow | null} focusWindow focusWindow
- * @property {(app: AppFacade, monitorIndex: number, focused: CinnamonWindow | null, animate?: boolean, wsIndex?: number | null) => void} retileMonitor retileMonitor
+ * @property {(app: AppFacade, monitorIndex: number, focused: CinnamonWindow | null, animate?: boolean, wsIndex?: number | null, actionLayout?: Layout | null, settle?: boolean) => void} retileMonitor retileMonitor
  * @property {(app: AppFacade) => void} retile exclRetile
  * @property {TranslateFn} translate _ gettext
  * @property {Map<number, boolean>} toggles session-owned Super+G toggles, seq -> true
@@ -129,7 +129,7 @@ export type ExclusionsDeps = {
     /**
      * retileMonitor
      */
-    retileMonitor: (app: AppFacade, monitorIndex: number, focused: CinnamonWindow | null, animate?: boolean, wsIndex?: number | null) => void;
+    retileMonitor: (app: AppFacade, monitorIndex: number, focused: CinnamonWindow | null, animate?: boolean, wsIndex?: number | null, actionLayout?: Layout | null, settle?: boolean) => void;
     /**
      * exclRetile
      */
