@@ -304,6 +304,10 @@ type AutoFacade = {
     sortPeek(seq: number, now: number): Rect | null;
     sortClear(seq: number): void;
     sortPoll(now: number): void;
+    /** whether the shell's workspace-switch effect still owns the window actors */
+    switching(): boolean;
+    /** runs fn now, or once the switch effect ended (one held run per key, newest wins) */
+    afterSwitch(key: string, fn: () => void): void;
     destroy(): void;
 };
 

@@ -39,6 +39,23 @@ export const Auto: {
         _workspaceSignals: Array<[AnyRecord, number, number]>;
         /** @type {Array<[CinnamonWindow, number, number, number]>} */
         _tracked: Array<[CinnamonWindow, number, number, number]>;
+        _switchTimer: number;
+        /** @type {Map<string, () => void>} */
+        _afterSwitch: Map<string, () => void>;
+        /**
+         * Whether the shell's workspace-switch effect may still own the window actors
+         * (see SWITCH_EFFECT_MS): a frame moved now would be drawn at its old place.
+         * @returns {boolean}
+         */
+        switching(): boolean;
+        /**
+         * Runs `fn` now, or — while the switch effect runs — once it ended. One held run
+         * per key: a newer request for the same surface replaces the older one.
+         * @param {string} key the surface (monitor and workspace)
+         * @param {() => void} fn
+         */
+        afterSwitch(key: string, fn: () => void): void;
+        _noteSwitch(): void;
         /**
          * @param {AppFacade} app
          * @param {number} monitorIndex
