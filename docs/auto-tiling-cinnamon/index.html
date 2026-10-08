@@ -3,13 +3,13 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Automatic window tiling on Cinnamon (Linux Mint) · greenTile</title>
-<meta name="description" content="Cinnamon snaps one window at a time. How to get automatic tiling on Linux Mint Cinnamon with the greenTile extension, step by step, and what it does for you.">
+<title>Automatic tiling for Cinnamon (Linux Mint) · greenTile</title>
+<meta name="description" content="greenTile arranges your windows on Linux Mint Cinnamon as they open: presets per monitor and workspace, wide columns, drag to split, gaps and floating windows. A walk through with screenshots.">
 <link rel="canonical" href="https://greentile.io/auto-tiling-cinnamon/">
 <meta property="og:type" content="article">
 <meta property="og:site_name" content="greenTile">
-<meta property="og:title" content="Automatic window tiling on Cinnamon (Linux Mint)">
-<meta property="og:description" content="What Cinnamon tiles on its own, what it leaves to you, and how to make windows tile themselves as they open with the greenTile extension.">
+<meta property="og:title" content="Automatic tiling for Cinnamon (Linux Mint)">
+<meta property="og:description" content="greenTile arranges your windows while you work: open one and the others make room. Presets, wide columns, drag to split, gaps and floating windows, shown on Linux Mint 22.3.">
 <meta property="og:url" content="https://greentile.io/auto-tiling-cinnamon/">
 <meta property="og:image" content="https://greentile.io/screenshots/tour-poster.jpg">
 <meta property="og:image:width" content="1280">
@@ -132,6 +132,29 @@ footer{padding:36px 0 56px;border-top:1px solid var(--rule);display:flex;justify
   nav ul{display:none}
 }
 @media (max-width:560px){.dt-grid{grid-template-columns:1fr}}
+/* article layout: prose next to real screenshots */
+.prose{max-width:64ch}
+.prose p{margin:0 0 14px;color:#2A3A30}
+.prose h3{font:700 24px/1.15 "Bricolage";letter-spacing:-.02em;margin:0 0 10px}
+.band{background:var(--sheet);border-top:1px solid #D6DED1;border-bottom:1px solid #D6DED1}
+.shot{margin:0}
+.shot img{display:block;width:100%;height:auto;border-radius:10px;box-shadow:0 24px 48px -28px rgba(19,32,26,.55),0 0 0 1px rgba(19,32,26,.12)}
+.shot figcaption{margin-top:10px;font:500 13px/1.45 "JBMono";color:var(--mute)}
+.shot figcaption kbd{padding:3px 6px 4px;font-size:12px}
+.strip{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;margin:28px 0 56px}
+.pair{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:22px;margin-top:28px;align-items:start}
+.feat{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.35fr);gap:48px;align-items:start;margin-top:28px}
+.feat.flip>.prose{order:2}
+.stack{display:grid;gap:22px}
+.keylist{list-style:none;margin:6px 0 18px;padding:0}
+.keylist li{display:grid;grid-template-columns:200px minmax(0,1fr);gap:14px;padding:11px 0;border-bottom:1px solid var(--rule);color:#34443A;font-size:15.5px;align-items:baseline}
+.keylist span{white-space:nowrap;color:var(--ink)}
+@media (max-width:980px){
+  .feat,.pair{grid-template-columns:1fr;gap:24px}
+  .feat.flip>.prose{order:0}
+  .strip{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .keylist li{grid-template-columns:1fr;gap:4px}
+}
 </style>
 </head>
 <body>
@@ -141,35 +164,148 @@ footer{padding:36px 0 56px;border-top:1px solid var(--rule);display:flex;justify
     <ul><li><a href="../#tour">Video</a></li><li><a href="../#features">Features</a></li><li><a href="../#details">Details</a></li><li><a href="../#keys">Hotkeys</a></li><li><a href="../#install">Install</a></li><li><a href="./" aria-current="page">Auto tiling</a></li><li><a href="../gtile-alternative/">vs gTile</a></li></ul>
     <a class="gh" href="https://github.com/carsteneu/greenTile">github.com/carsteneu/greenTile</a>
   </nav>
-
   <header class="hero">
     <div class="hero-top">
       <div>
         <div class="eyebrow">Linux Mint · Cinnamon</div>
-        <h1>Auto tiling on <em>Cinnamon.</em></h1>
-        <p class="lede">Cinnamon can snap a window to half or a quarter of the screen, one window at a time. It does not arrange your windows for you. For that you need an extension, and this page shows how to set one up, without leaving Cinnamon.</p>
+        <h1>Automatic tiling for <em>Cinnamon.</em></h1>
+        <p class="lede">greenTile is a free extension that arranges your windows while you work. Open a window and the others make room. Close one and the space closes with it. You choose the shape, greenTile keeps it.</p>
         <div class="cta">
-          <a class="btn" href="#steps">Show me how</a>
-          <a class="keys" href="#native">What Cinnamon already does</a>
+          <a class="btn" href="https://github.com/carsteneu/greenTile/releases/latest">Download greenTile</a>
+          <a class="keys" href="#walk">See how it works</a>
         </div>
       </div>
       <aside class="answer" aria-labelledby="short">
-        <h2 id="short">The short answer</h2>
-        <p>Install the greenTile extension and switch it on. Then press <kbd>Super</kbd><kbd>Ctrl</kbd><kbd>A</kbd> on a workspace.</p>
-        <p>From then on every window you open, close, minimize or restore on that monitor and workspace is retiled into a grid automatically. Your other workspaces stay as they are until you do the same there.</p>
+        <h2 id="short">In short</h2>
+        <p>Install greenTile, switch it on and press <kbd>Super</kbd><kbd>Ctrl</kbd><kbd>A</kbd> on a workspace.</p>
+        <p>From then on every window you open, close, minimize or restore on that monitor and workspace is tiled for you. Cinnamon on its own snaps one window at a time to a half or a quarter of the screen.</p>
       </aside>
     </div>
     <figure class="demo">
-      <img src="../screenshots/demo.gif" width="1600" height="450" fetchpriority="high" decoding="async" alt="Windows on a wide monitor tile themselves as they open; then one window is dragged onto another and splits it, with a translucent preview of the result">
-      <figcaption>Auto mode on a 32:9 monitor: windows take their place as they open, then a drag splits one of them.</figcaption>
+      <img src="../screenshots/guide/desk-leftmain-gap.webp" width="1600" height="900" fetchpriority="high" decoding="async" alt="Linux Mint desktop in a dark theme with four tiled windows: a file manager on the left, a terminal and an editor stacked in the middle, a system monitor on the right, with a narrow gap between them">
+      <figcaption>greenTile 2.2.4 on Linux Mint 22.3: the preset Left main + stacks with an 8 px gap.</figcaption>
     </figure>
   </header>
 </div>
 
+<section id="walk">
+  <div class="wrap">
+    <h2>Open a window. greenTile makes room.</h2>
+    <div class="prose">
+      <p>Switch on auto mode with <kbd>Super</kbd><kbd>Ctrl</kbd><kbd>A</kbd>. It acts on the monitor of the focused window and on the workspace you are looking at, so a second workspace or a second screen stays as it is until you switch it on there too.</p>
+      <p>Then simply work. A new window joins the end of the layout, and opening, closing, minimizing or restoring a window retiles the monitor after 300 ms. Dialogs are ignored. You do not have to pick a layout first: without one, greenTile puts up to three windows side by side on a monitor narrower than 2100 px and then starts to stack them. A wider monitor takes up to six in one row before it adds rows.</p>
+    </div>
+    <div class="strip">
+      <figure class="shot"><img src="../screenshots/guide/auto-2.webp" width="1200" height="675" loading="lazy" decoding="async" alt="Two windows side by side, each half of the screen"><figcaption>Two windows</figcaption></figure>
+      <figure class="shot"><img src="../screenshots/guide/auto-3.webp" width="1200" height="675" loading="lazy" decoding="async" alt="Three windows in three equal columns"><figcaption>Three, side by side</figcaption></figure>
+      <figure class="shot"><img src="../screenshots/guide/auto-4.webp" width="1200" height="675" loading="lazy" decoding="async" alt="Four windows: two full-height columns and a third column with two stacked windows"><figcaption>Four: the stacking starts</figcaption></figure>
+      <figure class="shot"><img src="../screenshots/guide/auto-6.webp" width="1200" height="675" loading="lazy" decoding="async" alt="Six windows in three columns of two"><figcaption>Six: three columns of two</figcaption></figure>
+    </div>
+    <div class="feat">
+      <div class="prose">
+        <h3>And when only one window is left?</h3>
+        <p>A lone window is centered: about 62 % of the width, the golden ratio, and 90 % of the height. It looks calm on a wide screen and leaves the desktop visible around it.</p>
+        <p>If you prefer it to fill the monitor, or to stay exactly where you put it, choose that under <i>A single window</i> in the settings. A window you maximized yourself, or one that opened in fullscreen, is always left as it is.</p>
+        <p>greenTile also keeps the order of your windows. They are tiled in the order they already have on screen, and on X11 that order survives a Cinnamon restart and unplugging and replugging a monitor.</p>
+      </div>
+      <div class="stack">
+        <figure class="shot"><img src="../screenshots/guide/one-window-centered.webp" width="1600" height="900" loading="lazy" decoding="async" alt="A single editor window centered on the desktop with free space around it"><figcaption>One window, centered.</figcaption></figure>
+        <figure class="shot"><img src="../screenshots/guide/settings-single.webp" width="805" height="508" loading="lazy" decoding="async" alt="greenTile settings with the select A single window open, offering Leave it untouched, Fill the monitor and Center the window"><figcaption>Three choices for a single window.</figcaption></figure>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="presets" class="band">
+  <div class="wrap">
+    <h2>Pick a shape from the preset panel.</h2>
+    <div class="feat flip">
+      <div class="prose">
+        <p><kbd>Super</kbd><kbd>Ctrl</kbd><kbd>P</kbd> opens the presets for the monitor you are on. greenTile ships with sixteen of them, from <i>Two columns</i> to <i>Center main</i>, and every card shows what a click would do with the windows you have open right now.</p>
+        <p>One click assigns the preset to this monitor and workspace and tiles at once. The panel stays open, so you can try a few before you settle. Each monitor and workspace keeps its own choice: three columns on the ultrawide, a main window with stacks on the laptop.</p>
+        <p>At the bottom of the panel you set the <b>gap between windows</b>, from 0 to 48 px in steps of 2. Only the edges where two windows meet move in, the outer edges stay flush with the screen.</p>
+      </div>
+      <figure class="shot"><img src="../screenshots/guide/preset-assigned.webp" width="800" height="752" loading="lazy" decoding="async" alt="The greenTile preset panel in its dark theme: sixteen preset cards with previews, Left main + stacks marked as assigned, Auto on in the title bar and a gap of 8 px"><figcaption>The preset panel. The assigned card carries a green edge and a check.</figcaption></figure>
+    </div>
+    <div class="feat">
+      <div class="prose">
+        <h3>Wide columns, new in 2.2.4</h3>
+        <p>A column can now be wider than its neighbours. Four of the sixteen starters use this: <i>Wide center</i>, <i>Wide center + stacks</i>, <i>Two thirds left</i> and <i>Two thirds right</i>.</p>
+        <p><i>Wide center</i> gives the middle column four of six parts: a file manager or a browser in the middle, a terminal on each side. Some applications insist on a minimum width; such a window simply takes the room it needs.</p>
+      </div>
+      <figure class="shot"><img src="../screenshots/guide/wide-center.webp" width="1600" height="900" loading="lazy" decoding="async" alt="Three tiled windows in the ratio one to four to one: a narrow terminal on the left, a wide file manager in the middle and a narrow terminal on the right"><figcaption>Wide center: 1 : 4 : 1.</figcaption></figure>
+    </div>
+  </div>
+</section>
+
+<section id="editor">
+  <div class="wrap">
+    <h2>Paint your own layout.</h2>
+    <div class="prose">
+      <p>The pencil on a card opens the editor. You paint on a grid of six columns and four rows: click or drag in a column to set how many windows it holds, right-click to remove it. A preset can have several rules by window count, for example two columns from two windows and a main window with stacks from four. Saving a preset that is in use retiles right away.</p>
+      <p>Between two painted columns sits a small handle. Drag it to merge them into one wide column; the handle inside a merged column splits it again. The line below the painter shows the result, for example <code>[1,2,2]</code>: one window in the first column, two in each of the others.</p>
+    </div>
+    <div class="pair">
+      <figure class="shot"><img src="../screenshots/guide/editor-leftmain.webp" width="602" height="435" loading="lazy" decoding="async" alt="The preset editor for Left main + stacks: a painter with one tall column on the left and two columns of two windows, rule from 2 windows"><figcaption>Left main + stacks in the editor.</figcaption></figure>
+      <figure class="shot"><img src="../screenshots/guide/editor-spans.webp" width="602" height="435" loading="lazy" decoding="async" alt="The preset editor for Wide center: a narrow column, a wide merged column and a narrow column, with handles between them"><figcaption>Wide center: the middle column is merged from four.</figcaption></figure>
+    </div>
+  </div>
+</section>
+
+<section id="mouse" class="band">
+  <div class="wrap">
+    <h2>Fine-tune with the mouse.</h2>
+    <div class="prose">
+      <p>Drag the border between two tiled windows and the neighbours follow. greenTile remembers your borders per window count: open a fourth window and it gets its own layout, close it again and your three-window borders come back.</p>
+      <p>Move a window by hand and let go. It lands in the slot under the pointer, and the others make room. Drop it on the outer quarter of another window instead, and it splits that window: it stacks above or below, or opens a new column beside it. A translucent preview shows the result before you release the mouse button.</p>
+    </div>
+    <div class="pair">
+      <figure class="shot"><img src="../screenshots/guide/split-preview.webp" width="1600" height="900" loading="lazy" decoding="async" alt="A terminal window is being dragged over the right part of a file manager; a translucent green area previews a new column there"><figcaption>Dragging a terminal onto the edge of the file manager: the green preview shows the new column.</figcaption></figure>
+      <figure class="shot"><img src="../screenshots/guide/split-done.webp" width="1600" height="900" loading="lazy" decoding="async" alt="After the drop: four columns, file manager, terminal, editor and system monitor"><figcaption>After the drop: four columns.</figcaption></figure>
+    </div>
+  </div>
+</section>
+
+<section id="keys">
+  <div class="wrap">
+    <h2>Or keep your hands on the keyboard.</h2>
+    <div class="feat">
+      <div class="prose">
+        <p>On a workspace with auto mode on, <kbd>Super</kbd>+arrow moves the keyboard focus to the neighbouring window instead of pushing the window to a screen half. A thin border in the state color shows for three seconds where the focus went.</p>
+        <ul class="keylist">
+          <li><span><kbd>Super</kbd><kbd>Ctrl</kbd>+arrow</span>swap the focused window with its neighbour, across monitors too</li>
+          <li><span><kbd>Super</kbd><kbd>Alt</kbd>+arrow</span>make it wider, narrower, taller or shorter</li>
+          <li><span><kbd>Super</kbd><kbd>Ctrl</kbd><kbd>3</kbd> / <kbd>6</kbd></span>three or six equal columns, even without auto mode</li>
+          <li><span><kbd>Super</kbd><kbd>Ctrl</kbd><kbd>D</kbd></span>pause: keeps the preset, stops the tiling</li>
+        </ul>
+        <p>Every one of greenTile's keys can be changed on the Hotkeys page of its settings.</p>
+      </div>
+      <figure class="shot"><img src="../screenshots/guide/focus-border.webp" width="1600" height="900" loading="lazy" decoding="async" alt="Four tiled windows; the file manager on the left is outlined by a thin green border after a focus move"><figcaption>After <kbd>Super</kbd><kbd>←</kbd>: the green border marks the focused window.</figcaption></figure>
+    </div>
+  </div>
+</section>
+
+<section id="float" class="band">
+  <div class="wrap">
+    <h2>Some windows should float.</h2>
+    <div class="feat flip">
+      <div class="prose">
+        <p>Not every window belongs in the grid. Dialogs that belong to another window, and windows that cannot be resized, always float where they open. The same goes for the settings dialogs of Cinnamon's extensions and applets, greenTile's own included.</p>
+        <p>For everything else there is the <b>Never tile</b> list in the settings. A row matches a window class, a title or an app id, and the app picker adds an installed application with one click, flatpaks included. Here the calculator stays out of the layout, and the windows behind it keep their places.</p>
+        <p>To let a single window float just for now, press <kbd>Super</kbd><kbd>G</kbd>. Press it again and the window tiles again.</p>
+      </div>
+      <div class="stack">
+        <figure class="shot"><img src="../screenshots/guide/float-calculator.webp" width="1600" height="900" loading="lazy" decoding="async" alt="Four tiled windows with a calculator floating on top of them in the upper right"><figcaption>The calculator floats, the four windows behind it stay tiled.</figcaption></figure>
+        <figure class="shot"><img src="../screenshots/guide/settings-never-tile.webp" width="805" height="899" loading="lazy" decoding="async" alt="greenTile settings: the Never tile list with the rows Window class xlet-settings.py and App id org.gnome.Calculator.desktop"><figcaption>The Never tile list in the settings.</figcaption></figure>
+      </div>
+    </div>
+  </div>
+</section>
+
 <section id="native">
   <div class="wrap">
     <h2>What Cinnamon does on its own.</h2>
-    <p class="sub">Cinnamon's window manager, Muffin, has tiling built in. It is good at placing a single window quickly. Everything beyond that is up to you.</p>
+    <p class="sub">Cinnamon's window manager, Muffin, has tiling built in. It is good at placing a single window quickly. Everything beyond that is what greenTile adds.</p>
     <div class="versus">
       <div>
         <h3>Built in</h3>
@@ -189,45 +325,7 @@ footer{padding:36px 0 56px;border-top:1px solid var(--rule);display:flex;justify
         </ul>
       </div>
     </div>
-  </div>
-</section>
-
-<section id="steps">
-  <div class="wrap">
-    <h2>How to get windows that tile themselves.</h2>
-    <p class="sub">With greenTile installed and enabled (see <a href="#install">install</a> below), this is the whole setup. Nothing has to be configured first.</p>
-    <ol class="steps">
-      <li>
-        <h3>Turn on auto mode</h3>
-        <p>Press the key on the workspace you want tiled. It acts on the monitor of the focused window, and its windows tile at once. Auto mode is stored per monitor and workspace, so it only affects the one you are on. A single window is left as it is unless you switch on <i>Fill the monitor with a single window</i> in the settings.</p>
-        <div class="k"><kbd>Super</kbd><kbd>Ctrl</kbd><kbd>A</kbd></div>
-      </li>
-      <li>
-        <h3>Open and close windows as usual</h3>
-        <p>New windows join the end of the layout. Opening, closing, minimizing or restoring a window retiles the monitor after 300 ms. Without a preset, a monitor 2100 px wide or wider gets up to six windows in one row, then even rows; a narrower one gets up to three in a row, then three columns with stacks.</p>
-      </li>
-      <li>
-        <h3>Pick a layout if you want a different shape</h3>
-        <p>The preset panel offers twelve editable starters, from <i>Two columns</i> to <i>Center main</i>, each with a live preview of what a click would do right now. Click one to assign it to this monitor and workspace, or paint your own on a 6 × 4 grid.</p>
-        <div class="k"><kbd>Super</kbd><kbd>Ctrl</kbd><kbd>P</kbd></div>
-      </li>
-      <li>
-        <h3>Adjust by hand</h3>
-        <p>Drag a border and the neighbours follow; borders are remembered per window count. Drop a window on the outer edge of another to split it; drop it in the middle and it takes that slot while its neighbours make room. Swap with the keyboard, and set a gap of 0 to 48 px in the preset panel.</p>
-        <div class="k"><kbd>Super</kbd><kbd>Alt</kbd>+arrow · <kbd>Super</kbd><kbd>Ctrl</kbd>+arrow</div>
-      </li>
-      <li>
-        <h3>Keep some windows out</h3>
-        <p>Let one window float with a key, press again to tile it again. Apps that should never tile go on a list in the settings, matched by window class, title or app id; an app picker fills in installed applications, flatpaks included.</p>
-        <div class="k"><kbd>Super</kbd><kbd>G</kbd></div>
-      </li>
-      <li>
-        <h3>Pause it again</h3>
-        <p>Auto mode off keeps the assigned preset but stops automatic tiling on this monitor and workspace. Turning it back on, or clicking a preset, resumes.</p>
-        <div class="k"><kbd>Super</kbd><kbd>Ctrl</kbd><kbd>D</kbd></div>
-      </li>
-    </ol>
-    <p class="note"><b>One change to Cinnamon's own keys:</b> on a monitor and workspace with auto mode on, <kbd>Super</kbd>+arrow moves the keyboard focus to the neighbouring tiled window instead of pushing the window to a half. Everywhere else, and for windows greenTile does not manage, the native edge tiling stays as it was. <kbd>Super</kbd>+arrow itself is Cinnamon's key and is changed in Cinnamon's keyboard settings; all of greenTile's own keys can be changed on the Hotkeys page of its settings.</p>
+    <p class="note"><b>One change to Cinnamon's own keys:</b> on a monitor and workspace with auto mode on, <kbd>Super</kbd>+arrow moves the focus instead of pushing the window to a half. Everywhere else, and for windows greenTile does not manage, the native edge tiling stays as it was.</p>
   </div>
 </section>
 
@@ -235,13 +333,13 @@ footer{padding:36px 0 56px;border-top:1px solid var(--rule);display:flex;justify
   <div class="wrap install">
     <div>
       <h2>Install greenTile.</h2>
-      <p class="sub">Requires Cinnamon 6.0.4 or newer. Tested on Linux Mint 21.3 to 22.3 (Cinnamon 6.0.4 to 6.6) with X11. Free software under the GPL v3.</p>
+      <p class="sub">Requires Cinnamon 6.0.4 or newer. Tested on Linux Mint 21.3 to 22.3 (Cinnamon 6.0.4 to 6.6) with X11; on Wayland the first tests work. Free software under the GPL v3.</p>
       <h3>From Cinnamon's Extensions manager</h3>
       <p>Not yet. greenTile is not listed in the Cinnamon Spices catalogue so far, so it does not show up under Extensions → Download. Until it is, use the release zip.</p>
       <h3>With the installer script</h3>
       <p>Download the zip from the latest release, unpack it and run <code>install.sh</code>. It copies the extension to <code>~/.local/share/cinnamon/extensions/greenTile@carsteneu/</code> and compiles the translations. It needs <code>flock</code> from util-linux; without <code>msgfmt</code> from gettext the interface stays in English. Then restart Cinnamon and enable greenTile in System Settings → Extensions.</p>
       <h3>Updating</h3>
-      <p>Run <code>./update.sh</code> from the unpacked zip: it fetches the latest release and installs it. A running Cinnamon keeps the code it loaded at startup, so restart Cinnamon (X11) or log out and back in (Wayland) afterwards.</p>
+      <p>Run <code>./update.sh</code> from the unpacked zip: it fetches the latest release and installs it. Settings and presets are kept. A running Cinnamon keeps the code it loaded at startup, so restart Cinnamon (X11) or log out and back in (Wayland) afterwards.</p>
       <p>Building from a checkout is described in the <a href="https://github.com/carsteneu/greenTile#development">README</a>. If gTile is installed, disable it first: both use <kbd>Super</kbd><kbd>G</kbd>.</p>
       <div class="next tight"><a class="btn" href="https://github.com/carsteneu/greenTile/releases/latest">Download the latest release</a></div>
     </div>
