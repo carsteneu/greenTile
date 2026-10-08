@@ -264,10 +264,6 @@ const createCinnamonEnv = (options) => {
         popModal() {},
         uiGroup: env.uiGroup,
         getTabList: () => env.tabList,
-        // the shell's workspace-switch effect runs only with animations on and no
-        // modal pushed (windowManager.js _switchWorkspace); the auto observer reads both
-        animations_enabled: true,
-        modalCount: 0,
         // usableArea (lib/tiling/screen.js) iterates this to subtract the
         // surrounding panels' insets — the fake keeps it empty like the old
         // silent stub did
@@ -275,9 +271,6 @@ const createCinnamonEnv = (options) => {
             getPanelsInMonitor: () => [],
         },
     };
-    // the live imports.ui.main members, for tests that flip a shell state
-    // (animations_enabled, modalCount) — the namespace proxy itself is read-only
-    env.mainBranch = mainBranch;
     env.ui = strictNs('imports.ui', {
         settings: {
             BindingDirection: { IN: 'in' },
@@ -371,10 +364,6 @@ const createCinnamonEnv = (options) => {
                 {return (...a) => env.logErrors.push(a.map(String).join(' '));}
             if (p === 'get_current_time')
                 {return () => 0;}
-            // the window actors (global.get_window_actors): empty unless a test
-            // installs its own list in env.windowActors
-            if (p === 'get_window_actors')
-                {return () => (typeof env.windowActors === 'function' ? env.windowActors() : (env.windowActors || []));}
             if (p === 'get_pointer')
                 {return () => env.pointer;}
             if (p === 'set_cursor' || p === 'unset_cursor')

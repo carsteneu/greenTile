@@ -6,7 +6,7 @@
  * @typedef {Object} FocusDeps
  * @property {AnyRecord} meta imports.gi.Meta
  * @property {AnyRecord} [keybindingManager] imports.ui.main.keybindingManager — absent on the 6.6 fake surface
- * @property {(app: AppFacade, dir: 'left' | 'right' | 'up' | 'down') => (display: AnyRecord, win: CinnamonWindow) => void} hotkey the handler factory: focusHotkey from lib/tiling/focus-nav.js, wrapped by the App so a press inside a workspace-switch effect waits behind the held retiles (app.auto.afterSwitchPress); the names of FOCUS_BINDING_NAMES end in exactly these directions
+ * @property {(app: AppFacade, dir: 'left' | 'right' | 'up' | 'down') => (display: AnyRecord, win: CinnamonWindow) => void} hotkey focusHotkey from lib/tiling/focus-nav.js; the names of FOCUS_BINDING_NAMES end in exactly these directions
  * @property {(message: string) => void} [logError] registration failures
  */
 /**
@@ -113,7 +113,7 @@ export type FocusDeps = {
      */
     keybindingManager?: AnyRecord;
     /**
-     * the handler factory: focusHotkey from lib/tiling/focus-nav.js, wrapped by the App so a press inside a workspace-switch effect waits behind the held retiles (app.auto.afterSwitchPress); the names of FOCUS_BINDING_NAMES end in exactly these directions
+     * focusHotkey from lib/tiling/focus-nav.js; the names of FOCUS_BINDING_NAMES end in exactly these directions
      */
     hotkey: (app: AppFacade, dir: "left" | "right" | "up" | "down") => (display: AnyRecord, win: CinnamonWindow) => void;
     /**

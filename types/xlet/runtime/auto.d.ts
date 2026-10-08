@@ -8,7 +8,6 @@
  * @property {AnyRecord} global the Cinnamon global object
  * @property {AnyRecord} signalManager fresh, this scope alone
  * @property {AnyRecord} gobject imports.gi.GObject
- * @property {AnyRecord} glib imports.gi.GLib (monotonic clock of the switch hold and its total bound)
  * @property {() => CinnamonWindow | null} focusWindow
  * @property {() => number} focusMonitorIndex
  * @property {(app: AppFacade, monitorIndex: number, wsIndex: number) => { auto: boolean }} layoutFor
@@ -40,74 +39,6 @@ export const Auto: {
         _workspaceSignals: Array<[AnyRecord, number, number]>;
         /** @type {Array<[CinnamonWindow, number, number, number]>} */
         _tracked: Array<[CinnamonWindow, number, number, number]>;
-        _switchTimer: number;
-        /** @type {Map<string, {fn: (opts: AnyRecord) => void, opts: AnyRecord}>} */
-        _afterSwitch: Map<string, {
-            fn: (opts: AnyRecord) => void;
-            opts: AnyRecord;
-        }>;
-        _holdSince: number;
-        _holdGen: number;
-        _pressSeq: number;
-        _pressDropLogged: boolean;
-        /**
-         * The current hold's number (it grows with every hold that opens).
-         * @returns {number}
-         */
-        holdGeneration(): number;
-        /**
-         * Whether the shell's workspace-switch effect may still own the window actors
-         * (see SWITCH_POLL_MS): a frame moved now would be drawn at its old place.
-         * @returns {boolean}
-         */
-        switching(): boolean;
-        /**
-         * Runs `fn(opts)` now, or — while the switch effect runs — once it ended. One held
-         * run per key: a newer request for the same key replaces the older one and moves
-         * to the end, so the held runs replay in the order of their newest request (the
-         * settle fan-out relies on the active surface being placed last). Options of the
-         * replaced request survive where the newer one leaves them empty: an option the
-         * newer request sets to null, undefined or false takes the older value, so a
-         * settle or an explicit arrangement is never lost to a plain retile.
-         * @param {string} key the surface (monitor and workspace)
-         * @param {(opts: AnyRecord) => void} fn
-         * @param {AnyRecord} [opts]
-         */
-        afterSwitch(key: string, fn: (opts: AnyRecord) => void, opts?: AnyRecord): void;
-        /**
-         * A key press that reads or moves tiled geometry: run now, or — inside the switch
-         * effect — queued behind every held retile, in press order. The surfaces it reads
-         * are only settled once the held retiles ran; a press answered from the frames
-         * before that lands one cell off, or arranges against a placement record of the
-         * wrong count. At most SWITCH_PRESS_CAP presses wait per hold; a flood beyond that
-         * is dropped (one log line per hold).
-         * @param {() => void} fn
-         */
-        afterSwitchPress(fn: () => void): void;
-        /** @returns {boolean} */
-        _effectRunning(): boolean;
-        _monotonicMs(): number;
-        _noteSwitch(): void;
-        /**
-         * Opens (or restarts) the hold: the first look after `ms`.
-         * @param {number} ms
-         */
-        _openHold(ms: number): void;
-        /**
-         * @param {number} ms the wait before the next look
-         * @param {number} elapsed the time the hold has lasted once that wait is over
-         */
-        _armSwitchEnd(ms: number, elapsed: number): void;
-        /**
-         * Puts runs of a finished hold behind the ones a new hold collected meanwhile. A
-         * key held in both keeps the NEWER run and its options win; the older options fill
-         * in what it leaves empty (the afterSwitch merge rule, applied in time order).
-         * @param {Array<[string, {fn: (opts: AnyRecord) => void, opts: AnyRecord}]>} rest
-         */
-        _rehold(rest: Array<[string, {
-            fn: (opts: AnyRecord) => void;
-            opts: AnyRecord;
-        }]>): void;
         /**
          * @param {AppFacade} app
          * @param {number} monitorIndex
@@ -346,10 +277,6 @@ export type AutoDeps = {
      * imports.gi.GObject
      */
     gobject: AnyRecord;
-    /**
-     * imports.gi.GLib (monotonic clock of the switch hold and its total bound)
-     */
-    glib: AnyRecord;
     focusWindow: () => CinnamonWindow | null;
     focusMonitorIndex: () => number;
     layoutFor: (app: AppFacade, monitorIndex: number, wsIndex: number) => {
