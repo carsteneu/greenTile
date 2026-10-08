@@ -638,3 +638,118 @@ test('an explicit arrangement kept from an older request is dropped when the win
     assert.deepEqual(frames([f.c, f.d, e]).sort(), ['0,0,1707,1440', '1707,0,1706,1440', '3413,0,1707,1440'].sort(),
         'the three windows share the surface instead of two fitted into an old two-column arrangement');
 });
+
+// ---- the remaining held paths and the bounds of the hold ----
+
+const openHold = (f) => f.env.windowManager.emit('switch-workspace', f.env.windowManager, 2, 1, LEFT);
+
+test('focus navigation inside the effect waits for the held retiles; a press whose window lost the focus is dropped', () => {
+    const f = setup();
+    f.env.activeWorkspace = f.ws12;
+    f.app.ops.retileMonitor(f.app, 0, null, false, 0);
+    openHold(f);
+    f.env.display.focus_window = f.b;
+    f.env.customBindings.get('push-tile-left')(f.env.display, f.b);
+    assert.equal(f.env.display.focus_window, f.b, 'nothing moved the focus inside the effect');
+    f.finishSwitch();
+    advance(f.env);
+    assert.equal(f.env.display.focus_window, f.a, 'after the hold the press moved the focus to the left neighbour');
+
+    openHold(f);
+    f.env.display.focus_window = f.b;
+    f.env.customBindings.get('push-tile-left')(f.env.display, f.b);
+    f.env.display.focus_window = f.c; // the user clicked another window meanwhile
+    f.finishSwitch();
+    advance(f.env);
+    assert.equal(f.env.display.focus_window, f.c, 'the stale press did not take the focus back');
+});
+
+test('the settle fan-out inside a hold places today\'s active surface even if the user switched on meanwhile', () => {
+    const f = setup();
+    f.env.activeWorkspace = f.ws12;
+    // Muffin left the ws12 windows somewhere (a restart, a monitor change)
+    f.a.rect = [100, 100, 500, 500];
+    f.b.rect = [700, 100, 500, 500];
+    openHold(f);
+    f.app.auto.settleAll(f.app);
+    f.env.activeWorkspace = f.ws14; // the user switched on before the hold ended
+    f.finishSwitch();
+    advance(f.env);
+    assert.deepEqual(frames([f.a, f.b]), ['0,0,2560,1440', '2560,0,2560,1440'],
+        'ws12, the active workspace at the settle, was placed although ws14 is active at the replay');
+});
+
+test('a drop that lands inside the effect is placed after it, and a closed window turns it into a plain retile', () => {
+    for (const closeOne of [false, true]) {
+        const f = setup();
+        f.env.activeWorkspace = f.ws12;
+        f.app.ops.retileMonitor(f.app, 0, null, false, 0);
+        const before = frames([f.a, f.b]);
+        f.app.drop.begin(f.app, f.b, f.env.gi.Meta.GrabOp.MOVING);
+        f.b.rect = [0, 0, 400, 1440];
+        openHold(f);
+        f.env.pointer = [50, 700];
+        assert.equal(f.app.drop.end(f.app, f.b, f.env.gi.Meta.GrabOp.MOVING), true, 'the drop applied');
+        assert.deepEqual(frames([f.a]), [before[0]], 'no frame of the surface moved inside the effect');
+        if (closeOne) {
+            f.a.get_compositor_private = () => null; // closed during the hold
+            f.all.splice(f.all.indexOf(f.a), 1);
+        }
+        f.finishSwitch();
+        // checked right when the hold ends: the auto observer's own 300 ms retile
+        // would re-place the surface anyway and hide what the held drop did
+        fire(f.env, 250);
+        if (closeOne) {
+            assert.deepEqual(f.b.rect, [978, 72, 3164, 1296], 'the remaining window was retiled alone (centred)');
+            assert.deepEqual(f.a.rect, before[0].split(',').map(Number), 'the closed window was not placed');
+        }
+        else {
+            assert.notDeepEqual(f.b.rect, [0, 0, 400, 1440], 'the dropped window was placed after the hold');
+            assert.ok(f.b.rect[1] <= f.a.rect[1] && f.b.rect[0] <= f.a.rect[0], 'the dropped window took the first cell');
+        }
+        advance(f.env);
+        assert.deepEqual(desynced(f.all), []);
+    }
+});
+
+test('a chain of switches does not extend the hold past three seconds', () => {
+    const f = setup();
+    let now = 0;
+    f.env.gi.GLib.get_monotonic_time = () => now * 1000;
+    openHold(f);
+    const first = f.env.liveTimers().find((t) => t.ms === 250).id;
+    now = 3100;
+    openHold(f);
+    assert.equal(f.env.liveTimers().find((t) => t.ms === 250).id, first, 'the running look was not restarted');
+    f.finishSwitch();
+});
+
+test('at most 32 presses wait in one hold', () => {
+    const f = setup();
+    openHold(f);
+    let ran = 0;
+    for (let i = 0; i < 40; i++) {
+        f.app.auto.afterSwitchPress(() => {
+            ran += 1;
+        });
+    }
+    assert.equal(f.env.logs.filter((l) => /dropping the rest/.test(l)).length, 1, 'the flood was reported once');
+    f.finishSwitch();
+    advance(f.env);
+    assert.equal(ran, 32);
+});
+
+test('only the time an override spent inside the hold is added to it', () => {
+    const f = setup();
+    let now = 1000;
+    f.env.gi.GLib.get_monotonic_time = () => now * 1000;
+    f.app.auto.sortOverride(77, [0, 0, 1, 1], 500); // set 500 ms before the hold
+    openHold(f);
+    now = 1200;
+    f.app.auto.sortOverride(78, [0, 0, 1, 1], 1200); // set inside the hold
+    now = 1900;
+    f.finishSwitch();
+    advance(f.env);
+    assert.equal(f.app.auto._overrides.get(77).at, 1400, 'the old override gained exactly the 900 ms of the hold');
+    assert.equal(f.app.auto._overrides.get(78).at, 1900, 'the new one gained its own 700 ms, never more than now');
+});

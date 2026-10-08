@@ -8,6 +8,7 @@
  * @property {AnyRecord} global the Cinnamon global object
  * @property {AnyRecord} signalManager fresh, this scope alone
  * @property {AnyRecord} gobject imports.gi.GObject
+ * @property {AnyRecord} [glib] imports.gi.GLib (monotonic clock of the switch hold; absent reads as 0)
  * @property {() => CinnamonWindow | null} focusWindow
  * @property {() => number} focusMonitorIndex
  * @property {(app: AppFacade, monitorIndex: number, wsIndex: number) => { auto: boolean }} layoutFor
@@ -47,6 +48,7 @@ export const Auto: {
         }>;
         _holdSince: number;
         _pressSeq: number;
+        _pressDropLogged: boolean;
         /**
          * Whether the shell's workspace-switch effect may still own the window actors
          * (see SWITCH_EFFECT_MS): a frame moved now would be drawn at its old place.
@@ -71,7 +73,8 @@ export const Auto: {
          * effect — queued behind every held retile, in press order. The surfaces it reads
          * are only settled once the held retiles ran; a press answered from the frames
          * before that lands one cell off, or arranges against a placement record of the
-         * wrong count.
+         * wrong count. At most SWITCH_PRESS_CAP presses wait per hold; a flood beyond that
+         * is dropped (one log line per hold).
          * @param {() => void} fn
          */
         afterSwitchPress(fn: () => void): void;
@@ -337,6 +340,10 @@ export type AutoDeps = {
      * imports.gi.GObject
      */
     gobject: AnyRecord;
+    /**
+     * imports.gi.GLib (monotonic clock of the switch hold; absent reads as 0)
+     */
+    glib?: AnyRecord;
     focusWindow: () => CinnamonWindow | null;
     focusMonitorIndex: () => number;
     layoutFor: (app: AppFacade, monitorIndex: number, wsIndex: number) => {
