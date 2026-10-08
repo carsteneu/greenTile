@@ -189,7 +189,7 @@ const setup = () => {
     app.ops.layoutSet(app, 0, 0, { auto: true });
     app.ops.layoutSet(app, 0, 1, { auto: true, preset: 'p2' });
     app.ops.layoutSet(app, 0, 2, { auto: true });
-    return { env, app, all, finishSwitch, a, b, c, d, lone, ws12, ws13, ws14 };
+    return { env, ext, app, all, finishSwitch, a, b, c, d, lone, ws12, ws13, ws14 };
 };
 
 // Lets the main loop run: every pending timer up to `limit` ms fires, shortest delay
@@ -258,4 +258,75 @@ test('a round trip of the centred lone window ws14 -> ws12 -> ws14 leaves no sta
     assert.deepEqual(desynced(f.all), [], 'an actor kept a position from before a push');
     const a = f.lone.get_compositor_private();
     assert.ok(a.x + a.width <= WIDE.width + EXT[2], 'the lone window is drawn inside the monitor');
+});
+
+const frames = (wins) => wins.map((w) => w.rect.join(','));
+const heldLines = (env) => env.logs.filter((l) => l.indexOf('greenTile retile after workspace switch') === 0);
+
+test('the push moves no frame while the switch effect runs; both surfaces are placed after it', () => {
+    const f = setup();
+    f.env.activeWorkspace = f.ws13;
+    f.app.ops.retileMonitor(f.app, 0, f.c, true, 1);
+    const before = frames(f.all);
+    f.env.display.focus_window = f.c;
+    f.env.keybindingManager.hotkeys.get('greenTile-swap-left').cb();
+    assert.equal(f.c.get_workspace(), f.ws12, 'the window changed workspace at once');
+    assert.equal(f.env.activeWorkspace, f.ws12, 'and the view followed');
+    assert.deepEqual(frames(f.all), before, 'no frame moved while the effect owns the actors');
+    f.finishSwitch();
+    advance(f.env);
+    assert.deepEqual(heldLines(f.env), ['greenTile retile after workspace switch n=2'],
+        'target and source were placed once, after the effect');
+    assert.deepEqual(f.c.rect, [3413, 0, 1707, 1440], 'the pushed window took the edge slot it came in through');
+    assert.deepEqual(frames([f.a, f.b]), ['0,0,1707,1440', '1707,0,1706,1440'], 'the residents moved over');
+    assert.deepEqual(f.d.rect, [978, 72, 3164, 1296], 'ws13 kept one window, centred');
+    assert.deepEqual(desynced(f.all), []);
+});
+
+test('a press during the effect is held too, and the surface ends in sync and without overlap', () => {
+    const f = setup();
+    f.env.activeWorkspace = f.ws13;
+    f.app.ops.retileMonitor(f.app, 0, f.c, true, 1);
+    f.env.display.focus_window = f.c;
+    f.env.keybindingManager.hotkeys.get('greenTile-swap-left').cb();
+    // the user presses again before the effect ended: a local swap on the new workspace
+    f.env.display.focus_window = f.c;
+    f.env.keybindingManager.hotkeys.get('greenTile-swap-left').cb();
+    assert.equal(f.c.get_workspace(), f.ws12, 'the second press was a local swap, no further push');
+    f.finishSwitch();
+    advance(f.env);
+    const ws12 = [f.a, f.b, f.c];
+    for (let i = 0; i < ws12.length; i++) {
+        for (let j = i + 1; j < ws12.length; j++) {
+            const p = ws12[i].rect;
+            const q = ws12[j].rect;
+            assert.ok(Math.min(p[0] + p[2], q[0] + q[2]) <= Math.max(p[0], q[0]), 'frames overlap');
+        }
+    }
+    assert.deepEqual(desynced(f.all), []);
+});
+
+test('a second switch inside the effect extends the hold to the last effect', () => {
+    const f = setup();
+    f.env.windowManager.emit('switch-workspace', f.env.windowManager, 2, 1, LEFT);
+    f.env.windowManager.emit('switch-workspace', f.env.windowManager, 1, 0, LEFT);
+    assert.equal(f.env.liveTimers().filter((t) => t.ms === 250).length, 1, 'one effect window, not two');
+    assert.equal(f.app.auto.switching(), true);
+    fire(f.env, 250);
+    assert.equal(f.app.auto.switching(), false, 'the window closed with the last effect');
+    f.finishSwitch();
+});
+
+test('disable while a retile is held leaves no timer and places nothing afterwards', () => {
+    const f = setup();
+    f.env.activeWorkspace = f.ws13;
+    f.app.ops.retileMonitor(f.app, 0, f.c, true, 1);
+    const before = frames(f.all);
+    f.env.display.focus_window = f.c;
+    f.env.keybindingManager.hotkeys.get('greenTile-swap-left').cb();
+    assert.ok(f.env.liveTimers().some((t) => t.ms === 250), 'the effect window is open');
+    f.ext.disable();
+    assert.deepEqual(f.env.liveTimers(), [], 'no timer survives disable');
+    f.finishSwitch();
+    assert.deepEqual(frames(f.all), before, 'the held retile died with the App, nothing was placed');
 });
