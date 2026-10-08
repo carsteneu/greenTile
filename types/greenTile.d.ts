@@ -306,8 +306,10 @@ type AutoFacade = {
     sortPoll(now: number): void;
     /** whether the shell's workspace-switch effect still owns the window actors */
     switching(): boolean;
-    /** runs fn now, or once the switch effect ended (one held run per key, newest wins, settle OR-merged) */
-    afterSwitch(key: string, fn: (settle: boolean) => void, settle?: boolean): void;
+    /** runs fn now, or once the switch effect ended (one held run per key, newest wins, empty options keep the older value) */
+    afterSwitch(key: string, fn: (opts: AnyRecord) => void, opts?: AnyRecord): void;
+    /** a geometry hotkey press: run now, or queued behind the held retiles in press order */
+    afterSwitchPress(fn: () => void): void;
     destroy(): void;
 };
 

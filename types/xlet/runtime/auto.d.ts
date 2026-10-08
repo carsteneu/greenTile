@@ -40,11 +40,13 @@ export const Auto: {
         /** @type {Array<[CinnamonWindow, number, number, number]>} */
         _tracked: Array<[CinnamonWindow, number, number, number]>;
         _switchTimer: number;
-        /** @type {Map<string, {fn: (settle: boolean) => void, settle: boolean}>} */
+        /** @type {Map<string, {fn: (opts: AnyRecord) => void, opts: AnyRecord}>} */
         _afterSwitch: Map<string, {
-            fn: (settle: boolean) => void;
-            settle: boolean;
+            fn: (opts: AnyRecord) => void;
+            opts: AnyRecord;
         }>;
+        _holdSince: number;
+        _pressSeq: number;
         /**
          * Whether the shell's workspace-switch effect may still own the window actors
          * (see SWITCH_EFFECT_MS): a frame moved now would be drawn at its old place.
@@ -52,18 +54,35 @@ export const Auto: {
          */
         switching(): boolean;
         /**
-         * Runs `fn` now, or — while the switch effect runs — once it ended. One held run
-         * per key: a newer request for the same surface replaces the older one and moves
+         * Runs `fn(opts)` now, or — while the switch effect runs — once it ended. One held
+         * run per key: a newer request for the same key replaces the older one and moves
          * to the end, so the held runs replay in the order of their newest request (the
-         * settle fan-out relies on the active surface being placed last). A replaced
-         * settle request is not lost: the run gets settle = true if any request had it.
+         * settle fan-out relies on the active surface being placed last). Options of the
+         * replaced request survive where the newer one leaves them empty: an option the
+         * newer request sets to null, undefined or false takes the older value, so a
+         * settle or an explicit arrangement is never lost to a plain retile.
          * @param {string} key the surface (monitor and workspace)
-         * @param {(settle: boolean) => void} fn
-         * @param {boolean} [settle]
+         * @param {(opts: AnyRecord) => void} fn
+         * @param {AnyRecord} [opts]
          */
-        afterSwitch(key: string, fn: (settle: boolean) => void, settle?: boolean): void;
+        afterSwitch(key: string, fn: (opts: AnyRecord) => void, opts?: AnyRecord): void;
+        /**
+         * A key press that reads or moves tiled geometry: run now, or — inside the switch
+         * effect — queued behind every held retile, in press order. The surfaces it reads
+         * are only settled once the held retiles ran; a press answered from the frames
+         * before that lands one cell off, or arranges against a placement record of the
+         * wrong count.
+         * @param {() => void} fn
+         */
+        afterSwitchPress(fn: () => void): void;
         _effectRunning(): any;
+        _monotonicMs(): number;
         _noteSwitch(): void;
+        /**
+         * Opens (or restarts) the hold: the first look after `ms`.
+         * @param {number} ms
+         */
+        _openHold(ms: number): void;
         /**
          * @param {number} ms the wait before the next look
          * @param {number} elapsed the time the hold has lasted once that wait is over

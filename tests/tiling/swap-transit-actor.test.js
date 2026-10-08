@@ -382,15 +382,15 @@ test('held runs replay in the order of their newest request, a replaced settle s
     const f = setup();
     f.env.windowManager.emit('switch-workspace', f.env.windowManager, 2, 1, LEFT);
     const order = [];
-    f.app.auto.afterSwitch('active', (s) => order.push('active-old ' + s));
-    f.app.auto.afterSwitch('background', (s) => order.push('background ' + s), true);
-    f.app.auto.afterSwitch('active', (s) => order.push('active-new ' + s));
-    f.app.auto.afterSwitch('background', (s) => order.push('background-user ' + s));
+    f.app.auto.afterSwitch('active', (o) => order.push('active-old ' + o.settle));
+    f.app.auto.afterSwitch('background', (o) => order.push('background ' + o.settle + ' ' + o.layout), { settle: true, layout: 'L' });
+    f.app.auto.afterSwitch('active', (o) => order.push('active-new ' + o.settle), { settle: false });
+    f.app.auto.afterSwitch('background', (o) => order.push('background-user ' + o.settle + ' ' + o.layout), { settle: false, layout: null });
     assert.deepEqual(order, [], 'nothing ran inside the effect');
     f.finishSwitch();
     fire(f.env, 250);
-    assert.deepEqual(order, ['active-new false', 'background-user true'],
-        'a replaced run moves to the end, the old one is gone, its settle is kept');
+    assert.deepEqual(order, ['active-new false', 'background-user true L'],
+        'a replaced run moves to the end, the old one is gone, its settle and layout are kept');
 });
 
 for (const [label, patch] of [['animations are off', { animations_enabled: false }], ['a modal is pushed', { modalCount: 1 }]]) {
@@ -409,6 +409,64 @@ for (const [label, patch] of [['animations are off', { animations_enabled: false
         f.finishSwitch();
     });
 }
+
+test('a second press inside the effect acts on the settled surface, not on the frames before it', () => {
+    const f = setup();
+    // ws12 and ws13 carry their placements, so a stale read has a record to go wrong on
+    f.app.ops.retileMonitor(f.app, 0, null, false, 0);
+    f.app.ops.retileMonitor(f.app, 0, null, false, 1);
+    f.env.display.focus_window = f.lone;
+    f.env.keybindingManager.hotkeys.get('greenTile-swap-left').cb(); // push ws14 -> ws13
+    assert.equal(f.lone.get_workspace(), f.ws13);
+    f.env.display.focus_window = f.lone;
+    f.env.keybindingManager.hotkeys.get('greenTile-swap-left').cb(); // pressed again at once
+    f.finishSwitch();
+    advance(f.env);
+    assert.equal(f.lone.get_workspace(), f.ws13, 'the second press was a local swap');
+    assert.deepEqual(f.lone.rect, [1707, 0, 1706, 1440], 'it swapped from the edge slot into the middle cell');
+    assert.deepEqual(desynced(f.all), []);
+});
+
+test('an origX left behind by a cancelled effect does not hold the next switch', () => {
+    const f = setup();
+    f.env.windowManager.emit('switch-workspace', f.env.windowManager, 2, 1, LEFT);
+    f.finishSwitch();
+    f.a.get_compositor_private().origX = 7; // another shell effect cancelled the ease
+    fire(f.env, 250);
+    assert.equal(f.app.auto.switching(), false, 'no running ease: the hold ended at the first look');
+});
+
+test('a long hold does not let the swap landing override expire', () => {
+    const f = setup();
+    let now = 0;
+    f.env.gi.GLib.get_monotonic_time = () => now * 1000;
+    f.env.activeWorkspace = f.ws13;
+    f.app.ops.retileMonitor(f.app, 0, f.c, true, 1);
+    f.env.display.focus_window = f.d;
+    f.env.keybindingManager.hotkeys.get('greenTile-swap-right').cb(); // push d ws13 -> ws14 (left slot)
+    assert.equal(f.d.get_workspace(), f.ws14);
+    now = 2500; // the main loop stalled: the override's 2 s freshness window has passed
+    f.finishSwitch();
+    advance(f.env);
+    assert.deepEqual(f.d.rect, [0, 0, 2560, 1440], 'the pushed window took the edge slot it came in through');
+});
+
+test('an App created while a switch effect still runs holds from the start', () => {
+    const f = setup();
+    f.ext.disable();
+    const a = f.a.get_compositor_private();
+    a.origX = a.x;
+    a.foreignTransition('x', a.x + 100);
+    f.ext.enable();
+    f.env.flushDisplayConfigNoReply();
+    const app = f.ext.currentSession().app;
+    assert.equal(app.auto.switching(), true, 'the new App holds');
+    a.removeAllTransitions();
+    a.origX = undefined;
+    fire(f.env, 20);
+    assert.equal(app.auto.switching(), false, 'and lets go once the effect ended');
+    f.ext.disable();
+});
 
 test('a focus window finalized during the hold does not drop the surface placement', () => {
     const f = setup();
