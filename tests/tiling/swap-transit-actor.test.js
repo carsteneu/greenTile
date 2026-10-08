@@ -749,6 +749,27 @@ test('a focus chain from an earlier hold does not carry a press over a click in 
     assert.notEqual(f.env.display.focus_window, x0);
 });
 
+test('a focus press re-held behind a replayed push still continues the chain of the press before it', () => {
+    const f = setup();
+    f.env.activeWorkspace = f.ws12;
+    f.c.get_workspace = () => f.ws12;
+    f.app.ops.retileMonitor(f.app, 0, null, false, 0);
+    const [x0, , x2] = [f.a, f.b, f.c].sort((p, q) => p.rect[0] - q.rect[0]);
+    openHold(f);
+    f.env.display.focus_window = x2;
+    // a held run that switches again (a held push), then the first focus press
+    f.app.auto.afterSwitch('push', () => f.env.windowManager.emit('switch-workspace', f.env.windowManager, 1, 0, LEFT));
+    f.env.customBindings.get('push-tile-left')(f.env.display, x2);
+    f.finishSwitch();
+    fire(f.env, 250); // the push replays and opens a new hold; the press is re-held into it
+    assert.equal(f.app.auto.switching(), true);
+    // the second press arrives during the new hold (Muffin still hands x2)
+    f.env.customBindings.get('push-tile-left')(f.env.display, x2);
+    f.finishSwitch();
+    advance(f.env);
+    assert.equal(f.env.display.focus_window, x0, 'both presses moved the focus, two cells');
+});
+
 test('two focus presses inside one effect move two cells, as without the hold', () => {
     const f = setup();
     f.env.activeWorkspace = f.ws13;
