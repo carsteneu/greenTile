@@ -21,15 +21,23 @@ const { Theme } = load('./lib/runtime/theme');
 const CACHE_DIR = '/home/fake/.cache';
 const ACCENT_DEFAULT = [255, 150, 64];
 
-// A delayed fake Gio: mkdir is the one synchronous GLib call; the bytes write
-// and the teardown delete are queued and completed by env.flush()/env.flushLast().
-// Every async dispatch records the Cancellable it was handed (always null here).
+// A delayed fake Gio: the directory creation, its mode, the bytes write and the
+// teardown delete are all queued and completed by env.flush()/env.flushLast().
+// Nothing synchronous is left to call — the runtime has no synchronous file API any
+// more — and the mode is applied through a separate set_attributes_async, because
+// make_directory_async takes no mode. Every async dispatch records the Cancellable
+// it was handed (always null here).
 const makeEnv = () => {
     const env = {
         ops: [],
         dispatched: [],
         writes: [],
+        // successful creations and the mode applications, plus every mkdir ATTEMPT
+        // (a failed attempt is not remembered as success, so it is retried)
         mkdirs: [],
+        mkdirAttempts: [],
+        modes: [],
+        dirs: new Set(),
         deletes: [],
         loads: [],
         unloads: [],
@@ -40,6 +48,7 @@ const makeEnv = () => {
           failWrite: false,
           failBytes: false,
           failMkdir: false,
+          failSetAttr: false,
         gen: 100,
         // St.Theme.load_stylesheet returns a boolean; a test flips loadOk to false
         // to drive a failed load (native: missing file -> false, no throw)
@@ -48,6 +57,27 @@ const makeEnv = () => {
 
     const makeFile = (p) => ({
         get_path: () => p,
+        make_directory_async(_priority, cancellable, cb) {
+            env.dispatched.push({ type: 'mkdir', cancellable });
+            env.mkdirAttempts.push({ path: p });
+            env.ops.push({ type: 'mkdir', path: p, cb });
+        },
+        make_directory_finish(res) {
+            if (res && res.error) {
+                throw res.error;
+            }
+            return true;
+        },
+        set_attributes_async(info, _flags, _priority, cancellable, cb) {
+            env.dispatched.push({ type: 'setattr', cancellable });
+            env.ops.push({ type: 'setattr', path: p, mode: info ? info.get_attribute_uint32('unix::mode') : null, cb });
+        },
+        set_attributes_finish(res) {
+            if (res && res.error) {
+                throw res.error;
+            }
+            return true;
+        },
         replace_contents_bytes_async(bytes, _etag, _backup, flags, cancellable, cb) {
             env.dispatched.push({ type: 'write', cancellable });
             env.ops.push({ type: 'write', path: p, bytes, flags, cb });
@@ -71,6 +101,18 @@ const makeEnv = () => {
 
     env.gio = {
         FileCreateFlags: { NONE: 0, PRIVATE: 1, REPLACE_DESTINATION: 2 },
+        FileQueryInfoFlags: { NONE: 0, NOFOLLOW_SYMLINKS: 4 },
+        IOErrorEnum: { EXISTS: 17 },
+        io_error_quark: () => 1,
+        FileInfo: {
+            new: () => {
+                const attrs = {};
+                return {
+                    set_attribute_uint32: (name, value) => { attrs[name] = value; },
+                    get_attribute_uint32: (name) => attrs[name],
+                };
+            },
+        },
         File: { new_for_path: (p) => makeFile(p) },
         SettingsSchemaSource: { get_default: () => ({ lookup: () => null }) },
     };
@@ -79,10 +121,6 @@ const makeEnv = () => {
         path_get_dirname: (p) => p.slice(0, p.lastIndexOf('/')),
         build_filenamev: (parts) => parts.join('/'),
         get_user_cache_dir: () => CACHE_DIR,
-          mkdir_with_parents: (path, mode) => {
-              env.mkdirs.push({ path, mode });
-              return env.failMkdir ? -1 : 0;
-        },
         Bytes: class {
             constructor(contents) {
                 if (env.failBytes) {
@@ -119,10 +157,40 @@ const makeEnv = () => {
                 env.writes.push({ path: op.path, flags: op.flags, text: Buffer.from(op.bytes.contents).toString('utf8') });
             }
         }
-        else {
+        else if (op.type === 'delete') {
             env.deletes.push(op.path);
         }
+        else if (op.type === 'mkdir') {
+            if (env.failMkdir) {
+                res = { error: new Error('fake mkdir failure') };
+            }
+            else if (env.dirs.has(op.path)) {
+                // the real finish reports an existing directory as EXISTS
+                res = { error: { matches: (_quark, code) => code === env.gio.IOErrorEnum.EXISTS } };
+            }
+            else {
+                env.dirs.add(op.path);
+                env.mkdirs.push({ path: op.path });
+            }
+        }
+        else {
+            if (env.failSetAttr) {
+                res = { error: new Error('fake set-attributes failure') };
+            }
+            else {
+                env.modes.push({ path: op.path, mode: op.mode });
+            }
+        }
         op.cb(null, res);
+    };
+    // How many WRITES are in flight — the directory ops sit in the same queue now.
+    env.pendingWrites = () => env.ops.filter((op) => op.type === 'write').length;
+    // Completes the queued directory ops (creation, then mode) so the in-flight
+    // request reaches its write — the directory work precedes the write now.
+    env.flushDirectory = () => {
+        while (env.ops.length && env.ops[0].type !== 'write') {
+            env.flushOne();
+        }
     };
     env.flushOne = () => {
         const op = env.ops.shift();
@@ -190,9 +258,12 @@ test('the sheet is written asynchronously and the look is applied only after the
     assert.equal(env.loads.length, 0, 'no sheet loaded before the write settled');
     assert.equal(env.restyles, 0, 'the border is not restyled before the write settled');
     assert.equal(theme.gen, '', 'no generation before the write settled');
-    assert.deepEqual(env.mkdirs.map((m) => m.mode), [0o700], 'the private directory is made once, 0700');
-    assert.equal(env.ops.length, 1, 'one write is in flight');
+    assert.deepEqual(env.mkdirs, [], 'the directory is not created synchronously');
+    assert.equal(env.pendingWrites(), 0, 'the write waits for the directory');
+    assert.equal(env.ops.length, 1, 'the directory creation is in flight');
     env.flush();
+    assert.deepEqual(env.mkdirs.length, 1, 'the private directory is created');
+    assert.deepEqual(env.modes.map((m) => m.mode), [0o700], 'and given the private mode in a second asynchronous step');
     assert.equal(env.writes.length, 1, 'exactly one write');
     assert.equal(env.loads.length, 1, 'the sheet loaded after the write');
     assert.equal(env.unloads.length, 0, 'nothing unloaded on the first load');
@@ -208,7 +279,7 @@ test('an unchanged accent performs no second write but still restyles', () => {
     theme.changed();
     assert.equal(env.writes.length, 1, 'unchanged accent: no second write');
     assert.equal(env.loads.length, 1, 'still a single load');
-    assert.equal(env.ops.length, 0, 'no file op dispatched for the unchanged accent');
+    assert.equal(env.pendingWrites(), 0, 'no file op dispatched for the unchanged accent');
     assert.equal(env.restyles, 2, 'the border is repainted');
 });
 
@@ -228,7 +299,8 @@ test('the private directory is prepared only once across distinct writes and a f
     theme.changed();
     env.flush();
     assert.equal(env.writes.length, 3, 'three different looks were successfully written');
-    assert.deepEqual(env.mkdirs.map((m) => m.mode), [0o700], 'one successful preparation per Theme');
+    assert.equal(env.mkdirAttempts.length, 1, 'the directory is prepared once per Theme');
+    assert.deepEqual(env.modes.map((m) => m.mode), [0o700], 'one successful 0700 preparation per Theme');
     assert.equal(theme.rgb[0], 60, 'a failed write can be retried without another mkdir');
 });
 
@@ -237,24 +309,41 @@ test('a failed directory preparation is reported and retried before the first wr
     env.failMkdir = true;
     const { theme, config } = makeTheme(env);
     theme.init(config);
-    assert.equal(env.ops.length, 0, 'no file write after mkdir failed');
+    assert.equal(env.pendingWrites(), 0, 'the write waits for the directory');
+    env.flush();
+    assert.equal(env.writes.length, 0, 'no file write after mkdir failed');
     assert.equal(env.logs.length, 1, 'directory failure is reported');
     env.failMkdir = false;
     theme.changed();
     env.flush();
-    assert.equal(env.mkdirs.length, 2, 'failed preparation was not remembered as success');
+    assert.equal(env.mkdirAttempts.length, 2, 'failed preparation was not remembered as success');
     assert.equal(env.writes.length, 1);
+    assert.deepEqual(env.modes.map((m) => m.mode), [0o700], 'the mode is applied after the directory exists');
     config.settings = settings({ accentColor: 'rgb(30, 40, 50)' });
     theme.changed();
     env.flush();
-    assert.equal(env.mkdirs.length, 2, 'successful preparation is reused');
+    assert.equal(env.mkdirAttempts.length, 2, 'successful preparation is reused');
+});
+
+test('an already existing directory is the normal case, not a failure', () => {
+    // Every start after the first finds the cache directory in place, and the finish
+    // reports that as EXISTS. Treating it as an error would skip the sheet entirely.
+    const env = makeEnv();
+    env.dirs.add(CACHE_DIR + '/greenTile@carsteneu');
+    const { theme, config } = makeTheme(env);
+    theme.init(config);
+    env.flush();
+    assert.equal(env.writes.length, 1, 'the sheet is still written');
+    assert.deepEqual(env.logs, [], 'and nothing is reported as a failure');
+    assert.deepEqual(env.modes.map((m) => m.mode), [0o700], 'the mode is still enforced on the existing directory');
+    assert.equal(theme.gen, 'gk-acc101', 'the look is applied');
 });
 
 test('rapid changes: only the latest content is written, loaded and applied', () => {
     const env = makeEnv();
     const { theme, config } = makeTheme(env);
     theme.init(config);
-    assert.equal(env.ops.length, 1, 'the first write is still in flight');
+    assert.equal(env.ops.length, 1, 'the first request is still in flight');
     config.settings = settings({ accentColor: 'rgb(30, 40, 50)' });
     theme.changed();
     env.flush();
@@ -273,7 +362,7 @@ test('a warm request arriving after a newer one still wins and does not bypass t
     // B starts a write that stays in flight…
     config.settings = settings({ accentColor: 'rgb(30, 40, 50)' });
     theme.changed();
-    assert.equal(env.ops.length, 1, 'B is writing');
+    assert.equal(env.pendingWrites(), 1, 'B is writing');
     // …when A is requested again; it must queue behind B and win
     config.settings = settings();
     theme.changed();
@@ -309,7 +398,8 @@ test('a write failure with a newer request pending does not wedge the queue: the
     theme.init(config); // A is writing
     config.settings = settings({ accentColor: 'rgb(30, 40, 50)' });
     theme.changed(); // B queues behind A
-    assert.equal(env.ops.length, 1, 'only A is in flight; B is pending');
+    env.flushDirectory(); // A's directory is ready, so its write is the op in flight
+    assert.equal(env.pendingWrites(), 1, 'only A is in flight; B is pending');
     env.flushOne(); // A fails
     env.failWrite = false;
     env.flush(); // B is written and applied
@@ -347,7 +437,7 @@ test('a replaced live St.Theme object forces a sheet reload even for unchanged c
     };
     theme.changed();
     env.flush();
-    assert.equal(env.ops.length, 0, 'unchanged content: no write on the theme switch');
+    assert.equal(env.pendingWrites(), 0, 'unchanged content: no write on the theme switch');
     assert.equal(env.unloads.length, 1, 'the sheet is unloaded off the replaced theme object');
     assert.equal(env.loads.length, 2, 'the sheet is loaded again on the new theme object');
 });
@@ -377,7 +467,7 @@ test('destroy while a write is pending: the completion neither loads nor repaint
     const { theme, config } = makeTheme(env);
     theme.init(config);
     const path = theme._path;
-    assert.equal(env.ops.length, 1, 'a write is in flight');
+    assert.equal(env.ops.length, 1, 'a request is in flight (its directory is being prepared)');
     theme.destroy();
     env.flush();
     assert.equal(env.loads.length, 0, 'a completion after destroy does not load');
@@ -408,10 +498,12 @@ test('out-of-order completion: an old owner late write lands on its own file, ne
     b.theme.init(b.config);
     const newPath = b.theme._path;
     assert.notEqual(oldPath, newPath, 'the owners do not share a stylesheet file');
-    // complete the new owner chain first, then let the old owner's write land last
+    // complete the new owner chain first (its three ops are the newest), then let the
+    // old owner's chain — and with it its write — land last
     env.flushLast();
     env.flushLast();
     env.flushLast();
+    env.flush();
     assert.equal(env.writes.find((w) => w.path === newPath).text.includes('30, 40, 50'), true, 'the new owner file holds its content');
     assert.equal(env.writes.find((w) => w.path === oldPath).text.includes('200, 10, 20'), true, 'the old write landed on its own file');
     assert.equal(env.loads.includes(newPath), true, 'the new owner loaded its own file');

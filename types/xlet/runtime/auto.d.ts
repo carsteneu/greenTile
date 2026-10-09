@@ -32,6 +32,7 @@ export const Auto: {
         _overrides: Map<any, any>;
         _timers: Map<any, any>;
         _destroyed: boolean;
+        _settleWaiting: boolean;
         _pending: Map<any, any>;
         _lastMonitor: Map<any, any>;
         _grabMonitor: Map<any, any>;
@@ -134,6 +135,11 @@ export const Auto: {
          * @param {AppFacade} app
          */
         settleAll(app: AppFacade): void;
+        /**
+         * The fan-out body: runs once the store is known.
+         * @param {AppFacade} app
+         */
+        _settleAllNow(app: AppFacade): void;
         /**
          * @param {AppFacade} app
          * @param {number} monitorIndex

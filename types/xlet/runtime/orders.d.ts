@@ -3,10 +3,12 @@
 export const ORDER_WRITE_MS: number;
 export const ORDER_DIR: string;
 export const ORDER_FILE: string;
+export const ORDER_DIR_MODE: number;
+export function isExistsError(gio: AnyRecord, error: any): boolean;
 /**
  * @typedef {Object} OrdersDeps
- * @property {AnyRecord} glib imports.gi.GLib (get_user_runtime_dir, build_filenamev, mkdir_with_parents)
- * @property {AnyRecord} gio imports.gi.Gio (File.new_for_path, query_info, FileCreateFlags, FileQueryInfoFlags, FileType)
+ * @property {AnyRecord} glib imports.gi.GLib (get_user_runtime_dir, build_filenamev, Bytes, PRIORITY_DEFAULT)
+ * @property {AnyRecord} gio imports.gi.Gio (File.new_for_path, query_info_async, load_contents_async, replace_contents_bytes_async, make_directory_async, set_attributes_async, FileInfo, FileCreateFlags, FileQueryInfoFlags, FileType, IOErrorEnum, io_error_quark)
  * @property {{ toString(bytes: Uint8Array): string, fromString(text: string): Uint8Array }} byteArray imports.byteArray
  * @property {AnyRecord} mainloop imports.mainloop (timeout_add, source_remove)
  * @property {AnyRecord} global the Cinnamon global object
@@ -28,16 +30,22 @@ export const Orders: {
             v: number;
             s: Record<string, string[]>;
         } | null;
+        /** @type {{ v: number, s: Record<string, string[]> }} */
         _store: {
             v: number;
             s: Record<string, string[]>;
-        } | {
-            v: any;
-            s: {};
         };
+        ready: boolean;
+        /**
+         * Callbacks waiting for the store to be known, released once by _loaded.
+         * @type {Array<() => void>}
+         */
+        _readyCbs: (() => void)[];
+        _dirty: boolean;
         _timer: number;
         _destroyed: boolean;
         _corruptLogged: boolean;
+        _earlyLogged: boolean;
         /**
          * The directory the store lives in, or null when there is no per-session
          * runtime dir to put it in.
@@ -49,15 +57,36 @@ export const Orders: {
         /** @returns {string} the directory the order file lives in. */
         _dir(): string;
         /**
-         * Reads and parses the file once. A missing file is an empty store; unreadable
-         * or foreign content is ignored (logged once) and treated as empty, so tiling
-         * never depends on the file's state.
-         * @returns {{ v: number, s: Record<string, string[]> } | null}
+         * Reads and parses the file once, asynchronously. A missing file is an empty
+         * store; unreadable or foreign content is ignored (logged once) and treated as
+         * empty, so tiling never depends on the file's state. EVERY exit path resolves
+         * the store: the settle fan-out waits for `ready` (lib/runtime/auto.js) and must
+         * never wait forever.
          */
-        _read(): {
+        _load(): void;
+        /**
+         * The content half of the read: its callback keeps the second size check the
+         * synchronous version had (the file can grow between the query and the read) and
+         * then parses.
+         * @param {any} file
+         */
+        _loadContents(file: any): void;
+        /**
+         * The read settled: publish the snapshot, merge whatever this run recorded while
+         * the read was in flight, and release everyone waiting for the store.
+         * @param {{ v: number, s: Record<string, string[]> } | null} store
+         */
+        _loaded(store: {
             v: number;
             s: Record<string, string[]>;
-        } | null;
+        } | null): void;
+        /**
+         * Runs cb once the store is known — immediately when it already is. One-shot, and
+         * a destroyed store releases nobody: that is what keeps a deferred retile off a
+         * torn-down App.
+         * @param {() => void} cb
+         */
+        onReady(cb: () => void): void;
         /**
          * Logs a rejected file once per store. A file that is not this code's own is
          * never an error that could break tiling: it is ignored and reported.
@@ -67,11 +96,30 @@ export const Orders: {
         /** Arms (or re-arms) the coalesced write. */
         _schedule(): void;
         /**
-         * Writes the whole store, atomically and privately. A failure (no runtime dir,
-         * read-only home, full disk) is logged and swallowed; the store keeps the
-         * latest order, so a later placement that changes it self-heals.
+         * Writes the whole store, privately and replacing any previous content. A failure
+         * (no runtime dir, read-only home, full disk) is logged and swallowed; the store
+         * keeps the latest order, so a later placement that changes it self-heals. The
+         * directory is prepared first and the write is chained to it, both asynchronously.
          */
         _flush(): void;
+        /**
+         * Prepares the private (0700) directory, then hands over to the write. An existing
+         * directory is the normal case — the finish reports EXISTS — and is not a failure;
+         * any other error means the store has nowhere to go, so the write is skipped (the
+         * next placement retries it) instead of stamping a file into a missing directory.
+         * @param {() => void} done
+         */
+        _makeDir(done: () => void): void;
+        /**
+         * Applies the private (0700) mode — make_directory_async takes no mode — and hands
+         * over to the write. A failure is logged and swallowed: the write reports the real
+         * error on the next placement.
+         * @param {any} file
+         * @param {() => void} done
+         */
+        _setDirMode(file: any, done: () => void): void;
+        /** The write half: the whole store, user-only (PRIVATE), atomically replacing the file. */
+        _write(): void;
         /**
          * The stored order for a (monitor, workspace) surface, for the FIRST retile of
          * that surface since enable — null afterwards, and null when there is none.
@@ -116,11 +164,11 @@ export const Orders: {
 };
 export type OrdersDeps = {
     /**
-     * imports.gi.GLib (get_user_runtime_dir, build_filenamev, mkdir_with_parents)
+     * imports.gi.GLib (get_user_runtime_dir, build_filenamev, Bytes, PRIORITY_DEFAULT)
      */
     glib: AnyRecord;
     /**
-     * imports.gi.Gio (File.new_for_path, query_info, FileCreateFlags, FileQueryInfoFlags, FileType)
+     * imports.gi.Gio (File.new_for_path, query_info_async, load_contents_async, replace_contents_bytes_async, make_directory_async, set_attributes_async, FileInfo, FileCreateFlags, FileQueryInfoFlags, FileType, IOErrorEnum, io_error_quark)
      */
     gio: AnyRecord;
     /**

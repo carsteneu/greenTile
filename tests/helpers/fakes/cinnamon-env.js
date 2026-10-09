@@ -184,6 +184,18 @@ const SETTINGS_DEFAULTS = {
 
 const createCinnamonEnv = (options) => {
     const settingsDefaults = Object.assign({}, SETTINGS_DEFAULTS, (options && options.settingsDefaults) || {});
+    // File operations the fake holds back when a test sets env.deferFileReads: the
+    // shipped runtime reads the restart-order store asynchronously, and this is how
+    // the window between "the App exists" and "the store is loaded" is observed.
+    const heldFileOps = [];
+    const defer = (work) => {
+        if (env.deferFileReads) {
+            heldFileOps.push(work);
+            return;
+        }
+        work();
+    };
+
     const env = {
         logs: [],
         logErrors: [],
@@ -202,18 +214,34 @@ const createCinnamonEnv = (options) => {
         // original addChrome/removeChrome were no-ops)
         chromeChildren: [],
         gioSettings: [],
-        // every ByteArray handed to Gio.File.replace_contents_bytes_async (the
-        // theme's accent stylesheet write); the file ops complete synchronously
-        // so enable() still leaves the sheet loaded
-        accentWrites: [],
         // stylesheet-file cleanup: paths removed via Gio.File.delete_async
         accentDeletes: [],
         // in-memory file system for the runtime-order store (lib/runtime/orders.js):
-        // path -> text (Gio.File.new_for_path load_contents/replace_contents), plus
-        // every write with the flags it used (PRIVATE must be among them)
+        // path -> text, plus every asynchronous read, every write with the flags it
+        // used (PRIVATE must be among them) and every directory it created
         files: new Map(),
         fileWrites: [],
+        // the theme's accent stylesheet writes (cache dir), kept apart from the
+        // restart-order store writes in fileWrites (runtime dir)
+        accentWrites: [],
         fileQueries: [],
+        fileReads: [],
+        mkdirs: [],
+        mkdirAttempts: [],
+        modes: [],
+        dirs: new Set(),
+        // A test sets this to hold every file callback until releaseFileReads(): the
+        // store is read asynchronously, and a restore must not be answered before the
+        // read landed (lib/runtime/orders.js `ready` / `onReady`).
+        deferFileReads: false,
+        releaseFileReads: () => {
+            for (let round = 0; round < 10 && heldFileOps.length; round++) {
+                const queued = heldFileOps.splice(0);
+                for (const work of queued) {
+                    work();
+                }
+            }
+        },
         // schema values for fake Gio.Settings.get_string, keyed by schema_id:
         // { 'org.x.apps.portal': { 'color-scheme': 'prefer-dark' } }
         schemaValues: {},
@@ -423,10 +451,10 @@ const createCinnamonEnv = (options) => {
         get_user_data_dir: () => '/home/fake/.local/share',
         build_filenamev: (parts) => parts.join('/'),
         path_get_dirname: (p) => p.split('/').slice(0, -1).join('/') || '.',
-        mkdir_with_parents: () => true,
-        // GLib.Bytes wrapper for the async accent write. The theme passes
-        // imports.byteArray.fromString(css) (a Uint8Array); Bytes keeps it
-        // verbatim so a test can read the written stylesheet back.
+        // GLib.Bytes wrapper for the asynchronous writes: the theme passes
+        // imports.byteArray.fromString(css) and the order store its JSON (both
+        // Uint8Arrays); Bytes keeps the bytes verbatim so a test can read the
+        // written file back.
         Bytes: class {
             constructor(contents) {
                 if (!(contents instanceof Uint8Array)) {
@@ -656,10 +684,27 @@ const createCinnamonEnv = (options) => {
         FileCreateFlags: { NONE: 0, PRIVATE: 1, REPLACE_DESTINATION: 2 },
         FileQueryInfoFlags: { NONE: 0, NOFOLLOW_SYMLINKS: 4 },
         FileType: { UNKNOWN: 0, REGULAR: 1, DIRECTORY: 2, SPECIAL: 3, SHORTCUT: 4, MOUNTABLE: 5 },
-        // Synchronous-completing async file ops for the lifecycle tests: the real
-        // engine completes asynchronously, but the accent write must land before
-        // enable() returns so the sheet is loaded (the async timing itself is
-        // covered by tests/runtime/theme.test.js over an on-demand fake).
+        IOErrorEnum: { EXISTS: 17 },
+        io_error_quark: () => 1,
+        // Gio.FileInfo.new() + set_attribute_uint32('unix::mode', …): the only way to
+        // give a make_directory_async directory its private mode, since that call has
+        // no mode parameter
+        FileInfo: {
+            new: () => {
+                const attrs = {};
+                return {
+                    set_attribute_uint32: (name, value) => { attrs[name] = value; },
+                    get_attribute_uint32: (name) => attrs[name],
+                };
+            },
+        },
+        // File access is ASYNCHRONOUS ONLY: the synchronous query_info, load_contents,
+        // replace_contents and mkdir_with_parents the runtime used to call are gone
+        // from this fake, so one surviving blocking call fails the suite instead of
+        // passing silently (tests/runtime/async-io.test.js pins the same rule for the
+        // shipped sources). The callbacks complete inline — enable() must still leave
+        // the store read and the sheet written when it returns — unless a test holds
+        // them with env.deferFileReads (see heldFileOps above).
         File: {
             new_for_path(path) {
                 return {
@@ -667,51 +712,84 @@ const createCinnamonEnv = (options) => {
                     // lib/runtime/orders.js checks the type and the size BEFORE reading,
                     // so the fake answers from env.fileType / env.fileSize when a test
                     // plants something that is not a small regular file
-                    query_info(attrs, flags, _cancellable) {
+                    query_info_async(attrs, flags, _priority, _cancellable, cb) {
                         if (env.queryFileThrows) {
                             throw new Error('fake: injected query failure');
                         }
                         env.fileQueries.push({ path, attrs, flags });
-                        return {
+                        const info = {
                             get_file_type: () => (env.fileType !== undefined ? env.fileType : 1),
                             get_size: () => (env.fileSize !== undefined ? env.fileSize : (env.files.get(path) || '').length),
                         };
+                        defer(() => cb({ path }, { info }));
                     },
-                    // lib/runtime/orders.js: synchronous read of the runtime-order store
-                    load_contents(_cancellable) {
+                    query_info_finish: (res) => res.info,
+                    // lib/runtime/orders.js: asynchronous read of the runtime-order store
+                    load_contents_async(_cancellable, cb) {
                         if (env.readFileThrows) {
                             throw new Error('fake: injected read failure');
                         }
-                        if (!env.files.has(path)) {
-                            return [false, null];
-                        }
-                        return [true, new TextEncoder().encode(env.files.get(path))];
+                        env.fileReads.push(path);
+                        const value = env.files.has(path) ? [true, new TextEncoder().encode(env.files.get(path))] : [false, null];
+                        defer(() => cb({ path }, { value }));
                     },
-                    // lib/runtime/orders.js: atomic (local) replacement; the fake keeps
-                    // the text so a test can read it back
-                    replace_contents(bytes, _etag, _backup, flags, _cancellable) {
+                    load_contents_finish: (res) => res.value,
+                    // the atomic (local) replacement both the order store and the accent
+                    // sheet use; the fake keeps the text so a test can read it back
+                    replace_contents_bytes_async(bytes, _etag, _backup, flags, _cancellable, cb) {
                         if (env.writeFileThrows) {
                             throw new Error('fake: injected write failure');
                         }
-                        const text = new TextDecoder().decode(bytes);
+                        const text = new TextDecoder().decode(bytes.contents);
                         env.files.set(path, text);
-                        env.fileWrites.push({ path, text, flags });
-                        return [true, 'fake-etag'];
+                        const record = { path, text, flags };
+                        // Two very different writers share this call: the theme's accent
+                        // stylesheet in the cache dir, and the restart-order store in the
+                        // runtime dir. They are recorded apart so a test can count either
+                        // one without the other.
+                        if (path.startsWith(env.glib.get_user_cache_dir())) {
+                            env.accentWrites.push(record);
+                        }
+                        else {
+                            env.fileWrites.push(record);
+                        }
+                        defer(() => cb({ path }, { value: [true, 'fake-etag'] }));
                     },
-                    replace_contents_bytes_async(bytes, _etag, _backup, _flags, _cancellable, cb) {
-                        env.accentWrites.push(bytes.contents);
-                        cb(null, {});
+                    replace_contents_finish: () => [true, 'fake-etag'],
+                    make_directory_async(_priority, _cancellable, cb) {
+                        env.mkdirAttempts.push({ path });
+                        let error = null;
+                        if (env.dirs.has(path)) {
+                            // the real finish reports an existing directory as EXISTS
+                            error = { matches: (_quark, code) => code === env.gio.IOErrorEnum.EXISTS };
+                        }
+                        else {
+                            env.dirs.add(path);
+                            env.mkdirs.push({ path });
+                        }
+                        defer(() => cb({ path }, { error }));
                     },
-                    replace_contents_finish() {
-                        return [true, 'fake-etag'];
+                    make_directory_finish: (res) => {
+                        if (res && res.error) {
+                            throw res.error;
+                        }
+                        return true;
+                    },
+                    set_attributes_async(info, _flags, _priority, _cancellable, cb) {
+                        env.modes.push({ path, mode: info ? info.get_attribute_uint32('unix::mode') : null });
+                        defer(() => cb({ path }, { error: null }));
+                    },
+                    set_attributes_finish: (res) => {
+                        if (res && res.error) {
+                            throw res.error;
+                        }
+                        return true;
                     },
                     delete_async(_priority, _cancellable, cb) {
                         env.accentDeletes.push(path);
                         cb(null, {});
                     },
-                    delete_finish() {
-                        return true;
-                    },
+                    delete_finish: () => true,
                 };
             },
         },
@@ -939,6 +1017,9 @@ const createCinnamonEnv = (options) => {
     };
     // --- gi branches: namespace list is strict (GObject access throws — greenTile
     // never touches it at runtime); the branches themselves are concrete.
+    // The concrete Gio object is also exposed as env.gio: the fake's own file
+    // operations and the tests reach for the same members off it.
+    env.gio = gio;
     env.gi = strictNs('imports.gi', {
         GLib: env.glib,
         Gio: gio,

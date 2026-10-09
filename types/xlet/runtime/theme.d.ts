@@ -1,5 +1,7 @@
 // GENERATED from lib/ by scripts/generate-xlet-types.mjs — do not edit;
 // regenerate with: npm run gen:types
+export const PRIVATE_DIR_MODE: number;
+export function existsError(gio: AnyRecord, error: any): boolean;
 /**
  * Theme and accent runtime owner: stylesheet generation and theme/accent
  * probing and resolution.
@@ -127,8 +129,21 @@ export const Theme: {
          * @param {any} error
          */
         _settle(request: LookRequest, error: any): void;
-        /** Prepares the private (0700) cache directory once after a successful mkdir. */
-        _mkdir(): void;
+        /**
+         * Runs done(null) once the private (0700) cache directory exists, and done(error)
+         * when it cannot be made at all. Both steps are asynchronous; the mode has to be
+         * applied separately because Gio.File.make_directory_async takes no mode.
+         * @param {(error: any) => void} done
+         */
+        _withDirectory(done: (error: any) => void): void;
+        /**
+         * Applies the private (0700) mode to the cache directory, then hands over to the
+         * write. A failure here is reported and retried with the next write rather than
+         * remembered as success.
+         * @param {any} file
+         * @param {(error: any) => void} done
+         */
+        _setDirectoryMode(file: any, done: (error: any) => void): void;
         /**
          * Starts the async bytes write of css to this Theme's file, user-only
          * (Gio.FileCreateFlags.PRIVATE) and replacing any previous content. No

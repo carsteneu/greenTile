@@ -342,6 +342,10 @@ type SplitFacade = {
 type OrdersFacade = {
     restore(app: AppFacade, monitorIndex: number, wsIndex: number): string[] | null;
     record(app: AppFacade, monitorIndex: number, wsIndex: number, ordered: CinnamonWindow[], explicit?: boolean): void;
+    /** True once the store was read (or its read failed); before that it is not known. */
+    ready: boolean;
+    /** Runs cb once the store is known — immediately when it already is. */
+    onReady(cb: () => void): void;
     destroy(): void;
 };
 
