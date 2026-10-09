@@ -28,6 +28,9 @@ cd "$ROOT"
 VER=$(python3 -c 'import json; print(json.load(open("metadata.json"))["version"])')
 REF=${SPICES_REF:-v$VER}
 DEST=${1:-dist/spices/$UUID}
+# Canonicalise first: the guard compares whole paths, so "$HOME/" or "$ROOT/."
+# would otherwise slip past it and reach the rm -rf below.
+DEST=$(realpath -m -- "$DEST")
 
 case $DEST in
     /|"$HOME"|"$ROOT"|'')
@@ -48,6 +51,10 @@ mkdir -p "$WORKROOT"
 WORK=$(mktemp -d "$WORKROOT/spices.XXXXXX")
 trap 'rm -rf "$WORK"' EXIT
 git archive "$REF" | tar -x -C "$WORK"
+
+# The archived tree is what is being shipped — the working copy may already
+# carry a newer version number than the ref.
+AVER=$(python3 -c 'import json, sys; print(json.load(open(sys.argv[1]))["version"])' "$WORK/metadata.json")
 
 # Listing level: what GitHub and the Spices website show.
 OUT="$WORK/submission"
@@ -82,8 +89,8 @@ if [ "$(ls "$F/po/" | wc -l)" -ne "$(ls "$WORK/po/" | wc -l)" ]; then
     exit 1
 fi
 
-rm -rf "$DEST"
+rm -rf -- "$DEST"
 mkdir -p "$(dirname -- "$DEST")"
-cp -R "$OUT" "$DEST"
+cp -R -- "$OUT" "$DEST"
 
-echo "built $DEST (ref $REF, version $VER)"
+echo "built $DEST (ref $REF, version $AVER)"
