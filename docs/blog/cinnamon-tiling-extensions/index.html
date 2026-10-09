@@ -117,6 +117,7 @@ p.body{max-width:68ch;color:#2A3A30;margin:0 0 16px}
 .model p{margin:0;font-size:15.5px;color:#34443A}
 .model .tag{font:500 12px/1 "JBMono";letter-spacing:.06em;text-transform:uppercase;color:var(--moss);display:block;margin-bottom:10px}
 .gain{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:8px}
+.gain .glyph{display:block;width:100%;max-width:260px;height:auto;aspect-ratio:64/42;margin:0 0 16px}
 
 .origin{max-width:68ch;color:#2A3A30}
 .origin p{margin:0 0 14px}
@@ -140,6 +141,35 @@ footer{padding:36px 0 56px;border-top:1px solid var(--rule);display:flex;justify
 </style>
 </head>
 <body>
+
+<!-- glyphs reused in the what-you-gain block, defined once -->
+<svg width="0" height="0" aria-hidden="true" focusable="false" style="position:absolute">
+  <symbol id="g-preset" viewBox="0 0 64 42">
+    <rect x="0.5" y="0.5" width="63" height="41" rx="4" class="scr"/>
+    <rect x="5" y="6" width="15" height="30" rx="2" class="pcol"/><rect x="5" y="6" width="15" height="3" rx="1.5" fill="#4EA530"/>
+    <rect x="24" y="6" width="15" height="14" rx="2" class="pcol"/><rect x="24" y="6" width="15" height="3" rx="1.5" fill="#3E7CB1"/>
+    <rect x="24" y="24" width="15" height="12" rx="2" class="pcol"/><rect x="24" y="24" width="15" height="3" rx="1.5" fill="#F0A23B"/>
+    <rect x="43" y="6" width="16" height="30" rx="2" class="pcol"/><rect x="43" y="6" width="16" height="3" rx="1.5" fill="#8E6CC4"/>
+  </symbol>
+  <symbol id="g-auto" viewBox="0 0 64 42">
+    <rect x="0.5" y="0.5" width="63" height="41" rx="4" class="scr"/>
+    <rect x="5" y="6" width="15" height="30" rx="2" class="pcol"/>
+    <rect x="24" y="6" width="15" height="30" rx="2" class="pcol"/>
+    <rect x="43" y="6" width="16" height="30" rx="2" fill="rgba(78,165,48,.45)" stroke="#4EA530" stroke-width="1.5"/>
+  </symbol>
+  <symbol id="g-gap" viewBox="0 0 64 42">
+    <rect x="0.5" y="0.5" width="63" height="41" rx="4" class="scr"/>
+    <rect x="8" y="8" width="20" height="26" rx="2" class="pcol"/>
+    <rect x="36" y="8" width="20" height="26" rx="2" class="pcol"/>
+    <path d="M32 6v30" stroke="#F0A23B" stroke-width="1.5"/>
+  </symbol>
+  <symbol id="g-monitor" viewBox="0 0 64 42">
+    <rect x="0.5" y="4" width="42" height="34" rx="4" class="scr"/>
+    <rect x="14" y="0.5" width="42" height="34" rx="4" fill="#13201A" stroke="#2F6A1E" stroke-width="1.5"/>
+    <rect x="19" y="6" width="14" height="24" rx="2" fill="#E6ECE2"/>
+    <rect x="36" y="6" width="15" height="24" rx="2" fill="#C5D0BF"/>
+  </symbol>
+</svg>
 
 <!-- drawings reused in the neighbour cards, defined once -->
 <svg width="0" height="0" aria-hidden="true" focusable="false" style="position:absolute">
@@ -355,21 +385,25 @@ footer{padding:36px 0 56px;border-top:1px solid var(--rule);display:flex;justify
     <p class="sub">Not more features — a different answer to who does the arranging.</p>
     <div class="gain">
       <article class="model">
+        <svg class="glyph" aria-hidden="true"><use href="#g-preset"/></svg>
         <span class="tag">The layout stays</span>
         <h3>You set it up once</h3>
         <p>A preset is painted on a 6 × 4 grid and assigned to a monitor and a workspace. Windows that open, close or return are fitted into it — rather than you opening a grid and selecting an area each time a window appears.</p>
       </article>
       <article class="model">
+        <svg class="glyph" aria-hidden="true"><use href="#g-auto"/></svg>
         <span class="tag">On its own</span>
         <h3>Auto mode per workspace</h3>
         <p>Turn it on for a workspace and new windows join the arrangement by themselves; close one and the neighbours move up. Leave it off and the workspace stays a free surface for windows you place by hand.</p>
       </article>
       <article class="model">
+        <svg class="glyph" aria-hidden="true"><use href="#g-gap"/></svg>
         <span class="tag">The details</span>
         <h3>Gaps, rules, wide columns</h3>
         <p>0–48 px between windows, a never tile list matched by window class, title or app id and filled from a picker that includes flatpaks, and columns you drag to merge into one wide one or split again.</p>
       </article>
       <article class="model">
+        <svg class="glyph" aria-hidden="true"><use href="#g-monitor"/></svg>
         <span class="tag">Per monitor and workspace</span>
         <h3>Every screen its own arrangement</h3>
         <p>A preset belongs to a monitor by its hardware identity and to a workspace, so the same screen can be laid out differently depending on where you are — and the layout is back when the hardware comes back.</p>

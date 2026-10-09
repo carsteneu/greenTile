@@ -78,6 +78,7 @@ svg text{font:500 10.5px "JBMono";letter-spacing:.07em;text-transform:uppercase;
 svg text.hl{fill:var(--moss)}
 svg text.big{font:600 12px "JBMono"}
 .scr{fill:#1B2A21}
+.pcol{fill:var(--sheet)}
 .win{fill:rgba(240,162,59,.42);stroke:var(--amber);stroke-width:1.5}
 .win2{fill:#2C3E32}
 .dash{fill:none;stroke:#7E9A86;stroke-width:1.4;stroke-dasharray:4 3}
@@ -105,6 +106,7 @@ p.body{max-width:68ch;color:#2A3A30;margin:0 0 16px}
 .model a{margin-top:auto;padding-top:8px;font:600 15px/1 "Instrument";color:var(--moss)}
 .model.g a{color:#9BD183}
 .gain{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:8px}
+.gain .glyph{display:block;width:100%;max-width:260px;height:auto;aspect-ratio:64/42;margin:0 0 16px}
 
 .origin{max-width:68ch;color:#2A3A30}
 .origin p{margin:0 0 14px}
@@ -123,6 +125,36 @@ footer{padding:36px 0 56px;border-top:1px solid var(--rule);display:flex;justify
 </style>
 </head>
 <body>
+
+<!-- glyphs reused in the what-you-gain block, defined once -->
+<svg width="0" height="0" aria-hidden="true" focusable="false" style="position:absolute">
+  <symbol id="g-preset" viewBox="0 0 64 42">
+    <rect x="0.5" y="0.5" width="63" height="41" rx="4" class="scr"/>
+    <rect x="5" y="6" width="15" height="30" rx="2" class="pcol"/><rect x="5" y="6" width="15" height="3" rx="1.5" fill="#4EA530"/>
+    <rect x="24" y="6" width="15" height="14" rx="2" class="pcol"/><rect x="24" y="6" width="15" height="3" rx="1.5" fill="#3E7CB1"/>
+    <rect x="24" y="24" width="15" height="12" rx="2" class="pcol"/><rect x="24" y="24" width="15" height="3" rx="1.5" fill="#F0A23B"/>
+    <rect x="43" y="6" width="16" height="30" rx="2" class="pcol"/><rect x="43" y="6" width="16" height="3" rx="1.5" fill="#8E6CC4"/>
+  </symbol>
+  <symbol id="g-auto" viewBox="0 0 64 42">
+    <rect x="0.5" y="0.5" width="63" height="41" rx="4" class="scr"/>
+    <rect x="5" y="6" width="15" height="30" rx="2" class="pcol"/>
+    <rect x="24" y="6" width="15" height="30" rx="2" class="pcol"/>
+    <rect x="43" y="6" width="16" height="30" rx="2" fill="rgba(78,165,48,.45)" stroke="#4EA530" stroke-width="1.5"/>
+  </symbol>
+  <symbol id="g-monitor" viewBox="0 0 64 42">
+    <rect x="0.5" y="4" width="42" height="34" rx="4" class="scr"/>
+    <rect x="14" y="0.5" width="42" height="34" rx="4" fill="#13201A" stroke="#2F6A1E" stroke-width="1.5"/>
+    <rect x="19" y="6" width="14" height="24" rx="2" fill="#E6ECE2"/>
+    <rect x="36" y="6" width="15" height="24" rx="2" fill="#C5D0BF"/>
+  </symbol>
+  <symbol id="g-panel" viewBox="0 0 64 42">
+    <rect x="0.5" y="0.5" width="63" height="41" rx="4" class="scr"/>
+    <rect x="6" y="7" width="24" height="12" rx="2" class="pcol"/>
+    <rect x="34" y="7" width="24" height="12" rx="2" class="pcol"/>
+    <rect x="6" y="23" width="24" height="12" rx="2" fill="rgba(240,162,59,.35)" stroke="#F0A23B" stroke-width="1.5"/>
+    <rect x="34" y="23" width="24" height="12" rx="2" class="pcol"/>
+  </symbol>
+</svg>
 <div class="wrap">
   <nav>
     <a class="mark" href="../../"><i><b></b><b></b><b></b></i>greenTile</a>
@@ -279,21 +311,25 @@ footer{padding:36px 0 56px;border-top:1px solid var(--rule);display:flex;justify
     <p class="sub">Four things the built-ins cannot do, and an extension can.</p>
     <div class="gain">
       <article class="model">
+        <svg class="glyph" aria-hidden="true"><use href="#g-preset"/></svg>
         <span class="tag">A layout, not moves</span>
         <h3>The arrangement exists on its own</h3>
         <p>You paint the layout once on a grid — columns, their widths, the stacks inside them — and assign it to a monitor and a workspace. From then on it is a thing that persists, not the result of what you did five minutes ago.</p>
       </article>
       <article class="model">
+        <svg class="glyph" aria-hidden="true"><use href="#g-auto"/></svg>
         <span class="tag">Nothing by hand</span>
         <h3>Windows join and leave by themselves</h3>
         <p>With auto mode on for a workspace, a window that opens is fitted into the layout a moment later, and when one closes the neighbours grow into the space. No hole to resize shut, no window to steer into place.</p>
       </article>
       <article class="model">
+        <svg class="glyph" aria-hidden="true"><use href="#g-monitor"/></svg>
         <span class="tag">Per workspace</span>
         <h3>Four desks, four shapes</h3>
         <p>The settings are kept per monitor and per workspace, so “writing”, “browsing” and “chat” each get their own arrangement — and each one is waiting after a switch, a replug or a Cinnamon restart.</p>
       </article>
       <article class="model">
+        <svg class="glyph" aria-hidden="true"><use href="#g-panel"/></svg>
         <span class="tag">Still Cinnamon</span>
         <h3>You keep the desktop you have</h3>
         <p>The panel, the menu, the applets, the themes and every built-in key stay exactly as they are. That is the difference from the third option above: no new session, no new habits to relearn.</p>

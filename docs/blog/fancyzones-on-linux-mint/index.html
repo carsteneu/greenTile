@@ -123,6 +123,7 @@ svg text.big{font:600 12px "JBMono"}
 .model .tag{font:500 12px/1 "JBMono";letter-spacing:.06em;text-transform:uppercase;color:var(--moss);display:block;margin-bottom:10px}
 .model h3{font:700 22px/1.1 "Bricolage";letter-spacing:-.02em;margin:0 0 10px}
 .gain{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:8px}
+.gain .glyph{display:block;width:100%;max-width:260px;height:auto;aspect-ratio:64/42;margin:0 0 16px}
 
 footer{padding:36px 0 56px;border-top:1px solid var(--rule);display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px;color:var(--mute);font-size:14px}
 
@@ -381,21 +382,25 @@ footer{padding:36px 0 56px;border-top:1px solid var(--rule);display:flex;justify
     <p class="sub">The four habits FancyZones gave you, kept — without the drag.</p>
     <div class="gain">
       <article class="model">
+        <svg class="glyph" aria-hidden="true"><use href="#g-preset"/></svg>
         <span class="tag">Set up once</span>
         <h3>The layout replaces the drag</h3>
         <p>Instead of drawing zones and then dragging each window into one, you paint the layout once — columns, their widths, the stacks inside them — and assign it to a monitor and a workspace. Placement is done for you from then on.</p>
       </article>
       <article class="model">
+        <svg class="glyph" aria-hidden="true"><use href="#g-auto"/></svg>
         <span class="tag">The whole layout</span>
         <h3>Auto mode, for every window</h3>
         <p>PowerToys puts a window back where that application last sat. Here the arrangement decides instead: with auto mode on, a window that opens is fitted into the layout, whatever the application is.</p>
       </article>
       <article class="model">
+        <svg class="glyph" aria-hidden="true"><use href="#g-merge"/></svg>
         <span class="tag">The details</span>
         <h3>Gaps, rules, wide columns</h3>
         <p>0–48 px between windows as insets that never push one off the screen, a never tile list matched by window class, title or app id and filled from a picker that includes flatpaks, and columns you merge into one wide one or split again.</p>
       </article>
       <article class="model">
+        <svg class="glyph" aria-hidden="true"><use href="#g-panel"/></svg>
         <span class="tag">Still Cinnamon</span>
         <h3>Nothing about the desktop changes</h3>
         <p>Panel, menu, applets, themes and every built-in key stay exactly as they are. greenTile adds the missing piece; it never asks you to move to a different desktop.</p>
