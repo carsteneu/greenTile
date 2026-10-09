@@ -545,7 +545,7 @@ const makeApp = (overrides = {}) => ({
 const makeAuto = (opts = {}) => {
     const ml = fakeMainloop();
     const logs = [];
-    const calls = { layoutSet: [], retileMonitor: [], borderUpdate: 0 };
+    const calls = { layoutSet: [], retileMonitor: [], borderUpdate: 0, resizeEnd: 0 };
     const monitorCount = 'monitorCount' in opts ? opts.monitorCount : 2;
     const activeWorkspace = { index: () => 3 };
     const deps = {
@@ -564,8 +564,8 @@ const makeAuto = (opts = {}) => {
         focusWindow: () => (opts.focus ? opts.focus : null),
         focusMonitorIndex: () => 1,
         grabIsResize: () => (opts.grabIsResize ? opts.grabIsResize() : false),
-        dropBegin: () => {}, dropEnd: () => false, dropStop: () => {},
-        resizeEnd: () => {}, exclToggleDelete: () => {}, exclToggleClear: () => {},
+        dropBegin: () => {}, dropEnd: opts.dropEnd || (() => false), dropStop: () => {},
+        resizeEnd: () => { calls.resizeEnd += 1; }, exclToggleDelete: () => {}, exclToggleClear: () => {},
     };
     return { ml, logs, calls, auto: new Auto(deps), activeWorkspace };
 };
@@ -657,4 +657,147 @@ test('auto scheduleMonitor: per-monitor timers replaced and guarded at fire time
     stale.auto.scheduleMonitor(deadApp, 0, 250);
     stale.ml.fire(stale.ml.live.keys().next().value);
     assert.equal(stale.calls.retileMonitor.length, 0, 'a monitor that lost readiness never retiles');
+});
+
+// A plain click on a title bar is a MOVING grab that ends without the window
+// having moved (drop.end reports false there too). Retiling for it re-places the
+// whole surface, and any 1-2 px deviation of a window (a focus-driven shift, a
+// size-increment rounding) then snaps visibly. The grabbed window's frame is
+// compared with the drop module's own slack (#94937).
+const grabWindow = (seq, holder, active, overrides = {}) => makeTrackedWindow(seq, {
+    get_workspace: () => active,
+    get_frame_rect: () => holder.rect,
+    ...overrides,
+});
+
+test('auto onGrabEnd: a MOVING grab that moved nothing schedules no retile', () => {
+    const { ml, auto, activeWorkspace } = makeAuto({ auto: true });
+    const app = makeApp();
+    const holder = { rect: { x: 100, y: 50, width: 800, height: 600 } };
+    const w = grabWindow(7, holder, activeWorkspace);
+    auto.onGrabBegin(app, w, 16);
+    auto.onGrabEnd(app, w, 16);
+    assert.deepEqual(ml.pendingMs(), [], 'a click without motion is not a placement');
+});
+
+test('auto onGrabEnd: a MOVING grab that moved the window keeps the 250 ms snap', () => {
+    const { ml, auto, activeWorkspace } = makeAuto({ auto: true });
+    const app = makeApp();
+    const holder = { rect: { x: 100, y: 50, width: 800, height: 600 } };
+    const w = grabWindow(7, holder, activeWorkspace);
+    auto.onGrabBegin(app, w, 16);
+    holder.rect = { x: 140, y: 90, width: 800, height: 600 };
+    auto.onGrabEnd(app, w, 16);
+    assert.deepEqual(ml.pendingMs(), [250], 'a real move still snaps on release');
+});
+
+test('auto onGrabEnd: a two-pixel shift inside the slack is not a move', () => {
+    const { ml, auto, activeWorkspace } = makeAuto({ auto: true });
+    const app = makeApp();
+    const holder = { rect: { x: 1711, y: 0, width: 1694, height: 600 } };
+    const w = grabWindow(7, holder, activeWorkspace);
+    auto.onGrabBegin(app, w, 16);
+    holder.rect = { x: 1713, y: 0, width: 1694, height: 600 };
+    auto.onGrabEnd(app, w, 16);
+    assert.deepEqual(ml.pendingMs(), [], 'a 2 px focus shift is treated as no move');
+});
+
+test('auto onGrabEnd: a three-pixel shift is a real move', () => {
+    const { ml, auto, activeWorkspace } = makeAuto({ auto: true });
+    const app = makeApp();
+    const holder = { rect: { x: 1711, y: 0, width: 1694, height: 600 } };
+    const w = grabWindow(7, holder, activeWorkspace);
+    auto.onGrabBegin(app, w, 16);
+    holder.rect = { x: 1714, y: 0, width: 1694, height: 600 };
+    auto.onGrabEnd(app, w, 16);
+    assert.deepEqual(ml.pendingMs(), [250], 'beyond the slack the release snaps');
+});
+
+test('auto onGrabEnd: KEYBOARD_MOVING is guarded too (Alt+F7 without motion)', () => {
+    const { ml, auto, activeWorkspace } = makeAuto({ auto: true });
+    const app = makeApp();
+    const holder = { rect: { x: 10, y: 10, width: 400, height: 300 } };
+    const w = grabWindow(7, holder, activeWorkspace);
+    auto.onGrabBegin(app, w, 17);
+    auto.onGrabEnd(app, w, 17);
+    assert.deepEqual(ml.pendingMs(), [], 'a keyboard grab that moved nothing does not retile');
+});
+
+test('auto onGrabEnd: a cross-monitor move snaps both monitors', () => {
+    const { ml, auto, activeWorkspace } = makeAuto({ auto: true });
+    const app = makeApp();
+    const holder = { rect: { x: 100, y: 50, width: 800, height: 600 } };
+    let mon = 0;
+    const w = grabWindow(7, holder, activeWorkspace, { get_monitor: () => mon });
+    auto.onGrabBegin(app, w, 16);
+    mon = 1;
+    holder.rect = { x: 1400, y: 50, width: 800, height: 600 };
+    auto.onGrabEnd(app, w, 16);
+    assert.deepEqual(ml.pendingMs().sort(), [250, 250], 'source and target monitor both snap');
+});
+
+test('auto onGrabEnd: an applied drop owns the placement, no extra snap', () => {
+    const { ml, auto, activeWorkspace } = makeAuto({ auto: true, dropEnd: () => true });
+    const app = makeApp();
+    const holder = { rect: { x: 100, y: 50, width: 800, height: 600 } };
+    const w = grabWindow(7, holder, activeWorkspace);
+    auto.onGrabBegin(app, w, 16);
+    holder.rect = { x: 900, y: 300, width: 800, height: 600 };
+    auto.onGrabEnd(app, w, 16);
+    assert.deepEqual(ml.pendingMs(), [], 'the drop packaged the layout itself');
+});
+
+test('auto onGrabEnd: a resize grab still reports to resizeEnd and schedules nothing', () => {
+    const { ml, calls, auto, activeWorkspace } = makeAuto({ auto: true, grabIsResize: () => true });
+    const app = makeApp();
+    const holder = { rect: { x: 0, y: 0, width: 100, height: 100 } };
+    const w = grabWindow(9, holder, activeWorkspace);
+    auto.onGrabBegin(app, w, 99);
+    auto.onGrabEnd(app, w, 99);
+    assert.equal(calls.resizeEnd, 1, 'the resize path is untouched');
+    assert.deepEqual(ml.pendingMs(), [], 'a resize does not schedule a move snap');
+});
+
+test('auto onGrabEnd: a MOVING grab that only resized is still a move', () => {
+    const { ml, auto, activeWorkspace } = makeAuto({ auto: true });
+    const app = makeApp();
+    const holder = { rect: { x: 100, y: 50, width: 800, height: 600 } };
+    const w = grabWindow(7, holder, activeWorkspace);
+    auto.onGrabBegin(app, w, 16);
+    // A MOVING grab can un-maximize or unsnap the window: same origin, new size. The
+    // window is floating now and has to be placed again.
+    holder.rect = { x: 100, y: 50, width: 1200, height: 900 };
+    auto.onGrabEnd(app, w, 16);
+    assert.deepEqual(ml.pendingMs(), [250], 'a size change without a move still snaps');
+});
+
+test('auto onGrabEnd: a release with no observed grab begin falls back to the snap', () => {
+    const { ml, auto, activeWorkspace } = makeAuto({ auto: true });
+    const app = makeApp();
+    const holder = { rect: { x: 100, y: 50, width: 800, height: 600 } };
+    const w = grabWindow(7, holder, activeWorkspace);
+    auto.onGrabEnd(app, w, 16);
+    assert.deepEqual(ml.pendingMs(), [250], 'without a start frame there is nothing to compare');
+});
+
+test('auto onGrabEnd: a vertical-only move is a move', () => {
+    const { ml, auto, activeWorkspace } = makeAuto({ auto: true });
+    const app = makeApp();
+    const holder = { rect: { x: 100, y: 50, width: 800, height: 600 } };
+    const w = grabWindow(7, holder, activeWorkspace);
+    auto.onGrabBegin(app, w, 16);
+    holder.rect = { x: 100, y: 90, width: 800, height: 600 };
+    auto.onGrabEnd(app, w, 16);
+    assert.deepEqual(ml.pendingMs(), [250], 'y alone counts as movement');
+});
+
+test('auto onGrabEnd: KEYBOARD_MOVING that moved keeps the snap', () => {
+    const { ml, auto, activeWorkspace } = makeAuto({ auto: true });
+    const app = makeApp();
+    const holder = { rect: { x: 10, y: 10, width: 400, height: 300 } };
+    const w = grabWindow(7, holder, activeWorkspace);
+    auto.onGrabBegin(app, w, 17);
+    holder.rect = { x: 60, y: 10, width: 400, height: 300 };
+    auto.onGrabEnd(app, w, 17);
+    assert.deepEqual(ml.pendingMs(), [250], 'an arrow-key move still snaps');
 });
