@@ -1,0 +1,405 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Automatic tiling for Cinnamon (Linux Mint) · greenTile</title>
+<meta name="description" content="greenTile arranges your windows on Linux Mint Cinnamon as they open: presets per monitor and workspace, wide columns, drag to split, gaps and floating windows. A walk through with screenshots.">
+<link rel="canonical" href="https://greentile.io/blog/auto-tiling-cinnamon/">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="greenTile">
+<meta property="og:title" content="Automatic tiling for Cinnamon (Linux Mint)">
+<meta property="og:description" content="greenTile arranges your windows while you work: open one and the others make room. Presets, wide columns, drag to split, gaps and floating windows, shown on Linux Mint 22.3.">
+<meta property="og:url" content="https://greentile.io/blog/auto-tiling-cinnamon/">
+<meta property="og:image" content="https://greentile.io/screenshots/tour-poster.jpg">
+<meta property="og:image:width" content="1280">
+<meta property="og:image:height" content="720">
+<meta property="og:image:alt" content="greenTile: tiling for Cinnamon, six windows in one row">
+<style>
+@font-face{font-family:"Bricolage";src:url(../../fonts/bricolage-normal-200_800.woff2) format("woff2");font-weight:200 800;font-stretch:75% 100%}
+@font-face{font-family:"Instrument";src:url(../../fonts/instrument-normal-400_700.woff2) format("woff2");font-weight:400 700}
+@font-face{font-family:"Instrument";src:url(../../fonts/instrument-italic-400_700.woff2) format("woff2");font-weight:400 700;font-style:italic}
+@font-face{font-family:"JBMono";src:url(../../fonts/jbmono-normal-400_700.woff2) format("woff2");font-weight:400 700}
+
+/* tokens and base: the same as the home page (../../index.html) */
+:root{
+  --sage:#E6ECE2;
+  --sheet:#F7F9F5;
+  --ink:#13201A;
+  --moss:#2F6A1E;
+  --leaf:#4EA530;
+  --amber:#F0A23B;
+  --rule:#C5D0BF;
+  --mute:#5B6B60;
+  --r:10px;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+html{background:var(--sage);color:var(--ink)}
+body{margin:0;font:400 17px/1.55 "Instrument",system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+a{color:inherit}
+:focus-visible{outline:3px solid var(--amber);outline-offset:3px;border-radius:4px}
+.wrap{max-width:1180px;margin:0 auto;padding:0 clamp(20px,4vw,48px)}
+
+nav{display:flex;align-items:center;justify-content:space-between;padding:22px 0}
+.mark{display:flex;align-items:center;gap:10px;font:700 21px/1 "Bricolage";letter-spacing:-.02em;text-decoration:none}
+.mark i{display:grid;grid-template-columns:1fr 1fr;gap:2px;width:22px;height:22px}
+.mark i b{background:var(--leaf);border-radius:2px}
+.mark i b:nth-child(2){background:var(--moss)}
+.mark i b:first-child{grid-row:span 2}
+nav ul{display:flex;gap:26px;list-style:none;margin:0;padding:0;font-size:15px}
+nav ul a{text-decoration:none;color:var(--mute)}
+nav ul a:hover,nav ul a[aria-current]{color:var(--ink)}
+.gh{font:600 14px/1 "Instrument";padding:10px 14px;border:1.5px solid var(--ink);border-radius:999px;text-decoration:none}
+.gh:hover{background:var(--ink);color:var(--sage)}
+
+.hero{padding:clamp(28px,6vh,72px) 0 24px}
+.eyebrow{font:500 13px/1 "JBMono";letter-spacing:.06em;text-transform:uppercase;color:var(--moss);display:flex;gap:10px;align-items:center}
+.eyebrow::before{content:"";width:28px;height:2px;background:var(--leaf)}
+h1{font:800 clamp(42px,6.2vw,88px)/.94 "Bricolage";font-variation-settings:"opsz" 96;letter-spacing:-.045em;margin:20px 0 22px;max-width:13ch}
+h1 em{font-style:normal;color:var(--leaf);white-space:nowrap}
+.lede{font-size:clamp(18px,1.6vw,21px);max-width:46ch;color:#2A3A30;margin:0 0 28px}
+.cta{display:flex;flex-wrap:wrap;gap:14px;align-items:center}
+.btn{font:600 16px/1 "Instrument";padding:15px 22px;border-radius:999px;background:var(--ink);color:var(--sage);text-decoration:none;display:inline-block}
+.btn:hover{background:var(--moss)}
+.keys{display:inline-flex;gap:6px;align-items:center;font-size:14px;color:var(--mute)}
+kbd{font:600 13px/1 "JBMono";padding:7px 9px 8px;border-radius:7px;background:var(--sheet);border:1px solid var(--rule);box-shadow:0 2px 0 var(--rule);color:var(--ink)}
+code{font:500 .9em "JBMono";background:var(--sheet);border:1px solid var(--rule);border-radius:5px;padding:1px 5px}
+
+/* the short answer, set like the dark feature card on the home page */
+.hero-top{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,420px);gap:48px;align-items:end}
+.answer{background:var(--ink);color:var(--sage);border-radius:var(--r);padding:26px 26px 28px}
+.answer h2{font:700 22px/1.1 "Bricolage";letter-spacing:-.02em;margin:0 0 10px;max-width:none}
+.answer p{margin:0 0 12px;color:#C9D5C3;font-size:15.5px}
+.answer p:last-child{margin:0}
+.answer kbd{background:#223329;border-color:#3A4D40;box-shadow:0 2px 0 #3A4D40;color:var(--sage)}
+.demo{margin:clamp(30px,5vh,52px) 0 0}
+.demo img{display:block;width:100%;height:auto;border-radius:12px;box-shadow:0 30px 60px -30px rgba(19,32,26,.55),0 0 0 1px rgba(19,32,26,.12)}
+.demo figcaption{margin-top:14px;font:500 13px/1.4 "JBMono";color:var(--mute)}
+
+section{padding:clamp(48px,8vh,88px) 0}
+h2{font:750 clamp(32px,4.2vw,52px)/1 "Bricolage";letter-spacing:-.035em;margin:0 0 12px;max-width:18ch}
+.sub{color:var(--mute);max-width:56ch;margin:0 0 32px}
+
+/* native vs missing: two columns of ruled rows, like the hotkey list */
+.versus{display:grid;grid-template-columns:1fr 1fr;gap:0 48px}
+.versus h3{font:700 22px/1.1 "Bricolage";letter-spacing:-.02em;margin:0;padding:0 0 14px;border-bottom:1.5px solid var(--ink)}
+.versus ul{list-style:none;margin:0;padding:0}
+.versus li{padding:14px 0 16px;border-bottom:1px solid var(--rule);color:#34443A;font-size:16px}
+.versus li b{display:block;font:600 16px/1.3 "Instrument";color:var(--ink);margin-bottom:3px}
+.versus .k{display:inline-flex;gap:4px;margin-top:6px}
+.versus .gap li b::before{content:"";display:inline-block;width:10px;height:10px;border-radius:2px;background:var(--amber);margin-right:8px;vertical-align:1px}
+
+/* a real sequence, so it is numbered */
+.steps{list-style:none;counter-reset:s;margin:0;padding:0;display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+.steps li{counter-increment:s;background:var(--sheet);border:1px solid #D6DED1;border-radius:var(--r);padding:22px 24px 24px;display:flex;flex-direction:column;gap:8px}
+.steps li::before{content:counter(s);font:600 13px/1 "JBMono";color:var(--moss)}
+.steps h3{font:700 21px/1.15 "Bricolage";letter-spacing:-.02em;margin:0}
+.steps p{margin:0;color:#34443A;font-size:15.5px}
+.steps .k{display:flex;gap:5px;flex-wrap:wrap;margin-top:auto;padding-top:6px}
+
+.note{max-width:68ch;margin:28px 0 0;padding:18px 22px;border-left:3px solid var(--amber);background:var(--sheet);border-radius:0 var(--r) var(--r) 0;color:#2A3A30;font-size:16px}
+.note b{color:var(--ink)}
+
+.install{display:grid;grid-template-columns:1fr 1.2fr;gap:40px;align-items:start}
+.install>*{min-width:0}
+.install code{overflow-wrap:anywhere}
+.install h3{font:700 20px/1.15 "Bricolage";letter-spacing:-.02em;margin:22px 0 6px}
+.install h3:first-of-type{margin-top:0}
+.install p{margin:0 0 10px;color:#2A3A30;max-width:52ch}
+pre{margin:0;background:var(--ink);color:#DDE7D8;border-radius:var(--r);padding:22px 24px;font:500 14px/1.7 "JBMono";overflow:auto}
+pre .c{color:#7E9483}pre .g{color:#8FD16F}
+
+.dt-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.dt{background:var(--sheet);border:1px solid #D6DED1;border-radius:var(--r);padding:12px 12px 24px;display:flex;flex-direction:column;gap:8px}
+.dt figure{margin:0 0 8px;background:#E4EBDF;border-radius:7px;padding:16px 16px 12px}
+.dt svg{display:block;width:100%;height:auto}
+.dt h3{font:700 21px/1.1 "Bricolage";letter-spacing:-.02em;margin:0 10px}
+.dt p{margin:0 10px;color:#34443A;font-size:15.5px}
+
+.next{display:flex;flex-wrap:wrap;gap:14px;align-items:center;margin-top:36px}
+.next.tight{margin-top:20px}
+.next a.plain{font:600 16px/1 "Instrument";padding:14px 20px;border:1.5px solid var(--ink);border-radius:999px;text-decoration:none}
+.next a.plain:hover{background:var(--ink);color:var(--sage)}
+
+footer{padding:36px 0 56px;border-top:1px solid var(--rule);display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px;color:var(--mute);font-size:14px}
+
+@media (max-width:980px){
+  .hero-top,.install,.versus{grid-template-columns:1fr;gap:32px}
+  .steps{grid-template-columns:1fr}
+  .dt-grid{grid-template-columns:repeat(2,1fr)}
+  nav ul{display:none}
+}
+@media (max-width:560px){.dt-grid{grid-template-columns:1fr}}
+/* article layout: prose next to real screenshots */
+.prose{max-width:64ch}
+.prose p{margin:0 0 14px;color:#2A3A30}
+.prose h3{font:700 24px/1.15 "Bricolage";letter-spacing:-.02em;margin:0 0 10px}
+.band{background:var(--sheet);border-top:1px solid #D6DED1;border-bottom:1px solid #D6DED1}
+.shot{margin:0}
+.shot img{display:block;width:100%;height:auto;border-radius:10px;box-shadow:0 24px 48px -28px rgba(19,32,26,.55),0 0 0 1px rgba(19,32,26,.12)}
+.shot figcaption{margin-top:10px;font:500 13px/1.45 "JBMono";color:var(--mute)}
+.shot figcaption kbd{padding:3px 6px 4px;font-size:12px}
+.strip{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;margin:28px 0 56px}
+.pair{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:22px;margin-top:28px;align-items:start}
+.feat{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.35fr);gap:48px;align-items:start;margin-top:28px}
+.feat.flip>.prose{order:2}
+.stack{display:grid;gap:22px}
+.keylist{list-style:none;margin:6px 0 18px;padding:0}
+.keylist li{display:grid;grid-template-columns:200px minmax(0,1fr);gap:14px;padding:11px 0;border-bottom:1px solid var(--rule);color:#34443A;font-size:15.5px;align-items:baseline}
+.keylist span{white-space:nowrap;color:var(--ink)}
+@media (max-width:980px){
+  .feat,.pair{grid-template-columns:1fr;gap:24px}
+  .feat.flip>.prose{order:0}
+  .strip{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .keylist li{grid-template-columns:1fr;gap:4px}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <nav>
+    <a class="mark" href="../../"><i><b></b><b></b><b></b></i>greenTile</a>
+    <ul><li><a href="../../#tour">Video</a></li><li><a href="../../#features">Features</a></li><li><a href="../../#details">Details</a></li><li><a href="../../#keys">Hotkeys</a></li><li><a href="../../#install">Install</a></li><li><a href="./" aria-current="page">Auto tiling</a></li><li><a href="../gtile-alternative/">vs gTile</a></li><li><a href="../">Blog</a></li></ul>
+    <a class="gh" href="https://github.com/carsteneu/greenTile">github.com/carsteneu/greenTile</a>
+  </nav>
+  <header class="hero">
+    <div class="hero-top">
+      <div>
+        <div class="eyebrow">Linux Mint · Cinnamon</div>
+        <h1>Automatic tiling for <em>Cinnamon.</em></h1>
+        <p class="lede">greenTile is a free extension that arranges your windows while you work. Open a window and the others make room. Close one and the space closes with it. You choose the shape, greenTile keeps it.</p>
+        <div class="cta">
+          <a class="btn" href="https://github.com/carsteneu/greenTile/releases/latest">Download greenTile</a>
+          <a class="keys" href="#walk">See how it works</a>
+        </div>
+      </div>
+      <aside class="answer" aria-labelledby="short">
+        <h2 id="short">In short</h2>
+        <p>Install greenTile, switch it on and press <kbd>Super</kbd><kbd>Ctrl</kbd><kbd>A</kbd> on a workspace.</p>
+        <p>From then on every window you open, close, minimize or restore on that monitor and workspace is tiled for you. Cinnamon on its own snaps one window at a time to a half or a quarter of the screen.</p>
+      </aside>
+    </div>
+    <figure class="demo">
+      <img src="../../screenshots/guide/desk-leftmain-gap.webp" width="1600" height="900" fetchpriority="high" decoding="async" alt="Linux Mint desktop in a dark theme with four tiled windows: a file manager on the left, a terminal and an editor stacked in the middle, a system monitor on the right, with a narrow gap between them">
+      <figcaption>greenTile 2.2.4 on Linux Mint 22.3: the preset Left main + stacks with an 8 px gap.</figcaption>
+    </figure>
+  </header>
+</div>
+
+<section id="walk">
+  <div class="wrap">
+    <h2>Open a window. greenTile makes room.</h2>
+    <div class="prose">
+      <p>Switch on auto mode with <kbd>Super</kbd><kbd>Ctrl</kbd><kbd>A</kbd>. It acts on the monitor of the focused window and on the workspace you are looking at, so a second workspace or a second screen stays as it is until you switch it on there too.</p>
+      <p>Then simply work. A new window joins the end of the layout, and opening, closing, minimizing or restoring a window retiles the monitor after 300 ms. Dialogs are ignored. You do not have to pick a layout first: without one, greenTile puts up to three windows side by side on a monitor narrower than 2100 px and then starts to stack them. A wider monitor takes up to six in one row before it adds rows.</p>
+    </div>
+    <div class="strip">
+      <figure class="shot"><img src="../../screenshots/guide/auto-2.webp" width="1200" height="675" loading="lazy" decoding="async" alt="Two windows side by side, each half of the screen"><figcaption>Two windows</figcaption></figure>
+      <figure class="shot"><img src="../../screenshots/guide/auto-3.webp" width="1200" height="675" loading="lazy" decoding="async" alt="Three windows in three equal columns"><figcaption>Three, side by side</figcaption></figure>
+      <figure class="shot"><img src="../../screenshots/guide/auto-4.webp" width="1200" height="675" loading="lazy" decoding="async" alt="Four windows: two full-height columns and a third column with two stacked windows"><figcaption>Four: the stacking starts</figcaption></figure>
+      <figure class="shot"><img src="../../screenshots/guide/auto-6.webp" width="1200" height="675" loading="lazy" decoding="async" alt="Six windows in three columns of two"><figcaption>Six: three columns of two</figcaption></figure>
+    </div>
+    <div class="feat">
+      <div class="prose">
+        <h3>And when only one window is left?</h3>
+        <p>A lone window is centered: about 62 % of the width, the golden ratio, and 90 % of the height. It looks calm on a wide screen and leaves the desktop visible around it.</p>
+        <p>If you prefer it to fill the monitor, or to stay exactly where you put it, choose that under <i>A single window</i> in the settings. A window you maximized yourself, or one that opened in fullscreen, is always left as it is.</p>
+        <p>greenTile also keeps the order of your windows. They are tiled in the order they already have on screen, and on X11 that order survives a Cinnamon restart and unplugging and replugging a monitor.</p>
+      </div>
+      <div class="stack">
+        <figure class="shot"><img src="../../screenshots/guide/one-window-centered.webp" width="1600" height="900" loading="lazy" decoding="async" alt="A single editor window centered on the desktop with free space around it"><figcaption>One window, centered.</figcaption></figure>
+        <figure class="shot"><img src="../../screenshots/guide/settings-single.webp" width="805" height="508" loading="lazy" decoding="async" alt="greenTile settings with the select A single window open, offering Leave it untouched, Fill the monitor and Center the window"><figcaption>Three choices for a single window.</figcaption></figure>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="presets" class="band">
+  <div class="wrap">
+    <h2>Pick a shape from the preset panel.</h2>
+    <div class="feat flip">
+      <div class="prose">
+        <p><kbd>Super</kbd><kbd>Ctrl</kbd><kbd>P</kbd> opens the presets for the monitor you are on. greenTile ships with sixteen of them, from <i>Two columns</i> to <i>Center main</i>, and every card shows what a click would do with the windows you have open right now.</p>
+        <p>One click assigns the preset to this monitor and workspace and tiles at once. The panel stays open, so you can try a few before you settle. Each monitor and workspace keeps its own choice: three columns on the ultrawide, a main window with stacks on the laptop.</p>
+        <p>At the bottom of the panel you set the <b>gap between windows</b>, from 0 to 48 px in steps of 2. Only the edges where two windows meet move in, the outer edges stay flush with the screen.</p>
+      </div>
+      <figure class="shot"><img src="../../screenshots/guide/preset-assigned.webp" width="800" height="752" loading="lazy" decoding="async" alt="The greenTile preset panel in its dark theme: sixteen preset cards with previews, Left main + stacks marked as assigned, Auto on in the title bar and a gap of 8 px"><figcaption>The preset panel. The assigned card carries a green edge and a check.</figcaption></figure>
+    </div>
+    <div class="feat">
+      <div class="prose">
+        <h3>Wide columns, new in 2.2.4</h3>
+        <p>A column can now be wider than its neighbours. Four of the sixteen starters use this: <i>Wide center</i>, <i>Wide center + stacks</i>, <i>Two thirds left</i> and <i>Two thirds right</i>.</p>
+        <p><i>Wide center</i> gives the middle column four of six parts: a file manager or a browser in the middle, a terminal on each side. Some applications insist on a minimum width; such a window simply takes the room it needs.</p>
+      </div>
+      <figure class="shot"><img src="../../screenshots/guide/wide-center.webp" width="1600" height="900" loading="lazy" decoding="async" alt="Three tiled windows in the ratio one to four to one: a narrow terminal on the left, a wide file manager in the middle and a narrow terminal on the right"><figcaption>Wide center: 1 : 4 : 1.</figcaption></figure>
+    </div>
+  </div>
+</section>
+
+<section id="editor">
+  <div class="wrap">
+    <h2>Paint your own layout.</h2>
+    <div class="prose">
+      <p>The pencil on a card opens the editor. You paint on a grid of six columns and four rows: click or drag in a column to set how many windows it holds, right-click to remove it. A preset can have several rules by window count, for example two columns from two windows and a main window with stacks from four. Saving a preset that is in use retiles right away.</p>
+      <p>Between two painted columns sits a small handle. Drag it to merge them into one wide column; the handle inside a merged column splits it again. The line below the painter shows the result, for example <code>[1,2,2]</code>: one window in the first column, two in each of the others.</p>
+    </div>
+    <div class="pair">
+      <figure class="shot"><img src="../../screenshots/guide/editor-leftmain.webp" width="602" height="435" loading="lazy" decoding="async" alt="The preset editor for Left main + stacks: a painter with one tall column on the left and two columns of two windows, rule from 2 windows"><figcaption>Left main + stacks in the editor.</figcaption></figure>
+      <figure class="shot"><img src="../../screenshots/guide/editor-spans.webp" width="602" height="435" loading="lazy" decoding="async" alt="The preset editor for Wide center: a narrow column, a wide merged column and a narrow column, with handles between them"><figcaption>Wide center: the middle column is merged from four.</figcaption></figure>
+    </div>
+  </div>
+</section>
+
+<section id="mouse" class="band">
+  <div class="wrap">
+    <h2>Fine-tune with the mouse.</h2>
+    <div class="prose">
+      <p>Drag the border between two tiled windows and the neighbours follow. greenTile remembers your borders per window count: open a fourth window and it gets its own layout, close it again and your three-window borders come back.</p>
+      <p>Move a window by hand and let go. It lands in the slot under the pointer, and the others make room. Drop it on the outer quarter of another window instead, and it splits that window: it stacks above or below, or opens a new column beside it. A translucent preview shows the result before you release the mouse button.</p>
+    </div>
+    <div class="pair">
+      <figure class="shot"><img src="../../screenshots/guide/split-preview.webp" width="1600" height="900" loading="lazy" decoding="async" alt="A terminal window is being dragged over the right part of a file manager; a translucent green area previews a new column there"><figcaption>Dragging a terminal onto the edge of the file manager: the green preview shows the new column.</figcaption></figure>
+      <figure class="shot"><img src="../../screenshots/guide/split-done.webp" width="1600" height="900" loading="lazy" decoding="async" alt="After the drop: four columns, file manager, terminal, editor and system monitor"><figcaption>After the drop: four columns.</figcaption></figure>
+    </div>
+  </div>
+</section>
+
+<section id="keys">
+  <div class="wrap">
+    <h2>Or keep your hands on the keyboard.</h2>
+    <div class="feat">
+      <div class="prose">
+        <p>On a workspace with auto mode on, <kbd>Super</kbd>+arrow moves the keyboard focus to the neighbouring window instead of pushing the window to a screen half. A thin border in the state color shows for three seconds where the focus went.</p>
+        <ul class="keylist">
+          <li><span><kbd>Super</kbd><kbd>Ctrl</kbd>+arrow</span>swap the focused window with its neighbour, across monitors too</li>
+          <li><span><kbd>Super</kbd><kbd>Alt</kbd>+arrow</span>make it wider, narrower, taller or shorter</li>
+          <li><span><kbd>Super</kbd><kbd>Ctrl</kbd><kbd>3</kbd> / <kbd>6</kbd></span>three or six equal columns, even without auto mode</li>
+          <li><span><kbd>Super</kbd><kbd>Ctrl</kbd><kbd>D</kbd></span>pause: keeps the preset, stops the tiling</li>
+        </ul>
+        <p>Every one of greenTile's keys can be changed on the Hotkeys page of its settings.</p>
+      </div>
+      <figure class="shot"><img src="../../screenshots/guide/focus-border.webp" width="1600" height="900" loading="lazy" decoding="async" alt="Four tiled windows; the file manager on the left is outlined by a thin green border after a focus move"><figcaption>After <kbd>Super</kbd><kbd>←</kbd>: the green border marks the focused window.</figcaption></figure>
+    </div>
+  </div>
+</section>
+
+<section id="float" class="band">
+  <div class="wrap">
+    <h2>Some windows should float.</h2>
+    <div class="feat flip">
+      <div class="prose">
+        <p>Not every window belongs in the grid. Dialogs that belong to another window, and windows that cannot be resized, always float where they open. The same goes for the settings dialogs of Cinnamon's extensions and applets, greenTile's own included.</p>
+        <p>For everything else there is the <b>Never tile</b> list in the settings. A row matches a window class, a title or an app id, and the app picker adds an installed application with one click, flatpaks included. Here the calculator stays out of the layout, and the windows behind it keep their places.</p>
+        <p>To let a single window float just for now, press <kbd>Super</kbd><kbd>G</kbd>. Press it again and the window tiles again.</p>
+      </div>
+      <div class="stack">
+        <figure class="shot"><img src="../../screenshots/guide/float-calculator.webp" width="1600" height="900" loading="lazy" decoding="async" alt="Four tiled windows with a calculator floating on top of them in the upper right"><figcaption>The calculator floats, the four windows behind it stay tiled.</figcaption></figure>
+        <figure class="shot"><img src="../../screenshots/guide/settings-never-tile.webp" width="805" height="899" loading="lazy" decoding="async" alt="greenTile settings: the Never tile list with the rows Window class xlet-settings.py and App id org.gnome.Calculator.desktop"><figcaption>The Never tile list in the settings.</figcaption></figure>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="native">
+  <div class="wrap">
+    <h2>What Cinnamon does on its own.</h2>
+    <p class="sub">Cinnamon's window manager, Muffin, has tiling built in. It is good at placing a single window quickly. Everything beyond that is what greenTile adds.</p>
+    <div class="versus">
+      <div>
+        <h3>Built in</h3>
+        <ul>
+          <li><b>Edge tiling by mouse</b>Drag a window against a screen edge and it fills that half. Depending on a setting, the top edge maximizes it instead.</li>
+          <li><b>Halves and quarters</b>Besides the four halves, Muffin knows a quarter tile for each corner of the screen.</li>
+          <li><b>Keyboard</b>Super with an arrow key pushes the focused window towards that side of the screen. The keys can be changed in Cinnamon's keyboard settings.<span class="k"><kbd>Super</kbd><kbd>←</kbd><kbd>→</kbd><kbd>↑</kbd><kbd>↓</kbd></span></li>
+        </ul>
+      </div>
+      <div class="gap">
+        <h3>Not built in</h3>
+        <ul>
+          <li><b>Arranging by itself</b>Each tile is one action on one window. A new window opens wherever the application puts it, and a closed one leaves a hole.</li>
+          <li><b>More than halves and quarters</b>Three or six columns, a main window with a stack beside it, a wide centre column: there is no way to set up shapes like these.</li>
+          <li><b>Layouts per monitor and workspace</b>There is nothing to remember that workspace 2 on the ultrawide is for three columns.</li>
+          <li><b>Gaps</b>There is no setting for space between tiled windows.</li>
+        </ul>
+      </div>
+    </div>
+    <p class="note"><b>One change to Cinnamon's own keys:</b> on a monitor and workspace with auto mode on, <kbd>Super</kbd>+arrow moves the focus instead of pushing the window to a half. Everywhere else, and for windows greenTile does not manage, the native edge tiling stays as it was.</p>
+  </div>
+</section>
+
+<section id="install">
+  <div class="wrap install">
+    <div>
+      <h2>Install greenTile.</h2>
+      <p class="sub">Requires Cinnamon 6.0.4 or newer. Tested on Linux Mint 21.3 to 22.3 (Cinnamon 6.0.4 to 6.6) with X11; on Wayland the first tests work. Free software under the GPL v3.</p>
+      <h3>From Cinnamon's Extensions manager</h3>
+      <p>Not yet. greenTile is not listed in the Cinnamon Spices catalogue so far, so it does not show up under Extensions → Download. Until it is, use the release zip.</p>
+      <h3>With the installer script</h3>
+      <p>Download the zip from the latest release, unpack it and run <code>install.sh</code>. It copies the extension to <code>~/.local/share/cinnamon/extensions/greenTile@carsteneu/</code> and compiles the translations. It needs <code>flock</code> from util-linux; without <code>msgfmt</code> from gettext the interface stays in English. Then restart Cinnamon and enable greenTile in System Settings → Extensions.</p>
+      <h3>Updating</h3>
+      <p>Run <code>./update.sh</code> from the unpacked zip: it fetches the latest release and installs it. Settings and presets are kept. A running Cinnamon keeps the code it loaded at startup, so restart Cinnamon (X11) or log out and back in (Wayland) afterwards.</p>
+      <p>Building from a checkout is described in the <a href="https://github.com/carsteneu/greenTile#development">README</a>. If gTile is installed, disable it first: both use <kbd>Super</kbd><kbd>G</kbd>.</p>
+      <div class="next tight"><a class="btn" href="https://github.com/carsteneu/greenTile/releases/latest">Download the latest release</a></div>
+    </div>
+<pre><span class="c"># unpack the release zip and install for your user</span>
+unzip greenTile-*.zip
+cd greenTile-*/ &amp;&amp; ./install.sh
+
+<span class="c"># restart Cinnamon on X11 to load the new code</span>
+Ctrl+Alt+Esc   <span class="c"># or Alt+F2, then r</span>
+<span class="c"># Wayland: log out and back in instead</span>
+
+<span class="c"># then: System Settings → Extensions → <span class="g">greenTile</span> → enable</span>
+<span class="c"># and on the workspace you want tiled:</span>
+Super+Ctrl+A</pre>
+  </div>
+</section>
+
+<section id="does">
+  <div class="wrap">
+    <h2>What greenTile does for you.</h2>
+    <p class="sub">Once auto mode is on, greenTile takes care of these. The <a href="../../#details">home page</a> has the rest, and the complete list is in <a href="https://github.com/carsteneu/greenTile/blob/main/FEATURES.md">FEATURES.md</a>.</p>
+    <div class="dt-grid">
+      <article class="dt">
+        <figure><svg viewBox="0 0 300 170" role="img" aria-label="A window dragged over a free slot snaps into it on release"><defs><linearGradient id="dtbg1" x1="1" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2E5A33"/><stop offset=".5" stop-color="#1E3A25"/><stop offset="1" stop-color="#15271B"/></linearGradient></defs><rect x="0" y="0" width="300" height="170" rx="7" fill="#1B2A21"/><rect x="5" y="5" width="290" height="160" rx="3.5" fill="url(#dtbg1)"/><g><rect x="5" y="5" width="94" height="160" rx="3" fill="#F7F9F5"/><path d="M8 5h88a3 3 0 0 1 3 3v5h-94v-5a3 3 0 0 1 3 -3z" fill="#4EA530"/><rect x="16.3" y="29" width="71.4" height="2.6" rx="1.3" fill="#DCE3D7"/><rect x="16.3" y="43.4" width="48.9" height="2.6" rx="1.3" fill="#DCE3D7"/><rect x="16.3" y="57.8" width="62" height="2.6" rx="1.3" fill="#DCE3D7"/><rect x="16.3" y="72.2" width="32" height="2.6" rx="1.3" fill="#DCE3D7"/></g><rect x="103.8" y="5.8" width="92.4" height="158.4" rx="3" fill="#fff" fill-opacity=".05" stroke="#F0A23B" stroke-width="1.6" stroke-dasharray="5 4"/><g><rect x="201" y="5" width="94" height="160" rx="3" fill="#F7F9F5"/><path d="M204 5h88a3 3 0 0 1 3 3v5h-94v-5a3 3 0 0 1 3 -3z" fill="#3E7CB1"/><rect x="212.3" y="29" width="71.4" height="2.6" rx="1.3" fill="#DCE3D7"/><rect x="212.3" y="43.4" width="48.9" height="2.6" rx="1.3" fill="#DCE3D7"/><rect x="212.3" y="57.8" width="62" height="2.6" rx="1.3" fill="#DCE3D7"/><rect x="212.3" y="72.2" width="32" height="2.6" rx="1.3" fill="#DCE3D7"/></g><g filter="none"><g transform="rotate(-4 165 79)"><rect x="125" y="19" width="84" height="126" rx="3" fill="#F7F9F5"/><path d="M128 19h78a3 3 0 0 1 3 3v5h-84v-5a3 3 0 0 1 3 -3z" fill="#F0A23B"/><rect x="135.1" y="39.6" width="63.8" height="2.6" rx="1.3" fill="#DCE3D7"/><rect x="135.1" y="50.9" width="43.7" height="2.6" rx="1.3" fill="#DCE3D7"/><rect x="135.1" y="62.3" width="55.4" height="2.6" rx="1.3" fill="#DCE3D7"/><rect x="135.1" y="73.6" width="28.6" height="2.6" rx="1.3" fill="#DCE3D7"/></g></g><g transform="translate(169 20)"><path d="M0 0v14l3.6-3.4 2.9 6.4 2.4-1-2.9-6.3h5z" fill="#fff" stroke="#13201A" stroke-width="1" stroke-linejoin="round"/></g></svg></figure>
+        <h3>Drop it, it snaps</h3>
+        <p>Move a window by hand and let go. It lands in the slot under the pointer and its neighbours make room. Drag it to another monitor and both screens retile.</p>
+      </article>
+      <article class="dt">
+        <figure><svg viewBox="0 0 300 170" role="img" aria-label="A two by two rule filled with four, three and two windows without empty cells"><defs><linearGradient id="dtbg2" x1="1" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2E5A33"/><stop offset=".5" stop-color="#1E3A25"/><stop offset="1" stop-color="#15271B"/></linearGradient></defs><text x="150" y="16" text-anchor="middle" fill="#13201A" style="font:600 10px JBMono,monospace">one rule · 2 · 2</text><rect x="4" y="32" width="88" height="96" rx="7" fill="#1B2A21"/><rect x="8" y="36" width="80" height="88" rx="3.5" fill="url(#dtbg2)"/><g><rect x="8" y="36" width="38.5" height="42.5" rx="3" fill="#F7F9F5"/><path d="M11 36h32.5a3 3 0 0 1 3 3v0.8h-38.5v-0.8a3 3 0 0 1 3 -3z" fill="#4EA530"/><rect x="12.6" y="44.1" width="29.3" height="2.6" rx="1.3" fill="#DCE3D7"/><rect x="12.6" y="49.1" width="20" height="2.6" rx="1.3" fill="#DCE3D7"/><rect x="12.6" y="54.1" width="25.4" height="2.6" rx="1.3" fill="#DCE3D7"/><rect x="12.6" y="59.1" width="13.1" height="2.6" rx="1.3" fill="#DCE3D7"/></g><g><rect x="8" y="81.5" width="38.5" height="42.5" rx="3" fill="#F7F9F5"/><path d="M11 81.5h32.5a3 3 0 0 1 3 3v0.8h-38.5v-0.8a3 3 0 0 1 3 -3z" fill="#3E7CB1"/><rect x="12.6" y="89.6" width="29.3" height="2.6" rx="1.3" fill="#DCE3D7"/><rect x="12.6" y="94.6" width="20" height="2.6" rx="1.3" fill="#DCE3D7"/><rect x="12.6" y="99.6" width="25.4" height="2.6" rx="1.3" fill="#DCE3D7"/><rect x="12.6" y="104.6" width="13.1" height="2.6" rx="1.3" fill="#DCE3D7"/></g><g><rect x="49.5" y="36" width="38.5" height="42.5" rx="3" fill="#F7F9F5"/><path d="M52.5 36h32.5a3 3 0 0 1 3 3v0.8h-38.5v-0.8a3 3 0 0 1 3 -3z" fill="#8E6CC4"/><rect x="54.1" y="44.1" width="29.3" height="2.6" rx="1.3" fill="#DCE3D7"/><rect x="54.1" y="49.1" width="20" height="2.6" rx="1.3" fill="#DCE3D7"/><rect x="54.1" y="54.1" width="25.4" height="2.6" rx="1.3" fill="#DCE3D7"/><rect x="54.1" y="59.1" width="13.1" height="2.6" rx="1.3" fill="#DCE3D7"/></g><g><rect x="49.5" y="81.5" width="38.5" height="42.5" rx="3" fill="#F7F9F5"/><path d="M52.5 81.5h32.5a3 3 0 0 1 3 3v0.8h-38.5v-0.8a3 3 0 0 1 3 -3z" fill="#2A9D8F"/><rect x="54.1" y="89.6" width="29.3" height="2.6" rx="1.3" fill="#DCE3D7"/><rect x="54.1" y="94.6" width="20" height="2.6" rx="1.3" fill="#DCE3D7"/><rect x="54.1" y="99.6" width="25.4" height="2.6" rx="1.3" fill="#DCE3D7"/><rect x="54.1" y="104.6" width="13.1" height="2.6" rx="1.3" fill="#DCE3D7"/></g><text x="48" y="146" text-anchor="middle" fill="#5B6B60" style="font:500 10px JBMono,monospace">4 windows</text><rect x="106" y="32" width="88" height="96" rx="7" fill="#1B2A21"/><rect x="110" y="36" width="80" height="88" rx="3.5" fill="url(#dtbg2)"/><g><rect x="110" y="36" width="38.5" height="42.5" rx="3" fill="#F7F9F5"/><path d="M113 36h32.5a3 3 0 0 1 3 3v0.8h-38.5v-0.8a3 3 0 0 1 3 -3z" fill="#4EA530"/><rect x="114.6" y="44.1" width="29.3" height="2.6" rx="1.3" fill="#DCE3D7"/><rect x="114.6" y="49.1" width="20" height="2.6" rx="1.3" fill="#DCE3D7"/><rect x="114.6" y="54.1" width="25.4" height="2.6" rx="1.3" fill="#DCE3D7"/><rect x="114.6" y="59.1" width="13.1" height="2.6" rx="1.3" fill="#DCE3D7"/></g><g><rect x="110" y="81.5" width="38.5" height="42.5" rx="3" fill="#F7F9F5"/><path d="M113 81.5h32.5a3 3 0 0 1 3 3v0.8h-38.5v-0.8a3 3 0 0 1 3 -3z" fill="#3E7CB1"/><rect x="114.6" y="89.6" width="29.3" height="2.6" rx="1.3" fill="#DCE3D7"/><rect x="114.6" y="94.6" width="20" height="2.6" rx="1.3" fill="#DCE3D7"/><rect x="114.6" y="99.6" width="25.4" height="2.6" rx="1.3" fill="#DCE3D7"/><rect x="114.6" y="104.6" width="13.1" height="2.6" rx="1.3" fill="#DCE3D7"/></g><g><rect x="151.5" y="36" width="38.5" height="88" rx="3" fill="#F7F9F5"/><path d="M154.5 36h32.5a3 3 0 0 1 3 3v4.9h-38.5v-4.9a3 3 0 0 1 3 -3z" fill="#8E6CC4"/><rect x="156.1" y="52.7" width="29.3" height="2.6" rx="1.3" fill="#DCE3D7"/><rect x="156.1" y="60.6" width="20" height="2.6" rx="1.3" fill="#DCE3D7"/><rect x="156.1" y="68.6" width="25.4" height="2.6" rx="1.3" fill="#DCE3D7"/><rect x="156.1" y="76.5" width="13.1" height="2.6" rx="1.3" fill="#DCE3D7"/></g><text x="150" y="146" text-anchor="middle" fill="#5B6B60" style="font:500 10px JBMono,monospace">3 windows</text><rect x="208" y="32" width="88" height="96" rx="7" fill="#1B2A21"/><rect x="212" y="36" width="80" height="88" rx="3.5" fill="url(#dtbg2)"/><g><rect x="212" y="36" width="38.5" height="88" rx="3" fill="#F7F9F5"/><path d="M215 36h32.5a3 3 0 0 1 3 3v4.9h-38.5v-4.9a3 3 0 0 1 3 -3z" fill="#4EA530"/><rect x="216.6" y="52.7" width="29.3" height="2.6" rx="1.3" fill="#DCE3D7"/><rect x="216.6" y="60.6" width="20" height="2.6" rx="1.3" fill="#DCE3D7"/><rect x="216.6" y="68.6" width="25.4" height="2.6" rx="1.3" fill="#DCE3D7"/><rect x="216.6" y="76.5" width="13.1" height="2.6" rx="1.3" fill="#DCE3D7"/></g><g><rect x="253.5" y="36" width="38.5" height="88" rx="3" fill="#F7F9F5"/><path d="M256.5 36h32.5a3 3 0 0 1 3 3v4.9h-38.5v-4.9a3 3 0 0 1 3 -3z" fill="#3E7CB1"/><rect x="258.1" y="52.7" width="29.3" height="2.6" rx="1.3" fill="#DCE3D7"/><rect x="258.1" y="60.6" width="20" height="2.6" rx="1.3" fill="#DCE3D7"/><rect x="258.1" y="68.6" width="25.4" height="2.6" rx="1.3" fill="#DCE3D7"/><rect x="258.1" y="76.5" width="13.1" height="2.6" rx="1.3" fill="#DCE3D7"/></g><text x="252" y="146" text-anchor="middle" fill="#5B6B60" style="font:500 10px JBMono,monospace">2 windows</text><path d="M95 80L103 80M98.5 83.1L103 80L98.5 76.9" stroke="#5B6B60" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" fill="none"/><path d="M197 80L205 80M200.5 83.1L205 80L200.5 76.9" stroke="#5B6B60" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg></figure>
+        <h3>No empty cells</h3>
+        <p>A preset made for four windows still works with three or two. Stacks shrink first, then columns, so the screen is always fully used.</p>
+      </article>
+      <article class="dt">
+        <figure><svg viewBox="0 0 300 170" role="img" aria-label="Two tiled windows with an adjustable gap between them, flush with the screen edges"><defs><linearGradient id="dtbg3" x1="1" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2E5A33"/><stop offset=".5" stop-color="#1E3A25"/><stop offset="1" stop-color="#15271B"/></linearGradient></defs><rect x="0" y="0" width="300" height="170" rx="7" fill="#1B2A21"/><rect x="5" y="5" width="290" height="160" rx="3.5" fill="url(#dtbg3)"/><g><rect x="5" y="5" width="134" height="160" rx="3" fill="#F7F9F5"/><path d="M8 5h128a3 3 0 0 1 3 3v5h-134v-5a3 3 0 0 1 3 -3z" fill="#4EA530"/><rect x="21.1" y="29" width="101.8" height="2.6" rx="1.3" fill="#DCE3D7"/><rect x="21.1" y="43.4" width="69.7" height="2.6" rx="1.3" fill="#DCE3D7"/><rect x="21.1" y="57.8" width="88.4" height="2.6" rx="1.3" fill="#DCE3D7"/><rect x="21.1" y="72.2" width="45.6" height="2.6" rx="1.3" fill="#DCE3D7"/></g><g><rect x="161" y="5" width="134" height="160" rx="3" fill="#F7F9F5"/><path d="M164 5h128a3 3 0 0 1 3 3v5h-134v-5a3 3 0 0 1 3 -3z" fill="#3E7CB1"/><rect x="177.1" y="29" width="101.8" height="2.6" rx="1.3" fill="#DCE3D7"/><rect x="177.1" y="43.4" width="69.7" height="2.6" rx="1.3" fill="#DCE3D7"/><rect x="177.1" y="57.8" width="88.4" height="2.6" rx="1.3" fill="#DCE3D7"/><rect x="177.1" y="72.2" width="45.6" height="2.6" rx="1.3" fill="#DCE3D7"/></g><path d="M140 99.2v10M160 99.2v10M140 104.2h20" stroke="#F0A23B" stroke-width="1.6" stroke-linecap="round"/><rect x="117.5" y="64.2" width="65" height="16" rx="8" fill="#13201A"/><text x="150" y="75.6" text-anchor="middle" fill="#F0A23B" style="font:600 9px JBMono,monospace">0 – 48 px</text></svg></figure>
+        <h3>Gap between windows</h3>
+        <p>Set 0 to 48 px in the preset panel. Only the edges where two windows meet move in; the outer edges stay flush with the screen.</p>
+      </article>
+      <article class="dt">
+        <figure><svg viewBox="0 0 300 170" role="img" aria-label="A moved border for three windows comes back after a fourth window closes"><defs><linearGradient id="dtbg4" x1="1" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2E5A33"/><stop offset=".5" stop-color="#1E3A25"/><stop offset="1" stop-color="#15271B"/></linearGradient></defs><rect x="4" y="32" width="88" height="96" rx="7" fill="#1B2A21"/><rect x="8" y="36" width="80" height="88" rx="3.5" fill="url(#dtbg4)"/><g><rect x="8" y="36" width="38.5" height="88" rx="3" fill="#F7F9F5"/><path d="M11 36h32.5a3 3 0 0 1 3 3v4.9h-38.5v-4.9a3 3 0 0 1 3 -3z" fill="#4EA530"/><rect x="12.6" y="52.7" width="29.2" height="2.6" rx="1.3" fill="#DCE3D7"/><rect x="12.6" y="60.6" width="20" height="2.6" rx="1.3" fill="#DCE3D7"/><rect x="12.6" y="68.6" width="25.4" height="2.6" rx="1.3" fill="#DCE3D7"/><rect x="12.6" y="76.5" width="13.1" height="2.6" rx="1.3" fill="#DCE3D7"/></g><g><rect x="49.5" y="36" width="17.8" height="88" rx="3" fill="#F7F9F5"/><path d="M52.4 36h11.8a3 3 0 0 1 3 3v5h-17.8v-5a3 3 0 0 1 3 -3z" fill="#3E7CB1"/></g><g><rect x="70.2" y="36" width="17.8" height="88" rx="3" fill="#F7F9F5"/><path d="M73.2 36h11.8a3 3 0 0 1 3 3v5h-17.8v-5a3 3 0 0 1 3 -3z" fill="#8E6CC4"/></g><path d="M48 42v76" stroke="#F0A23B" stroke-width="2.6" stroke-linecap="round"/><path d="M45 76l-4 4 4 4M51 76l4 4-4 4" stroke="#F0A23B" stroke-width="1.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/><text x="48" y="146" text-anchor="middle" fill="#5B6B60" style="font:500 10px JBMono,monospace">3 windows</text><rect x="106" y="32" width="88" height="96" rx="7" fill="#1B2A21"/><rect x="110" y="36" width="80" height="88" rx="3.5" fill="url(#dtbg4)"/><g><rect x="110" y="36" width="17.8" height="88" rx="3" fill="#F7F9F5"/><path d="M113 36h11.8a3 3 0 0 1 3 3v5h-17.8v-5a3 3 0 0 1 3 -3z" fill="#4EA530"/></g><g><rect x="130.8" y="36" width="17.8" height="88" rx="3" fill="#F7F9F5"/><path d="M133.7 36h11.8a3 3 0 0 1 3 3v5h-17.8v-5a3 3 0 0 1 3 -3z" fill="#3E7CB1"/></g><g><rect x="151.5" y="36" width="17.8" height="88" rx="3" fill="#F7F9F5"/><path d="M154.5 36h11.8a3 3 0 0 1 3 3v5h-17.8v-5a3 3 0 0 1 3 -3z" fill="#8E6CC4"/></g><g><rect x="172.2" y="36" width="17.8" height="88" rx="3" fill="#F7F9F5"/><path d="M175.2 36h11.8a3 3 0 0 1 3 3v5h-17.8v-5a3 3 0 0 1 3 -3z" fill="#2A9D8F"/></g><text x="150" y="146" text-anchor="middle" fill="#5B6B60" style="font:500 10px JBMono,monospace">4 windows</text><rect x="208" y="32" width="88" height="96" rx="7" fill="#1B2A21"/><rect x="212" y="36" width="80" height="88" rx="3.5" fill="url(#dtbg4)"/><g><rect x="212" y="36" width="38.5" height="88" rx="3" fill="#F7F9F5"/><path d="M215 36h32.5a3 3 0 0 1 3 3v4.9h-38.5v-4.9a3 3 0 0 1 3 -3z" fill="#4EA530"/><rect x="216.6" y="52.7" width="29.2" height="2.6" rx="1.3" fill="#DCE3D7"/><rect x="216.6" y="60.6" width="20" height="2.6" rx="1.3" fill="#DCE3D7"/><rect x="216.6" y="68.6" width="25.4" height="2.6" rx="1.3" fill="#DCE3D7"/><rect x="216.6" y="76.5" width="13.1" height="2.6" rx="1.3" fill="#DCE3D7"/></g><g><rect x="253.5" y="36" width="17.8" height="88" rx="3" fill="#F7F9F5"/><path d="M256.4 36h11.8a3 3 0 0 1 3 3v5h-17.8v-5a3 3 0 0 1 3 -3z" fill="#3E7CB1"/></g><g><rect x="274.2" y="36" width="17.8" height="88" rx="3" fill="#F7F9F5"/><path d="M277.2 36h11.8a3 3 0 0 1 3 3v5h-17.8v-5a3 3 0 0 1 3 -3z" fill="#8E6CC4"/></g><path d="M252 42v76" stroke="#F0A23B" stroke-width="2.6" stroke-linecap="round"/><path d="M249 76l-4 4 4 4M255 76l4 4-4 4" stroke="#F0A23B" stroke-width="1.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/><text x="252" y="146" text-anchor="middle" fill="#5B6B60" style="font:500 10px JBMono,monospace">3 again</text><path d="M95 80L103 80M98.5 83.1L103 80L98.5 76.9" stroke="#5B6B60" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" fill="none"/><path d="M197 80L205 80M200.5 83.1L205 80L200.5 76.9" stroke="#5B6B60" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" fill="none"/><text x="150" y="16" text-anchor="middle" fill="#13201A" style="font:600 10px JBMono,monospace">borders are kept per window count</text></svg></figure>
+        <h3>Remembers your borders</h3>
+        <p>Borders you move are stored per window count. A fourth window gets its own layout, and when it closes your three-window borders come back.</p>
+      </article>
+      <article class="dt">
+        <figure><svg viewBox="0 0 300 172" role="img" aria-label="Two monitors with different layouts, each recognised by vendor, product and serial"><defs><linearGradient id="dtbg5" x1="1" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2E5A33"/><stop offset=".5" stop-color="#1E3A25"/><stop offset="1" stop-color="#15271B"/></linearGradient></defs><rect x="4" y="22" width="186" height="62" rx="7" fill="#1B2A21"/><rect x="8" y="26" width="178" height="54" rx="3.5" fill="url(#dtbg5)"/><path d="M91 84h12l3 9h-18z" fill="#1B2A21"/><rect x="80" y="93" width="34" height="3" rx="1.5" fill="#1B2A21"/><g><rect x="8" y="26" width="37.5" height="54" rx="3" fill="#F7F9F5"/><path d="M11 26h31.5a3 3 0 0 1 3 3v1.9h-37.5v-1.9a3 3 0 0 1 3 -3z" fill="#4EA530"/></g><g><rect x="48" y="26" width="44.3" height="54" rx="3" fill="#F7F9F5"/><path d="M51 26h38.3a3 3 0 0 1 3 3v1.9h-44.3v-1.9a3 3 0 0 1 3 -3z" fill="#3E7CB1"/></g><g><rect x="94.8" y="26" width="44.3" height="25.8" rx="3" fill="#F7F9F5"/><path d="M97.8 26h38.3a3 3 0 0 1 3 3v0.5h-44.3v-0.5a3 3 0 0 1 3 -3z" fill="#8E6CC4"/></g><g><rect x="94.8" y="54.2" width="44.3" height="25.8" rx="3" fill="#F7F9F5"/><path d="M97.8 54.2h38.3a3 3 0 0 1 3 3v0.5h-44.3v-0.5a3 3 0 0 1 3 -3z" fill="#2A9D8F"/></g><g><rect x="141.7" y="26" width="44.3" height="25.8" rx="3" fill="#F7F9F5"/><path d="M144.7 26h38.3a3 3 0 0 1 3 3v0.5h-44.3v-0.5a3 3 0 0 1 3 -3z" fill="#2F6A1E"/></g><g><rect x="141.7" y="54.2" width="44.3" height="25.8" rx="3" fill="#F7F9F5"/><path d="M144.7 54.2h38.3a3 3 0 0 1 3 3v0.5h-44.3v-0.5a3 3 0 0 1 3 -3z" fill="#D9534F"/></g><rect x="204" y="10" width="92" height="74" rx="7" fill="#1B2A21"/><rect x="208" y="14" width="84" height="66" rx="3.5" fill="url(#dtbg5)"/><path d="M244 84h12l3 9h-18z" fill="#1B2A21"/><rect x="233" y="93" width="34" height="3" rx="1.5" fill="#1B2A21"/><g><rect x="208" y="14" width="40.8" height="66" rx="3" fill="#F7F9F5"/><path d="M211 14h34.8a3 3 0 0 1 3 3v2.9h-40.8v-2.9a3 3 0 0 1 3 -3z" fill="#2A9D8F"/></g><g><rect x="251.2" y="14" width="40.8" height="66" rx="3" fill="#F7F9F5"/><path d="M254.2 14h34.8a3 3 0 0 1 3 3v2.9h-40.8v-2.9a3 3 0 0 1 3 -3z" fill="#2F6A1E"/></g><text x="97" y="118" text-anchor="middle" fill="#13201A" style="font:600 10px JBMono,monospace">AOC 49″</text><text x="97" y="132" text-anchor="middle" fill="#5B6B60" style="font:500 10px JBMono,monospace">ws 1 · preset Code</text><text x="250" y="118" text-anchor="middle" fill="#13201A" style="font:600 10px JBMono,monospace">eDP</text><text x="250" y="132" text-anchor="middle" fill="#5B6B60" style="font:500 10px JBMono,monospace">ws 1 · auto grid</text><text x="150" y="160" text-anchor="middle" fill="#13201A" style="font:600 9px JBMono,monospace">replug, rearrange: assignments stay</text></svg></figure>
+        <h3>Per monitor and workspace</h3>
+        <p>Each monitor and workspace keeps its own preset and auto state. Monitors are recognised by vendor, product and serial; failed detection uses a separate fallback key. After a hotplug greenTile waits for the windows to settle before it tiles.</p>
+      </article>
+      <article class="dt">
+        <figure><svg viewBox="0 0 300 170" role="img" aria-label="Windows keep their left to right order when they are tiled"><defs><linearGradient id="dtbg9" x1="1" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2E5A33"/><stop offset=".5" stop-color="#1E3A25"/><stop offset="1" stop-color="#15271B"/></linearGradient></defs><rect x="4" y="30" width="124" height="100" rx="7" fill="#1B2A21"/><rect x="8" y="34" width="116" height="92" rx="3.5" fill="url(#dtbg9)"/><g><rect x="12" y="44" width="52" height="44" rx="3" fill="#F7F9F5"/><path d="M15 44h46a3 3 0 0 1 3 3v1h-52v-1a3 3 0 0 1 3 -3z" fill="#4EA530"/></g><circle cx="38" cy="69" r="7.5" fill="#13201A"/><text x="38" y="72.5" text-anchor="middle" fill="#fff" style="font:700 9px JBMono,monospace">1</text><g><rect x="70" y="40" width="46" height="46" rx="3" fill="#F7F9F5"/><path d="M73 40h40a3 3 0 0 1 3 3v1.1h-46v-1.1a3 3 0 0 1 3 -3z" fill="#8E6CC4"/></g><circle cx="93" cy="66" r="7.5" fill="#13201A"/><text x="93" y="69.5" text-anchor="middle" fill="#fff" style="font:700 9px JBMono,monospace">3</text><g><rect x="40" y="76" width="54" height="40" rx="3" fill="#F7F9F5"/><path d="M43 76h48a3 3 0 0 1 3 3v0.6h-54v-0.6a3 3 0 0 1 3 -3z" fill="#3E7CB1"/></g><circle cx="67" cy="99" r="7.5" fill="#13201A"/><text x="67" y="102.5" text-anchor="middle" fill="#fff" style="font:700 9px JBMono,monospace">2</text><g><rect x="92" y="84" width="30" height="34" rx="3" fill="#F7F9F5"/><path d="M95 84h24a3 3 0 0 1 3 3v0.5h-30v-0.5a3 3 0 0 1 3 -3z" fill="#2A9D8F"/></g><circle cx="107" cy="104" r="7.5" fill="#13201A"/><text x="107" y="107.5" text-anchor="middle" fill="#fff" style="font:700 9px JBMono,monospace">4</text><path d="M136 80L162 80M157.5 83.1L162 80L157.5 76.9" stroke="#13201A" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" fill="none"/><rect x="172" y="30" width="124" height="100" rx="7" fill="#1B2A21"/><rect x="176" y="34" width="116" height="92" rx="3.5" fill="url(#dtbg9)"/><g><rect x="176" y="34" width="26.8" height="92" rx="3" fill="#F7F9F5"/><path d="M179 34h20.8a3 3 0 0 1 3 3v5h-26.8v-5a3 3 0 0 1 3 -3z" fill="#4EA530"/></g><circle cx="189.4" cy="83" r="7.5" fill="#13201A"/><text x="189.4" y="86.5" text-anchor="middle" fill="#fff" style="font:700 9px JBMono,monospace">1</text><g><rect x="205.8" y="34" width="26.8" height="92" rx="3" fill="#F7F9F5"/><path d="M208.8 34h20.8a3 3 0 0 1 3 3v5h-26.8v-5a3 3 0 0 1 3 -3z" fill="#3E7CB1"/></g><circle cx="219.1" cy="83" r="7.5" fill="#13201A"/><text x="219.1" y="86.5" text-anchor="middle" fill="#fff" style="font:700 9px JBMono,monospace">2</text><g><rect x="235.5" y="34" width="26.8" height="92" rx="3" fill="#F7F9F5"/><path d="M238.5 34h20.8a3 3 0 0 1 3 3v5h-26.8v-5a3 3 0 0 1 3 -3z" fill="#8E6CC4"/></g><circle cx="248.9" cy="83" r="7.5" fill="#13201A"/><text x="248.9" y="86.5" text-anchor="middle" fill="#fff" style="font:700 9px JBMono,monospace">3</text><g><rect x="265.2" y="34" width="26.8" height="92" rx="3" fill="#F7F9F5"/><path d="M268.2 34h20.8a3 3 0 0 1 3 3v5h-26.8v-5a3 3 0 0 1 3 -3z" fill="#2A9D8F"/></g><circle cx="278.6" cy="83" r="7.5" fill="#13201A"/><text x="278.6" y="86.5" text-anchor="middle" fill="#fff" style="font:700 9px JBMono,monospace">4</text><text x="66" y="148" text-anchor="middle" fill="#5B6B60" style="font:500 10px JBMono,monospace">where you left them</text><text x="234" y="148" text-anchor="middle" fill="#5B6B60" style="font:500 10px JBMono,monospace">tiled in that order</text></svg></figure>
+        <h3>Keeps your order</h3>
+        <p>Windows are tiled in the order they already have on screen. Rearrange them by hand and the next retile respects it.</p>
+      </article>
+    </div>
+    <div class="next">
+      <a class="btn" href="../../">See all features</a>
+      <a class="plain" href="../gtile-alternative/">Coming from gTile? Compare the two</a>
+    </div>
+  </div>
+</section>
+
+<div class="wrap"><footer><span>greenTile · GPL v3 · based on gTile by vibou and shuairan</span><span><a href="../../">Home</a> · <a href="../gtile-alternative/">greenTile vs gTile</a></span><span>Made for Linux Mint</span></footer></div>
+</body>
+</html>
