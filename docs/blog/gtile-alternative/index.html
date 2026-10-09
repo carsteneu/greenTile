@@ -60,6 +60,8 @@ nav ul a:hover,nav ul a[aria-current]{color:var(--ink)}
 h1{font:800 clamp(42px,6.6vw,92px)/.94 "Bricolage";font-variation-settings:"opsz" 96;letter-spacing:-.045em;margin:20px 0 22px;max-width:12ch}
 h1 em{font-style:normal;color:var(--leaf);white-space:nowrap}
 .lede{font-size:clamp(18px,1.6vw,21px);max-width:46ch;color:#2A3A30;margin:0 0 28px}
+.promise{border-left:3px solid var(--leaf);padding:2px 0 2px 16px;margin:0 0 26px;color:#2A3A30;font-size:clamp(17px,1.5vw,19px);line-height:1.55;max-width:54ch}
+.promise b{color:var(--moss);font-weight:600}
 .cta{display:flex;flex-wrap:wrap;gap:14px;align-items:center}
 .btn{font:600 16px/1 "Instrument";padding:15px 22px;border-radius:999px;background:var(--ink);color:var(--sage);text-decoration:none;display:inline-block}
 .btn:hover{background:var(--moss)}
@@ -82,6 +84,14 @@ code{font:500 .9em "JBMono";background:var(--sheet);border:1px solid var(--rule)
 .tiles{height:100%;display:grid;grid-template-columns:2fr 1fr 1fr;grid-template-rows:1fr 1fr;gap:3px}
 .tiles i{border-radius:3px;background:var(--sheet);border-top:5px solid var(--c)}
 .tiles i:first-child{grid-row:span 2}
+
+/* what greenTile adds: 2x2 cards with the shared glyph set */
+.scr{fill:#1B2A21}
+.pcol{fill:var(--sheet)}
+.gain{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:8px}
+.gain .glyph{display:block;width:100%;max-width:260px;height:auto;aspect-ratio:64/42;margin:0 0 16px}
+.model h3{font:700 22px/1.1 "Bricolage";letter-spacing:-.02em;margin:0}
+.model .tag{font:500 12px/1 "JBMono";letter-spacing:.06em;text-transform:uppercase;color:var(--moss)}
 
 section{padding:clamp(48px,8vh,88px) 0}
 h2{font:750 clamp(32px,4.2vw,52px)/1 "Bricolage";letter-spacing:-.035em;margin:0 0 12px;max-width:18ch}
@@ -108,12 +118,38 @@ table.cmp{width:100%;border-collapse:collapse;min-width:640px}
 footer{padding:36px 0 56px;border-top:1px solid var(--rule);display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px;color:var(--mute);font-size:14px}
 
 @media (max-width:980px){
-  .models{grid-template-columns:1fr}
+  .models,.gain{grid-template-columns:1fr}
   nav ul{display:none}
 }
 </style>
 </head>
 <body>
+<svg width="0" height="0" aria-hidden="true" focusable="false" style="position:absolute">
+  <symbol id="g-auto" viewBox="0 0 64 42">
+    <rect x="0.5" y="0.5" width="63" height="41" rx="4" class="scr"/>
+    <rect x="5" y="6" width="15" height="30" rx="2" class="pcol"/>
+    <rect x="24" y="6" width="15" height="30" rx="2" class="pcol"/>
+    <rect x="43" y="6" width="16" height="30" rx="2" fill="rgba(78,165,48,.45)" stroke="#4EA530" stroke-width="1.5"/>
+  </symbol>
+  <symbol id="g-monitor" viewBox="0 0 64 42">
+    <rect x="0.5" y="4" width="42" height="34" rx="4" class="scr"/>
+    <rect x="14" y="0.5" width="42" height="34" rx="4" fill="#13201A" stroke="#2F6A1E" stroke-width="1.5"/>
+    <rect x="19" y="6" width="14" height="24" rx="2" fill="#E6ECE2"/>
+    <rect x="36" y="6" width="15" height="24" rx="2" fill="#C5D0BF"/>
+  </symbol>
+  <symbol id="g-split" viewBox="0 0 64 42">
+    <rect x="0.5" y="0.5" width="63" height="41" rx="4" class="scr"/>
+    <rect x="5" y="6" width="26" height="30" rx="2" class="pcol"/>
+    <rect x="35" y="6" width="24" height="30" rx="2" fill="rgba(240,162,59,.35)" stroke="#F0A23B" stroke-width="1.5"/>
+    <path d="M24 12v18" stroke="#F0A23B" stroke-width="1.5" stroke-dasharray="3 2"/>
+  </symbol>
+  <symbol id="g-gap" viewBox="0 0 64 42">
+    <rect x="0.5" y="0.5" width="63" height="41" rx="4" class="scr"/>
+    <rect x="8" y="8" width="20" height="26" rx="2" class="pcol"/>
+    <rect x="36" y="8" width="20" height="26" rx="2" class="pcol"/>
+    <path d="M32 6v30" stroke="#F0A23B" stroke-width="1.5"/>
+  </symbol>
+</svg>
 <div class="wrap">
   <nav>
     <a class="mark" href="../../"><i><b></b><b></b><b></b></i>greenTile</a>
@@ -125,6 +161,7 @@ footer{padding:36px 0 56px;border-top:1px solid var(--rule);display:flex;justify
     <div class="eyebrow">A gTile alternative for Cinnamon</div>
     <h1>greenTile vs <em>gTile.</em></h1>
     <p class="lede">Both are tiling extensions for the Cinnamon desktop, and greenTile started as a fork of gTile. They answer different questions, though: gTile places the window you point at, greenTile arranges a whole workspace by itself. Here is how they compare.</p>
+    <p class="promise"><b>greenTile</b> takes over the step gTile leaves to you: the layout is there before the window, so nothing has to be opened, selected or confirmed, and every monitor and workspace keeps its own.</p>
     <div class="cta">
       <a class="btn" href="#compare">Compare them</a>
       <a class="plain" href="#switch">Switching from gTile</a>
@@ -173,6 +210,39 @@ footer{padding:36px 0 56px;border-top:1px solid var(--rule);display:flex;justify
           <tr><th scope="row">Maintained by</th><td>The community, in the Linux Mint Spices repository.</td><td>Its author, on GitHub.</td></tr>
         </tbody>
       </table>
+    </div>
+  </div>
+</section>
+
+<section id="gain">
+  <div class="wrap">
+    <h2>What greenTile adds over a grid.</h2>
+    <p class="sub">Four things that need no grid at all, read straight from the table above.</p>
+    <div class="gain">
+      <article class="model">
+        <svg class="glyph" aria-hidden="true"><use href="#g-auto"/></svg>
+        <span class="tag">Nothing to open</span>
+        <h3>Windows find their place</h3>
+        <p>In gTile every placement starts with opening the grid. In greenTile the layout is already there: with auto mode on, a window that opens is fitted into it 300 ms later, and when one closes the neighbours take over its space.</p>
+      </article>
+      <article class="model">
+        <svg class="glyph" aria-hidden="true"><use href="#g-monitor"/></svg>
+        <span class="tag">Per monitor and workspace</span>
+        <h3>Every screen keeps its own layout</h3>
+        <p>gTile offers the same four grids everywhere. greenTile keeps a preset and an auto state per monitor and per workspace, and finds them again after a monitor is replugged.</p>
+      </article>
+      <article class="model">
+        <svg class="glyph" aria-hidden="true"><use href="#g-split"/></svg>
+        <span class="tag">By hand, when you want</span>
+        <h3>Your corrections are kept</h3>
+        <p>Drag a border and the neighbours follow; drop a window on the edge of another and it splits that space. Borders are remembered per window count, so a fourth window gets its own layout and your three-window borders come back when it closes.</p>
+      </article>
+      <article class="model">
+        <svg class="glyph" aria-hidden="true"><use href="#g-gap"/></svg>
+        <span class="tag">The details</span>
+        <h3>Gaps and a never tile list</h3>
+        <p>0 to 48 px between windows with the screen edges flush, a never tile list by window class, title or app id, and <kbd>Super</kbd><kbd>G</kbd> to let a single window float. gTile has no setting for either.</p>
+      </article>
     </div>
   </div>
 </section>

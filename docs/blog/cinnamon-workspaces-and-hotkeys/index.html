@@ -163,7 +163,7 @@ footer{padding:36px 0 56px;border-top:1px solid var(--rule);display:flex;justify
   <header class="hero">
     <div class="eyebrow">Workspaces</div>
     <h1>A layout <em>per workspace.</em></h1>
-    <p class="lede">Workspaces are the oldest way to keep a desktop tidy: four screens, each with its own windows. What Cinnamon does not do is let those screens look different from each other. Here are the defaults — and how to put a different layout on every workspace.</p>
+    <p class="lede">Workspaces are the oldest way to keep a desktop tidy: four screens, each with its own windows. What Cinnamon does not do is let those screens look different from each other. Here are the defaults, and how to put a different layout on every workspace.</p>
     <p class="promise"><b>greenTile</b> adds what Cinnamon leaves out: a layout per workspace that comes back on its own, with the panel, the switcher and the hot corners untouched.</p>
     <div class="cta">
       <a class="btn" href="#defaults">The defaults</a>
@@ -213,7 +213,7 @@ footer{padding:36px 0 56px;border-top:1px solid var(--rule);display:flex;justify
         <text x="508" y="140" class="big hl nz">workspace 3</text>
         <text x="508" y="158">editor + two</text>
       </svg>
-      <figcaption>Three workspaces, three arrangements. The dots in the panel mark which one is on screen — the workspace switcher does not care what the windows inside look like, which is exactly the gap this page is about.</figcaption>
+      <figcaption>Three workspaces, three arrangements. The dots in the panel mark which one is on screen. The workspace switcher does not care what the windows inside look like, which is exactly the gap this page is about.</figcaption>
     </figure>
   </header>
 </div>
@@ -230,7 +230,7 @@ footer{padding:36px 0 56px;border-top:1px solid var(--rule);display:flex;justify
       <li><b>See where you are</b><span>The workspace switcher applet in the panel, and the workspace name that can be flashed on screen while switching.</span></li>
       <li><b>Expo and Scale</b><span>An overview of all workspaces, or of the windows on the current one. Both reachable from the hot corners, which ship switched off.</span></li>
     </ul>
-    <p class="body" style="margin-top:26px">Everything in that list lives in two places in System Settings: the workspace settings decide how many workspaces exist and whether their names flash on screen while switching, while the keyboard page holds the shortcuts and the Hot Corners panel holds the four corners. None of it needs an extension — and none of it says anything about what the windows inside a workspace should look like.</p>
+    <p class="body" style="margin-top:26px">Everything in that list lives in two places in System Settings: the workspace settings decide how many workspaces exist and whether their names flash on screen while switching, while the keyboard page holds the shortcuts and the Hot Corners panel holds the four corners. None of it needs an extension, and none of it says anything about what the windows inside a workspace should look like.</p>
     <figure class="fig">
       <svg viewBox="0 0 720 240" role="img" aria-labelledby="hc1">
         <title id="hc1">A screen with its four hot corners marked: the top left one is set to Expo, the top right and bottom left to Scale, the bottom right to Desktop.</title>
@@ -261,10 +261,10 @@ footer{padding:36px 0 56px;border-top:1px solid var(--rule);display:flex;justify
     <ul>
       <li><b>No arrangement of its own.</b> Move a window in workspace 2, and workspaces 1 and 3 do not know or care.</li>
       <li><b>Nothing arrives ready.</b> Switch to an empty workspace and the screen is empty. The first two windows still land wherever the applications put them.</li>
-      <li><b>The half-tiling is manual, too.</b> <kbd>Super</kbd>+arrows pushes one window at a time — see <a href="../tiling-on-linux-mint/">what Cinnamon does on its own</a>.</li>
+      <li><b>The half-tiling is manual, too.</b> <kbd>Super</kbd>+arrows pushes one window at a time; see <a href="../tiling-on-linux-mint/">what Cinnamon does on its own</a>.</li>
       <li><b>Nothing carries over.</b> Every workspace, every day, one window at a time.</li>
     </ul>
-    <p>The reason is structural, and worth one sentence: a window's position is a property of the window, and a workspace is little more than the list of which windows are on it. Neither of the two stores an arrangement. That is why the desktop behaves like a desk rather than a template — the piles are wherever you last put them, and nothing wrote down where they belong.</p>
+    <p>The reason is structural, and worth one sentence: a window's position is a property of the window, and a workspace is little more than the list of which windows are on it. Neither of the two stores an arrangement. That is why the desktop behaves like a desk rather than a template: the piles are wherever you last put them, and nothing wrote down where they belong.</p>
     <p>If that is exactly how you like it, you are finished here. If your three workspaces are "writing", "browsing" and "chat", each with a shape you keep rebuilding, the rest of this page is for you.</p>
   </div>
 </section>
@@ -276,11 +276,11 @@ footer{padding:36px 0 56px;border-top:1px solid var(--rule);display:flex;justify
     <ol class="steps">
       <li><span><b>Install greenTile</b> from the <a href="../auto-tiling-cinnamon/#install">release zip</a>, restart Cinnamon, enable it in the Extensions manager.</span></li>
       <li><span><b>Open the preset panel</b> on the workspace you are setting up: <kbd>Super</kbd><kbd>Ctrl</kbd><kbd>P</kbd>. Pick one of the sixteen starters or paint your own on the 6 × 4 grid.</span></li>
-      <li><span><b>Assign the preset</b> to the monitor and workspace. Switch to the next workspace and repeat — the panel always edits the workspace you are on.</span></li>
+      <li><span><b>Assign the preset</b> to the monitor and workspace. Switch to the next workspace and repeat; the panel always edits the workspace you are on.</span></li>
       <li><span><b>Turn auto mode on</b> for the workspaces that should look after themselves: <kbd>Super</kbd><kbd>Ctrl</kbd><kbd>A</kbd> on, <kbd>Super</kbd><kbd>Ctrl</kbd><kbd>D</kbd> off. Leave a workspace without auto mode and it stays a free surface for windows you place by hand.</span></li>
       <li><span><b>Work normally.</b> Switch between workspaces as you always did; each one brings its own arrangement with it.</span></li>
     </ol>
-    <p class="body">Three workspaces, then, as three concrete assignments. Workspace 1 gets one full-width column and auto mode on: whatever you open there is fitted into it, and the workspace is a writing desk with a single sheet on it. Workspace 2 gets the main-plus-list shape, the browser wide on the left and the mail client narrow on the right, so a message can be read without leaving the page it is about. Workspace 3 stays without auto mode and without a preset — a free surface for the windows the afternoon brings. Switching between them is the same <kbd>Ctrl</kbd><kbd>Alt</kbd>+<kbd>←</kbd>/<kbd>→</kbd> as before; what changes is that each switch lands on a desk that is already arranged.</p>
+    <p class="body">Three workspaces, then, as three concrete assignments. Workspace 1 gets one full-width column and auto mode on: whatever you open there is fitted into it, and the workspace is a writing desk with a single sheet on it. Workspace 2 gets the main-plus-list shape, the browser wide on the left and the mail client narrow on the right, so a message can be read without leaving the page it is about. Workspace 3 stays without auto mode and without a preset: a free surface for the windows the afternoon brings. Switching between them is the same <kbd>Ctrl</kbd><kbd>Alt</kbd>+<kbd>←</kbd>/<kbd>→</kbd> as before; what changes is that each switch lands on a desk that is already arranged.</p>
     <p class="note">That is the part no window manager shortcut can do for you: the workspace remembers the shape of your work, not just the windows you left there. A monitor that gets replugged or a Cinnamon that gets restarted finds its assignment again and puts the windows back in the order you left them.</p>
   </div>
 </section>
@@ -300,7 +300,7 @@ footer{padding:36px 0 56px;border-top:1px solid var(--rule);display:flex;justify
         <svg class="glyph" aria-hidden="true"><use href="#g-auto"/></svg>
         <span class="tag">On its own</span>
         <h3>It looks after itself</h3>
-        <p>With auto mode on, a window that opens joins the arrangement and a window that closes leaves its space to the neighbours. Off, the workspace stays a free surface — useful for the one you use for a single big window.</p>
+        <p>With auto mode on, a window that opens joins the arrangement and a window that closes leaves its space to the neighbours. Off, the workspace stays a free surface, useful for the one you use for a single big window.</p>
       </article>
       <article class="model">
         <svg class="glyph" aria-hidden="true"><use href="#g-monitor"/></svg>
@@ -332,7 +332,7 @@ footer{padding:36px 0 56px;border-top:1px solid var(--rule);display:flex;justify
       <article class="model">
         <span class="tag">RearrangeWorkspaces</span>
         <h3>Reorder them</h3>
-        <p>Rearranges the workspaces themselves and takes their windows along — handy when the busy one ended up fourth.</p>
+        <p>Rearranges the workspaces themselves and takes their windows along, handy when the busy one ended up fourth.</p>
         <span class="old">declared for Cinnamon 5.4</span>
       </article>
       <article class="model">

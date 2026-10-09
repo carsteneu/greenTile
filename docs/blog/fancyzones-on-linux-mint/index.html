@@ -222,7 +222,7 @@ footer{padding:36px 0 56px;border-top:1px solid var(--rule);display:flex;justify
     <p class="sub">FancyZones is part of Microsoft PowerToys, the open source toolbox for Windows. It has had years to grow, and the list is longer than most people remember using:</p>
     <ul class="keys">
       <li><b>Layouts with zones</b><span>Built from templates (columns, rows, grid, priority) or drawn by hand in two editor styles: <i>Grid</i>, which splits and merges cells, and <i>Canvas</i>, where zones may overlap.</span></li>
-      <li><b>A layout per monitor</b><span>Different monitors can run different layouts, and a default layout applies when the display setup changes — one for horizontal, one for vertical orientation.</span></li>
+      <li><b>A layout per monitor</b><span>Different monitors can run different layouts, and a default layout applies when the display setup changes: one for horizontal, one for vertical orientation.</span></li>
       <li><b>Drop a window into a zone</b><span>Hold <kbd>Shift</kbd> while dragging and the zones appear; the zone under the pointer lights up. Holding <kbd>Ctrl</kbd> while dragging spreads one window over several zones.</span></li>
       <li><b>Layout hotkeys</b><span><kbd>Win</kbd><kbd>Ctrl</kbd><kbd>Alt</kbd>+a number applies a saved layout to the active screen. Every layout can carry its own hotkey.</span></li>
       <li><b>New windows go where they belong</b><span><i>Move newly created windows to the last known zone</i> puts a new window back where that application sat before.</span></li>
@@ -245,14 +245,14 @@ footer{padding:36px 0 56px;border-top:1px solid var(--rule);display:flex;justify
       <li><b>Hot corners, switched off</b><span>The four screen corners can run Expo, Scale or show the desktop, but every one of them ships disabled. If you miss the Windows corner gestures, this is where to switch them on.</span></li>
     </ul>
     <p class="body" style="margin-top:26px">Read that list again and you will notice what it has in common. Every entry acts on <i>the window you are pointing at or focusing</i>, and every one of them is a single, finished move: push this one left, drop that one on an edge, send the third one to another workspace. Nothing on the list can look at the screen and decide. Nothing on it can hold a shape in mind, and nothing remembers what you built yesterday.</p>
-    <p class="body">That is not a criticism, it is a design decision. Cinnamon's window management is built to stay predictable, and predictable means: only what you asked for, only when you ask. The price is that the arranging is yours to do every single time — which is exactly the part FancyZones automated for you, and the part a tiling extension takes over here.</p>
+    <p class="body">That is not a criticism, it is a design decision. Cinnamon's window management is built to stay predictable, and predictable means: only what you asked for, only when you ask. The price is that the arranging is yours to do every single time. That is exactly the part FancyZones automated for you, and the part greenTile takes over here.</p>
   </div>
 </section>
 
 <section id="map">
   <div class="wrap">
     <h2>The mapping.</h2>
-    <p class="sub">Here is every FancyZones idea worth keeping, and what it becomes on Cinnamon. The drawings show the result — a preset column is not a zone, and it is worth seeing the difference before you start painting.</p>
+    <p class="sub">Here is every FancyZones idea worth keeping, and what it becomes on Cinnamon. The drawings show the result: a preset column is not a zone, and it is worth seeing the difference before you start painting.</p>
 
     <figure class="bigfig">
       <svg viewBox="0 0 720 250" role="img" aria-labelledby="fig1t" style="max-width:720px">
@@ -281,7 +281,7 @@ footer{padding:36px 0 56px;border-top:1px solid var(--rule);display:flex;justify
         <rect x="644" y="38" width="62" height="148" rx="4" class="pcol"/><rect x="644" y="38" width="62" height="4" rx="2" fill="#3E7CB1"/>
         <text x="466" y="218">columns that fill themselves</text>
       </svg>
-      <figcaption>The difference in one picture: a zone layout on the left draws where windows <i>may</i> go, and you move each one there. A preset on the right is the arrangement itself — columns with widths, filled as windows appear.</figcaption>
+      <figcaption>The difference in one picture: a zone layout on the left draws where windows <i>may</i> go, and you move each one there. A preset on the right is the arrangement itself: columns with widths, filled as windows appear.</figcaption>
     </figure>
 
     <ol class="map" style="margin-top:44px">
@@ -298,7 +298,7 @@ footer{padding:36px 0 56px;border-top:1px solid var(--rule);display:flex;justify
         <div>
           <span class="src">PowerToys: the layout editor</span>
           <h3>The preset panel</h3>
-          <p><kbd>Win</kbd><kbd>Shift</kbd>+<kbd>`</kbd> opens the editor on Windows. <kbd>Super</kbd><kbd>Ctrl</kbd><kbd>P</kbd> opens the preset panel here, on the monitor of the focused window. Sixteen editable starters are already in it, so you rarely start from an empty grid — the panel shows a live preview of what each card would do with the windows you have open right now.</p>
+          <p><kbd>Win</kbd><kbd>Shift</kbd>+<kbd>`</kbd> opens the editor on Windows. <kbd>Super</kbd><kbd>Ctrl</kbd><kbd>P</kbd> opens the preset panel here, on the monitor of the focused window. Sixteen editable starters are already in it, so you rarely start from an empty grid, and the panel shows a live preview of what each card would do with the windows you have open right now.</p>
         </div>
       </li>
       <li>
@@ -306,7 +306,7 @@ footer{padding:36px 0 56px;border-top:1px solid var(--rule);display:flex;justify
         <div>
           <span class="src">PowerToys: drop into a zone</span>
           <h3>Drop into a cell, or split a neighbour</h3>
-          <p><kbd>Shift</kbd> and drag on Windows, then release over the highlighted zone. Here you drag a window over another one: a translucent preview shows the new column, the stack or the row before you let go, and the neighbours move up to fill what you left. The preview is doing the job the highlight does in FancyZones — telling you the result before it happens.</p>
+          <p><kbd>Shift</kbd> and drag on Windows, then release over the highlighted zone. Here you drag a window over another one: a translucent preview shows the new column, the stack or the row before you let go, and the neighbours move up to fill what you left. The preview is doing the job the highlight does in FancyZones: telling you the result before it happens.</p>
         </div>
       </li>
       <li>
@@ -314,7 +314,7 @@ footer{padding:36px 0 56px;border-top:1px solid var(--rule);display:flex;justify
         <div>
           <span class="src">PowerToys: layout hotkeys</span>
           <h3>Columns on a key</h3>
-          <p>FancyZones gives every saved layout a hotkey. Here presets are applied from the panel or by assignment, and the column hotkeys <kbd>Super</kbd><kbd>Ctrl</kbd>+<kbd>3</kbd> and <kbd>Super</kbd><kbd>Ctrl</kbd>+<kbd>6</kbd> re-draw the screen as equal columns on the spot — useful when you want a quick three-way split without touching the presets.</p>
+          <p>FancyZones gives every saved layout a hotkey. Here presets are applied from the panel or by assignment, and the column hotkeys <kbd>Super</kbd><kbd>Ctrl</kbd>+<kbd>3</kbd> and <kbd>Super</kbd><kbd>Ctrl</kbd>+<kbd>6</kbd> re-draw the screen as equal columns on the spot, useful when you want a quick three-way split without touching the presets.</p>
         </div>
       </li>
       <li>
@@ -322,7 +322,7 @@ footer{padding:36px 0 56px;border-top:1px solid var(--rule);display:flex;justify
         <div>
           <span class="src">PowerToys: new windows remember their zone</span>
           <h3>Auto mode</h3>
-          <p>This is the feature to port first, and greenTile answers it for the whole layout rather than per application. With auto mode on for a workspace (<kbd>Super</kbd><kbd>Ctrl</kbd><kbd>A</kbd>), a window that opens is fitted into the preset a quarter second later. Close one and the others grow into the space. No dragging, no remembering where things were.</p>
+          <p>This is the feature to port first, and greenTile answers it for the whole layout rather than per application. With auto mode on for a workspace (<kbd>Super</kbd><kbd>Ctrl</kbd><kbd>A</kbd>), a window that opens is fitted into the preset 300 ms later. Close one and the others grow into the space. No dragging, no remembering where things were.</p>
         </div>
       </li>
       <li>
@@ -346,7 +346,7 @@ footer{padding:36px 0 56px;border-top:1px solid var(--rule);display:flex;justify
         <div>
           <span class="src">PowerToys: space around zones</span>
           <h3>Gaps between windows</h3>
-          <p>A setting in PowerToys, a slider in the preset panel here: 0 to 48 px between windows. Only the shared edges move in — the outer edges of the layout stay flush with the screen, which is the part that makes a tiled desktop look deliberate instead of accidental. The value is applied as insets, so a gap can never push a window off its monitor.</p>
+          <p>A setting in PowerToys, a slider in the preset panel here: 0 to 48 px between windows. Only the shared edges move in; the outer edges of the layout stay flush with the screen, which is the part that makes a tiled desktop look deliberate instead of accidental. The value is applied as insets, so a gap can never push a window off its monitor.</p>
         </div>
       </li>
       <li>
@@ -354,7 +354,7 @@ footer{padding:36px 0 56px;border-top:1px solid var(--rule);display:flex;justify
         <div>
           <span class="src">PowerToys: one window over several zones</span>
           <h3>Columns that span</h3>
-          <p>FancyZones lets you hold <kbd>Ctrl</kbd> while dragging to spread a window over two adjacent zones. greenTile turns that around: the width belongs to the <i>layout</i>, not to the drop. Drag the handle between two painted columns to merge them into one wide column — 1 : 2 : 1, 25 / 50 / 25, whatever your screen wants — and the handle inside a wide column splits it again.</p>
+          <p>FancyZones lets you hold <kbd>Ctrl</kbd> while dragging to spread a window over two adjacent zones. greenTile turns that around: the width belongs to the <i>layout</i>, not to the drop. Drag the handle between two painted columns to merge them into one wide column (1 : 2 : 1, 25 / 50 / 25, whatever your screen wants), and the handle inside a wide column splits it again.</p>
         </div>
       </li>
     </ol>
@@ -368,10 +368,10 @@ footer{padding:36px 0 56px;border-top:1px solid var(--rule);display:flex;justify
     <ol class="steps">
       <li><span><b>Install greenTile</b> from the <a href="../auto-tiling-cinnamon/#install">release zip</a>, restart Cinnamon, switch it on in the Extensions manager. Nothing is replaced or removed; the built-in keys keep working.</span></li>
       <li><span><b>Paint your most used layout</b> in the preset panel (<kbd>Super</kbd><kbd>Ctrl</kbd><kbd>P</kbd>): columns on the 6 × 4 grid, the handle between two columns to merge them into a wide one. A layout like <i>one wide column left, two stacked right</i> is three clicks, and the preview under each card shows what a click does with the windows you have open.</span></li>
-      <li><span><b>Assign it</b> to the monitor and workspace you want it on. Then switch to the next workspace and set that one up too — the panel always edits the monitor and workspace you are on right now.</span></li>
+      <li><span><b>Assign it</b> to the monitor and workspace you want it on. Then switch to the next workspace and set that one up too; the panel always edits the monitor and workspace you are on right now.</span></li>
       <li><span><b>Turn on auto mode</b> (<kbd>Super</kbd><kbd>Ctrl</kbd><kbd>A</kbd>) on the workspaces that should look after themselves. Leave one off and it stays a free surface, which is often what you want on a workspace you use for one big window.</span></li>
       <li><span><b>Fill the never tile list</b> with the apps that should stay out, the same way you excluded applications in PowerToys. Dialogs and fixed-size windows are already excluded for you.</span></li>
-      <li><span><b>Try the two habits that replace dragging:</b> <kbd>Super</kbd><kbd>G</kbd> floats a window and pressing it again tiles it back, and <kbd>Super</kbd><kbd>Ctrl</kbd>+arrow swaps the focused window with its neighbour — and keeps going across monitors and workspaces if you hold the rhythm.</span></li>
+      <li><span><b>Try the two habits that replace dragging:</b> <kbd>Super</kbd><kbd>G</kbd> floats a window and pressing it again tiles it back, and <kbd>Super</kbd><kbd>Ctrl</kbd>+arrow swaps the focused window with its neighbour, and keeps going across monitors and workspaces if you hold the rhythm.</span></li>
     </ol>
   </div>
 </section>
@@ -379,13 +379,13 @@ footer{padding:36px 0 56px;border-top:1px solid var(--rule);display:flex;justify
 <section id="gain">
   <div class="wrap">
     <h2>What you gain.</h2>
-    <p class="sub">The four habits FancyZones gave you, kept — without the drag.</p>
+    <p class="sub">The idea of FancyZones, kept, with the dragging done for you.</p>
     <div class="gain">
       <article class="model">
         <svg class="glyph" aria-hidden="true"><use href="#g-preset"/></svg>
         <span class="tag">Set up once</span>
         <h3>The layout replaces the drag</h3>
-        <p>Instead of drawing zones and then dragging each window into one, you paint the layout once — columns, their widths, the stacks inside them — and assign it to a monitor and a workspace. Placement is done for you from then on.</p>
+        <p>Instead of drawing zones and then dragging each window into one, you paint the layout once (columns, their widths, the stacks inside them) and assign it to a monitor and a workspace. Placement is done for you from then on.</p>
       </article>
       <article class="model">
         <svg class="glyph" aria-hidden="true"><use href="#g-auto"/></svg>
@@ -415,9 +415,9 @@ footer{padding:36px 0 56px;border-top:1px solid var(--rule);display:flex;justify
     <p>Not everything comes across, and it is worth knowing which parts before you start:</p>
     <ul>
       <li><b>Overlapping zones.</b> FancyZones Canvas allows zones that overlap and windows that share space. Here a layout is a grid: cells share edges, they do not stack on top of each other. A wide column is how you make room, not an overlapping zone.</li>
-      <li><b>Zones that span monitors.</b> FancyZones can treat all monitors as one large screen. greenTile works per monitor — dragging a window to the other screen retiles both, but there is no single layout stretching across both displays.</li>
+      <li><b>Zones that span monitors.</b> FancyZones can treat all monitors as one large screen. greenTile works per monitor: dragging a window to the other screen retiles both, but there is no single layout stretching across both displays.</li>
       <li><b>Zone-based keyboard navigation.</b> Stepping from zone to zone with <kbd>Win</kbd>+arrows has no mirror image; the nearest things are swapping with the neighbour (<kbd>Super</kbd><kbd>Ctrl</kbd>+arrow) or giving the workspace a different preset.</li>
-      <li><b>Per-application zone memory.</b> PowerToys remembers the zone a specific application last sat in. Here the layout decides, not the application — every window of a workspace is fitted into the same arrangement, which is simpler to predict and costs you the "Editor always on the right" habit. The related Cinnamon extension <i>auto-move-windows</i> covers that part separately, by putting applications on their own workspace.</li>
+      <li><b>Per-application zone memory.</b> PowerToys remembers the zone a specific application last sat in. Here the layout decides, not the application: every window of a workspace is fitted into the same arrangement, which is simpler to predict and costs you the "Editor always on the right" habit. The related Cinnamon extension <i>auto-move-windows</i> covers that part separately, by putting applications on their own workspace.</li>
       <li><b>Windows-only muscle memory.</b> The <kbd>Win</kbd> key is <kbd>Super</kbd> here, and Cinnamon keeps its own keys for workspaces. Ten keys in total are documented on the <a href="../../#keys">home page</a>.</li>
     </ul>
     <p>The idea you keep is the one that mattered: you decide once how the screen is divided, and afterwards the windows obey.</p>
