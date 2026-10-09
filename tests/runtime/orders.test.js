@@ -25,6 +25,9 @@ const makeDeps = (initial = {}, opts = {}) => {
     const reads = [];
     const queries = [];
     const ops = [];
+    // Every async file call records the Cancellable it was handed: the store must
+    // never hand one over (a cancelled replace would tear an atomic write in half).
+    const cancellables = [];
     const timers = new Map();
     let nextTimer = 1;
     // Completion queue: with opts.deferReads every file callback is held until
@@ -49,6 +52,7 @@ const makeDeps = (initial = {}, opts = {}) => {
         reads,
         queries,
         ops,
+        cancellables,
         timers,
         releaseReads: () => {
             // The read is a CHAIN (query, then content): draining once would stop after
@@ -100,8 +104,9 @@ const makeDeps = (initial = {}, opts = {}) => {
                     // modelled like the real Gio.File: the size/type is known before
                     // the content is read, which is what the guard relies on — the
                     // check just moved into the query callback
-                    query_info_async: (attrs, flags, _priority, _cancellable, cb) => {
+                    query_info_async: (attrs, flags, _priority, cancellable, cb) => {
                         ops.push('query_info_async');
+                        cancellables.push(cancellable);
                         queries.push({ path, attrs, flags });
                         if (opts.queryThrows) {
                             throw new Error('injected query failure');
@@ -113,8 +118,9 @@ const makeDeps = (initial = {}, opts = {}) => {
                         settle(() => cb({ path }, { info }));
                     },
                     query_info_finish: (res) => res.info,
-                    load_contents_async: (_cancellable, cb) => {
+                    load_contents_async: (cancellable, cb) => {
                         ops.push('load_contents_async');
+                        cancellables.push(cancellable);
                         reads.push(path);
                         if (opts.readThrows) {
                             throw new Error('injected read failure');
@@ -123,8 +129,9 @@ const makeDeps = (initial = {}, opts = {}) => {
                         settle(() => cb({ path }, { value }));
                     },
                     load_contents_finish: (res) => res.value,
-                    replace_contents_bytes_async: (bytes, _etag, _backup, flags, _cancellable, cb) => {
+                    replace_contents_bytes_async: (bytes, _etag, _backup, flags, cancellable, cb) => {
                         ops.push('replace_contents_bytes_async');
+                        cancellables.push(cancellable);
                         if (opts.writeThrows) {
                             throw new Error('injected write failure');
                         }
@@ -137,8 +144,9 @@ const makeDeps = (initial = {}, opts = {}) => {
                     // The real make_directory_finish reports an EXISTING directory as an
                     // error — the normal case for every start after the first — and any
                     // other error as a genuine failure. The fake models both.
-                    make_directory_async: (_priority, _cancellable, cb) => {
+                    make_directory_async: (_priority, cancellable, cb) => {
                         ops.push('make_directory_async');
+                        cancellables.push(cancellable);
                         if (opts.mkdirThrows) {
                             throw new Error('injected mkdir dispatch failure');
                         }
@@ -265,6 +273,19 @@ test('record stores the placed order of the identifiable windows, debounced and 
     assert.equal(deps.writes[0].path, PATH);
     assert.equal(deps.writes[0].flags, deps.gio.FileCreateFlags.PRIVATE | deps.gio.FileCreateFlags.REPLACE_DESTINATION);
     assert.deepEqual(JSON.parse(deps.writes[0].text), { v: 1, s: { 'MK0\n1': ['0x1', '0x2', '0x3'] } });
+});
+
+test('no file operation is ever handed a Cancellable', () => {
+    // A Cancellable on the replace would let a shutdown tear the atomic write in half,
+    // and one on the read would turn it into a lost order. The store hands over null
+    // everywhere: every operation it starts is one it means to let finish.
+    const deps = makeDeps({ [PATH]: stored({ 'MK0\n1': ['0x1'] }) });
+    const orders = new Orders(deps);
+    orders.restore(makeApp(), 0, 0);
+    orders.record(makeApp(), 0, 1, [win('0x1'), win('0x2')], true);
+    deps.fireTimers();
+    assert.ok(deps.cancellables.length >= 4, 'query, read, mkdir and replace all ran: ' + deps.ops.join(', '));
+    assert.deepEqual(deps.cancellables.filter((c) => c !== null), [], 'every call was handed null');
 });
 
 test('record ignores surfaces with fewer than two identifiable windows', () => {
@@ -461,6 +482,19 @@ test('a file that is not a small regular file is rejected BEFORE it is read', ()
         assert.equal(deps.queries[0].flags, deps.gio.FileQueryInfoFlags.NOFOLLOW_SYMLINKS, 'without following a symlink');
         assert.equal(orders.restore(makeApp(), 0, 0), null);
     }
+});
+
+test('content that grew past the limit between query and read is rejected after the read', () => {
+    // The query guard cannot close the race on its own: the file can grow after the
+    // query answered and before the content arrives, so the size is checked a second
+    // time on the bytes that actually came back. Here the query reports 8 bytes and
+    // the read hands over far more.
+    const pad = 'x'.repeat(orderModel.ORDER_MAX_BYTES + 16);
+    const deps = makeDeps({ [PATH]: stored({ 'MK0\n0': ['0xa', '0xb'] }).replace('{', '{"pad":"' + pad + '",') }, { fileSize: 8 });
+    const orders = new Orders(deps);
+    assert.equal(orders.restore(makeApp(), 0, 0), null, 'the grown content is not trusted');
+    assert.deepEqual(deps.reads, [PATH], 'it was read — the query still answered with a small size');
+    assert.ok(deps.logs.some((l) => l.includes('order')), 'and the rejection is logged');
 });
 
 test('a query failure is tolerated and logged, never thrown', () => {
