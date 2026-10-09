@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>FancyZones on Linux Mint: zone layouts on the Cinnamon desktop</title>
-<meta name="description" content="You used FancyZones in Windows PowerToys. Here is what Cinnamon does on its own, what has no equivalent, and how to rebuild your zone layouts on Linux Mint.">
+<meta name="description" content="You used FancyZones in Windows PowerToys. Here is what Cinnamon does on its own, what maps to a preset, what has no equivalent, and how to rebuild your zone layouts on Linux Mint.">
 <link rel="canonical" href="https://greentile.io/blog/fancyzones-on-linux-mint/">
 <meta property="og:type" content="article">
 <meta property="og:site_name" content="greenTile">
@@ -68,36 +68,40 @@ h1 em{font-style:normal;color:var(--leaf);white-space:nowrap}
 kbd{font:600 13px/1 "JBMono";padding:7px 9px 8px;border-radius:7px;background:var(--sheet);border:1px solid var(--rule);box-shadow:0 2px 0 var(--rule);color:var(--ink)}
 code{font:500 .9em "JBMono";background:var(--sheet);border:1px solid var(--rule);border-radius:5px;padding:1px 5px}
 
-/* the two models side by side, the same device as on the comparison page */
-.models{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:clamp(30px,5vh,52px)}
-.model{background:var(--sheet);border:1px solid #D6DED1;border-radius:var(--r);padding:22px 24px 24px;display:flex;flex-direction:column;gap:10px}
-.model.g{background:var(--ink);color:var(--sage);border-color:var(--ink)}
-.model h2{font:700 22px/1.1 "Bricolage";letter-spacing:-.02em;margin:0;max-width:none}
-.model p{margin:0;font-size:15.5px;color:#34443A}
-.model.g p{color:#C9D5C3}
-.screen{aspect-ratio:16/7;border-radius:8px;padding:6px;background:#1B2A21}
-.zones{height:100%;display:grid;grid-template-columns:2fr 1fr;gap:4px}
-.zones i{border-radius:4px;background:#2C3E32;border:2px dashed #47624F}
-.zones i.win{border-style:solid;background:rgba(240,162,59,.35);border-color:var(--amber)}
-.tiles{height:100%;display:grid;grid-template-columns:2fr 1fr 1fr;grid-template-rows:1fr 1fr;gap:3px}
-.tiles i{border-radius:3px;background:var(--sheet);border-top:5px solid var(--c)}
-
 section{padding:clamp(48px,8vh,88px) 0}
 h2{font:750 clamp(32px,4.2vw,52px)/1 "Bricolage";letter-spacing:-.035em;margin:0 0 12px;max-width:18ch}
+h3{font:600 18px/1.3 "Instrument";margin:0 0 5px}
 .sub{color:var(--mute);max-width:58ch;margin:0 0 32px}
+p.body{max-width:68ch;color:#2A3A30;margin:0 0 16px}
 
-/* the key list, ruled like the hotkey list on the home page */
+/* the key lists */
 .keys{list-style:none;margin:0;padding:0;border-top:1.5px solid var(--ink);max-width:900px}
 .keys li{display:grid;grid-template-columns:230px 1fr;gap:16px;padding:13px 0 15px;border-bottom:1px solid var(--rule);color:#34443A;font-size:16px;align-items:baseline}
 .keys b{color:var(--ink);font-weight:600}
 
-.cmp-wrap{overflow-x:auto}
-table.cmp{width:100%;border-collapse:collapse;min-width:680px}
-.cmp th,.cmp td{text-align:left;vertical-align:top;padding:14px 18px 16px 0;border-bottom:1px solid var(--rule);font-size:15.5px;line-height:1.5}
-.cmp thead th{font:700 22px/1.1 "Bricolage";letter-spacing:-.02em;border-bottom:1.5px solid var(--ink);padding-bottom:14px}
-.cmp tbody th{font:600 15.5px/1.35 "Instrument";color:var(--ink);width:34%}
-.cmp td{color:#34443A}
-.cmp kbd{font-size:11px;padding:3px 5px 4px}
+/* the two screens, side by side: the device this article is about */
+.bigfig{margin:26px 0 0;max-width:1000px}
+.bigfig svg{display:block;width:100%;height:auto}
+.bigfig figcaption{font:400 14.5px/1.5 "Instrument";color:var(--mute);margin-top:12px;max-width:66ch}
+
+/* the mapping: one row per idea, each with a small drawing of the result */
+.map{list-style:none;margin:0;padding:0;border-top:1.5px solid var(--ink);max-width:940px}
+.map li{display:grid;grid-template-columns:64px 1fr;gap:20px;padding:18px 0 20px;border-bottom:1px solid var(--rule)}
+.map .glyph{width:64px;height:42px}
+.map .src{display:block;font:500 11.5px/1 "JBMono";letter-spacing:.05em;text-transform:uppercase;color:var(--moss);margin:0 0 6px}
+.map p{margin:0;color:#34443A;font-size:15.5px;max-width:70ch}
+
+/* svg lettering and shapes, shared by every drawing on this page */
+svg text{font:500 10px "JBMono";letter-spacing:.07em;text-transform:uppercase;fill:var(--mute)}
+svg text.nz{text-transform:none;letter-spacing:.02em}
+svg text.hl{fill:var(--moss)}
+svg text.big{font:600 12px "JBMono"}
+.scr{fill:#1B2A21}
+.scrIn{fill:#22352A}
+.dash{fill:none;stroke:#7E9A86;stroke-width:1.5;stroke-dasharray:4 3}
+.zwin{fill:rgba(240,162,59,.35);stroke:var(--amber);stroke-width:1.5}
+.pcol{fill:var(--sheet)}
+.arrow{stroke:var(--moss);stroke-width:1.6;fill:none}
 
 .steps{list-style:none;counter-reset:s;margin:0;padding:0;border-top:1.5px solid var(--ink);max-width:880px}
 .steps li{counter-increment:s;display:grid;grid-template-columns:48px 1fr;gap:0 12px;padding:16px 0 18px;border-bottom:1px solid var(--rule);color:#34443A;font-size:16px}
@@ -109,17 +113,79 @@ table.cmp{width:100%;border-collapse:collapse;min-width:680px}
 .origin ul{margin:0 0 18px;padding-left:20px}
 .origin li{margin:0 0 8px}
 .next{display:flex;flex-wrap:wrap;gap:14px;align-items:center;margin-top:36px}
+.note{border-left:3px solid var(--leaf);padding:2px 0 2px 16px;color:#34443A;margin:28px 0 0;max-width:68ch}
 
 footer{padding:36px 0 56px;border-top:1px solid var(--rule);display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px;color:var(--mute);font-size:14px}
 
 @media (max-width:980px){
-  .models{grid-template-columns:1fr}
   .keys li{grid-template-columns:1fr;gap:4px}
+  .map li{grid-template-columns:56px 1fr;gap:14px}
   nav ul{display:none}
 }
 </style>
 </head>
 <body>
+
+<!-- drawings reused further down, defined once -->
+<svg width="0" height="0" aria-hidden="true" focusable="false" style="position:absolute">
+  <symbol id="g-preset" viewBox="0 0 64 42">
+    <rect x="0.5" y="0.5" width="63" height="41" rx="4" class="scr"/>
+    <rect x="5" y="6" width="15" height="30" rx="2" class="pcol"/><rect x="5" y="6" width="15" height="3" rx="1.5" fill="#4EA530"/>
+    <rect x="24" y="6" width="15" height="14" rx="2" class="pcol"/><rect x="24" y="6" width="15" height="3" rx="1.5" fill="#3E7CB1"/>
+    <rect x="24" y="24" width="15" height="12" rx="2" class="pcol"/><rect x="24" y="24" width="15" height="3" rx="1.5" fill="#F0A23B"/>
+    <rect x="43" y="6" width="16" height="30" rx="2" class="pcol"/><rect x="43" y="6" width="16" height="3" rx="1.5" fill="#8E6CC4"/>
+  </symbol>
+  <symbol id="g-panel" viewBox="0 0 64 42">
+    <rect x="0.5" y="0.5" width="63" height="41" rx="4" class="scr"/>
+    <rect x="6" y="7" width="24" height="12" rx="2" class="pcol"/>
+    <rect x="34" y="7" width="24" height="12" rx="2" class="pcol"/>
+    <rect x="6" y="23" width="24" height="12" rx="2" fill="rgba(240,162,59,.35)" stroke="#F0A23B" stroke-width="1.5"/>
+    <rect x="34" y="23" width="24" height="12" rx="2" class="pcol"/>
+  </symbol>
+  <symbol id="g-split" viewBox="0 0 64 42">
+    <rect x="0.5" y="0.5" width="63" height="41" rx="4" class="scr"/>
+    <rect x="5" y="6" width="26" height="30" rx="2" class="pcol"/>
+    <rect x="35" y="6" width="24" height="30" rx="2" fill="rgba(240,162,59,.35)" stroke="#F0A23B" stroke-width="1.5"/>
+    <path d="M24 12v18" stroke="#F0A23B" stroke-width="1.5" stroke-dasharray="3 2"/>
+  </symbol>
+  <symbol id="g-cols" viewBox="0 0 64 42">
+    <rect x="0.5" y="0.5" width="63" height="41" rx="4" class="scr"/>
+    <rect x="5" y="6" width="16" height="30" rx="2" class="pcol"/>
+    <rect x="24" y="6" width="16" height="30" rx="2" class="pcol"/>
+    <rect x="43" y="6" width="16" height="30" rx="2" class="pcol"/>
+  </symbol>
+  <symbol id="g-auto" viewBox="0 0 64 42">
+    <rect x="0.5" y="0.5" width="63" height="41" rx="4" class="scr"/>
+    <rect x="5" y="6" width="15" height="30" rx="2" class="pcol"/>
+    <rect x="24" y="6" width="15" height="30" rx="2" class="pcol"/>
+    <rect x="43" y="6" width="16" height="30" rx="2" fill="rgba(78,165,48,.45)" stroke="#4EA530" stroke-width="1.5"/>
+  </symbol>
+  <symbol id="g-monitor" viewBox="0 0 64 42">
+    <rect x="0.5" y="4" width="42" height="34" rx="4" class="scr"/>
+    <rect x="14" y="0.5" width="42" height="34" rx="4" fill="#13201A" stroke="#2F6A1E" stroke-width="1.5"/>
+    <rect x="19" y="6" width="14" height="24" rx="2" fill="#E6ECE2"/>
+    <rect x="36" y="6" width="15" height="24" rx="2" fill="#C5D0BF"/>
+  </symbol>
+  <symbol id="g-list" viewBox="0 0 64 42">
+    <rect x="0.5" y="0.5" width="63" height="41" rx="4" class="scr"/>
+    <rect x="6" y="7" width="52" height="7" rx="2" class="pcol"/>
+    <rect x="6" y="18" width="52" height="7" rx="2" class="pcol"/>
+    <rect x="6" y="29" width="52" height="7" rx="2" fill="none" stroke="#C5D0BF" stroke-width="1" stroke-dasharray="3 3"/>
+    <path d="M44 29.5l12 6M56 29.5l-12 6" stroke="#D9534F" stroke-width="1.6" fill="none"/>
+  </symbol>
+  <symbol id="g-gap" viewBox="0 0 64 42">
+    <rect x="0.5" y="0.5" width="63" height="41" rx="4" class="scr"/>
+    <rect x="8" y="8" width="20" height="26" rx="2" class="pcol"/>
+    <rect x="36" y="8" width="20" height="26" rx="2" class="pcol"/>
+    <path d="M32 6v30" stroke="#F0A23B" stroke-width="1.5"/>
+  </symbol>
+  <symbol id="g-merge" viewBox="0 0 64 42">
+    <rect x="0.5" y="0.5" width="63" height="41" rx="4" class="scr"/>
+    <rect x="6" y="8" width="34" height="26" rx="2" fill="rgba(78,165,48,.28)" stroke="#4EA530" stroke-width="1.5"/>
+    <rect x="46" y="8" width="12" height="26" rx="2" class="pcol"/>
+  </symbol>
+</svg>
+
 <div class="wrap">
   <nav>
     <a class="mark" href="../../"><i><b></b><b></b><b></b></i>greenTile</a>
@@ -135,38 +201,22 @@ footer{padding:36px 0 56px;border-top:1px solid var(--rule);display:flex;justify
       <a class="btn" href="#map">See what maps to what</a>
       <a class="plain" href="#rebuild">Rebuild your layouts</a>
     </div>
-
-    <div class="models">
-      <article class="model">
-        <div class="screen" aria-hidden="true"><div class="zones">
-          <i class="win"></i><i></i>
-        </div></div>
-        <h2>FancyZones: zones you draw</h2>
-        <p>You design a layout of zones, then move windows into them one by one: <kbd>Shift</kbd> and drag, or <kbd>Win</kbd>+arrows. The layout is a target. What ends up in it is your decision, every time.</p>
-      </article>
-      <article class="model g">
-        <div class="screen" aria-hidden="true"><div class="tiles">
-          <i style="--c:#4EA530"></i><i style="--c:#3E7CB1"></i><i style="--c:#F0A23B"></i><i style="--c:#8E6CC4"></i><i style="--c:#2A9D8F"></i>
-        </div></div>
-        <h2>greenTile: a layout that fills itself</h2>
-        <p>A preset is assigned to a monitor and a workspace. Windows that open, close or come back are fitted into it. You still drag and swap when you want to, but you do not have to.</p>
-      </article>
-    </div>
   </header>
 </div>
 
 <section id="fancyzones">
   <div class="wrap">
     <h2>What you are leaving behind.</h2>
-    <p class="sub">FancyZones is part of Microsoft PowerToys, the open source toolbox for Windows. Its features are the reason zone layouts are hard to give up:</p>
+    <p class="sub">FancyZones is part of Microsoft PowerToys, the open source toolbox for Windows. It has had years to grow, and the list is longer than most people remember using:</p>
     <ul class="keys">
       <li><b>Layouts with zones</b><span>Built from templates (columns, rows, grid, priority) or drawn by hand in two editor styles: <i>Grid</i>, which splits and merges cells, and <i>Canvas</i>, where zones may overlap.</span></li>
-      <li><b>A layout per monitor</b><span>Different monitors can run different layouts, and a default layout applies when the display setup changes.</span></li>
+      <li><b>A layout per monitor</b><span>Different monitors can run different layouts, and a default layout applies when the display setup changes — one for horizontal, one for vertical orientation.</span></li>
       <li><b>Drop a window into a zone</b><span>Hold <kbd>Shift</kbd> while dragging and the zones appear; the zone under the pointer lights up. Holding <kbd>Ctrl</kbd> while dragging spreads one window over several zones.</span></li>
-      <li><b>Layout hotkeys</b><span><kbd>Win</kbd><kbd>Ctrl</kbd><kbd>Alt</kbd>+a number applies a saved layout to the active screen.</span></li>
+      <li><b>Layout hotkeys</b><span><kbd>Win</kbd><kbd>Ctrl</kbd><kbd>Alt</kbd>+a number applies a saved layout to the active screen. Every layout can carry its own hotkey.</span></li>
       <li><b>New windows go where they belong</b><span><i>Move newly created windows to the last known zone</i> puts a new window back where that application sat before.</span></li>
       <li><b>Rules that survive</b><span>Excluded applications, gaps around zones, and <i>keep windows in their zones when the screen resolution changes</i>.</span></li>
     </ul>
+    <p class="note">The feature that carries the whole idea is the last one of the drop-a-window group: the zone is not just a picture, it is a target with memory. Everything you rebuild on Linux has to reproduce that memory one way or another.</p>
   </div>
 </section>
 
@@ -178,49 +228,140 @@ footer{padding:36px 0 56px;border-top:1px solid var(--rule);display:flex;justify
       <li><b>Halves, from the keyboard</b><span><kbd>Super</kbd>+<kbd>←</kbd> pushes the focused window into the left half, <kbd>Super</kbd>+<kbd>→</kbd> into the right one, <kbd>Super</kbd>+<kbd>↑</kbd> and <kbd>Super</kbd>+<kbd>↓</kbd> into the top and bottom half.</span></li>
       <li><b>Quarters, by combining them</b><span>Push left, then push up: the window takes the upper left quarter. Pushing in the opposite direction untiles it again. Cinnamon's window manager Muffin supports this; the keyboard reference in the settings just does not mention it.</span></li>
       <li><b>Halves and maximise, with the mouse</b><span>Drop a window on a vertical screen edge and it covers that half. Drop it on the top edge and it maximises. This <i>edge tiling</i> is on by default.</span></li>
-      <li><b>Maximise</b><span><kbd>Alt</kbd>+<kbd>F10</kbd>.</span></li>
+      <li><b>Maximise</b><span><kbd>Alt</kbd>+<kbd>F10</kbd>, or a double click on the title bar.</span></li>
       <li><b>Workspaces</b><span>Four of them by default (up to 36). <kbd>Ctrl</kbd><kbd>Alt</kbd>+<kbd>←</kbd>/<kbd>→</kbd> switches, <kbd>Ctrl</kbd><kbd>Alt</kbd><kbd>Shift</kbd>+<kbd>←</kbd>/<kbd>→</kbd> takes the focused window along.</span></li>
       <li><b>Hot corners, switched off</b><span>The four screen corners can run Expo, Scale or show the desktop, but every one of them ships disabled. If you miss the Windows corner gestures, this is where to switch them on.</span></li>
     </ul>
-    <p class="sub" style="margin-top:26px">Everything above is about the window you are pointing at. What is missing is the part FancyZones was really for: a layout that exists before any window does, and windows that find their place in it.</p>
+    <p class="body" style="margin-top:26px">Read that list again and you will notice what it has in common. Every entry acts on <i>the window you are pointing at or focusing</i>, and every one of them is a single, finished move: push this one left, drop that one on an edge, send the third one to another workspace. Nothing on the list can look at the screen and decide. Nothing on it can hold a shape in mind, and nothing remembers what you built yesterday.</p>
+    <p class="body">That is not a criticism, it is a design decision. Cinnamon's window management is built to stay predictable, and predictable means: only what you asked for, only when you ask. The price is that the arranging is yours to do every single time — which is exactly the part FancyZones automated for you, and the part a tiling extension takes over here.</p>
   </div>
 </section>
 
 <section id="map">
   <div class="wrap">
     <h2>The mapping.</h2>
-    <p class="sub">Left column: what you used in PowerToys. Right column: what it is called here.</p>
-    <div class="cmp-wrap">
-      <table class="cmp">
-        <thead><tr><td></td><th scope="col">FancyZones on Windows</th><th scope="col">Cinnamon, with greenTile</th></tr></thead>
-        <tbody>
-          <tr><th scope="row">A layout of zones</th><td>Zones from a template or drawn by hand, per monitor.</td><td>A <b>preset</b>: columns painted on a 6 × 4 grid, each column holding one window or a stack, widths free. Assigned per monitor and workspace.</td></tr>
-          <tr><th scope="row">The layout editor</th><td><kbd>Win</kbd><kbd>Shift</kbd>+<kbd>`</kbd> opens the editor.</td><td><kbd>Super</kbd><kbd>Ctrl</kbd><kbd>P</kbd> opens the preset panel. Sixteen editable starters are already there.</td></tr>
-          <tr><th scope="row">Putting a window in a zone</th><td><kbd>Shift</kbd> while dragging, then drop into the highlighted zone.</td><td>Drag a window over another window's edge: a preview shows the new column, stack or row, and the drop lands there. Neighbours make room.</td></tr>
-          <tr><th scope="row">Jump to a saved layout</th><td><kbd>Win</kbd><kbd>Ctrl</kbd><kbd>Alt</kbd>+number applies a layout to the active screen.</td><td>Presets are applied from the panel or by assignment; the column hotkeys <kbd>Super</kbd><kbd>Ctrl</kbd>+<kbd>3</kbd> and <kbd>Super</kbd><kbd>Ctrl</kbd>+<kbd>6</kbd> set equal columns on the spot.</td></tr>
-          <tr><th scope="row">New windows remember their zone</th><td><i>Move newly created windows to the last known zone.</i></td><td>Auto mode: with <kbd>Super</kbd><kbd>Ctrl</kbd><kbd>A</kbd> on, a window that opens is fitted into the layout a quarter second later. Close one and the gap closes.</td></tr>
-          <tr><th scope="row">Surviving a display change</th><td><i>Keep windows in their zones when the screen resolution changes.</i></td><td>A preset belongs to a monitor and is found again after a replug. After a Cinnamon restart, windows come back in the order you left them.</td></tr>
-          <tr><th scope="row">Exceptions</th><td>An exclude list per application name.</td><td>A never tile list by window class, title or app id, plus <kbd>Super</kbd><kbd>G</kbd> to let the focused window float. Dialogs float on their own.</td></tr>
-          <tr><th scope="row">Space around zones</th><td><i>Space around zones</i>, in pixels.</td><td>Gap between windows, 0 to 48 px. The screen edges stay flush.</td></tr>
-          <tr><th scope="row">One window over two zones</th><td><kbd>Ctrl</kbd> while dragging merges the zones under the pointer.</td><td>The opposite direction: the preset already says it. Drag the handle between two columns to merge them into one wide column, 1 : 2 : 1 and so on.</td></tr>
-        </tbody>
-      </table>
-    </div>
+    <p class="sub">Here is every FancyZones idea worth keeping, and what it becomes on Cinnamon. The drawings show the result — a preset column is not a zone, and it is worth seeing the difference before you start painting.</p>
+
+    <figure class="bigfig">
+      <svg viewBox="0 0 720 250" role="img" aria-labelledby="fig1t" style="max-width:720px">
+        <title id="fig1t">On the left: a FancyZones layout of dashed zones with one window dropped in. On the right: a greenTile preset of solid columns, one of them wide, each column holding a window.</title>
+        <text x="0" y="12" class="big nz">PowerToys · FancyZones</text>
+        <text x="452" y="12" class="big hl nz">Cinnamon · a greenTile preset</text>
+
+        <!-- left screen: zones you draw -->
+        <rect x="0.5" y="22.5" width="300" height="180" rx="8" class="scr"/>
+        <rect x="16" y="38" width="120" height="148" rx="4" class="dash"/>
+        <rect x="148" y="38" width="136" height="70" rx="4" class="dash"/>
+        <rect x="148" y="116" width="136" height="70" rx="4" class="dash"/>
+        <rect x="26" y="52" width="100" height="120" rx="3" class="zwin"/>
+        <text x="16" y="218">zones you draw, then fill</text>
+
+        <!-- arrow -->
+        <path class="arrow" d="M322 112h56"/>
+        <path d="M384 112l-8 5.6v-11.2z" fill="#2F6A1E"/>
+        <text x="318" y="134">same split</text>
+
+        <!-- right screen: a preset -->
+        <rect x="452.5" y="22.5" width="267" height="180" rx="8" class="scr"/>
+        <rect x="466" y="38" width="100" height="148" rx="4" class="pcol"/><rect x="466" y="38" width="100" height="4" rx="2" fill="#4EA530"/>
+        <rect x="572" y="38" width="66" height="70" rx="4" class="pcol"/><rect x="572" y="38" width="66" height="4" rx="2" fill="#F0A23B"/>
+        <rect x="572" y="116" width="66" height="70" rx="4" class="pcol"/><rect x="572" y="116" width="66" height="4" rx="2" fill="#8E6CC4"/>
+        <rect x="644" y="38" width="62" height="148" rx="4" class="pcol"/><rect x="644" y="38" width="62" height="4" rx="2" fill="#3E7CB1"/>
+        <text x="466" y="218">columns that fill themselves</text>
+      </svg>
+      <figcaption>The difference in one picture: a zone layout on the left draws where windows <i>may</i> go, and you move each one there. A preset on the right is the arrangement itself — columns with widths, filled as windows appear.</figcaption>
+    </figure>
+
+    <ol class="map" style="margin-top:44px">
+      <li>
+        <svg class="glyph" aria-hidden="true"><use href="#g-preset"/></svg>
+        <div>
+          <span class="src">PowerToys: a layout of zones</span>
+          <h3>A preset instead of zones</h3>
+          <p>In FancyZones you design a layout of zones, per monitor, and pick which application sits where. Here the equivalent is a <b>preset</b>: columns painted on a 6 × 4 grid, each column holding one window or a stack of them, widths free. A preset belongs to a monitor <i>and</i> a workspace, so the same screen can be laid out differently depending on where you are.</p>
+        </div>
+      </li>
+      <li>
+        <svg class="glyph" aria-hidden="true"><use href="#g-panel"/></svg>
+        <div>
+          <span class="src">PowerToys: the layout editor</span>
+          <h3>The preset panel</h3>
+          <p><kbd>Win</kbd><kbd>Shift</kbd>+<kbd>`</kbd> opens the editor on Windows. <kbd>Super</kbd><kbd>Ctrl</kbd><kbd>P</kbd> opens the preset panel here, on the monitor of the focused window. Sixteen editable starters are already in it, so you rarely start from an empty grid — the panel shows a live preview of what each card would do with the windows you have open right now.</p>
+        </div>
+      </li>
+      <li>
+        <svg class="glyph" aria-hidden="true"><use href="#g-split"/></svg>
+        <div>
+          <span class="src">PowerToys: drop into a zone</span>
+          <h3>Drop into a cell, or split a neighbour</h3>
+          <p><kbd>Shift</kbd> and drag on Windows, then release over the highlighted zone. Here you drag a window over another one: a translucent preview shows the new column, the stack or the row before you let go, and the neighbours move up to fill what you left. The preview is doing the job the highlight does in FancyZones — telling you the result before it happens.</p>
+        </div>
+      </li>
+      <li>
+        <svg class="glyph" aria-hidden="true"><use href="#g-cols"/></svg>
+        <div>
+          <span class="src">PowerToys: layout hotkeys</span>
+          <h3>Columns on a key</h3>
+          <p>FancyZones gives every saved layout a hotkey. Here presets are applied from the panel or by assignment, and the column hotkeys <kbd>Super</kbd><kbd>Ctrl</kbd>+<kbd>3</kbd> and <kbd>Super</kbd><kbd>Ctrl</kbd>+<kbd>6</kbd> re-draw the screen as equal columns on the spot — useful when you want a quick three-way split without touching the presets.</p>
+        </div>
+      </li>
+      <li>
+        <svg class="glyph" aria-hidden="true"><use href="#g-auto"/></svg>
+        <div>
+          <span class="src">PowerToys: new windows remember their zone</span>
+          <h3>Auto mode</h3>
+          <p>This is the feature to port first, and greenTile answers it for the whole layout rather than per application. With auto mode on for a workspace (<kbd>Super</kbd><kbd>Ctrl</kbd><kbd>A</kbd>), a window that opens is fitted into the preset a quarter second later. Close one and the others grow into the space. No dragging, no remembering where things were.</p>
+        </div>
+      </li>
+      <li>
+        <svg class="glyph" aria-hidden="true"><use href="#g-monitor"/></svg>
+        <div>
+          <span class="src">PowerToys: layouts survive a resolution change</span>
+          <h3>Assignments survive a replug</h3>
+          <p>FancyZones keeps windows in their zones when the resolution changes. Here the layout itself is remembered: a preset is assigned to a monitor by its hardware identity, so unplugging the big screen, plugging it back in or turning it off for the afternoon brings the right layout back. After a Cinnamon restart the windows return in the order you left them, so the arrangement rebuilds the same way.</p>
+        </div>
+      </li>
+      <li>
+        <svg class="glyph" aria-hidden="true"><use href="#g-list"/></svg>
+        <div>
+          <span class="src">PowerToys: excluded applications</span>
+          <h3>The never tile list</h3>
+          <p>PowerToys takes a list of application names that should never be snapped. The same exists here and is a bit more precise: a never tile list that matches window class, title or app id, filled either by hand or from a picker that lists your installed applications, flatpaks included. Dialogs and fixed-size windows stay out on their own, and <kbd>Super</kbd><kbd>G</kbd> lifts a single window out of the grid without a rule.</p>
+        </div>
+      </li>
+      <li>
+        <svg class="glyph" aria-hidden="true"><use href="#g-gap"/></svg>
+        <div>
+          <span class="src">PowerToys: space around zones</span>
+          <h3>Gaps between windows</h3>
+          <p>A setting in PowerToys, a slider in the preset panel here: 0 to 48 px between windows. Only the shared edges move in — the outer edges of the layout stay flush with the screen, which is the part that makes a tiled desktop look deliberate instead of accidental. The value is applied as insets, so a gap can never push a window off its monitor.</p>
+        </div>
+      </li>
+      <li>
+        <svg class="glyph" aria-hidden="true"><use href="#g-merge"/></svg>
+        <div>
+          <span class="src">PowerToys: one window over several zones</span>
+          <h3>Columns that span</h3>
+          <p>FancyZones lets you hold <kbd>Ctrl</kbd> while dragging to spread a window over two adjacent zones. greenTile turns that around: the width belongs to the <i>layout</i>, not to the drop. Drag the handle between two painted columns to merge them into one wide column — 1 : 2 : 1, 25 / 50 / 25, whatever your screen wants — and the handle inside a wide column splits it again.</p>
+        </div>
+      </li>
+    </ol>
   </div>
 </section>
 
 <section id="rebuild">
   <div class="wrap">
     <h2>Rebuilding your layouts.</h2>
-    <p class="sub">Half an hour, if you had three or four layouts on Windows. Start with the one you used most.</p>
+    <p class="sub">Half an hour, if you had three or four layouts on Windows. Start with the one you used most, live with it for a day, then do the next.</p>
     <ol class="steps">
-      <li><span><b>Install greenTile</b> from the <a href="../auto-tiling-cinnamon/#install">release zip</a>, restart Cinnamon, switch it on in the Extensions manager.</span></li>
-      <li><span><b>Paint your most used layout</b> in the preset panel (<kbd>Super</kbd><kbd>Ctrl</kbd><kbd>P</kbd>): columns on the 6 × 4 grid, the handle between two columns to merge them into a wide one. A layout like <i>one wide column left, two stacked right</i> is three clicks.</span></li>
-      <li><span><b>Assign it</b> to the monitor and workspace you want it on. Other workspaces keep their own preset, so the same monitor can work differently depending on where you are.</span></li>
-      <li><span><b>Turn on auto mode</b> (<kbd>Super</kbd><kbd>Ctrl</kbd><kbd>A</kbd>) on that workspace. This is the FancyZones habit replaced by something better: you do not drag a window into its zone, it is already there.</span></li>
-      <li><span><b>Fill the never tile list</b> with the apps that should stay out, the same way you excluded applications in PowerToys.</span></li>
-      <li><span><b>Keep two keys in mind</b> for the days you want to rearrange by hand: <kbd>Super</kbd><kbd>G</kbd> floats a window, <kbd>Super</kbd><kbd>Ctrl</kbd>+arrow swaps it with its neighbour and walks on to the next monitor.</span></li>
+      <li><span><b>Install greenTile</b> from the <a href="../auto-tiling-cinnamon/#install">release zip</a>, restart Cinnamon, switch it on in the Extensions manager. Nothing is replaced or removed; the built-in keys keep working.</span></li>
+      <li><span><b>Paint your most used layout</b> in the preset panel (<kbd>Super</kbd><kbd>Ctrl</kbd><kbd>P</kbd>): columns on the 6 × 4 grid, the handle between two columns to merge them into a wide one. A layout like <i>one wide column left, two stacked right</i> is three clicks, and the preview under each card shows what a click does with the windows you have open.</span></li>
+      <li><span><b>Assign it</b> to the monitor and workspace you want it on. Then switch to the next workspace and set that one up too — the panel always edits the monitor and workspace you are on right now.</span></li>
+      <li><span><b>Turn on auto mode</b> (<kbd>Super</kbd><kbd>Ctrl</kbd><kbd>A</kbd>) on the workspaces that should look after themselves. Leave one off and it stays a free surface, which is often what you want on a workspace you use for one big window.</span></li>
+      <li><span><b>Fill the never tile list</b> with the apps that should stay out, the same way you excluded applications in PowerToys. Dialogs and fixed-size windows are already excluded for you.</span></li>
+      <li><span><b>Try the two habits that replace dragging:</b> <kbd>Super</kbd><kbd>G</kbd> floats a window and pressing it again tiles it back, and <kbd>Super</kbd><kbd>Ctrl</kbd>+arrow swaps the focused window with its neighbour — and keeps going across monitors and workspaces if you hold the rhythm.</span></li>
     </ol>
+    <p class="body" style="margin-top:26px">The first week feels strange for one reason: you are used to placing windows, and now you mostly watch them place themselves. Getting the layouts right is the work; using them is not. After two days you stop dragging windows across the screen, because there is nothing left to drag them away from.</p>
   </div>
 </section>
 
@@ -229,9 +370,10 @@ footer{padding:36px 0 56px;border-top:1px solid var(--rule);display:flex;justify
     <h2>What has no equivalent.</h2>
     <p>Not everything comes across, and it is worth knowing which parts before you start:</p>
     <ul>
-      <li><b>Overlapping zones.</b> FancyZones Canvas allows zones that overlap and windows that share space. Here a layout is a grid: cells share edges, they do not stack.</li>
-      <li><b>Zones that span monitors.</b> FancyZones can treat all monitors as one large screen. greenTile works per monitor — dragging a window to the other screen retiles both, but there is no single layout across both.</li>
-      <li><b>Zone-based keyboard navigation.</b> <kbd>Win</kbd>+arrows stepping through zone by zone has no mirror image; the nearest thing is swapping with the neighbour (<kbd>Super</kbd><kbd>Ctrl</kbd>+arrow) or setting a different preset.</li>
+      <li><b>Overlapping zones.</b> FancyZones Canvas allows zones that overlap and windows that share space. Here a layout is a grid: cells share edges, they do not stack on top of each other. A wide column is how you make room, not an overlapping zone.</li>
+      <li><b>Zones that span monitors.</b> FancyZones can treat all monitors as one large screen. greenTile works per monitor — dragging a window to the other screen retiles both, but there is no single layout stretching across both displays.</li>
+      <li><b>Zone-based keyboard navigation.</b> Stepping from zone to zone with <kbd>Win</kbd>+arrows has no mirror image; the nearest things are swapping with the neighbour (<kbd>Super</kbd><kbd>Ctrl</kbd>+arrow) or giving the workspace a different preset.</li>
+      <li><b>Per-application zone memory.</b> PowerToys remembers the zone a specific application last sat in. Here the layout decides, not the application — every window of a workspace is fitted into the same arrangement, which is simpler to predict and costs you the "Editor always on the right" habit. The related Cinnamon extension <i>auto-move-windows</i> covers that part separately, by putting applications on their own workspace.</li>
       <li><b>Windows-only muscle memory.</b> The <kbd>Win</kbd> key is <kbd>Super</kbd> here, and Cinnamon keeps its own keys for workspaces. Ten keys in total are documented on the <a href="../../#keys">home page</a>.</li>
     </ul>
     <p>The idea you keep is the one that mattered: you decide once how the screen is divided, and afterwards the windows obey.</p>

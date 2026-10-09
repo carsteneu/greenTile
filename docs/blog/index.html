@@ -74,16 +74,9 @@ h2{font:750 clamp(32px,4.2vw,52px)/1 "Bricolage";letter-spacing:-.035em;margin:0
 .card p{margin:0;color:#34443A;font-size:15.5px}
 .card .more{margin-top:auto;padding-top:8px;font:600 15px/1 "Instrument";color:var(--moss)}
 
-/* the chronological area: newest first */
-.posts{list-style:none;margin:0;padding:0;border-top:1.5px solid var(--ink)}
-.posts:empty{border-top:0}   /* no dangling rule while the list is empty */
-.posts li{border-bottom:1px solid var(--rule)}
-.posts a{display:grid;gap:4px;padding:18px 0 20px;text-decoration:none}
-.posts time{font:500 13px/1 "JBMono";color:var(--mute)}
-.posts h3{font:700 22px/1.15 "Bricolage";letter-spacing:-.02em;margin:0}
-.posts p{margin:0;color:#34443A;font-size:15.5px;max-width:70ch}
-.posts a:hover h3{color:var(--moss)}
-.empty{color:var(--mute);font-size:15.5px;margin:18px 0 0}
+/* the chronological area reuses the pinned card look; the date lives in the tag line */
+.card time{font:inherit;letter-spacing:inherit}
+kbd{font:600 12px/1 "JBMono";padding:3px 5px 4px;border-radius:4px;background:var(--sage);border:1px solid var(--rule);box-shadow:0 2px 0 var(--rule);color:var(--ink);white-space:nowrap}
 
 footer{padding:36px 0 56px;border-top:1px solid var(--rule);display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px;color:var(--mute);font-size:14px}
 
@@ -140,50 +133,44 @@ footer{padding:36px 0 56px;border-top:1px solid var(--rule);display:flex;justify
 
       To add a post:
         1. create docs/blog/<slug>/index.html (copy an existing article page)
-        2. delete the <p class="empty"> line below
-        3. paste one <li> as the FIRST child of <ol class="posts">:
+        2. paste one card as the FIRST card of this .cards grid:
 
-      <li>
-        <a href="<slug>/">
-          <time datetime="YYYY-MM-DD">Month D, YYYY</time>
-          <h3>Post title</h3>
-          <p>One or two lines about the post.</p>
-        </a>
-      </li>
+      <a class="card" href="<slug>/">
+        <span class="tag"><time datetime="YYYY-MM-DD">Mon D, YYYY</time> · Label</span>
+        <h3>Post title</h3>
+        <p>Two or three lines about the post.</p>
+        <span class="more">Read it →</span>
+      </a>
 
-        4. add https://greentile.io/blog/<slug>/ to docs/sitemap.xml, and bump
+        3. add https://greentile.io/blog/<slug>/ to docs/sitemap.xml, and bump
            its <lastmod> plus the <lastmod> of https://greentile.io/blog/
     -->
-    <ol class="posts">
-      <li>
-        <a href="fancyzones-on-linux-mint/">
-          <time datetime="2026-10-09">October 9, 2026</time>
-          <h3>FancyZones on Linux Mint</h3>
-          <p>You drew zones in Windows PowerToys and every window had a home. What maps to what on Cinnamon, what has no equivalent, and how to rebuild your layouts.</p>
-        </a>
-      </li>
-      <li>
-        <a href="tiling-on-linux-mint/">
-          <time datetime="2026-10-09">October 9, 2026</time>
-          <h3>Tiling on Linux Mint: what Cinnamon does and where it stops</h3>
-          <p>Halves, quarters, edge snapping, four workspaces — the full inventory of the built-ins, the five things they cannot do, and the three ways to go further.</p>
-        </a>
-      </li>
-      <li>
-        <a href="cinnamon-tiling-extensions/">
-          <time datetime="2026-10-09">October 9, 2026</time>
-          <h3>Tiling extensions for Cinnamon: the short list</h3>
-          <p>The Spices catalogue lists 44 extensions and exactly one of them tiles windows. What exists inside and outside the catalogue, and how to choose between them.</p>
-        </a>
-      </li>
-      <li>
-        <a href="cinnamon-workspaces-and-hotkeys/">
-          <time datetime="2026-10-09">October 9, 2026</time>
-          <h3>Workspaces in Cinnamon, and a layout for each one</h3>
-          <p>The defaults (four workspaces, Ctrl+Alt+arrows), what workspaces do not do, and how to give each one its own window layout that comes back on its own.</p>
-        </a>
-      </li>
-    </ol>
+    <div class="cards">
+      <a class="card" href="fancyzones-on-linux-mint/">
+        <span class="tag"><time datetime="2026-10-09">Oct 9, 2026</time> · Coming from Windows</span>
+        <h3>FancyZones on Linux Mint</h3>
+        <p>You drew zones in PowerToys once and every window had a home. Cinnamon has no zones, but it has most of the pieces: what maps to a preset, what the desktop does on its own, and which parts of FancyZones have no equivalent here.</p>
+        <span class="more">Read it →</span>
+      </a>
+      <a class="card" href="tiling-on-linux-mint/">
+        <span class="tag"><time datetime="2026-10-09">Oct 9, 2026</time> · The built-ins</span>
+        <h3>Tiling on Linux Mint: what Cinnamon does and where it stops</h3>
+        <p>Halves from the keyboard, quarters by combining two keys, edge snapping with the mouse, four workspaces — the full inventory of what needs no extension, the five things it cannot do, and the three ways to go further with their costs.</p>
+        <span class="more">Read it →</span>
+      </a>
+      <a class="card" href="cinnamon-tiling-extensions/">
+        <span class="tag"><time datetime="2026-10-09">Oct 9, 2026</time> · Overview</span>
+        <h3>Tiling extensions for Cinnamon: the short list</h3>
+        <p>The Spices catalogue lists 44 extensions and exactly one of them tiles windows. What the neighbours actually do, how gTile and greenTile differ in one paragraph, and the two projects outside the catalogue.</p>
+        <span class="more">Read it →</span>
+      </a>
+      <a class="card" href="cinnamon-workspaces-and-hotkeys/">
+        <span class="tag"><time datetime="2026-10-09">Oct 9, 2026</time> · Workspaces</span>
+        <h3>Workspaces in Cinnamon, and a layout for each one</h3>
+        <p>Four workspaces by default, <kbd>Ctrl</kbd><kbd>Alt</kbd>+arrows to move between them — and no way to make them look different. How to give each workspace its own layout that comes back on its own.</p>
+        <span class="more">Read it →</span>
+      </a>
+    </div>
   </div>
 </section>
 

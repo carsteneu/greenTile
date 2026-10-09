@@ -68,18 +68,33 @@ h1 em{font-style:normal;color:var(--leaf);white-space:nowrap}
 kbd{font:600 13px/1 "JBMono";padding:7px 9px 8px;border-radius:7px;background:var(--sheet);border:1px solid var(--rule);box-shadow:0 2px 0 var(--rule);color:var(--ink)}
 code{font:500 .9em "JBMono";background:var(--sheet);border:1px solid var(--rule);border-radius:5px;padding:1px 5px}
 
+/* drawings */
+.fig{margin:clamp(26px,4vh,40px) 0 0}
+.fig svg{display:block;width:100%;height:auto}
+.fig figcaption{font:400 14.5px/1.5 "Instrument";color:var(--mute);margin-top:12px;max-width:66ch}
+svg text{font:500 10.5px "JBMono";letter-spacing:.07em;text-transform:uppercase;fill:var(--mute)}
+svg text.nz{text-transform:none;letter-spacing:.02em}
+svg text.hl{fill:var(--moss)}
+svg text.big{font:600 12px "JBMono"}
+.scr{fill:#1B2A21}
+.pcol{fill:var(--sheet)}
+.gdash{stroke:#7E9A86;stroke-width:1;stroke-dasharray:2 2.5;fill:none}
+
 section{padding:clamp(48px,8vh,88px) 0}
 h2{font:750 clamp(32px,4.2vw,52px)/1 "Bricolage";letter-spacing:-.035em;margin:0 0 12px;max-width:18ch}
 h3{font:700 clamp(22px,2.2vw,28px)/1.1 "Bricolage";letter-spacing:-.02em;margin:0 0 10px}
 .sub{color:var(--mute);max-width:58ch;margin:0 0 32px}
+p.body{max-width:68ch;color:#2A3A30;margin:0 0 16px}
 
-.cmp-wrap{overflow-x:auto}
-table.cmp{width:100%;border-collapse:collapse;min-width:680px}
-.cmp th,.cmp td{text-align:left;vertical-align:top;padding:13px 18px 15px 0;border-bottom:1px solid var(--rule);font-size:15.5px;line-height:1.5}
-.cmp thead th{font:700 22px/1.1 "Bricolage";letter-spacing:-.02em;border-bottom:1.5px solid var(--ink);padding-bottom:14px}
-.cmp tbody th{font:600 15.5px/1.35 "Instrument";color:var(--ink);width:26%}
-.cmp td{color:#34443A}
-.cmp td.old{color:var(--mute);font-variant-numeric:tabular-nums;white-space:nowrap}
+/* the neighbours: one card per catalogue entry, each with its own little drawing */
+.neigh{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.neigh article{background:var(--sheet);border:1px solid #D6DED1;border-radius:var(--r);padding:18px 20px 20px}
+.neigh .top{display:flex;align-items:center;gap:12px;margin-bottom:12px}
+.neigh .top svg{width:54px;height:36px;flex:none}
+.neigh h4{font:600 17px/1.15 "Instrument";margin:0}
+.neigh .who{font:500 11.5px/1.6 "JBMono";letter-spacing:.05em;text-transform:uppercase;color:var(--moss)}
+.neigh p{margin:0 0 12px;font-size:15px;color:#34443A}
+.neigh .ver{font:500 11.5px/1 "JBMono";color:var(--mute);letter-spacing:.03em;display:block;border-top:1px solid var(--rule);padding-top:10px}
 
 /* the two extension profiles */
 .pick{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:8px}
@@ -88,6 +103,7 @@ table.cmp{width:100%;border-collapse:collapse;min-width:680px}
 .pick h3{margin-bottom:6px}
 .pick .who{font:500 12px/1 "JBMono";letter-spacing:.06em;text-transform:uppercase;color:var(--moss);margin-bottom:14px}
 .pick article.g .who{color:#8FBF7A}
+.pick svg{display:block;width:100%;height:auto;margin:0 0 16px}
 .pick ul{margin:0;padding-left:20px}
 .pick li{font-size:15.5px;color:#34443A;margin:0 0 8px}
 .pick article.g li{color:#C9D5C3}
@@ -98,18 +114,67 @@ table.cmp{width:100%;border-collapse:collapse;min-width:680px}
 .origin p{margin:0 0 14px}
 .origin ul{margin:0 0 18px;padding-left:20px}
 .origin li{margin:0 0 8px}
+.keys{list-style:none;margin:0;padding:0;border-top:1.5px solid var(--ink);max-width:900px}
+.keys li{display:grid;grid-template-columns:280px 1fr;gap:16px;padding:13px 0 15px;border-bottom:1px solid var(--rule);color:#34443A;font-size:16px;align-items:baseline}
+.keys b{color:var(--ink);font-weight:600}
 .next{display:flex;flex-wrap:wrap;gap:14px;align-items:center;margin-top:36px}
 .note{border-left:3px solid var(--leaf);padding:2px 0 2px 16px;color:#34443A;margin:26px 0 0;max-width:68ch}
 
 footer{padding:36px 0 56px;border-top:1px solid var(--rule);display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px;color:var(--mute);font-size:14px}
 
 @media (max-width:980px){
-  .pick{grid-template-columns:1fr}
+  .pick,.neigh{grid-template-columns:1fr}
+  .neigh{grid-template-columns:1fr 1fr}
+  .keys li{grid-template-columns:1fr;gap:4px}
   nav ul{display:none}
 }
+@media (max-width:640px){.neigh{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
+
+<!-- drawings reused in the neighbour cards, defined once -->
+<svg width="0" height="0" aria-hidden="true" focusable="false" style="position:absolute">
+  <symbol id="n-move" viewBox="0 0 54 36">
+    <rect x="0.5" y="4.5" width="26" height="27" rx="3" class="scr"/>
+    <rect x="4" y="8" width="19" height="10" rx="2" class="pcol"/>
+    <path d="M31 18h9" stroke="#2F6A1E" stroke-width="1.5"/><path d="M42 18l-5 3.4v-6.8z" fill="#2F6A1E"/>
+    <rect x="45.5" y="4.5" width="8" height="27" rx="2" fill="#13201A" stroke="#2F6A1E" stroke-width="1.4"/>
+  </symbol>
+  <symbol id="n-ws" viewBox="0 0 54 36">
+    <rect x="3" y="9" width="14" height="24" rx="2" fill="#C5D0BF"/>
+    <rect x="20" y="9" width="14" height="24" rx="2" class="pcol"/>
+    <rect x="37" y="9" width="14" height="24" rx="2" fill="#C5D0BF"/>
+    <path d="M8 4h38" stroke="#2F6A1E" stroke-width="1.4"/>
+    <path d="M6 4l5-3v6zM48 4l-5-3v6z" fill="#2F6A1E"/>
+  </symbol>
+  <symbol id="n-adj" viewBox="0 0 54 36">
+    <rect x="0.5" y="6.5" width="23" height="23" rx="3" class="scr"/>
+    <rect x="4" y="10" width="16" height="16" rx="2" class="pcol"/>
+    <rect x="30.5" y="6.5" width="23" height="23" rx="3" class="scr"/>
+    <rect x="34" y="10" width="16" height="16" rx="2" fill="rgba(240,162,59,.35)" stroke="#F0A23B" stroke-width="1.3"/>
+    <path d="M26 18h2M28 15l3 3-3 3" stroke="#2F6A1E" stroke-width="1.5" fill="none"/>
+  </symbol>
+  <symbol id="n-max" viewBox="0 0 54 36">
+    <rect x="0.5" y="0.5" width="53" height="35" rx="3" fill="rgba(240,162,59,.28)" stroke="#F0A23B" stroke-width="1.4"/>
+    <path d="M9 12h18M9 18h26M9 24h14" stroke="#B8762A" stroke-width="1.6" stroke-linecap="round"/>
+  </symbol>
+  <symbol id="n-scroll" viewBox="0 0 54 36">
+    <rect x="0.5" y="2.5" width="40" height="31" rx="3" class="scr"/>
+    <rect x="5" y="7" width="31" height="22" rx="2" class="pcol"/>
+    <path d="M46 8v20" stroke="#F0A23B" stroke-width="1.6"/>
+    <path d="M50 12l3 4-3 4M50 20l3 4-3 4" stroke="#2F6A1E" stroke-width="1.4" fill="none"/>
+  </symbol>
+  <symbol id="n-icons" viewBox="0 0 54 36">
+    <rect x="0.5" y="3.5" width="23" height="29" rx="3" class="scr"/>
+    <rect x="4" y="8" width="5" height="5" rx="1" fill="#4EA530"/><rect x="12" y="8" width="5" height="5" rx="1" fill="#C5D0BF"/>
+    <rect x="4" y="17" width="5" height="5" rx="1" fill="#C5D0BF"/>
+    <rect x="30.5" y="3.5" width="23" height="29" rx="3" class="scr"/>
+    <rect x="34" y="8" width="5" height="5" rx="1" fill="#C5D0BF"/>
+    <rect x="42" y="8" width="5" height="5" rx="1" fill="#4EA530"/><rect x="42" y="17" width="5" height="5" rx="1" fill="#C5D0BF"/>
+  </symbol>
+</svg>
+
 <div class="wrap">
   <nav>
     <a class="mark" href="../../"><i><b></b><b></b><b></b></i>greenTile</a>
@@ -132,21 +197,97 @@ footer{padding:36px 0 56px;border-top:1px solid var(--rule);display:flex;justify
   <div class="wrap">
     <h2>44 extensions, one tiler.</h2>
     <p class="sub">Cinnamon installs extensions from the Spices catalogue, reachable in System Settings → Extensions → Download. We went through all 44 entries and searched for anything that touches window placement. One extension does: <b>gTile</b>.</p>
-    <p class="sub">These are the neighbours — useful, but they solve a different problem:</p>
-    <div class="cmp-wrap">
-      <table class="cmp">
-        <thead><tr><td></td><th scope="col">Catalogue entry</th><th scope="col">What it actually does</th><th scope="col">Declared for Cinnamon</th></tr></thead>
-        <tbody>
-          <tr><th scope="row">auto-move-windows</th><td>JeffHanna</td><td>Moves applications to specific workspaces when they create windows. The closest thing to layouts the catalogue has — it decides <i>where</i> a window opens, not how the windows are arranged.</td><td class="old">4.0 – 5.6</td></tr>
-          <tr><th scope="row">RearrangeWorkspaces</th><td>klangman</td><td>Rearranges the workspaces themselves, taking their windows along.</td><td class="old">5.4</td></tr>
-          <tr><th scope="row">adjacent-windows</th><td>klangman</td><td>Hotkeys to jump to the neighbouring window instead of cycling through all of them.</td><td class="old">5.4</td></tr>
-          <tr><th scope="row">cinnamon-maximus</th><td>fmete</td><td>Removes window decorations the way Maximus does on older desktops.</td><td class="old">2.4 – 4.8</td></tr>
-          <tr><th scope="row">workspace-scroller</th><td>ori</td><td>Switches workspaces when you scroll at the screen edge.</td><td class="old">2.4 – 4.4</td></tr>
-          <tr><th scope="row">desktop-icons-per-workspace</th><td>cardsurf</td><td>Keeps desktop icons in different positions per workspace.</td><td class="old">2.6 – 4.0</td></tr>
-        </tbody>
-      </table>
+
+    <figure class="fig">
+      <svg viewBox="0 0 720 96" role="img" aria-labelledby="cat1">
+        <title id="cat1">A row of 44 squares, one of them green and labelled gTile: the Cinnamon Spices catalogue, in which a single extension tiles windows.</title>
+        <text x="0" y="12" class="big">the Cinnamon Spices catalogue · 44 entries</text>
+        <rect x="0" y="26" width="13" height="13" rx="2.5" fill="#C5D0BF"/>
+        <rect x="16" y="26" width="13" height="13" rx="2.5" fill="#C5D0BF"/>
+        <rect x="32" y="26" width="13" height="13" rx="2.5" fill="#C5D0BF"/>
+        <rect x="48" y="26" width="13" height="13" rx="2.5" fill="#C5D0BF"/>
+        <rect x="64" y="26" width="13" height="13" rx="2.5" fill="#C5D0BF"/>
+        <rect x="80" y="26" width="13" height="13" rx="2.5" fill="#C5D0BF"/>
+        <rect x="96" y="26" width="13" height="13" rx="2.5" fill="#C5D0BF"/>
+        <rect x="112" y="26" width="13" height="13" rx="2.5" fill="#C5D0BF"/>
+        <rect x="128" y="26" width="13" height="13" rx="2.5" fill="#C5D0BF"/>
+        <rect x="144" y="26" width="13" height="13" rx="2.5" fill="#C5D0BF"/>
+        <rect x="160" y="26" width="13" height="13" rx="2.5" fill="#C5D0BF"/>
+        <rect x="176" y="26" width="13" height="13" rx="2.5" fill="#C5D0BF"/>
+        <rect x="192" y="26" width="13" height="13" rx="2.5" fill="#C5D0BF"/>
+        <rect x="208" y="26" width="13" height="13" rx="2.5" fill="#C5D0BF"/>
+        <rect x="224" y="26" width="13" height="13" rx="2.5" fill="#C5D0BF"/>
+        <rect x="240" y="26" width="13" height="13" rx="2.5" fill="#C5D0BF"/>
+        <rect x="256" y="26" width="13" height="13" rx="2.5" fill="#C5D0BF"/>
+        <rect x="272" y="26" width="13" height="13" rx="2.5" fill="#C5D0BF"/>
+        <rect x="288" y="26" width="13" height="13" rx="2.5" fill="#C5D0BF"/>
+        <rect x="304" y="26" width="13" height="13" rx="2.5" fill="#C5D0BF"/>
+        <rect x="320" y="26" width="13" height="13" rx="2.5" fill="#C5D0BF"/>
+        <rect x="336" y="26" width="13" height="13" rx="2.5" fill="#4EA530"/>
+        <rect x="352" y="26" width="13" height="13" rx="2.5" fill="#C5D0BF"/>
+        <rect x="368" y="26" width="13" height="13" rx="2.5" fill="#C5D0BF"/>
+        <rect x="384" y="26" width="13" height="13" rx="2.5" fill="#C5D0BF"/>
+        <rect x="400" y="26" width="13" height="13" rx="2.5" fill="#C5D0BF"/>
+        <rect x="416" y="26" width="13" height="13" rx="2.5" fill="#C5D0BF"/>
+        <rect x="432" y="26" width="13" height="13" rx="2.5" fill="#C5D0BF"/>
+        <rect x="448" y="26" width="13" height="13" rx="2.5" fill="#C5D0BF"/>
+        <rect x="464" y="26" width="13" height="13" rx="2.5" fill="#C5D0BF"/>
+        <rect x="480" y="26" width="13" height="13" rx="2.5" fill="#C5D0BF"/>
+        <rect x="496" y="26" width="13" height="13" rx="2.5" fill="#C5D0BF"/>
+        <rect x="512" y="26" width="13" height="13" rx="2.5" fill="#C5D0BF"/>
+        <rect x="528" y="26" width="13" height="13" rx="2.5" fill="#C5D0BF"/>
+        <rect x="544" y="26" width="13" height="13" rx="2.5" fill="#C5D0BF"/>
+        <rect x="560" y="26" width="13" height="13" rx="2.5" fill="#C5D0BF"/>
+        <rect x="576" y="26" width="13" height="13" rx="2.5" fill="#C5D0BF"/>
+        <rect x="592" y="26" width="13" height="13" rx="2.5" fill="#C5D0BF"/>
+        <rect x="608" y="26" width="13" height="13" rx="2.5" fill="#C5D0BF"/>
+        <rect x="624" y="26" width="13" height="13" rx="2.5" fill="#C5D0BF"/>
+        <rect x="640" y="26" width="13" height="13" rx="2.5" fill="#C5D0BF"/>
+        <rect x="656" y="26" width="13" height="13" rx="2.5" fill="#C5D0BF"/>
+        <rect x="672" y="26" width="13" height="13" rx="2.5" fill="#C5D0BF"/>
+        <rect x="688" y="26" width="13" height="13" rx="2.5" fill="#C5D0BF"/>
+        <path d="M342.5 42v14" stroke="#2F6A1E" stroke-width="1.2"/>
+        <text x="336" y="70" class="big hl nz">gTile</text>
+        <text x="0" y="92">44 extensions · 1 tiles windows · the rest do other things</text>
+      </svg>
+      <figcaption>One square among 44. Not a gap in the catalogue's quality — the other 43 solve different problems, and the next cards are the ones you are most likely to meet while looking for a tiler.</figcaption>
+    </figure>
+
+    <h3 style="font:600 20px/1.3 'Instrument';margin:44px 0 16px">The neighbours</h3>
+    <p class="sub" style="margin-bottom:22px">Useful extensions that come up whenever you search for "tiling" — each of them good at one thing, none of them tiling:</p>
+    <div class="neigh">
+      <article>
+        <div class="top"><svg aria-hidden="true"><use href="#n-move"/></svg><div><h4>auto-move-windows</h4><span class="who">JeffHanna</span></div></div>
+        <p>Moves applications to specific workspaces when they create windows. The closest thing to layouts the catalogue has — it decides <i>where</i> a window opens, not how the windows are arranged next to each other.</p>
+        <span class="ver">declared for Cinnamon 4.0 – 5.6</span>
+      </article>
+      <article>
+        <div class="top"><svg aria-hidden="true"><use href="#n-ws"/></svg><div><h4>RearrangeWorkspaces</h4><span class="who">klangman</span></div></div>
+        <p>Rearranges the workspaces themselves, taking their windows along. Handy when you keep a fixed order in your head — but the windows inside a workspace are not touched.</p>
+        <span class="ver">declared for Cinnamon 5.4</span>
+      </article>
+      <article>
+        <div class="top"><svg aria-hidden="true"><use href="#n-adj"/></svg><div><h4>adjacent-windows</h4><span class="who">klangman</span></div></div>
+        <p>Hotkeys to jump to the neighbouring window instead of cycling through all of them. Moving <i>between</i> windows rather than moving the windows.</p>
+        <span class="ver">declared for Cinnamon 5.4</span>
+      </article>
+      <article>
+        <div class="top"><svg aria-hidden="true"><use href="#n-max"/></svg><div><h4>cinnamon-maximus</h4><span class="who">fmete</span></div></div>
+        <p>Removes window decorations the way Maximus does on older desktops. More screen for one window; nothing here arranges two of them.</p>
+        <span class="ver">declared for Cinnamon 2.4 – 4.8</span>
+      </article>
+      <article>
+        <div class="top"><svg aria-hidden="true"><use href="#n-scroll"/></svg><div><h4>workspace-scroller</h4><span class="who">ori</span></div></div>
+        <p>Switches workspaces when you scroll at the screen edge. A gesture for the desktop you already have, and a comfortable one once you are used to it.</p>
+        <span class="ver">declared for Cinnamon 2.4 – 4.4</span>
+      </article>
+      <article>
+        <div class="top"><svg aria-hidden="true"><use href="#n-icons"/></svg><div><h4>desktop-icons-per-workspace</h4><span class="who">cardsurf</span></div></div>
+        <p>Keeps desktop icons in different positions per workspace. Desktop furniture, not window management — but a good example of how far the catalogue's idea of "per workspace" reaches.</p>
+        <span class="ver">declared for Cinnamon 2.6 – 4.0</span>
+      </article>
     </div>
-    <p class="note">The third column is worth a look in general: a good part of the catalogue was written before Cinnamon 6, and its entries still declare support for 4.x or 5.x. Cinnamon runs them anyway in most cases, but nobody has tested them recently.</p>
+    <p class="note">The version line is worth reading in general: a good part of the catalogue was written before Cinnamon 6, and its entries still declare support for 4.x or 5.x. Cinnamon runs them anyway in most cases, but nobody has tested them recently, and the maintainer list for some of these has been quiet for years.</p>
   </div>
 </section>
 
@@ -158,6 +299,14 @@ footer{padding:36px 0 56px;border-top:1px solid var(--rule);display:flex;justify
       <article>
         <div class="who">In the catalogue · since forever</div>
         <h3>gTile</h3>
+        <svg viewBox="0 0 320 138" role="img" aria-labelledby="pg1">
+          <title id="pg1">A window on a screen with a grid of dashed lines and one selected area highlighted.</title>
+          <rect x="0.5" y="0.5" width="319" height="114" rx="6" class="scr"/>
+          <rect x="8" y="8" width="304" height="99" rx="4" class="pcol"/>
+          <path d="M84 8v99M160 8v99M236 8v99M8 57h304" class="gdash"/>
+          <rect x="164" y="12" width="68" height="88" fill="rgba(240,162,59,.35)" stroke="#F0A23B" stroke-width="1.5"/>
+          <text x="0" y="132" class="big hl nz">you select an area of the grid</text>
+        </svg>
         <ul>
           <li><b>You place a window.</b> A grid opens over the focused window, you select an area — with the mouse, with the arrow keys and <kbd>Shift</kbd>, or by typing two tile labels — and confirm. The other windows do not move.</li>
           <li>Four grids on the number keys, plus two buttons that arrange everything once: <i>Auto tile main and list</i> and <i>Auto tile two lists</i>.</li>
@@ -169,6 +318,15 @@ footer{padding:36px 0 56px;border-top:1px solid var(--rule);display:flex;justify
       <article class="g">
         <div class="who">Not in the catalogue · installs from a zip</div>
         <h3>greenTile</h3>
+        <svg viewBox="0 0 320 138" role="img" aria-labelledby="pg2">
+          <title id="pg2">A screen divided into three columns of different widths, the middle one split into two stacked windows, each with a colour bar on top.</title>
+          <rect x="0.5" y="0.5" width="319" height="114" rx="6" class="scr"/>
+          <rect x="8" y="8" width="90" height="99" rx="4" class="pcol"/><rect x="8" y="8" width="90" height="4" rx="2" fill="#4EA530"/>
+          <rect x="102" y="8" width="120" height="47" rx="4" class="pcol"/><rect x="102" y="8" width="120" height="4" rx="2" fill="#F0A23B"/>
+          <rect x="102" y="60" width="120" height="47" rx="4" class="pcol"/><rect x="102" y="60" width="120" height="4" rx="2" fill="#3E7CB1"/>
+          <rect x="226" y="8" width="86" height="99" rx="4" class="pcol"/><rect x="226" y="8" width="86" height="4" rx="2" fill="#8E6CC4"/>
+          <text x="0" y="132" class="big hl nz">the layout is already there</text>
+        </svg>
         <ul>
           <li><b>The layout exists first.</b> A preset is painted on a 6 × 4 grid and assigned to a monitor and a workspace. Windows that open, close or return are fitted into it.</li>
           <li>Auto mode per workspace, sixteen editable starter presets, columns that span, gaps from 0 to 48 px, a never tile list, drag-to-split.</li>
@@ -191,6 +349,7 @@ footer{padding:36px 0 56px;border-top:1px solid var(--rule);display:flex;justify
       <li><b>Smaller side projects.</b> A GitHub search for "cinnamon tiling" turns up 19 repositories in total, most of them experiments, personal setups or abandoned sketches. There is no third project with real use behind it.</li>
     </ul>
     <p>That is the whole market. On a desktop that has a catalogue with 44 maintained extensions, window tiling is a niche with one long-standing entry — which is exactly why greenTile exists.</p>
+    <p>It is also why the field looks wider than it is when you search for it. Most "Cinnamon tiling" results are GNOME Shell extensions, which are a different platform with a different API; a GNOME extension cannot be installed on Cinnamon, and its code cannot be ported by copying it. The one exception on the list above is gTile itself, and it needed a hand-written port to get here.</p>
   </div>
 </section>
 

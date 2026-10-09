@@ -68,17 +68,19 @@ h1 em{font-style:normal;color:var(--leaf);white-space:nowrap}
 kbd{font:600 13px/1 "JBMono";padding:7px 9px 8px;border-radius:7px;background:var(--sheet);border:1px solid var(--rule);box-shadow:0 2px 0 var(--rule);color:var(--ink)}
 code{font:500 .9em "JBMono";background:var(--sheet);border:1px solid var(--rule);border-radius:5px;padding:1px 5px}
 
-/* three workspaces, three different layouts */
-.ws{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:clamp(30px,5vh,52px)}
-.ws figure{margin:0}
-.ws .screen{aspect-ratio:16/9;border-radius:8px;padding:6px;background:#1B2A21}
-.ws .l{display:grid;gap:3px;height:100%}
-.ws .l.one{grid-template-columns:1fr}
-.ws .l.two{grid-template-columns:2fr 1fr}
-.ws .l.three{grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr}
-.ws i{border-radius:3px;background:var(--sheet);border-top:5px solid var(--c)}
-.ws .l.three i:first-child{grid-row:span 2}
-.ws figcaption{font:500 12px/1 "JBMono";color:var(--mute);margin-top:8px}
+/* the drawings */
+.fig{margin:clamp(30px,5vh,52px) 0 0}
+.fig svg{display:block;width:100%;height:auto}
+.fig figcaption{font:400 14.5px/1.5 "Instrument";color:var(--mute);margin-top:12px;max-width:66ch}
+svg text{font:500 10.5px "JBMono";letter-spacing:.07em;text-transform:uppercase;fill:var(--mute)}
+svg text.nz{text-transform:none;letter-spacing:.02em}
+svg text.hl{fill:var(--moss)}
+svg text.big{font:600 12px "JBMono"}
+.scr{fill:#1B2A21}
+.pcol{fill:var(--sheet)}
+.pan{fill:#24352B}
+.win2{fill:#2C3E32}
+.corner{fill:none;stroke:#7E9A86;stroke-width:1.3;stroke-dasharray:3 3}
 
 section{padding:clamp(48px,8vh,88px) 0}
 h2{font:750 clamp(32px,4.2vw,52px)/1 "Bricolage";letter-spacing:-.035em;margin:0 0 12px;max-width:18ch}
@@ -110,7 +112,7 @@ h3{font:700 clamp(20px,2vw,24px)/1.15 "Bricolage";letter-spacing:-.02em;margin:0
 footer{padding:36px 0 56px;border-top:1px solid var(--rule);display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px;color:var(--mute);font-size:14px}
 
 @media (max-width:980px){
-  .ws,.models{grid-template-columns:1fr}
+  .models{grid-template-columns:1fr}
   .keys li{grid-template-columns:1fr;gap:4px}
   nav ul{display:none}
 }
@@ -133,20 +135,51 @@ footer{padding:36px 0 56px;border-top:1px solid var(--rule);display:flex;justify
       <a class="plain" href="#perworkspace">A layout per workspace</a>
     </div>
 
-    <div class="ws">
-      <figure>
-        <div class="screen" aria-hidden="true"><div class="l one"><i style="--c:#4EA530"></i></div></div>
-        <figcaption>workspace 1 · one window</figcaption>
-      </figure>
-      <figure>
-        <div class="screen" aria-hidden="true"><div class="l two"><i style="--c:#3E7CB1"></i><i style="--c:#F0A23B"></i></div></div>
-        <figcaption>workspace 2 · main + list</figcaption>
-      </figure>
-      <figure>
-        <div class="screen" aria-hidden="true"><div class="l three"><i style="--c:#8E6CC4"></i><i style="--c:#2A9D8F"></i><i style="--c:#3E7CB1"></i></div></div>
-        <figcaption>workspace 3 · editor + two</figcaption>
-      </figure>
-    </div>
+    <figure class="fig">
+      <svg viewBox="0 0 720 176" role="img" aria-labelledby="ws1t">
+        <title id="ws1t">Three screens side by side, each with a different arrangement of windows and a panel holding the workspace switcher: one full window, a main window with a narrow list beside it, and a wide window with two stacked windows.</title>
+        <!-- workspace 1: one window -->
+        <rect x="0.5" y="0.5" width="211" height="117" rx="6" class="scr"/>
+        <rect x="7" y="7" width="198" height="87" rx="3" class="pcol"/>
+        <rect x="7" y="7" width="198" height="4" rx="2" fill="#4EA530"/>
+        <rect x="7" y="98" width="198" height="13" rx="3" class="pan"/>
+        <circle cx="17" cy="104.5" r="2.6" fill="#4EA530"/>
+        <circle cx="26" cy="104.5" r="2.6" fill="#5C7A64"/>
+        <circle cx="35" cy="104.5" r="2.6" fill="#5C7A64"/>
+        <circle cx="44" cy="104.5" r="2.6" fill="#5C7A64"/>
+        <text x="0" y="140" class="big hl nz">workspace 1</text>
+        <text x="0" y="158">one window</text>
+        <!-- workspace 2: main + list -->
+        <rect x="254.5" y="0.5" width="211" height="117" rx="6" class="scr"/>
+        <rect x="261" y="7" width="130" height="87" rx="3" class="pcol"/>
+        <rect x="261" y="7" width="130" height="4" rx="2" fill="#3E7CB1"/>
+        <rect x="395" y="7" width="64" height="87" rx="3" class="pcol"/>
+        <rect x="395" y="7" width="64" height="4" rx="2" fill="#F0A23B"/>
+        <rect x="261" y="98" width="198" height="13" rx="3" class="pan"/>
+        <circle cx="271" cy="104.5" r="2.6" fill="#5C7A64"/>
+        <circle cx="280" cy="104.5" r="2.6" fill="#4EA530"/>
+        <circle cx="289" cy="104.5" r="2.6" fill="#5C7A64"/>
+        <circle cx="298" cy="104.5" r="2.6" fill="#5C7A64"/>
+        <text x="254" y="140" class="big hl nz">workspace 2</text>
+        <text x="254" y="158">main + list</text>
+        <!-- workspace 3: editor + two -->
+        <rect x="508.5" y="0.5" width="211" height="117" rx="6" class="scr"/>
+        <rect x="515" y="7" width="130" height="87" rx="3" class="pcol"/>
+        <rect x="515" y="7" width="130" height="4" rx="2" fill="#8E6CC4"/>
+        <rect x="649" y="7" width="64" height="41" rx="3" class="pcol"/>
+        <rect x="649" y="7" width="64" height="4" rx="2" fill="#2A9D8F"/>
+        <rect x="649" y="52" width="64" height="42" rx="3" class="pcol"/>
+        <rect x="649" y="52" width="64" height="4" rx="2" fill="#3E7CB1"/>
+        <rect x="515" y="98" width="198" height="13" rx="3" class="pan"/>
+        <circle cx="525" cy="104.5" r="2.6" fill="#5C7A64"/>
+        <circle cx="534" cy="104.5" r="2.6" fill="#5C7A64"/>
+        <circle cx="543" cy="104.5" r="2.6" fill="#4EA530"/>
+        <circle cx="552" cy="104.5" r="2.6" fill="#5C7A64"/>
+        <text x="508" y="140" class="big hl nz">workspace 3</text>
+        <text x="508" y="158">editor + two</text>
+      </svg>
+      <figcaption>Three workspaces, three arrangements. The dots in the panel mark which one is on screen — the workspace switcher does not care what the windows inside look like, which is exactly the gap this page is about.</figcaption>
+    </figure>
   </header>
 </div>
 
@@ -162,6 +195,27 @@ footer{padding:36px 0 56px;border-top:1px solid var(--rule);display:flex;justify
       <li><b>See where you are</b><span>The workspace switcher applet in the panel, and the workspace name that can be flashed on screen while switching.</span></li>
       <li><b>Expo and Scale</b><span>An overview of all workspaces, or of the windows on the current one. Both reachable from the hot corners, which ship switched off.</span></li>
     </ul>
+    <p class="body" style="margin-top:26px">Everything in that list lives in two places in System Settings: the workspace settings decide how many workspaces exist and whether their names flash on screen while switching, while the keyboard page holds the shortcuts and the Hot Corners panel holds the four corners. None of it needs an extension — and none of it says anything about what the windows inside a workspace should look like.</p>
+    <figure class="fig">
+      <svg viewBox="0 0 720 240" role="img" aria-labelledby="hc1">
+        <title id="hc1">A screen with its four hot corners marked: the top left one is set to Expo, the top right and bottom left to Scale, the bottom right to Desktop.</title>
+        <rect x="170.5" y="10.5" width="379" height="213" rx="6" class="scr"/>
+        <rect x="182" y="22" width="356" height="190" rx="3" class="win2"/>
+        <path d="M170 10 L216 10 A46 46 0 0 1 170 56 Z" class="corner"/>
+        <path d="M550 10 L504 10 A46 46 0 0 0 550 56 Z" class="corner"/>
+        <path d="M170 224 L170 178 A46 46 0 0 1 216 224 Z" class="corner"/>
+        <path d="M550 224 L504 224 A46 46 0 0 1 550 178 Z" class="corner"/>
+        <text x="158" y="22" text-anchor="end" class="big hl nz">Expo</text>
+        <text x="158" y="40" text-anchor="end">show all workspaces</text>
+        <text x="562" y="22" class="big hl nz">Scale</text>
+        <text x="562" y="40">show all windows</text>
+        <text x="158" y="204" text-anchor="end" class="big hl nz">Scale</text>
+        <text x="158" y="222" text-anchor="end">show all windows</text>
+        <text x="562" y="204" class="big hl nz">Desktop</text>
+        <text x="562" y="222">show the desktop</text>
+      </svg>
+      <figcaption>What waits behind the four switches: Expo on the top left, Scale on the top right and the bottom left, Desktop on the bottom right. All four ship switched off, every corner can take any of the three actions or a command instead, and each has its own activation delay. System Settings → Preferences → Hot Corners.</figcaption>
+    </figure>
   </div>
 </section>
 
@@ -175,6 +229,7 @@ footer{padding:36px 0 56px;border-top:1px solid var(--rule);display:flex;justify
       <li><b>The half-tiling is manual, too.</b> <kbd>Super</kbd>+arrows pushes one window at a time — see <a href="../tiling-on-linux-mint/">what Cinnamon does on its own</a>.</li>
       <li><b>Nothing carries over.</b> Every workspace, every day, one window at a time.</li>
     </ul>
+    <p>The reason is structural, and worth one sentence: a window's position is a property of the window, and a workspace is little more than the list of which windows are on it. Neither of the two stores an arrangement. That is why the desktop behaves like a desk rather than a template — the piles are wherever you last put them, and nothing wrote down where they belong.</p>
     <p>If that is exactly how you like it, you are finished here. If your three workspaces are "writing", "browsing" and "chat", each with a shape you keep rebuilding, the rest of this page is for you.</p>
   </div>
 </section>
@@ -190,6 +245,7 @@ footer{padding:36px 0 56px;border-top:1px solid var(--rule);display:flex;justify
       <li><span><b>Turn auto mode on</b> for the workspaces that should look after themselves: <kbd>Super</kbd><kbd>Ctrl</kbd><kbd>A</kbd> on, <kbd>Super</kbd><kbd>Ctrl</kbd><kbd>D</kbd> off. Leave a workspace without auto mode and it stays a free surface for windows you place by hand.</span></li>
       <li><span><b>Work normally.</b> Switch between workspaces as you always did; each one brings its own arrangement with it.</span></li>
     </ol>
+    <p class="body">Three workspaces, then, as three concrete assignments. Workspace 1 gets one full-width column and auto mode on: whatever you open there is fitted into it, and the workspace is a writing desk with a single sheet on it. Workspace 2 gets the main-plus-list shape, the browser wide on the left and the mail client narrow on the right, so a message can be read without leaving the page it is about. Workspace 3 stays without auto mode and without a preset — a free surface for the windows the afternoon brings. Switching between them is the same <kbd>Ctrl</kbd><kbd>Alt</kbd>+<kbd>←</kbd>/<kbd>→</kbd> as before; what changes is that each switch lands on a desk that is already arranged.</p>
     <p class="note">That is the part no window manager shortcut can do for you: the workspace remembers the shape of your work, not just the windows you left there. A monitor that gets replugged or a Cinnamon that gets restarted finds its assignment again and puts the windows back in the order you left them.</p>
   </div>
 </section>
