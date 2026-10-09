@@ -26,7 +26,7 @@ Every feature in one line or two. Details and screenshots are in the [README](RE
 - **Wide columns**: a column can span several painter grid columns (merge neighbours in the painter). The spans are the starting widths, so a rule of three columns with `[1, 2, 1]` tiles 25 % / 50 % / 25 %; a border dragged or a layout dropped for the current window count still wins over them until the next card click, or **Reset sizes**, returns to the spans.
 - **Per monitor and workspace**: every monitor and workspace can have its own preset.
 - **Gap-free fill**: no cell stays empty: with fewer windows, stacked cells and then columns are dropped; with more windows, the rightmost column takes the rest.
-- **Pause**: `Super+Ctrl+D` keeps the assigned preset but stops auto tiling, snap-on-release and swaps from that monitor and workspace. A pause requested before monitor readiness is retained; Auto on or an explicit preset selection resumes tiling.
+- **Pause**: `Super+Ctrl+D` keeps the assigned preset but stops auto tiling, snap-on-release and swaps on that monitor and workspace; nothing there is rearranged, while `Super+Ctrl+Left/Right` can still send the focused window away. A pause requested before monitor readiness is retained; Auto on or an explicit preset selection resumes tiling.
 
 ## Preset panel
 
@@ -62,7 +62,7 @@ Every feature in one line or two. Details and screenshots are in the [README](RE
 - **Split by drag**: dropping a window on the outer 25 % of another window's cell stacks it above or below, or opens a new column or row beside it. A translucent preview shows the result before release.
 - **Cross-monitor split**: split drops also work onto another monitor.
 - **Swap by keyboard**: `Super+Ctrl+Arrow` swaps the focused window with its neighbour; borders stay where they are.
-- **Walk across monitors and workspaces**: Left/Right continue onto the next monitor and past the outermost one onto the previous or next workspace. Focus stays on the moved window.
+- **Walk across monitors and workspaces**: Left/Right continue onto the next monitor and past the outermost one onto the previous or next workspace. Focus stays on the moved window. The walk passes surfaces without tiling or with tiling paused too: the window moves straight on, nothing left behind is rearranged, and where the target does not tile it is only moved over as it is (it may lie on top of the windows there).
 
 ## Excluding windows
 

@@ -27,9 +27,12 @@ const activeWorkspace = (env) => {
     return ws;
 };
 
-// ---------------- issue 8: pause beats the swap chain ----------------
+// ---------------- issue 8: an untiled/paused source rearranges nothing ----------------
+// Superseded in part by the user decision of 2026-10-08: a source without active
+// tiling still SENDS the focus away along the chain (Left/Right), it only never
+// rearranges what stays on it. Up/Down and the edge without a chain stay no-ops.
 
-test('issue 8: no swap direction moves a paused source onto another monitor or chain', () => {
+test('issue 8: an untiled source never rearranges itself; only Right sends the window along the chain', () => {
     const { env, ext } = makeEnv({ windowGap: 0 });
     enableOnMonitors(env, ext, [LEFT, RIGHT]);
     activeWorkspace(env);
@@ -39,17 +42,22 @@ test('issue 8: no swap direction moves a paused source onto another monitor or c
     const w4 = makeWindow(env, 4, [3000, 0, 1000, 1100], 1);
     env.tabList.push(w1, w2, w3, w4);
     const app = ext.currentSession().app;
-    // monitor 1 tiles, monitor 0 stays paused (default auto:false)
+    // monitor 1 tiles, monitor 0 has no tiling (default auto:false)
     app.ops.layoutSet(app, 1, 0, { auto: true });
     env.display.focus_window = w1;
     const before = [w1, w2, w3, w4].map((w) => ({ rect: w.rect.slice(), monitor: w.get_monitor() }));
-    for (const dir of ['left', 'right', 'up', 'down']) {
+    for (const dir of ['left', 'up', 'down']) {
         env.keybindingManager.hotkeys.get('greenTile-swap-' + dir).cb();
     }
     assert.deepEqual([w1, w2, w3, w4].map((w) => ({ rect: w.rect, monitor: w.get_monitor() })), before,
-        'all four swap directions left the paused monitor untouched');
+        'Left (no chain to the left), Up and Down left everything untouched');
     assert.deepEqual(env.logs.filter((l) => l.indexOf('greenTile swap') === 0), [],
-        'the paused swaps never entered the local exchange or the chain push');
+        'no local exchange and no push');
+    env.keybindingManager.hotkeys.get('greenTile-swap-right').cb();
+    assert.equal(w1.get_monitor(), 1, 'Right pushed the window onto the tiled monitor');
+    assert.deepEqual(w2.rect, before[1].rect, 'the window left on the untiled source was not rearranged');
+    assert.deepEqual(env.logs.filter((l) => l.indexOf('greenTile swap') === 0).map((l) => l.split(' mon=')[0]),
+        ['greenTile swap pushed'], 'one chain push, no local exchange');
 });
 
 test('issue 8 regression: an active source still pushes along the monitor chain', () => {
@@ -141,7 +149,7 @@ const retainedSwap = ({ monitorIndex = 0, wsIndex = 0, local = false, onlyPrimar
     return { env, ext, app, windows, crossings, state };
 };
 
-for (const dir of ['left', 'right', 'up', 'down']) {
+for (const dir of ['left', 'up', 'down']) {
     test('issues 4/8: retained pause prevents local swap effects after external repair: ' + dir, () => {
         const f = retainedSwap({ local: true });
         try {
@@ -153,22 +161,107 @@ for (const dir of ['left', 'right', 'up', 'down']) {
     });
 }
 
+// The retained pause still rearranges nothing on the source; sending the focus away
+// along the chain is allowed (user decision 2026-10-08).
+const sourceUntouched = (before, after, moved) => {
+    assert.equal(after.pending, before.pending, 'the retained intent was not consumed');
+    assert.equal(after.layouts, before.layouts, 'no layouts write');
+    assert.deepEqual(after.eases, before.eases, 'no animation');
+    assert.deepEqual(after.overrides, before.overrides, 'no swap override');
+    assert.deepEqual(after.resets, before.resets, 'no unmaximize');
+    assert.deepEqual(after.timers, before.timers, 'no timer armed');
+    after.windows.forEach((w, i) => {
+        if (i !== moved) {
+            assert.deepEqual(w, before.windows[i], 'window ' + (i + 1) + ' on the paused source kept its place');
+        }
+    });
+};
+
+test('issues 4/8: under a retained pause Right skips the local exchange and sends the focus along the chain', () => {
+    const f = retainedSwap({ local: true });
+    try {
+        f.env.display.focus_window = f.windows[0]; // has a right neighbour on the paused surface
+        const before = f.state();
+        f.env.keybindingManager.hotkeys.get('greenTile-swap-right').cb();
+        const after = f.state();
+        assert.deepEqual(after.crossings, [['move-monitor', 1]], 'straight to the next monitor, no local swap');
+        assert.deepEqual(after.swapLogs.map((l) => l.split(' mon=')[0]), ['greenTile swap pushed']);
+        sourceUntouched(before, after, 0);
+    } finally { f.ext.disable(); }
+});
+
 for (const c of [
-    { name: 'monitor right', dir: 'right', monitorIndex: 0, wsIndex: 0 },
-    { name: 'monitor left', dir: 'left', monitorIndex: 1, wsIndex: 0 },
-    { name: 'workspace right', dir: 'right', monitorIndex: 1, wsIndex: 0 },
-    { name: 'workspace left', dir: 'left', monitorIndex: 0, wsIndex: 1 },
-    { name: 'secondary shared slot', dir: 'left', monitorIndex: 1, wsIndex: 1, onlyPrimary: true },
+    { name: 'monitor right', dir: 'right', monitorIndex: 0, wsIndex: 0, crossings: [['move-monitor', 1]] },
+    { name: 'monitor left', dir: 'left', monitorIndex: 1, wsIndex: 0, crossings: [['move-monitor', 0]] },
+    { name: 'workspace right', dir: 'right', monitorIndex: 1, wsIndex: 0,
+        crossings: [['move-workspace', 1], ['move-monitor', 0], ['activate-workspace', 1]] },
+    { name: 'workspace left', dir: 'left', monitorIndex: 0, wsIndex: 1,
+        crossings: [['move-workspace', 0], ['move-monitor', 1], ['activate-workspace', 0]] },
+    { name: 'secondary shared slot', dir: 'left', monitorIndex: 1, wsIndex: 1, onlyPrimary: true,
+        crossings: [['move-monitor', 0]] },
 ]) {
-    test('issues 4/8: retained pause prevents the ' + c.name + ' chain after external repair', () => {
+    test('issues 4/8: a retained pause sends the window along the ' + c.name + ' chain without touching the source', () => {
         const f = retainedSwap(c);
         try {
             const before = f.state();
             f.env.keybindingManager.hotkeys.get('greenTile-swap-' + c.dir).cb();
-            assert.deepEqual(f.state(), before, 'the retained source pause precedes every chain intervention');
+            const after = f.state();
+            assert.deepEqual(after.crossings, c.crossings, 'the chain push ran');
+            assert.equal(after.swapLogs.length, 1);
+            sourceUntouched(before, after, 0);
         } finally { f.ext.disable(); }
     });
 }
+
+// A retained pause on the TARGET must be honoured like on the source: the window
+// only moves there, no slot override is armed that the gated retile never consumes
+// (it would sort the window on the next retile after an explicit resume).
+test('issues 4/8: a push INTO a surface with a retained pause moves only and arms no override', () => {
+    const f = retainedSwap();
+    try {
+        const visitor = makeWindow(f.env, 9, [2100, 100, 500, 400], 1);
+        f.env.tabList.push(visitor);
+        f.env.display.focus_window = visitor;
+        const before = f.state();
+        f.env.keybindingManager.hotkeys.get('greenTile-swap-left').cb();
+        const after = f.state();
+        assert.equal(visitor.get_monitor(), 0, 'the window was pushed onto the paused monitor');
+        assert.deepEqual(visitor.rect, [2100, 100, 500, 400], 'move only, no slot');
+        assert.equal(f.app.auto.sortPeek(9, 0), null, 'no override armed on the paused target');
+        sourceUntouched(before, after, -1);
+    } finally { f.ext.disable(); }
+});
+
+test('issues 4/8: a workspace push INTO a surface with a retained pause moves only and arms no override', () => {
+    const f = retainedSwap({ monitorIndex: 0, wsIndex: 1 });
+    try {
+        const visitor = makeWindow(f.env, 9, [2100, 100, 500, 400], 1);
+        let workspace = f.env.workspaces[0];
+        visitor.get_workspace = () => workspace;
+        visitor.change_workspace_by_index = (index) => { workspace = f.env.workspaces[index]; };
+        f.env.tabList.push(visitor);
+        f.env.activeWorkspace = f.env.workspaces[0];
+        f.env.display.focus_window = visitor;
+        f.env.keybindingManager.hotkeys.get('greenTile-swap-right').cb();
+        assert.deepEqual([visitor.get_workspace().index(), visitor.get_monitor()], [1, 0],
+            'the window crossed onto the paused monitor-workspace');
+        assert.deepEqual(visitor.rect, [2100, 100, 500, 400], 'move only, no slot');
+        assert.equal(f.app.auto.sortPeek(9, 0), null, 'no override armed on the paused target');
+    } finally { f.ext.disable(); }
+});
+
+test('issues 4/8: a push INTO the secondary shared slot with a retained pause moves only and arms no override', () => {
+    const f = retainedSwap({ monitorIndex: 1, wsIndex: 1, onlyPrimary: true });
+    try {
+        const visitor = makeWindow(f.env, 9, [100, 100, 500, 400], 0);
+        f.env.tabList.push(visitor);
+        f.env.display.focus_window = visitor;
+        f.env.keybindingManager.hotkeys.get('greenTile-swap-right').cb();
+        assert.equal(visitor.get_monitor(), 1, 'the window was pushed onto the secondary monitor');
+        assert.deepEqual(visitor.rect, [100, 100, 500, 400], 'move only, no slot');
+        assert.equal(f.app.auto.sortPeek(9, 0), null, 'no override armed on the paused shared slot');
+    } finally { f.ext.disable(); }
+});
 
 for (const control of ['auto-on', 'preset-card']) {
     test('issues 4/8: explicit ' + control + ' reactivation permits the monitor chain again', () => {

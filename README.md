@@ -102,7 +102,7 @@ After a Cinnamon restart on X11 (`Alt+F2` → `r`) the first retile of each moni
 
 _The window order survives a Cinnamon restart and a monitor change (X11 only)._
 
-Pausing keeps the preset assigned but stops automatic tiling, snap-on-release and swapping from that monitor and workspace. Turning auto mode on or selecting a preset explicitly resumes tiling. A pause requested before monitor detection finishes is retained until it can be applied. New windows normally join the end of the layout; an explicit successful drop takes precedence over that automatic ordering.
+Pausing keeps the preset assigned but stops automatic tiling, snap-on-release and swapping on that monitor and workspace: nothing there is rearranged. `Super+Ctrl+Left/Right` can still send the focused window away from it (see **Swapping**). Turning auto mode on or selecting a preset explicitly resumes tiling. A pause requested before monitor detection finishes is retained until it can be applied. New windows normally join the end of the layout; an explicit successful drop takes precedence over that automatic ordering.
 
 Without a preset, the auto grid depends on the monitor width:
 
@@ -128,7 +128,7 @@ _**Center the window:** a lone window at about 62 % of the width and 90 % of the
 
 The centre keeps the normal snap. `Esc` during the drag cancels. Dropping onto another monitor works too.
 
-**Swapping.** `Super+Ctrl+Arrow` swaps the focused window with its neighbour, all borders stay. Left/Right continue across monitors (the window moves over and is inserted at the edge) and past the outermost monitor to the previous or next workspace. Focus stays on the moved window, so repeated presses walk it along.
+**Swapping.** `Super+Ctrl+Arrow` swaps the focused window with its neighbour, all borders stay. Left/Right continue across monitors (the window moves over and is inserted at the edge) and past the outermost monitor to the previous or next workspace. Focus stays on the moved window, so repeated presses walk it along. The walk also passes monitors and workspaces without tiling or with tiling paused: there Left/Right move the window straight on to the next monitor or workspace without rearranging anything that stays behind, and Up/Down do nothing. Where tiling is active the window is inserted at the edge; elsewhere it is only moved over as it is (a maximized window stays maximized) and may lie on top of the windows already there. The walk stops at the first and the last workspace.
 
 **Focus and border.** `Super+Arrow` moves the keyboard focus to the neighbouring tiled window, without touching the layout. Left/Right cross over to the adjacent monitor at the edge, nothing wraps. Outside auto mode, and for windows the tiling does not manage, the key keeps its native edge-tiling behaviour. After each `Super+Arrow` move the newly focused window flashes a thin **focus border** in the state color for three seconds, so you see where the focus went; mouse clicks and `Alt+Tab` do not show it. It can be turned off in the settings (**Border around the focused window**).
 
