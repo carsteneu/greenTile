@@ -48,14 +48,14 @@ concurrency:
 
 jobs:
   release:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     steps:
       - name: require the main branch
         run: |
           if [ "$GITHUB_REF" != "refs/heads/main" ]; then
             echo "::error::release-dispatch must run on main, but GITHUB_REF is $GITHUB_REF"; exit 1
           fi
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           ref: main
           fetch-depth: 0
@@ -81,9 +81,11 @@ jobs:
           if git ls-remote --exit-code --tags origin "refs/tags/v$VERSION" >/dev/null 2>&1; then
             echo "::error::tag v$VERSION already exists on origin"; exit 1
           fi
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v7
         with:
           node-version: 22
+          # A release build never restores a dependency cache (cache poisoning).
+          package-manager-cache: false
       - name: install release dependencies
         run: sudo apt-get update && sudo apt-get install -y gettext zip unzip
       - run: npm ci

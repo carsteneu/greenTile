@@ -12,12 +12,14 @@ permissions:
 
 jobs:
   zip:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
         with:
           node-version: 22
+          # A release build never restores a dependency cache (cache poisoning).
+          package-manager-cache: false
       - name: install shell-test dependencies
         run: sudo apt-get update && sudo apt-get install -y gettext zip unzip
       - run: npm ci
