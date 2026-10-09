@@ -3,205 +3,23 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>greenTile vs gTile: a gTile alternative for Cinnamon</title>
-<meta name="description" content="greenTile started as a fork of gTile. gTile places the window you point at; greenTile arranges a whole Cinnamon workspace by itself. A side by side comparison.">
-<link rel="canonical" href="https://greentile.io/gtile-alternative/">
-<meta property="og:type" content="article">
-<meta property="og:site_name" content="greenTile">
-<meta property="og:title" content="greenTile vs gTile: two ways to tile windows on Cinnamon">
-<meta property="og:description" content="gTile places the window you point at; greenTile arranges a whole workspace as windows open and close. How they differ, and how to switch.">
-<meta property="og:url" content="https://greentile.io/gtile-alternative/">
-<meta property="og:image" content="https://greentile.io/screenshots/tour-poster.jpg">
-<meta property="og:image:width" content="1280">
-<meta property="og:image:height" content="720">
-<meta property="og:image:alt" content="greenTile: tiling for Cinnamon, six windows in one row">
+<title>Moved · greenTile vs gTile · greenTile</title>
+<link rel="canonical" href="https://greentile.io/blog/gtile-alternative/">
+<meta name="robots" content="noindex">
+<meta http-equiv="refresh" content="0; url=https://greentile.io/blog/gtile-alternative/">
 <style>
-@font-face{font-family:"Bricolage";src:url(../fonts/bricolage-normal-200_800.woff2) format("woff2");font-weight:200 800;font-stretch:75% 100%}
-@font-face{font-family:"Instrument";src:url(../fonts/instrument-normal-400_700.woff2) format("woff2");font-weight:400 700}
-@font-face{font-family:"Instrument";src:url(../fonts/instrument-italic-400_700.woff2) format("woff2");font-weight:400 700;font-style:italic}
-@font-face{font-family:"JBMono";src:url(../fonts/jbmono-normal-400_700.woff2) format("woff2");font-weight:400 700}
-
-/* tokens and base: the same as the home page (../index.html) */
-:root{
-  --sage:#E6ECE2;
-  --sheet:#F7F9F5;
-  --ink:#13201A;
-  --moss:#2F6A1E;
-  --leaf:#4EA530;
-  --amber:#F0A23B;
-  --rule:#C5D0BF;
-  --mute:#5B6B60;
-  --r:10px;
-}
-*{box-sizing:border-box}
-html{scroll-behavior:smooth}
-@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+:root{--sage:#E6ECE2;--ink:#13201A;--moss:#2F6A1E;--leaf:#4EA530}
 html{background:var(--sage);color:var(--ink)}
-body{margin:0;font:400 17px/1.55 "Instrument",system-ui,sans-serif;-webkit-font-smoothing:antialiased}
-a{color:inherit}
-:focus-visible{outline:3px solid var(--amber);outline-offset:3px;border-radius:4px}
-.wrap{max-width:1180px;margin:0 auto;padding:0 clamp(20px,4vw,48px)}
-
-nav{display:flex;align-items:center;justify-content:space-between;padding:22px 0}
-.mark{display:flex;align-items:center;gap:10px;font:700 21px/1 "Bricolage";letter-spacing:-.02em;text-decoration:none}
-.mark i{display:grid;grid-template-columns:1fr 1fr;gap:2px;width:22px;height:22px}
-.mark i b{background:var(--leaf);border-radius:2px}
-.mark i b:nth-child(2){background:var(--moss)}
-.mark i b:first-child{grid-row:span 2}
-nav ul{display:flex;gap:26px;list-style:none;margin:0;padding:0;font-size:15px}
-nav ul a{text-decoration:none;color:var(--mute)}
-nav ul a:hover,nav ul a[aria-current]{color:var(--ink)}
-.gh{font:600 14px/1 "Instrument";padding:10px 14px;border:1.5px solid var(--ink);border-radius:999px;text-decoration:none}
-.gh:hover{background:var(--ink);color:var(--sage)}
-
-.hero{padding:clamp(28px,6vh,72px) 0 24px}
-.eyebrow{font:500 13px/1 "JBMono";letter-spacing:.06em;text-transform:uppercase;color:var(--moss);display:flex;gap:10px;align-items:center}
-.eyebrow::before{content:"";width:28px;height:2px;background:var(--leaf)}
-h1{font:800 clamp(42px,6.6vw,92px)/.94 "Bricolage";font-variation-settings:"opsz" 96;letter-spacing:-.045em;margin:20px 0 22px;max-width:12ch}
-h1 em{font-style:normal;color:var(--leaf);white-space:nowrap}
-.lede{font-size:clamp(18px,1.6vw,21px);max-width:46ch;color:#2A3A30;margin:0 0 28px}
-.cta{display:flex;flex-wrap:wrap;gap:14px;align-items:center}
-.btn{font:600 16px/1 "Instrument";padding:15px 22px;border-radius:999px;background:var(--ink);color:var(--sage);text-decoration:none;display:inline-block}
-.btn:hover{background:var(--moss)}
-.plain{font:600 16px/1 "Instrument";padding:14px 20px;border:1.5px solid var(--ink);border-radius:999px;text-decoration:none;display:inline-block}
-.plain:hover{background:var(--ink);color:var(--sage)}
-kbd{font:600 13px/1 "JBMono";padding:7px 9px 8px;border-radius:7px;background:var(--sheet);border:1px solid var(--rule);box-shadow:0 2px 0 var(--rule);color:var(--ink)}
-code{font:500 .9em "JBMono";background:var(--sheet);border:1px solid var(--rule);border-radius:5px;padding:1px 5px}
-
-/* the two models side by side: a selected area in a grid vs a layout that fills itself */
-.models{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:clamp(30px,5vh,52px)}
-.model{background:var(--sheet);border:1px solid #D6DED1;border-radius:var(--r);padding:22px 24px 24px;display:flex;flex-direction:column;gap:10px}
-.model.g{background:var(--ink);color:var(--sage);border-color:var(--ink)}
-.model h2{font:700 22px/1.1 "Bricolage";letter-spacing:-.02em;margin:0;max-width:none}
-.model p{margin:0;font-size:15.5px;color:#34443A}
-.model.g p{color:#C9D5C3}
-.screen{aspect-ratio:16/7;border-radius:8px;padding:6px;background:#1B2A21}
-.cells{height:100%;display:grid;grid-template-columns:repeat(6,1fr);grid-template-rows:repeat(4,1fr);gap:3px}
-.cells i{border-radius:3px;background:#2C3E32}
-.cells i.sel{background:rgba(240,162,59,.45);outline:2px solid var(--amber);outline-offset:-2px}
-.tiles{height:100%;display:grid;grid-template-columns:2fr 1fr 1fr;grid-template-rows:1fr 1fr;gap:3px}
-.tiles i{border-radius:3px;background:var(--sheet);border-top:5px solid var(--c)}
-.tiles i:first-child{grid-row:span 2}
-
-section{padding:clamp(48px,8vh,88px) 0}
-h2{font:750 clamp(32px,4.2vw,52px)/1 "Bricolage";letter-spacing:-.035em;margin:0 0 12px;max-width:18ch}
-.sub{color:var(--mute);max-width:58ch;margin:0 0 32px}
-
-/* comparison table, ruled like the hotkey list on the home page */
-.cmp-wrap{overflow-x:auto}
-table.cmp{width:100%;border-collapse:collapse;min-width:640px}
-.cmp th,.cmp td{text-align:left;vertical-align:top;padding:14px 18px 16px 0;border-bottom:1px solid var(--rule);font-size:15.5px;line-height:1.5}
-.cmp thead th{font:700 22px/1.1 "Bricolage";letter-spacing:-.02em;border-bottom:1.5px solid var(--ink);padding-bottom:14px}
-.cmp tbody th{font:600 15.5px/1.35 "Instrument";color:var(--ink);width:22%}
-.cmp td{color:#34443A;width:39%}
-.cmp kbd{font-size:11px;padding:3px 5px 4px}
-
-.steps{list-style:none;counter-reset:s;margin:0;padding:0;border-top:1.5px solid var(--ink);max-width:880px}
-.steps li{counter-increment:s;display:grid;grid-template-columns:48px 1fr;gap:0 12px;padding:16px 0 18px;border-bottom:1px solid var(--rule);color:#34443A;font-size:16px}
-.steps li::before{content:counter(s);font:600 13px/1.6 "JBMono";color:var(--moss)}
-.steps b{color:var(--ink)}
-
-.origin{max-width:68ch;color:#2A3A30}
-.origin p{margin:0 0 14px}
-.next{display:flex;flex-wrap:wrap;gap:14px;align-items:center;margin-top:36px}
-
-footer{padding:36px 0 56px;border-top:1px solid var(--rule);display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px;color:var(--mute);font-size:14px}
-
-@media (max-width:980px){
-  .models{grid-template-columns:1fr}
-  nav ul{display:none}
-}
+body{margin:0;min-height:100vh;display:grid;place-items:center;font:400 17px/1.55 system-ui,sans-serif;padding:24px;text-align:center}
+h1{font-size:22px;margin:0 0 10px}
+a{color:var(--moss)}
+a:hover{color:var(--leaf)}
 </style>
 </head>
 <body>
-<div class="wrap">
-  <nav>
-    <a class="mark" href="../"><i><b></b><b></b><b></b></i>greenTile</a>
-    <ul><li><a href="../#tour">Video</a></li><li><a href="../#features">Features</a></li><li><a href="../#details">Details</a></li><li><a href="../#keys">Hotkeys</a></li><li><a href="../#install">Install</a></li><li><a href="../auto-tiling-cinnamon/">Auto tiling</a></li><li><a href="./" aria-current="page">vs gTile</a></li></ul>
-    <a class="gh" href="https://github.com/carsteneu/greenTile">github.com/carsteneu/greenTile</a>
-  </nav>
-
-  <header class="hero">
-    <div class="eyebrow">A gTile alternative for Cinnamon</div>
-    <h1>greenTile vs <em>gTile.</em></h1>
-    <p class="lede">Both are tiling extensions for the Cinnamon desktop, and greenTile started as a fork of gTile. They answer different questions, though: gTile places the window you point at, greenTile arranges a whole workspace by itself. Here is how they compare.</p>
-    <div class="cta">
-      <a class="btn" href="#compare">Compare them</a>
-      <a class="plain" href="#switch">Switching from gTile</a>
-    </div>
-
-    <div class="models">
-      <article class="model">
-        <div class="screen" aria-hidden="true"><div class="cells">
-          <i></i><i></i><i></i><i></i><i></i><i></i>
-          <i></i><i></i><i class="sel"></i><i class="sel"></i><i class="sel"></i><i></i>
-          <i></i><i></i><i class="sel"></i><i class="sel"></i><i class="sel"></i><i></i>
-          <i></i><i></i><i></i><i></i><i></i><i></i>
-        </div></div>
-        <h2>gTile: you place a window</h2>
-        <p>Open the grid over the focused window, select an area of cells with the mouse or the arrow keys, confirm, and the window moves there. The other windows stay where they are.</p>
-      </article>
-      <article class="model g">
-        <div class="screen" aria-hidden="true"><div class="tiles">
-          <i style="--c:#4EA530"></i><i style="--c:#3E7CB1"></i><i style="--c:#F0A23B"></i><i style="--c:#8E6CC4"></i><i style="--c:#2A9D8F"></i>
-        </div></div>
-        <h2>greenTile: windows place themselves</h2>
-        <p>Turn on auto mode or assign a preset to a monitor and workspace. Every window that opens, closes, minimizes or comes back is fitted into that layout, without opening anything.</p>
-      </article>
-    </div>
-  </header>
-</div>
-
-<section id="compare">
-  <div class="wrap">
-    <h2>Side by side.</h2>
-    <p class="sub">Compared with gTile 2.2.1 from the Cinnamon Spices catalogue (the <code>5.4</code> code path, the version greenTile was forked from) and greenTile as described in its <a href="https://github.com/carsteneu/greenTile/blob/main/FEATURES.md">feature list</a>.</p>
-    <div class="cmp-wrap">
-      <table class="cmp">
-        <thead><tr><td></td><th scope="col">gTile</th><th scope="col">greenTile</th></tr></thead>
-        <tbody>
-          <tr><th scope="row">How a window gets its place</th><td>You select an area of grid cells for the focused window: with the mouse, with the arrow keys and <kbd>Shift</kbd>, or by typing two tile labels.</td><td>The layout of the monitor and workspace decides. A window you drag is dropped into the slot under the pointer, or splits a neighbour when dropped on its edge.</td></tr>
-          <tr><th scope="row">When a window opens or closes</th><td>Nothing moves. Two buttons in the grid, <i>Auto tile main and list</i> and <i>Auto tile two lists</i>, arrange all windows once when you click them.</td><td>With auto mode on, the monitor is retiled 300 ms later. New windows join the end of the layout.</td></tr>
-          <tr><th scope="row">Layouts</th><td>Four grids on buttons <kbd>1</kbd> to <kbd>4</kbd>. Columns and rows are set in the settings, each with a relative span.</td><td>An automatic grid, sixteen editable starter presets and your own, painted on a 6 × 4 grid, with columns that can span several grid columns. A preset has rules by window count, so it adapts as windows come and go. A lone window can be centered.</td></tr>
-          <tr><th scope="row">Per monitor and workspace</th><td>The same four grids everywhere. The grid opens on the monitor of the focused window by default.</td><td>Each monitor and workspace keeps its own preset and auto state, found again after replugging a monitor.</td></tr>
-          <tr><th scope="row">Changing sizes afterwards</th><td>Open the grid again and select a different area.</td><td>Drag a border and the neighbours follow, or use <kbd>Super</kbd><kbd>Alt</kbd>+arrow. Borders are remembered per window count.</td></tr>
-          <tr><th scope="row">Moving windows around</th><td><kbd>Alt</kbd>+arrow in the grid moves the selection to another monitor.</td><td><kbd>Super</kbd><kbd>Ctrl</kbd>+arrow swaps with the neighbour; left and right walk on to the next monitor and workspace.</td></tr>
-          <tr><th scope="row">Gap between windows</th><td>No setting.</td><td>0 to 48 px, screen edges stay flush.</td></tr>
-          <tr><th scope="row">Keeping windows out</th><td>No list of its own. When you tile a single window, only that window moves.</td><td>A never tile list by window class, title or app id, and <kbd>Super</kbd><kbd>G</kbd> to let one window float.</td></tr>
-          <tr><th scope="row">Install</th><td>From Cinnamon's Extensions manager (Spices catalogue).</td><td>Release zip with an installer script. Not in the Spices catalogue yet.</td></tr>
-          <tr><th scope="row">Cinnamon versions</th><td>Supports releases from 3.6 on, with separate code paths for 3.8 and 5.4.</td><td>6.0.4 or newer; tested on 6.0.4 to 6.6. Wayland works in first tests.</td></tr>
-          <tr><th scope="row">Maintained by</th><td>The community, in the Linux Mint Spices repository.</td><td>Its author, on GitHub.</td></tr>
-        </tbody>
-      </table>
-    </div>
-  </div>
-</section>
-
-<section id="switch">
-  <div class="wrap">
-    <h2>Switching from gTile.</h2>
-    <p class="sub">Both can stay installed, but do not enable them together: they claim some of the same keys, <kbd>Super</kbd><kbd>G</kbd> among them.</p>
-    <ol class="steps">
-      <li><span><b>Disable gTile</b> in System Settings → Extensions.</span></li>
-      <li><span><b>Install greenTile</b> from the <a href="../auto-tiling-cinnamon/#install">release zip</a>, restart Cinnamon and enable it.</span></li>
-      <li><span><b>Press <kbd>Super</kbd><kbd>Ctrl</kbd><kbd>A</kbd></b> on a workspace. Its windows tile, and new ones join on their own from now on.</span></li>
-      <li><span><b>Rebuild your grids as presets</b> in the preset panel (<kbd>Super</kbd><kbd>Ctrl</kbd><kbd>P</kbd>). A preset is a set of columns painted on a 6 × 4 grid, each holding one window or a stack. For <i>Auto tile main and list</i>, the starter <i>Left main + stacks</i> keeps a main window on the left and stacks the rest beside it. Drag a border to change the widths; greenTile remembers them per window count.</span></li>
-      <li><span><b>Learn one new key:</b> in greenTile, <kbd>Super</kbd><kbd>G</kbd> does not open a grid. It lets the focused window float, and pressing it again tiles it again.</span></li>
-    </ol>
-  </div>
-</section>
-
-<section id="origin">
-  <div class="wrap origin">
-    <h2>Where greenTile comes from.</h2>
-    <p>greenTile is a fork of gTile 2.2.1, which was written by vibou for GNOME Shell and ported to Cinnamon by shuairan. The extension skeleton and the translation sources come from gTile; the classic grid was removed and the preset and auto model built in its place. Nearly unchanged code inherited from gTile is less than 1 % of greenTile's runtime code, measured on version 2.2.0 as described in the <a href="https://github.com/carsteneu/greenTile#origin">README</a>. Both are free software under the GPL v3.</p>
-    <div class="next">
-      <a class="btn" href="../auto-tiling-cinnamon/#install">Install greenTile</a>
-      <a class="plain" href="../">See all features</a>
-    </div>
-  </div>
-</section>
-
-<div class="wrap"><footer><span>greenTile · GPL v3 · based on gTile by vibou and shuairan</span><span><a href="../">Home</a> · <a href="../auto-tiling-cinnamon/">Auto tiling on Cinnamon</a></span><span>Made for Linux Mint</span></footer></div>
+<main>
+<h1>This page has moved</h1>
+<p>“greenTile vs gTile” now lives at<br><a href="https://greentile.io/blog/gtile-alternative/">https://greentile.io/blog/gtile-alternative/</a></p>
+</main>
 </body>
 </html>

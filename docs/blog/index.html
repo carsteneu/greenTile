@@ -1,0 +1,162 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>greenTile blog · tiling for Cinnamon</title>
+<meta name="description" content="Guides and comparisons for greenTile, the tiling extension for the Cinnamon desktop: automatic tiling, presets and how it compares with gTile.">
+<link rel="canonical" href="https://greentile.io/blog/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="greenTile">
+<meta property="og:title" content="greenTile blog">
+<meta property="og:description" content="Guides and comparisons for greenTile, the tiling extension for the Cinnamon desktop.">
+<meta property="og:url" content="https://greentile.io/blog/">
+<meta property="og:image" content="https://greentile.io/screenshots/tour-poster.jpg">
+<meta property="og:image:width" content="1280">
+<meta property="og:image:height" content="720">
+<meta property="og:image:alt" content="greenTile: tiling for Cinnamon, six windows in one row">
+<style>
+@font-face{font-family:"Bricolage";src:url(../fonts/bricolage-normal-200_800.woff2) format("woff2");font-weight:200 800;font-stretch:75% 100%}
+@font-face{font-family:"Instrument";src:url(../fonts/instrument-normal-400_700.woff2) format("woff2");font-weight:400 700}
+@font-face{font-family:"Instrument";src:url(../fonts/instrument-italic-400_700.woff2) format("woff2");font-weight:400 700;font-style:italic}
+@font-face{font-family:"JBMono";src:url(../fonts/jbmono-normal-400_700.woff2) format("woff2");font-weight:400 700}
+
+/* tokens and base: the same as the home page (../index.html) */
+:root{
+  --sage:#E6ECE2;
+  --sheet:#F7F9F5;
+  --ink:#13201A;
+  --moss:#2F6A1E;
+  --leaf:#4EA530;
+  --amber:#F0A23B;
+  --rule:#C5D0BF;
+  --mute:#5B6B60;
+  --r:10px;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+html{background:var(--sage);color:var(--ink)}
+body{margin:0;font:400 17px/1.55 "Instrument",system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+a{color:inherit}
+:focus-visible{outline:3px solid var(--amber);outline-offset:3px;border-radius:4px}
+.wrap{max-width:1180px;margin:0 auto;padding:0 clamp(20px,4vw,48px)}
+
+nav{display:flex;align-items:center;justify-content:space-between;padding:22px 0}
+.mark{display:flex;align-items:center;gap:10px;font:700 21px/1 "Bricolage";letter-spacing:-.02em;text-decoration:none}
+.mark i{display:grid;grid-template-columns:1fr 1fr;gap:2px;width:22px;height:22px}
+.mark i b{background:var(--leaf);border-radius:2px}
+.mark i b:nth-child(2){background:var(--moss)}
+.mark i b:first-child{grid-row:span 2}
+nav ul{display:flex;gap:26px;list-style:none;margin:0;padding:0;font-size:15px}
+nav ul a{text-decoration:none;color:var(--mute)}
+nav ul a:hover,nav ul a[aria-current]{color:var(--ink)}
+.gh{font:600 14px/1 "Instrument";padding:10px 14px;border:1.5px solid var(--ink);border-radius:999px;text-decoration:none}
+.gh:hover{background:var(--ink);color:var(--sage)}
+
+.hero{padding:clamp(28px,6vh,72px) 0 8px}
+.eyebrow{font:500 13px/1 "JBMono";letter-spacing:.06em;text-transform:uppercase;color:var(--moss);display:flex;gap:10px;align-items:center}
+.eyebrow::before{content:"";width:28px;height:2px;background:var(--leaf)}
+h1{font:800 clamp(42px,6.6vw,88px)/.94 "Bricolage";font-variation-settings:"opsz" 96;letter-spacing:-.045em;margin:20px 0 22px;max-width:14ch}
+h1 em{font-style:normal;color:var(--leaf);white-space:nowrap}
+.lede{font-size:clamp(18px,1.6vw,21px);max-width:52ch;color:#2A3A30;margin:0 0 8px}
+
+section{padding:clamp(40px,7vh,80px) 0}
+h2{font:750 clamp(32px,4.2vw,52px)/1 "Bricolage";letter-spacing:-.035em;margin:0 0 12px;max-width:18ch}
+.sub{color:var(--mute);max-width:58ch;margin:0 0 32px}
+
+/* the pinned comparisons: the two money articles, never below newer posts */
+.cards{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.card{background:var(--sheet);border:1px solid #D6DED1;border-radius:var(--r);padding:24px 24px 26px;display:flex;flex-direction:column;gap:10px;text-decoration:none;min-height:230px}
+.card:hover{border-color:var(--moss)}
+.card .tag{font:500 12px/1 "JBMono";letter-spacing:.06em;text-transform:uppercase;color:var(--moss)}
+.card h3{font:700 24px/1.1 "Bricolage";letter-spacing:-.02em;margin:0}
+.card p{margin:0;color:#34443A;font-size:15.5px}
+.card .more{margin-top:auto;padding-top:8px;font:600 15px/1 "Instrument";color:var(--moss)}
+
+/* the chronological area: newest first */
+.posts{list-style:none;margin:0;padding:0;border-top:1.5px solid var(--ink)}
+.posts li{border-bottom:1px solid var(--rule)}
+.posts a{display:grid;gap:4px;padding:18px 0 20px;text-decoration:none}
+.posts time{font:500 13px/1 "JBMono";color:var(--mute)}
+.posts h3{font:700 22px/1.15 "Bricolage";letter-spacing:-.02em;margin:0}
+.posts p{margin:0;color:#34443A;font-size:15.5px;max-width:70ch}
+.posts a:hover h3{color:var(--moss)}
+.empty{color:var(--mute);font-size:15.5px;margin:18px 0 0}
+
+footer{padding:36px 0 56px;border-top:1px solid var(--rule);display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px;color:var(--mute);font-size:14px}
+
+@media (max-width:980px){
+  .cards{grid-template-columns:1fr}
+  nav ul{display:none}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <nav>
+    <a class="mark" href="../"><i><b></b><b></b><b></b></i>greenTile</a>
+    <ul><li><a href="../#tour">Video</a></li><li><a href="../#features">Features</a></li><li><a href="../#details">Details</a></li><li><a href="../#keys">Hotkeys</a></li><li><a href="../#install">Install</a></li><li><a href="auto-tiling-cinnamon/">Auto tiling</a></li><li><a href="gtile-alternative/">vs gTile</a></li><li><a href="./" aria-current="page">Blog</a></li></ul>
+    <a class="gh" href="https://github.com/carsteneu/greenTile">github.com/carsteneu/greenTile</a>
+  </nav>
+
+  <header class="hero">
+    <div class="eyebrow">greenTile · notes</div>
+    <h1>The greenTile <em>blog.</em></h1>
+    <p class="lede">Guides and comparisons for greenTile, the tiling extension that arranges your windows on the Cinnamon desktop. Start with the two articles below.</p>
+  </header>
+</div>
+
+<section id="start">
+  <div class="wrap">
+    <h2>Start here.</h2>
+    <p class="sub">The two comparisons, pinned to the top for good.</p>
+    <div class="cards">
+      <a class="card" href="auto-tiling-cinnamon/">
+        <span class="tag">Guide</span>
+        <h3>Automatic tiling for Cinnamon</h3>
+        <p>What greenTile does on Linux Mint, with screenshots: auto mode, presets per monitor and workspace, wide columns, drag to split, gaps and floating windows. A walk through.</p>
+        <span class="more">Read the guide →</span>
+      </a>
+      <a class="card" href="gtile-alternative/">
+        <span class="tag">Comparison</span>
+        <h3>greenTile vs gTile</h3>
+        <p>Both tile windows on Cinnamon, and greenTile started as a fork of gTile. They answer different questions: gTile places the window you point at, greenTile arranges a whole workspace. Side by side, and how to switch.</p>
+        <span class="more">Read the comparison →</span>
+      </a>
+    </div>
+  </div>
+</section>
+
+<section id="posts">
+  <div class="wrap">
+    <h2>More posts.</h2>
+    <p class="sub">Newer entries appear here, newest first. The two articles above stay pinned at the top.</p>
+
+    <!--
+      CHRONOLOGICAL AREA — insert new posts here, newest first.
+      The two comparison articles above are permanent (pinned) and are NOT part of this list.
+
+      To add a post:
+        1. create docs/blog/<slug>/index.html (copy an existing article page)
+        2. delete the <p class="empty"> line below
+        3. paste one <li> as the FIRST child of <ol class="posts">:
+
+      <li>
+        <a href="<slug>/">
+          <time datetime="YYYY-MM-DD">Month D, YYYY</time>
+          <h3>Post title</h3>
+          <p>One or two lines about the post.</p>
+        </a>
+      </li>
+
+        4. add https://greentile.io/blog/<slug>/ to docs/sitemap.xml
+    -->
+    <ol class="posts"></ol>
+    <p class="empty">Nothing here yet. The two articles above are the place to start.</p>
+  </div>
+</section>
+
+<div class="wrap"><footer><span>greenTile · GPL v3 · based on gTile by vibou and shuairan</span><span><a href="../">Home</a> · <a href="auto-tiling-cinnamon/">Auto tiling on Cinnamon</a> · <a href="gtile-alternative/">greenTile vs gTile</a></span><span>Made for Linux Mint</span></footer></div>
+</body>
+</html>
