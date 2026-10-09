@@ -757,3 +757,47 @@ test('auto onGrabEnd: a resize grab still reports to resizeEnd and schedules not
     assert.equal(calls.resizeEnd, 1, 'the resize path is untouched');
     assert.deepEqual(ml.pendingMs(), [], 'a resize does not schedule a move snap');
 });
+
+test('auto onGrabEnd: a MOVING grab that only resized is still a move', () => {
+    const { ml, auto, activeWorkspace } = makeAuto({ auto: true });
+    const app = makeApp();
+    const holder = { rect: { x: 100, y: 50, width: 800, height: 600 } };
+    const w = grabWindow(7, holder, activeWorkspace);
+    auto.onGrabBegin(app, w, 16);
+    // A MOVING grab can un-maximize or unsnap the window: same origin, new size. The
+    // window is floating now and has to be placed again.
+    holder.rect = { x: 100, y: 50, width: 1200, height: 900 };
+    auto.onGrabEnd(app, w, 16);
+    assert.deepEqual(ml.pendingMs(), [250], 'a size change without a move still snaps');
+});
+
+test('auto onGrabEnd: a release with no observed grab begin falls back to the snap', () => {
+    const { ml, auto, activeWorkspace } = makeAuto({ auto: true });
+    const app = makeApp();
+    const holder = { rect: { x: 100, y: 50, width: 800, height: 600 } };
+    const w = grabWindow(7, holder, activeWorkspace);
+    auto.onGrabEnd(app, w, 16);
+    assert.deepEqual(ml.pendingMs(), [250], 'without a start frame there is nothing to compare');
+});
+
+test('auto onGrabEnd: a vertical-only move is a move', () => {
+    const { ml, auto, activeWorkspace } = makeAuto({ auto: true });
+    const app = makeApp();
+    const holder = { rect: { x: 100, y: 50, width: 800, height: 600 } };
+    const w = grabWindow(7, holder, activeWorkspace);
+    auto.onGrabBegin(app, w, 16);
+    holder.rect = { x: 100, y: 90, width: 800, height: 600 };
+    auto.onGrabEnd(app, w, 16);
+    assert.deepEqual(ml.pendingMs(), [250], 'y alone counts as movement');
+});
+
+test('auto onGrabEnd: KEYBOARD_MOVING that moved keeps the snap', () => {
+    const { ml, auto, activeWorkspace } = makeAuto({ auto: true });
+    const app = makeApp();
+    const holder = { rect: { x: 10, y: 10, width: 400, height: 300 } };
+    const w = grabWindow(7, holder, activeWorkspace);
+    auto.onGrabBegin(app, w, 17);
+    holder.rect = { x: 60, y: 10, width: 400, height: 300 };
+    auto.onGrabEnd(app, w, 17);
+    assert.deepEqual(ml.pendingMs(), [250], 'an arrow-key move still snaps');
+});
