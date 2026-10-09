@@ -1,0 +1,216 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tiling extensions for Cinnamon: the short list</title>
+<meta name="description" content="The Cinnamon Spices catalogue lists 44 extensions and exactly one of them tiles windows. What exists inside and outside the catalogue, and how to choose.">
+<link rel="canonical" href="https://greentile.io/blog/cinnamon-tiling-extensions/">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="greenTile">
+<meta property="og:title" content="Tiling extensions for Cinnamon: the short list">
+<meta property="og:description" content="One tiling extension in the catalogue, two projects outside it. The whole field, with what each one is actually good for.">
+<meta property="og:url" content="https://greentile.io/blog/cinnamon-tiling-extensions/">
+<meta property="og:image" content="https://greentile.io/screenshots/tour-poster.jpg">
+<meta property="og:image:width" content="1280">
+<meta property="og:image:height" content="720">
+<meta property="og:image:alt" content="greenTile: tiling for Cinnamon, six windows in one row">
+<style>
+@font-face{font-family:"Bricolage";src:url(../../fonts/bricolage-normal-200_800.woff2) format("woff2");font-weight:200 800;font-stretch:75% 100%}
+@font-face{font-family:"Instrument";src:url(../../fonts/instrument-normal-400_700.woff2) format("woff2");font-weight:400 700}
+@font-face{font-family:"Instrument";src:url(../../fonts/instrument-italic-400_700.woff2) format("woff2");font-weight:400 700;font-style:italic}
+@font-face{font-family:"JBMono";src:url(../../fonts/jbmono-normal-400_700.woff2) format("woff2");font-weight:400 700}
+
+/* tokens and base: the same as the home page (../../index.html) */
+:root{
+  --sage:#E6ECE2;
+  --sheet:#F7F9F5;
+  --ink:#13201A;
+  --moss:#2F6A1E;
+  --leaf:#4EA530;
+  --amber:#F0A23B;
+  --rule:#C5D0BF;
+  --mute:#5B6B60;
+  --r:10px;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+html{background:var(--sage);color:var(--ink)}
+body{margin:0;font:400 17px/1.55 "Instrument",system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+a{color:inherit}
+:focus-visible{outline:3px solid var(--amber);outline-offset:3px;border-radius:4px}
+.wrap{max-width:1180px;margin:0 auto;padding:0 clamp(20px,4vw,48px)}
+
+nav{display:flex;align-items:center;justify-content:space-between;padding:22px 0}
+.mark{display:flex;align-items:center;gap:10px;font:700 21px/1 "Bricolage";letter-spacing:-.02em;text-decoration:none}
+.mark i{display:grid;grid-template-columns:1fr 1fr;gap:2px;width:22px;height:22px}
+.mark i b{background:var(--leaf);border-radius:2px}
+.mark i b:nth-child(2){background:var(--moss)}
+.mark i b:first-child{grid-row:span 2}
+nav ul{display:flex;gap:26px;list-style:none;margin:0;padding:0;font-size:15px}
+nav ul a{text-decoration:none;color:var(--mute)}
+nav ul a:hover,nav ul a[aria-current]{color:var(--ink)}
+.gh{font:600 14px/1 "Instrument";padding:10px 14px;border:1.5px solid var(--ink);border-radius:999px;text-decoration:none}
+.gh:hover{background:var(--ink);color:var(--sage)}
+
+.hero{padding:clamp(28px,6vh,72px) 0 24px}
+.eyebrow{font:500 13px/1 "JBMono";letter-spacing:.06em;text-transform:uppercase;color:var(--moss);display:flex;gap:10px;align-items:center}
+.eyebrow::before{content:"";width:28px;height:2px;background:var(--leaf)}
+h1{font:800 clamp(42px,6.6vw,92px)/.94 "Bricolage";font-variation-settings:"opsz" 96;letter-spacing:-.045em;margin:20px 0 22px;max-width:14ch}
+h1 em{font-style:normal;color:var(--leaf);white-space:nowrap}
+.lede{font-size:clamp(18px,1.6vw,21px);max-width:48ch;color:#2A3A30;margin:0 0 28px}
+.cta{display:flex;flex-wrap:wrap;gap:14px;align-items:center}
+.btn{font:600 16px/1 "Instrument";padding:15px 22px;border-radius:999px;background:var(--ink);color:var(--sage);text-decoration:none;display:inline-block}
+.btn:hover{background:var(--moss)}
+.plain{font:600 16px/1 "Instrument";padding:14px 20px;border:1.5px solid var(--ink);border-radius:999px;text-decoration:none;display:inline-block}
+.plain:hover{background:var(--ink);color:var(--sage)}
+kbd{font:600 13px/1 "JBMono";padding:7px 9px 8px;border-radius:7px;background:var(--sheet);border:1px solid var(--rule);box-shadow:0 2px 0 var(--rule);color:var(--ink)}
+code{font:500 .9em "JBMono";background:var(--sheet);border:1px solid var(--rule);border-radius:5px;padding:1px 5px}
+
+section{padding:clamp(48px,8vh,88px) 0}
+h2{font:750 clamp(32px,4.2vw,52px)/1 "Bricolage";letter-spacing:-.035em;margin:0 0 12px;max-width:18ch}
+h3{font:700 clamp(22px,2.2vw,28px)/1.1 "Bricolage";letter-spacing:-.02em;margin:0 0 10px}
+.sub{color:var(--mute);max-width:58ch;margin:0 0 32px}
+
+.cmp-wrap{overflow-x:auto}
+table.cmp{width:100%;border-collapse:collapse;min-width:680px}
+.cmp th,.cmp td{text-align:left;vertical-align:top;padding:13px 18px 15px 0;border-bottom:1px solid var(--rule);font-size:15.5px;line-height:1.5}
+.cmp thead th{font:700 22px/1.1 "Bricolage";letter-spacing:-.02em;border-bottom:1.5px solid var(--ink);padding-bottom:14px}
+.cmp tbody th{font:600 15.5px/1.35 "Instrument";color:var(--ink);width:26%}
+.cmp td{color:#34443A}
+.cmp td.old{color:var(--mute);font-variant-numeric:tabular-nums;white-space:nowrap}
+
+/* the two extension profiles */
+.pick{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:8px}
+.pick article{background:var(--sheet);border:1px solid #D6DED1;border-radius:var(--r);padding:24px}
+.pick article.g{background:var(--ink);color:var(--sage);border-color:var(--ink)}
+.pick h3{margin-bottom:6px}
+.pick .who{font:500 12px/1 "JBMono";letter-spacing:.06em;text-transform:uppercase;color:var(--moss);margin-bottom:14px}
+.pick article.g .who{color:#8FBF7A}
+.pick ul{margin:0;padding-left:20px}
+.pick li{font-size:15.5px;color:#34443A;margin:0 0 8px}
+.pick article.g li{color:#C9D5C3}
+.pick a{color:var(--moss)}
+.pick article.g a{color:#9BD183}
+
+.origin{max-width:68ch;color:#2A3A30}
+.origin p{margin:0 0 14px}
+.origin ul{margin:0 0 18px;padding-left:20px}
+.origin li{margin:0 0 8px}
+.next{display:flex;flex-wrap:wrap;gap:14px;align-items:center;margin-top:36px}
+.note{border-left:3px solid var(--leaf);padding:2px 0 2px 16px;color:#34443A;margin:26px 0 0;max-width:68ch}
+
+footer{padding:36px 0 56px;border-top:1px solid var(--rule);display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px;color:var(--mute);font-size:14px}
+
+@media (max-width:980px){
+  .pick{grid-template-columns:1fr}
+  nav ul{display:none}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <nav>
+    <a class="mark" href="../../"><i><b></b><b></b><b></b></i>greenTile</a>
+    <ul><li><a href="../../#tour">Video</a></li><li><a href="../../#features">Features</a></li><li><a href="../../#details">Details</a></li><li><a href="../../#keys">Hotkeys</a></li><li><a href="../../#install">Install</a></li><li><a href="../" aria-current="page">Blog</a></li></ul>
+    <a class="gh" href="https://github.com/carsteneu/greenTile">github.com/carsteneu/greenTile</a>
+  </nav>
+
+  <header class="hero">
+    <div class="eyebrow">The field, honestly</div>
+    <h1>Tiling extensions <em>for Cinnamon.</em></h1>
+    <p class="lede">The Cinnamon Spices catalogue lists 44 extensions. Exactly one of them tiles windows. Outside the catalogue there are two more projects worth knowing about. That is the entire field for window tiling on Cinnamon — here it is, with what each project is good for.</p>
+    <div class="cta">
+      <a class="btn" href="#gtile">The two tiling extensions</a>
+      <a class="plain" href="#choose">How to choose</a>
+    </div>
+  </header>
+</div>
+
+<section id="catalogue">
+  <div class="wrap">
+    <h2>44 extensions, one tiler.</h2>
+    <p class="sub">Cinnamon installs extensions from the Spices catalogue, reachable in System Settings → Extensions → Download. We went through all 44 entries and searched for anything that touches window placement. One extension does: <b>gTile</b>.</p>
+    <p class="sub">These are the neighbours — useful, but they solve a different problem:</p>
+    <div class="cmp-wrap">
+      <table class="cmp">
+        <thead><tr><td></td><th scope="col">Catalogue entry</th><th scope="col">What it actually does</th><th scope="col">Declared for Cinnamon</th></tr></thead>
+        <tbody>
+          <tr><th scope="row">auto-move-windows</th><td>JeffHanna</td><td>Moves applications to specific workspaces when they create windows. The closest thing to layouts the catalogue has — it decides <i>where</i> a window opens, not how the windows are arranged.</td><td class="old">4.0 – 5.6</td></tr>
+          <tr><th scope="row">RearrangeWorkspaces</th><td>klangman</td><td>Rearranges the workspaces themselves, taking their windows along.</td><td class="old">5.4</td></tr>
+          <tr><th scope="row">adjacent-windows</th><td>klangman</td><td>Hotkeys to jump to the neighbouring window instead of cycling through all of them.</td><td class="old">5.4</td></tr>
+          <tr><th scope="row">cinnamon-maximus</th><td>fmete</td><td>Removes window decorations the way Maximus does on older desktops.</td><td class="old">2.4 – 4.8</td></tr>
+          <tr><th scope="row">workspace-scroller</th><td>ori</td><td>Switches workspaces when you scroll at the screen edge.</td><td class="old">2.4 – 4.4</td></tr>
+          <tr><th scope="row">desktop-icons-per-workspace</th><td>cardsurf</td><td>Keeps desktop icons in different positions per workspace.</td><td class="old">2.6 – 4.0</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="note">The third column is worth a look in general: a good part of the catalogue was written before Cinnamon 6, and its entries still declare support for 4.x or 5.x. Cinnamon runs them anyway in most cases, but nobody has tested them recently.</p>
+  </div>
+</section>
+
+<section id="gtile">
+  <div class="wrap">
+    <h2>The two tiling extensions.</h2>
+    <p class="sub">They answer different questions. Both are free software under the GPL v3, both can be installed side by side, and only one of them should be enabled at a time.</p>
+    <div class="pick">
+      <article>
+        <div class="who">In the catalogue · since forever</div>
+        <h3>gTile</h3>
+        <ul>
+          <li><b>You place a window.</b> A grid opens over the focused window, you select an area — with the mouse, with the arrow keys and <kbd>Shift</kbd>, or by typing two tile labels — and confirm. The other windows do not move.</li>
+          <li>Four grids on the number keys, plus two buttons that arrange everything once: <i>Auto tile main and list</i> and <i>Auto tile two lists</i>.</li>
+          <li>Version 2.2.1 in the catalogue, <code>multiversion</code>, with separate code paths for Cinnamon 3.8 and 5.4 and support declared from 3.6 on.</li>
+          <li>Written by vibou for GNOME Shell, ported to Cinnamon by shuairan, maintained by the community in Linux Mint's spices repository. Its last functional change there is from September 2025; since then only translations.</li>
+          <li>Installed in one click from the Extensions manager — the lowest-friction way to try tiling on Cinnamon.</li>
+        </ul>
+      </article>
+      <article class="g">
+        <div class="who">Not in the catalogue · installs from a zip</div>
+        <h3>greenTile</h3>
+        <ul>
+          <li><b>The layout exists first.</b> A preset is painted on a 6 × 4 grid and assigned to a monitor and a workspace. Windows that open, close or return are fitted into it.</li>
+          <li>Auto mode per workspace, sixteen editable starter presets, columns that span, gaps from 0 to 48 px, a never tile list, drag-to-split.</li>
+          <li>A fork of gTile 2.2.1: the extension skeleton and the translation sources come from gTile, the classic grid was replaced by the preset and auto model. Less than 1 % of the runtime code is untouched gTile code, measured on 2.2.0.</li>
+          <li>Installs from a release zip with a script, so it does not appear in the Extensions manager's download list yet.</li>
+          <li>Tested on Linux Mint 21.3 to 22.3 (Cinnamon 6.0.4 to 6.6) with X11; first tests on Wayland pass for auto tiling, retiling and the preset panel.</li>
+        </ul>
+      </article>
+    </div>
+    <p class="sub" style="margin-top:30px">The detailed comparison — per monitor and workspace, gaps, keys, what happens when a window closes — is in <a href="../gtile-alternative/">greenTile vs gTile</a>.</p>
+  </div>
+</section>
+
+<section id="outside">
+  <div class="wrap origin">
+    <h2>Outside the catalogue.</h2>
+    <p>Extensions do not have to live in the catalogue. Two kinds of projects exist out there:</p>
+    <ul>
+      <li><b>Cinnamon Automatic Tiling</b> (perlgui, on GitHub, version 0.3) — "Automatic window tiling for the Linux Mint Cinnamon desktop environment". It requires Linux Mint 22.x with Cinnamon 6.6.x and says about itself that it is functional but that some behaviour may be unstable or incomplete. It brings its own installer and supports drag-and-drop tile swapping. Worth a look if you want to compare a second approach; expect to install it by hand and to keep an eye on it.</li>
+      <li><b>Smaller side projects.</b> A GitHub search for "cinnamon tiling" turns up 19 repositories in total, most of them experiments, personal setups or abandoned sketches. There is no third project with real use behind it.</li>
+    </ul>
+    <p>That is the whole market. On a desktop that has a catalogue with 44 maintained extensions, window tiling is a niche with one long-standing entry — which is exactly why greenTile exists.</p>
+  </div>
+</section>
+
+<section id="choose">
+  <div class="wrap">
+    <h2>How to choose.</h2>
+    <p class="sub">Three questions, three answers.</p>
+    <ul class="keys">
+      <li><b>Do you want to place each window yourself?</b><span>Then you want a grid you open and select in. That is gTile, and it has been doing it well for a decade.</span></li>
+      <li><b>Do you want the workspace to arrange itself?</b><span>Then the layout has to exist before the windows do, which is what greenTile's presets and auto mode are for.</span></li>
+      <li><b>Do you want neither?</b><span>Cinnamon's built-in halves, quarters and edge snapping may be all you need. <a href="../tiling-on-linux-mint/">Here is what the desktop does on its own.</a></span></li>
+    </ul>
+    <p class="note">Do not enable two tiling extensions at the same time. gTile and greenTile claim some of the same keys — <kbd>Super</kbd><kbd>G</kbd> among them — and the result is windows fighting over the same pixel. Disable one before you try the other.</p>
+    <div class="next">
+      <a class="btn" href="../auto-tiling-cinnamon/#install">Install greenTile</a>
+      <a class="plain" href="../gtile-alternative/">greenTile vs gTile in detail</a>
+    </div>
+  </div>
+</section>
+
+<div class="wrap"><footer><span>greenTile · GPL v3 · based on gTile by vibou and shuairan</span><span><a href="../../">Home</a> · <a href="../auto-tiling-cinnamon/">Auto tiling on Cinnamon</a> · <a href="../gtile-alternative/">greenTile vs gTile</a></span><span>Made for Linux Mint · <a href="../../imprint/">Imprint</a> · <a href="../../privacy/">Privacy</a></span></footer></div>
+</body>
+</html>
