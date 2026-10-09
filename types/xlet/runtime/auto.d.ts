@@ -35,6 +35,7 @@ export const Auto: {
         _pending: Map<any, any>;
         _lastMonitor: Map<any, any>;
         _grabMonitor: Map<any, any>;
+        _moveStart: Map<any, any>;
         _resizeStart: Map<any, any>;
         /** @type {Array<[AnyRecord, number, number]>} */
         _workspaceSignals: Array<[AnyRecord, number, number]>;
