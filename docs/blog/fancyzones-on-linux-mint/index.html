@@ -1,0 +1,247 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>FancyZones on Linux Mint: zone layouts on the Cinnamon desktop</title>
+<meta name="description" content="You used FancyZones in Windows PowerToys. Here is what Cinnamon does on its own, what has no equivalent, and how to rebuild your zone layouts on Linux Mint.">
+<link rel="canonical" href="https://greentile.io/blog/fancyzones-on-linux-mint/">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="greenTile">
+<meta property="og:title" content="FancyZones on Linux Mint: zone layouts on the Cinnamon desktop">
+<meta property="og:description" content="Windows zone layouts, rebuilt on Cinnamon: what the desktop already does, what has no equivalent, and how to get your layouts back.">
+<meta property="og:url" content="https://greentile.io/blog/fancyzones-on-linux-mint/">
+<meta property="og:image" content="https://greentile.io/screenshots/tour-poster.jpg">
+<meta property="og:image:width" content="1280">
+<meta property="og:image:height" content="720">
+<meta property="og:image:alt" content="greenTile: tiling for Cinnamon, six windows in one row">
+<style>
+@font-face{font-family:"Bricolage";src:url(../../fonts/bricolage-normal-200_800.woff2) format("woff2");font-weight:200 800;font-stretch:75% 100%}
+@font-face{font-family:"Instrument";src:url(../../fonts/instrument-normal-400_700.woff2) format("woff2");font-weight:400 700}
+@font-face{font-family:"Instrument";src:url(../../fonts/instrument-italic-400_700.woff2) format("woff2");font-weight:400 700;font-style:italic}
+@font-face{font-family:"JBMono";src:url(../../fonts/jbmono-normal-400_700.woff2) format("woff2");font-weight:400 700}
+
+/* tokens and base: the same as the home page (../../index.html) */
+:root{
+  --sage:#E6ECE2;
+  --sheet:#F7F9F5;
+  --ink:#13201A;
+  --moss:#2F6A1E;
+  --leaf:#4EA530;
+  --amber:#F0A23B;
+  --rule:#C5D0BF;
+  --mute:#5B6B60;
+  --r:10px;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+html{background:var(--sage);color:var(--ink)}
+body{margin:0;font:400 17px/1.55 "Instrument",system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+a{color:inherit}
+:focus-visible{outline:3px solid var(--amber);outline-offset:3px;border-radius:4px}
+.wrap{max-width:1180px;margin:0 auto;padding:0 clamp(20px,4vw,48px)}
+
+nav{display:flex;align-items:center;justify-content:space-between;padding:22px 0}
+.mark{display:flex;align-items:center;gap:10px;font:700 21px/1 "Bricolage";letter-spacing:-.02em;text-decoration:none}
+.mark i{display:grid;grid-template-columns:1fr 1fr;gap:2px;width:22px;height:22px}
+.mark i b{background:var(--leaf);border-radius:2px}
+.mark i b:nth-child(2){background:var(--moss)}
+.mark i b:first-child{grid-row:span 2}
+nav ul{display:flex;gap:26px;list-style:none;margin:0;padding:0;font-size:15px}
+nav ul a{text-decoration:none;color:var(--mute)}
+nav ul a:hover,nav ul a[aria-current]{color:var(--ink)}
+.gh{font:600 14px/1 "Instrument";padding:10px 14px;border:1.5px solid var(--ink);border-radius:999px;text-decoration:none}
+.gh:hover{background:var(--ink);color:var(--sage)}
+
+.hero{padding:clamp(28px,6vh,72px) 0 24px}
+.eyebrow{font:500 13px/1 "JBMono";letter-spacing:.06em;text-transform:uppercase;color:var(--moss);display:flex;gap:10px;align-items:center}
+.eyebrow::before{content:"";width:28px;height:2px;background:var(--leaf)}
+h1{font:800 clamp(42px,6.6vw,92px)/.94 "Bricolage";font-variation-settings:"opsz" 96;letter-spacing:-.045em;margin:20px 0 22px;max-width:13ch}
+h1 em{font-style:normal;color:var(--leaf);white-space:nowrap}
+.lede{font-size:clamp(18px,1.6vw,21px);max-width:48ch;color:#2A3A30;margin:0 0 28px}
+.cta{display:flex;flex-wrap:wrap;gap:14px;align-items:center}
+.btn{font:600 16px/1 "Instrument";padding:15px 22px;border-radius:999px;background:var(--ink);color:var(--sage);text-decoration:none;display:inline-block}
+.btn:hover{background:var(--moss)}
+.plain{font:600 16px/1 "Instrument";padding:14px 20px;border:1.5px solid var(--ink);border-radius:999px;text-decoration:none;display:inline-block}
+.plain:hover{background:var(--ink);color:var(--sage)}
+kbd{font:600 13px/1 "JBMono";padding:7px 9px 8px;border-radius:7px;background:var(--sheet);border:1px solid var(--rule);box-shadow:0 2px 0 var(--rule);color:var(--ink)}
+code{font:500 .9em "JBMono";background:var(--sheet);border:1px solid var(--rule);border-radius:5px;padding:1px 5px}
+
+/* the two models side by side, the same device as on the comparison page */
+.models{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:clamp(30px,5vh,52px)}
+.model{background:var(--sheet);border:1px solid #D6DED1;border-radius:var(--r);padding:22px 24px 24px;display:flex;flex-direction:column;gap:10px}
+.model.g{background:var(--ink);color:var(--sage);border-color:var(--ink)}
+.model h2{font:700 22px/1.1 "Bricolage";letter-spacing:-.02em;margin:0;max-width:none}
+.model p{margin:0;font-size:15.5px;color:#34443A}
+.model.g p{color:#C9D5C3}
+.screen{aspect-ratio:16/7;border-radius:8px;padding:6px;background:#1B2A21}
+.zones{height:100%;display:grid;grid-template-columns:2fr 1fr;gap:4px}
+.zones i{border-radius:4px;background:#2C3E32;border:2px dashed #47624F}
+.zones i.win{border-style:solid;background:rgba(240,162,59,.35);border-color:var(--amber)}
+.tiles{height:100%;display:grid;grid-template-columns:2fr 1fr 1fr;grid-template-rows:1fr 1fr;gap:3px}
+.tiles i{border-radius:3px;background:var(--sheet);border-top:5px solid var(--c)}
+
+section{padding:clamp(48px,8vh,88px) 0}
+h2{font:750 clamp(32px,4.2vw,52px)/1 "Bricolage";letter-spacing:-.035em;margin:0 0 12px;max-width:18ch}
+.sub{color:var(--mute);max-width:58ch;margin:0 0 32px}
+
+/* the key list, ruled like the hotkey list on the home page */
+.keys{list-style:none;margin:0;padding:0;border-top:1.5px solid var(--ink);max-width:900px}
+.keys li{display:grid;grid-template-columns:230px 1fr;gap:16px;padding:13px 0 15px;border-bottom:1px solid var(--rule);color:#34443A;font-size:16px;align-items:baseline}
+.keys b{color:var(--ink);font-weight:600}
+
+.cmp-wrap{overflow-x:auto}
+table.cmp{width:100%;border-collapse:collapse;min-width:680px}
+.cmp th,.cmp td{text-align:left;vertical-align:top;padding:14px 18px 16px 0;border-bottom:1px solid var(--rule);font-size:15.5px;line-height:1.5}
+.cmp thead th{font:700 22px/1.1 "Bricolage";letter-spacing:-.02em;border-bottom:1.5px solid var(--ink);padding-bottom:14px}
+.cmp tbody th{font:600 15.5px/1.35 "Instrument";color:var(--ink);width:34%}
+.cmp td{color:#34443A}
+.cmp kbd{font-size:11px;padding:3px 5px 4px}
+
+.steps{list-style:none;counter-reset:s;margin:0;padding:0;border-top:1.5px solid var(--ink);max-width:880px}
+.steps li{counter-increment:s;display:grid;grid-template-columns:48px 1fr;gap:0 12px;padding:16px 0 18px;border-bottom:1px solid var(--rule);color:#34443A;font-size:16px}
+.steps li::before{content:counter(s);font:600 13px/1.6 "JBMono";color:var(--moss)}
+.steps b{color:var(--ink)}
+
+.origin{max-width:68ch;color:#2A3A30}
+.origin p{margin:0 0 14px}
+.origin ul{margin:0 0 18px;padding-left:20px}
+.origin li{margin:0 0 8px}
+.next{display:flex;flex-wrap:wrap;gap:14px;align-items:center;margin-top:36px}
+
+footer{padding:36px 0 56px;border-top:1px solid var(--rule);display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px;color:var(--mute);font-size:14px}
+
+@media (max-width:980px){
+  .models{grid-template-columns:1fr}
+  .keys li{grid-template-columns:1fr;gap:4px}
+  nav ul{display:none}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <nav>
+    <a class="mark" href="../../"><i><b></b><b></b><b></b></i>greenTile</a>
+    <ul><li><a href="../../#tour">Video</a></li><li><a href="../../#features">Features</a></li><li><a href="../../#details">Details</a></li><li><a href="../../#keys">Hotkeys</a></li><li><a href="../../#install">Install</a></li><li><a href="../" aria-current="page">Blog</a></li></ul>
+    <a class="gh" href="https://github.com/carsteneu/greenTile">github.com/carsteneu/greenTile</a>
+  </nav>
+
+  <header class="hero">
+    <div class="eyebrow">Coming from Windows</div>
+    <h1>FancyZones, <em>on Linux Mint.</em></h1>
+    <p class="lede">On Windows you drew zones once, held <kbd>Shift</kbd> while dragging, and every window had a home. Linux Mint has nothing called FancyZones. It has most of the pieces, though, and the missing ones are a different way of thinking rather than a missing feature.</p>
+    <div class="cta">
+      <a class="btn" href="#map">See what maps to what</a>
+      <a class="plain" href="#rebuild">Rebuild your layouts</a>
+    </div>
+
+    <div class="models">
+      <article class="model">
+        <div class="screen" aria-hidden="true"><div class="zones">
+          <i class="win"></i><i></i>
+        </div></div>
+        <h2>FancyZones: zones you draw</h2>
+        <p>You design a layout of zones, then move windows into them one by one: <kbd>Shift</kbd> and drag, or <kbd>Win</kbd>+arrows. The layout is a target. What ends up in it is your decision, every time.</p>
+      </article>
+      <article class="model g">
+        <div class="screen" aria-hidden="true"><div class="tiles">
+          <i style="--c:#4EA530"></i><i style="--c:#3E7CB1"></i><i style="--c:#F0A23B"></i><i style="--c:#8E6CC4"></i><i style="--c:#2A9D8F"></i>
+        </div></div>
+        <h2>greenTile: a layout that fills itself</h2>
+        <p>A preset is assigned to a monitor and a workspace. Windows that open, close or come back are fitted into it. You still drag and swap when you want to, but you do not have to.</p>
+      </article>
+    </div>
+  </header>
+</div>
+
+<section id="fancyzones">
+  <div class="wrap">
+    <h2>What you are leaving behind.</h2>
+    <p class="sub">FancyZones is part of Microsoft PowerToys, the open source toolbox for Windows. Its features are the reason zone layouts are hard to give up:</p>
+    <ul class="keys">
+      <li><b>Layouts with zones</b><span>Built from templates (columns, rows, grid, priority) or drawn by hand in two editor styles: <i>Grid</i>, which splits and merges cells, and <i>Canvas</i>, where zones may overlap.</span></li>
+      <li><b>A layout per monitor</b><span>Different monitors can run different layouts, and a default layout applies when the display setup changes.</span></li>
+      <li><b>Drop a window into a zone</b><span>Hold <kbd>Shift</kbd> while dragging and the zones appear; the zone under the pointer lights up. Holding <kbd>Ctrl</kbd> while dragging spreads one window over several zones.</span></li>
+      <li><b>Layout hotkeys</b><span><kbd>Win</kbd><kbd>Ctrl</kbd><kbd>Alt</kbd>+a number applies a saved layout to the active screen.</span></li>
+      <li><b>New windows go where they belong</b><span><i>Move newly created windows to the last known zone</i> puts a new window back where that application sat before.</span></li>
+      <li><b>Rules that survive</b><span>Excluded applications, gaps around zones, and <i>keep windows in their zones when the screen resolution changes</i>.</span></li>
+    </ul>
+  </div>
+</section>
+
+<section id="builtin">
+  <div class="wrap">
+    <h2>What Cinnamon does on its own.</h2>
+    <p class="sub">No extension needed. These are the defaults on Linux Mint 22 with Cinnamon 6.x, taken from Cinnamon's own settings schemas.</p>
+    <ul class="keys">
+      <li><b>Halves, from the keyboard</b><span><kbd>Super</kbd>+<kbd>←</kbd> pushes the focused window into the left half, <kbd>Super</kbd>+<kbd>→</kbd> into the right one, <kbd>Super</kbd>+<kbd>↑</kbd> and <kbd>Super</kbd>+<kbd>↓</kbd> into the top and bottom half.</span></li>
+      <li><b>Quarters, by combining them</b><span>Push left, then push up: the window takes the upper left quarter. Pushing in the opposite direction untiles it again. Cinnamon's window manager Muffin supports this; the keyboard reference in the settings just does not mention it.</span></li>
+      <li><b>Halves and maximise, with the mouse</b><span>Drop a window on a vertical screen edge and it covers that half. Drop it on the top edge and it maximises. This <i>edge tiling</i> is on by default.</span></li>
+      <li><b>Maximise</b><span><kbd>Alt</kbd>+<kbd>F10</kbd>.</span></li>
+      <li><b>Workspaces</b><span>Four of them by default (up to 36). <kbd>Ctrl</kbd><kbd>Alt</kbd>+<kbd>←</kbd>/<kbd>→</kbd> switches, <kbd>Ctrl</kbd><kbd>Alt</kbd><kbd>Shift</kbd>+<kbd>←</kbd>/<kbd>→</kbd> takes the focused window along.</span></li>
+      <li><b>Hot corners, switched off</b><span>The four screen corners can run Expo, Scale or show the desktop, but every one of them ships disabled. If you miss the Windows corner gestures, this is where to switch them on.</span></li>
+    </ul>
+    <p class="sub" style="margin-top:26px">Everything above is about the window you are pointing at. What is missing is the part FancyZones was really for: a layout that exists before any window does, and windows that find their place in it.</p>
+  </div>
+</section>
+
+<section id="map">
+  <div class="wrap">
+    <h2>The mapping.</h2>
+    <p class="sub">Left column: what you used in PowerToys. Right column: what it is called here.</p>
+    <div class="cmp-wrap">
+      <table class="cmp">
+        <thead><tr><td></td><th scope="col">FancyZones on Windows</th><th scope="col">Cinnamon, with greenTile</th></tr></thead>
+        <tbody>
+          <tr><th scope="row">A layout of zones</th><td>Zones from a template or drawn by hand, per monitor.</td><td>A <b>preset</b>: columns painted on a 6 × 4 grid, each column holding one window or a stack, widths free. Assigned per monitor and workspace.</td></tr>
+          <tr><th scope="row">The layout editor</th><td><kbd>Win</kbd><kbd>Shift</kbd>+<kbd>`</kbd> opens the editor.</td><td><kbd>Super</kbd><kbd>Ctrl</kbd><kbd>P</kbd> opens the preset panel. Sixteen editable starters are already there.</td></tr>
+          <tr><th scope="row">Putting a window in a zone</th><td><kbd>Shift</kbd> while dragging, then drop into the highlighted zone.</td><td>Drag a window over another window's edge: a preview shows the new column, stack or row, and the drop lands there. Neighbours make room.</td></tr>
+          <tr><th scope="row">Jump to a saved layout</th><td><kbd>Win</kbd><kbd>Ctrl</kbd><kbd>Alt</kbd>+number applies a layout to the active screen.</td><td>Presets are applied from the panel or by assignment; the column hotkeys <kbd>Super</kbd><kbd>Ctrl</kbd>+<kbd>3</kbd> and <kbd>Super</kbd><kbd>Ctrl</kbd>+<kbd>6</kbd> set equal columns on the spot.</td></tr>
+          <tr><th scope="row">New windows remember their zone</th><td><i>Move newly created windows to the last known zone.</i></td><td>Auto mode: with <kbd>Super</kbd><kbd>Ctrl</kbd><kbd>A</kbd> on, a window that opens is fitted into the layout a quarter second later. Close one and the gap closes.</td></tr>
+          <tr><th scope="row">Surviving a display change</th><td><i>Keep windows in their zones when the screen resolution changes.</i></td><td>A preset belongs to a monitor and is found again after a replug. After a Cinnamon restart, windows come back in the order you left them.</td></tr>
+          <tr><th scope="row">Exceptions</th><td>An exclude list per application name.</td><td>A never tile list by window class, title or app id, plus <kbd>Super</kbd><kbd>G</kbd> to let the focused window float. Dialogs float on their own.</td></tr>
+          <tr><th scope="row">Space around zones</th><td><i>Space around zones</i>, in pixels.</td><td>Gap between windows, 0 to 48 px. The screen edges stay flush.</td></tr>
+          <tr><th scope="row">One window over two zones</th><td><kbd>Ctrl</kbd> while dragging merges the zones under the pointer.</td><td>The opposite direction: the preset already says it. Drag the handle between two columns to merge them into one wide column, 1 : 2 : 1 and so on.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<section id="rebuild">
+  <div class="wrap">
+    <h2>Rebuilding your layouts.</h2>
+    <p class="sub">Half an hour, if you had three or four layouts on Windows. Start with the one you used most.</p>
+    <ol class="steps">
+      <li><span><b>Install greenTile</b> from the <a href="../auto-tiling-cinnamon/#install">release zip</a>, restart Cinnamon, switch it on in the Extensions manager.</span></li>
+      <li><span><b>Paint your most used layout</b> in the preset panel (<kbd>Super</kbd><kbd>Ctrl</kbd><kbd>P</kbd>): columns on the 6 × 4 grid, the handle between two columns to merge them into a wide one. A layout like <i>one wide column left, two stacked right</i> is three clicks.</span></li>
+      <li><span><b>Assign it</b> to the monitor and workspace you want it on. Other workspaces keep their own preset, so the same monitor can work differently depending on where you are.</span></li>
+      <li><span><b>Turn on auto mode</b> (<kbd>Super</kbd><kbd>Ctrl</kbd><kbd>A</kbd>) on that workspace. This is the FancyZones habit replaced by something better: you do not drag a window into its zone, it is already there.</span></li>
+      <li><span><b>Fill the never tile list</b> with the apps that should stay out, the same way you excluded applications in PowerToys.</span></li>
+      <li><span><b>Keep two keys in mind</b> for the days you want to rearrange by hand: <kbd>Super</kbd><kbd>G</kbd> floats a window, <kbd>Super</kbd><kbd>Ctrl</kbd>+arrow swaps it with its neighbour and walks on to the next monitor.</span></li>
+    </ol>
+  </div>
+</section>
+
+<section id="limits">
+  <div class="wrap origin">
+    <h2>What has no equivalent.</h2>
+    <p>Not everything comes across, and it is worth knowing which parts before you start:</p>
+    <ul>
+      <li><b>Overlapping zones.</b> FancyZones Canvas allows zones that overlap and windows that share space. Here a layout is a grid: cells share edges, they do not stack.</li>
+      <li><b>Zones that span monitors.</b> FancyZones can treat all monitors as one large screen. greenTile works per monitor — dragging a window to the other screen retiles both, but there is no single layout across both.</li>
+      <li><b>Zone-based keyboard navigation.</b> <kbd>Win</kbd>+arrows stepping through zone by zone has no mirror image; the nearest thing is swapping with the neighbour (<kbd>Super</kbd><kbd>Ctrl</kbd>+arrow) or setting a different preset.</li>
+      <li><b>Windows-only muscle memory.</b> The <kbd>Win</kbd> key is <kbd>Super</kbd> here, and Cinnamon keeps its own keys for workspaces. Ten keys in total are documented on the <a href="../../#keys">home page</a>.</li>
+    </ul>
+    <p>The idea you keep is the one that mattered: you decide once how the screen is divided, and afterwards the windows obey.</p>
+    <div class="next">
+      <a class="btn" href="../auto-tiling-cinnamon/#install">Install greenTile</a>
+      <a class="plain" href="../tiling-on-linux-mint/">What Cinnamon does on its own</a>
+    </div>
+  </div>
+</section>
+
+<div class="wrap"><footer><span>greenTile · GPL v3 · based on gTile by vibou and shuairan</span><span><a href="../../">Home</a> · <a href="../auto-tiling-cinnamon/">Auto tiling on Cinnamon</a> · <a href="../gtile-alternative/">greenTile vs gTile</a></span><span>Made for Linux Mint · <a href="../../imprint/">Imprint</a> · <a href="../../privacy/">Privacy</a></span></footer></div>
+</body>
+</html>

@@ -1,0 +1,228 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tiling windows on Linux Mint: what Cinnamon does and where it stops</title>
+<meta name="description" content="Cinnamon ships with halves, quarters, edge snapping and four workspaces. What Linux Mint can do for window tiling on its own, where it stops, and the three ways to go further.">
+<link rel="canonical" href="https://greentile.io/blog/tiling-on-linux-mint/">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="greenTile">
+<meta property="og:title" content="Tiling windows on Linux Mint: what Cinnamon does and where it stops">
+<meta property="og:description" content="The honest inventory of Cinnamon's built-in window management, and what a tiling extension adds on top of it.">
+<meta property="og:url" content="https://greentile.io/blog/tiling-on-linux-mint/">
+<meta property="og:image" content="https://greentile.io/screenshots/tour-poster.jpg">
+<meta property="og:image:width" content="1280">
+<meta property="og:image:height" content="720">
+<meta property="og:image:alt" content="greenTile: tiling for Cinnamon, six windows in one row">
+<style>
+@font-face{font-family:"Bricolage";src:url(../../fonts/bricolage-normal-200_800.woff2) format("woff2");font-weight:200 800;font-stretch:75% 100%}
+@font-face{font-family:"Instrument";src:url(../../fonts/instrument-normal-400_700.woff2) format("woff2");font-weight:400 700}
+@font-face{font-family:"Instrument";src:url(../../fonts/instrument-italic-400_700.woff2) format("woff2");font-weight:400 700;font-style:italic}
+@font-face{font-family:"JBMono";src:url(../../fonts/jbmono-normal-400_700.woff2) format("woff2");font-weight:400 700}
+
+/* tokens and base: the same as the home page (../../index.html) */
+:root{
+  --sage:#E6ECE2;
+  --sheet:#F7F9F5;
+  --ink:#13201A;
+  --moss:#2F6A1E;
+  --leaf:#4EA530;
+  --amber:#F0A23B;
+  --rule:#C5D0BF;
+  --mute:#5B6B60;
+  --r:10px;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+html{background:var(--sage);color:var(--ink)}
+body{margin:0;font:400 17px/1.55 "Instrument",system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+a{color:inherit}
+:focus-visible{outline:3px solid var(--amber);outline-offset:3px;border-radius:4px}
+.wrap{max-width:1180px;margin:0 auto;padding:0 clamp(20px,4vw,48px)}
+
+nav{display:flex;align-items:center;justify-content:space-between;padding:22px 0}
+.mark{display:flex;align-items:center;gap:10px;font:700 21px/1 "Bricolage";letter-spacing:-.02em;text-decoration:none}
+.mark i{display:grid;grid-template-columns:1fr 1fr;gap:2px;width:22px;height:22px}
+.mark i b{background:var(--leaf);border-radius:2px}
+.mark i b:nth-child(2){background:var(--moss)}
+.mark i b:first-child{grid-row:span 2}
+nav ul{display:flex;gap:26px;list-style:none;margin:0;padding:0;font-size:15px}
+nav ul a{text-decoration:none;color:var(--mute)}
+nav ul a:hover,nav ul a[aria-current]{color:var(--ink)}
+.gh{font:600 14px/1 "Instrument";padding:10px 14px;border:1.5px solid var(--ink);border-radius:999px;text-decoration:none}
+.gh:hover{background:var(--ink);color:var(--sage)}
+
+.hero{padding:clamp(28px,6vh,72px) 0 24px}
+.eyebrow{font:500 13px/1 "JBMono";letter-spacing:.06em;text-transform:uppercase;color:var(--moss);display:flex;gap:10px;align-items:center}
+.eyebrow::before{content:"";width:28px;height:2px;background:var(--leaf)}
+h1{font:800 clamp(42px,6.6vw,92px)/.94 "Bricolage";font-variation-settings:"opsz" 96;letter-spacing:-.045em;margin:20px 0 22px;max-width:13ch}
+h1 em{font-style:normal;color:var(--leaf);white-space:nowrap}
+.lede{font-size:clamp(18px,1.6vw,21px);max-width:48ch;color:#2A3A30;margin:0 0 28px}
+.cta{display:flex;flex-wrap:wrap;gap:14px;align-items:center}
+.btn{font:600 16px/1 "Instrument";padding:15px 22px;border-radius:999px;background:var(--ink);color:var(--sage);text-decoration:none;display:inline-block}
+.btn:hover{background:var(--moss)}
+.plain{font:600 16px/1 "Instrument";padding:14px 20px;border:1.5px solid var(--ink);border-radius:999px;text-decoration:none;display:inline-block}
+.plain:hover{background:var(--ink);color:var(--sage)}
+kbd{font:600 13px/1 "JBMono";padding:7px 9px 8px;border-radius:7px;background:var(--sheet);border:1px solid var(--rule);box-shadow:0 2px 0 var(--rule);color:var(--ink)}
+code{font:500 .9em "JBMono";background:var(--sheet);border:1px solid var(--rule);border-radius:5px;padding:1px 5px}
+
+/* one picture of what the built-ins produce: halves and quarters */
+.screen{aspect-ratio:21/7;border-radius:8px;padding:6px;background:#1B2A21;margin-top:clamp(26px,4vh,40px)}
+.quad{height:100%;display:grid;grid-template-columns:1fr 1fr 1fr;gap:4px}
+.quad div{display:grid;grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr;gap:3px}
+.quad i{border-radius:3px;background:#2C3E32}
+.quad i.on{background:rgba(240,162,59,.45);outline:2px solid var(--amber);outline-offset:-2px}
+.quad span{align-self:end;font:500 12px/1 "JBMono";color:#8FA695;padding-bottom:2px}
+
+section{padding:clamp(48px,8vh,88px) 0}
+h2{font:750 clamp(32px,4.2vw,52px)/1 "Bricolage";letter-spacing:-.035em;margin:0 0 12px;max-width:18ch}
+.sub{color:var(--mute);max-width:58ch;margin:0 0 32px}
+
+.keys{list-style:none;margin:0;padding:0;border-top:1.5px solid var(--ink);max-width:900px}
+.keys li{display:grid;grid-template-columns:230px 1fr;gap:16px;padding:13px 0 15px;border-bottom:1px solid var(--rule);color:#34443A;font-size:16px;align-items:baseline}
+.keys b{color:var(--ink);font-weight:600}
+
+/* the three ways to go further */
+.models{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:8px}
+.model{background:var(--sheet);border:1px solid #D6DED1;border-radius:var(--r);padding:22px 24px 24px;display:flex;flex-direction:column;gap:10px}
+.model.g{background:var(--ink);color:var(--sage);border-color:var(--ink)}
+.model h3{font:700 22px/1.1 "Bricolage";letter-spacing:-.02em;margin:0}
+.model p{margin:0;font-size:15.5px;color:#34443A}
+.model.g p{color:#C9D5C3}
+.model .tag{font:500 12px/1 "JBMono";letter-spacing:.06em;text-transform:uppercase;color:var(--moss)}
+.model.g .tag{color:#8FBF7A}
+.model a{margin-top:auto;padding-top:8px;font:600 15px/1 "Instrument";color:var(--moss)}
+.model.g a{color:#9BD183}
+
+.origin{max-width:68ch;color:#2A3A30}
+.origin p{margin:0 0 14px}
+.origin ul{margin:0 0 18px;padding-left:20px}
+.origin li{margin:0 0 8px}
+.next{display:flex;flex-wrap:wrap;gap:14px;align-items:center;margin-top:36px}
+
+footer{padding:36px 0 56px;border-top:1px solid var(--rule);display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px;color:var(--mute);font-size:14px}
+
+@media (max-width:980px){
+  .models{grid-template-columns:1fr}
+  .keys li{grid-template-columns:1fr;gap:4px}
+  nav ul{display:none}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <nav>
+    <a class="mark" href="../../"><i><b></b><b></b><b></b></i>greenTile</a>
+    <ul><li><a href="../../#tour">Video</a></li><li><a href="../../#features">Features</a></li><li><a href="../../#details">Details</a></li><li><a href="../../#keys">Hotkeys</a></li><li><a href="../../#install">Install</a></li><li><a href="../" aria-current="page">Blog</a></li></ul>
+    <a class="gh" href="https://github.com/carsteneu/greenTile">github.com/carsteneu/greenTile</a>
+  </nav>
+
+  <header class="hero">
+    <div class="eyebrow">Before you install anything</div>
+    <h1>Tiling on <em>Linux Mint.</em></h1>
+    <p class="lede">Cinnamon comes with more window management than most people ever find: halves, quarters, edge snapping, four workspaces. What it does not come with is a layout that stays. Here is the full inventory — and the three ways to go further, with what each one costs.</p>
+    <div class="cta">
+      <a class="btn" href="#keyboard">What you already have</a>
+      <a class="plain" href="#stopping">Where it stops</a>
+    </div>
+
+    <div class="screen" aria-hidden="true"><div class="quad">
+      <div><i></i><i class="on"></i><i></i><i></i></div>
+      <div><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i></div>
+      <div><i></i><i></i><i class="on"></i><i></i></div>
+      <span>left half</span><span>top + bottom half</span><span>button right quarter</span>
+    </div></div>
+  </header>
+</div>
+
+<section id="keyboard">
+  <div class="wrap">
+    <h2>Everything the keyboard already does.</h2>
+    <p class="sub">These are the defaults in Cinnamon 6.x, read from Cinnamon's own keybinding schemas. All of them can be changed under System Settings → Keyboard → Shortcuts → Windows.</p>
+    <ul class="keys">
+      <li><b>Halves</b><span><kbd>Super</kbd>+<kbd>←</kbd> left half, <kbd>Super</kbd>+<kbd>→</kbd> right half, <kbd>Super</kbd>+<kbd>↑</kbd> top half, <kbd>Super</kbd>+<kbd>↓</kbd> bottom half.</span></li>
+      <li><b>Quarters</b><span>Combine two of them: push left, then push up, and the window sits in the upper left quarter. Push in the opposite direction to undo it.</span></li>
+      <li><b>Maximise</b><span><kbd>Alt</kbd>+<kbd>F10</kbd>.</span></li>
+      <li><b>Switch workspace</b><span><kbd>Ctrl</kbd><kbd>Alt</kbd>+<kbd>←</kbd>/<kbd>→</kbd>.</span></li>
+      <li><b>Take the window along</b><span><kbd>Ctrl</kbd><kbd>Alt</kbd><kbd>Shift</kbd>+<kbd>←</kbd>/<kbd>→</kbd> moves the focused window to the workspace next door.</span></li>
+      <li><b>Workspace overview</b><span>Expo (all workspaces as a grid) and Scale (all windows of the current one) are already there. The hot corners can open them — they are simply switched off until you turn a corner on.</span></li>
+    </ul>
+  </div>
+</section>
+
+<section id="mouse">
+  <div class="wrap">
+    <h2>Everything the mouse already does.</h2>
+    <p class="sub">The oldest trick on the desktop, and still the fastest for a single window.</p>
+    <ul class="keys">
+      <li><b>Drag to a side edge</b><span>The window covers that half of the screen, full height. Works on every monitor.</span></li>
+      <li><b>Drag to the top edge</b><span>The window maximises.</span></li>
+      <li><b>Drag to another monitor</b><span>It stays where you drop it. Nothing else moves.</span></li>
+      <li><b>Double-click the title bar</b><span>Maximise.</span></li>
+    </ul>
+    <p class="sub" style="margin-top:26px">Notice the pattern: every gesture moves <em>one</em> window, and the rest of the screen does not react. Neighbours do not make room, and closing a window leaves a hole.</p>
+  </div>
+</section>
+
+<section id="stopping">
+  <div class="wrap origin">
+    <h2>Where it stops.</h2>
+    <p>None of this is a bug; Cinnamon's window management simply answers a narrower question than tiling does. What is missing, exactly:</p>
+    <ul>
+      <li><b>No layout that exists on its own.</b> There is nothing to save, name or assign. How the windows sit is the result of what you did to each one, and it is gone the moment you rearrange them.</li>
+      <li><b>Nothing happens by itself.</b> A window that opens gets a size and a place chosen by the application. A window that closes leaves its space empty.</li>
+      <li><b>One arrangement for all workspaces.</b> Four workspaces are four places to put windows, not four different layouts. Switch over and you start arranging again.</li>
+      <li><b>No gaps, no rules.</b> Windows share their edges exactly, and there is no way to say "keep this app out".</li>
+      <li><b>Two at a time is the ceiling.</b> Two halves or four quarters. A third window always covers one of the others unless you resize it by hand — and then the next window that opens breaks the arrangement again.</li>
+    </ul>
+  </div>
+</section>
+
+<section id="forward">
+  <div class="wrap">
+    <h2>Three ways forward.</h2>
+    <p class="sub">All three are legitimate. They differ in what you keep and what you give up.</p>
+    <div class="models">
+      <article class="model">
+        <span class="tag">Costs nothing</span>
+        <h3>Stay with the built-ins</h3>
+        <p>Two windows per screen, halves and quarters, workspaces by hand. Perfectly fine if your work fits in two windows — and the gestures above are already muscle memory for a reason.</p>
+        <a href="#keyboard">Re-read the list</a>
+      </article>
+      <article class="model g">
+        <span class="tag">Keeps Cinnamon</span>
+        <h3>Install a tiling extension</h3>
+        <p>You keep the panel, the menu, the themes and the applets, and get layouts on top: presets, auto placement, gaps, rules. This is what greenTile does, and <a href="../gtile-alternative/">gTile</a> is the other option in the catalogue.</p>
+        <a href="../cinnamon-tiling-extensions/">Compare the extensions →</a>
+      </article>
+      <article class="model">
+        <span class="tag">Changes the session</span>
+        <h3>Use a tiling window manager</h3>
+        <p>i3, sway, bspwm and friends tile by nature and are loved for it. The cost is real: you log into a different session, and Cinnamon's panel, applets and menu do not come with it. Choose it at the login screen, not instead of Cinnamon.</p>
+        <a href="https://github.com/i3/i3">i3 on GitHub</a>
+      </article>
+    </div>
+  </div>
+</section>
+
+<section id="next">
+  <div class="wrap origin">
+    <h2>If you take the middle road.</h2>
+    <p>The install is a zip and a script, and it does not touch the rest of your desktop:</p>
+    <ul>
+      <li>Download the <a href="https://github.com/carsteneu/greenTile/releases/latest">latest release</a>, unpack it, run <code>./install.sh</code>, restart Cinnamon (<kbd>Ctrl</kbd><kbd>Alt</kbd><kbd>Esc</kbd>), then enable greenTile in the Extensions manager.</li>
+      <li>Press <kbd>Super</kbd><kbd>Ctrl</kbd><kbd>A</kbd> on a workspace: its windows tile, and from then on new ones join the layout by themselves.</li>
+      <li>Nothing is replaced quietly. The built-in keys above keep working, and the extension can be switched off at any time — the windows simply stay where they are.</li>
+    </ul>
+    <div class="next">
+      <a class="btn" href="../auto-tiling-cinnamon/#install">Install greenTile</a>
+      <a class="plain" href="../fancyzones-on-linux-mint/">Coming from FancyZones?</a>
+    </div>
+  </div>
+</section>
+
+<div class="wrap"><footer><span>greenTile · GPL v3 · based on gTile by vibou and shuairan</span><span><a href="../../">Home</a> · <a href="../auto-tiling-cinnamon/">Auto tiling on Cinnamon</a> · <a href="../gtile-alternative/">greenTile vs gTile</a></span><span>Made for Linux Mint · <a href="../../imprint/">Imprint</a> · <a href="../../privacy/">Privacy</a></span></footer></div>
+</body>
+</html>
