@@ -46,9 +46,10 @@ test('the assembled layout has the Spices structure', (t) => {
 
 test('the runtime tree carries no dev-only or forbidden file', (t) => {
     const files = path.join(assemble(t), 'files', UUID);
-    for (const rel of ['install.sh', 'update.sh', 'package.json', 'package-lock.json',
-        'tsconfig.json', 'eslint.config.js', 'tests', 'types', 'scripts', '.github'])
-        { assert.ok(!fs.existsSync(path.join(files, rel)), `dev-only file in layout: ${rel}`); }
+    // Exact, not a spot-check: dev config, node_modules, docs, tests or anything
+    // else that crept into the tree would ship to every user of the extension.
+    assert.deepEqual(fs.readdirSync(files).sort(), ['LICENSE', 'extension.js', 'icon.png',
+        'lib', 'metadata.json', 'po', 'settings-schema.json', 'stylesheet.css']);
 });
 
 test('po/ holds only .po and .pot, with exactly one template', (t) => {
