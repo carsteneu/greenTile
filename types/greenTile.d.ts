@@ -304,6 +304,14 @@ type AutoFacade = {
     sortPeek(seq: number, now: number): Rect | null;
     sortClear(seq: number): void;
     sortPoll(now: number): void;
+    /** whether the shell's workspace-switch effect still owns the window actors */
+    switching(): boolean;
+    /** runs fn now, or once the switch effect ended (one held run per key, newest wins, empty options keep the older value) */
+    afterSwitch(key: string, fn: (opts: AnyRecord) => void, opts?: AnyRecord): void;
+    /** a geometry hotkey press: run now, or queued behind the held retiles in press order */
+    afterSwitchPress(fn: () => void): void;
+    /** the current hold's number (grows with every hold that opens) */
+    holdGeneration(): number;
     destroy(): void;
 };
 
