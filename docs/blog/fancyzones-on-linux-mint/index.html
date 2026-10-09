@@ -61,6 +61,8 @@ h1{font:800 clamp(42px,6.6vw,92px)/.94 "Bricolage";font-variation-settings:"opsz
 h1 em{font-style:normal;color:var(--leaf);white-space:nowrap}
 .lede{font-size:clamp(18px,1.6vw,21px);max-width:48ch;color:#2A3A30;margin:0 0 28px}
 .cta{display:flex;flex-wrap:wrap;gap:14px;align-items:center}
+.promise{border-left:3px solid var(--leaf);padding:2px 0 2px 16px;margin:0 0 26px;color:#2A3A30;font-size:clamp(17px,1.5vw,19px);line-height:1.55;max-width:54ch}
+.promise b{color:var(--moss);font-weight:600}
 .btn{font:600 16px/1 "Instrument";padding:15px 22px;border-radius:999px;background:var(--ink);color:var(--sage);text-decoration:none;display:inline-block}
 .btn:hover{background:var(--moss)}
 .plain{font:600 16px/1 "Instrument";padding:14px 20px;border:1.5px solid var(--ink);border-radius:999px;text-decoration:none;display:inline-block}
@@ -115,11 +117,19 @@ svg text.big{font:600 12px "JBMono"}
 .next{display:flex;flex-wrap:wrap;gap:14px;align-items:center;margin-top:36px}
 .note{border-left:3px solid var(--leaf);padding:2px 0 2px 16px;color:#34443A;margin:28px 0 0;max-width:68ch}
 
+/* what you gain, one card each */
+.model{background:var(--sheet);border:1px solid #D6DED1;border-radius:var(--r);padding:22px 24px 24px}
+.model p{margin:0;font-size:15.5px;color:#34443A}
+.model .tag{font:500 12px/1 "JBMono";letter-spacing:.06em;text-transform:uppercase;color:var(--moss);display:block;margin-bottom:10px}
+.model h3{font:700 22px/1.1 "Bricolage";letter-spacing:-.02em;margin:0 0 10px}
+.gain{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:8px}
+
 footer{padding:36px 0 56px;border-top:1px solid var(--rule);display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px;color:var(--mute);font-size:14px}
 
 @media (max-width:980px){
   .keys li{grid-template-columns:1fr;gap:4px}
   .map li{grid-template-columns:56px 1fr;gap:14px}
+  .gain{grid-template-columns:1fr}
   nav ul{display:none}
 }
 </style>
@@ -197,6 +207,7 @@ footer{padding:36px 0 56px;border-top:1px solid var(--rule);display:flex;justify
     <div class="eyebrow">Coming from Windows</div>
     <h1>FancyZones, <em>on Linux Mint.</em></h1>
     <p class="lede">On Windows you drew zones once, held <kbd>Shift</kbd> while dragging, and every window had a home. Linux Mint has nothing called FancyZones. It has most of the pieces, though, and the missing ones are a different way of thinking rather than a missing feature.</p>
+    <p class="promise"><b>greenTile</b> is that missing part on Cinnamon: the layout exists before the windows do, every window lands in it by itself, and the rest of the desktop stays as it is.</p>
     <div class="cta">
       <a class="btn" href="#map">See what maps to what</a>
       <a class="plain" href="#rebuild">Rebuild your layouts</a>
@@ -361,7 +372,35 @@ footer{padding:36px 0 56px;border-top:1px solid var(--rule);display:flex;justify
       <li><span><b>Fill the never tile list</b> with the apps that should stay out, the same way you excluded applications in PowerToys. Dialogs and fixed-size windows are already excluded for you.</span></li>
       <li><span><b>Try the two habits that replace dragging:</b> <kbd>Super</kbd><kbd>G</kbd> floats a window and pressing it again tiles it back, and <kbd>Super</kbd><kbd>Ctrl</kbd>+arrow swaps the focused window with its neighbour — and keeps going across monitors and workspaces if you hold the rhythm.</span></li>
     </ol>
-    <p class="body" style="margin-top:26px">The first week feels strange for one reason: you are used to placing windows, and now you mostly watch them place themselves. Getting the layouts right is the work; using them is not. After two days you stop dragging windows across the screen, because there is nothing left to drag them away from.</p>
+  </div>
+</section>
+
+<section id="gain">
+  <div class="wrap">
+    <h2>What you gain.</h2>
+    <p class="sub">The four habits FancyZones gave you, kept — without the drag.</p>
+    <div class="gain">
+      <article class="model">
+        <span class="tag">Set up once</span>
+        <h3>The layout replaces the drag</h3>
+        <p>Instead of drawing zones and then dragging each window into one, you paint the layout once — columns, their widths, the stacks inside them — and assign it to a monitor and a workspace. Placement is done for you from then on.</p>
+      </article>
+      <article class="model">
+        <span class="tag">The whole layout</span>
+        <h3>Auto mode, for every window</h3>
+        <p>PowerToys puts a window back where that application last sat. Here the arrangement decides instead: with auto mode on, a window that opens is fitted into the layout, whatever the application is.</p>
+      </article>
+      <article class="model">
+        <span class="tag">The details</span>
+        <h3>Gaps, rules, wide columns</h3>
+        <p>0–48 px between windows as insets that never push one off the screen, a never tile list matched by window class, title or app id and filled from a picker that includes flatpaks, and columns you merge into one wide one or split again.</p>
+      </article>
+      <article class="model">
+        <span class="tag">Still Cinnamon</span>
+        <h3>Nothing about the desktop changes</h3>
+        <p>Panel, menu, applets, themes and every built-in key stay exactly as they are. greenTile adds the missing piece; it never asks you to move to a different desktop.</p>
+      </article>
+    </div>
   </div>
 </section>
 

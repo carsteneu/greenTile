@@ -61,6 +61,8 @@ h1{font:800 clamp(42px,6.6vw,92px)/.94 "Bricolage";font-variation-settings:"opsz
 h1 em{font-style:normal;color:var(--leaf);white-space:nowrap}
 .lede{font-size:clamp(18px,1.6vw,21px);max-width:48ch;color:#2A3A30;margin:0 0 28px}
 .cta{display:flex;flex-wrap:wrap;gap:14px;align-items:center}
+.promise{border-left:3px solid var(--leaf);padding:2px 0 2px 16px;margin:0 0 26px;color:#2A3A30;font-size:clamp(17px,1.5vw,19px);line-height:1.55;max-width:54ch}
+.promise b{color:var(--moss);font-weight:600}
 .btn{font:600 16px/1 "Instrument";padding:15px 22px;border-radius:999px;background:var(--ink);color:var(--sage);text-decoration:none;display:inline-block}
 .btn:hover{background:var(--moss)}
 .plain{font:600 16px/1 "Instrument";padding:14px 20px;border:1.5px solid var(--ink);border-radius:999px;text-decoration:none;display:inline-block}
@@ -102,6 +104,7 @@ p.body{max-width:68ch;color:#2A3A30;margin:0 0 16px}
 .model.g .tag{color:#8FBF7A}
 .model a{margin-top:auto;padding-top:8px;font:600 15px/1 "Instrument";color:var(--moss)}
 .model.g a{color:#9BD183}
+.gain{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:8px}
 
 .origin{max-width:68ch;color:#2A3A30}
 .origin p{margin:0 0 14px}
@@ -113,7 +116,7 @@ p.body{max-width:68ch;color:#2A3A30;margin:0 0 16px}
 footer{padding:36px 0 56px;border-top:1px solid var(--rule);display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px;color:var(--mute);font-size:14px}
 
 @media (max-width:980px){
-  .models{grid-template-columns:1fr}
+  .models,.gain{grid-template-columns:1fr}
   .keys li{grid-template-columns:1fr;gap:4px}
   nav ul{display:none}
 }
@@ -131,6 +134,7 @@ footer{padding:36px 0 56px;border-top:1px solid var(--rule);display:flex;justify
     <div class="eyebrow">Before you install anything</div>
     <h1>Tiling on <em>Linux Mint.</em></h1>
     <p class="lede">Cinnamon comes with more window management than most people ever find: halves, quarters, edge snapping, four workspaces. What it does not come with is a layout that stays. Here is the full inventory — and the three ways to go further, with what each one costs.</p>
+    <p class="promise"><b>greenTile</b> closes that gap: a layout per workspace that windows join and leave by themselves, while the built-in keys and the rest of the desktop stay as they are.</p>
     <div class="cta">
       <a class="btn" href="#keyboard">What you already have</a>
       <a class="plain" href="#stopping">Where it stops</a>
@@ -266,6 +270,35 @@ footer{padding:36px 0 56px;border-top:1px solid var(--rule);display:flex;justify
       </article>
     </div>
     <p class="body" style="margin-top:26px">The middle road is the one that surprises people, because it does not force the choice. After installation Cinnamon is still Cinnamon — the panel, the menu, the applets and the settings are untouched, and the built-in keys from the list above keep working on top of the layout. What changes is only what happens after you stop arranging: windows that open join the arrangement, windows that close leave their space to the neighbours, and each workspace keeps its own shape.</p>
+  </div>
+</section>
+
+<section id="gain">
+  <div class="wrap">
+    <h2>What the middle road gains you.</h2>
+    <p class="sub">Four things the built-ins cannot do, and an extension can.</p>
+    <div class="gain">
+      <article class="model">
+        <span class="tag">A layout, not moves</span>
+        <h3>The arrangement exists on its own</h3>
+        <p>You paint the layout once on a grid — columns, their widths, the stacks inside them — and assign it to a monitor and a workspace. From then on it is a thing that persists, not the result of what you did five minutes ago.</p>
+      </article>
+      <article class="model">
+        <span class="tag">Nothing by hand</span>
+        <h3>Windows join and leave by themselves</h3>
+        <p>With auto mode on for a workspace, a window that opens is fitted into the layout a moment later, and when one closes the neighbours grow into the space. No hole to resize shut, no window to steer into place.</p>
+      </article>
+      <article class="model">
+        <span class="tag">Per workspace</span>
+        <h3>Four desks, four shapes</h3>
+        <p>The settings are kept per monitor and per workspace, so “writing”, “browsing” and “chat” each get their own arrangement — and each one is waiting after a switch, a replug or a Cinnamon restart.</p>
+      </article>
+      <article class="model">
+        <span class="tag">Still Cinnamon</span>
+        <h3>You keep the desktop you have</h3>
+        <p>The panel, the menu, the applets, the themes and every built-in key stay exactly as they are. That is the difference from the third option above: no new session, no new habits to relearn.</p>
+      </article>
+    </div>
   </div>
 </section>
 

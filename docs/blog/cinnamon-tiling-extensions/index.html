@@ -61,6 +61,8 @@ h1{font:800 clamp(42px,6.6vw,92px)/.94 "Bricolage";font-variation-settings:"opsz
 h1 em{font-style:normal;color:var(--leaf);white-space:nowrap}
 .lede{font-size:clamp(18px,1.6vw,21px);max-width:48ch;color:#2A3A30;margin:0 0 28px}
 .cta{display:flex;flex-wrap:wrap;gap:14px;align-items:center}
+.promise{border-left:3px solid var(--leaf);padding:2px 0 2px 16px;margin:0 0 26px;color:#2A3A30;font-size:clamp(17px,1.5vw,19px);line-height:1.55;max-width:54ch}
+.promise b{color:var(--moss);font-weight:600}
 .btn{font:600 16px/1 "Instrument";padding:15px 22px;border-radius:999px;background:var(--ink);color:var(--sage);text-decoration:none;display:inline-block}
 .btn:hover{background:var(--moss)}
 .plain{font:600 16px/1 "Instrument";padding:14px 20px;border:1.5px solid var(--ink);border-radius:999px;text-decoration:none;display:inline-block}
@@ -110,6 +112,12 @@ p.body{max-width:68ch;color:#2A3A30;margin:0 0 16px}
 .pick a{color:var(--moss)}
 .pick article.g a{color:#9BD183}
 
+/* what the layout-first model buys */
+.model{background:var(--sheet);border:1px solid #D6DED1;border-radius:var(--r);padding:22px 24px 24px}
+.model p{margin:0;font-size:15.5px;color:#34443A}
+.model .tag{font:500 12px/1 "JBMono";letter-spacing:.06em;text-transform:uppercase;color:var(--moss);display:block;margin-bottom:10px}
+.gain{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:8px}
+
 .origin{max-width:68ch;color:#2A3A30}
 .origin p{margin:0 0 14px}
 .origin ul{margin:0 0 18px;padding-left:20px}
@@ -123,7 +131,7 @@ p.body{max-width:68ch;color:#2A3A30;margin:0 0 16px}
 footer{padding:36px 0 56px;border-top:1px solid var(--rule);display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px;color:var(--mute);font-size:14px}
 
 @media (max-width:980px){
-  .pick,.neigh{grid-template-columns:1fr}
+  .pick,.neigh,.gain{grid-template-columns:1fr}
   .neigh{grid-template-columns:1fr 1fr}
   .keys li{grid-template-columns:1fr;gap:4px}
   nav ul{display:none}
@@ -186,6 +194,7 @@ footer{padding:36px 0 56px;border-top:1px solid var(--rule);display:flex;justify
     <div class="eyebrow">The field, honestly</div>
     <h1>Tiling extensions <em>for Cinnamon.</em></h1>
     <p class="lede">The Cinnamon Spices catalogue lists 44 extensions. Exactly one of them tiles windows. Outside the catalogue there are two more projects worth knowing about. That is the entire field for window tiling on Cinnamon — here it is, with what each project is good for.</p>
+    <p class="promise"><b>greenTile</b> answers the other half: the layout exists before the windows do, so the workspace arranges itself — and it installs as an ordinary Cinnamon extension.</p>
     <div class="cta">
       <a class="btn" href="#gtile">The two tiling extensions</a>
       <a class="plain" href="#choose">How to choose</a>
@@ -337,6 +346,35 @@ footer{padding:36px 0 56px;border-top:1px solid var(--rule);display:flex;justify
       </article>
     </div>
     <p class="sub" style="margin-top:30px">The detailed comparison — per monitor and workspace, gaps, keys, what happens when a window closes — is in <a href="../gtile-alternative/">greenTile vs gTile</a>.</p>
+  </div>
+</section>
+
+<section id="gain">
+  <div class="wrap">
+    <h2>What greenTile gives you that a grid does not.</h2>
+    <p class="sub">Not more features — a different answer to who does the arranging.</p>
+    <div class="gain">
+      <article class="model">
+        <span class="tag">The layout stays</span>
+        <h3>You set it up once</h3>
+        <p>A preset is painted on a 6 × 4 grid and assigned to a monitor and a workspace. Windows that open, close or return are fitted into it — rather than you opening a grid and selecting an area each time a window appears.</p>
+      </article>
+      <article class="model">
+        <span class="tag">On its own</span>
+        <h3>Auto mode per workspace</h3>
+        <p>Turn it on for a workspace and new windows join the arrangement by themselves; close one and the neighbours move up. Leave it off and the workspace stays a free surface for windows you place by hand.</p>
+      </article>
+      <article class="model">
+        <span class="tag">The details</span>
+        <h3>Gaps, rules, wide columns</h3>
+        <p>0–48 px between windows, a never tile list matched by window class, title or app id and filled from a picker that includes flatpaks, and columns you drag to merge into one wide one or split again.</p>
+      </article>
+      <article class="model">
+        <span class="tag">Per monitor and workspace</span>
+        <h3>Every screen its own arrangement</h3>
+        <p>A preset belongs to a monitor by its hardware identity and to a workspace, so the same screen can be laid out differently depending on where you are — and the layout is back when the hardware comes back.</p>
+      </article>
+    </div>
   </div>
 </section>
 
