@@ -76,6 +76,7 @@ h2{font:750 clamp(32px,4.2vw,52px)/1 "Bricolage";letter-spacing:-.035em;margin:0
 
 /* the chronological area: newest first */
 .posts{list-style:none;margin:0;padding:0;border-top:1.5px solid var(--ink)}
+.posts:empty{border-top:0}   /* no dangling rule while the list is empty */
 .posts li{border-bottom:1px solid var(--rule)}
 .posts a{display:grid;gap:4px;padding:18px 0 20px;text-decoration:none}
 .posts time{font:500 13px/1 "JBMono";color:var(--mute)}
@@ -150,7 +151,8 @@ footer{padding:36px 0 56px;border-top:1px solid var(--rule);display:flex;justify
         </a>
       </li>
 
-        4. add https://greentile.io/blog/<slug>/ to docs/sitemap.xml
+        4. add https://greentile.io/blog/<slug>/ to docs/sitemap.xml, and bump
+           its <lastmod> plus the <lastmod> of https://greentile.io/blog/
     -->
     <ol class="posts"></ol>
     <p class="empty">Nothing here yet. The two articles above are the place to start.</p>
