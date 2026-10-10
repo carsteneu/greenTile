@@ -1,6 +1,6 @@
 # greenTile
 
-Window tiling for Cinnamon: presets per monitor and workspace, an auto mode, snap-on-release, draggable borders and keyboard swapping. A fork of gTile, requires Cinnamon 6.0.4 or newer; tested on Linux Mint 21.3–22.3 (Cinnamon 6.0.4–6.6) with X11. On Wayland it works in first tests on Linux Mint 22.3 (Cinnamon 6.6); swap, border resize and multi-monitor are not tested there yet. Newer Cinnamon versions are not yet verified.
+Window tiling for Cinnamon: presets per monitor and workspace, an auto mode, snap-on-release, draggable borders and keyboard swapping. Requires Cinnamon 6.0.4 or newer; tested on Linux Mint 21.3–22.3 (Cinnamon 6.0.4–6.6) with X11. On Wayland it works in first tests on Linux Mint 22.3 (Cinnamon 6.6); swap, border resize and multi-monitor are not tested there yet. Newer Cinnamon versions are not yet verified.
 
 ## Features
 
@@ -34,7 +34,7 @@ All hotkeys can be changed on the **Hotkeys** page of the settings.
 - Hardware monitor keys use vendor, product and serial, with the connector added when the serial is missing or all zeros. Failed hardware detection uses a separate name-and-size key; its assignments are not automatically joined with the hardware-key assignments.
 - After an update, restart Cinnamon on X11 (`Alt+F2` → `r` → Enter, or `Ctrl+Alt+Esc`). Reloading or toggling the extension alone does not activate updated native library modules. Under Wayland, log out and back in instead.
 - An external layout reset or import cancels older pending resize writes once Cinnamon reports a changed value. Avoid importing or resetting layouts during an unfinished resize; identical-value imports and notification timing still have limitations.
-- If **gTile** is still installed, disable it: both extensions claim the same keys.
+- greenTile started as a fork of **gTile**; about 98 % of today's code is new, either rewritten or added since. If gTile is still installed, disable it: both extensions claim the same keys.
 - On Cinnamon 6.6, avoid other extensions overriding `push-tile-*`: disabling greenTile restores Cinnamon's defaults, not their handlers.
 - greenTile is self-contained: no configuration outside the standard xlet settings, no runtime downloads.
 
