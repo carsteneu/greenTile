@@ -183,6 +183,49 @@ test('only the FIRST retile of a surface uses the stored order', () => {
     assert.deepEqual(w1.rect, RIGHT);
 });
 
+test('the settle fan-out waits for the asynchronous store, then restores the order', () => {
+    // The store is read asynchronously now. The fan-out is the retile that restores the
+    // recorded order, so it must not run before the read landed — and it must run once
+    // the read does, or the order would be lost for the whole session.
+    const first = scene();
+    const a1 = makeWindow(first.env, 11, [10, 10, 400, 300], 0, null, { description: '0x1' });
+    const a2 = makeWindow(first.env, 12, [500, 0, 400, 300], 0, null, { description: '0x2' });
+    first.env.tabList.push(a1, a2);
+    first.env.display.focus_window = a1;
+    first.app.ops.retileMonitor(first.app, 0);
+    fireMs(first.env, 1000);
+    const recorded = first.env.files.get(PATH);
+
+    const { env, ext } = scene(recorded);
+    env.deferFileReads = true; // the read is still in flight
+    enableOnMonitor(env, ext);
+    const app = ext.currentSession().app;
+    const w2 = makeWindow(env, 91, [0, 0, 400, 300], 0, null, { description: '0x2' });
+    const w1 = makeWindow(env, 92, [500, 0, 400, 300], 0, null, { description: '0x1' });
+    env.tabList.push(w2, w1);
+    env.display.focus_window = w2;
+    assert.equal(app.orders.ready, false, 'the store is still loading');
+
+    // the settle wait expires while the read is in flight
+    const settle = ext.currentSession().settle;
+    const armed = env.timers.get(settle._timer);
+    env.timers.delete(settle._timer);
+    armed.cb();
+
+    assert.deepEqual(w1.rect, [500, 0, 400, 300], 'nothing was placed before the store was known');
+    assert.equal(env.timers.size === 0 || ![...env.timers.values()].some((t) => t.ms === 0), true,
+        'and the fan-out did not arm its immediate retile');
+
+    env.releaseFileReads();
+    assert.equal(app.orders.ready, true, 'the read landed');
+    const retile = [...env.timers.entries()].find(([, t]) => t.ms === 0);
+    assert.ok(retile, 'the held fan-out ran and armed the immediate retile');
+    env.timers.delete(retile[0]);
+    retile[1].cb();
+    assert.deepEqual(w1.rect, LEFT, 'the stored order was restored after the wait');
+    assert.deepEqual(w2.rect, RIGHT);
+});
+
 test('the store never touches the settings', () => {
     const { env, app } = scene();
     const layouts = settingsInstance(env).getValue('layouts');
