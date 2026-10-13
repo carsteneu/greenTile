@@ -27,6 +27,10 @@ const painter = (rule) => {
     const app = {
         theme: { rgb: [10, 20, 30], cairo: () => [40, 50, 60] },
         panel: { draft: { id: 'p1', name: 'T', index: 0, isNew: true, rules: [rule] } },
+        // the body also names the slots the draft is assigned to, so it reads the
+        // stored layouts: no assignments here, the painter is all this test drives
+        config: { settings: { getValue: () => '' } },
+        monitors: { keys: [], labels: [] },
     };
     const body = load('./lib/ui/editor.js').editorBody(app);
     body.painter.transform_stage_point = (sx, sy) => [true, sx, sy];

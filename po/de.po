@@ -61,6 +61,28 @@ msgstr ""
 "Klicken oder ziehen: Die Zeile legt fest, wie viele Fenster die Spalte "
 "aufnimmt. Rechtsklick entfernt eine Spalte."
 
+#: lib/ui/editor.js:485
+msgid "Assigned on"
+msgstr "Zugewiesen auf"
+
+#: lib/ui/editor.js:487
+msgid "Not assigned anywhere."
+msgstr "Nirgends zugewiesen."
+
+#: lib/ui/editor.js:492
+msgid "all workspaces"
+msgstr "alle Arbeitsflächen"
+
+#: lib/ui/editor.js:492
+#, javascript-format
+msgid "workspace %d"
+msgstr "Arbeitsfläche %d"
+
+#: lib/ui/editor.js:496
+#, javascript-format
+msgid "+%d more"
+msgstr "+%d weitere"
+
 #: lib/ui/editor.js:476
 msgid "Name"
 msgstr "Name"

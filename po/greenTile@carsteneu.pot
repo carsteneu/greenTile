@@ -56,6 +56,28 @@ msgid ""
 "removes a column."
 msgstr ""
 
+#: lib/ui/editor.js:485
+msgid "Assigned on"
+msgstr ""
+
+#: lib/ui/editor.js:487
+msgid "Not assigned anywhere."
+msgstr ""
+
+#: lib/ui/editor.js:492
+msgid "all workspaces"
+msgstr ""
+
+#: lib/ui/editor.js:492
+#, javascript-format
+msgid "workspace %d"
+msgstr ""
+
+#: lib/ui/editor.js:496
+#, javascript-format
+msgid "+%d more"
+msgstr ""
+
 #: lib/ui/editor.js:476
 msgid "Name"
 msgstr ""
