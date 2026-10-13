@@ -46,6 +46,18 @@ test('stale preset id is reported, live and absent ones are not', () => {
     assert.equal(m.layoutsStalePreset(layouts, 'M', '7', ['p1']), null);
 });
 
+test('layoutsRefs lists every stored preset reference with its keys', () => {
+    const layouts = {
+        M: { '5': { preset: 'p1' }, '6': { auto: true }, '7': { preset: '' } },
+        N: { '*': { preset: 'p2', splits: {} } },
+    };
+    assert.deepEqual(m.layoutsRefs(layouts), [
+        { mkey: 'M', wskey: '5', preset: 'p1' },
+        { mkey: 'N', wskey: '*', preset: 'p2' },
+    ]);
+    assert.deepEqual(m.layoutsRefs(null), []);
+});
+
 test('other monitors or workspaces are not inherited', () => {
     const layouts = { N: { '5': { preset: 'p1' } }, M: { '4': { preset: 'p1' } } };
     assert.deepEqual(m.layoutsEntry(layouts, 'M', '5', ['p1']), { preset: null, auto: false });

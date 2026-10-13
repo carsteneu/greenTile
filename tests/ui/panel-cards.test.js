@@ -8,7 +8,7 @@
 // and this file asserts the actor tree the panel actually builds.
 const test = require('node:test');
 const assert = require('node:assert/strict');
-const { makeEnv, makeWindow, MONITOR } = require('../helpers/fakes/cinnamon-harness');
+const { makeEnv, makeWindow, MONITOR, settingsInstance } = require('../helpers/fakes/cinnamon-harness');
 const { load } = require('../helpers/cinnamon-loader');
 
 // A workspace hub with real connect/disconnect accounting, like the panel and
@@ -320,6 +320,28 @@ test('the edit action opens the editor instead of applying the preset', () => {
     assert.equal(app.panel.view, 'editor', 'the editor view is shown');
     assert.equal(app.ops.layoutFor(app, 0, 0).preset.id, 'a', 'the assignment did not change');
     assert.equal(window.moves.length, before, 'edit did not retile');
+    ext.disable();
+});
+
+test('a new preset id avoids the ids the layouts still reference', () => {
+    // The list's next free number is p3, and p3 is the id a stored assignment still
+    // points at (an id can survive in the layouts: the corrupt-layouts branch of the
+    // delete path deliberately leaves the references alone). Issuing it would silently
+    // re-target that assignment at the new preset, so '+' must step past it.
+    const { layoutsRefs } = load('./lib/model/layouts.js');
+    const listed = [
+        { id: 'p1', name: 'Alpha', rules: [{ min: 1, stacks: [1] }] },
+        { id: 'p2', name: 'Beta', rules: [{ min: 1, stacks: [1, 1] }] },
+    ];
+    const { env, ext } = makeEnv({ presets: JSON.stringify(listed) });
+    const { app } = openPanel(env, ext, listed, { assign: 'p3' });
+    const referenced = layoutsRefs(JSON.parse(settingsInstance(env).getValue('layouts'))).map((r) => r.preset);
+    assert.deepEqual(referenced, ['p3'], 'the referenced id really is the next free number');
+    byClass(app.panel.actor, /^gk-plus(?: |$)/)[0].emit('clicked');
+    assert.equal(app.panel.view, 'editor', 'the editor is open');
+    assert.equal(app.panel.draft.id, 'p4', 'the issued id steps past the referenced one');
+    assert.equal(referenced.includes(app.panel.draft.id), false, 'the new id is not one layouts references');
+    assert.equal(app.ops.presetsRead(app).some((p) => p.id === app.panel.draft.id), false, 'and not one the list carries');
     ext.disable();
 });
 

@@ -9,6 +9,11 @@ export function layoutsStalePreset(layouts: any, mkey: MonitorKey, wskey: WsKey,
 export function layoutsSplits(layouts: any, mkey: MonitorKey, wskey: WsKey): any;
 export function layoutsShapes(layouts: any, mkey: MonitorKey, wskey: WsKey): any;
 export function layoutsSet(layouts: any, mkey: MonitorKey, wskey: WsKey, patch: any): any;
+export function layoutsRefs(layouts: any): Array<{
+    mkey: MonitorKey;
+    wskey: WsKey;
+    preset: string;
+}>;
 export function layoutsRemovePreset(layouts: any, presetId: string): any;
 export function shapeValid(value: any, n: number): DragLayout | null;
 export function layoutResolve(base: DragLayout | null, stored: any, n: number): Layout | null;

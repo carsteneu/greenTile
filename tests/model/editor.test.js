@@ -122,6 +122,13 @@ test('new_id continues the p<number> sequence', () => {
     assert.equal(m.editorNewId([]), 'p1');
 });
 
+test('new_id steps past the ids layouts still references', () => {
+    assert.equal(m.editorNewId([{ id: 'p1' }, { id: 'p2' }], ['p3']), 'p4');
+    assert.equal(m.editorNewId([{ id: 'p2' }], ['p3']), 'p4');
+    assert.equal(m.editorNewId([{ id: 'p1' }], ['p2', 'p3']), 'p4');
+    assert.equal(m.editorNewId([{ id: 'p1' }, { id: 'p2' }], ['p5']), 'p3');
+});
+
 test('commit replaces by id in place or appends, without mutating', () => {
     const presets = [{ id: 'p1', name: 'A' }, { id: 'p2', name: 'B' }];
     const replaced = m.editorCommit(presets, { id: 'p1', name: 'A2' });
