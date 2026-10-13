@@ -156,7 +156,20 @@ test('a very long stored preset id cannot stretch the report line', () => {
     app.ops.layoutFor(app, 0, 0);
     const line = env.logs.filter((l) => l.indexOf('greenTile preset "') === 0)[0];
     assert.ok(line, 'the fallback is reported');
-    assert.equal((line.match(/x/g) || []).length, 64, 'the echoed id is capped at 64 characters');
+    const echoed = line.split('"')[1];
+    assert.equal(echoed, 'g' + 'x'.repeat(63), 'exactly the first 64 characters of the stored id');
+    ext.disable();
+});
+
+test('the echo cap never cuts a character in half', () => {
+    // Code points, not UTF-16 units: a unit-based cut leaves a lone surrogate behind.
+    const { env, ext } = makeEnv();
+    enableOnMonitor(env, ext);
+    const app = ext.currentSession().app;
+    assert.equal(app.ops.layoutSet(app, 0, 0, { preset: 'g' + '\u{1f600}'.repeat(80) }), true);
+    app.ops.layoutFor(app, 0, 0);
+    const echoed = env.logs.filter((l) => l.indexOf('greenTile preset "') === 0)[0].split('"')[1];
+    assert.equal(echoed, 'g' + '\u{1f600}'.repeat(63), 'the cap counts characters, not code units');
     ext.disable();
 });
 
