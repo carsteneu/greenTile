@@ -115,3 +115,25 @@ test('more than six assignments collapse into five lines and a count', () => {
     assert.equal(lines.length, 6, 'five slots plus the count line');
     ctx.ext.disable();
 });
+
+test('an unreadable workspace key is shown raw instead of as a number', () => {
+    // greenTile only ever writes "<n>" or "*", but a hand-edited or restored store can
+    // carry anything: the model ignores invalid data on read, so the display does too
+    // instead of printing "workspace NaN".
+    const ctx = boot();
+    storeLayouts(ctx.env, { [ctx.app.monitors.keys[0]]: { abc: { preset: 'p1' } } });
+    const panel = openEditor(ctx);
+    assert.deepEqual(texts(panel, 'gk-ed-used'), ['AOC 49" · abc']);
+    ctx.ext.disable();
+});
+
+test('the assignment lines carry a stylesheet rule of the column', () => {
+    // The lines are text, not a hook: without a rule they render in St's default look
+    // next to the 11px tokens of this column.
+    const fs = require('node:fs');
+    const path = require('node:path');
+    const { ROOT } = require('../helpers/cinnamon-loader');
+    const css = fs.readFileSync(path.join(ROOT, 'stylesheet.css'), 'utf8');
+    assert.match(css, /\.gk-ed-used \{[^}]*font-size:\s*11px;/);
+    assert.match(css, /\.gk-light \.gk-ed-used \{/);
+});

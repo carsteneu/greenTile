@@ -114,6 +114,36 @@ test('a vanished preset id is logged once per session, the read never writes', (
     ext.disable();
 });
 
+test('a paused slot with a vanished preset id is not reported as using the grid', () => {
+    // An explicitly stored pause outranks the fallback, so no grid runs there and the
+    // message would be a lie — consumed once per session, it would also swallow the
+    // report of a slot where the grid really did take over.
+    const { env, ext } = makeEnv();
+    enableOnMonitor(env, ext);
+    const app = ext.currentSession().app;
+    assert.equal(app.ops.layoutSet(app, 0, 0, { preset: 'gone' }), true);
+    assert.equal(app.ops.layoutSet(app, 0, 0, { auto: false }), true, 'the user paused the slot');
+    const layout = app.ops.layoutFor(app, 0, 0);
+    assert.deepEqual({ preset: layout.preset, auto: layout.auto }, { preset: null, auto: false }, 'the pause wins');
+    assert.deepEqual(env.logs.filter((l) => l.indexOf('greenTile preset "gone"') === 0), [], 'nothing claims a grid ran');
+    ext.disable();
+});
+
+test('a vanished preset id cannot forge a second log line', () => {
+    // The id comes out of the stored settings string, so it is echoed back only in a
+    // shape that cannot break out of the one line it was meant to occupy.
+    const { env, ext } = makeEnv();
+    enableOnMonitor(env, ext);
+    const app = ext.currentSession().app;
+    assert.equal(app.ops.layoutSet(app, 0, 0, { preset: 'gone\nforged' }), true);
+    app.ops.layoutFor(app, 0, 0);
+    const lines = env.logs.filter((l) => l.indexOf('greenTile preset "') === 0 && l.indexOf('no longer exists') !== -1);
+    assert.equal(lines.length, 1, 'exactly one report line');
+    assert.equal(lines[0].includes('\n'), false, 'the stored id cannot break out of the line');
+    assert.equal(lines[0].includes('\u0000'), false, 'nor smuggle a NUL through');
+    ext.disable();
+});
+
 // The retile reaches the same decision through the shared query: with the stored
 // setting on but a pause retained, an automatic retile places nothing.
 test('autoAllowed gates the retile: a retained pause leaves the windows unmoved', () => {

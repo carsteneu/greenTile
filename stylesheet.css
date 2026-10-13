@@ -452,6 +452,14 @@
     padding-top: 8px;
 }
 
+/* The "Assigned on" slots: read-only text in the column's token, a step brighter
+   than the faint hints around it. */
+.gk-ed-used {
+    color: #8b91a0;
+    font-size: 11px;
+    padding-top: 2px;
+}
+
 .gk-ed-name-row {
     spacing: 10px;
     padding-top: 14px;
@@ -797,6 +805,10 @@
 }
 
 .gk-light .gk-ed-faint {
+    color: #5f6672;
+}
+
+.gk-light .gk-ed-used {
     color: #5f6672;
 }
 
