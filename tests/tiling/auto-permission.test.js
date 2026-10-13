@@ -135,12 +135,26 @@ test('a vanished preset id cannot forge a second log line', () => {
     const { env, ext } = makeEnv();
     enableOnMonitor(env, ext);
     const app = ext.currentSession().app;
-    assert.equal(app.ops.layoutSet(app, 0, 0, { preset: 'gone\nforged' }), true);
+    assert.equal(app.ops.layoutSet(app, 0, 0, { preset: 'gone\r\nforged\u2028x' }), true);
     app.ops.layoutFor(app, 0, 0);
     const lines = env.logs.filter((l) => l.indexOf('greenTile preset "') === 0 && l.indexOf('no longer exists') !== -1);
-    assert.equal(lines.length, 1, 'exactly one report line');
-    assert.equal(lines[0].includes('\n'), false, 'the stored id cannot break out of the line');
-    assert.equal(lines[0].includes('\u0000'), false, 'nor smuggle a NUL through');
+    assert.equal(lines.length, 1, 'exactly one report');
+    assert.equal(lines[0].includes('\n'), false, 'LF cannot split the line');
+    assert.equal(lines[0].includes('\r'), false, 'CR neither');
+    assert.equal(lines[0].includes('\u2028'), false, 'nor the JS line separator');
+    assert.equal(lines[0].includes('forged'), true, 'the id is still recognisable, only collapsed');
+    ext.disable();
+});
+
+test('a very long stored preset id cannot stretch the report line', () => {
+    const { env, ext } = makeEnv();
+    enableOnMonitor(env, ext);
+    const app = ext.currentSession().app;
+    assert.equal(app.ops.layoutSet(app, 0, 0, { preset: 'p' + 'x'.repeat(4000) }), true);
+    app.ops.layoutFor(app, 0, 0);
+    const line = env.logs.filter((l) => l.indexOf('greenTile preset "') === 0)[0];
+    assert.ok(line, 'the fallback is reported');
+    assert.ok(line.length < 200, 'the echoed id is capped, the line stays readable (got ' + line.length + ' chars)');
     ext.disable();
 });
 

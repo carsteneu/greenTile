@@ -118,12 +118,14 @@ test('more than six assignments collapse into five lines and a count', () => {
 
 test('an unreadable workspace key is shown raw instead of as a number', () => {
     // greenTile only ever writes "<n>" or "*", but a hand-edited or restored store can
-    // carry anything: the model ignores invalid data on read, so the display does too
-    // instead of printing "workspace NaN".
+    // carry anything. The layout lookup keys on the canonical string, so a non-canonical
+    // key must not be dressed up as a workspace number the lookup would never match.
     const ctx = boot();
-    storeLayouts(ctx.env, { [ctx.app.monitors.keys[0]]: { abc: { preset: 'p1' } } });
+    storeLayouts(ctx.env, { [ctx.app.monitors.keys[0]]: { abc: { preset: 'p1' }, '01': { preset: 'p1' }, '1e3': { preset: 'p1' } } });
     const panel = openEditor(ctx);
-    assert.deepEqual(texts(panel, 'gk-ed-used'), ['AOC 49" · abc']);
+    const lines = texts(panel, 'gk-ed-used');
+    assert.deepEqual(lines, ['AOC 49" · abc', 'AOC 49" · 01', 'AOC 49" · 1e3']);
+    assert.equal(lines.some((l) => l.indexOf('NaN') !== -1), false, 'never NaN');
     ctx.ext.disable();
 });
 
@@ -135,5 +137,6 @@ test('the assignment lines carry a stylesheet rule of the column', () => {
     const { ROOT } = require('../helpers/cinnamon-loader');
     const css = fs.readFileSync(path.join(ROOT, 'stylesheet.css'), 'utf8');
     assert.match(css, /\.gk-ed-used \{[^}]*font-size:\s*11px;/);
-    assert.match(css, /\.gk-light \.gk-ed-used \{/);
+    assert.match(css, /\.gk-ed-used \{[^}]*color:\s*#8b91a0;/);
+    assert.match(css, /\.gk-light \.gk-ed-used \{[^}]*color:\s*#5f6672;/);
 });

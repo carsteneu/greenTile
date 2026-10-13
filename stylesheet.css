@@ -452,8 +452,9 @@
     padding-top: 8px;
 }
 
-/* The "Assigned on" slots: read-only text in the column's token, a step brighter
-   than the faint hints around it. */
+/* The "Assigned on" slots: read-only text in the column's secondary tone, a step
+   brighter than the faint hints below it in the dark theme; the light theme keeps
+   one secondary tone for both (see the .gk-light rules). */
 .gk-ed-used {
     color: #8b91a0;
     font-size: 11px;
