@@ -255,6 +255,8 @@ type SessionFacade = {
     monitorFallbackLogged: boolean;
     splitCorruptLogged: boolean;
     layoutsWriteGuardLogged: boolean;
+    /** One-shot report of a stored preset id that no longer exists (fallback). */
+    stalePresetLogged: boolean;
     accentGenSeq: number;
     panelSaved: any;
     exclToggles: Map<number, boolean>;

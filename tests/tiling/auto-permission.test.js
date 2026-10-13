@@ -77,6 +77,43 @@ test('autoAllowed: the real app agrees with its own stored state and retained qu
     ext.disable();
 });
 
+// A stored preset id the preset list no longer contains counts as assigned: the
+// automatic grid takes over, and the fallback is reported exactly once.
+const appStale = (ref) => ({
+    monitors: { ready: true, keys: [ref.mkey], wsKey: () => ref.wskey },
+    session: { holdsPause: () => false },
+    config: {
+        settings: {
+            getValue: (k) => (k === 'layouts'
+                ? JSON.stringify({ [ref.mkey]: { [ref.wskey]: { preset: 'gone' } } })
+                : k === 'presets' ? '[]' : undefined),
+            setValue: () => assert.fail('the fallback must not write settings'),
+        },
+    },
+});
+
+test('autoAllowed: a vanished preset id falls back to the automatic grid', () => {
+    const { ref, autoAllowed } = loadWithEnv();
+    assert.equal(autoAllowed(appStale(ref), 0, 0), true, 'the fallback turns automatic tiling on');
+});
+
+test('a vanished preset id is logged once per session, the read never writes', () => {
+    // Through the real app: `load()` caches ONE importer per process, so a module
+    // loaded that way keeps the `global` of the first environment in this file and
+    // its log would land in another test's env. The harness gives every env its own
+    // module tree, so the line is asserted where the product actually writes it.
+    const { env, ext } = makeEnv();
+    enableOnMonitor(env, ext);
+    const app = ext.currentSession().app;
+    assert.equal(app.ops.layoutSet(app, 0, 0, { preset: 'gone' }), true, 'the stale assignment is stored');
+    const first = app.ops.layoutFor(app, 0, 0);
+    assert.deepEqual({ preset: first.preset, auto: first.auto }, { preset: null, auto: true }, 'the automatic grid takes over');
+    app.ops.layoutFor(app, 0, 0);
+    const lines = env.logs.filter((l) => l.indexOf('greenTile preset "gone" no longer exists') === 0);
+    assert.equal(lines.length, 1, 'the fallback is reported exactly once per session');
+    ext.disable();
+});
+
 // The retile reaches the same decision through the shared query: with the stored
 // setting on but a pause retained, an automatic retile places nothing.
 test('autoAllowed gates the retile: a retained pause leaves the windows unmoved', () => {

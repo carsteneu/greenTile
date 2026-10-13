@@ -5,6 +5,7 @@ export function layoutsEntry(layouts: any, mkey: MonitorKey, wskey: WsKey, prese
     preset: string | null;
     auto: boolean;
 };
+export function layoutsStalePreset(layouts: any, mkey: MonitorKey, wskey: WsKey, presetIds: string[]): string | null;
 export function layoutsSplits(layouts: any, mkey: MonitorKey, wskey: WsKey): any;
 export function layoutsShapes(layouts: any, mkey: MonitorKey, wskey: WsKey): any;
 export function layoutsSet(layouts: any, mkey: MonitorKey, wskey: WsKey, patch: any): any;

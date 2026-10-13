@@ -33,8 +33,17 @@ test('explicit auto wins over the preset default', () => {
     assert.deepEqual(m.layoutsEntry({ M: { '5': { auto: true } } }, 'M', '5', ['p1']), { preset: null, auto: true });
 });
 
-test('entry with unknown preset id is no preset', () => {
-    assert.deepEqual(m.layoutsEntry({ M: { '5': { preset: 'gone' } } }, 'M', '5', ['p1']), { preset: null, auto: false });
+test('a vanished preset id falls back to the automatic grid', () => {
+    assert.deepEqual(m.layoutsEntry({ M: { '5': { preset: 'gone' } } }, 'M', '5', ['p1']), { preset: null, auto: true });
+    assert.deepEqual(m.layoutsEntry({ M: { '5': { preset: 'gone', auto: false } } }, 'M', '5', ['p1']), { preset: null, auto: false });
+    assert.deepEqual(m.layoutsEntry({ M: { '5': { preset: '' } } }, 'M', '5', ['p1']), { preset: null, auto: false });
+});
+
+test('stale preset id is reported, live and absent ones are not', () => {
+    const layouts = { M: { '5': { preset: 'gone' }, '6': { preset: 'p1' }, '7': { auto: true } } };
+    assert.equal(m.layoutsStalePreset(layouts, 'M', '5', ['p1']), 'gone');
+    assert.equal(m.layoutsStalePreset(layouts, 'M', '6', ['p1']), null);
+    assert.equal(m.layoutsStalePreset(layouts, 'M', '7', ['p1']), null);
 });
 
 test('other monitors or workspaces are not inherited', () => {
