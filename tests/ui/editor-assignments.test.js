@@ -121,11 +121,16 @@ test('an unreadable workspace key is shown raw instead of as a number', () => {
     // carry anything. The layout lookup keys on the canonical string, so a non-canonical
     // key must not be dressed up as a workspace number the lookup would never match.
     const ctx = boot();
-    storeLayouts(ctx.env, { [ctx.app.monitors.keys[0]]: { abc: { preset: 'p1' }, '01': { preset: 'p1' }, '1e3': { preset: 'p1' } } });
+    storeLayouts(ctx.env, {
+        [ctx.app.monitors.keys[0]]: {
+            abc: { preset: 'p1' }, '01': { preset: 'p1' }, '1e3': { preset: 'p1' },
+            '1.5': { preset: 'p1' }, Infinity: { preset: 'p1' },
+        },
+    });
     const panel = openEditor(ctx);
-    const lines = texts(panel, 'gk-ed-used');
-    assert.deepEqual(lines, ['AOC 49" · abc', 'AOC 49" · 01', 'AOC 49" · 1e3']);
-    assert.equal(lines.some((l) => l.indexOf('NaN') !== -1), false, 'never NaN');
+    assert.deepEqual(texts(panel, 'gk-ed-used'), [
+        'AOC 49" · abc', 'AOC 49" · 01', 'AOC 49" · 1e3', 'AOC 49" · 1.5', 'AOC 49" · Infinity',
+    ]);
     ctx.ext.disable();
 });
 

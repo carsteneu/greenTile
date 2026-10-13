@@ -9,7 +9,7 @@ const test = require('node:test');
 const assert = require('node:assert/strict');
 
 const { load } = require('../helpers/cinnamon-loader');
-const { makeEnv, makeWindow, makeWorkspace, enableOnMonitor } = require('../helpers/fakes/cinnamon-harness');
+const { makeEnv, makeWindow, makeWorkspace, settingsInstance, enableOnMonitor } = require('../helpers/fakes/cinnamon-harness');
 
 // autoAllowed reads `imports.ui.main.layoutManager.monitors`, so the module must be
 // loaded through the fake env that installed `globalThis.imports`; the real app from
@@ -129,20 +129,22 @@ test('a paused slot with a vanished preset id is not reported as using the grid'
     ext.disable();
 });
 
-test('a vanished preset id cannot forge a second log line', () => {
-    // The id comes out of the stored settings string, so it is echoed back only in a
-    // shape that cannot break out of the one line it was meant to occupy.
+test('the reported preset id is echoed without line breaks or control characters', () => {
+    // The id comes out of the stored settings string. This pins the SHAPE of the echo —
+    // what a reader of the log file gets — not a line count: the harness keeps one entry
+    // per global.log call, so a smuggled LF could never show up as a second entry.
     const { env, ext } = makeEnv();
     enableOnMonitor(env, ext);
     const app = ext.currentSession().app;
-    assert.equal(app.ops.layoutSet(app, 0, 0, { preset: 'gone\r\nforged\u2028x' }), true);
+    assert.equal(app.ops.layoutSet(app, 0, 0, { preset: 'go"ne\r\nforged\u2028x\u0000\u001b[31m\u0085y' }), true);
     app.ops.layoutFor(app, 0, 0);
-    const lines = env.logs.filter((l) => l.indexOf('greenTile preset "') === 0 && l.indexOf('no longer exists') !== -1);
-    assert.equal(lines.length, 1, 'exactly one report');
-    assert.equal(lines[0].includes('\n'), false, 'LF cannot split the line');
-    assert.equal(lines[0].includes('\r'), false, 'CR neither');
-    assert.equal(lines[0].includes('\u2028'), false, 'nor the JS line separator');
-    assert.equal(lines[0].includes('forged'), true, 'the id is still recognisable, only collapsed');
+    const line = env.logs.filter((l) => l.indexOf('greenTile preset "') === 0)[0];
+    assert.ok(line, 'the fallback is reported');
+    for (const bad of ['\n', '\r', '\u2028', '\u0085', '\u0000', '\u001b']) {
+        assert.equal(line.includes(bad), false, 'the echo carries no ' + JSON.stringify(bad));
+    }
+    assert.equal((line.match(/"/g) || []).length, 2, 'the two delimiters only — the id cannot forge message text');
+    assert.equal(line.includes('forged'), true, 'the id stays recognisable, only collapsed');
     ext.disable();
 });
 
@@ -150,11 +152,24 @@ test('a very long stored preset id cannot stretch the report line', () => {
     const { env, ext } = makeEnv();
     enableOnMonitor(env, ext);
     const app = ext.currentSession().app;
-    assert.equal(app.ops.layoutSet(app, 0, 0, { preset: 'p' + 'x'.repeat(4000) }), true);
+    assert.equal(app.ops.layoutSet(app, 0, 0, { preset: 'g' + 'x'.repeat(4000) }), true);
     app.ops.layoutFor(app, 0, 0);
     const line = env.logs.filter((l) => l.indexOf('greenTile preset "') === 0)[0];
     assert.ok(line, 'the fallback is reported');
-    assert.ok(line.length < 200, 'the echoed id is capped, the line stays readable (got ' + line.length + ' chars)');
+    assert.equal((line.match(/x/g) || []).length, 64, 'the echoed id is capped at 64 characters');
+    ext.disable();
+});
+
+test('corrupt layouts report nothing and still leave the slot untiled', () => {
+    // Review Focus 4: unreadable data must behave exactly as before — no fallback, and
+    // no line claiming one.
+    const { env, ext } = makeEnv();
+    enableOnMonitor(env, ext);
+    const app = ext.currentSession().app;
+    settingsInstance(env).setValue('layouts', '{not json');
+    const layout = app.ops.layoutFor(app, 0, 0);
+    assert.deepEqual({ preset: layout.preset, auto: layout.auto }, { preset: null, auto: false }, 'unreadable data is no assignment');
+    assert.deepEqual(env.logs.filter((l) => l.indexOf('greenTile preset "') === 0), [], 'and no fallback is claimed');
     ext.disable();
 });
 
