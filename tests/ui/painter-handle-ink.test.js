@@ -62,6 +62,10 @@ const painter = (rule, accent = [255, 150, 64]) => {
     const app = {
         theme: { rgb: accent, theme: 'dark', cairo: (k) => (k === 'painter' ? PAINTER : [42, 46, 57]) },
         panel: { draft: { id: 'p1', name: 'T', index: 0, isNew: true, rules: [rule] } },
+        // the body also names the slots the draft is assigned to, so it reads the
+        // stored layouts: no assignments here, the painter is all this test drives
+        config: { settings: { getValue: () => '' } },
+        monitors: { keys: [], labels: [] },
     };
     const body = load('./lib/ui/editor.js').editorBody(app);
     const { calls, cr } = recorder();

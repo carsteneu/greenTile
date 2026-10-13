@@ -43,6 +43,6 @@ export function editorStepMin(rules: Rule[], index: number, delta: number): {
 export function editorValidate(draft: {
     name?: string;
 }): "name" | null;
-export function editorNewId(presets: Preset[]): string;
+export function editorNewId(presets: Preset[], taken?: string[]): string;
 export function editorCommit(presets: Preset[], preset: Preset): Preset[];
 export function editorDeletePreset(presets: Preset[], id: string): Preset[];
