@@ -172,6 +172,37 @@ test('the assigned card is marked in place and independent of Auto', () => {
     ext.disable();
 });
 
+test('an assigned card on an Auto-off workspace is marked as resting', () => {
+    // A stored preset on a workspace whose Auto is off places nothing: the retile
+    // gates on autoAllowed (lib/tiling/layout.js), so a monitor change or a new
+    // window leaves the surface exactly as it was. The card still carries the
+    // assigned mark (the assignment IS stored), but it must not read as a live
+    // arrangement — it says why it rests instead.
+    const { env, ext } = makeEnv({ presets: JSON.stringify(PRESETS) });
+    const { app } = openPanel(env, ext, PRESETS, { assign: 'b', autoOff: true });
+    assert.equal(app.ops.layoutFor(app, 0, 0).auto, false, 'Auto is off');
+    const beta = cardOf(app, 'Beta');
+    assert.ok(/gk-card-assigned/.test(beta.style_class), 'the assignment is still marked');
+    assert.ok(/gk-card-idle/.test(beta.style_class), 'and it is marked as resting');
+    assert.match(byClass(beta, /^gk-sub(?: |$)/)[0].text, /Auto: off/, 'the state row names the reason');
+    const alpha = cardOf(app, 'Alpha');
+    assert.equal(/gk-card-idle/.test(alpha.style_class), false, 'an unassigned card is not resting');
+    ext.disable();
+});
+
+test('turning Auto off in the open panel marks the assigned card as resting', () => {
+    const { env, ext } = makeEnv({ presets: JSON.stringify(PRESETS) });
+    const { app } = openPanel(env, ext, PRESETS, { assign: 'a' });
+    assert.equal(/gk-card-idle/.test(cardOf(app, 'Alpha').style_class), false, 'Auto is on, nothing rests');
+    byClass(app.panel.actor, /^gk-auto(?: |$)/)[0].emit('clicked');
+    assert.equal(app.ops.layoutFor(app, 0, 0).auto, false, 'Auto is off now');
+    assert.ok(/gk-card-idle/.test(cardOf(app, 'Alpha').style_class), 'the card follows without a rebuild');
+    byClass(app.panel.actor, /^gk-auto(?: |$)/)[0].emit('clicked');
+    assert.equal(app.ops.layoutFor(app, 0, 0).auto, true, 'Auto is back on');
+    assert.equal(/gk-card-idle/.test(cardOf(app, 'Alpha').style_class), false, 'and the card is live again');
+    ext.disable();
+});
+
 test('clicking a card assigns it, turns Auto on, tiles and moves the mark in place', () => {
     const { env, ext } = makeEnv({ presets: JSON.stringify(PRESETS) });
     const { app, window } = openPanel(env, ext, PRESETS, { assign: 'a' });
