@@ -6,4 +6,5 @@ export function landingCells(app: AppFacade, targetMonitor: CinnamonMonitor, mon
     monitorIndex: number;
     wsIndex: number;
 }): Rect[];
+export function moveToMonitor(w: CinnamonWindow, source: CinnamonMonitor, target: CinnamonMonitor, targetIndex: number, frame: Rect): void;
 export function swapHotkey(app: AppFacade, dir: "left" | "right" | "up" | "down"): void;

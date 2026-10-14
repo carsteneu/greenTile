@@ -104,6 +104,12 @@ interface CinnamonWindow {
     move_resize_frame(userOp: boolean, x: number, y: number, width: number, height: number): void;
     /** Meta.Window.move_frame(user_op, x, y) */
     move_frame(userOp: boolean, x: number, y: number): void;
+    /** Meta.Window.move_to_monitor(monitor_index) — moves the window onto that
+     * monitor, keeping its position within the work area. Verified live 2026-10-14
+     * (muffin 6.6/X11): it does nothing at all when the window is TALLER than the
+     * target's work area — no error, no frame change (lib/tiling/swap.js
+     * moveToMonitor verifies the move and places the window itself then). */
+    move_to_monitor(monitorIndex: number): void;
     get_frame_rect(): CinnamonRectangle;
     /** The window frame's Clutter actor (null once the window is destroyed). */
     get_compositor_private(): CinnamonActor | null;
