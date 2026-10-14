@@ -103,6 +103,11 @@ export const Session: {
         panelSaved: any;
         exclToggles: Map<any, any>;
         exclWatches: Map<any, any>;
+        /** @type {Map<number, { rect: number[], maximized: number }>} */
+        preTiling: Map<number, {
+            rect: number[];
+            maximized: number;
+        }>;
         /** @type {Set<string>} */
         orderUsed: Set<string>;
         /** @type {any} */ app: any;
@@ -160,6 +165,23 @@ export const Session: {
          * @param {number} wsIndex
          */
         dropIntent(app: AppFacade, monitorIndex: number, wsIndex: number): void;
+        /**
+         * Remembers the frame and maximize mask a window has right now, before greenTile
+         * places it for the first time. First write wins — every later placement would
+         * record the tiled frame instead of the original one.
+         * @param {CinnamonWindow} w
+         */
+        rememberFrame(w: CinnamonWindow): void;
+        /**
+         * The recorded pre-tiling state of a window, removed: the auto-off restore hands
+         * it back exactly once.
+         * @param {CinnamonWindow} w
+         * @returns {{ rect: number[], maximized: number } | null}
+         */
+        takeFrame(w: CinnamonWindow): {
+            rect: number[];
+            maximized: number;
+        } | null;
         /**
          * Whether a RETAINED pause covers that monitor+workspace. An automatic retile
          * must not place windows against the user's last command just because the
@@ -308,6 +330,11 @@ export type SessionDeps = {
         panelSaved: any;
         exclToggles: Map<any, any>;
         exclWatches: Map<any, any>;
+        /** @type {Map<number, { rect: number[], maximized: number }>} */
+        preTiling: Map<number, {
+            rect: number[];
+            maximized: number;
+        }>;
         /** @type {Set<string>} */
         orderUsed: Set<string>;
         /** @type {any} */ app: any;
@@ -365,6 +392,23 @@ export type SessionDeps = {
          * @param {number} wsIndex
          */
         dropIntent(app: AppFacade, monitorIndex: number, wsIndex: number): void;
+        /**
+         * Remembers the frame and maximize mask a window has right now, before greenTile
+         * places it for the first time. First write wins — every later placement would
+         * record the tiled frame instead of the original one.
+         * @param {CinnamonWindow} w
+         */
+        rememberFrame(w: CinnamonWindow): void;
+        /**
+         * The recorded pre-tiling state of a window, removed: the auto-off restore hands
+         * it back exactly once.
+         * @param {CinnamonWindow} w
+         * @returns {{ rect: number[], maximized: number } | null}
+         */
+        takeFrame(w: CinnamonWindow): {
+            rect: number[];
+            maximized: number;
+        } | null;
         /**
          * Whether a RETAINED pause covers that monitor+workspace. An automatic retile
          * must not place windows against the user's last command just because the

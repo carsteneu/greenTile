@@ -14,6 +14,7 @@
  * @property {(app: AppFacade, monitorIndex: number, wsIndex: number) => { auto: boolean }} layoutFor
  * @property {(app: AppFacade, monitorIndex: number, wsIndex: number, patch: {}) => boolean} layoutSet
  * @property {(app: AppFacade, monitorIndex: number, focused: CinnamonWindow | null, animate?: boolean, wsIndex?: number | null, actionLayout?: Layout | null, settle?: boolean) => void} retileMonitor
+ * @property {(app: AppFacade, monitorIndex: number, wsIndex: number) => void} restoreFrames
  * @property {() => void} borderUpdate
  * @property {(op: string) => boolean} grabIsResize
  * @property {(app: AppFacade, w: CinnamonWindow, op: string) => boolean} dropBegin
@@ -364,6 +365,7 @@ export type AutoDeps = {
     };
     layoutSet: (app: AppFacade, monitorIndex: number, wsIndex: number, patch: {}) => boolean;
     retileMonitor: (app: AppFacade, monitorIndex: number, focused: CinnamonWindow | null, animate?: boolean, wsIndex?: number | null, actionLayout?: Layout | null, settle?: boolean) => void;
+    restoreFrames: (app: AppFacade, monitorIndex: number, wsIndex: number) => void;
     borderUpdate: () => void;
     grabIsResize: (op: string) => boolean;
     dropBegin: (app: AppFacade, w: CinnamonWindow, op: string) => boolean;

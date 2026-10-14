@@ -69,6 +69,7 @@ const makeWindow = (env, seq, rect, monitor = 0, withActor = null, options = {})
         /** @type {boolean} marked windows have no owning app (app-less window) */
         __noApp: options.noApp === true,
         moves: [],
+        maximizes: [],
         rect: rect.slice(),
         connect(sig, cb) {
             const id = nextId++;
@@ -111,10 +112,17 @@ const makeWindow = (env, seq, rect, monitor = 0, withActor = null, options = {})
             window.moves.push(['move', x, y]);
             window.rect = [x, y, window.rect[2], window.rect[3]];
         },
+        // Maximize state stays a live fixture on `options` (a test may set it after the
+        // window was created), plus the calls a restore makes. `unmaximize` stays a
+        // no-op on purpose: a placement must not silently rewrite the fixture.
         unmaximize() {},
+        maximize(flags) {
+            window.maximizes.push(flags);
+            options.maximized = (options.maximized !== undefined ? options.maximized : 0) | (flags === undefined ? 6 : flags);
+        },
         // maximize/fullscreen state read by the single-window mode guard: a lone
         // window the user maximized (both directions) or put fullscreen is left
-        // alone. `maximized` is the Meta.MaximizeFlags mask, 0 by default.
+        // alone. `maximized` is the Meta.MaximizeFlags mask (HORIZONTAL 2 | VERTICAL 4).
         get_maximized: () => (options.maximized !== undefined ? options.maximized : 0),
         is_fullscreen: () => options.fullscreen === true,
         // a transient window (a child/properties dialog) and a window that cannot

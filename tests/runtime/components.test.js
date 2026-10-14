@@ -545,7 +545,7 @@ const makeApp = (overrides = {}) => ({
 const makeAuto = (opts = {}) => {
     const ml = fakeMainloop();
     const logs = [];
-    const calls = { layoutSet: [], retileMonitor: [], borderUpdate: 0, resizeEnd: 0 };
+    const calls = { layoutSet: [], retileMonitor: [], borderUpdate: 0, resizeEnd: 0, restoreFrames: [] };
     const monitorCount = 'monitorCount' in opts ? opts.monitorCount : 2;
     const activeWorkspace = { index: () => 3 };
     const deps = {
@@ -560,6 +560,7 @@ const makeAuto = (opts = {}) => {
         layoutFor: () => ({ preset: null, auto: 'auto' in opts ? opts.auto : true }),
         layoutSet: (app, monitorIndex, wsIndex, patch) => calls.layoutSet.push({ monitorIndex, wsIndex, patch }),
         retileMonitor: (app, monitorIndex, focusWindow) => calls.retileMonitor.push({ monitorIndex, focusWindow }),
+        restoreFrames: (app, monitorIndex, wsIndex) => calls.restoreFrames.push({ monitorIndex, wsIndex }),
         borderUpdate: () => { calls.borderUpdate += 1; },
         focusWindow: () => (opts.focus ? opts.focus : null),
         focusMonitorIndex: () => 1,
@@ -636,6 +637,8 @@ test('auto activate/deactivate: layout stored when off, retile follows, border r
     assert.deepEqual(logs2, ['greenTile auto tiling off for ws3']);
     assert.equal(calls2.borderUpdate, 1, 'auto off refreshes the border (no geometry event follows)');
     assert.equal(calls2.retileMonitor.length, 1, 'no retile follows auto off');
+    assert.deepEqual(calls2.restoreFrames, [{ monitorIndex: 1, wsIndex: 3 }],
+        'auto off hands the windows of that surface their pre-tiling state back');
 });
 
 test('auto scheduleMonitor: per-monitor timers replaced and guarded at fire time', () => {
