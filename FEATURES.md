@@ -33,7 +33,7 @@ Every feature in one line or two. Details and screenshots are in the [README](RE
 - **Panel**: `Super+Ctrl+P` opens the presets for the monitor of the focused window, titled with workspace and monitor name.
 - **Card grid**: equal-width cards in as many columns as the panel width holds, so the same panel works on a laptop and an ultrawide.
 - **Live previews**: each card shows the layout a click would produce with the current number of windows.
-- **Assignment marker**: the assigned card carries a colored edge, a check and the ✕ that removes the assignment.
+- **Assignment marker**: the assigned card carries a colored edge, a check and the ✕ that removes the assignment. A card whose monitor and workspace have auto mode off is marked as resting: the accent gives way to neutral gray and the line adds `Auto: off`, since a paused assignment places nothing.
 - **One-click assign**: a click assigns the preset and tiles at once, and it is binding — every moved border and dragged layout of this monitor and workspace is cleared as part of the click, so the preset's own widths apply. The panel stays open for trying more; the assigned look moves in place.
 - **Edit button**: the pencil on a card opens that preset in the editor, without applying it.
 - **Auto switch**: the title bar shows and toggles auto mode (green = on).
@@ -49,6 +49,7 @@ Every feature in one line or two. Details and screenshots are in the [README](RE
 - **Rule list**: add, select and delete rules; "from N" sets the window count a rule starts at, changed with − / +.
 - **Painter**: 6 × 4 grid. Click or drag to set how many windows each column holds, right-click removes a column. The handle between two painted columns merges them, the handle inside a merged column splits it again.
 - **Result line**: shows the column stacks of the selected rule, e.g. `[1,2,2]`.
+- **Assignment display**: names the monitor and workspace slots this preset hangs on (`+N more` beyond five, `Not assigned anywhere.` when it is free). Read-only: it shows what a save would reshape.
 - **Name check**: a preset cannot be saved without a name.
 - **Save and retile**: saving a preset in use retiles right away. `Esc` or ← Back discards the draft.
 - **Delete preset**: the solid red button right of Save deletes the preset after an inline confirmation and removes its workspace assignments. Hidden for a new, not-yet-saved preset. `Enter` always runs Save.
