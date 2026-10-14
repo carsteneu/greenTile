@@ -8,3 +8,4 @@ export function presetRetile(app: AppFacade, monitorIndex: number, focused: Cinn
 export function retileMonitor(app: AppFacade, monitorIndex: number, focused: CinnamonWindow | null, animate?: boolean, wsIndex?: number | null, actionLayout?: Layout | null, settle?: boolean): void;
 export function singleRetile(app: AppFacade): void;
 export function exclRetile(app: AppFacade): void;
+export function restoreFrames(app: AppFacade, monitorIndex: number, wsIndex: number): void;

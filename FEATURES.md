@@ -26,7 +26,7 @@ Every feature in one line or two. Details and screenshots are in the [README](RE
 - **Wide columns**: a column can span several painter grid columns (merge neighbours in the painter). The spans are the starting widths, so a rule of three columns with `[1, 2, 1]` tiles 25 % / 50 % / 25 %; a border dragged or a layout dropped for the current window count still wins over them until the next card click, or **Reset sizes**, returns to the spans.
 - **Per monitor and workspace**: every monitor and workspace can have its own preset.
 - **Gap-free fill**: no cell stays empty: with fewer windows, stacked cells and then columns are dropped; with more windows, the rightmost column takes the rest.
-- **Pause**: `Super+Ctrl+D` keeps the assigned preset but stops auto tiling, snap-on-release and swaps on that monitor and workspace; nothing there is rearranged, while `Super+Ctrl+Left/Right` can still send the focused window away. A pause requested before monitor readiness is retained; Auto on or an explicit preset selection resumes tiling.
+- **Pause**: `Super+Ctrl+D` keeps the assigned preset but stops auto tiling, snap-on-release and swaps on that monitor and workspace; switching it off hands the windows there back the frame they had before greenTile first placed them (a maximize the placement had taken away is restored too), while `Super+Ctrl+Left/Right` can still send the focused window away. A pause requested before monitor readiness is retained; Auto on or an explicit preset selection resumes tiling.
 
 ## Preset panel
 

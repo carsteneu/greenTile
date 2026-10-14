@@ -31,7 +31,7 @@ To update an installed greenTile, run `./update.sh` from the unpacked zip instea
 | Key | Action |
 |---|---|
 | `Super+Ctrl+A` | Auto mode on for this monitor and workspace, tile now (again: retile) |
-| `Super+Ctrl+D` | Auto mode off for this monitor and workspace (pauses its preset) |
+| `Super+Ctrl+D` | Auto mode off for this monitor and workspace (pauses its preset; the windows go back to their pre-tiling frames) |
 | `Super+Ctrl+P` | Open or close the preset panel |
 | `Super+Ctrl+3` / `6` | 3 or 6 columns of equal width |
 | `Super+Ctrl+←/→/↑/↓` | Swap the focused window with its neighbour |
@@ -93,6 +93,8 @@ Auto mode is switched per monitor and workspace. It is on by default where a pre
 - New, closed, minimized and restored windows retile the monitor after 300 ms. New windows are appended at the end.
 - A window moved by hand snaps into the slot where you drop it. Moving it to another monitor retiles both.
 - Movements are animated (250 ms, can be turned off with **Animate tiling**).
+
+Switching auto mode off (`Super+Ctrl+D`) hands the windows of that monitor and workspace back the frame they had before greenTile first placed them — including a maximize the placement had taken away — and a window you moved yourself in the meantime is put back too. A window greenTile never placed stays where it is, and so does one whose record is gone: the records live in the session, over a Cinnamon restart they are lost.
 
 Only visible windows of the active workspace are tiled. The order follows their position on screen.
 

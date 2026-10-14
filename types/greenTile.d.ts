@@ -98,6 +98,8 @@ interface CinnamonWindow {
     /** Meta.Window.allows_resize() — false for a fixed-size window. */
     allows_resize(): boolean;
     unmaximize(flags: number): void;
+    /** Meta.Window.maximize(flags) — hands a maximize mask back (restore path). */
+    maximize(flags: number): void;
     /** Meta.Window.move_resize_frame(user_op, x, y, width, height) */
     move_resize_frame(userOp: boolean, x: number, y: number, width: number, height: number): void;
     /** Meta.Window.move_frame(user_op, x, y) */
@@ -263,6 +265,8 @@ type SessionFacade = {
     exclWatches: Map<number, { disconnect: () => void }>;
     /** Surfaces whose stored restart order was already used (first-use gate). */
     orderUsed: Set<string>;
+    /** Frame + maximize mask each window had before greenTile first placed it. */
+    preTiling: Map<number, { rect: number[]; maximized: number }>;
     /** Auto on/off commands pressed before the monitor registry was ready. */
     pendingAuto: Array<{ monitorIndex: number; wsIndex: number; auto: boolean }>;
     nextAccentGen(): string;
@@ -275,6 +279,10 @@ type SessionFacade = {
     dropIntent(app: AppFacade, monitorIndex: number, wsIndex: number): void;
     /** Collapses the retained queue to one intent per effective slot, newest wins. */
     normalizePending(app: AppFacade): void;
+    /** Records the pre-tiling frame of a window once (first placement wins). */
+    rememberFrame(w: CinnamonWindow): void;
+    /** The recorded pre-tiling state of a window, removed. */
+    takeFrame(w: CinnamonWindow): { rect: number[]; maximized: number } | null;
     destroy(): void;
 };
 
