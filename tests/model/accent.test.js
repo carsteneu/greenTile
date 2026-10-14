@@ -223,6 +223,9 @@ test('generated state CSS carries every state selector in both scopes', () => {
         '.gk-panel .gk-card-assigned:hover { background-color: rgba(156, 224, 114, 0.13); }',
         '.gk-panel .gk-card-stripe { background-color: rgb(156, 224, 114); }',
         '.gk-panel .gk-sub { color: rgb(156, 224, 114); }',
+        '.gk-panel .gk-card-idle { background-color: rgba(255, 255, 255, 0.03); }',
+        '.gk-panel .gk-card-idle .gk-card-stripe { background-color: #5f6672; }',
+        '.gk-panel .gk-card-idle .gk-sub { color: #8b91a0; }',
     ])
         {assert.equal(css.includes(selector), true, selector);}
     for (const selector of [
@@ -232,8 +235,28 @@ test('generated state CSS carries every state selector in both scopes', () => {
         '.gk-panel.gk-light .gk-card-assigned:hover { background-color: rgba(78, 165, 48, 0.16); }',
         '.gk-panel.gk-light .gk-card-stripe { background-color: rgb(78, 165, 48); }',
         '.gk-panel.gk-light .gk-sub { color: rgb(63, 143, 34); }',
+        '.gk-panel.gk-light .gk-card-idle { background-color: rgba(0, 0, 0, 0.03); }',
+        '.gk-panel.gk-light .gk-card-idle .gk-card-stripe { background-color: #c3c9d6; }',
+        '.gk-panel.gk-light .gk-card-idle .gk-sub { color: #5f6672; }',
     ])
         {assert.equal(css.includes(selector), true, selector);}
+});
+
+test('the resting look outranks the assignment rules in the shipped sheet too', () => {
+    // The sheet is the fallback when the generated state CSS is not the one in
+    // effect, so it needs the same neutral resting rules — and it needs a
+    // SPECIFICITY edge over the `.gk-panel .gk-card-assigned` and state rules,
+    // which are appended after this file. The .gk-panel prefix is that edge.
+    const sheet = fs.readFileSync(path.join(__dirname, '..', '..', 'stylesheet.css'), 'utf8');
+    for (const selector of [
+        '.gk-panel .gk-card-idle.gk-card-assigned',
+        '.gk-panel .gk-card-idle .gk-card-stripe',
+        '.gk-panel .gk-card-idle .gk-sub',
+        '.gk-panel.gk-light .gk-card-idle.gk-card-assigned',
+        '.gk-panel.gk-light .gk-card-idle .gk-card-stripe',
+        '.gk-panel.gk-light .gk-card-idle .gk-sub',
+    ])
+        {assert.equal(sheet.includes(selector), true, selector + ' missing in stylesheet.css');}
 });
 
 test('generated state CSS for a custom color carries it, not the green', () => {
