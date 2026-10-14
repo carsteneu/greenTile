@@ -57,7 +57,8 @@ const makeEnv = (extraSettings = {}) => {
 // application-enforced minimum frame (the WM refuses a smaller request and keeps
 // the minimum, exactly like a terminal that snaps to its character grid), and
 // move_to_monitor keeps get_monitor() live like Meta does on a real
-// cross-monitor move. `minSize` is a live array, so a test can relax it later.
+// cross-monitor move, including its refusal to move a window that is taller
+// than the target work area. `minSize` is a live array, so a test can relax it later.
 const makeWindow = (env, seq, rect, monitor = 0, withActor = null, options = {}) => {
     const handlers = [];
     let nextId = 1;
@@ -103,14 +104,39 @@ const makeWindow = (env, seq, rect, monitor = 0, withActor = null, options = {})
         is_on_all_workspaces: () => false,
         get_frame_rect: () => ({ x: window.rect[0], y: window.rect[1], width: window.rect[2], height: window.rect[3] }),
         get_compositor_private: () => withActor,
+        // Muffin re-homes a window on every frame change: the monitor the window then
+        // reports is the one with the largest overlap with its frame
+        // (meta_window_calculate_main_logical_monitor) — a placement onto another
+        // monitor's coordinates changes get_monitor() right away. Verified live
+        // 2026-10-14: a window at x=3440 (monitor 0) placed at x=100 reported monitor 1.
+        rehome() {
+            let best = mon;
+            let bestArea = 0;
+            const monitors = env.layoutManager.monitors;
+            for (let i = 0; i < monitors.length; i++) {
+                const m = monitors[i];
+                const ox = Math.min(window.rect[0] + window.rect[2], m.x + m.width) - Math.max(window.rect[0], m.x);
+                const oy = Math.min(window.rect[1] + window.rect[3], m.y + m.height) - Math.max(window.rect[1], m.y);
+                const area = (ox > 0 && oy > 0) ? ox * oy : 0;
+                if (area > bestArea) {
+                    best = i;
+                    bestArea = area;
+                }
+            }
+            if (bestArea > 0) {
+                mon = best;
+            }
+        },
         move_resize_frame(anim, x, y, w, h) {
             window.moves.push(['resize', x, y, w, h]);
             const min = window.minSize;
             window.rect = [x, y, min ? Math.max(w, min[0]) : w, min ? Math.max(h, min[1]) : h];
+            window.rehome();
         },
         move_frame(anim, x, y) {
             window.moves.push(['move', x, y]);
             window.rect = [x, y, window.rect[2], window.rect[3]];
+            window.rehome();
         },
         // Maximize state stays a live fixture on `options` (a test may set it after the
         // window was created), plus the calls a restore makes. `unmaximize` stays a
@@ -135,6 +161,16 @@ const makeWindow = (env, seq, rect, monitor = 0, withActor = null, options = {})
         },
         change_workspace_by_index() {},
         move_to_monitor(index) {
+            // Muffin performs the move only while the window fits the TARGET work
+            // area's height; a taller window stays on its source monitor without any
+            // error (live-verified 2026-10-14, Cinnamon 6.6/X11: 1401 px and 1440 px
+            // tall into a 1400 px work area did not move, 1400 px and 1390 px did; the
+            // width is not checked — a 4000 px wide window moved). The fakes carry no
+            // panels, so a monitor's rect is its work area here.
+            const target = env.layoutManager.monitors[index];
+            if (target && window.rect[3] > target.height) {
+                return;
+            }
             mon = index;
         },
     };
