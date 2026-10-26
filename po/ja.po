@@ -339,6 +339,21 @@ msgstr ""
 "ウィンドウが新しい位置へ滑らかに移動します。オフ: すぐにその位置へ移動しま"
 "す。"
 
+#. settings-schema.json->tileAnimationDuration->units
+msgid "ms"
+msgstr "ms"
+
+#. settings-schema.json->tileAnimationDuration->description
+msgid "Animation duration"
+msgstr "アニメーションの長さ"
+
+#. settings-schema.json->tileAnimationDuration->tooltip
+msgid ""
+"How long a window glides into its place, in milliseconds. The window still "
+"lands on its final frame at once; only the picture travels."
+msgstr ""
+"ウィンドウが所定の位置へ滑る時間 (ミリ秒)。ウィンドウ自体はすぐに最終的な枠に収まり、画像だけが移動します。"
+
 #. settings-schema.json->focusBorder->description
 msgid "Border around the focused window"
 msgstr "フォーカスされたウィンドウの周りの境界線"

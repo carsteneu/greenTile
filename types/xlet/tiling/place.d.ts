@@ -1,6 +1,9 @@
 // GENERATED from lib/ by scripts/generate-xlet-types.mjs — do not edit;
 // regenerate with: npm run gen:types
 export const ANIMATE_MS: number;
+export const ANIMATE_MS_MIN: number;
+export const ANIMATE_MS_MAX: number;
+export function animateMs(v: any): number;
 export function place(app: AppFacade, metaWindow: CinnamonWindow, x: number, y: number, width: number, height: number, animate?: boolean): CinnamonRectangle;
 export function gap(app: AppFacade): number;
 export function placeCell(app: AppFacade, metaWindow: CinnamonWindow, x: number, y: number, width: number, height: number, area: Rect, animate?: boolean): {

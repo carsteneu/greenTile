@@ -180,6 +180,8 @@ const SETTINGS_DEFAULTS = {
     singleWindowMigrated: true,
     panelSize: '',
     windowGap: 8,
+    // the schema default of the tiling-animation duration
+    tileAnimationDuration: 250,
 };
 
 const createCinnamonEnv = (options) => {

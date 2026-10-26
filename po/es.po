@@ -343,6 +343,23 @@ msgstr ""
 "Las ventanas se deslizan hasta su nueva posición. Desactivado: saltan allí "
 "de inmediato."
 
+#. settings-schema.json->tileAnimationDuration->units
+msgid "ms"
+msgstr "ms"
+
+#. settings-schema.json->tileAnimationDuration->description
+msgid "Animation duration"
+msgstr "Duración de la animación"
+
+#. settings-schema.json->tileAnimationDuration->tooltip
+msgid ""
+"How long a window glides into its place, in milliseconds. The window still "
+"lands on its final frame at once; only the picture travels."
+msgstr ""
+"Cuánto tarda una ventana en deslizarse hasta su posición, en milisegundos. "
+"La ventana sigue llegando de inmediato a su marco final; solo viaja la "
+"imagen."
+
 #. settings-schema.json->focusBorder->description
 msgid "Border around the focused window"
 msgstr "Borde alrededor de la ventana enfocada"

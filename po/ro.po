@@ -340,6 +340,22 @@ msgstr "Animează aranjarea"
 msgid "Windows glide into their new place. Off: they jump there at once."
 msgstr "Ferestrele alunecă la noul loc. Oprit: sar acolo imediat."
 
+#. settings-schema.json->tileAnimationDuration->units
+msgid "ms"
+msgstr "ms"
+
+#. settings-schema.json->tileAnimationDuration->description
+msgid "Animation duration"
+msgstr "Durata animației"
+
+#. settings-schema.json->tileAnimationDuration->tooltip
+msgid ""
+"How long a window glides into its place, in milliseconds. The window still "
+"lands on its final frame at once; only the picture travels."
+msgstr ""
+"Cât durează alunecarea unei ferestre la locul ei, în milisecunde. Fereastra "
+"ajunge în continuare imediat la cadrul final; doar imaginea călătorește."
+
 #. settings-schema.json->focusBorder->description
 msgid "Border around the focused window"
 msgstr "Chenar în jurul ferestrei focalizate"

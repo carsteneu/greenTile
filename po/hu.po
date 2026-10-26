@@ -341,6 +341,22 @@ msgstr "Csempézés animálása"
 msgid "Windows glide into their new place. Off: they jump there at once."
 msgstr "Az ablakok az új helyükre siklanak. Kikapcsolva: azonnal odaugranak."
 
+#. settings-schema.json->tileAnimationDuration->units
+msgid "ms"
+msgstr "ms"
+
+#. settings-schema.json->tileAnimationDuration->description
+msgid "Animation duration"
+msgstr "Animáció hossza"
+
+#. settings-schema.json->tileAnimationDuration->tooltip
+msgid ""
+"How long a window glides into its place, in milliseconds. The window still "
+"lands on its final frame at once; only the picture travels."
+msgstr ""
+"Mennyi ideig csúszik egy ablak a helyére, ezredmásodpercben. Az ablak "
+"továbbra is azonnal a végleges keretére kerül; csak a kép mozog."
+
 #. settings-schema.json->focusBorder->description
 msgid "Border around the focused window"
 msgstr "Keret a fókuszált ablak körül"

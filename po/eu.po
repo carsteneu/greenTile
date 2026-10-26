@@ -341,6 +341,23 @@ msgstr ""
 "Leihoak beren leku berrira irristatzen dira. Desaktibatuta: berehala jauzi "
 "egiten dute hara."
 
+#. settings-schema.json->tileAnimationDuration->units
+msgid "ms"
+msgstr "ms"
+
+#. settings-schema.json->tileAnimationDuration->description
+msgid "Animation duration"
+msgstr "Animazioaren iraupena"
+
+#. settings-schema.json->tileAnimationDuration->tooltip
+msgid ""
+"How long a window glides into its place, in milliseconds. The window still "
+"lands on its final frame at once; only the picture travels."
+msgstr ""
+"Zenbat denbora behar duen leiho batek bere lekura irristatzeko, "
+"milisegundotan. Leihoa bere azken markora berehala iristen da oraindik; "
+"irudia baino ez da mugitzen."
+
 #. settings-schema.json->focusBorder->description
 msgid "Border around the focused window"
 msgstr "Fokuako leihoaren inguruko ertza"

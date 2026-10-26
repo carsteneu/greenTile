@@ -344,6 +344,22 @@ msgid "Windows glide into their new place. Off: they jump there at once."
 msgstr ""
 "Ikkunat liukuvat uuteen paikkaansa. Pois päältä: ne hyppäävät sinne heti."
 
+#. settings-schema.json->tileAnimationDuration->units
+msgid "ms"
+msgstr "ms"
+
+#. settings-schema.json->tileAnimationDuration->description
+msgid "Animation duration"
+msgstr "Animaation kesto"
+
+#. settings-schema.json->tileAnimationDuration->tooltip
+msgid ""
+"How long a window glides into its place, in milliseconds. The window still "
+"lands on its final frame at once; only the picture travels."
+msgstr ""
+"Kuinka kauan ikkuna liukuu paikalleen millisekunteina. Ikkuna asettuu silti "
+"heti lopulliseen kehykseensä; vain kuva liikkuu."
+
 #. settings-schema.json->focusBorder->description
 msgid "Border around the focused window"
 msgstr "Reuna kohdistetun ikkunan ympärillä"

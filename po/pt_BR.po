@@ -342,6 +342,22 @@ msgid "Windows glide into their new place. Off: they jump there at once."
 msgstr ""
 "As janelas deslizam até o novo lugar. Desligado: elas saltam para lá na hora."
 
+#. settings-schema.json->tileAnimationDuration->units
+msgid "ms"
+msgstr "ms"
+
+#. settings-schema.json->tileAnimationDuration->description
+msgid "Animation duration"
+msgstr "Duração da animação"
+
+#. settings-schema.json->tileAnimationDuration->tooltip
+msgid ""
+"How long a window glides into its place, in milliseconds. The window still "
+"lands on its final frame at once; only the picture travels."
+msgstr ""
+"Quanto tempo uma janela leva para deslizar até o lugar, em milissegundos. A "
+"janela ainda chega de imediato ao seu quadro final; só a imagem viaja."
+
 #. settings-schema.json->focusBorder->description
 msgid "Border around the focused window"
 msgstr "Borda ao redor da janela focada"

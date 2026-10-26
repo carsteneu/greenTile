@@ -342,6 +342,23 @@ msgstr ""
 "Le finestre scivolano nella nuova posizione. Disattivato: vi saltano "
 "all'istante."
 
+#. settings-schema.json->tileAnimationDuration->units
+msgid "ms"
+msgstr "ms"
+
+#. settings-schema.json->tileAnimationDuration->description
+msgid "Animation duration"
+msgstr "Durata dell'animazione"
+
+#. settings-schema.json->tileAnimationDuration->tooltip
+msgid ""
+"How long a window glides into its place, in milliseconds. The window still "
+"lands on its final frame at once; only the picture travels."
+msgstr ""
+"Quanto tempo impiega una finestra a scorrere nella sua posizione, in "
+"millisecondi. La finestra arriva comunque subito alla sua cornice finale; si "
+"muove solo l'immagine."
+
 #. settings-schema.json->focusBorder->description
 msgid "Border around the focused window"
 msgstr "Bordo attorno alla finestra a fuoco"

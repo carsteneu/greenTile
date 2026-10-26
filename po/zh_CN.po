@@ -326,6 +326,21 @@ msgstr "平铺动画"
 msgid "Windows glide into their new place. Off: they jump there at once."
 msgstr "窗口平滑移动到新位置。关闭时：窗口立即跳到新位置。"
 
+#. settings-schema.json->tileAnimationDuration->units
+msgid "ms"
+msgstr "ms"
+
+#. settings-schema.json->tileAnimationDuration->description
+msgid "Animation duration"
+msgstr "动画时长"
+
+#. settings-schema.json->tileAnimationDuration->tooltip
+msgid ""
+"How long a window glides into its place, in milliseconds. The window still "
+"lands on its final frame at once; only the picture travels."
+msgstr ""
+"窗口滑入其位置的时长，以毫秒为单位。窗口仍会立即落在最终边框上，只有画面在移动。"
+
 #. settings-schema.json->focusBorder->description
 msgid "Border around the focused window"
 msgstr "聚焦窗口周围的边框"

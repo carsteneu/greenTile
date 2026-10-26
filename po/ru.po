@@ -341,6 +341,23 @@ msgstr ""
 "Окна плавно перемещаются на новое место. Если выключено, они сразу "
 "оказываются там."
 
+#. settings-schema.json->tileAnimationDuration->units
+msgid "ms"
+msgstr "ms"
+
+#. settings-schema.json->tileAnimationDuration->description
+msgid "Animation duration"
+msgstr "Длительность анимации"
+
+#. settings-schema.json->tileAnimationDuration->tooltip
+msgid ""
+"How long a window glides into its place, in milliseconds. The window still "
+"lands on its final frame at once; only the picture travels."
+msgstr ""
+"Сколько времени окно скользит на новое место, в миллисекундах. Окно "
+"по-прежнему сразу оказывается в своей итоговой рамке; перемещается только "
+"изображение."
+
 #. settings-schema.json->focusBorder->description
 msgid "Border around the focused window"
 msgstr "Рамка вокруг активного окна"

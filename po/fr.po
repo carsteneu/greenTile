@@ -342,6 +342,23 @@ msgstr ""
 "Les fenêtres glissent vers leur nouvelle place. Désactivé : elles y sautent "
 "instantanément."
 
+#. settings-schema.json->tileAnimationDuration->units
+msgid "ms"
+msgstr "ms"
+
+#. settings-schema.json->tileAnimationDuration->description
+msgid "Animation duration"
+msgstr "Durée de l'animation"
+
+#. settings-schema.json->tileAnimationDuration->tooltip
+msgid ""
+"How long a window glides into its place, in milliseconds. The window still "
+"lands on its final frame at once; only the picture travels."
+msgstr ""
+"Combien de temps une fenêtre glisse vers sa place, en millisecondes. La "
+"fenêtre se pose toujours immédiatement sur son cadre final ; seule l'image "
+"se déplace."
+
 #. settings-schema.json->focusBorder->description
 msgid "Border around the focused window"
 msgstr "Bordure autour de la fenêtre active"

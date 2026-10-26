@@ -341,6 +341,22 @@ msgstr "Döşemeyi canlandır"
 msgid "Windows glide into their new place. Off: they jump there at once."
 msgstr "Pencereler yeni yerlerine kayarak geçer. Kapalı: hemen oraya atlarlar."
 
+#. settings-schema.json->tileAnimationDuration->units
+msgid "ms"
+msgstr "ms"
+
+#. settings-schema.json->tileAnimationDuration->description
+msgid "Animation duration"
+msgstr "Canlandırma süresi"
+
+#. settings-schema.json->tileAnimationDuration->tooltip
+msgid ""
+"How long a window glides into its place, in milliseconds. The window still "
+"lands on its final frame at once; only the picture travels."
+msgstr ""
+"Bir pencerenin yerine kayma süresi, milisaniye olarak. Pencere yine de hemen "
+"son çerçevesine oturur; yalnızca görüntü hareket eder."
+
 #. settings-schema.json->focusBorder->description
 msgid "Border around the focused window"
 msgstr "Odaklanmış pencerenin etrafına çerçeve"

@@ -337,6 +337,22 @@ msgstr "Hiệu ứng động khi xếp ô"
 msgid "Windows glide into their new place. Off: they jump there at once."
 msgstr "Cửa sổ lướt êm đến vị trí mới. Tắt: chúng nhảy đến đó ngay lập tức."
 
+#. settings-schema.json->tileAnimationDuration->units
+msgid "ms"
+msgstr "ms"
+
+#. settings-schema.json->tileAnimationDuration->description
+msgid "Animation duration"
+msgstr "Thời lượng hiệu ứng"
+
+#. settings-schema.json->tileAnimationDuration->tooltip
+msgid ""
+"How long a window glides into its place, in milliseconds. The window still "
+"lands on its final frame at once; only the picture travels."
+msgstr ""
+"Thời gian một cửa sổ trượt về vị trí của nó, tính bằng mili giây. Cửa sổ vẫn "
+"vào đúng khung cuối cùng ngay lập tức; chỉ hình ảnh di chuyển."
+
 #. settings-schema.json->focusBorder->description
 msgid "Border around the focused window"
 msgstr "Viền quanh cửa sổ có tiêu điểm"

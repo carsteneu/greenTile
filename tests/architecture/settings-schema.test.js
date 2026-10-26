@@ -83,12 +83,64 @@ test('stored boolean values survive the checkbox -> switch upgrade', () => {
 });
 
 test('the single-window select replaced the switch in the Tiling section', () => {
-    assert.deepEqual(schema.layout['tiling-section'].keys, ['tileAnimation', 'focusBorder', 'singleWindowMode']);
+    assert.deepEqual(schema.layout['tiling-section'].keys,
+        ['tileAnimation', 'tileAnimationDuration', 'focusBorder', 'singleWindowMode']);
     const sectionKeys = new Set(Object.values(schema.layout)
         .filter((entry) => entry.type === 'section')
         .flatMap((entry) => entry.keys));
     assert.equal(sectionKeys.has('singleWindowMode'), true, 'the select is shown');
     assert.equal(sectionKeys.has('fillSingleWindow'), false, 'the old key is hidden from every section but stays in the schema');
+});
+
+test('the animation duration is a spinbutton bounded to what the placement clamps', () => {
+    // lib/tiling/place.js clamps a stored value to the same bounds, so a
+    // hand-edited settings file cannot animate for ever or not at all
+    assert.deepEqual(schema.tileAnimationDuration, {
+        type: 'spinbutton',
+        default: 250,
+        min: 50,
+        max: 1000,
+        step: 50,
+        units: 'ms',
+        description: 'Animation duration',
+        tooltip: 'How long a window glides into its place, in milliseconds. The window still lands on its final frame at once; only the picture travels.',
+        dependency: 'tileAnimation',
+    });
+    // Cinnamon's _checkSanity accepts a stored spinbutton value only strictly
+    // inside (min, max), so the default has to survive an upgrade.
+    assert.ok(schema.tileAnimationDuration.default > schema.tileAnimationDuration.min);
+    assert.ok(schema.tileAnimationDuration.default < schema.tileAnimationDuration.max);
+    // Known platform limitation, deliberate here: the two extremes ARE reachable in
+    // the dialog, so a user who picks exactly 50 or exactly 1000 loses that choice
+    // on the next _doUpgrade (any future edit of this file bumps the checksum).
+    // Widening the schema to 49/1001 would keep them, but the spinbutton would then
+    // show 49 and 1001 — a range that lies about what the setting does. The bounds
+    // stay honest; windowGap is widened instead (below) because its bound is never
+    // rendered: it is set only from the preset panel.
+    assert.equal(schema.tileAnimationDuration.min, 50);
+    assert.equal(schema.tileAnimationDuration.max, 1000);
+    // the duration is only meaningful while the animation is on
+    assert.equal(schema.tileAnimationDuration.dependency, 'tileAnimation');
+});
+
+test('a stored gap at the model maximum survives the upgrade this key forces', () => {
+    // Adding a key changes the template checksum, so every existing install runs
+    // _doUpgrade once — and that re-runs _checkSanity over EVERY stored value, which
+    // accepts a spinbutton only STRICTLY inside (min, max). windowGap is set only
+    // from the preset panel, whose + stops at GAP_MAX (lib/model/gap.js), so the
+    // stored 48 must stay strictly inside the schema bounds or the upgrade would
+    // silently reset those users to 0.
+    const { load } = require('../helpers/cinnamon-loader');
+    const { GAP_MAX } = load('./lib/model/gap.js');
+    assert.equal(GAP_MAX, 48, 'the model maximum the panel can reach');
+    assert.ok(schema.windowGap.max > GAP_MAX,
+        'the schema max has to stay above the model maximum, or _checkSanity drops a stored '
+        + GAP_MAX + ' on the next schema change');
+    const current = { windowGap: { value: GAP_MAX } };
+    const upgraded = doUpgrade(current, {
+        windowGap: { type: 'spinbutton', min: schema.windowGap.min, max: schema.windowGap.max, default: schema.windowGap.default },
+    });
+    assert.equal(upgraded.windowGap.value, GAP_MAX, 'the stored gap is kept across the upgrade');
 });
 
 test('singleWindowMode is a combobox over language-neutral tokens, with the migration marker', () => {

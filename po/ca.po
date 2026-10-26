@@ -341,6 +341,22 @@ msgid "Windows glide into their new place. Off: they jump there at once."
 msgstr ""
 "Les finestres llisquen fins al seu lloc nou. Desactivat: hi salten de cop."
 
+#. settings-schema.json->tileAnimationDuration->units
+msgid "ms"
+msgstr "ms"
+
+#. settings-schema.json->tileAnimationDuration->description
+msgid "Animation duration"
+msgstr "Durada de l'animació"
+
+#. settings-schema.json->tileAnimationDuration->tooltip
+msgid ""
+"How long a window glides into its place, in milliseconds. The window still "
+"lands on its final frame at once; only the picture travels."
+msgstr ""
+"Quant triga una finestra a lliscar fins al seu lloc, en mil·lisegons. La "
+"finestra continua arribant de cop al seu marc final; només viatja la imatge."
+
 #. settings-schema.json->focusBorder->description
 msgid "Border around the focused window"
 msgstr "Vora al voltant de la finestra enfocada"

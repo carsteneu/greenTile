@@ -339,6 +339,23 @@ msgstr "Animera kakling"
 msgid "Windows glide into their new place. Off: they jump there at once."
 msgstr "Fönstren glider till sin nya plats. Av: de hoppar dit direkt."
 
+#. settings-schema.json->tileAnimationDuration->units
+msgid "ms"
+msgstr "ms"
+
+#. settings-schema.json->tileAnimationDuration->description
+msgid "Animation duration"
+msgstr "Animationens längd"
+
+#. settings-schema.json->tileAnimationDuration->tooltip
+msgid ""
+"How long a window glides into its place, in milliseconds. The window still "
+"lands on its final frame at once; only the picture travels."
+msgstr ""
+"Hur länge ett fönster glider till sin plats, i millisekunder. Fönstret "
+"landar fortfarande direkt på sin slutliga ram; det är bara bilden som "
+"färdas."
+
 #. settings-schema.json->focusBorder->description
 msgid "Border around the focused window"
 msgstr "Ram runt det fokuserade fönstret"

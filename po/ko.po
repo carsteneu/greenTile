@@ -335,6 +335,21 @@ msgstr "타일링 애니메이션"
 msgid "Windows glide into their new place. Off: they jump there at once."
 msgstr "창이 새 위치로 부드럽게 이동합니다. 끔: 즉시 그 위치로 이동합니다."
 
+#. settings-schema.json->tileAnimationDuration->units
+msgid "ms"
+msgstr "ms"
+
+#. settings-schema.json->tileAnimationDuration->description
+msgid "Animation duration"
+msgstr "애니메이션 길이"
+
+#. settings-schema.json->tileAnimationDuration->tooltip
+msgid ""
+"How long a window glides into its place, in milliseconds. The window still "
+"lands on its final frame at once; only the picture travels."
+msgstr ""
+"창이 제자리로 미끄러지는 시간(밀리초)입니다. 창은 즉시 최종 프레임에 자리 잡고, 그림만 이동합니다."
+
 #. settings-schema.json->focusBorder->description
 msgid "Border around the focused window"
 msgstr "포커스된 창 주위의 테두리"

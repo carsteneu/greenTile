@@ -25,6 +25,7 @@ export const SETTINGS_KEYS: Readonly<{
     panelSize: "panelSize";
     windowGap: "windowGap";
     tileAnimation: "tileAnimation";
+    tileAnimationDuration: "tileAnimationDuration";
     focusBorder: "focusBorder";
     fillSingleWindow: "fillSingleWindow";
     singleWindowMode: "singleWindowMode";

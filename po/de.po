@@ -362,6 +362,23 @@ msgid "Windows glide into their new place. Off: they jump there at once."
 msgstr ""
 "Fenster gleiten an ihren neuen Platz. Aus: Sie springen sofort dorthin."
 
+#. settings-schema.json->tileAnimationDuration->units
+msgid "ms"
+msgstr "ms"
+
+#. settings-schema.json->tileAnimationDuration->description
+msgid "Animation duration"
+msgstr "Animationsdauer"
+
+#. settings-schema.json->tileAnimationDuration->tooltip
+msgid ""
+"How long a window glides into its place, in milliseconds. The window still "
+"lands on its final frame at once; only the picture travels."
+msgstr ""
+"Wie lange ein Fenster bis zu seinem Platz gleitet, in Millisekunden. Das "
+"Fenster landet weiterhin sofort auf seinem endgültigen Rahmen; nur das Bild "
+"wandert."
+
 #. settings-schema.json->focusBorder->description
 msgid "Border around the focused window"
 msgstr "Rahmen um das fokussierte Fenster"
