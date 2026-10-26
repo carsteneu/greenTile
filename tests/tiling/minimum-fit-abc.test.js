@@ -52,7 +52,7 @@ const countCycle = () => {
     C.minimized = true;
     C.emit('notify::minimized');
     const timer = f.env.timers.get(f.app.auto._timers.get(0));
-    assert.equal(timer.ms, 300);
+    assert.equal(timer.ms, 100, 'a minimizing window frees an area: the short vanish wait');
     timer.cb();
     assert.deepEqual([A.rect, B.rect], [[0, 0, 1200, 1100], [1200, 0, 1200, 1100]]);
     C.minimized = false;

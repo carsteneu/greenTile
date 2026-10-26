@@ -5,7 +5,7 @@ Every feature in one line or two. Details and screenshots are in the [README](RE
 ## Tiling
 
 - **Auto mode**: tiles the windows of a monitor and workspace automatically. Switched per monitor and workspace with `Super+Ctrl+A` / `Super+Ctrl+D` or in the preset panel; on by default where a preset is assigned.
-- **Auto retile**: opening, closing, minimizing or restoring a window retiles its monitor after 300 ms. Dialogs are ignored.
+- **Auto retile**: opening, closing, minimizing or restoring a window retiles its monitor. A window that appears waits 300 ms for its map; one that disappears (closed or minimized) is retiled after 100 ms, because the area it frees shows the desktop until the neighbours are placed. Dialogs are ignored.
 - **Retile on workspace switch**: switching to a workspace with auto mode on tiles it again.
 - **Auto grid**: the layout used without a preset. From 2100 px width up to 6 windows in a row, then evenly filled full-width rows; on narrower monitors up to 3 in a row, then 3 columns with stacks.
 - **Screen-position order**: windows are placed in the order they already have on screen. New windows normally join the end; a successful explicit drop keeps its chosen position, and focus navigation does not consume resize-order protection.

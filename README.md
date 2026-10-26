@@ -92,7 +92,7 @@ _Column spans in the painter: the middle column spans two grid columns (1 : 2 : 
 
 Auto mode is switched per monitor and workspace. It is on by default where a preset is assigned, otherwise off. While it is on:
 
-- New, closed, minimized and restored windows retile the monitor after 300 ms. New windows are appended at the end.
+- New and restored windows retile the monitor after 300 ms; closed and minimized ones after 100 ms, because the area they free would show the desktop for as long as the retile waits. New windows are appended at the end.
 - A window moved by hand snaps into the slot where you drop it. Moving it to another monitor retiles both.
 - Movements are animated (**Animation duration**, 50 to 1000 ms, default 250 ms; can be turned off with **Animate tiling**).
 

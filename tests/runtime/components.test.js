@@ -662,6 +662,55 @@ test('auto scheduleMonitor: per-monitor timers replaced and guarded at fire time
     assert.equal(stale.calls.retileMonitor.length, 0, 'a monitor that lost readiness never retiles');
 });
 
+// A window that DISAPPEARS leaves an empty surface behind: the freed area shows
+// the desktop until the retile places its neighbours, and that wait is what
+// issue #2 reads as a flicker (measured live: 314 ms between minimize and the
+// first placement). A window that APPEARS needs a wait of its own — it has to be
+// mapped and positioned before it can be placed. The two paths therefore
+// debounce differently: the removal wait is short enough to hide the hole and
+// still long enough to coalesce the burst a multi-window close produces.
+test('auto debounce: a removal is retiled sooner than an appearance', () => {
+    const added = makeAuto({ auto: true });
+    added.auto.onWindowAdded(makeApp(), added.activeWorkspace, makeTrackedWindow(1));
+    assert.deepEqual(added.ml.pendingMs(), [300], 'an appearing window keeps the settle wait');
+
+    const minimized = makeAuto({ auto: true });
+    minimized.auto.onMinimizedNotify(makeApp(),
+        makeTrackedWindow(2, { minimized: true, get_workspace: () => minimized.activeWorkspace }));
+    assert.deepEqual(minimized.ml.pendingMs(), [100],
+        'minimizing frees an area: no reason to wait for a map that will not come');
+
+    const restored = makeAuto({ auto: true });
+    restored.auto.onMinimizedNotify(makeApp(),
+        makeTrackedWindow(2, { minimized: false, get_workspace: () => restored.activeWorkspace }));
+    assert.deepEqual(restored.ml.pendingMs(), [300], 'restoring is an appearance again');
+
+    const closed = makeAuto({ auto: true });
+    const app = makeApp();
+    closed.auto.onWindowAdded(app, closed.activeWorkspace, makeTrackedWindow(3));
+    for (const id of [...closed.ml.live.keys()]) {
+        closed.ml.fire(id);
+    }
+    closed.auto.onWindowRemoved(app, closed.activeWorkspace, makeTrackedWindow(3));
+    assert.deepEqual(closed.ml.pendingMs(), [100], 'closing frees an area too');
+});
+
+test('auto debounce: a burst of removals still collapses into one retile', () => {
+    const { ml, auto, activeWorkspace } = makeAuto({ auto: true });
+    const app = makeApp();
+    for (const seq of [1, 2, 3]) {
+        auto.onWindowAdded(app, activeWorkspace, makeTrackedWindow(seq));
+    }
+    assert.equal(ml.live.size, 1, 'three additions, one timer per monitor');
+    for (const id of [...ml.live.keys()]) {
+        ml.fire(id);
+    }
+    for (const seq of [1, 2, 3]) {
+        auto.onWindowRemoved(app, activeWorkspace, makeTrackedWindow(seq));
+    }
+    assert.deepEqual(ml.pendingMs(), [100], 'three closes in a row are one pending retile, not three');
+});
+
 // A plain click on a title bar is a MOVING grab that ends without the window
 // having moved (drop.end reports false there too). Retiling for it re-places the
 // whole surface, and any 1-2 px deviation of a window (a focus-driven shift, a
