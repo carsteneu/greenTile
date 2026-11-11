@@ -96,3 +96,59 @@ test('gap_value clamps to 0..MAX on the step and tolerates junk', () => {
     assert.equal(m.gapValue('12'), 0);
     assert.equal(m.gapValue(NaN), 0);
 });
+
+// ---------------- space to the screen edge (setting edgeGap) ----------------
+
+test('edge_value clamps to 0..48 on a 1px step and tolerates junk', () => {
+    assert.equal(m.EDGE_MAX, 48);
+    assert.equal(m.EDGE_STEP, 1);
+    assert.equal(m.edgeValue(12), 12);
+    assert.equal(m.edgeValue(7.6), 7);
+    assert.equal(m.edgeValue(-4), 0);
+    assert.equal(m.edgeValue(999), m.EDGE_MAX);
+    assert.equal(m.edgeValue(undefined), 0);
+    assert.equal(m.edgeValue('12'), 0);
+    assert.equal(m.edgeValue(NaN), 0);
+});
+
+test('a full-area cell moves in from all four edges by the edge value', () => {
+    // the lone window case of issue 4: no neighbour, so only the edge rule applies
+    assert.deepEqual(m.gapCell(area.slice(), area, 0, 12), [12, 42, 1896, 1146]);
+    assert.deepEqual(m.gapCell(area.slice(), area, 0, m.EDGE_MAX), [48, 78, 1824, 1074]);
+});
+
+test('the edge value insets only the sides on the area edge, the inner side stays', () => {
+    // left column: only its right side borders the neighbour, so only the three
+    // outer sides take the edge inset
+    assert.deepEqual(m.gapCell([0, 30, 960, 1170], area, 0, 12), [12, 42, 948, 1146]);
+});
+
+test('gap and edge are independent: the seam keeps its gap, the outside takes the edge', () => {
+    const left = m.gapCell([0, 30, 960, 1170], area, 10, 12);
+    const right = m.gapCell([960, 30, 960, 1170], area, 10, 12);
+    assert.deepEqual(left, [12, 42, 943, 1146]);
+    assert.deepEqual(right, [965, 42, 943, 1146]);
+    assert.equal(right[0] - (left[0] + left[2]), 10, 'the seam between the windows is unchanged');
+    assert.equal(left[0] - area[0], 12, 'the left window keeps 12 px to the screen edge');
+    assert.equal(area[0] + area[2] - (right[0] + right[2]), 12, 'and the right one too');
+});
+
+test('an edge value of 0 leaves every cell exactly as the gap alone does', () => {
+    const cells = [[0, 30, 960, 1170], [960, 30, 960, 1170], [400, 300, 300, 200], area.slice()];
+    for (const cell of cells) {
+        for (const gap of [0, 2, 10, 48]) {
+            assert.deepEqual(m.gapCell(cell, area, gap, 0), m.gapCell(cell, area, gap),
+                'cell ' + JSON.stringify(cell) + ' gap ' + gap);
+        }
+    }
+});
+
+test('an edge larger than the cell never collapses or leaves the usable area', () => {
+    // the bounded clamp has to absorb the edge inset as well, not only the gap
+    for (const a of [[0, 0, 10, 10], [0, 0, 100, 60], [100, 200, 12, 12]]) {
+        const c = m.gapCell(a.slice(), a, 0, m.EDGE_MAX);
+        assert.ok(c[2] >= 1 && c[3] >= 1, 'at least 1px, got ' + JSON.stringify(c));
+        assert.ok(c[0] >= a[0] && c[1] >= a[1], 'origin inside, got ' + JSON.stringify(c));
+        assert.ok(c[0] + c[2] <= a[0] + a[2] && c[1] + c[3] <= a[1] + a[3], 'ends inside, got ' + JSON.stringify(c));
+    }
+});
