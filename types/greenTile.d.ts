@@ -242,6 +242,7 @@ type OpsFacade = {
     presetsRead(app: AppFacade): Preset[];
     presetsWrite(app: AppFacade, presets: Preset[]): void;
     gap(app: AppFacade): number;
+    edge(app: AppFacade): number;
     rulesPick(rules: Rule[], count: number): Rule | null;
     windowCount(app: AppFacade): number;
     rebuild(app: AppFacade | null): void;

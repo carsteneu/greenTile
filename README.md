@@ -63,7 +63,7 @@ On the first start after upgrading to a version with these starters, greenTile a
 - ✎ on a card opens that preset in the editor; ✕ on the assigned card removes the assignment. **＋ New preset** starts an empty one.
 - The assigned card shows whether its assignment is live: with auto mode on it carries the state color, with auto mode off it rests in neutral gray and its line adds **Auto: off** — a paused assignment places nothing until auto mode is on again.
 - **Auto: on / off** in the title bar shows and switches auto mode (green = on).
-- **Gap between windows** sets the gap between tiled windows (0 to 48 px). Screen edges stay flush.
+- **Gap between windows** sets the gap between tiled windows (0 to 48 px). Screen edges stay flush by default; **Space to the screen edge**, right below it, sets 0 to 48 px between the windows and the edge of the usable area, the panel edge included. The two values are independent.
 - **Reset sizes** is offered when borders were moved or layouts dragged on this monitor and workspace, and returns to the preset's widths — the column spans when the rule has them, equal sizes otherwise. Clicking a card does the same and takes the button away; sizes made while the panel is open bring it back the next time the panel is opened.
 - The sun/moon button switches between light and dark; ⚙ opens the settings.
 - Drag the title bar to move the panel, ◢ to resize it. `Esc`, ✕ or a click outside closes it.

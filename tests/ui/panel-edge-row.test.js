@@ -87,7 +87,7 @@ const runRetile = (env) => {
 };
 
 test('the edge stepper sits in its own row directly below the gap row', () => {
-    const { env, ext, app } = openPanel({ edgeGap: 12 });
+    const { ext, app } = openPanel({ edgeGap: 12 });
     const rows = byClass(app.panel.actor, /^gk-gap-row(?: |$)/);
     assert.equal(rows.length, 2, 'two spacing rows');
     assert.equal(labelOf(rows[0]), 'Gap between windows', 'the window gap keeps the first row');
