@@ -4,7 +4,10 @@ languages:
     # has no node_modules and no registry. Four suites load the `typescript`
     # devDependency and cannot run there: tests/architecture/generated-types,
     # tests/architecture/zero-module-state, tests/model/minimum-fit-abc,
-    # tests/tiling/minimum-fit-abc. Everything else runs dependency-free —
-    # 1139 tests, proven in that sandbox. Locally `npm test` / `npm run check`
-    # stay the full gate (1177 tests).
+    # tests/tiling/minimum-fit-abc. Everything else runs dependency-free, and
+    # the profile was proved in exactly that sandbox.
+    #
+    # Counts are deliberately absent: they drift with every added test. Locally
+    # `npm test` and `npm run check` stay the full gate, those four suites
+    # included — run them before trusting a green sandbox run alone.
     test_command: node --test $(ls tests/*/*.test.js | grep -vE "minimum-fit-abc|generated-types|zero-module-state")
