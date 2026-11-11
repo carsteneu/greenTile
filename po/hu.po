@@ -434,16 +434,17 @@ msgstr "Egyetlen ablak"
 
 #. settings-schema.json->singleWindowMode->tooltip
 msgid ""
-"What happens to a lone tiled window when automatic tiling or a preset is on. "
-"\"Leave it untouched\" does nothing to it. \"Fill the monitor\" makes it "
-"fill the whole usable area. \"Center the window\" centers it at about 62 % "
-"of the width (golden ratio) and 90 % of the height."
+"What happens to a lone tiled window when automatic tiling or a preset is "
+"on. \"Leave it untouched\" does nothing to it. \"Fill the monitor\" makes it "
+"fill the whole usable area. \"Center the window\" centers it at about 62 % of "
+"the width (golden ratio), but never wider than 1600 px, and 90 % of the "
+"height."
 msgstr ""
 "Mi történik az egyetlen csempézett ablakkal, ha az automatikus csempézés "
 "vagy egy előbeállítás be van kapcsolva. Hagyd érintetlenül: nem tesz vele "
 "semmit. Töltse ki a monitort: kitölti a teljes hasznos területet. Ablak "
-"középre: körülbelül a szélesség 62 %-ánál (aranymetszés) és a magasság 90 %-"
-"ánál középre igazítja."
+"középre: körülbelül a szélesség 62 %-ánál (aranymetszés), de soha nem "
+"szélesebb 1600 px-nél, és a magasság 90 %-ánál középre igazítja."
 
 #. settings-schema.json->singleWindowMode->options
 msgid "Leave it untouched"

@@ -424,15 +424,15 @@ msgstr "창 하나"
 
 #. settings-schema.json->singleWindowMode->tooltip
 msgid ""
-"What happens to a lone tiled window when automatic tiling or a preset is on. "
-"\"Leave it untouched\" does nothing to it. \"Fill the monitor\" makes it "
-"fill the whole usable area. \"Center the window\" centers it at about 62 % "
-"of the width (golden ratio) and 90 % of the height."
+"What happens to a lone tiled window when automatic tiling or a preset is "
+"on. \"Leave it untouched\" does nothing to it. \"Fill the monitor\" makes it "
+"fill the whole usable area. \"Center the window\" centers it at about 62 % of "
+"the width (golden ratio), but never wider than 1600 px, and 90 % of the "
+"height."
 msgstr ""
-"자동 타일링이나 프리셋이 켜져 있을 때 창이 하나만 남으면 어떻게 할지 정합니"
-"다. 그대로 두기: 아무것도 하지 않습니다. 모니터 채우기: 사용 가능한 영역 전체"
-"를 채웁니다. 창 가운데 정렬: 너비의 약 62 %(황금비), 높이의 90 %로 가운데에 "
-"배치합니다."
+"자동 타일링이나 프리셋이 켜져 있을 때 창이 하나만 남으면 어떻게 할지 정합니다. 그대로 두기: 아무것도 하지 않습니다. 모니터 "
+"채우기: 사용 가능한 영역 전체를 채웁니다. 창 가운데 정렬: 너비의 약 62 %(황금비)이되 폭이 1600 px를 넘지는 않으며, "
+"높이의 90 %로 가운데에 배치합니다."
 
 #. settings-schema.json->singleWindowMode->options
 msgid "Leave it untouched"

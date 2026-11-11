@@ -434,15 +434,17 @@ msgstr "Tek pencere"
 
 #. settings-schema.json->singleWindowMode->tooltip
 msgid ""
-"What happens to a lone tiled window when automatic tiling or a preset is on. "
-"\"Leave it untouched\" does nothing to it. \"Fill the monitor\" makes it "
-"fill the whole usable area. \"Center the window\" centers it at about 62 % "
-"of the width (golden ratio) and 90 % of the height."
+"What happens to a lone tiled window when automatic tiling or a preset is "
+"on. \"Leave it untouched\" does nothing to it. \"Fill the monitor\" makes it "
+"fill the whole usable area. \"Center the window\" centers it at about 62 % of "
+"the width (golden ratio), but never wider than 1600 px, and 90 % of the "
+"height."
 msgstr ""
 "Otomatik döşeme veya bir ön ayar açıkken tek kalan döşenmiş pencereye ne "
 "olacağını belirler. Olduğu gibi bırak: ona dokunmaz. Monitörü doldur: "
-"kullanılabilir alanın tamamını kaplar. Pencereyi ortala: genişliğin yaklaşık "
-"% 62'sinde (altın oran) ve yüksekliğin % 90'ında ortalar."
+"kullanılabilir alanın tamamını kaplar. Pencereyi ortala: genişliğin "
+"yaklaşık % 62'sinde (altın oran), ancak genişliği asla 1600 px'i aşmaz, ve "
+"yüksekliğin % 90'ında ortalar."
 
 #. settings-schema.json->singleWindowMode->options
 msgid "Leave it untouched"

@@ -434,16 +434,17 @@ msgstr "Ein einzelnes Fenster"
 
 #. settings-schema.json->singleWindowMode->tooltip
 msgid ""
-"What happens to a lone tiled window when automatic tiling or a preset is on. "
-"\"Leave it untouched\" does nothing to it. \"Fill the monitor\" makes it "
-"fill the whole usable area. \"Center the window\" centers it at about 62 % "
-"of the width (golden ratio) and 90 % of the height."
+"What happens to a lone tiled window when automatic tiling or a preset is "
+"on. \"Leave it untouched\" does nothing to it. \"Fill the monitor\" makes it "
+"fill the whole usable area. \"Center the window\" centers it at about 62 % of "
+"the width (golden ratio), but never wider than 1600 px, and 90 % of the "
+"height."
 msgstr ""
 "Was mit einem einzelnen gekachelten Fenster geschieht, wenn automatisches "
 "Kacheln oder ein Preset aktiv ist. Unverändert lassen: keine Wirkung. "
 "Monitor füllen: das Fenster nimmt die ganze nutzbare Fläche ein. Fenster "
-"zentrieren: das Fenster wird bei etwa 62 % der Breite (Goldener Schnitt) und "
-"90 % der Höhe zentriert."
+"zentrieren: das Fenster wird bei etwa 62 % der Breite (Goldener Schnitt), "
+"aber nie breiter als 1600 px, und 90 % der Höhe zentriert."
 
 #. settings-schema.json->singleWindowMode->options
 msgid "Leave it untouched"

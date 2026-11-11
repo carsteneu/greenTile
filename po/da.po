@@ -433,15 +433,17 @@ msgstr "Et enkelt vindue"
 
 #. settings-schema.json->singleWindowMode->tooltip
 msgid ""
-"What happens to a lone tiled window when automatic tiling or a preset is on. "
-"\"Leave it untouched\" does nothing to it. \"Fill the monitor\" makes it "
-"fill the whole usable area. \"Center the window\" centers it at about 62 % "
-"of the width (golden ratio) and 90 % of the height."
+"What happens to a lone tiled window when automatic tiling or a preset is "
+"on. \"Leave it untouched\" does nothing to it. \"Fill the monitor\" makes it "
+"fill the whole usable area. \"Center the window\" centers it at about 62 % of "
+"the width (golden ratio), but never wider than 1600 px, and 90 % of the "
+"height."
 msgstr ""
 "Hvad der sker med et enkelt tilet vindue, når automatisk tiling eller en "
 "forudindstilling er slået til. Lad det være: gør ingenting ved det. Fyld "
 "skærmen: lader det fylde hele det brugbare område. Centrér vinduet: "
-"centrerer det ved cirka 62 % af bredden (det gyldne snit) og 90 % af højden."
+"centrerer det ved cirka 62 % af bredden (det gyldne snit), men aldrig "
+"bredere end 1600 px, og 90 % af højden."
 
 #. settings-schema.json->singleWindowMode->options
 msgid "Leave it untouched"

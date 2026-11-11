@@ -435,15 +435,17 @@ msgstr "Одно окно"
 
 #. settings-schema.json->singleWindowMode->tooltip
 msgid ""
-"What happens to a lone tiled window when automatic tiling or a preset is on. "
-"\"Leave it untouched\" does nothing to it. \"Fill the monitor\" makes it "
-"fill the whole usable area. \"Center the window\" centers it at about 62 % "
-"of the width (golden ratio) and 90 % of the height."
+"What happens to a lone tiled window when automatic tiling or a preset is "
+"on. \"Leave it untouched\" does nothing to it. \"Fill the monitor\" makes it "
+"fill the whole usable area. \"Center the window\" centers it at about 62 % of "
+"the width (golden ratio), but never wider than 1600 px, and 90 % of the "
+"height."
 msgstr ""
 "Что происходит с единственным окном в плитке, когда включено автоматическое "
 "размещение или предустановка. Не трогать: ничего с ним не делает. Заполнить "
 "монитор: занимает всю доступную область. Центрировать окно: центрирует его "
-"примерно на 62 % ширины (золотое сечение) и 90 % высоты."
+"примерно на 62 % ширины (золотое сечение), но никогда не шире 1600 px, и 90 "
+"% высоты."
 
 #. settings-schema.json->singleWindowMode->options
 msgid "Leave it untouched"
