@@ -9,6 +9,7 @@
     },
     "scripts": {
         "test": "node --test tests/*/*.test.js",
+        "test:no-deps": "node --test $(ls tests/*/*.test.js | grep -vE \"minimum-fit-abc|generated-types|zero-module-state\")",
         "lint": "eslint .",
         "typecheck": "tsc -p tsconfig.json",
         "check:types": "node scripts/type-contract-check.mjs",

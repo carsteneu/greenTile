@@ -1,13 +1,13 @@
 languages:
   - name: node
-    # The verifier's sandbox (bwrap: read-only root, tmpfs /home, --unshare-net)
-    # has no node_modules and no registry. Four suites load the `typescript`
-    # devDependency and cannot run there: tests/architecture/generated-types,
-    # tests/architecture/zero-module-state, tests/model/minimum-fit-abc,
-    # tests/tiling/minimum-fit-abc. Everything else runs dependency-free, and
-    # the profile was proved in exactly that sandbox.
+    # npm test is the gate, but four suites load the `typescript` devDependency
+    # at require time: tests/architecture/generated-types,
+    # tests/architecture/zero-module-state, tests/model/minimum-fit-abc and
+    # tests/tiling/minimum-fit-abc. The verifier's sandbox (bwrap: read-only
+    # root, tmpfs /home, --unshare-net) has no node_modules and cannot install
+    # any, so it runs the dependency-free subset instead.
     #
-    # Counts are deliberately absent: they drift with every added test. Locally
-    # `npm test` and `npm run check` stay the full gate, those four suites
-    # included — run them before trusting a green sandbox run alone.
-    test_command: node --test $(ls tests/*/*.test.js | grep -vE "minimum-fit-abc|generated-types|zero-module-state")
+    # Both commands live in package.json, so the subset has one definition and
+    # no count that drifts. Locally npm test and npm run check stay the full
+    # gate, those four suites included.
+    test_command: npm run test:no-deps
