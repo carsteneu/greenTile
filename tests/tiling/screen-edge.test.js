@@ -73,8 +73,9 @@ test('the window gap keeps its own geometry when the edge value is set', () => {
 });
 
 test('center mode keeps its golden frame, measured inside the layout area', () => {
-    // With no margin the centered frame is exactly the one the pinned chain of
-    // tests/model/single.test.js:102 describes (that test stays untouched).
+    // With no margin the centered frame is exactly the one the 2000x1100 row of the
+    // centered-frame test in tests/model/single.test.js pins (this monitor is that size,
+    // well below the 1600 px ceiling).
     const flush = run({ windowGap: 8, edgeGap: 0, singleWindowMode: 'center', singleWindowMigrated: true }, 1);
     assert.deepEqual(flush.rects[0], CENTER, 'no margin: the golden frame as before');
     flush.ext.disable();
