@@ -2,6 +2,8 @@
 *.orig
 *.mo
 node_modules/
+# a worktree links the shared dependency dir instead of copying it
+node_modules
 
 # internal working documents, kept local
 docs/todo.md
