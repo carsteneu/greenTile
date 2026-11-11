@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: greenTile 2.3.0\n"
 "Report-Msgid-Bugs-To: https://github.com/carsteneu\n"
-"POT-Creation-Date: 2026-11-11 09:57+0100\n"
+"POT-Creation-Date: 2026-11-11 10:42+0100\n"
 "PO-Revision-Date: 2022-02-09 15:35-0300\n"
 "Last-Translator: Marcelo Aof\n"
 "Language-Team: Brazilian Portuguese\n"
@@ -140,7 +140,6 @@ msgstr "%d px"
 msgid "Reset sizes"
 msgstr "Redefinir tamanhos"
 
-#. settings-schema.json->edgeGap->description
 #: lib/ui/panel.js:237
 msgid "Space to the screen edge"
 msgstr "Espaço até a borda da tela"
@@ -360,6 +359,14 @@ msgstr ""
 #. settings-schema.json->edgeGap->units
 msgid "px"
 msgstr "px"
+
+#. settings-schema.json->edgeGap->description
+msgid ""
+"Space to the screen edge (set with − / + in the preset panel; not shown in "
+"this dialog)"
+msgstr ""
+"Espaço até a borda da tela (definido com − / + no painel de predefinições; "
+"não exibido nesta caixa de diálogo)"
 
 #. settings-schema.json->edgeGap->tooltip
 msgid ""

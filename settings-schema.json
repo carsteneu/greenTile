@@ -226,7 +226,7 @@
    },
    "edgeGap": {
       "type": "spinbutton",
-      "description": "Space to the screen edge",
+      "description": "Space to the screen edge (set with − / + in the preset panel; not shown in this dialog)",
       "tooltip": "Distance tiled windows keep from the edges of the usable area, the panel edge included. Independent of the gap between windows; 0 leaves them flush with the edges.",
       "min": 0,
       "max": 49,

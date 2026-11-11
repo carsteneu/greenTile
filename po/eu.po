@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: greenTile 2.3.0\n"
 "Report-Msgid-Bugs-To: https://github.com/carsteneu\n"
-"POT-Creation-Date: 2026-11-11 09:57+0100\n"
+"POT-Creation-Date: 2026-11-11 10:42+0100\n"
 "PO-Revision-Date: 2024-05-30 9:50+1\n"
 "Last-Translator: Muxutruk <muxutruk2@users.noreply.github.com>\n"
 "Language-Team: Basque <muxutruk2@users.noreply.github.com>\n"
@@ -138,7 +138,6 @@ msgstr "%d px"
 msgid "Reset sizes"
 msgstr "Berrezarri tamainak"
 
-#. settings-schema.json->edgeGap->description
 #: lib/ui/panel.js:237
 msgid "Space to the screen edge"
 msgstr "Tartea pantailaren ertzera"
@@ -358,6 +357,14 @@ msgstr ""
 #. settings-schema.json->edgeGap->units
 msgid "px"
 msgstr "px"
+
+#. settings-schema.json->edgeGap->description
+msgid ""
+"Space to the screen edge (set with − / + in the preset panel; not shown in "
+"this dialog)"
+msgstr ""
+"Tartea pantailaren ertzera (− / + bidez ezartzen da aurrezarpenen panelean; "
+"ez da elkarrizketa-koadro honetan erakusten)"
 
 #. settings-schema.json->edgeGap->tooltip
 msgid ""

@@ -10,7 +10,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: greenTile 2.3.0\n"
 "Report-Msgid-Bugs-To: https://github.com/carsteneu\n"
-"POT-Creation-Date: 2026-11-11 09:57+0100\n"
+"POT-Creation-Date: 2026-11-11 10:42+0100\n"
 "PO-Revision-Date: 2025-03-05 17:30+0300\n"
 "Last-Translator: Erdem Uygun <uygun.erdem@gmail.com>\n"
 "Language-Team: Turkish <dev@pardus.org.tr>\n"
@@ -142,7 +142,6 @@ msgstr "%d px"
 msgid "Reset sizes"
 msgstr "Boyutları sıfırla"
 
-#. settings-schema.json->edgeGap->description
 #: lib/ui/panel.js:237
 msgid "Space to the screen edge"
 msgstr "Ekran kenarına boşluk"
@@ -360,6 +359,14 @@ msgstr ""
 #. settings-schema.json->edgeGap->units
 msgid "px"
 msgstr "px"
+
+#. settings-schema.json->edgeGap->description
+msgid ""
+"Space to the screen edge (set with − / + in the preset panel; not shown in "
+"this dialog)"
+msgstr ""
+"Ekran kenarına boşluk (ön ayar panelinde − / + ile ayarlanır; bu iletişim "
+"kutusunda gösterilmez)"
 
 #. settings-schema.json->edgeGap->tooltip
 msgid ""

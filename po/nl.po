@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: greenTile 2.3.0\n"
 "Report-Msgid-Bugs-To: https://github.com/carsteneu\n"
-"POT-Creation-Date: 2026-11-11 09:57+0100\n"
+"POT-Creation-Date: 2026-11-11 10:42+0100\n"
 "PO-Revision-Date: 2024-04-17 10:36+0200\n"
 "Last-Translator: qadzek\n"
 "Language-Team: Dutch\n"
@@ -138,7 +138,6 @@ msgstr "%d px"
 msgid "Reset sizes"
 msgstr "Afmetingen herstellen"
 
-#. settings-schema.json->edgeGap->description
 #: lib/ui/panel.js:237
 msgid "Space to the screen edge"
 msgstr "Ruimte tot de schermrand"
@@ -359,6 +358,14 @@ msgstr ""
 msgid "px"
 msgstr "px"
 
+#. settings-schema.json->edgeGap->description
+msgid ""
+"Space to the screen edge (set with − / + in the preset panel; not shown in "
+"this dialog)"
+msgstr ""
+"Ruimte tot de schermrand (in te stellen met − / + in het "
+"voorinstellingenpaneel; niet getoond in dit venster)"
+
 #. settings-schema.json->edgeGap->tooltip
 msgid ""
 "Distance tiled windows keep from the edges of the usable area, the panel "
@@ -366,8 +373,8 @@ msgid ""
 "with the edges."
 msgstr ""
 "Afstand die betegelde vensters houden tot de randen van het bruikbare "
-"gebied, inclusief de rand van het paneel. Onafhankelijk van de ruimte "
-"tussen vensters; 0 laat ze tegen de randen aansluiten."
+"gebied, inclusief de rand van het paneel. Onafhankelijk van de ruimte tussen "
+"vensters; 0 laat ze tegen de randen aansluiten."
 
 #. settings-schema.json->tileAnimation->description
 msgid "Animate tiling"

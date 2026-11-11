@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: greenTile 2.3.0\n"
 "Report-Msgid-Bugs-To: https://github.com/carsteneu\n"
-"POT-Creation-Date: 2026-11-11 09:57+0100\n"
+"POT-Creation-Date: 2026-11-11 10:42+0100\n"
 "PO-Revision-Date: 2023-03-31 10:43+0200\n"
 "Last-Translator: Dragone2 <dragone2@risposteinformatiche.it>\n"
 "Language-Team: Italian\n"
@@ -140,7 +140,6 @@ msgstr "%d px"
 msgid "Reset sizes"
 msgstr "Ripristina dimensioni"
 
-#. settings-schema.json->edgeGap->description
 #: lib/ui/panel.js:237
 msgid "Space to the screen edge"
 msgstr "Spazio dal bordo dello schermo"
@@ -360,6 +359,14 @@ msgstr ""
 msgid "px"
 msgstr "px"
 
+#. settings-schema.json->edgeGap->description
+msgid ""
+"Space to the screen edge (set with − / + in the preset panel; not shown in "
+"this dialog)"
+msgstr ""
+"Spazio dal bordo dello schermo (impostata con − / + nel pannello delle "
+"preimpostazioni; non mostrata in questa finestra)"
+
 #. settings-schema.json->edgeGap->tooltip
 msgid ""
 "Distance tiled windows keep from the edges of the usable area, the panel "
@@ -367,8 +374,8 @@ msgid ""
 "with the edges."
 msgstr ""
 "Distanza che le finestre affiancate mantengono dai bordi dell'area "
-"utilizzabile, bordo del pannello compreso. Indipendente dalla spaziatura "
-"tra le finestre; 0 le lascia a filo dei bordi."
+"utilizzabile, bordo del pannello compreso. Indipendente dalla spaziatura tra "
+"le finestre; 0 le lascia a filo dei bordi."
 
 #. settings-schema.json->tileAnimation->description
 msgid "Animate tiling"
