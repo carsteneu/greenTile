@@ -72,12 +72,67 @@ test('full-area cell is flush with the screen edges (no gap on outer edges)', ()
 // ---------------- centered frame (option "center") ----------------
 
 test('the centered frame is golden-ratio wide, 90 % high and centered', () => {
-    // 5120 * 0.6180339887 = 3164.33 -> 3164; 1400 * 0.9 = 1260;
-    // margins (5120-3164)/2 = 978 and (1400-1260)/2 = 70, both exact.
-    assert.deepEqual(m.singleCenterRect([0, 0, 5120, 1400]), [978, 70, 3164, 1260]);
+    // 5120 * 0.6180339887 = 3164.33 -> 3164, held at the 1600 ceiling; 1400 * 0.9 = 1260;
+    // margins (5120-1600)/2 = 1760 and (1400-1260)/2 = 70, both exact.
+    assert.deepEqual(m.singleCenterRect([0, 0, 5120, 1400]), [1760, 70, 1600, 1260]);
     // 1920 * 0.6180339887 = 1186.63 -> 1187; (1920-1187)/2 = 366.5 -> floor 366.
     assert.deepEqual(m.singleCenterRect([0, 0, 1920, 1040]), [366, 52, 1187, 936]);
     assert.deepEqual(m.singleCenterRect([0, 0, 2000, 1100]), [382, 55, 1236, 990]);
+});
+
+// The frame is a share of the width, so it grows with the monitor: on a very
+// wide screen the golden frame passes 1600 px and the window becomes a wall of
+// text. 1600 is the product decision — it leaves every usable width up to
+// 2560 px untouched (laptops, most desktops) and is a width text still reads
+// without the eye wandering between lines. The number is hard-coded on purpose:
+// a setting would put a UI on a detail, and changing it again should be a
+// reasoned change, not a slider.
+test('the centered frame never grows wider than 1600 px', () => {
+    for (const [area, want] of [
+        // 3440 * 0.618 = 2126 -> capped; (3440 - 1600)/2 = 920.
+        [[0, 0, 3440, 1440], [920, 72, 1600, 1296]],
+        [[0, 0, 3840, 1080], [1120, 54, 1600, 972]],
+        [[0, 0, 5120, 1400], [1760, 70, 1600, 1260]],
+        // An area already inset by the screen-edge setting (12 px each side):
+        // the cap holds for that smaller area, and the frame stays centred in it.
+        [[12, 12, 5096, 1376], [1760, 81, 1600, 1238]],
+    ]) {
+        assert.deepEqual(m.singleCenterRect(area), want, 'area=' + JSON.stringify(area));
+    }
+});
+
+test('the cap binds from a usable width of 2590 px, not below it', () => {
+    // 2589 * 0.6180339887 = 1600.09 -> 1600 either way: the cap changes nothing yet.
+    assert.deepEqual(m.singleCenterRect([0, 0, 2589, 1040]), [494, 52, 1600, 936], 'just below the cap');
+    // 2590 * 0.6180339887 = 1601.08 -> 1601 without the cap; the cap pulls it to 1600.
+    assert.deepEqual(m.singleCenterRect([0, 0, 2590, 1040]), [495, 52, 1600, 936], 'first width the cap binds');
+});
+
+test('the cap leaves the golden ratio alone on a 2560 px area', () => {
+    // The widest monitor the number is chosen to leave untouched.
+    assert.deepEqual(m.singleCenterRect([0, 0, 2560, 1040]), [489, 52, 1582, 936]);
+});
+
+test('the capped frame stays centred on its axis', () => {
+    for (const area of [[0, 0, 3440, 1440], [0, 0, 3840, 1080], [0, 0, 5120, 1400], [100, 40, 5120, 1400]]) {
+        const [x, , w] = m.singleCenterRect(area);
+        const left = x - area[0];
+        const right = area[0] + area[2] - (x + w);
+        assert.ok(right - left === 0 || right - left === 1,
+            'margins differ by at most one pixel: ' + JSON.stringify(area) + ' left=' + left + ' right=' + right);
+    }
+});
+
+// A capped frame leaves much larger margins than the golden one, so the outset
+// singleCenterLayout adds for the gap must still be cancelled exactly.
+test('the gap compensation still lands on the capped frame', () => {
+    for (const area of [[0, 0, 3440, 1440], [0, 0, 5120, 1400], [12, 12, 5096, 1376]]) {
+        for (const g of [0, 2, 8, 48]) {
+            const layout = m.singleCenterLayout(area, g);
+            assert.deepEqual(gap.gapCell(layout.area, area, g), m.singleCenterRect(area),
+                'area=' + JSON.stringify(area) + ' gap=' + g);
+        }
+    }
 });
 
 test('the centered frame respects the usable-area origin (panels, other monitors)', () => {
