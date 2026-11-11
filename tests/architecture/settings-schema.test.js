@@ -143,6 +143,32 @@ test('a stored gap at the model maximum survives the upgrade this key forces', (
     assert.equal(upgraded.windowGap.value, GAP_MAX, 'the stored gap is kept across the upgrade');
 });
 
+test('the screen-edge key is hidden from the dialog so its maximum survives the upgrade', () => {
+    // Same protection as windowGap: the panel is the only writer, so the dialog never
+    // renders the spinbutton and _checkSanity never sees a value equal to max. Put the
+    // key in a section and the reachable 48 would be reset to 0 on the next _doUpgrade.
+    const { load } = require('../helpers/cinnamon-loader');
+    const { EDGE_MAX, EDGE_STEP } = load('./lib/model/gap.js');
+    assert.equal(EDGE_MAX, 48, 'the model maximum the panel can reach');
+    assert.equal(EDGE_STEP, 1, 'the stepper stores whole pixels');
+    assert.equal(schema.edgeGap.type, 'spinbutton');
+    assert.equal(schema.edgeGap.default, 0, 'default 0: nothing changes for an existing install');
+    assert.equal(schema.edgeGap.step, EDGE_STEP);
+    assert.equal(schema.edgeGap.min, 0);
+    assert.ok(schema.edgeGap.max > EDGE_MAX,
+        'the schema max has to stay above the model maximum, or _checkSanity drops a stored '
+        + EDGE_MAX + ' on the next schema change');
+    const sectionKeys = new Set(Object.values(schema.layout)
+        .filter((entry) => entry.type === 'section')
+        .flatMap((entry) => entry.keys));
+    assert.equal(sectionKeys.has('edgeGap'), false, 'never rendered in the dialog');
+    const current = { edgeGap: { value: EDGE_MAX } };
+    const upgraded = doUpgrade(current, {
+        edgeGap: { type: 'spinbutton', min: schema.edgeGap.min, max: schema.edgeGap.max, default: schema.edgeGap.default },
+    });
+    assert.equal(upgraded.edgeGap.value, EDGE_MAX, 'the stored edge distance is kept across the upgrade');
+});
+
 test('singleWindowMode is a combobox over language-neutral tokens, with the migration marker', () => {
     assert.equal(schema.singleWindowMode.type, 'combobox');
     assert.equal(schema.singleWindowMode.default, 'center');
