@@ -134,3 +134,11 @@ test('an area too small for the edge distance keeps a 1px axis inside itself', (
     }
     assert.deepEqual(m.insetArea([0, 0, 10, 10], m.EDGE_MAX), [4, 4, 2, 2]);
 });
+
+test('a degenerate axis stays degenerate, so the placement layer still declines it', () => {
+    // usableArea returns a 0-wide axis when panels use up the whole monitor; placeCell
+    // declines such an area and leaves the window where it is. A fabricated 1 px would
+    // place and animate a frame that the default never moves.
+    assert.deepEqual(m.insetArea([0, 0, 0, 1100], 48), [0, 48, 0, 1004]);
+    assert.deepEqual(m.insetArea([0, 0, 1100, 0], 48), [48, 0, 1004, 0]);
+});

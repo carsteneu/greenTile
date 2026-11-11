@@ -1,10 +1,11 @@
 'use strict';
 // The optional "Space to the screen edge" (setting edgeGap) through the REAL
-// extension on the fake Cinnamon runtime. The value insets every cell side that
-// lies on the edge of the usable area, independently of the window gap: a lone
-// window in fill mode finally gets a margin (issue 4), two windows keep their
-// seam and gain an outer margin, center mode stays untouched, and the drag
-// preview shows the frame the drop then produces.
+// extension on the fake Cinnamon runtime. The value insets the AREA a layout is
+// solved in (lib/tiling/screen.js layoutArea), so fit, minima, splits and the drop
+// preview all see the same smaller box: a lone window in fill mode gets a margin
+// (issue 4), two windows keep their seam and gain an outer margin, center measures
+// its golden frame inside the inset area, a layout at an application minimum does
+// not overlap, and the drag preview shows the frame the drop then produces.
 const test = require('node:test');
 const assert = require('node:assert/strict');
 const {
