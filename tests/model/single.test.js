@@ -117,6 +117,8 @@ test('the capped frame stays centred on its axis', () => {
     // An odd difference is where the floored offset shows: (3841-1600)/2 = 1120.5.
     // Rounding up or to nearest would put the frame one pixel right of centre.
     assert.deepEqual(m.singleCenterRect([0, 0, 3841, 1080]), [1120, 54, 1600, 972], 'odd margin floors to the left');
+    // And the same on the vertical axis, which no other row pins: (1030-927)/2 = 51.5.
+    assert.deepEqual(m.singleCenterRect([0, 0, 1920, 1030]), [366, 51, 1187, 927], 'odd vertical margin floors');
     for (const area of [[0, 0, 3440, 1440], [0, 0, 3840, 1080], [0, 0, 5120, 1400], [100, 40, 5120, 1400]]) {
         const [x, , w] = m.singleCenterRect(area);
         const left = x - area[0];
@@ -128,7 +130,7 @@ test('the capped frame stays centred on its axis', () => {
 
 // A capped frame leaves much larger margins than the golden one, so the outset
 // singleCenterLayout adds for the gap must still be cancelled exactly. (The
-// existing gap test above already covers 5120: its expected value comes from
+// existing gap test below already covers 5120: its expected value comes from
 // singleCenterRect, so it tracks the ceiling on its own.)
 test('the gap compensation still lands on the capped frame at other wide sizes', () => {
     for (const area of [[0, 0, 3440, 1440], [12, 12, 5096, 1376]]) {
