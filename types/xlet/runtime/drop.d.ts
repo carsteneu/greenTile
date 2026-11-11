@@ -11,9 +11,8 @@
  * @property {(monitor: CinnamonMonitor, focus: CinnamonWindow | null, ws?: number) => CinnamonWindow[]} collectWindows
  * @property {(app: AppFacade, monitorIndex: number, windowCount: number) => Layout | null} layoutShape
  * @property {(app: AppFacade, monitorIndex: number, wsIndex: number, patch: {}) => void} layoutSet
- * @property {(monitor: CinnamonMonitor) => Rect} usableArea
+ * @property {(app: AppFacade, monitor: CinnamonMonitor) => Rect} layoutArea
  * @property {(app: AppFacade) => number} gap
- * @property {(app: AppFacade) => number} edge
  * @property {(app: AppFacade, wins: CinnamonWindow[], layout: Layout, area: Rect, animate: boolean, monitorIndex: number, wsIndex: number, n: number) => FittedLayout} placeFit
  * @property {() => Rgb} accentRgb
  */
@@ -99,9 +98,8 @@ export type DropDeps = {
     collectWindows: (monitor: CinnamonMonitor, focus: CinnamonWindow | null, ws?: number) => CinnamonWindow[];
     layoutShape: (app: AppFacade, monitorIndex: number, windowCount: number) => Layout | null;
     layoutSet: (app: AppFacade, monitorIndex: number, wsIndex: number, patch: {}) => void;
-    usableArea: (monitor: CinnamonMonitor) => Rect;
+    layoutArea: (app: AppFacade, monitor: CinnamonMonitor) => Rect;
     gap: (app: AppFacade) => number;
-    edge: (app: AppFacade) => number;
     placeFit: (app: AppFacade, wins: CinnamonWindow[], layout: Layout, area: Rect, animate: boolean, monitorIndex: number, wsIndex: number, n: number) => FittedLayout;
     accentRgb: () => Rgb;
 };

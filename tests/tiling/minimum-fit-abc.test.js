@@ -222,7 +222,7 @@ test('ABC: runtime fit selects shape once and reads raw split once for effective
         app.split = runtime;
         const landingSource = fs.readFileSync(path.join(ROOT, 'lib/tiling/swap.js'), 'utf8');
         globalThis.imports.extensions['greenTile@carsteneu'].lib.tiling = {
-            screen: { usableArea: () => [0, 0, 2000, 1100] },
+            screen: { usableArea: () => [0, 0, 2000, 1100], layoutArea: () => [0, 0, 2000, 1100] },
             windows: {}, layout: {}, order: { sortReadingOrder: (_app, wins) => wins }, retile: {},
             place: { gap: () => 0 },
         };

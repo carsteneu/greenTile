@@ -10,4 +10,5 @@ export const EDGE_MAX: number;
 export const EDGE_STEP: number;
 export function gapValue(v: any): number;
 export function edgeValue(v: any): number;
-export function gapCell(cell: Rect, area: Rect, gap: number, edge?: number): Rect;
+export function insetArea(area: Rect, edge: number): Rect;
+export function gapCell(cell: Rect, area: Rect, gap: number): Rect;

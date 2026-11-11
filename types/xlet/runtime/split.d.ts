@@ -7,7 +7,7 @@ export const SPLIT_FLUSH_MS: number;
  * mainloop (imports.mainloop), glib (imports.gi.GLib), gio (imports.gi.Gio),
  * global (the global object), main (imports.ui.main — layoutManager),
  * focusWindow, layoutFor, layoutShape, layoutSet, collectWindows,
- * usableArea, gap, retileMonitor, grabOpName, sortReadingOrder.
+ * layoutArea, gap, retileMonitor, grabOpName, sortReadingOrder.
  * @typedef {Object} SplitDeps
  * @property {AnyRecord} mainloop imports.mainloop
  * @property {AnyRecord} glib imports.gi.GLib
@@ -19,7 +19,7 @@ export const SPLIT_FLUSH_MS: number;
  * @property {(app: AppFacade, monitorIndex: number, windowCount: number) => DragLayout | null} layoutShape
  * @property {(app: AppFacade, monitorIndex: number, wsIndex: number, patch: {}) => void} layoutSet
  * @property {(monitor: CinnamonMonitor, focus: CinnamonWindow | null, ws?: number | null) => CinnamonWindow[]} collectWindows
- * @property {(monitor: CinnamonMonitor) => Rect} usableArea
+ * @property {(app: AppFacade, monitor: CinnamonMonitor) => Rect} layoutArea
  * @property {(app: AppFacade) => number} gap
  * @property {(app: AppFacade, monitorIndex: number, focused: CinnamonWindow | null, animate?: boolean, wsIndex?: number | null, actionLayout?: Layout | null, settle?: boolean) => void} retileMonitor
  * @property {(op: string) => string} grabOpName
@@ -288,7 +288,7 @@ export const Split: {
  * mainloop (imports.mainloop), glib (imports.gi.GLib), gio (imports.gi.Gio),
  * global (the global object), main (imports.ui.main — layoutManager),
  * focusWindow, layoutFor, layoutShape, layoutSet, collectWindows,
- * usableArea, gap, retileMonitor, grabOpName, sortReadingOrder.
+ * layoutArea, gap, retileMonitor, grabOpName, sortReadingOrder.
  */
 export type SplitDeps = {
     /**
@@ -319,7 +319,7 @@ export type SplitDeps = {
     layoutShape: (app: AppFacade, monitorIndex: number, windowCount: number) => DragLayout | null;
     layoutSet: (app: AppFacade, monitorIndex: number, wsIndex: number, patch: {}) => void;
     collectWindows: (monitor: CinnamonMonitor, focus: CinnamonWindow | null, ws?: number | null) => CinnamonWindow[];
-    usableArea: (monitor: CinnamonMonitor) => Rect;
+    layoutArea: (app: AppFacade, monitor: CinnamonMonitor) => Rect;
     gap: (app: AppFacade) => number;
     retileMonitor: (app: AppFacade, monitorIndex: number, focused: CinnamonWindow | null, animate?: boolean, wsIndex?: number | null, actionLayout?: Layout | null, settle?: boolean) => void;
     grabOpName: (op: string) => string;

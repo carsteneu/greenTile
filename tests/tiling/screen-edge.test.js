@@ -15,16 +15,18 @@ const AREA = [0, 0, 2000, 1100];
 const SPAWN = [20, 0, 300, 300];
 const CENTER = [382, 55, 1236, 990];
 
-// Retile `n` windows on monitor 0 (automatic tiling) with the given settings.
-const run = (settings, n) => {
+// Retile `n` windows on a monitor (automatic tiling) with the given settings; `min`
+// gives every window an application-enforced minimum frame.
+const run = (settings, n, monitor = MONITOR, min = null) => {
     const { env, ext } = makeEnv(settings);
-    enableOnMonitors(env, ext, [MONITOR]);
+    enableOnMonitors(env, ext, [monitor]);
     const ws = makeWorkspace(env);
     ws.index = () => 0;
     env.activeWorkspace = ws;
     const wins = [];
     for (let i = 1; i <= n; i++) {
-        wins.push(makeWindow(env, i, [SPAWN[0] + (i - 1) * 20, SPAWN[1], SPAWN[2], SPAWN[3]], 0));
+        wins.push(makeWindow(env, i, [SPAWN[0] + (i - 1) * 20, SPAWN[1], SPAWN[2], SPAWN[3]], 0,
+            null, min ? { minSize: min } : {}));
     }
     env.tabList.push(...wins);
     env.display.focus_window = wins[0] || null;
@@ -69,14 +71,48 @@ test('the window gap keeps its own geometry when the edge value is set', () => {
     edged.ext.disable();
 });
 
-test('center mode is untouched: its frame never lies on the area edge', () => {
-    // the pinned chain of tests/model/single.test.js:102 stays valid because the
-    // centered frame sits far from the edge, so the edge rule cannot reach it
+test('center mode keeps its golden frame, measured inside the layout area', () => {
+    // With no margin the centered frame is exactly the one the pinned chain of
+    // tests/model/single.test.js:102 describes (that test stays untouched).
+    const flush = run({ windowGap: 8, edgeGap: 0, singleWindowMode: 'center', singleWindowMigrated: true }, 1);
+    assert.deepEqual(flush.rects[0], CENTER, 'no margin: the golden frame as before');
+    flush.ext.disable();
+    // With a margin the frame is the golden share of the inset area: smaller by the
+    // margin and correspondingly further in, with equal margins on each axis. That is
+    // the direct consequence of giving the layout a smaller box, not an accident.
+    const area = [12, 12, 1976, 1076];
     for (const gap of [0, 8]) {
         const { rects, ext } = run({ windowGap: gap, edgeGap: 12, singleWindowMode: 'center', singleWindowMigrated: true }, 1);
-        assert.deepEqual(rects[0], CENTER, 'gap ' + gap + ': the golden frame is placed unchanged');
+        assert.deepEqual(rects[0], [389, 66, 1221, 968], 'gap ' + gap + ': golden share of the inset area');
+        assert.ok(Math.abs((rects[0][0] - area[0]) - (area[0] + area[2] - (rects[0][0] + rects[0][2]))) <= 1,
+            'equal horizontal margins inside the area');
+        assert.ok(Math.abs((rects[0][1] - area[1]) - (area[1] + area[3] - (rects[0][1] + rects[0][3]))) <= 1,
+            'equal vertical margins inside the area');
         ext.disable();
     }
+});
+
+test('a layout at an application minimum does not overlap when the margin is set', () => {
+    // The fit budgets the final frames. With the margin inside the area it sees the
+    // smaller box, so three 320 px columns on a 1000 px monitor regroup instead of
+    // growing past each other — before the area carried the margin, the fit certified
+    // a fit for 1000 px and gapCell then shaved the outer windows into an overlap.
+    const { ext, app, wins } = run({ windowGap: 0, edgeGap: 48 }, 3, { x: 0, y: 0, width: 1000, height: 800 }, [320, 100]);
+    const rects = wins.map((w) => w.rect.slice());
+    const overlaps = (a, b) => a[0] < b[0] + b[2] && b[0] < a[0] + a[2]
+        && a[1] < b[1] + b[3] && b[1] < a[1] + a[3];
+    for (let i = 0; i < rects.length; i++) {
+        for (let j = i + 1; j < rects.length; j++) {
+            assert.equal(overlaps(rects[i], rects[j]), false,
+                'frames ' + i + ' and ' + j + ' must not overlap: ' + JSON.stringify(rects));
+        }
+        assert.ok(rects[i][0] >= 48 && rects[i][1] >= 48
+            && rects[i][0] + rects[i][2] <= 1000 - 48 && rects[i][1] + rects[i][3] <= 800 - 48,
+        'frame ' + i + ' keeps the margin: ' + JSON.stringify(rects[i]));
+    }
+    // the regrouped arrangement still fills the area it was given
+    assert.equal(app.split.placementFor(app, 0, 0, 3, wins) != null, true, 'a placement was recorded');
+    ext.disable();
 });
 
 test('the drag preview shows the frame the drop produces', () => {

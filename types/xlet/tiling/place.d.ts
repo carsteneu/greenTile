@@ -6,7 +6,6 @@ export const ANIMATE_MS_MAX: number;
 export function animateMs(v: any): number;
 export function place(app: AppFacade, metaWindow: CinnamonWindow, x: number, y: number, width: number, height: number, animate?: boolean): CinnamonRectangle;
 export function gap(app: AppFacade): number;
-export function edge(app: AppFacade): number;
 export function placeCell(app: AppFacade, metaWindow: CinnamonWindow, x: number, y: number, width: number, height: number, area: Rect, animate?: boolean): {
     req: Rect;
     got: CinnamonRectangle;

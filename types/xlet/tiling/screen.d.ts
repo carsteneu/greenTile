@@ -2,5 +2,7 @@
 // regenerate with: npm run gen:types
 export function panelHeight(panel: AnyRecord): number;
 export function usableArea(monitor: CinnamonMonitor): Rect;
+export function edge(app: AppFacade): number;
+export function layoutArea(app: AppFacade, monitor: CinnamonMonitor): Rect;
 export function focusWindow(): any;
 export function focusMonitorIndex(): any;
