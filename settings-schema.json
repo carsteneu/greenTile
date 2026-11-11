@@ -224,6 +224,16 @@
       "units": "px",
       "default": 0
    },
+   "edgeGap": {
+      "type": "spinbutton",
+      "description": "Space to the screen edge",
+      "tooltip": "Distance tiled windows keep from the edges of the usable area, the panel edge included. Independent of the gap between windows; 0 leaves them flush with the edges.",
+      "min": 0,
+      "max": 49,
+      "step": 1,
+      "units": "px",
+      "default": 0
+   },
    "tileAnimation": {
       "type": "switch",
       "default": true,

@@ -41,7 +41,7 @@ test('the schema carries exactly this persisted key set', () => {
     // must be a deliberate change of this list
     assert.deepEqual(SCHEMA_KEYS, [
         'accentColor', 'accentMode', 'autoOffHotkey', 'autoOnHotkey',
-        'columns3Hotkey', 'columns6Hotkey', 'excludeAppPicker', 'excludeHotkey',
+        'columns3Hotkey', 'columns6Hotkey', 'edgeGap', 'excludeAppPicker', 'excludeHotkey',
         'exclusions', 'exclusionsSeeded', 'fillSingleWindow', 'focusBorder', 'layouts', 'panelSize',
         'panelTheme', 'presetHotkey', 'presets', 'resizeNarrowerHotkey',
           'resizeShorterHotkey', 'resizeTallerHotkey', 'resizeWiderHotkey',

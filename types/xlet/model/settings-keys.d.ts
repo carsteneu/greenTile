@@ -24,6 +24,7 @@ export const SETTINGS_KEYS: Readonly<{
     layouts: "layouts";
     panelSize: "panelSize";
     windowGap: "windowGap";
+    edgeGap: "edgeGap";
     tileAnimation: "tileAnimation";
     tileAnimationDuration: "tileAnimationDuration";
     focusBorder: "focusBorder";

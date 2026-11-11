@@ -40,6 +40,7 @@ export const App: {
             presetsRead: any;
             presetsWrite: any;
             gap: any;
+            edge: any;
             rulesPick: any;
             windowCount: any;
             rebuild: any;

@@ -180,6 +180,8 @@ const SETTINGS_DEFAULTS = {
     singleWindowMigrated: true,
     panelSize: '',
     windowGap: 8,
+    // the schema default: 0 keeps every fixture's geometry exactly as before
+    edgeGap: 0,
     // the schema default of the tiling-animation duration
     tileAnimationDuration: 250,
 };
@@ -953,7 +955,12 @@ const createCinnamonEnv = (options) => {
             this.px = x;
             this.py = y;
         }
-        set_size() {}
+        set_size(w, h) {
+            // Recorded, not ignored: the drag preview is an actor whose geometry is
+            // its only observable (tests/tiling/screen-edge.test.js compares it with
+            // the frame the drop produces).
+            this.allocSize = [w, h];
+        }
         // Records the width request (there is no allocation in the fake): the
         // card grid tests read it back to prove the cards follow the panel width.
         set_width(w) {
