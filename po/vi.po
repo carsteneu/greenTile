@@ -429,18 +429,8 @@ msgid "A single window"
 msgstr "Một cửa sổ"
 
 #. settings-schema.json->singleWindowMode->tooltip
-msgid ""
-"What happens to a lone tiled window when automatic tiling or a preset is "
-"on. \"Leave it untouched\" does nothing to it. \"Fill the monitor\" makes it "
-"fill the whole usable area. \"Center the window\" centers it at about 62 % of "
-"the width (golden ratio), but never wider than 1600 px, and 90 % of the "
-"height."
-msgstr ""
-"Điều gì xảy ra với cửa sổ được xếp ô duy nhất khi tính năng xếp ô tự động "
-"hoặc một cấu hình sẵn đang bật. Giữ nguyên: không làm gì với nó. Lấp đầy "
-"màn hình: chiếm toàn bộ vùng sử dụng được. Căn giữa cửa sổ: căn giữa ở "
-"khoảng 62 % chiều rộng (tỷ lệ vàng), nhưng không bao giờ rộng hơn 1600 px, "
-"và 90 % chiều cao."
+msgid "A lone window while automatic tiling or a preset is on: leave it untouched, let it fill the usable area, or center it."
+msgstr "Một cửa sổ đơn lẻ khi bật xếp gạch tự động hoặc một preset: để nguyên, lấp đầy vùng khả dụng hoặc căn giữa."
 
 #. settings-schema.json->singleWindowMode->options
 msgid "Leave it untouched"

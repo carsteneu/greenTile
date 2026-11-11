@@ -21,7 +21,7 @@ const SCHEMA = JSON.parse(fs.readFileSync(path.join(ROOT, 'settings-schema.json'
 const STARTERS = JSON.parse(SCHEMA.presets.default);
 const AREA = [0, 0, 2000, 1100];
 const SPAWN = [20, 0, 300, 300];
-const CENTER = [382, 55, 1236, 990];
+const CENTER = [444, 55, 1112, 990];
 
 // Retile `n` windows on monitor 0 under the given mode. `preset` null uses
 // automatic tiling instead of an assigned preset. Returns the windows' frames.

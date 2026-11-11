@@ -435,18 +435,8 @@ msgid "A single window"
 msgstr "Une seule fenêtre"
 
 #. settings-schema.json->singleWindowMode->tooltip
-msgid ""
-"What happens to a lone tiled window when automatic tiling or a preset is "
-"on. \"Leave it untouched\" does nothing to it. \"Fill the monitor\" makes it "
-"fill the whole usable area. \"Center the window\" centers it at about 62 % of "
-"the width (golden ratio), but never wider than 1600 px, and 90 % of the "
-"height."
-msgstr ""
-"Ce qui arrive à une fenêtre pavée seule lorsque le pavage automatique ou un "
-"préréglage est actif. Ne pas y toucher : ne lui fait rien. Remplir l'écran "
-": elle occupe toute la zone utile. Centrer la fenêtre : elle est centrée à "
-"environ 62 % de la largeur (nombre d'or), mais jamais plus large que 1600 "
-"px, et 90 % de la hauteur."
+msgid "A lone window while automatic tiling or a preset is on: leave it untouched, let it fill the usable area, or center it."
+msgstr "Une fenêtre seule lorsqu'un pavage automatique ou un préréglage est actif : la laisser intacte, la faire remplir la zone utilisable ou la centrer."
 
 #. settings-schema.json->singleWindowMode->options
 msgid "Leave it untouched"

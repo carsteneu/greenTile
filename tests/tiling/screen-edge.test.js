@@ -14,7 +14,7 @@ const {
 
 const AREA = [0, 0, 2000, 1100];
 const SPAWN = [20, 0, 300, 300];
-const CENTER = [382, 55, 1236, 990];
+const CENTER = [444, 55, 1112, 990];
 
 // Retile `n` windows on a monitor (automatic tiling) with the given settings; `min`
 // gives every window an application-enforced minimum frame.
@@ -72,20 +72,19 @@ test('the window gap keeps its own geometry when the edge value is set', () => {
     edged.ext.disable();
 });
 
-test('center mode keeps its golden frame, measured inside the layout area', () => {
+test('center mode keeps its frame, measured inside the layout area', () => {
     // With no margin the centered frame is exactly the one the 2000x1100 row of the
-    // centered-frame test in tests/model/single.test.js pins (this monitor is that size,
-    // well below the 1600 px ceiling).
+    // centered-frame test in tests/model/single.test.js pins (this monitor is that size).
     const flush = run({ windowGap: 8, edgeGap: 0, singleWindowMode: 'center', singleWindowMigrated: true }, 1);
-    assert.deepEqual(flush.rects[0], CENTER, 'no margin: the golden frame as before');
+    assert.deepEqual(flush.rects[0], CENTER, 'no margin: the centered frame as before');
     flush.ext.disable();
-    // With a margin the frame is the golden share of the inset area: smaller by the
+    // With a margin the frame is the share of the inset area: smaller by the
     // margin and correspondingly further in, with equal margins on each axis. That is
     // the direct consequence of giving the layout a smaller box, not an accident.
     const area = [12, 12, 1976, 1076];
     for (const gap of [0, 8]) {
         const { rects, ext } = run({ windowGap: gap, edgeGap: 12, singleWindowMode: 'center', singleWindowMigrated: true }, 1);
-        assert.deepEqual(rects[0], [389, 66, 1221, 968], 'gap ' + gap + ': golden share of the inset area');
+        assert.deepEqual(rects[0], [450, 66, 1099, 968], 'gap ' + gap + ': share of the inset area');
         assert.ok(Math.abs((rects[0][0] - area[0]) - (area[0] + area[2] - (rects[0][0] + rects[0][2]))) <= 1,
             'equal horizontal margins inside the area');
         assert.ok(Math.abs((rects[0][1] - area[1]) - (area[1] + area[3] - (rects[0][1] + rects[0][3]))) <= 1,

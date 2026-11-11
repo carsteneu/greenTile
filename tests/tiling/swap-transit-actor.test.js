@@ -14,7 +14,7 @@
 //
 // Host evidence (2026-10-08 16:02, 5120x1400 usable): a hidden ws12 Brave window had
 // frame x=0 but actor x=962 = 978 - 16, i.e. exactly the centred-lone x as it stood
-// before the 1600 px width ceiling (5120 * 0.618 -> 3164 wide, floor((5120 - 3164) / 2)
+// 2848 wide, floor((5120 - 2848) / 2) = 1136
 // = 978; the same area centres at floor((5120 - 1600) / 2) = 1760 today) minus Brave's
 // 16 px CSD extent: the actor kept the position it had before it was pushed.
 //
@@ -191,7 +191,7 @@ const setup = () => {
     const b = win(2, [2560, 0, 2560, 1440], ws12);
     const c = win(3, [0, 0, 2560, 1440], ws13);
     const d = win(4, [2560, 0, 2560, 1440], ws13);
-    const lone = win(5, [1760, 72, 1600, 1296], ws14);
+    const lone = win(5, [1136, 72, 2848, 1296], ws14);
     app.ops.layoutSet(app, 0, 0, { auto: true });
     app.ops.layoutSet(app, 0, 1, { auto: true, preset: 'p2' });
     app.ops.layoutSet(app, 0, 2, { auto: true });
@@ -269,7 +269,7 @@ test('a round trip of the centred lone window ws14 -> ws12 -> ws14 leaves no sta
     assert.equal(f.lone.get_workspace(), f.ws13);
     pushOut(f, 'right', f.lone);
     assert.equal(f.lone.get_workspace(), f.ws14, 'the window is home again');
-    assert.deepEqual(f.lone.rect, [1760, 72, 1600, 1296], 'the frame is the centred lone cell');
+    assert.deepEqual(f.lone.rect, [1136, 72, 2848, 1296], 'the frame is the centred lone cell');
     assert.deepEqual(desynced(f.all), [], 'an actor kept a position from before a push');
     const a = f.lone.get_compositor_private();
     assert.ok(a.x + a.width <= WIDE.width + EXT[2], 'the lone window is drawn inside the monitor');
@@ -294,7 +294,7 @@ test('the push moves no frame while the switch effect runs; both surfaces are pl
         'target and source were placed once, after the effect');
     assert.deepEqual(f.c.rect, [3413, 0, 1707, 1440], 'the pushed window took the edge slot it came in through');
     assert.deepEqual(frames([f.a, f.b]), ['0,0,1707,1440', '1707,0,1706,1440'], 'the residents moved over');
-    assert.deepEqual(f.d.rect, [1760, 72, 1600, 1296], 'ws13 kept one window, centred');
+    assert.deepEqual(f.d.rect, [1136, 72, 2848, 1296], 'ws13 kept one window, centred');
     assert.deepEqual(desynced(f.all), []);
 });
 
@@ -746,7 +746,7 @@ test('a drop that lands inside the effect is placed after it, and a closed windo
         // would re-place the surface anyway and hide what the held drop did
         fire(f.env, 16);
         if (closeOne) {
-            assert.deepEqual(f.b.rect, [1760, 72, 1600, 1296], 'the remaining window was retiled alone (centred)');
+            assert.deepEqual(f.b.rect, [1136, 72, 2848, 1296], 'the remaining window was retiled alone (centred)');
             assert.deepEqual(f.a.rect, before[0].split(',').map(Number), 'the closed window was not placed');
         }
         else {
@@ -935,7 +935,7 @@ test('a held drop whose dragged window still lies mostly on another monitor is p
     // frame of this fixture, so the test still has bite — the positive twin at
     // "the remaining window was retiled alone (centred)" proves that frame is
     // reachable in this setup. A stale value would pass forever.
-    assert.notDeepEqual(f.a.rect, [1760, 72, 1600, 1296], 'the resident was not retiled alone');
+    assert.notDeepEqual(f.a.rect, [1136, 72, 2848, 1296], 'the resident was not retiled alone');
 });
 
 test('a held drop whose neighbour moved to another workspace becomes a plain retile', () => {
@@ -950,7 +950,7 @@ test('a held drop whose neighbour moved to another workspace becomes a plain ret
     f.a.change_workspace_by_index(2); // moved to ws14 during the hold
     f.finishSwitch();
     fire(f.env, 16);
-    assert.deepEqual(f.b.rect, [1760, 72, 1600, 1296], 'the remaining window was retiled alone (centred)');
+    assert.deepEqual(f.b.rect, [1136, 72, 2848, 1296], 'the remaining window was retiled alone (centred)');
 });
 
 test('at most 32 presses wait in one hold', () => {

@@ -432,18 +432,8 @@ msgid "A single window"
 msgstr "Eén venster"
 
 #. settings-schema.json->singleWindowMode->tooltip
-msgid ""
-"What happens to a lone tiled window when automatic tiling or a preset is "
-"on. \"Leave it untouched\" does nothing to it. \"Fill the monitor\" makes it "
-"fill the whole usable area. \"Center the window\" centers it at about 62 % of "
-"the width (golden ratio), but never wider than 1600 px, and 90 % of the "
-"height."
-msgstr ""
-"Wat er gebeurt met één tegelt venster als automatisch tegelen of een "
-"voorinstelling aan staat. Onaangeroerd laten: doet er niets mee. Vul het "
-"scherm: het vult het hele bruikbare gebied. Venster centreren: centreert "
-"het op ongeveer 62 % van de breedte (gulden snede), maar nooit breder dan "
-"1600 px, en 90 % van de hoogte."
+msgid "A lone window while automatic tiling or a preset is on: leave it untouched, let it fill the usable area, or center it."
+msgstr "Een enkel venster terwijl automatisch tegelen of een preset actief is: ongemoeid laten, het bruikbare gebied laten vullen of centreren."
 
 #. settings-schema.json->singleWindowMode->options
 msgid "Leave it untouched"

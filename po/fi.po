@@ -437,18 +437,8 @@ msgid "A single window"
 msgstr "Yksi ikkuna"
 
 #. settings-schema.json->singleWindowMode->tooltip
-msgid ""
-"What happens to a lone tiled window when automatic tiling or a preset is "
-"on. \"Leave it untouched\" does nothing to it. \"Fill the monitor\" makes it "
-"fill the whole usable area. \"Center the window\" centers it at about 62 % of "
-"the width (golden ratio), but never wider than 1600 px, and 90 % of the "
-"height."
-msgstr ""
-"Mitä yksittäiselle tiilille asetellulle ikkunalle tapahtuu, kun "
-"automaattinen tiilisyys tai esiasetus on päällä. Jätä ennalleen: ei tee "
-"sille mitään. Täytä näyttö: ikkuna täyttää koko käytettävissä olevan "
-"alueen. Keskitä ikkuna: keskittää sen noin 62 %:iin leveydestä (kultainen "
-"leikkaus), mutta ei koskaan yli 1600 px leveä, ja 90 %:iin korkeudesta."
+msgid "A lone window while automatic tiling or a preset is on: leave it untouched, let it fill the usable area, or center it."
+msgstr "Yksittäinen ikkuna, kun automaattinen ruudutus tai esiasetus on päällä: jätä koskemattomaksi, täytä käytettävissä oleva alue tai keskitä."
 
 #. settings-schema.json->singleWindowMode->options
 msgid "Leave it untouched"

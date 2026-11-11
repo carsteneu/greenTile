@@ -434,18 +434,8 @@ msgid "A single window"
 msgstr "Uma única janela"
 
 #. settings-schema.json->singleWindowMode->tooltip
-msgid ""
-"What happens to a lone tiled window when automatic tiling or a preset is "
-"on. \"Leave it untouched\" does nothing to it. \"Fill the monitor\" makes it "
-"fill the whole usable area. \"Center the window\" centers it at about 62 % of "
-"the width (golden ratio), but never wider than 1600 px, and 90 % of the "
-"height."
-msgstr ""
-"O que acontece com uma janela lado a lado sozinha quando o mosaico "
-"automático ou uma predefinição está ativo. Deixar como está: não faz nada "
-"com ela. Preencher o monitor: ocupa toda a área útil. Centralizar a janela: "
-"centraliza em cerca de 62 % da largura (proporção áurea), mas nunca mais "
-"larga que 1600 px, e 90 % da altura."
+msgid "A lone window while automatic tiling or a preset is on: leave it untouched, let it fill the usable area, or center it."
+msgstr "Uma janela sozinha enquanto o mosaico automático ou uma predefinição está ativo: deixá-la intacta, fazê-la preencher a área utilizável ou centralizá-la."
 
 #. settings-schema.json->singleWindowMode->options
 msgid "Leave it untouched"

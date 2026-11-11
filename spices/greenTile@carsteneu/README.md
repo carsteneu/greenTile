@@ -12,7 +12,7 @@ Window tiling for Cinnamon: presets per monitor and workspace, an auto mode, sna
 - **Splitting by drag** — drop a window at the edge zone of a tiled window to stack it, add a column or a row; a preview shows where it lands.
 - **Swapping** — `Super+Ctrl+Arrow` swaps the focused window with its neighbour; Left/Right continue across monitors and workspaces, also through untiled or paused ones, which they leave as they are; there the window is only moved over and may lie on top of the windows already there, and one that is too tall for the target monitor is clamped into it instead of being left behind.
 - **Focus navigation** — `Super+Arrow` moves the focus, with a short border flash so you can see where it went.
-- **A single window** — the last tiled window of a workspace is centered at the golden ratio of the width (about 62 %, never wider than 1600 px) and 90 % of the height, fills the monitor, or is left untouched; new installs center it.
+- **A single window** — the last tiled window of a workspace is centered at about 56 % of the width and 90 % of the height, fills the monitor, or is left untouched; new installs center it.
 - **Never tile** — a settings list by window class, title or app id (covers flatpaks); `Super+G` floats a single window temporarily.
 - **Theming** — light/dark/follow-system panel theme, accent and state colors (follow the Cinnamon theme or custom), animated tiling with an adjustable duration (250 ms by default).
 
