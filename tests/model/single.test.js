@@ -104,7 +104,7 @@ test('the centered frame never grows wider than 1600 px', () => {
 test('the cap binds from a usable width of 2590 px, not below it', () => {
     // 2589 * 0.6180339887 = 1600.09 -> 1600 either way: the cap changes nothing yet.
     assert.deepEqual(m.singleCenterRect([0, 0, 2589, 1040]), [494, 52, 1600, 936], 'just below the cap');
-    // 2590 * 0.6180339887 = 1601.08 -> 1601 without the cap; the cap pulls it to 1600.
+    // 2590 * 0.6180339887 = 1600.708 -> 1601 without the cap; the cap pulls it to 1600.
     assert.deepEqual(m.singleCenterRect([0, 0, 2590, 1040]), [495, 52, 1600, 936], 'first width the cap binds');
 });
 
@@ -114,6 +114,9 @@ test('the cap leaves the golden ratio alone on a 2560 px area', () => {
 });
 
 test('the capped frame stays centred on its axis', () => {
+    // An odd difference is where the floored offset shows: (3841-1600)/2 = 1120.5.
+    // Rounding up or to nearest would put the frame one pixel right of centre.
+    assert.deepEqual(m.singleCenterRect([0, 0, 3841, 1080]), [1120, 54, 1600, 972], 'odd margin floors to the left');
     for (const area of [[0, 0, 3440, 1440], [0, 0, 3840, 1080], [0, 0, 5120, 1400], [100, 40, 5120, 1400]]) {
         const [x, , w] = m.singleCenterRect(area);
         const left = x - area[0];
@@ -124,9 +127,11 @@ test('the capped frame stays centred on its axis', () => {
 });
 
 // A capped frame leaves much larger margins than the golden one, so the outset
-// singleCenterLayout adds for the gap must still be cancelled exactly.
-test('the gap compensation still lands on the capped frame', () => {
-    for (const area of [[0, 0, 3440, 1440], [0, 0, 5120, 1400], [12, 12, 5096, 1376]]) {
+// singleCenterLayout adds for the gap must still be cancelled exactly. (The
+// existing gap test above already covers 5120: its expected value comes from
+// singleCenterRect, so it tracks the ceiling on its own.)
+test('the gap compensation still lands on the capped frame at other wide sizes', () => {
+    for (const area of [[0, 0, 3440, 1440], [12, 12, 5096, 1376]]) {
         for (const g of [0, 2, 8, 48]) {
             const layout = m.singleCenterLayout(area, g);
             assert.deepEqual(gap.gapCell(layout.area, area, g), m.singleCenterRect(area),
