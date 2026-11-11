@@ -1,0 +1,10 @@
+languages:
+  - name: node
+    # The verifier's sandbox (bwrap: read-only root, tmpfs /home, --unshare-net)
+    # has no node_modules and no registry. Four suites load the `typescript`
+    # devDependency and cannot run there: tests/architecture/generated-types,
+    # tests/architecture/zero-module-state, tests/model/minimum-fit-abc,
+    # tests/tiling/minimum-fit-abc. Everything else runs dependency-free —
+    # 1139 tests, proven in that sandbox. Locally `npm test` / `npm run check`
+    # stay the full gate (1177 tests).
+    test_command: node --test $(ls tests/*/*.test.js | grep -vE "minimum-fit-abc|generated-types|zero-module-state")
