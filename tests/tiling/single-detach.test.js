@@ -216,6 +216,32 @@ test('a border click without a drag does not release the lone window', () => {
     assert.deepEqual(w.rect, CENTER, 'an unmarked lone window is placed again');
 });
 
+// A preset saved in the editor retiles every surface it hangs on — an explicit
+// command, so a released lone window there is taken back (lib/ui/editor.js).
+test('saving a preset in the editor takes a released window back', () => {
+    const PRESETS = [{ id: 'p2', name: 'Two columns', rules: [{ min: 2, stacks: [1, 1] }] }];
+    const { env, ext } = makeEnv({ windowGap: 0, singleWindowMode: 'center', singleWindowMigrated: true, presets: JSON.stringify(PRESETS) });
+    const ws = makeWorkspace(env);
+    ws.index = () => 0;
+    env.activeWorkspace = ws;
+    const w = makeWindow(env, 1, SPAWN.slice(), 0);
+    env.tabList.push(w);
+    enableOnMonitors(env, ext, [MONITOR]);
+    env.display.focus_window = w;
+    const app = ext.currentSession().app;
+    app.ops.presetsWrite(app, PRESETS);
+    app.ops.layoutSet(app, 0, 0, { preset: 'p2' });
+    app.ops.retileMonitor(app, 0);
+    assert.deepEqual(w.rect, CENTER, 'the preset starts at two windows, so the lone window centers');
+    drag(env, w, DROPPED);
+    env.keybindingManager.hotkeys.get('greenTile-preset').cb();
+    const card = findAll(app.panel.actor, (a) => /^gk-card(?: |$)/.test(a.style_class || ''))[0];
+    assert.ok(card, 'the preset card exists');
+    findAll(card, (a) => /gk-card-edit/.test(a.style_class || ''))[0].emit('clicked');
+    findAll(app.panel.actor, (a) => /^gk-save/.test(a.style_class || ''))[0].emit('clicked');
+    assert.deepEqual(w.rect, CENTER, 'the save placed the released window again');
+});
+
 // A swap push is an explicit placement command: the window is sent to the target
 // monitor and the tiling places it there. It must not stay unplaced.
 test('a swap push places a released lone window on the target monitor', () => {
