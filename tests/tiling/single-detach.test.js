@@ -204,6 +204,41 @@ test('minimizing and restoring keeps a released window released', () => {
     assert.deepEqual(w.rect, DROPPED, 'restoring does not place the window again');
 });
 
+// A border click without a drag is not a resize: pressing on the border is how a
+// window gets the focus, and it must not release the window (the move path guards
+// the same click with GRAB_MOVE_TOLERANCE).
+test('a border click without a drag does not release the lone window', () => {
+    const { env, app, wins } = scene('center', 1);
+    const w = wins[0];
+    resize(env, w, CENTER.slice());
+    w.rect = DROPPED.slice();
+    app.ops.retileMonitor(app, 0);
+    assert.deepEqual(w.rect, CENTER, 'an unmarked lone window is placed again');
+});
+
+// A swap push is an explicit placement command: the window is sent to the target
+// monitor and the tiling places it there. It must not stay unplaced.
+test('a swap push places a released lone window on the target monitor', () => {
+    const { env, wins } = scene('center', 1, [LEFT, RIGHT]);
+    const w = wins[0];
+    drag(env, w, DROPPED);
+    env.keybindingManager.hotkeys.get('greenTile-swap-right').cb();
+    fireAll(env, 250);
+    assert.deepEqual(w.rect, CENTER_R, 'the pushed window is placed on the other monitor');
+});
+
+test('a lone window dragged onto an empty monitor keeps the frame it was dropped at', () => {
+    const { env, app, wins } = scene('center', 1, [LEFT, RIGHT]);
+    const w = wins[0];
+    assert.deepEqual(w.rect, CENTER, 'the lone window starts centered');
+    drag(env, w, [2300, 100, 1112, 990]);
+    // The monitor the window left still retiles: it is empty now and has to be.
+    fireAll(env, 250);
+    assert.deepEqual(w.rect, [2300, 100, 1112, 990], 'the target monitor leaves the window where it was dropped');
+    app.ops.retileMonitor(app, 1);
+    assert.deepEqual(w.rect, [2300, 100, 1112, 990], 'and a later retile there honours it');
+});
+
 test('a fresh App forgets the release (memory only)', () => {
     const { env, ext, wins } = scene('center', 1);
     const w = wins[0];
