@@ -1,0 +1,362 @@
+[
+ {
+  "family": "async-io",
+  "name": "sync_spawn_command_line",
+  "regex": "(g_spawn_command_line_sync|GLib\\.spawn_command_line_sync)\\s*\\("
+ },
+ {
+  "family": "async-io",
+  "name": "sync_spawn",
+  "regex": "(g_spawn_sync|GLib\\.spawn_sync)\\s*\\("
+ },
+ {
+  "family": "async-io",
+  "name": "sync_file_load_contents",
+  "regex": "(g_file_load_contents|\\.load_contents)\\s*\\((?!.*async)"
+ },
+ {
+  "family": "async-io",
+  "name": "sync_file_get_contents",
+  "regex": "(g_file_get_contents|GLib\\.file_get_contents)\\s*\\("
+ },
+ {
+  "family": "async-io",
+  "name": "sync_get_file_contents_utf8",
+  "regex": "Cinnamon\\.get_file_contents_utf8_sync\\s*\\("
+ },
+ {
+  "family": "async-io",
+  "name": "sync_file_replace_contents",
+  "regex": "(g_file_replace_contents|\\.replace_contents)\\s*\\((?!.*async)"
+ },
+ {
+  "family": "async-io",
+  "name": "sync_file_query_info",
+  "regex": "(g_file_query_info|\\.query_info)\\s*\\((?!.*async)"
+ },
+ {
+  "family": "async-io",
+  "name": "sync_file_enumerate_children",
+  "regex": "(g_file_enumerate_children|\\.enumerate_children)\\s*\\((?!.*async)"
+ },
+ {
+  "family": "async-io",
+  "name": "sync_file_test",
+  "regex": "(g_file_test|GLib\\.file_test)\\s*\\("
+ },
+ {
+  "family": "async-io",
+  "name": "sync_file_query_exists",
+  "regex": "(g_file_query_exists|\\.query_exists)\\s*\\("
+ },
+ {
+  "family": "async-io",
+  "name": "sync_find_program_in_path",
+  "regex": "GLib\\.find_program_in_path\\s*\\("
+ },
+ {
+  "family": "async-io",
+  "name": "sync_soup_send_message",
+  "regex": "(soup_session_send_message|\\.send_message)\\s*\\("
+ },
+ {
+  "family": "cinnamon-api",
+  "name": "gio_desktop_app_info",
+  "regex": "new\\s+Gio\\.DesktopAppInfo\\s*\\("
+ },
+ {
+  "family": "cinnamon-api",
+  "name": "gtk_recent_manager",
+  "regex": "Gtk\\.RecentManager"
+ },
+ {
+  "family": "cinnamon-api",
+  "name": "gio_volume_monitor",
+  "regex": "Gio\\.VolumeMonitor"
+ },
+ {
+  "family": "cinnamon-api",
+  "name": "gio_notification",
+  "regex": "new\\s+Gio\\.Notification\\s*\\("
+ },
+ {
+  "family": "cinnamon-api",
+  "name": "file_dialog",
+  "regex": "Gtk\\.FileChooser"
+ },
+ {
+  "family": "cinnamon-api",
+  "name": "raw_keybinding",
+  "regex": "global\\.display\\.(add_custom_keybinding|remove_keybinding)\\s*\\("
+ },
+ {
+  "family": "cinnamon-api",
+  "name": "raw_pointer_tracking",
+  "regex": "Clutter\\.get_default_backend\\(\\)\\.get_default_seat\\(\\)"
+ },
+ {
+  "family": "cinnamon-api",
+  "name": "raw_warp_pointer",
+  "regex": "\\.warp_pointer\\s*\\("
+ },
+ {
+  "family": "cinnamon-api",
+  "name": "raw_upower",
+  "regex": "imports\\.gi\\.UPowerGlib"
+ },
+ {
+  "family": "dbus-proxies",
+  "name": "raw_session_manager_dbus",
+  "regex": "org\\.gnome\\.SessionManager"
+ },
+ {
+  "family": "dbus-proxies",
+  "name": "raw_screensaver_dbus",
+  "regex": "org\\.cinnamon\\.ScreenSaver"
+ },
+ {
+  "family": "dbus-proxies",
+  "name": "raw_power_dbus",
+  "regex": "org\\.cinnamon\\.SettingsDaemon\\.Power"
+ },
+ {
+  "family": "dbus-proxies",
+  "name": "raw_mpris_dbus",
+  "regex": "org\\.mpris\\.MediaPlayer2"
+ },
+ {
+  "family": "dbus-proxies",
+  "name": "raw_notifications_dbus",
+  "regex": "org\\.freedesktop\\.Notifications"
+ },
+ {
+  "family": "deprecations",
+  "name": "global_screen",
+  "regex": "\\bglobal\\.screen\\b"
+ },
+ {
+  "family": "deprecations",
+  "name": "tweener_usage",
+  "regex": "\\b(Tweener\\.addTween|Tweener\\.removeTweens|Tweener\\.pauseTweens|Tweener\\.resumeTweens|imports\\.ui\\.tweener)\\b"
+ },
+ {
+  "family": "deprecations",
+  "name": "file_utils_desktop_dir",
+  "regex": "\\bgetUserDesktopDir\\s*\\("
+ },
+ {
+  "family": "deprecations",
+  "name": "generic_container",
+  "regex": "Cinnamon\\.GenericContainer"
+ },
+ {
+  "family": "deprecations",
+  "name": "panel_height_property",
+  "regex": "\\.panel\\.height\\b"
+ },
+ {
+  "family": "deprecations",
+  "name": "require_usage",
+  "regex": "\\brequire\\s*\\("
+ },
+ {
+  "family": "deprecations",
+  "name": "module_exports",
+  "regex": "\\bmodule\\.exports\\b"
+ },
+ {
+  "family": "deprecations",
+  "name": "file_utils_old_api",
+  "regex": "\\b(requireModule|getModuleByIndex|unloadModule)\\s*\\("
+ },
+ {
+  "family": "deprecations",
+  "name": "global_background_actor",
+  "regex": "\\bglobal\\.background_actor\\b"
+ },
+ {
+  "family": "deprecations",
+  "name": "meta_background_actor",
+  "regex": "\\bMeta\\.BackgroundActor\\b"
+ },
+ {
+  "family": "deprecations",
+  "name": "meta_x11_background_actor",
+  "regex": "\\bMeta\\.X11BackgroundActor\\b"
+ },
+ {
+  "family": "file-paths",
+  "name": "tilde_in_string",
+  "regex": "['\\\"]~/"
+ },
+ {
+  "family": "file-paths",
+  "name": "hardcoded_xdg_user_dir",
+  "regex": "get_home_dir\\\\(\\\\)\\\\s*[,+]\\\\s*['\\\"]\\\\s*/?(Desktop|Documents|Downloads|Music|Pictures|Videos|Templates|Public)"
+ },
+ {
+  "family": "file-paths",
+  "name": "hardcoded_data_dir",
+  "regex": "['\\\"]/?\\\\.(local/share|local['\\\"/]+share)"
+ },
+ {
+  "family": "file-paths",
+  "name": "hardcoded_config_dir",
+  "regex": "['\\\"]/?\\\\.(config)"
+ },
+ {
+  "family": "file-paths",
+  "name": "hardcoded_cache_dir",
+  "regex": "['\\\"]/?\\\\.(cache)"
+ },
+ {
+  "family": "file-paths",
+  "name": "hardcoded_state_dir",
+  "regex": "['\\\"]/?\\\\.(local/state|local['\\\"/]+state)"
+ },
+ {
+  "family": "forbidden-api",
+  "name": "global_reexec_self",
+  "regex": "global\\.reexec_self\\s*\\("
+ },
+ {
+  "family": "forbidden-api",
+  "name": "global_real_restart",
+  "regex": "global\\.real_restart\\s*\\("
+ },
+ {
+  "family": "forbidden-api",
+  "name": "meta_quit",
+  "regex": "Meta\\.(quit|exit)\\s*\\("
+ },
+ {
+  "family": "forbidden-api",
+  "name": "global_segfault",
+  "regex": "global\\.segfault\\s*\\("
+ },
+ {
+  "family": "forbidden-api",
+  "name": "global_alloc_leak",
+  "regex": "global\\.alloc_leak\\s*\\("
+ },
+ {
+  "family": "forbidden-api",
+  "name": "cinnamon_breakpoint",
+  "regex": "Cinnamon\\.breakpoint\\s*\\("
+ },
+ {
+  "family": "forbidden-api",
+  "name": "global_begin_modal",
+  "regex": "global\\.begin_modal\\s*\\("
+ },
+ {
+  "family": "forbidden-api",
+  "name": "global_set_stage_input_mode",
+  "regex": "global\\.set_stage_input_mode\\s*\\("
+ },
+ {
+  "family": "forbidden-api",
+  "name": "global_set_stage_input_region",
+  "regex": "global\\.set_stage_input_region\\s*\\("
+ },
+ {
+  "family": "forbidden-api",
+  "name": "meta_begin_grab_op",
+  "regex": "\\.begin_grab_op\\s*\\("
+ },
+ {
+  "family": "forbidden-api",
+  "name": "meta_keybindings_set_custom_handler",
+  "regex": "Meta\\.keybindings_set_custom_handler\\s*\\("
+ },
+ {
+  "family": "forbidden-api",
+  "name": "meta_disable_unredirect",
+  "regex": "Meta\\.(disable|enable)_unredirect_for_display\\s*\\("
+ },
+ {
+  "family": "forbidden-api",
+  "name": "global_set_pointer",
+  "regex": "global\\.set_pointer\\s*\\("
+ },
+ {
+  "family": "forbidden-api",
+  "name": "global_create_pointer_barrier",
+  "regex": "global\\.create_pointer_barrier\\s*\\("
+ },
+ {
+  "family": "forbidden-api",
+  "name": "cinnamon_recorder",
+  "regex": "new\\s+Cinnamon\\.Recorder\\s*\\("
+ },
+ {
+  "family": "gtk-gdk",
+  "name": "gtk_forbidden",
+  "regex": "\\bGtk\\.(?!IconTheme|DirectionType|TextDirection|PositionType|accelerator_parse|accelerator_get_label|accelerator_name|Settings|Widget\\.get_default_direction)"
+ },
+ {
+  "family": "gtk-gdk",
+  "name": "has_icon",
+  "regex": "\\bhas_icon\\s*\\("
+ },
+ {
+  "family": "gtk-gdk",
+  "name": "gdkpixbuf_loading",
+  "regex": "GdkPixbuf\\.Pixbuf\\.(new_from_file|new_from_stream|new_from_data|new_from_resource|new_from_bytes)\\s*\\("
+ },
+ {
+  "family": "gtk-gdk",
+  "name": "gdk_screen",
+  "regex": "Gdk\\.Screen\\."
+ },
+ {
+  "family": "gtk-gdk",
+  "name": "gdk_display",
+  "regex": "Gdk\\.Display\\."
+ },
+ {
+  "family": "gtk-gdk",
+  "name": "gdk_monitor",
+  "regex": "Gdk\\.Monitor\\."
+ },
+ {
+  "family": "gtk-gdk",
+  "name": "gdk_keymap",
+  "regex": "Gdk\\.Keymap\\."
+ },
+ {
+  "family": "js-conventions",
+  "name": "lang_bind",
+  "regex": "\\bLang\\.bind\\s*\\("
+ },
+ {
+  "family": "js-conventions",
+  "name": "shell_string_spawn",
+  "regex": "\\b(spawnCommandLine|spawnCommandLineAsync|spawnCommandLineAsyncIO|spawn_command_line_async|spawn_command_line_sync)\\s*\\("
+ },
+ {
+  "family": "screensaver",
+  "name": "screensaver_imports",
+  "regex": "imports\\.(ui\\.screensaver\\.|misc\\.authClient|misc\\.screenSaver)"
+ },
+ {
+  "family": "screensaver",
+  "name": "screensaver_pam_helper",
+  "regex": "cinnamon-screensaver-pam-helper"
+ },
+ {
+  "family": "screensaver",
+  "name": "backup_locker_dbus",
+  "regex": "org\\.cinnamon\\.BackupLocker"
+ },
+ {
+  "family": "screensaver",
+  "name": "action_mode_write",
+  "regex": "(Main|imports\\.ui\\.main)\\.actionMode\\s*="
+ },
+ {
+  "family": "screensaver",
+  "name": "cursor_show_hide",
+  "regex": "global\\.stage\\.(show_cursor|hide_cursor)\\s*\\("
+ }
+]

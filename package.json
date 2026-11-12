@@ -14,7 +14,8 @@
         "typecheck": "tsc -p tsconfig.json",
         "check:types": "node scripts/type-contract-check.mjs",
         "check:catalogs": "./scripts/check-catalogs.sh",
-        "check": "npm run check:catalogs && npm run test && npm run typecheck && npm run lint && npm run check:types",
+        "check": "npm run check:patterns && npm run check:catalogs && npm run test && npm run typecheck && npm run lint && npm run check:types",
+        "check:patterns": "node scripts/check-patterns.mjs",
         "gen:types": "node scripts/generate-xlet-types.mjs"
     },
     "devDependencies": {
