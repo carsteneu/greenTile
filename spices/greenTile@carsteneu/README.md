@@ -20,7 +20,7 @@ Window tiling for Cinnamon: presets per monitor and workspace, an auto mode, sna
 
 | Key | Action |
 |---|---|
-| `Super+Ctrl+A` / `D` | Auto mode on / off for this monitor and workspace |
+| `Super+Ctrl+A` / `D` | Auto mode on / off for this monitor and workspace; `A` also takes back a released window |
 | `Super+Ctrl+P` | Open or close the preset panel |
 | `Super+Ctrl+3` / `6` | Tile all windows into 3 / 6 equal columns |
 | `Super+Ctrl+←/→/↑/↓` | Swap the focused window with its neighbour |
