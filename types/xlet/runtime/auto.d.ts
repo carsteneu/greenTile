@@ -11,6 +11,7 @@
  * @property {AnyRecord} glib imports.gi.GLib (monotonic clock of the switch hold and its total bound)
  * @property {() => CinnamonWindow | null} focusWindow
  * @property {() => number} focusMonitorIndex
+ * @property {(monitor: CinnamonMonitor, focus: CinnamonWindow | null, ws?: number | null) => CinnamonWindow[]} collectWindows
  * @property {(app: AppFacade, monitorIndex: number, wsIndex: number) => { auto: boolean }} layoutFor
  * @property {(app: AppFacade, monitorIndex: number, wsIndex: number, patch: {}) => boolean} layoutSet
  * @property {(app: AppFacade, monitorIndex: number, focused: CinnamonWindow | null, animate?: boolean, wsIndex?: number | null, actionLayout?: Layout | null, settle?: boolean) => void} retileMonitor
@@ -39,6 +40,7 @@ export const Auto: {
         _grabMonitor: Map<any, any>;
         _moveStart: Map<any, any>;
         _resizeStart: Map<any, any>;
+        _detached: Set<any>;
         /** @type {Array<[AnyRecord, number, number]>} */
         _workspaceSignals: Array<[AnyRecord, number, number]>;
         /** @type {Array<[CinnamonWindow, number, number, number]>} */
@@ -249,6 +251,37 @@ export const Auto: {
          */
         onWindowRemoved(app: AppFacade, ws: AnyRecord, w: CinnamonWindow): void;
         /**
+         * Whether the tiling has let go of this window: the single-window mode marked it
+         * when the user moved or resized it, and every placement drops the mark again
+         * (lib/tiling/place.js placeCell), so the mode leaves it where it is until one runs.
+         * @param {number} seq
+         * @returns {boolean}
+         */
+        detached(seq: number): boolean;
+        /**
+         * Marks the window as let go when it is the only one on its monitor and the
+         * single-window mode is on: the grab-end paths report this instead of scheduling
+         * the retile that would snap it back. Any other count keeps the plain retile, and
+         * the placement itself clears the mark.
+         * @param {AppFacade} app
+         * @param {CinnamonWindow} w
+         * @returns {boolean} whether the window was marked
+         */
+        detachLone(app: AppFacade, w: CinnamonWindow): boolean;
+        /**
+         * The tiling placed the window: the mode owns it again.
+         * @param {number} seq
+         */
+        detachClear(seq: number): void;
+        /**
+         * Drops every release marker of this monitor's windows. An explicit reset for the
+         * commands that retile without an actionLayout (auto on, a preset click) — they
+         * would otherwise hang on the lone-window skip and land nowhere.
+         * @param {AppFacade} app
+         * @param {number} monitorIndex
+         */
+        detachClearMonitor(app: AppFacade, monitorIndex: number): void;
+        /**
          * @param {AppFacade} app
          * @param {CinnamonWindow} w
          * @param {string} op
@@ -360,6 +393,7 @@ export type AutoDeps = {
     glib: AnyRecord;
     focusWindow: () => CinnamonWindow | null;
     focusMonitorIndex: () => number;
+    collectWindows: (monitor: CinnamonMonitor, focus: CinnamonWindow | null, ws?: number | null) => CinnamonWindow[];
     layoutFor: (app: AppFacade, monitorIndex: number, wsIndex: number) => {
         auto: boolean;
     };

@@ -29,7 +29,8 @@ export const App: {
         focus: any;
         /** @type {DropFacade} */
         drop: DropFacade;
-        auto: any;
+        /** @type {AutoFacade} */
+        auto: AutoFacade;
         ops: Readonly<{
             focusWindow: any;
             focusMonitorIndex: any;

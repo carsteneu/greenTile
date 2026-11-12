@@ -539,6 +539,8 @@ const makeApp = (overrides = {}) => ({
     monitors: { ready: true, keys: ['mkey0', 'mkey1'] },
     session: makeSessionStub(),
     placement: { release() {} },
+    // The grab cluster reads the single-window mode ("leave" here: nothing to let go of)
+    config: { settings: { getValue: () => 'leave' } },
     ...overrides,
 });
 
@@ -564,6 +566,8 @@ const makeAuto = (opts = {}) => {
         borderUpdate: () => { calls.borderUpdate += 1; },
         focusWindow: () => (opts.focus ? opts.focus : null),
         focusMonitorIndex: () => 1,
+        // no window on any monitor: the grab cluster has no lone window to let go of
+        collectWindows: () => [],
         grabIsResize: () => (opts.grabIsResize ? opts.grabIsResize() : false),
         dropBegin: () => {}, dropEnd: opts.dropEnd || (() => false), dropStop: () => {},
         resizeEnd: () => { calls.resizeEnd += 1; }, exclToggleDelete: () => {}, exclToggleClear: () => {},

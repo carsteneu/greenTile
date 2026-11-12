@@ -321,6 +321,14 @@ type AutoFacade = {
     sortPeek(seq: number, now: number): Rect | null;
     sortClear(seq: number): void;
     sortPoll(now: number): void;
+    /** whether the single-window mode let go of this window (the user moved or resized it) */
+    detached(seq: number): boolean;
+    /** marks the window as let go when it is the only one on its monitor and the mode is on */
+    detachLone(app: AppFacade, win: CinnamonWindow): boolean;
+    /** the tiling placed the window: the mode owns it again */
+    detachClear(seq: number): void;
+    /** drops every release marker of this monitor's windows (an explicit reset) */
+    detachClearMonitor(app: AppFacade, monitorIndex: number): void;
     /** whether the shell's workspace-switch effect still owns the window actors */
     switching(): boolean;
     /** runs fn now, or once the switch effect ended (one held run per key, newest wins, empty options keep the older value) */
